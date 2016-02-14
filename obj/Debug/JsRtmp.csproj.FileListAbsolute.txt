@@ -1,0 +1,6 @@
+D:\projects\JsRtmp\obj\Debug\JsRtmp.csprojResolveAssemblyReference.cache
+D:\projects\JsRtmp\bin\JsRtmp.dll.config
+D:\projects\JsRtmp\bin\JsRtmp.dll
+D:\projects\JsRtmp\bin\JsRtmp.pdb
+D:\projects\JsRtmp\obj\Debug\JsRtmp.dll
+D:\projects\JsRtmp\obj\Debug\JsRtmp.pdb

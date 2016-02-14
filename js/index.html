@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+	<meta charset="utf-8" />
+</head>
+<body>
+<canvas id="canvas" style="background-color: #0D0E1B"></canvas>
+    <button id="connectbn" style="width: 100px;height: 100px" onclick="test()">连接</button>
+<button onclick="ns.play('user1')" style="width: 100px; height: 100px">开始</button>
+<div id="logout">
+    
+</div>
+<script>
+    var nc = null;
+    var ns = null;
+    onerror = handleErr;
+    var txt = "";
+
+function handleErr(msg,url,l) {
+    txt = "There was an error on this page.\n\n";
+    txt += "Error: " + msg + "\n";
+    txt += "URL: " + url + "\n";
+    txt += "Line: " + l + "\n\n";
+    txt += "Click OK to continue.\n\n";
+    alert(txt);
+    return true;
+}
+    function test() {
+        nc = new NetConnection();
+
+        nc.onNetStatus = function(info) {
+            Module.print(info.code);
+            if (info.code == "NetConnection.Connect.Success") {
+                document.getElementById("connectbn").style.display = "none";
+                ns = new NetStream(nc);
+                ns.attachCanvas(document.getElementById("canvas"));
+                ns.initAudio(50);
+            }
+        }
+        nc.connect("192.168.0.100:1936", "live", "");
+    }
+
+    var Module = {
+       
+        print: (function() {
+            return function(text) {
+                if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+                document.getElementById("logout").innerHTML += text + "<br>";
+                // These replacements are necessary if you render to raw HTML
+                //text = text.replace(/&/g, "&amp;");
+                //text = text.replace(/</g, "&lt;");
+                //text = text.replace(/>/g, "&gt;");
+                //text = text.replace('\n', '<br>', 'g');
+                console.log(text);
+            };
+        })(),
+        printErr: function(text) {
+            if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+            if (0) { // XXX disabled for safety typeof dump == 'function') {
+                dump(text + '\n'); // fast, straight to the real console
+            } else {
+                console.error(text);
+            }
+        },
+    };
+
+</script>
+<script src="RtmpLLVM.js?version=3"> </script>
+</body>
+</html>
