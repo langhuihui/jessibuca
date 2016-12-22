@@ -1,0 +1,29 @@
+lpc.lo: lpc.c ../config.h lpc.h arch.h ../include/speex/speex_types.h \
+ ../include/speex/speex_config_types.h /usr/include/stdint.h \
+ /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h /usr/include/bits/wchar.h
+
+../config.h:
+
+lpc.h:
+
+arch.h:
+
+../include/speex/speex_types.h:
+
+../include/speex/speex_config_types.h:
+
+/usr/include/stdint.h:
+
+/usr/include/features.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/bits/wordsize.h:
+
+/usr/include/gnu/stubs.h:
+
+/usr/include/gnu/stubs-64.h:
+
+/usr/include/bits/wchar.h:

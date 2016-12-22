@@ -1,0 +1,23 @@
+ 驱动器 D 中的卷没有标签。
+ 卷的序列号是 3AB7-E51A
+
+ D:\OpenSource\speex-1.2rc2\libspeex 的目录
+
+
+ D:\OpenSource\speex-1.2rc2\libspeex 的目录
+
+bits.c               cb_search.c          exc_10_16_table.c
+exc_10_32_table.c    exc_20_32_table.c    exc_5_256_table.c
+exc_5_64_table.c     exc_8_128_table.c    filters.c
+gain_table.c         gain_table_lbr.c     hexc_10_32_table.c
+hexc_table.c         high_lsp_tables.c    kiss_fft.c
+kiss_fftr.c          lpc.c                lsp.c
+lsp_tables_nb.c      ltp.c                modes.c
+modes_wb.c           nb_celp.c            quant_lsp.c
+sb_celp.c            smallft.c            speex.c
+speex_callbacks.c    speex_header.c       stereo.c
+testenc.c            testenc_uwb.c        testenc_wb.c
+vbr.c                vorbis_psy.c         vq.c
+window.c             
+              37 个文件        400,608 字节
+               0 个目录  5,197,000,704 可用字节

@@ -1,0 +1,56 @@
+lsp.lo: lsp.c ../config.h /usr/include/math.h /usr/include/features.h \
+ /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
+ /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h \
+ /usr/include/bits/huge_val.h /usr/include/bits/huge_valf.h \
+ /usr/include/bits/huge_vall.h /usr/include/bits/inf.h \
+ /usr/include/bits/nan.h /usr/include/bits/mathdef.h \
+ /usr/include/bits/mathcalls.h /usr/include/bits/mathinline.h lsp.h \
+ arch.h ../include/speex/speex_types.h \
+ ../include/speex/speex_config_types.h /usr/include/stdint.h \
+ /usr/include/bits/wchar.h stack_alloc.h math_approx.h
+
+../config.h:
+
+/usr/include/math.h:
+
+/usr/include/features.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/bits/wordsize.h:
+
+/usr/include/gnu/stubs.h:
+
+/usr/include/gnu/stubs-64.h:
+
+/usr/include/bits/huge_val.h:
+
+/usr/include/bits/huge_valf.h:
+
+/usr/include/bits/huge_vall.h:
+
+/usr/include/bits/inf.h:
+
+/usr/include/bits/nan.h:
+
+/usr/include/bits/mathdef.h:
+
+/usr/include/bits/mathcalls.h:
+
+/usr/include/bits/mathinline.h:
+
+lsp.h:
+
+arch.h:
+
+../include/speex/speex_types.h:
+
+../include/speex/speex_config_types.h:
+
+/usr/include/stdint.h:
+
+/usr/include/bits/wchar.h:
+
+stack_alloc.h:
+
+math_approx.h:

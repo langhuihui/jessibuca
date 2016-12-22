@@ -1,0 +1,22 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>MonaClient 1.0</title>
+	<meta charset="utf-8" />
+        <script src="jquery-3.1.1.min.js"> </script>
+</head>
+<body>
+<script>
+  $.ajax({
+    type:"get",
+    url:"http://localhost:3000/showAll",/*url写异域的请求地址*/
+    dataType:"jsonp",/*加上datatype*/
+    jsonpCallback:"cb",/*设置一个回调函数，名字随便取，和下面的函数里的名字相同就行*/
+    success:function(result){
+    }
+});
+</script>
+</body>
+</html>
