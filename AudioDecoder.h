@@ -8,6 +8,7 @@
 #ifdef USE_MP3
 #include "libmad/mad.h"
 #include "libid3tag/tag.h"
+#include "mp3Decoder.h"
 #endif
 /*  0 = Linear PCM, platform endian
 1 = ADPCM
@@ -43,11 +44,7 @@ public:
 	SpeexBits speexBits;
 #endif
 #ifdef USE_MP3
-	mad_stream stream;
-	mad_frame frame;
-	mad_synth synth;
-	MemoryStream inputBuffer;
-	int inputCount;
+	MP3Decoder mp3Decoder;
 #endif
 	
 	AudioDecoder(int bl) :bufferLength(bl), bufferFilled(0)
@@ -65,20 +62,9 @@ public:
 		faacConfiguration = faacDecGetCurrentConfiguration(faacHandle);
 		emscripten_log(0, "aac init! %d", faacHandle);
 #endif
-#ifdef USE_MP3
-		mad_stream_init(&stream);
-		mad_frame_init(&frame);
-		mad_synth_init(&synth);
-		emscripten_log(0, "mp3 init!");
-#endif
 	}
 	~AudioDecoder()
 	{
-#ifdef USE_MP3
-		mad_synth_finish(&synth);
-		mad_frame_finish(&frame);
-		mad_stream_finish(&stream);
-#endif
 #ifdef USE_AAC
 		faacDecClose(faacHandle);
 #endif
@@ -132,7 +118,7 @@ public:
 	int decodeAAC(MemoryStream& input, u8* output)
 	{
 #ifdef USE_AAC
-		//0 = AAC sequence header£¬1 = AAC raw¡£
+		//0 = AAC sequence headerï¿½ï¿½1 = AAC rawï¿½ï¿½
 		if(input.readB<1,u8>())
 		{
 			faacDecFrameInfo frame_info;
@@ -173,10 +159,8 @@ public:
 #ifdef USE_MP3
 		//int result = mad_decoder_run(&mp3Decoder, MAD_DECODER_MODE_SYNC);
 		//emscripten_log(0, "mp3 result:%d", result);
-		inputBuffer << input;
-		inputCount++;
-		if (inputCount < 5)return 0;
-		mad_stream_buffer(&stream, (const unsigned char *)inputBuffer.point(), inputBuffer.length());
+		mad_pcm &pcm = mp3Decoder.decode(input);
+		//mad_stream_buffer(&stream, (const unsigned char *)inputBuffer.point(), inputBuffer.length());
 		
 		while(true)
 		{
@@ -220,9 +204,7 @@ public:
 		{
 			emscripten_log(0, "mad_frame_decode:%d", stream.error);
 		}
-		inputBuffer.clear();
-		inputBuffer << input;
-		inputCount = 1;
+
 #endif
 		return 0;
 	}
