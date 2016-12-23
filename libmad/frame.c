@@ -116,7 +116,7 @@ void mad_frame_finish(struct mad_frame *frame)
  * NAME:	decode_header()
  * DESCRIPTION:	read header data and following CRC word
  */
-static
+
 int decode_header(struct mad_header *header, struct mad_stream *stream)
 {
   unsigned int index;
@@ -235,7 +235,7 @@ int decode_header(struct mad_header *header, struct mad_stream *stream)
  * NAME:	free_bitrate()
  * DESCRIPTION:	attempt to discover the bitstream's free bitrate
  */
-static
+
 int free_bitrate(struct mad_stream *stream, struct mad_header const *header)
 {
   struct mad_bitptr keep_ptr;

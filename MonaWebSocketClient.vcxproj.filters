@@ -33,6 +33,9 @@
     <ClInclude Include="VideoDecoder.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="mp3Decoder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MonaClient.cpp">

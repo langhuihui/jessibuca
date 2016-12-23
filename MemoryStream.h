@@ -17,6 +17,10 @@ public:
 	MemoryStream():offset(0),data()
 	{
 	}
+	MemoryStream(u8* bytes,size_t size):offset(0),data(){
+		data.resize(size);
+		memcpy((void*)point(), bytes, size);
+	}
 	MemoryStream(const MemoryStream& right):data(),offset(right.offset) {
 		data.append(right.data);
 	}
@@ -140,6 +144,12 @@ public:
 	void clear() {
 		data.clear();
 		offset = 0;
+	}
+	void removeConsume(){
+		auto l = length();
+		memmove((void*)data.data(),point(),l);
+		data.resize(l);
+		offset=0;
 	}
 	int size() const{
 		return data.length();

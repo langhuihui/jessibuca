@@ -159,38 +159,12 @@ public:
 #ifdef USE_MP3
 		//int result = mad_decoder_run(&mp3Decoder, MAD_DECODER_MODE_SYNC);
 		//emscripten_log(0, "mp3 result:%d", result);
-		mad_pcm &pcm = mp3Decoder.decode(input);
+		int ret = mp3Decoder.decode(input);
 		//mad_stream_buffer(&stream, (const unsigned char *)inputBuffer.point(), inputBuffer.length());
 		
-		while(true)
+		while(ret!=-1)
 		{
-			if (-1 == mad_frame_decode(&frame, &stream))
-			{
-				if (!MAD_RECOVERABLE(stream.error))
-				{
-					break;
-				}
-
-				switch (stream.error)
-				{
-				case MAD_ERROR_BADDATAPTR:
-					continue;
-
-				case MAD_ERROR_LOSTSYNC:
-				{
-					// excute id3 tag frame skipping  
-					unsigned long tagsize = id3_tag_query(stream.this_frame, stream.bufend - stream.this_frame);
-					if (tagsize > 0)mad_stream_skip(&stream, tagsize);
-				}
-				continue;
-
-				default:
-					continue;
-				}
-			}
-			//mad_frame_decode(&frame, &stream);
-			mad_synth_frame(&synth, &frame);
-			mad_pcm &pcm = synth.pcm;
+			mad_pcm &pcm = mp3Decoder.getPCM();
 			unsigned int nchannels, nsamples;
 			mad_fixed_t const *left_ch, *right_ch;
 			nchannels = pcm.channels;
@@ -198,11 +172,8 @@ public:
 			left_ch = pcm.samples[0];
 			right_ch = pcm.samples[1];
 			memcpy(output, pcm.samples[0], nsamples * 2);
-			emscripten_log(0, "mad_frame_decode channels:%d", pcm.channels);
-		}
-		if(stream.error)
-		{
-			emscripten_log(0, "mad_frame_decode:%d", stream.error);
+			ret = mp3Decoder.decode();
+			emscripten_log(0, "mad_frame_decode channels:%d nsamples:%d",nchannels,nsamples);
 		}
 
 #endif

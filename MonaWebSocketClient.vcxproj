@@ -117,6 +117,7 @@
     <ClInclude Include="MemoryStream.h" />
     <ClInclude Include="MonaClient.h" />
     <ClInclude Include="AudioDecoder.h" />
+    <ClInclude Include="mp3Decoder.h" />
     <ClInclude Include="NetStream.h" />
     <ClInclude Include="VideoDecoder.h" />
   </ItemGroup>
