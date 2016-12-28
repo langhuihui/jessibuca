@@ -171,7 +171,8 @@ public:
 		unsigned char flag = 0;
 		data.readB<1>(flag);
 		auto audioType = flag >> 4;
-		if(audioDecoder->decode(audioType, data))jsThis->call<void>("playAudio");
+		if(audioDecoder->decode(audioType, data))
+			jsThis->call<void>("playAudio");
 		return true;
 	}
 	int initAudio(val _this,int frameCount, int channels) {

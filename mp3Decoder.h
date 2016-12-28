@@ -42,20 +42,15 @@ extern "C"
 class MP3Decoder
 {
     mad_stream inputStream;
-    mad_stream mainStream;
     mad_frame frame;
-    mad_frame lastFrame;
     mad_synth synth;
     MemoryStream lastInput;
     MemoryStream mainBuffer;
-
   public:
-    MP3Decoder() : step(0)
+    MP3Decoder()
     {
         mad_stream_init(&inputStream);
-        mad_stream_init(&mainStream);
         mad_frame_init(&frame);
-        mad_frame_init(&lastFrame);
         mad_synth_init(&synth);
         emscripten_log(0, "mp3 init!");
     }
@@ -63,34 +58,27 @@ class MP3Decoder
     {
         mad_synth_finish(&synth);
         mad_frame_finish(&frame);
-        mad_frame_finish(&lastFrame);
-        mad_stream_finish(&inputStream);
-        mad_stream_finish(&mainStream);
     }
     int decodeHeader(unsigned const char *headerPtr)
     {
-        unsigned char const *ptr, *end;
         unsigned int pad_slot, N;
         struct mad_header &header = frame.header;
         mad_bit_init(&inputStream.ptr, headerPtr);
-        ptr = mad_bit_nextbyte(&inputStream.ptr);
-        if (!(ptr[0] == 0xff && (ptr[1] & 0xe0) == 0xe0))
-            return -1;
-        mad_bit_init(&inputStream.ptr, ptr);
-        ptr = mad_bit_nextbyte(&inputStream.ptr);
-        inputStream.this_frame = ptr;
-        mad_bit_init(&inputStream.ptr, inputStream.this_frame);
+        inputStream.this_frame = headerPtr;
         decode_header(&header, &inputStream);
+        
         /* calculate frame duration */
         mad_timer_set(&header.duration, 0,
                       32 * MAD_NSBSAMPLES(&header), header.samplerate);
         /* calculate free bit rate */
         if (header.bitrate == 0)
         {
+            
             if ((inputStream.freerate == 0 ||
                  (header.layer == MAD_LAYER_III && inputStream.freerate > 640000)) &&
                 free_bitrate(&inputStream, &header) == -1)
                 return -1;
+            
             header.bitrate = inputStream.freerate;
             header.flags |= MAD_FLAG_FREEFORMAT;
         }
@@ -109,6 +97,7 @@ class MP3Decoder
 
             N = (slots_per_frame * header.bitrate / header.samplerate) + pad_slot;
         }
+        emscripten_log(0, "audio size:%d bitrate:%d samplerate:%d",N ,header.bitrate,header.samplerate);
         return N;
     }
     int checkCRC()
@@ -129,7 +118,7 @@ class MP3Decoder
             frame.overlap = (decltype(frame.overlap))calloc(2 * 32 * 18, sizeof(mad_fixed_t));
             if (frame.overlap == 0)
             {
-                mainStream.error = MAD_ERROR_NOMEM;
+                inputStream.error = MAD_ERROR_NOMEM;
                 return -1;
             }
         }
@@ -174,9 +163,11 @@ class MP3Decoder
     {
         auto startPtr = (unsigned const char *)lastInput.point();
         int size = decodeHeader(startPtr);
+        if(size==-1)return -1;
         lastInput >>= size;
         if (lastInput.length() == 0)
         {
+            lastInput<<=size;
             return -1;
         }
         auto si_len = checkCRC();
@@ -187,23 +178,22 @@ class MP3Decoder
                                   &si, &data_bitlen, &priv_bitlen);
         frame.header.flags |= priv_bitlen;
         frame.header.private_bits |= si.private_bits;
-
         auto main_begin = mad_bit_nextbyte(&inputStream.ptr);
         auto headerSize = main_begin - startPtr;
         int mainSize = size - headerSize;
         /* find main_data of next frame */
         next_md_begin = get_main_data_begin((const unsigned char *)lastInput.point());
         int oldSize = mainBuffer.length();
-        if (oldSize < si.main_data_begin)
-            return -1;
         mainBuffer << MemoryStream((u8 *)main_begin, mainSize);
+        lastInput.removeConsume();
         int newSize = mainBuffer.length();
-        if (newSize < next_md_begin)
+        if (oldSize < si.main_data_begin || newSize < next_md_begin)
             return -1;
         mainBuffer.offset = oldSize - si.main_data_begin;
         int dataSize = newSize - next_md_begin - mainBuffer.offset;
-        mad_bit_init(&mainStream.ptr, (unsigned const char *)mainBuffer.point());
-        III_decode(&mainStream.ptr, &frame, &si, nch);
+        struct mad_bitptr mainStreamBitPtr;
+        mad_bit_init(&mainStreamBitPtr, (unsigned const char *)mainBuffer.point());
+        III_decode(&mainStreamBitPtr, &frame, &si, nch);
         mad_synth_frame(&synth, &frame);
         mainBuffer >>= dataSize;
         mainBuffer.removeConsume();
@@ -212,11 +202,9 @@ class MP3Decoder
     int decode(MemoryStream &input)
     {
         //frame.options = inputStream.options;
-        if (lastInput.length())
-        {
-            lastInput << input;
-            lastInput.offset = 0;
-        }
+        int oldSize=lastInput.size();
+        lastInput.data.resize(lastInput.size()+input.length());
+        memcpy((void*)(lastInput.data.data()+oldSize), input.point(), input.length());
         return decode();
     }
 

@@ -28,7 +28,7 @@ emcc_args = [
   '--bind',
   '-Ispeex-1.2rc2/include',
   '-IBroadway','-I.',
-  '-I../libid3tag',
+  #'-I../libid3tag',
   '-DUSE_MP3',
   #'-DUSE_AAC'
   #'--js-library', 'library.js'
