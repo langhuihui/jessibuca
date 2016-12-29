@@ -9,8 +9,7 @@ public:
 	bool isFirstVideoReceived = true;
 	//mp4AudioSpecificConfig* config;
 	u8 NAL_unit_length;
-	int spsLen = 0;
-	int ppsLen = 0;
+
 	//string sps;
 	//string pps;
 	bool webgl = false;
@@ -31,7 +30,9 @@ public:
 	{
 		delete videoDecoder;
 		delete audioDecoder;
-		if (jsThis != nullptr)delete jsThis;
+		if (jsThis != nullptr){
+			delete jsThis;
+		}
 	}
 	void onConnect(val&& result) {
 		id = result.isNull()?0:result.as<int>();
@@ -51,62 +52,25 @@ public:
 		videoDecoder->webgl = webgl;
 	}
 	
-	void decodeVideo(MemoryStream& data) {
-		int NALUnitLength = 0;
-		data >>= 5;
-		while (data.length() > 4) {
-			switch (NAL_unit_length) {
-			case 3:
-				data.read4B(NALUnitLength);
-				break;
-			case 2:
-				data.read3B(NALUnitLength);
-				break;
-			case 1:
-				data.read2B(NALUnitLength);
-				break;
-			default:
-				data.read1(NALUnitLength);
-			}
-			u8 naluType = data[0] & 0x1f;
-			switch (naluType) {
-			case 5:
-			case 1:
-				videoDecoder->decode((const char *)data, NALUnitLength);
-				break;
-			}
-			data >>= NALUnitLength;
-		}
-	}
-
 	bool decodeVideo(clock_t _timestamp, MemoryStream& data) {
-		int index = data.offset;
+		
 		u8 frame_type = data[0];
 		int codec_id = frame_type & 0x0f;
 		frame_type = (frame_type >> 4) & 0x0f;
-		if (codec_id != 7) {
-			emscripten_log(0, "Only support video h.264/avc codec. actual=%d", data[0]);
+
+		if (codec_id == 7) {
+			
+		}else if(codec_id == 12){
+
+		}else{
+			emscripten_log(0, "Only support video h.264/avc or h.265/hevc codec. actual=%d", data[0]);
 			return false;
 		}
 		u8 avc_packet_type = data[1];
 		if (frame_type == 1 && avc_packet_type == 0) {
 			if (isFirstVideoReceived) {
 				timestamp = getTime() - _timestamp;
-				u8 lengthSizeMinusOne = data[9];
-				lengthSizeMinusOne &= 0x03;
-				NAL_unit_length = lengthSizeMinusOne;
-				data.offset = 11+ index;
-				//data.consoleHex();
-				data.read2B(spsLen);
-				if (spsLen > 0) {
-					videoDecoder->decode((const char*)data,spsLen);
-					data >>= spsLen;
-				}
-				data >>= 1;
-				data.read2B(ppsLen);
-				if (ppsLen > 0) {
-					videoDecoder->decode((const char*)data,ppsLen);
-				}
+				videoDecoder->decodeHeader(data,codec_id);
 				isFirstVideoReceived = false;
 			}
 		}
@@ -133,14 +97,14 @@ public:
 					return false;
 				}
 			}
-			decodeVideo(data);
+			videoDecoder->decode(data);
 		}
 		return true;
 	}
 	void decodeVideoBuffer() {
 		if (!videoBuffers.empty()) {
 			//emscripten_log(0, "decode video buffer %d", videoBuffers.size());
-			decodeVideo(videoBuffers.front().data);
+			videoDecoder->decode(videoBuffers.front().data);
 			videoBuffers.pop();
 			//emscripten_log(0, "decode video buffer2 %d", videoBuffers.empty());
 			if (!videoBuffers.empty()) {

@@ -10,10 +10,9 @@
 <body>
     <canvas id="canvas" style="background-color: #0D0E1B"></canvas>
     <button id="connectbn" style="width: 100px;height: 100px" onclick="test()">连接</button>
-    <button onclick="ns.play('test2')" style="width: 100px; height: 100px">开始</button>
+    <button onclick="play()" style="width: 100px; height: 100px">开始</button>
     <button onclick="mc.close()" style="width: 100px; height: 100px">结束</button>
     <div id="logout">
-
     </div>
     <script>
         var ns = null;
@@ -31,12 +30,31 @@
             return true;
         }
 
+        function play() {
+            if (!NetStream.prototype.audioContext) {
+
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                var context = new window.AudioContext();
+                NetStream.prototype.audioContext = context;
+                // you should null check window.AudioContext for old browsers to not blow up
+                ns.initAudio(12 * 576, 22050, 1);
+                // create a dummy sound - and play it immediately in same 'thread'
+                var oscillator = context.createOscillator();
+                oscillator.frequency.value = 0;
+                oscillator.connect(context.destination);
+                oscillator.start(0);
+                //oscillator.stop(.5);
+            }
+
+            ns.play('user2')
+        }
+
         function test() {
             mc = new MonaClient();
-            //mc.connect("127.0.0.1:81", "live", "");
-            mc.connect("113.10.201.210:81", "live", "")
-                //mc.connect("123.108.249.106", "live");
-                //mc.connect('43.227.97.170:81','live');
+            mc.connect("127.0.0.1:81", "live", "");
+            //mc.connect("113.10.201.210:81", "live", "")
+            //mc.connect("123.108.249.106", "live");
+            //mc.connect('43.227.97.170:81','live');
             mc.onWsMessage = function(data) {
 
             };
@@ -51,7 +69,7 @@
                 console.log(info.code);
             };
             //ns.initAudio(12 * 1024, 44100, 2);
-            ns.initAudio(12 * 576, 22050, 1);
+
             // nc = new NetConnection();
             // nc.onNetStatus = function(info) {
             //     Module.print(info.code);

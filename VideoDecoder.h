@@ -34,10 +34,10 @@ public:
 	u32 videoWidth;
 	u32 videoHeight;
 	u32 p_yuv[3];
-	
+	int NAL_unit_length;
 	bool webgl;
 	
-	VideoDecoder():heap(nullptr), webgl(false)
+	VideoDecoder():heap(nullptr), webgl(false),NAL_unit_length(0)
 	{
 #ifdef USE_H265
 		h265DecContext = de265_new_decoder();
@@ -157,7 +157,74 @@ public:
 		return ret;
 	}
 #endif
-	void decode(const char* data, int len) {
+	void decodeHeader(MemoryStream& data, int codec_id){
+		int index = data.offset;
+		emscripten_log(0, "codec = %d", codec_id);
+		if(codec_id==7){
+			u8 lengthSizeMinusOne = data[9];
+			lengthSizeMinusOne &= 0x03;
+			NAL_unit_length = lengthSizeMinusOne;
+			data.offset = 11+ index;
+			//data.consoleHex();
+			int spsLen = 0;
+			int ppsLen = 0;
+			data.read2B(spsLen);
+			if (spsLen > 0) {
+				_decode((const char*)data,spsLen);
+				data >>= spsLen;
+			}
+			data >>= 1;
+			data.read2B(ppsLen);
+			if (ppsLen > 0) {
+				_decode((const char*)data,ppsLen);
+			}
+			
+		}else if(codec_id==12){
+			u8 lengthSizeMinusOne = data[27];
+			lengthSizeMinusOne &= 0x03;
+			NAL_unit_length = lengthSizeMinusOne;
+			data.offset = 31 + index;
+			int vps=0,sps=0,pps=0;
+			data.read2B(vps);
+			_decode((const char*)data,vps);
+			data>>=vps;
+			data>>=3;
+			data.read2B(sps);
+			_decode((const char*)data,sps);
+			data>>=sps;
+			data>>=3;
+			data.read2B(pps);
+			_decode((const char*)data,pps);
+		}
+	}
+	void decode(MemoryStream& data) {
+		int NALUnitLength = 0;
+		data >>= 5;
+		while (data.length() > 4) {
+			switch (NAL_unit_length) {
+			case 3:
+				data.read4B(NALUnitLength);
+				break;
+			case 2:
+				data.read3B(NALUnitLength);
+				break;
+			case 1:
+				data.read2B(NALUnitLength);
+				break;
+			default:
+				data.read1(NALUnitLength);
+			}
+			u8 naluType = data[0] & 0x1f;
+			switch (naluType) {
+			case 5:
+			case 1:
+				_decode((const char *)data, NALUnitLength);
+				break;
+			}
+			data >>= NALUnitLength;
+		}
+	}
+	void _decode(const char* data, int len) {
 		//emscripten_log(0, "%d %d",len,(int)data);
 #ifdef USE_H265
 		de265_push_NAL(h265DecContext, data, len, 0, nullptr);
@@ -184,14 +251,17 @@ public:
 			}
 		}
 #else
-		decInput.pStream = (u8*)data;
-		decInput.dataLen = len;
-		u32 i = 0;
-		do {
-			u8 *start = decInput.pStream;
-			u32 ret = broadwayDecode();
-			//emscripten_log(0,"Decoded Unit #%d, Size: %x, Result: %i\n", i++, (decInput.pStream - start), ret);
-		} while (decInput.dataLen > 0);
+			
+				decInput.pStream = (u8*)data;
+				decInput.dataLen = len;
+				u32 i = 0;
+				do {
+					u8 *start = decInput.pStream;
+					u32 ret = broadwayDecode();
+					//emscripten_log(0,"Decoded Unit #%d, Size: %x, Result: %i\n", i++, (decInput.pStream - start), ret);
+				} while (decInput.dataLen > 0);
+			
+		
 #endif
 	}
 };

@@ -97,7 +97,7 @@ class MP3Decoder
 
             N = (slots_per_frame * header.bitrate / header.samplerate) + pad_slot;
         }
-        emscripten_log(0, "audio size:%d bitrate:%d samplerate:%d",N ,header.bitrate,header.samplerate);
+        //emscripten_log(0, "audio size:%d bitrate:%d samplerate:%d",N ,header.bitrate,header.samplerate);
         return N;
     }
     int checkCRC()
