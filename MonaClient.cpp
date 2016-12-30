@@ -113,10 +113,9 @@ int main()
 				//setTimeout(playNextBuffer, audioBufferTime-audioBuffers.length*200);
 				source.start();
 			};
-			this.playAudio = playAudio;
-			this.close = function(){
-				this.playAudio = function(){};
-			} }; mc.prototype.connect = function(url, appName, roomName) {
+			this.playAudio = playAudio; 
+			};
+			mc.prototype.connect = function(url, appName, roomName) {
 			var ws = this.$connect(this, url, appName, roomName || "");
 			this.send = function(ptr, length, output) {
 				var outputArray = HEAPU8.subarray(ptr, ptr + length);
@@ -255,11 +254,6 @@ val MonaClient::Connect(val _this, string url, string appName, string roomName)
 void MonaClient::Close()
 {
     ws->call<void>("close");
-    if (netStreams.size())
-    {
-	netStreams[0]->jsThis->call<void>("close");
-	//delete netStreams[0];
-    }
 }
 EMSCRIPTEN_BINDINGS(MonaClient)
 {
