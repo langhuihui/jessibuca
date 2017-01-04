@@ -37,7 +37,7 @@ public:
 	int NAL_unit_length;
 	bool webgl;
 	
-	VideoDecoder():heap(nullptr), webgl(false),NAL_unit_length(0)
+	VideoDecoder():heap(nullptr), webgl(false),NAL_unit_length(0),videoWidth(0),videoHeight(0)
 	{
 #ifdef USE_H265
 		h265DecContext = de265_new_decoder();
@@ -184,6 +184,7 @@ public:
 			lengthSizeMinusOne &= 0x03;
 			NAL_unit_length = lengthSizeMinusOne;
 			data.offset = 31 + index;
+			//data.consoleHex();
 			int vps=0,sps=0,pps=0;
 			data.read2B(vps);
 			_decode((const char*)data,vps);
@@ -214,6 +215,10 @@ public:
 			default:
 				data.read1(NALUnitLength);
 			}
+			#ifdef USE_H265
+			//emscripten_log(0, "NALUnitLength %d",NALUnitLength);
+			_decode((const char *)data, NALUnitLength);
+			#else
 			u8 naluType = data[0] & 0x1f;
 			switch (naluType) {
 			case 5:
@@ -221,6 +226,7 @@ public:
 				_decode((const char *)data, NALUnitLength);
 				break;
 			}
+			#endif
 			data >>= NALUnitLength;
 		}
 	}
@@ -233,21 +239,23 @@ public:
 			more = 0;
 			auto err = de265_decode(h265DecContext, &more);
 			if (err != DE265_OK) {
-				emscripten_log(0, "%d", err);
+				//emscripten_log(0, "%d", err);
 				break;
 			}
 			const de265_image* img = de265_get_next_picture(h265DecContext);
 			if (img) {
+				//emscripten_log(0, "%d", img);
 				int out_stride;
 				//u8* y = (u8*)de265_get_image_plane(img, 0, &out_stride);
 				//u8* u = (u8*)de265_get_image_plane(img, 1, &out_stride);
 				//u8* v = (u8*)de265_get_image_plane(img, 2, &out_stride);
 				for(int i=0;i<3;i++)
 					p_yuv[i] = (u32)de265_get_image_plane(img, i, &out_stride);
-				videoWidth = de265_get_image_width(img, 0);
-				videoHeight = de265_get_image_height(img, 0);
+				//videoWidth = de265_get_image_width(img, 0);
+				//videoHeight = de265_get_image_height(img, 0);
+				if(videoWidth==0)
+				decodeVideoSize(de265_get_image_width(img, 0),de265_get_image_height(img, 0));
 				decodeYUV420();
-				de265_release_next_picture(h265DecContext);
 			}
 		}
 #else

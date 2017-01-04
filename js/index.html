@@ -37,23 +37,37 @@
                 NetStream.prototype.audioContext = context;
                 // you should null check window.AudioContext for old browsers to not blow up
                 // create a dummy sound - and play it immediately in same 'thread'
-                var oscillator = context.createOscillator();
-                oscillator.frequency.value = 0;
-                oscillator.connect(context.destination);
-                oscillator.start(0);
+                //var real = new Float32Array(2);
+                //var imag = new Float32Array(2);
+                //var oscillator = context.createOscillator();
+                //real[0] = 0;
+                //imag[0] = 0;
+                //real[1] = 1;
+                //imag[1] = 0;
+
+                //var wave = context.createPeriodicWave(real, imag)
+                //oscillator.setPeriodicWave(wave)
+                //oscillator.frequency.value = 0;
+                //oscillator.connect(context.destination);
+                //oscillator.start(0);
                 //oscillator.stop(.5);
             }
+            //speex
+            //ns.initAudio(50*320, 16000 , 1);
+            //mp3
             ns.initAudio(12 * 576, 22050, 1);
-            ns.play('B01')
+            //aac
+            //ns.initAudio(12 * 1024, 44100, 2);
+            ns.play('h265')
         }
 
         function test() {
             mc = new MonaClient();
-            mc.connect("182.16.68.70:81", "live", "")
-                //mc.connect("127.0.0.1:81", "live", "");
-                //mc.connect("113.10.201.210:81", "live", "")
-                //mc.connect("123.108.249.106", "live");
-                //mc.connect('43.227.97.170:81','live');
+            //mc.connect("182.16.68.70:81", "live", "")
+            //mc.connect("127.0.0.1:81", "live", "");
+            //mc.connect("113.10.201.210:81", "live", "")
+            //mc.connect("123.108.249.106", "live");
+            mc.connect('43.227.97.170:81', 'live');
             mc.onWsMessage = function(data) {
 
             };
@@ -63,11 +77,11 @@
             ns = new NetStream(mc);
             ns.bufferTime = 1;
             ns.attachCanvas(document.getElementById("canvas"));
-            //ns.initAudio(50*320, 16000 , 1);
+
             ns.onNetStatus = function(info) {
                 console.log(info.code);
             };
-            //ns.initAudio(12 * 1024, 44100, 2);
+
 
             // nc = new NetConnection();
             // nc.onNetStatus = function(info) {
