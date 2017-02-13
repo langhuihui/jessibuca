@@ -20,7 +20,7 @@ public:
 	queue<VideoPacket> videoBuffers;
 	bool bufferIsPlaying;
 	int bufferTime;
-	NetStream(MonaClient* mc) :mc(mc),webgl(false), jsThis(nullptr), bufferIsPlaying(0)
+	NetStream(MonaClient* mc) :mc(mc),webgl(false), jsThis(nullptr), bufferIsPlaying(0),audioDecoder(nullptr),videoDecoder(nullptr)
 	{
 		//nc->sendRtmpMessage({ 0x14,0 }, "createStream", nc->createResultFunction({ bind(&NetStream::onConnect,this,placeholders::_1),nullptr }), val::null());
 		onConnect(val::null());
@@ -28,8 +28,8 @@ public:
 
 	~NetStream()
 	{
-		delete videoDecoder;
-		delete audioDecoder;
+		if(videoDecoder)delete videoDecoder;
+		if(audioDecoder)delete audioDecoder;
 		if (jsThis != nullptr){
 			delete jsThis;
 		}
@@ -132,6 +132,7 @@ public:
 	}
 
 	bool decodeAudio(clock_t _timestamp, MemoryStream & data) {
+		if(audioDecoder == nullptr)return false;
 		unsigned char flag = 0;
 		data.readB<1>(flag);
 		auto audioType = flag >> 4;

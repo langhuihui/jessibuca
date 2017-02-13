@@ -29,9 +29,9 @@ emcc_args = [
   '-Ispeex-1.2rc2/include',
   '-IBroadway','-I.',
   #'-I../libid3tag',
-  '-DUSE_MP3',
-  '-DUSE_H265'
-  #'-DUSE_AAC'
+  #'-DUSE_MP3',
+  #'-DUSE_H265'
+  '-DUSE_AAC'
   #'--js-library', 'library.js'
   # '--js-transform', 'python appender.py'
 ]

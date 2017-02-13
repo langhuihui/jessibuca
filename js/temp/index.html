@@ -33,8 +33,12 @@
         function play() {
             if (!NetStream.prototype.audioContext) {
                 window.AudioContext = window.AudioContext || window.webkitAudioContext;
-                var context = new window.AudioContext();
-                NetStream.prototype.audioContext = context;
+                if (window.AudioContext) {
+                    var context = new window.AudioContext();
+                    NetStream.prototype.audioContext = context;
+                } else {
+                    console.log("not support AudioContext!");
+                }
                 // you should null check window.AudioContext for old browsers to not blow up
                 // create a dummy sound - and play it immediately in same 'thread'
                 //var real = new Float32Array(2);
@@ -52,22 +56,26 @@
                 //oscillator.start(0);
                 //oscillator.stop(.5);
             }
-            //speex
-            //ns.initAudio(50*320, 16000 , 1);
-            //mp3
-            ns.initAudio(12 * 576, 22050, 1);
-            //aac
-            //ns.initAudio(12 * 1024, 44100, 2);
-            ns.play('h265')
+            if (ns.audioContext) {
+
+
+                //speex
+                //ns.initAudio(50*320, 16000 , 1);
+                //mp3
+                ns.initAudio(12 * 576, 22050, 1);
+                //aac
+                //ns.initAudio(12 * 1024, 44100, 2);
+            }
+            ns.play('game1table3')
         }
 
         function test() {
             mc = new MonaClient();
             //mc.connect("182.16.68.70:81", "live", "")
-            mc.connect("127.0.0.1:81", "live", "");
+            //mc.connect("127.0.0.1:81", "live", "");
             //mc.connect("113.10.201.210:81", "live", "")
             //mc.connect("123.108.249.106", "live");
-            //mc.connect('43.227.97.170:81', 'live');
+            mc.connect('113.10.201.210:81', 'live');
             mc.onWsMessage = function(data) {
 
             };
