@@ -188,7 +188,7 @@ class AudioDecoder
 	    nsamples = pcm.length;
 	    left_ch = pcm.samples[0];
 	    right_ch = pcm.samples[1];
-	    samplesBytes += nsamples*2;
+	    samplesBytes += nsamples*2* nchannels;
 	    //i16 left_output[576];
 		//emscripten_log(0,"%d %d",left_ch[0],left_ch[1])
 		while (nsamples--) {
@@ -197,6 +197,11 @@ class AudioDecoder
 			sample = scale(*left_ch++);
 			(*output++) = ((sample >> 0) & 0xff);
 			(*output++) = ((sample >> 8) & 0xff);
+			if (nchannels == 2) {
+				sample = scale(*right_ch++);
+				(*output++) = ((sample >> 0) & 0xff);
+				(*output++) = ((sample >> 8) & 0xff);
+			}
 			//memcpy(output, &sample, 2);
 			//output+=2;
 			//*(left_output++) = (i16)sample;
