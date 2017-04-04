@@ -65,7 +65,7 @@ class AudioDecoder
 #endif
     }
     ~AudioDecoder()
-    {
+    {emscripten_log(0, "audio decoder release\n");
 #ifdef USE_AAC
 	faacDecClose(faacHandle);
 #endif
@@ -75,6 +75,7 @@ class AudioDecoder
 	free(audioOutput);
 #endif
 	free(outputBuffer);
+		emscripten_log(0, "audio decoder release!\n");
     }
     bool decode(int audioType, MemoryStream &data)
     {

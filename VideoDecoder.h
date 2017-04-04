@@ -56,13 +56,16 @@ public:
 	}
 	~VideoDecoder()
 	{
-		if(heap)free(heap);
+		if(!webgl&&heap)free(heap);
 #ifdef USE_H265
 		de265_free_decoder(h265DecContext);
 #else
-		H264SwDecRelease(&decInst);
+		if(decInst){
+			H264SwDecRelease(decInst);
+			decInst = nullptr;
+		}
 #endif
-
+	emscripten_log(0, "video decoder release!\n");
 	}
 	void decodeVideoSize(u32 width, u32 height)
 	{
@@ -95,8 +98,7 @@ public:
 	}
 #ifndef USE_H265
 	u32 broadwayDecode() {
-		decInput.picId = picDecodeNumber;
-
+	
 		H264SwDecRet ret = H264SwDecDecode(decInst, &decInput, &decOutput);
 
 		switch (ret) {
@@ -259,7 +261,7 @@ public:
 			}
 		}
 #else
-			
+			if(!decInst)return;
 				decInput.pStream = (u8*)data;
 				decInput.dataLen = len;
 				u32 i = 0;

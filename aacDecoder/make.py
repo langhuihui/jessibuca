@@ -49,8 +49,8 @@ source_files =[
 'filtbank.c',''
 ]
 '''
-build_files = ['bits.c','syntax.c','decoder.c']
-#build_files =source_files
+#build_files = ['bits.c','syntax.c','decoder.c']
+build_files =source_files
 for file in build_files:
   target = file.replace('.c', '.o')
   print 'emcc %s -> %s' % (file, target)

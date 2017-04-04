@@ -186,6 +186,7 @@ void MonaClient::OnWsMessage(val evt)
 {
     string &&dataType = evt["data"].typeof().as<string>();
     string data = evt["data"].as<string>();
+	if(netStreams.size()>0)
     switch (data.at(0))
     {
     case 1:
@@ -254,6 +255,8 @@ val MonaClient::Connect(val _this, string url, string appName, string roomName)
 void MonaClient::Close()
 {
     ws->call<void>("close");
+	if(netStreams.size()>0) delete netStreams[0];
+	delete this;
 }
 EMSCRIPTEN_BINDINGS(MonaClient)
 {

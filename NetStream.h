@@ -20,7 +20,8 @@ public:
 	queue<VideoPacket> videoBuffers;
 	bool bufferIsPlaying;
 	int bufferTime;
-	NetStream(MonaClient* mc) :mc(mc),webgl(false), jsThis(nullptr), bufferIsPlaying(0),audioDecoder(nullptr),videoDecoder(nullptr)
+	int videoTimeoutId;
+	NetStream(MonaClient* mc) :mc(mc),webgl(false), jsThis(nullptr),videoTimeoutId(0), bufferIsPlaying(0),audioDecoder(nullptr),videoDecoder(nullptr)
 	{
 		//nc->sendRtmpMessage({ 0x14,0 }, "createStream", nc->createResultFunction({ bind(&NetStream::onConnect,this,placeholders::_1),nullptr }), val::null());
 		onConnect(val::null());
@@ -28,32 +29,37 @@ public:
 
 	~NetStream()
 	{
+		emscripten_log(0, "netStream deleted! %d", id);
+		EM_ASM_({
+			clearTimeout($0)
+		}, videoTimeoutId);
 		if(videoDecoder)delete videoDecoder;
 		if(audioDecoder)delete audioDecoder;
-		if (jsThis != nullptr){
-			delete jsThis;
-		}
+		if (jsThis)	delete jsThis;
 	}
 	void onConnect(val&& result) {
 		id = result.isNull()?0:result.as<int>();
 		mc->netStreams[id] = this;
-		videoDecoder = new VideoDecoder();
+		
 		emscripten_log(0, "netStream connect! %d", id);
 	}
 	void play(string name) {
 		mc->Send("[\"__play\",\"" + name + "\"]");
 	}
 	void attachCanvas(val _this,bool webgl) {
-		this->webgl = webgl;
-		emscripten_log(0, "webgl:%s", webgl ? "true" : "false");
-		//consoleLog("webgl:%s",webgl?"true":"false");
-		if (!jsThis)jsThis = new val(_this);
-		videoDecoder->jsObject = jsThis;
-		videoDecoder->webgl = webgl;
+		if(videoDecoder==nullptr){
+			this->webgl = webgl;
+			emscripten_log(0, "webgl:%s", webgl ? "true" : "false");
+			videoDecoder = new VideoDecoder();
+			//consoleLog("webgl:%s",webgl?"true":"false");
+			if (!jsThis)jsThis = new val(_this);
+			videoDecoder->jsObject = jsThis;
+			videoDecoder->webgl = webgl;
+		}
 	}
 	
 	bool decodeVideo(clock_t _timestamp, MemoryStream& data) {
-		
+		if(videoDecoder == nullptr)return false;
 		u8 frame_type = data[0];
 		int codec_id = frame_type & 0x0f;
 		frame_type = (frame_type >> 4) & 0x0f;
@@ -92,7 +98,7 @@ public:
 						info.set("code", "NetStream.Play.Start");
 						jsThis->call<void>("onNetStatus", info);
 						emscripten_log(0, "setTimeout to play video buffer %d", _timestamp - targetTime + bufferTime * 1000);
-						jsThis->call<int>("checkVideoBuffer", _timestamp - targetTime + bufferTime * 1000);
+						videoTimeoutId=jsThis->call<int>("checkVideoBuffer", _timestamp - targetTime + bufferTime * 1000);
 					}
 					return false;
 				}
@@ -112,7 +118,7 @@ public:
 				auto targetTime = getTime() - timestamp;
 				//emscripten_log(0, "decode video buffer time:%d targetTime:%d timestamp:%d", time, targetTime, timestamp);
 				if (time + bufferTime * 1000> targetTime) {
-					jsThis->call<int>("checkVideoBuffer", time - targetTime + bufferTime * 1000);
+					videoTimeoutId=jsThis->call<int>("checkVideoBuffer", time - targetTime + bufferTime * 1000);
 					return;
 				}
 				else {
