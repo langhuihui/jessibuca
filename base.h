@@ -7,6 +7,7 @@
 #include "basetype.h"
 #ifdef USE_H265
 #include "libde265/de265.h"
+#include "libde265/image.h"
 #else
 #include "H264SwDecApi.h"
 void* H264SwDecMalloc(u32 size)
