@@ -22,28 +22,20 @@
         var txt = "";
 
         var testFunctions = []
-        testFunctions.push(function() {
+        testFunctions.push(function(n) {
             test()
+            setTimeout(testFunctions[1], 2000, n)
         })
-        testFunctions.push(function() {
-            play('user1')
+        testFunctions.push(function(n) {
+            play(n)
+            setTimeout(testFunctions[2], 8000, n == 'user1' ? 'user2' : 'user1')
         })
-        testFunctions.push(function() {
+        testFunctions.push(function(n) {
             mc.close()
+            setTimeout(testFunctions[0], 1000, n)
         })
-        testFunctions.push(function() {
-            test()
-        })
-        testFunctions.push(function() {
-            play('user2')
-        })
-        testFunctions.push(function() {
-            mc.close()
-        })
-        setInterval(function() {
-            testFunctions[0]()
-            testFunctions.push(testFunctions.shift())
-        }, 5000)
+
+        setTimeout(testFunctions[0], 1000, 'user1')
 
         function handleErr(msg, url, l) {
             txt = "There was an error on this page.\n\n";

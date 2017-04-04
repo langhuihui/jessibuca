@@ -191,14 +191,17 @@ void MonaClient::OnWsMessage(val evt)
     {
     case 1:
     {
-	MemoryStream ms(data.substr(1));
-	netStreams[0]->decodeAudio(ms.readUInt32B(), ms);
+		if(netStreams[0]->audioDecoder){
+				emscripten_log(0, "netStream audioDecoder! %d", netStreams[0]->audioDecoder);
+			MemoryStream ms(data.substr(1));
+			netStreams[0]->decodeAudio(ms.readUInt32B(), ms);
+		}
     }
     break;
     case 2:
     {
-	MemoryStream ms(data.substr(1));
-	netStreams[0]->decodeVideo(ms.readUInt32B(), ms);
+		MemoryStream ms(data.substr(1));
+		netStreams[0]->decodeVideo(ms.readUInt32B(), ms);
     }
     break;
     default:

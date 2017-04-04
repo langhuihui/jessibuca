@@ -37,7 +37,7 @@ class AudioDecoder
     u8 *outputBuffer;
 #ifdef USE_AAC
     faacDecHandle faacHandle;
-    faacDecConfigurationPtr faacConfiguration;
+    //faacDecConfigurationPtr faacConfiguration;
 #endif
 #ifdef USE_SPEEX
     i16 *audioOutput;
@@ -60,9 +60,10 @@ class AudioDecoder
 #endif
 #ifdef USE_AAC
 	faacHandle = faacDecOpen();
-	faacConfiguration = faacDecGetCurrentConfiguration(faacHandle);
+	//faacConfiguration = faacDecGetCurrentConfiguration(faacHandle);
 	emscripten_log(0, "aac init! %d", faacHandle);
 #endif
+emscripten_log(0, "audio init! %d", this);
     }
     ~AudioDecoder()
     {emscripten_log(0, "audio decoder release\n");
@@ -127,12 +128,12 @@ class AudioDecoder
 	if (input.readB<1, u8>())
 	{
 	    faacDecFrameInfo frame_info;
-	    //emscripten_log(0, "%d", data.length());
+	    
 	    auto pcm_data = faacDecDecode(faacHandle, &frame_info, (unsigned char *)input.point(), input.length());
 
 	    if (frame_info.error > 0)
 	    {
-		emscripten_log(1, "%s\n", NeAACDecGetErrorMessage(frame_info.error));
+			emscripten_log(1, "!!%s\n", NeAACDecGetErrorMessage(frame_info.error));
 	    }
 	    else
 	    {

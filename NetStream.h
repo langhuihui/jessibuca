@@ -1,10 +1,10 @@
 #pragma once
 class NetStream
 {
-private:
+public:
 	AudioDecoder* audioDecoder;
 	VideoDecoder* videoDecoder;
-public:
+
 	MonaClient *mc;
 	bool isFirstVideoReceived = true;
 	//mp4AudioSpecificConfig* config;
@@ -30,9 +30,7 @@ public:
 	~NetStream()
 	{
 		emscripten_log(0, "netStream deleted! %d", id);
-		EM_ASM_({
-			clearTimeout($0)
-		}, videoTimeoutId);
+		EM_ASM_({clearTimeout($0)}, videoTimeoutId);
 		if(videoDecoder)delete videoDecoder;
 		if(audioDecoder)delete audioDecoder;
 		if (jsThis)	delete jsThis;
@@ -138,7 +136,7 @@ public:
 	}
 
 	bool decodeAudio(clock_t _timestamp, MemoryStream & data) {
-		if(audioDecoder == nullptr)return false;
+		
 		unsigned char flag = 0;
 		data.readB<1>(flag);
 		auto audioType = flag >> 4;
