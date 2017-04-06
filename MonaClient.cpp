@@ -192,7 +192,6 @@ void MonaClient::OnWsMessage(val evt)
     case 1:
     {
 		if(netStreams[0]->audioDecoder){
-				emscripten_log(0, "netStream audioDecoder! %d", netStreams[0]->audioDecoder);
 			MemoryStream ms(data.substr(1));
 			netStreams[0]->decodeAudio(ms.readUInt32B(), ms);
 		}
@@ -200,8 +199,10 @@ void MonaClient::OnWsMessage(val evt)
     break;
     case 2:
     {
-		MemoryStream ms(data.substr(1));
-		netStreams[0]->decodeVideo(ms.readUInt32B(), ms);
+		if(netStreams[0]->videoDecoder){
+			MemoryStream ms(data.substr(1));
+			netStreams[0]->decodeVideo(ms.readUInt32B(), ms);
+		}
     }
     break;
     default:
@@ -258,7 +259,10 @@ val MonaClient::Connect(val _this, string url, string appName, string roomName)
 void MonaClient::Close()
 {
     ws->call<void>("close");
-	if(netStreams.size()>0) delete netStreams[0];
+	if(netStreams.size()>0){
+		delete netStreams[0];
+		netStreams.clear();
+	} 
 	delete this;
 }
 EMSCRIPTEN_BINDINGS(MonaClient)
