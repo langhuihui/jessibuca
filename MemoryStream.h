@@ -44,6 +44,9 @@ public:
 	MemoryStream(string&& right) :data(move(right)), offset(0) {
 
 	}
+	MemoryStream(string & right):data(move(right)),offset(0){
+		
+	}
 	MemoryStream& operator = (string&& right) {
 		data = move(right);
 		offset = 0;

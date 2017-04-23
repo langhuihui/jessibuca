@@ -10,8 +10,8 @@
 <body>
     <canvas id="canvas" style="background-color: #0D0E1B"></canvas>
     <button id="connectbn" style="width: 100px;height: 100px" onclick="test()">连接</button>
-    <button onclick="play('user1')" style="width: 100px; height: 100px">开始</button>
-    <button onclick="play('user2')" style="width: 100px; height: 100px">开始2</button>
+    <button onclick="play('user1')" style="width: 100px; height: 100px">开始user1</button>
+    <button onclick="play('user2')" style="width: 100px; height: 100px">开始user2</button>
     <button onclick="mc.close()" style="width: 100px; height: 100px">结束</button>
     <div id="logout">
     </div>
@@ -35,7 +35,7 @@
             setTimeout(testFunctions[0], 1000, n)
         })
 
-        setTimeout(testFunctions[0], 1000, 'user1')
+        //setTimeout(testFunctions[0], 1000, 'user1')
 
         function handleErr(msg, url, l) {
             txt = "There was an error on this page.\n\n";

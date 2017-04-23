@@ -12,9 +12,9 @@ import tools.shared as emscripten
 emcc_args = [
 '--pre-js',os.path.join('js','WebGLCanvas.js'),
   #'-m32',
-  '-O3',
+  #'-O3',
  '--memory-init-file', '0',
-  '--llvm-opts', '3',
+ # '--llvm-opts', '3',
   #'-s', 'CORRECT_SIGNS=1',
   #'-s', 'CORRECT_OVERFLOWS=1',
  '-s', 'TOTAL_MEMORY=67108864',
@@ -30,21 +30,22 @@ emcc_args = [
   '-IBroadway','-I.',
   #'-I../libid3tag',
   '-DUSE_MP3',
-  '-DUSE_H265',
+  #'-DUSE_H265',
   #'-DUSE_AAC',
   #'--js-library', 'library.js'
   # '--js-transform', 'python appender.py'
 ]
 
 print 'build'
-print 'emcc -> %s' % 'MonaClient.o'
-emscripten.Building.emcc('MonaClient.cpp', emcc_args, 'obj/MonaClient.o')
-print 'link -> %s' % 'MonaClient.bc'
+print 'emcc -> %s' % 'target.o'
+emscripten.Building.emcc('MonaClient.cpp', emcc_args, 'obj/target.o')
+print 'link -> %s' % 'target.bc'
 object_files = os.listdir('obj')
-object_files.remove('MonaClient.bc')
+if  'target.bc' in object_files:
+  object_files.remove('target.bc')
 object_files = [os.path.join('obj', x) for x in object_files]
-emscripten.Building.link(object_files, 'obj/MonaClient.bc')
-print 'emcc %s -> %s' % ('MonaClient.bc', 'MonaClient.js')
-emscripten.Building.emcc('obj/MonaClient.bc', emcc_args, 'js/MonaClient.js')
+emscripten.Building.link(object_files, 'obj/target.bc')
+print 'emcc %s -> %s' % ('target.bc', 'MonaClient.js')
+emscripten.Building.emcc('obj/target.bc', emcc_args, 'js/MonaClient.js')
 
 print 'done'

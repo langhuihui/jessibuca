@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>FlvClient 1.0</title>
+    <meta charset="utf-8" />
+</head>
+
+<body>
+    <canvas id="canvas" style="background-color: #0D0E1B"></canvas>
+    <button id="connectbn" style="width: 100px;height: 100px" onclick="test()">连接</button>
+    <button onclick="fc.close()" style="width: 100px; height: 100px">结束</button>
+    <div id="logout">
+    </div>
+    <script>
+        var fc = null;
+        onerror = handleErr;
+        var txt = "";
+
+        function handleErr(msg, url, l) {
+            txt = "There was an error on this page.\n\n";
+            txt += "Error: " + msg + "\n";
+            txt += "URL: " + url + "\n";
+            txt += "Line: " + l + "\n\n";
+            txt += "Click OK to continue.\n\n";
+            alert(txt);
+            return true;
+        }
+
+        function test() {
+            fc = new FlvClient();
+            if (!FlvClient.prototype.audioContext) {
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                var context = new window.AudioContext();
+                FlvClient.prototype.audioContext = context;
+                // you should null check window.AudioContext for old browsers to not blow up
+                // create a dummy sound - and play it immediately in same 'thread'
+                //var real = new Float32Array(2);
+                //var imag = new Float32Array(2);
+                //var oscillator = context.createOscillator();
+                //real[0] = 0;
+                //imag[0] = 0;
+                //real[1] = 1;
+                //imag[1] = 0;
+
+                //var wave = context.createPeriodicWave(real, imag)
+                //oscillator.setPeriodicWave(wave)
+                //oscillator.frequency.value = 0;
+                //oscillator.connect(context.destination);
+                //oscillator.start(0);
+                //oscillator.stop(.5);
+            }
+            //mc.connect("182.16.68.70:81", "live", "")
+            fc.play("ws://192.168.2.205:8088/live/user1.flv", document.getElementById("canvas"));
+            //mc.connect("113.10.201.210:81", "live", "")
+            //mc.connect("123.108.249.106", "live");
+            //mc.connect('43.227.97.170:81', 'live');
+            fc.onNetStatus = function(info) {
+                console.log(info.code);
+            };
+
+        }
+
+        var Module = {
+
+            print: (function() {
+                return function(text) {
+                    if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+                    document.getElementById("logout").innerHTML += text + "<br>";
+                    // These replacements are necessary if you render to raw HTML
+                    //text = text.replace(/&/g, "&amp;");
+                    //text = text.replace(/</g, "&lt;");
+                    //text = text.replace(/>/g, "&gt;");
+                    //text = text.replace('\n', '<br>', 'g');
+                    console.log(text);
+                };
+            })(),
+            printErr: function(text) {
+                if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+                if (0) { // XXX disabled for safety typeof dump == 'function') {
+                    dump(text + '\n'); // fast, straight to the real console
+                } else {
+                    console.error(text);
+                }
+            },
+        };
+    </script>
+    <script src="FlvClient.js?version=1">
+    </script>
+</body>
+
+</html>
