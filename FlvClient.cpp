@@ -19,7 +19,7 @@ int main()
 			var setCurrentAudioData;
 			var resampled = samplerate < 22050;
 			var audioBuffer = resampled? audioCtx.createBuffer(channels, frameCount<<1, samplerate<<1) : audioCtx.createBuffer(channels, frameCount, samplerate);
-			var outputPtr = this._initAudio(this, frameCount, channels);
+			var outputPtr = this._initAudio(frameCount, channels);
 			var audioOutputArray = HEAP16.subarray(outputPtr, outputPtr + allFrameCount);
 			var playNextBuffer = function() {
 				isPlaying = false;
@@ -147,6 +147,7 @@ public:
 					status=1;
 					buffer.offset=13;
 					buffer.removeConsume();
+					
 				}
 				break;
 			case 1:
@@ -155,7 +156,6 @@ public:
 				{
 					u8 type = buffer.readu8();
 					unsigned int length = buffer.readUInt24B();
-				 	emscripten_log(0,"%d",length);
 					if(buffer.length()<length+4){
 						buffer<<=4;
 						break;
@@ -167,10 +167,11 @@ public:
 					switch(type){
 						case 0x08:
 						if(!flvDecoder.audioDecoder){
-							unsigned char flag = buffer[0];
+							unsigned char flag = ms[0];
 							auto audioType = flag >> 4;
 							int channels = (flag & 1)+1;
 							int rate = (flag>>2)&3;
+							
 							switch(rate){
 								case 1:
 								rate=11025;
@@ -183,13 +184,13 @@ public:
 								break;
 							}
 							switch(audioType){
-								case 0x10://AAC
+								case 10://AAC
 								jsThis->call<void>("initAudio",12 * 1024, rate, channels);
 								break;
-								case 0x11://Speex
+								case 11://Speex
 								jsThis->call<void>("initAudio",50*320, 16000 , channels);
 								break;
-								case 0x02://MP3
+								case 2://MP3
 								jsThis->call<void>("initAudio",12 * 576, rate,channels);
 								break;
 							}
@@ -200,7 +201,8 @@ public:
 						flvDecoder.decodeVideo(timestamp,ms);
 						break;
 					}
-					buffer.readUInt32B();
+					length = buffer.readUInt32B();
+				
 				}
 				buffer.removeConsume();
 				break;
@@ -235,6 +237,10 @@ public:
         ws->call<void>("close");
         delete this;
     }
+	int initAudio(int frameCount, int channels) {
+		emscripten_log(0,"%d,%d",frameCount,channels);
+		return flvDecoder.initAudio(frameCount,channels);
+	}
 };
 EMSCRIPTEN_BINDINGS(FlvClient)
 {
@@ -244,6 +250,7 @@ EMSCRIPTEN_BINDINGS(FlvClient)
 	.function("$onWsOpen", &FlvClient::OnWsOpen)
 	.function("getWebSocket", &FlvClient::GetWebSocket)
 	.function("close", &FlvClient::Close)
+	.function("_initAudio",&FlvClient::initAudio)
 	//.function("$call", &MonaClient::call)
 	.function("$play", &FlvClient::Play)
 	//.property("client", &MonaClient::getClient, &MonaClient::setClient)
