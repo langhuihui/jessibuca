@@ -14,6 +14,7 @@ emcc_args = [
   #'-m32',
  # '-O3',
  '--memory-init-file', '0',
+ 
   #'--llvm-opts', '3',
   #'-s', 'CORRECT_SIGNS=1',
   #'-s', 'CORRECT_OVERFLOWS=1',
@@ -25,6 +26,7 @@ emcc_args = [
   #'-s', '''EXPORTED_FUNCTIONS=["_main"]''',
   #'--closure', '1',
   '-s','NO_EXIT_RUNTIME=1',
+   '-s', 'DEMANGLE_SUPPORT=1',
   '--bind',
   '-Ispeex-1.2rc2/include',
   '-IBroadway','-I.',

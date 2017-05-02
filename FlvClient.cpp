@@ -4,7 +4,10 @@ int main()
 {
     EM_ASM(
 	var fc = window["FlvClient"] = Module["FlvClient"];
-	fc.prototype.checkVideoBuffer = function(t) { return setTimeout(this.decodeVideoBuffer.bind(this), t); };
+	fc.prototype.checkVideoBuffer = function(t) {
+		console.log(t,this.decodeVideoBuffer);
+		return setTimeout(this.decodeVideoBuffer.bind(this), t);
+	};
 	fc.prototype.onNetStatus = function(info){
 
 	};
@@ -241,6 +244,9 @@ public:
 		emscripten_log(0,"%d,%d",frameCount,channels);
 		return flvDecoder.initAudio(frameCount,channels);
 	}
+	void decodeVideoBuffer(){
+		flvDecoder.decodeVideoBuffer();
+	}
 };
 EMSCRIPTEN_BINDINGS(FlvClient)
 {
@@ -251,10 +257,7 @@ EMSCRIPTEN_BINDINGS(FlvClient)
 	.function("getWebSocket", &FlvClient::GetWebSocket)
 	.function("close", &FlvClient::Close)
 	.function("_initAudio",&FlvClient::initAudio)
-	//.function("$call", &MonaClient::call)
+	.function("decodeVideoBuffer", &FlvClient::decodeVideoBuffer)
 	.function("$play", &FlvClient::Play)
-	//.property("client", &MonaClient::getClient, &MonaClient::setClient)
-	//.property("onNetStatus", &MonaClient::getOnNetStatus, &MonaClient::setOnNetStatus);
-	//.field("ws",&NetConnection::ws)
 	;
 }
