@@ -12,10 +12,10 @@ import tools.shared as emscripten
 emcc_args = [
 '--pre-js',os.path.join('js','WebGLCanvas.js'),
   #'-m32',
- # '-O3',
+'-O3',
  '--memory-init-file', '0',
  
-  #'--llvm-opts', '3',
+'--llvm-opts', '3',
   #'-s', 'CORRECT_SIGNS=1',
   #'-s', 'CORRECT_OVERFLOWS=1',
  '-s', 'TOTAL_MEMORY=67108864',

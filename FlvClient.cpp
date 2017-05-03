@@ -5,7 +5,6 @@ int main()
     EM_ASM(
 	var fc = window["FlvClient"] = Module["FlvClient"];
 	fc.prototype.checkVideoBuffer = function(t) {
-		console.log(t,this.decodeVideoBuffer);
 		return setTimeout(this.decodeVideoBuffer.bind(this), t);
 	};
 	fc.prototype.onNetStatus = function(info){
@@ -159,7 +158,7 @@ public:
 				{
 					u8 type = buffer.readu8();
 					unsigned int length = buffer.readUInt24B();
-					if(buffer.length()<length+4){
+					if(buffer.length()<length+4+7){
 						buffer<<=4;
 						break;
 					}

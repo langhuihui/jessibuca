@@ -74,8 +74,6 @@ public:
 				if (_timestamp + bufferTime * 1000 > targetTime) {
 					videoBuffers.emplace(_timestamp, move(data));
 					//emscripten_log(0,"add to video buffer %d", _timestamp);
-					//videoBuffers.insert(videoBuffers.begin(), VideoPacket{ _timestamp,data });
-					//checkVideoBuffer();
 					if(!bufferIsPlaying)
 					{
 						bufferIsPlaying = true;
