@@ -86,8 +86,9 @@ int main()
 			};
 			this.playAudio = playAudio; 
 		};
-		fc.prototype.play = function(url,canvas) {
-			var webGLCanvas = new WebGLCanvas(canvas, Module["noWebGL"], {});
+		fc.prototype.play = function(url,webGLCanvas) {
+			
+			var canvas = webGLCanvas.canvasElement;
 			this.setVideoSize = function(w, h, dataPtr)
 			{
 				canvas.width = w;
@@ -128,11 +129,12 @@ class FlvClient
 	val* jsThis = nullptr;
 	string url;
 	int status = 0;
+	int audioBuffer = 12;
 	MemoryStream buffer;
 public:
 	FlvDecoder flvDecoder;
 	FlvClient(){
-		flvDecoder.bufferTime=1;
+		
     }
 	~FlvClient(){
         delete ws;
@@ -157,6 +159,7 @@ public:
 				while(buffer.length()>3)
 				{
 					u8 type = buffer.readu8();
+					
 					unsigned int length = buffer.readUInt24B();
 					if(buffer.length()<length+4+7){
 						buffer<<=4;
@@ -187,13 +190,13 @@ public:
 							}
 							switch(audioType){
 								case 10://AAC
-								jsThis->call<void>("initAudio",12 * 1024, rate, channels);
+								jsThis->call<void>("initAudio",audioBuffer * 1024, rate, channels);
 								break;
 								case 11://Speex
 								jsThis->call<void>("initAudio",50*320, 16000 , channels);
 								break;
 								case 2://MP3
-								jsThis->call<void>("initAudio",12 * 576, rate,channels);
+								jsThis->call<void>("initAudio",audioBuffer * 576, rate,channels);
 								break;
 							}
 						}
@@ -236,8 +239,14 @@ public:
         return *ws;
     }
 	void Close(){
+		ws->set("onmessage",val::null());
+		buffer.clear();
         ws->call<void>("close");
-        delete this;
+		delete ws;
+		ws = nullptr;
+		flvDecoder.clear();
+		status = 0;
+        //delete this;
     }
 	int initAudio(int frameCount, int channels) {
 		emscripten_log(0,"%d,%d",frameCount,channels);
@@ -245,6 +254,22 @@ public:
 	}
 	void decodeVideoBuffer(){
 		flvDecoder.decodeVideoBuffer();
+	}
+	val getBufferTime() const
+	{
+		return val(flvDecoder.bufferTime);
+	}
+	void setBufferTime(val value)
+	{
+		flvDecoder.bufferTime = value.as<int>();
+	}
+	val getAudioBuffer() const
+	{
+		return val(audioBuffer);
+	}
+	void setAudioBuffer(val value)
+	{
+		audioBuffer = value.as<int>();
 	}
 };
 EMSCRIPTEN_BINDINGS(FlvClient)
@@ -257,6 +282,8 @@ EMSCRIPTEN_BINDINGS(FlvClient)
 	.function("close", &FlvClient::Close)
 	.function("_initAudio",&FlvClient::initAudio)
 	.function("decodeVideoBuffer", &FlvClient::decodeVideoBuffer)
+	.property("videoBuffer", &FlvClient::getBufferTime, &FlvClient::setBufferTime)
+	.property("audioBuffer", &FlvClient::getAudioBuffer, &FlvClient::setAudioBuffer)
 	.function("$play", &FlvClient::Play)
 	;
 }

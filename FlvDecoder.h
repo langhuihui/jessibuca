@@ -30,17 +30,30 @@ public:
 		if(videoDecoder)delete videoDecoder;
 		if(audioDecoder)delete audioDecoder;
 	}
-	
+	void clear(){
+		EM_ASM_({clearTimeout($0)}, videoTimeoutId);
+		while(!videoBuffers.empty()){
+			videoBuffers.pop();
+		}
+		bufferIsPlaying = false;
+		videoTimeoutId = 0;
+		if(videoDecoder)delete videoDecoder;
+		if(audioDecoder)delete audioDecoder;
+		videoDecoder=nullptr;
+		audioDecoder=nullptr;
+		isFirstVideoReceived=true;
+		//videoBuffers = queue<VideoPacket>();
+	}
 	void attachCanvas(val* _this,bool webgl) {
+		this->webgl = webgl;
 		if(videoDecoder==nullptr){
-			this->webgl = webgl;
 			emscripten_log(0, "webgl:%s", webgl ? "true" : "false");
 			videoDecoder = new VideoDecoder();
 			//consoleLog("webgl:%s",webgl?"true":"false");
 			if (!jsThis)jsThis = _this;
 			videoDecoder->jsObject = jsThis;
-			videoDecoder->webgl = webgl;
 		}
+		videoDecoder->webgl = webgl;
 	}
 	
 	bool decodeVideo(clock_t _timestamp, MemoryStream& data) {

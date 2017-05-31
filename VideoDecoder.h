@@ -152,7 +152,7 @@ public:
 			decInput.dataLen = 0;
 			break;
 		default:
-			emscripten_log(0, "%d", -ret);
+			emscripten_log(0, "video decode %d", -ret);
 			decInput.dataLen = 0;
 			break;
 		}

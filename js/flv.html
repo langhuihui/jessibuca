@@ -14,8 +14,7 @@
     <div id="logout">
     </div>
     <script>
-        var fc = null;
-        //onerror = handleErr;
+        onerror = handleErr;
         var txt = "";
 
         function handleErr(msg, url, l) {
@@ -24,36 +23,14 @@
             txt += "URL: " + url + "\n";
             txt += "Line: " + l + "\n\n";
             txt += "Click OK to continue.\n\n";
-            alert(txt);
+            document.getElementById("logout").innerHTML += txt + "<br>";
             return true;
         }
 
         function test() {
-            fc = new FlvClient();
-            if (!FlvClient.prototype.audioContext) {
-                window.AudioContext = window.AudioContext || window.webkitAudioContext;
-                var context = new window.AudioContext();
-                FlvClient.prototype.audioContext = context;
-                // you should null check window.AudioContext for old browsers to not blow up
-                // create a dummy sound - and play it immediately in same 'thread'
-                //var real = new Float32Array(2);
-                //var imag = new Float32Array(2);
-                //var oscillator = context.createOscillator();
-                //real[0] = 0;
-                //imag[0] = 0;
-                //real[1] = 1;
-                //imag[1] = 0;
-
-                //var wave = context.createPeriodicWave(real, imag)
-                //oscillator.setPeriodicWave(wave)
-                //oscillator.frequency.value = 0;
-                //oscillator.connect(context.destination);
-                //oscillator.start(0);
-                //oscillator.stop(.5);
-            }
             //mc.connect("182.16.68.70:81", "live", "")
             //fc.play("ws://192.168.2.205:8088/live/user1.flv", document.getElementById("canvas"));
-            fc.play("ws://182.16.68.41:8088/live/B06.flv", document.getElementById("canvas"));
+            fc.play("ws://182.16.68.41:8088/live/B06.flv", webGLCanvas);
             //mc.connect("113.10.201.210:81", "live", "")
             //mc.connect("123.108.249.106", "live");
             //mc.connect('43.227.97.170:81', 'live');
@@ -79,6 +56,7 @@
             })(),
             printErr: function(text) {
                 if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+                document.getElementById("logout").innerHTML += text + "<br>";
                 if (0) { // XXX disabled for safety typeof dump == 'function') {
                     dump(text + '\n'); // fast, straight to the real console
                 } else {
@@ -87,7 +65,33 @@
             },
         };
     </script>
-    <script src="FlvClient.js?version=1">
+    <script src="FlvClient.js?version=1"></script>
+    <script>
+        var webGLCanvas = new WebGLCanvas(document.getElementById("canvas"), Module["noWebGL"], {});
+        var fc = new FlvClient();
+        fc.videoBuffer = 1;
+        fc.audioBuffer = 12;
+        if (!FlvClient.prototype.audioContext) {
+            window.AudioContext = window.AudioContext || window.webkitAudioContext;
+            var context = new window.AudioContext();
+            FlvClient.prototype.audioContext = context;
+            // you should null check window.AudioContext for old browsers to not blow up
+            // create a dummy sound - and play it immediately in same 'thread'
+            //var real = new Float32Array(2);
+            //var imag = new Float32Array(2);
+            //var oscillator = context.createOscillator();
+            //real[0] = 0;
+            //imag[0] = 0;
+            //real[1] = 1;
+            //imag[1] = 0;
+
+            //var wave = context.createPeriodicWave(real, imag)
+            //oscillator.setPeriodicWave(wave)
+            //oscillator.frequency.value = 0;
+            //oscillator.connect(context.destination);
+            //oscillator.start(0);
+            //oscillator.stop(.5);
+        }
     </script>
 </body>
 
