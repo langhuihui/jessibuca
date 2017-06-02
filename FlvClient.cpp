@@ -116,14 +116,30 @@ int main()
 			{
 				return webGLCanvas;
 			};
-
-		var ws = this.$play(this, url,webGLCanvas.isWebGL());
-		};);
+			var _this = this;
+			var ws = new WebSocket(url);
+			ws.onmessage = function(data){
+				_this.$onWsMessage(data);
+			};
+			ws.open = function(){
+				
+			};
+			ws.binaryType = "arraybuffer";
+			if(this.onWsError)ws.onerror = this.onWsError;
+			ws.onclose = function(){
+				_this.$close();
+			};
+			this.close = function(){
+				ws.close();
+			};
+			this.$play(this, webGLCanvas.isWebGL());
+		};
+	);
     return 0;
 }
 class FlvClient
 {
-	val* ws = nullptr;
+
 	val* client = nullptr;
 	val* netStatusLisenter = nullptr;
 	val* jsThis = nullptr;
@@ -137,7 +153,7 @@ public:
 		
     }
 	~FlvClient(){
-        delete ws;
+      
         delete client;
         delete netStatusLisenter;
         delete jsThis;
@@ -214,36 +230,12 @@ public:
 		}
         //MemoryStream ms(data);
     }
-	void OnWsOpen(val evt){
-        emscripten_log(0, "websocket open!");
-       // jsThis->call<void>("onWsOpen");
-    }
-	val GetWebSocket(val evt){
-        return *ws;
-    }
-	val Play(val _this, string url, bool webgl){
+	void Play(val _this, bool webgl){
          if (!jsThis) jsThis = new val(_this);
 		 flvDecoder.attachCanvas(jsThis,webgl);
-        val WebSocket = val::global("WebSocket");
-        if (ws)
-        {
-            ws->call<void>("close");
-            delete ws;
-        }
-        ws = new val(WebSocket.new_(url));
-        ws->set("binaryType", "arraybuffer");
-        ws->set("onopen", _this["$onWsOpen"].call<val>("bind", _this));
-        ws->set("onmessage", _this["$onWsMessage"].call<val>("bind", _this));
-        ws->set("onerror", _this["onWsError"]);
-        ws->set("onclose", _this["onWsClose"]);
-        return *ws;
     }
 	void Close(){
-		ws->set("onmessage",val::null());
 		buffer.clear();
-        ws->call<void>("close");
-		delete ws;
-		ws = nullptr;
 		flvDecoder.clear();
 		status = 0;
         //delete this;
@@ -277,9 +269,7 @@ EMSCRIPTEN_BINDINGS(FlvClient)
     class_<FlvClient>("FlvClient")
 	.constructor()
 	.function("$onWsMessage", &FlvClient::OnWsMessage)
-	.function("$onWsOpen", &FlvClient::OnWsOpen)
-	.function("getWebSocket", &FlvClient::GetWebSocket)
-	.function("close", &FlvClient::Close)
+	.function("$close", &FlvClient::Close)
 	.function("_initAudio",&FlvClient::initAudio)
 	.function("decodeVideoBuffer", &FlvClient::decodeVideoBuffer)
 	.property("videoBuffer", &FlvClient::getBufferTime, &FlvClient::setBufferTime)
