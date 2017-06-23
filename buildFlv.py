@@ -28,7 +28,7 @@ emcc_args = [
   '-s','NO_EXIT_RUNTIME=1',
    '-s', 'DEMANGLE_SUPPORT=1',
   '--bind',
-  '-Ispeex-1.2rc2/include',
+  #'-Ispeex-1.2rc2/include',
   '-IBroadway','-I.',
   #'-I../libid3tag',
   '-DUSE_MP3',
@@ -45,6 +45,7 @@ print 'link -> %s' % 'target.bc'
 object_files = os.listdir('obj')
 if  'target.bc' in object_files:
   object_files.remove('target.bc')
+object_files.remove('h265.bc')
 object_files = [os.path.join('obj', x) for x in object_files]
 emscripten.Building.link(object_files, 'obj/target.bc')
 print 'emcc %s -> %s' % ('target.bc', 'FlvClient.js')

@@ -57,6 +57,7 @@ public:
 	}
 	
 	bool decodeVideo(clock_t _timestamp, MemoryStream& data) {
+		emscripten_log(0,"%d", _timestamp);
 		if(videoDecoder == nullptr)return false;
 		u8 frame_type = data[0];
 		int codec_id = frame_type & 0x0f;
