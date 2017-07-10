@@ -289,8 +289,9 @@
     H264bsdCanvas.prototype.drawNextOuptutPictureRGBA = function(width, height, croppingParams, data) {
         // var canvas = this.canvasElement;
         //var argbData = data;
-        // var ctx = canvas.getContext('2d');
+        //var ctx = canvas.getContext('2d');
         // var imageData = ctx.getImageData(0, 0, width, height);
+        this.imageData = this.ctx2d.getImageData(0, 0, width, height);
         this.imageData.data.set(data);
         //Module.print(typeof this.imageData.data);
         if (croppingParams === null) {
