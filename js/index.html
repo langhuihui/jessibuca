@@ -10,7 +10,7 @@
 <body>
     <canvas id="canvas" style="background-color: #0D0E1B"></canvas>
     <button id="connectbn" style="width: 100px;height: 100px" onclick="test()">连接</button>
-    <button onclick="play('B1')" style="width: 100px; height: 100px">开始user1</button>
+    <button onclick="play('user1')" style="width: 100px; height: 100px">开始user1</button>
     <button onclick="play('user2')" style="width: 100px; height: 100px">开始user2</button>
     <button onclick="mc.close()" style="width: 100px; height: 100px">结束</button>
     <div id="logout">
@@ -80,9 +80,10 @@
 
         function test() {
             mc = new MonaClient();
-            //mc.connect("182.16.68.70:81", "live", "")
-            //mc.connect("119.9.73.212:81", "live", "")
-            mc.connect("43.248.76.17:81", "live", "")
+            mc.connect("localhost:8080", "live", "")
+                //mc.connect("182.16.68.70:81", "live", "")
+                //mc.connect("119.9.73.212:81", "live", "")
+                //mc.connect("43.248.76.17:81", "live", "")
                 //mc.connect("192.168.1.110:80", "live", "");
                 //mc.connect("113.10.201.210:81", "live", "")
                 //mc.connect("123.108.249.106", "live");

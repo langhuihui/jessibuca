@@ -29,8 +29,9 @@ emcc_args = [
   #'--closure', '1',
   '-s','NO_EXIT_RUNTIME=1',
   '--bind',
-    '-I../speex-1.2rc2/include',
-  '-I../Broadway','-I../libid3tag',
+    #'-I../speex-1.2rc2/include',
+  '-I../Broadway',
+  '-I../libid3tag',
   '-I.',
   '-DHAVE_CONFIG_H',
   '-DFPM_DEFAULT',
@@ -58,11 +59,11 @@ print 'link -> %s' % 'mp3.bc'
 emscripten.Building.link(object_files, '../obj/mp3.bc')
 print 'link -> %s' % 'MonaClient.bc'
 
-object_files = os.listdir('../obj')
-object_files.remove('MonaClient.bc')
-object_files = [os.path.join('../obj', x) for x in object_files]
+# object_files = os.listdir('../obj')
+# object_files.remove('MonaClient.bc')
+# object_files = [os.path.join('../obj', x) for x in object_files]
 
-emscripten.Building.link(object_files, '../obj/MonaClient.bc')
-print 'emcc -> %s' % 'MonaClient.js'
-emscripten.Building.emcc('../obj/MonaClient.bc', emcc_args, '../js/MonaClient.js')
+# emscripten.Building.link(object_files, '../obj/MonaClient.bc')
+# print 'emcc -> %s' % 'MonaClient.js'
+# emscripten.Building.emcc('../obj/MonaClient.bc', emcc_args, '../js/MonaClient.js')
 print 'done'

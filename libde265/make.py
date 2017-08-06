@@ -53,13 +53,13 @@ for file in build_files:
 object_files = [os.path.join('obj', x.replace('.cc', '.o')) for x in source_files]
 print 'link -> %s' % 'h265.bc'
 emscripten.Building.link(object_files, '../obj/h265.bc')
-print 'link -> %s' % 'MonaClient.bc'
+# print 'link -> %s' % 'MonaClient.bc'
 
-object_files = os.listdir('../obj')
-object_files.remove('MonaClient.bc')
-object_files = [os.path.join('../obj', x) for x in object_files]
+# object_files = os.listdir('../obj')
+# object_files.remove('MonaClient.bc')
+# object_files = [os.path.join('../obj', x) for x in object_files]
 
-emscripten.Building.link(object_files, '../obj/MonaClient.bc')
-print 'emcc -> %s' % 'MonaClient.js'
-emscripten.Building.emcc('../obj/MonaClient.bc', emcc_args, '../js/MonaClient.js')
+# emscripten.Building.link(object_files, '../obj/MonaClient.bc')
+# print 'emcc -> %s' % 'MonaClient.js'
+# emscripten.Building.emcc('../obj/MonaClient.bc', emcc_args, '../js/MonaClient.js')
 print 'done'

@@ -121,8 +121,8 @@ int main()
 			ws.onmessage = function(data){
 				_this.$onWsMessage(data);
 			};
-			ws.open = function(){
-				
+			ws.onopen = function(){
+				Module.print("websocket open");
 			};
 			ws.binaryType = "arraybuffer";
 			if(this.onWsError)ws.onerror = this.onWsError;

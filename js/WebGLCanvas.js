@@ -291,7 +291,7 @@
         //var argbData = data;
         //var ctx = canvas.getContext('2d');
         // var imageData = ctx.getImageData(0, 0, width, height);
-        this.imageData = this.ctx2d.getImageData(0, 0, width, height);
+        //this.imageData = this.ctx2d.getImageData(0, 0, width, height);
         this.imageData.data.set(data);
         //Module.print(typeof this.imageData.data);
         if (croppingParams === null) {
