@@ -47,6 +47,7 @@ if  'target.bc' in object_files:
   object_files.remove('target.bc')
 object_files.remove('h265.bc')
 object_files = [os.path.join('obj', x) for x in object_files]
+print object_files
 emscripten.Building.link(object_files, 'obj/target.bc')
 print 'emcc %s -> %s' % ('target.bc', 'FlvClient.js')
 emscripten.Building.emcc('obj/target.bc', emcc_args, 'js/FlvClient.js')

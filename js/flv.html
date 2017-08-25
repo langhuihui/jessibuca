@@ -30,12 +30,12 @@
 
         function test() {
             //mc.connect("182.16.68.70:81", "live", "")
-            fc.play("ws://localhost:8080/live/user1.flv", webGLCanvas)
-                //fc.play("ws://192.168.2.205:8088/live/user1.flv", document.getElementById("canvas"));
-                //fc.play("ws://182.16.68.41:8088/live/B06.flv", webGLCanvas);
-                //mc.connect("113.10.201.210:81", "live", "")
-                //mc.connect("123.108.249.106", "live");
-                //mc.connect('43.227.97.170:81', 'live');
+            // fc.play("ws://localhost:8080/live/user1.flv", webGLCanvas)
+            //fc.play("ws://192.168.2.205:8088/live/user1.flv", document.getElementById("canvas"));
+            fc.play("ws://182.16.68.41:8088/live/B06.flv", webGLCanvas);
+            //mc.connect("113.10.201.210:81", "live", "")
+            //mc.connect("123.108.249.106", "live");
+            //mc.connect('43.227.97.170:81', 'live');
 
         }
 
@@ -76,27 +76,6 @@
         fc.onNetStatus = function(info) {
             console.log(info.code);
         };
-        if (!FlvClient.prototype.audioContext) {
-            window.AudioContext = window.AudioContext || window.webkitAudioContext;
-            var context = new window.AudioContext();
-            FlvClient.prototype.audioContext = context;
-            // you should null check window.AudioContext for old browsers to not blow up
-            // create a dummy sound - and play it immediately in same 'thread'
-            //var real = new Float32Array(2);
-            //var imag = new Float32Array(2);
-            //var oscillator = context.createOscillator();
-            //real[0] = 0;
-            //imag[0] = 0;
-            //real[1] = 1;
-            //imag[1] = 0;
-
-            //var wave = context.createPeriodicWave(real, imag)
-            //oscillator.setPeriodicWave(wave)
-            //oscillator.frequency.value = 0;
-            //oscillator.connect(context.destination);
-            //oscillator.start(0);
-            //oscillator.stop(.5);
-        }
     </script>
 </body>
 

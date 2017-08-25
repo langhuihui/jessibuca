@@ -57,7 +57,7 @@ for file in build_files:
 object_files = [os.path.join('obj', x.replace('.c', '.o')) for x in source_files]
 print 'link -> %s' % 'mp3.bc'
 emscripten.Building.link(object_files, '../obj/mp3.bc')
-print 'link -> %s' % 'MonaClient.bc'
+#print 'link -> %s' % 'MonaClient.bc'
 
 # object_files = os.listdir('../obj')
 # object_files.remove('MonaClient.bc')
