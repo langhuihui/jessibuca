@@ -35,20 +35,55 @@ emcc_args = [
   # '--js-transform', 'python appender.py'
 ]
 
-source_files = []  
-FileNames=os.listdir(os.getcwd())  
-if (len(FileNames)>0):  
-    for fn in FileNames:  
-        if(os.path.splitext(fn)[1]=='.c'):
-            source_files.append(fn)  
+# source_files = []  
+# FileNames=os.listdir(os.getcwd())  
+# if (len(FileNames)>0):  
+#     for fn in FileNames:  
+#         if(os.path.splitext(fn)[1]=='.c'):
+#             source_files.append(fn)  
 
-''''
+
 source_files =[
-'bits.c','cfft.c','common.c','decoder.c','drm_dec.c','drc.c'
-'ps_dec.c','sbr_dec.c','syntax.c','mp4.c','huffman.c','specrec.c','pulse.c',
-'filtbank.c',''
+"bits.c",
+    "cfft.c",
+    "common.c",
+    "decoder.c",
+    "drc.c",
+    "drm_dec.c",
+    "error.c",
+    "filtbank.c",
+    "hcr.c",
+    "huffman.c",
+    "ic_predict.c",
+    "is.c",
+    "lt_predict.c",
+    "mdct.c",
+    "mp4.c",
+    "ms.c",
+    "output.c",
+    "pns.c",
+    "ps_dec.c",
+    "ps_syntax.c",
+    "pulse.c",
+    "rvlc.c",
+    "sbr_dct.c",
+    "sbr_dec.c",
+    "sbr_e_nf.c",
+    "sbr_fbt.c",
+    "sbr_hfadj.c",
+    "sbr_hfgen.c",
+    "sbr_huff.c",
+    "sbr_qmf.c",
+    "sbr_syntax.c",
+    "sbr_tf_grid.c",
+    "specrec.c",
+    "ssr.c",
+    "ssr_fb.c",
+    "ssr_ipqf.c",
+    "syntax.c",
+    "tns.c",
 ]
-'''
+
 #build_files = ['bits.c','syntax.c','decoder.c']
 build_files =source_files
 for file in build_files:
@@ -58,9 +93,10 @@ for file in build_files:
 
 object_files = [os.path.join('obj', x.replace('.c', '.o')) for x in source_files]
 print 'link -> %s' % 'aac.bc'
-emscripten.Building.link(object_files, '../obj/aac.bc')
-print 'link -> %s' % 'MonaClient.bc'
-emscripten.Building.link(['../obj/avc.bc','../obj/aac.bc','../obj/libspeex.bc','../obj/MonaClient.o'], '../obj/MonaClient.bc')
-print 'emcc -> %s' % 'MonaClient.js'
-emscripten.Building.emcc('../obj/MonaClient.bc', emcc_args, '../js/MonaClient.js')
+os.system('emcc '+ (' '.join(object_files)) +' -o ../obj/aac.bc')
+# emscripten.Building.link(object_files, '../obj/aac.bc')
+# print 'link -> %s' % 'MonaClient.bc'
+# emscripten.Building.link(['../obj/avc.bc','../obj/aac.bc','../obj/libspeex.bc','../obj/MonaClient.o'], '../obj/MonaClient.bc')
+# print 'emcc -> %s' % 'MonaClient.js'
+# emscripten.Building.emcc('../obj/MonaClient.bc', emcc_args, '../js/MonaClient.js')
 print 'done'

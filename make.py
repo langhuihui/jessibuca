@@ -35,8 +35,8 @@ emcc_args = [
     #'-I../libid3tag',
     #'-DUSE_MP3',
     #'-DUSE_H265',
-    #'-DUSE_AAC',
-    #'--js-library', 'library.js'
+    '-DUSE_AAC',
+    '--js-library',  os.path.join('js', 'MonaMain.js')
     # '--js-transform', 'python appender.py'
 ]
 
@@ -49,7 +49,8 @@ if 'target.bc' in object_files:
     object_files.remove('target.bc')
 object_files.remove('h265.bc')
 object_files = [os.path.join('obj', x) for x in object_files]
-emscripten.Building.link(object_files, 'obj/target.bc')
+os.system('emcc '+ (' '.join(object_files)) +' -o obj/target.bc')
+# emscripten.Building.link(object_files, 'obj/target.bc')
 print 'emcc %s -> %s' % ('target.bc', 'MonaClient.js')
 emscripten.Building.emcc('obj/target.bc', emcc_args, 'js/MonaClient.js')
 

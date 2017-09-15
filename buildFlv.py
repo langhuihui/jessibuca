@@ -31,10 +31,10 @@ emcc_args = [
   #'-Ispeex-1.2rc2/include',
   '-IBroadway','-I.',
   #'-I../libid3tag',
-  '-DUSE_MP3',
+  #'-DUSE_MP3',
   #'-DUSE_H265',
-  #'-DUSE_AAC',
-  #'--js-library', 'library.js'
+  '-DUSE_AAC',
+  '--js-library', os.path.join('js', 'FlvMain.js')
   # '--js-transform', 'python appender.py'
 ]
 
@@ -47,8 +47,10 @@ if  'target.bc' in object_files:
   object_files.remove('target.bc')
 object_files.remove('h265.bc')
 object_files = [os.path.join('obj', x) for x in object_files]
-print object_files
-emscripten.Building.link(object_files, 'obj/target.bc')
+print 'emcc '+ (' '.join(object_files)) +' -o obj/target.bc'
+# emscripten.Building.link(object_files, 'obj/target.bc')
+
+os.system('emcc '+ (' '.join(object_files)) +' -o obj/target.bc')
 print 'emcc %s -> %s' % ('target.bc', 'FlvClient.js')
 emscripten.Building.emcc('obj/target.bc', emcc_args, 'js/FlvClient.js')
 

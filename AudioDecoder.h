@@ -4,6 +4,7 @@
 #endif
 #ifdef USE_AAC
 #include "aacDecoder/include/neaacdec.h"
+// #include "libfdk-aac/libAACdec/include/aacdecoder_lib.h"
 #endif
 #ifdef USE_MP3
 #include "libmad/mad.h"
@@ -32,12 +33,14 @@ class AudioDecoder
 {
     int bufferLength;
     int bufferFilled;
-
   public:
     u8 *outputBuffer;
 #ifdef USE_AAC
-    faacDecHandle faacHandle;
-    //faacDecConfigurationPtr faacConfiguration;
+	faacDecHandle faacHandle;
+	// HANDLE_AACDECODER aacHandler;
+	// UCHAR* inBuffer[FILEREAD_MAX_LAYERS];  
+    // UINT inBufferLength[FILEREAD_MAX_LAYERS] = {0};  
+    // UINT bytesValid[FILEREAD_MAX_LAYERS] = {0}; 
 #endif
 #ifdef USE_SPEEX
     i16 *audioOutput;
@@ -60,7 +63,7 @@ class AudioDecoder
 #endif
 #ifdef USE_AAC
 	faacHandle = faacDecOpen();
-	//faacConfiguration = faacDecGetCurrentConfiguration(faacHandle);
+	// aacHandler = aacDecoder_Open(TT_MP4_ADIF,1);
 	emscripten_log(0, "aac init! %d", faacHandle);
 #endif
 emscripten_log(0, "audio init! %d", this);
@@ -69,6 +72,7 @@ emscripten_log(0, "audio init! %d", this);
     {emscripten_log(0, "audio decoder release\n");
 #ifdef USE_AAC
 	faacDecClose(faacHandle);
+	// aacDecoder_Close(aacHandler);
 #endif
 #ifdef USE_SPEEX
 	speex_decoder_destroy(speexState);
@@ -145,6 +149,11 @@ emscripten_log(0, "audio init! %d", this);
 				frame_info.samplerate);
 				*/
 		int samplesBytes = frame_info.samples << 1;
+		// inBuffer[0] =  (unsigned char *)input.point();
+		// bytesValid[0] = inBufferLength[0] =  input.length();
+		// aacDecoder_Fill(aacHandler,inBuffer, inBufferLength,bytesValid);
+		
+		// auto decoderErr = aacDecoder_DecodeFrame(aacHandler,,0);
 		memcpy(output, pcm_data, samplesBytes);
 		return samplesBytes;
 	    }
@@ -152,7 +161,12 @@ emscripten_log(0, "audio init! %d", this);
 	else
 	{
 	    unsigned long samplerate;
-	    unsigned char channels;
+		unsigned char channels;
+		
+		// aacDecoder_ConfigRaw(aacHandler,(unsigned char *)input.point(), 4)
+		// auto info = aacDecoder_GetStreamInfo(aacHandler);
+		// samplerate = info->sampleRate;
+		// channels = info->numChannels;
 	    faacDecInit2(faacHandle, (unsigned char *)input.point(), 4, &samplerate, &channels);
 	    emscripten_log(0, "aac samplerate:%d channels:%d", samplerate, channels);
 	}
