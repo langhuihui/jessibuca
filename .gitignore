@@ -3,7 +3,7 @@ cheerp
 obj
 x64
 Debug
-MonaClient.zip
 .vs
 .vscode
 *.zip
+*.rar

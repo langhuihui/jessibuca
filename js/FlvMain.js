@@ -92,7 +92,7 @@ mergeInto(LibraryManager.library, {
             };
             this.playAudio = playAudio;
         };
-        fc.prototype.play = function(url, webGLCanvas) {
+        fc.prototype.play = function(url, webGLCanvas, croppingParams) {
 
             var canvas = webGLCanvas.canvasElement;
             this.setVideoSize = function(w, h, dataPtr) {
@@ -104,13 +104,13 @@ mergeInto(LibraryManager.library, {
                         var u = HEAPU32[dataPtr + 1];
                         var v = HEAPU32[dataPtr + 2];
                         var outputArray = [HEAPU8.subarray(y, y + w * h), HEAPU8.subarray(u, u + (w * h >> 2)), HEAPU8.subarray(v, v + (w * h >> 2))];
-                        webGLCanvas.drawNextOutputPicture(w, h, null, outputArray);
+                        webGLCanvas.drawNextOutputPicture(w, h, croppingParams, outputArray);
                     };
                 } else {
                     var outputArray = HEAPU8.subarray(dataPtr, dataPtr + (w * h << 2));
                     webGLCanvas.initRGB(w, h);
                     this.draw = function() {
-                        webGLCanvas.drawNextOutputPicture(w, h, null, outputArray);
+                        webGLCanvas.drawNextOutputPicture(w, h, croppingParams, outputArray);
                     };
                 }
             }.bind(this);
