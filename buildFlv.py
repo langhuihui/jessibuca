@@ -14,7 +14,7 @@ emcc_args = [
   #'-m32',
 '-O3',
  '--memory-init-file', '0',
- 
+ '-s','WASM=1',
 '--llvm-opts', '3',
   #'-s', 'CORRECT_SIGNS=1',
   #'-s', 'CORRECT_OVERFLOWS=1',
@@ -22,6 +22,7 @@ emcc_args = [
   #'-s', 'FAST_MEMORY=' + str(12*1024*1024),
   #'-s', 'INVOKE_RUN=0',
   '-s', 'ASSERTIONS=1', 
+  '--emit-symbol-map',
  # '-s', 'RELOOP=1',
   #'-s', '''EXPORTED_FUNCTIONS=["_main"]''',
   #'--closure', '1',
@@ -37,12 +38,13 @@ emcc_args = [
   '--js-library', os.path.join('js', 'FlvMain.js')
   # '--js-transform', 'python appender.py'
 ]
+object_files = os.listdir('obj')
 
 print 'build'
 print 'emcc -> %s' % 'target.o'
 emscripten.Building.emcc('FlvClient.cpp', emcc_args, 'obj/target.o')
 print 'link -> %s' % 'target.bc'
-object_files = os.listdir('obj')
+
 if  'target.bc' in object_files:
   object_files.remove('target.bc')
 object_files.remove('h265.bc')
@@ -51,6 +53,7 @@ print 'emcc '+ (' '.join(object_files)) +' -o obj/target.bc'
 # emscripten.Building.link(object_files, 'obj/target.bc')
 
 os.system('emcc '+ (' '.join(object_files)) +' -o obj/target.bc')
+
 print 'emcc %s -> %s' % ('target.bc', 'FlvClient.js')
 emscripten.Building.emcc('obj/target.bc', emcc_args, 'js/FlvClient.js')
 

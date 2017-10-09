@@ -161,7 +161,7 @@ extern "C"
     void H264SwDecTrace(char *);
 
     /* function prototype for memory allocation */
-    void* H264SwDecMalloc(u32 size);
+    void* H264SwDecMalloc(u32 size,u32 num);
 
     /* function prototype for memory free */
     void H264SwDecFree(void *ptr);

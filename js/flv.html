@@ -17,6 +17,8 @@
     <script>
         onerror = handleErr;
         var txt = "";
+        var fc = null;
+        var webGLCanvas = null;
 
         function handleErr(msg, url, l) {
             txt = "There was an error on this page.\n\n";
@@ -65,18 +67,19 @@
                     console.error(text);
                 }
             },
+            postRun: function() {
+
+                webGLCanvas = new WebGLCanvas(document.getElementById("canvas"), Module["noWebGL"], {});
+                fc = new FlvClient();
+                fc.videoBuffer = 1;
+                fc.audioBuffer = 12;
+                fc.onNetStatus = function(info) {
+                    console.log(info.code);
+                };
+            }
         };
     </script>
     <script src="FlvClient.js?version=1"></script>
-    <script>
-        var webGLCanvas = new WebGLCanvas(document.getElementById("canvas"), Module["noWebGL"], {});
-        var fc = new FlvClient();
-        fc.videoBuffer = 1;
-        fc.audioBuffer = 12;
-        fc.onNetStatus = function(info) {
-            console.log(info.code);
-        };
-    </script>
 </body>
 
 </html>

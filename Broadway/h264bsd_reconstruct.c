@@ -42,6 +42,8 @@
 #include "armVC.h"
 #endif /* H264DEC_OMXDL */
 
+#define UNUSED(x) (void)(x)
+
 /*------------------------------------------------------------------------------
     2. External compiler flags
 --------------------------------------------------------------------------------
@@ -2136,7 +2138,8 @@ static void FillRow1(
   i32 center,
   i32 right)
 {
-
+    UNUSED(left);
+    UNUSED(right);
     ASSERT(ref);
     ASSERT(fill);
 

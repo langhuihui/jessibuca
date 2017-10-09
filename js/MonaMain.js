@@ -52,7 +52,6 @@ mergeInto(LibraryManager.library, {
                     playAudio(audioBuffers.shift());
                 }
                 if (audioBuffers.length > 1) audioBuffers.shift();
-                console.log(audioBuffers.length)
             };
             var copyAudioOutputArray = resampled ? function(target) {
                 for (var i = 0; i < allFrameCount; i++) {

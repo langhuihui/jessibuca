@@ -994,9 +994,8 @@ static u32 DecodeDecRefPicMarkingRepetition(
 
     /* frame_mbs_only_flag assumed always true so some field related syntax
      * elements are skipped, see H.264 standard */
-    // tmp = h264bsdDecRefPicMarking(pStrmData,
-    //  &pDecRefPicMarkingRepetition->decRefPicMarking, NAL_SEI, numRefFrames);
-    return(HANTRO_NOK);
+    tmp = h264bsdDecRefPicMarking(pStrmData,
+      &pDecRefPicMarkingRepetition->decRefPicMarking, NAL_SEI, numRefFrames);
 
     return(tmp);
 

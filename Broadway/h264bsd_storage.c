@@ -58,6 +58,10 @@
     3. Module defines
 ------------------------------------------------------------------------------*/
 
+#ifndef UINT32_MAX
+#define UINT32_MAX       (4294967295U)
+#endif
+
 /*------------------------------------------------------------------------------
     4. Local function prototypes
 ------------------------------------------------------------------------------*/
@@ -326,9 +330,23 @@ u32 h264bsdActivateParamSets(storage_t *pStorage, u32 ppsId, u32 isIdr)
         pStorage->activePps = pStorage->pps[ppsId];
         pStorage->activeSpsId = pStorage->activePps->seqParameterSetId;
         pStorage->activeSps = pStorage->sps[pStorage->activeSpsId];
-        pStorage->picSizeInMbs =
-            pStorage->activeSps->picWidthInMbs *
-            pStorage->activeSps->picHeightInMbs;
+
+        /* report error before multiplication to prevent integer overflow */
+        if (pStorage->activeSps->picWidthInMbs == 0)
+        {
+            pStorage->picSizeInMbs = 0;
+        }
+        else if (pStorage->activeSps->picHeightInMbs >
+                 UINT32_MAX / pStorage->activeSps->picWidthInMbs)
+        {
+            return(MEMORY_ALLOCATION_ERROR);
+        }
+        else
+        {
+            pStorage->picSizeInMbs =
+                pStorage->activeSps->picWidthInMbs *
+                pStorage->activeSps->picHeightInMbs;
+        }
 
         pStorage->currImage->width = pStorage->activeSps->picWidthInMbs;
         pStorage->currImage->height = pStorage->activeSps->picHeightInMbs;

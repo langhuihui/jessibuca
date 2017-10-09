@@ -9,11 +9,15 @@ sys.path.append(EMSCRIPTEN_ROOT)
 import tools.shared as emscripten
 
 emcc_args = [
-'--pre-js',os.path.join('Broadway','WebGLCanvas.js'),
+#'--pre-js',os.path.join('Broadway','WebGLCanvas.js'),
   #'-m32',
   '-O3',
  '--memory-init-file', '0',
   '--llvm-opts', '3',
+  '--llvm-lto', '3',
+   '-s', 'NO_EXIT_RUNTIME=1',
+  '-s', 'NO_FILESYSTEM=1',
+  #'-s', 'NO_BROWSER=1',
   #'-s', 'CORRECT_SIGNS=1',
   #'-s', 'CORRECT_OVERFLOWS=1',
  '-s', 'TOTAL_MEMORY=67108864',
@@ -61,6 +65,7 @@ for file in source_files:
   target = file.replace('.c', '.o')
   print 'emcc %s -> %s' % (file, target)
   emscripten.Building.emcc(file, emcc_args + ['-DHAVE_CONFIG_H','-D__SSE__','-Isrc', '-Iinc'], os.path.join('obj', target))
-  object_files = [os.path.join('obj', x.replace('.c', '.o')) for x in source_files];
+object_files = [os.path.join('obj', x.replace('.c', '.o')) for x in source_files];
 print 'link -> %s' % 'avc.bc'
-emscripten.Building.link(object_files, 'avc.bc')
+#emscripten.Building.link(object_files, 'avc.bc')
+os.system('emcc '+ (' '.join(object_files)) +' -o ../obj/avc.bc')

@@ -47,6 +47,8 @@
 #include "h264bsd_nal_unit.h"
 #include "h264bsd_dpb.h"
 
+#define UNUSED(x) (void)(x)
+
 /*------------------------------------------------------------------------------
     2. External compiler flags
 --------------------------------------------------------------------------------
@@ -1407,6 +1409,7 @@ u32 h264bsdCheckPriorPicsFlag(u32 * noOutputOfPriorPicsFlag,
     u32 tmp, value, i;
     i32 ivalue;
     strmData_t tmpStrmData[1];
+    UNUSED(nalUnitType);
 
 /* Code */
 

@@ -10,22 +10,22 @@
 #include "libde265/image.h"
 #else
 #include "H264SwDecApi.h"
-void* H264SwDecMalloc(u32 size)
-{
-	return malloc(size);
-}
-void H264SwDecFree(void *ptr)
-{
-	free(ptr);
-}
-void H264SwDecMemcpy(void *dest, void *src, u32 count)
-{
-	memcpy(dest, src, count);
-}
-void H264SwDecMemset(void *ptr, i32 value, u32 count)
-{
-	memset(ptr, value, count);
-}
+// void* H264SwDecMalloc(u32 size)
+// {
+// 	return malloc(size);
+// }
+// void H264SwDecFree(void *ptr)
+// {
+// 	free(ptr);
+// }
+// void H264SwDecMemcpy(void *dest, void *src, u32 count)
+// {
+// 	memcpy(dest, src, count);
+// }
+// void H264SwDecMemset(void *ptr, i32 value, u32 count)
+// {
+// 	memset(ptr, value, count);
+// }
 #endif
 #include <time.h>
 #include <map>

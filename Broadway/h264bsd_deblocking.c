@@ -638,12 +638,6 @@ void h264bsdFilterPicture(
 
 }
 
-int sample = 0;
-unsigned int hashA = 0;
-unsigned int hashB = 0;
-unsigned int hashC = 0;
-unsigned int hashD = 0;
-
 /*------------------------------------------------------------------------------
 
     Function: FilterVerLumaEdge
@@ -663,13 +657,9 @@ void FilterVerLumaEdge(
 
     i32 delta, tc, tmp;
     u32 i;
-    i32 p0, q0, p1, q1, p2, q2;
+    u8 p0, q0, p1, q1, p2, q2;
     u32 tmpFlag;
     const u8 *clp = h264bsdClip + 512;
-
-    u32 alpha = thresholds->alpha;
-    u32 beta = thresholds->beta;
-    i32 val;
 
 /* Code */
 
@@ -685,30 +675,29 @@ void FilterVerLumaEdge(
         {
             p1 = data[-2]; p0 = data[-1];
             q0 = data[0]; q1 = data[1];
-
-            if ( (ABS(p0 - q0) < alpha) &&
-                 (ABS(p1 - p0) < beta)  &&
-                 (ABS(q1 - q0) < beta) )
+            if ( ((unsigned)ABS(p0-q0) < thresholds->alpha) &&
+                 ((unsigned)ABS(p1-p0) < thresholds->beta)  &&
+                 ((unsigned)ABS(q1-q0) < thresholds->beta) )
             {
                 p2 = data[-3];
                 q2 = data[2];
 
-                if (ABS(p2 - p0) < beta)
+                if ((unsigned)ABS(p2-p0) < thresholds->beta)
                 {
-                    val = (p2 + ((p0 + q0 + 1) >> 1) - (p1 << 1)) >> 1;
-                    data[-2] = (p1 + CLIP3(-tc, tc, val));
+                    data[-2] = (u8)(p1 + CLIP3(-tc,tc,
+                        (p2 + ((p0 + q0 + 1) >> 1) - (p1 << 1)) >> 1));
                     tmp++;
                 }
 
-                if (ABS(q2 - q0) < beta)
+                if ((unsigned)ABS(q2-q0) < thresholds->beta)
                 {
-                    val = (q2 + ((p0 + q0 + 1) >> 1) - (q1 << 1)) >> 1;
-                    data[1] = (q1 + CLIP3(-tc, tc, val));
+                    data[1] = (u8)(q1 + CLIP3(-tc,tc,
+                        (q2 + ((p0 + q0 + 1) >> 1) - (q1 << 1)) >> 1));
                     tmp++;
                 }
 
-                val = (((q0 - p0) << 2) + (p1 - q1) + 4) >> 3;
-                delta = CLIP3(-tmp, tmp, val);
+                delta = CLIP3(-tmp, tmp, ((((q0 - p0) << 2) +
+                          (p1 - q1) + 4) >> 3));
 
                 p0 = clp[p0 + delta];
                 q0 = clp[q0 - delta];
@@ -716,7 +705,6 @@ void FilterVerLumaEdge(
                 data[-1] = p0;
                 data[ 0] = q0;
             }
-            // hashA += data[-2] + data[-1] + data[0] + data[1];
         }
     }
     else
@@ -725,34 +713,36 @@ void FilterVerLumaEdge(
         {
             p1 = data[-2]; p0 = data[-1];
             q0 = data[0]; q1 = data[1];
-            if ( (ABS(p0-q0) < alpha) &&
-                 (ABS(p1-p0) < beta)  &&
-                 (ABS(q1-q0) < beta) )
+            if ( ((unsigned)ABS(p0-q0) < thresholds->alpha) &&
+                 ((unsigned)ABS(p1-p0) < thresholds->beta)  &&
+                 ((unsigned)ABS(q1-q0) < thresholds->beta) )
             {
-                tmpFlag = (ABS(p0 - q0) < ((alpha >> 2) +2)) ? HANTRO_TRUE : HANTRO_FALSE;
+                tmpFlag =
+                    ((unsigned)ABS(p0-q0) < ((thresholds->alpha >> 2) +2)) ?
+                        HANTRO_TRUE : HANTRO_FALSE;
 
                 p2 = data[-3];
                 q2 = data[2];
 
-                if (tmpFlag && ABS(p2-p0) < beta)
+                if (tmpFlag && (unsigned)ABS(p2-p0) < thresholds->beta)
                 {
                     tmp = p1 + p0 + q0;
-                    data[-1] = ((p2 + 2 * tmp + q1 + 4) >> 3);
-                    data[-2] = ((p2 + tmp + 2) >> 2);
-                    data[-3] = ((2 * data[-4] + 3 * p2 + tmp + 4) >> 3);
+                    data[-1] = (u8)((p2 + 2 * tmp + q1 + 4) >> 3);
+                    data[-2] = (u8)((p2 + tmp + 2) >> 2);
+                    data[-3] = (u8)((2 * data[-4] + 3 * p2 + tmp + 4) >> 3);
                 }
                 else
                     data[-1] = (2 * p1 + p0 + q1 + 2) >> 2;
 
-                if (tmpFlag && ABS(q2-q0) < beta)
+                if (tmpFlag && (unsigned)ABS(q2-q0) < thresholds->beta)
                 {
                     tmp = p0 + q0 + q1;
-                    data[0] = ((p1 + 2 * tmp + q2 + 4) >> 3);
-                    data[1] = ((tmp + q2 + 2) >> 2);
-                    data[2] = ((2 * data[3] + 3 * q2 + tmp + 4) >> 3);
+                    data[0] = (u8)((p1 + 2 * tmp + q2 + 4) >> 3);
+                    data[1] = (u8)((tmp + q2 + 2) >> 2);
+                    data[2] = (u8)((2 * data[3] + 3 * q2 + tmp + 4) >> 3);
                 }
                 else
-                    data[0] = ((2 * q1 + q0 + p1 + 2) >> 2);
+                    data[0] = (u8)((2 * q1 + q0 + p1 + 2) >> 2);
             }
         }
     }
@@ -780,7 +770,6 @@ void FilterHorLumaEdge(
     u32 i;
     u8 p0, q0, p1, q1, p2, q2;
     const u8 *clp = h264bsdClip + 512;
-    i32 val;
 
 /* Code */
 
@@ -788,40 +777,36 @@ void FilterHorLumaEdge(
     ASSERT(bS < 4);
     ASSERT(thresholds);
 
-//    if (sample ++ % (1024 * 128) == 0) {
-//        printf("Hash A: %d, Hash B: %d\n", hashA, hashB);
-//    }
-
     tc = thresholds->tc0[bS-1];
     tmp = tc;
     for (i = 4; i; i--, data++)
     {
         p1 = data[-imageWidth*2]; p0 = data[-imageWidth];
         q0 = data[0]; q1 = data[imageWidth];
-        if ( (ABS(p0-q0) < thresholds->alpha) &&
-             (ABS(p1-p0) < thresholds->beta)  &&
-             (ABS(q1-q0) < thresholds->beta) )
+        if ( ((unsigned)ABS(p0-q0) < thresholds->alpha) &&
+             ((unsigned)ABS(p1-p0) < thresholds->beta)  &&
+             ((unsigned)ABS(q1-q0) < thresholds->beta) )
         {
             p2 = data[-imageWidth*3];
 
-            if (ABS(p2-p0) < thresholds->beta)
+            if ((unsigned)ABS(p2-p0) < thresholds->beta)
             {
-                val = (p2 + ((p0 + q0 + 1) >> 1) - (p1 << 1)) >> 1;
-                data[-imageWidth*2] = (p1 + CLIP3(-tc, tc, val));
+                data[-imageWidth*2] = (u8)(p1 + CLIP3(-tc,tc,
+                    (p2 + ((p0 + q0 + 1) >> 1) - (p1 << 1)) >> 1));
                 tmp++;
             }
 
             q2 = data[imageWidth*2];
 
-            if (ABS(q2-q0) < thresholds->beta)
+            if ((unsigned)ABS(q2-q0) < thresholds->beta)
             {
-                val = (q2 + ((p0 + q0 + 1) >> 1) - (q1 << 1)) >> 1;
-                data[imageWidth] = (q1 + CLIP3(-tc, tc, val));
+                data[imageWidth] = (u8)(q1 + CLIP3(-tc,tc,
+                    (q2 + ((p0 + q0 + 1) >> 1) - (q1 << 1)) >> 1));
                 tmp++;
             }
 
-            val = ((((q0 - p0) << 2) + (p1 - q1) + 4) >> 3);
-            delta = CLIP3(-tmp, tmp, val);
+            delta = CLIP3(-tmp, tmp, ((((q0 - p0) << 2) +
+                      (p1 - q1) + 4) >> 3));
 
             p0 = clp[p0 + delta];
             q0 = clp[q0 - delta];
@@ -829,8 +814,6 @@ void FilterHorLumaEdge(
             data[-imageWidth] = p0;
             data[  0] = q0;
         }
-
-        // hashB += data[-imageWidth*2] + data[-imageWidth] + data[0] + data[imageWidth];
     }
 }
 
@@ -849,25 +832,20 @@ void FilterHorLuma(
   edgeThreshold_t *thresholds,
   i32 imageWidth)
 {
+
 /* Variables */
 
     i32 delta, tc, tmp;
     u32 i;
-    i32 p0, q0, p1, q1, p2, q2;
+    u8 p0, q0, p1, q1, p2, q2;
     u32 tmpFlag;
     const u8 *clp = h264bsdClip + 512;
-    u32 alpha = thresholds->alpha;
-    u32 beta = thresholds->beta;
-    i32 val;
+
 /* Code */
 
     ASSERT(data);
     ASSERT(bS <= 4);
     ASSERT(thresholds);
-
-//    if (sample ++ % (1024 * 64) == 0) {
-//        printf("Hash A: %d, Hash B: %d\n", hashA, hashB);
-//    }
 
     if (bS < 4)
     {
@@ -877,30 +855,30 @@ void FilterHorLuma(
         {
             p1 = data[-imageWidth*2]; p0 = data[-imageWidth];
             q0 = data[0]; q1 = data[imageWidth];
-            if ( (ABS(p0 - q0) < alpha) &&
-                 (ABS(p1 - p0) < beta)  &&
-                 (ABS(q1 - q0) < beta) )
+            if ( ((unsigned)ABS(p0-q0) < thresholds->alpha) &&
+                 ((unsigned)ABS(p1-p0) < thresholds->beta)  &&
+                 ((unsigned)ABS(q1-q0) < thresholds->beta) )
             {
                 p2 = data[-imageWidth*3];
 
-                if (ABS(p2 - p0) < beta)
+                if ((unsigned)ABS(p2-p0) < thresholds->beta)
                 {
-                    val = (p2 + ((p0 + q0 + 1) >> 1) - (p1 << 1)) >> 1;
-                    data[-imageWidth*2] = (u8)(p1 + CLIP3(-tc, tc, val));
+                    data[-imageWidth*2] = (u8)(p1 + CLIP3(-tc,tc,
+                        (p2 + ((p0 + q0 + 1) >> 1) - (p1 << 1)) >> 1));
                     tmp++;
                 }
 
                 q2 = data[imageWidth*2];
 
-                if ((unsigned)ABS(q2-q0) < beta)
+                if ((unsigned)ABS(q2-q0) < thresholds->beta)
                 {
-                    val = (q2 + ((p0 + q0 + 1) >> 1) - (q1 << 1)) >> 1;
-                    data[imageWidth] = (u8)(q1 + CLIP3(-tc, tc, val));
+                    data[imageWidth] = (u8)(q1 + CLIP3(-tc,tc,
+                        (q2 + ((p0 + q0 + 1) >> 1) - (q1 << 1)) >> 1));
                     tmp++;
                 }
 
-                val = ((((q0 - p0) << 2) + (p1 - q1) + 4) >> 3);
-                delta = CLIP3(-tmp, tmp, val);
+                delta = CLIP3(-tmp, tmp, ((((q0 - p0) << 2) +
+                          (p1 - q1) + 4) >> 3));
 
                 p0 = clp[p0 + delta];
                 q0 = clp[q0 - delta];
@@ -916,17 +894,17 @@ void FilterHorLuma(
         {
             p1 = data[-imageWidth*2]; p0 = data[-imageWidth];
             q0 = data[0]; q1 = data[imageWidth];
-            if ( (ABS(p0 - q0) < alpha) &&
-                 (ABS(p1 - p0) < beta)  &&
-                 (ABS(q1 - q0) < beta) )
+            if ( ((unsigned)ABS(p0-q0) < thresholds->alpha) &&
+                 ((unsigned)ABS(p1-p0) < thresholds->beta)  &&
+                 ((unsigned)ABS(q1-q0) < thresholds->beta) )
             {
-                tmpFlag = ((unsigned)ABS(p0 - q0) < ((alpha >> 2) +2))
+                tmpFlag = ((unsigned)ABS(p0-q0) < ((thresholds->alpha >> 2) +2))
                             ? HANTRO_TRUE : HANTRO_FALSE;
 
                 p2 = data[-imageWidth*3];
                 q2 = data[imageWidth*2];
 
-                if (tmpFlag && (unsigned)ABS(p2 - p0) < beta)
+                if (tmpFlag && (unsigned)ABS(p2-p0) < thresholds->beta)
                 {
                     tmp = p1 + p0 + q0;
                     data[-imageWidth] = (u8)((p2 + 2 * tmp + q1 + 4) >> 3);
@@ -937,7 +915,7 @@ void FilterHorLuma(
                 else
                     data[-imageWidth] = (u8)((2 * p1 + p0 + q1 + 2) >> 2);
 
-                if (tmpFlag && (unsigned)ABS(q2 - q0) < beta)
+                if (tmpFlag && (unsigned)ABS(q2-q0) < thresholds->beta)
                 {
                     tmp = p0 + q0 + q1;
                     data[ 0] = (u8)((p1 + 2 * tmp + q2 + 4) >> 3);
@@ -950,8 +928,6 @@ void FilterHorLuma(
             }
         }
     }
-
-    // hashA += data[-imageWidth*2] + data[-imageWidth] + data[0] + data[imageWidth];
 
 }
 
@@ -1145,34 +1121,6 @@ void FilterHorChroma(
 }
 
 
-void GetBoundaryStrengthsA(mbStorage_t *mb, bS_t *bS) {
-    bS[4].top = mb->totalCoeff[2] || mb->totalCoeff[0] ? 2 : 0;
-    bS[5].top = mb->totalCoeff[3] || mb->totalCoeff[1] ? 2 : 0;
-    bS[6].top = mb->totalCoeff[6] || mb->totalCoeff[4] ? 2 : 0;
-    bS[7].top = mb->totalCoeff[7] || mb->totalCoeff[5] ? 2 : 0;
-    bS[8].top = mb->totalCoeff[8] || mb->totalCoeff[2] ? 2 : 0;
-    bS[9].top = mb->totalCoeff[9] || mb->totalCoeff[3] ? 2 : 0;
-    bS[10].top = mb->totalCoeff[12] || mb->totalCoeff[6] ? 2 : 0;
-    bS[11].top = mb->totalCoeff[13] || mb->totalCoeff[7] ? 2 : 0;
-    bS[12].top = mb->totalCoeff[10] || mb->totalCoeff[8] ? 2 : 0;
-    bS[13].top = mb->totalCoeff[11] || mb->totalCoeff[9] ? 2 : 0;
-    bS[14].top = mb->totalCoeff[14] || mb->totalCoeff[12] ? 2 : 0;
-    bS[15].top = mb->totalCoeff[15] || mb->totalCoeff[13] ? 2 : 0;
-
-    bS[1].left = mb->totalCoeff[1] || mb->totalCoeff[0] ? 2 : 0;
-    bS[2].left = mb->totalCoeff[4] || mb->totalCoeff[1] ? 2 : 0;
-    bS[3].left = mb->totalCoeff[5] || mb->totalCoeff[4] ? 2 : 0;
-    bS[5].left = mb->totalCoeff[3] || mb->totalCoeff[2] ? 2 : 0;
-    bS[6].left = mb->totalCoeff[6] || mb->totalCoeff[3] ? 2 : 0;
-    bS[7].left = mb->totalCoeff[7] || mb->totalCoeff[6] ? 2 : 0;
-    bS[9].left = mb->totalCoeff[9] || mb->totalCoeff[8] ? 2 : 0;
-    bS[10].left = mb->totalCoeff[12] || mb->totalCoeff[9] ? 2 : 0;
-    bS[11].left = mb->totalCoeff[13] || mb->totalCoeff[12] ? 2 : 0;
-    bS[13].left = mb->totalCoeff[11] || mb->totalCoeff[10] ? 2 : 0;
-    bS[14].left = mb->totalCoeff[14] || mb->totalCoeff[11] ? 2 : 0;
-    bS[15].left = mb->totalCoeff[15] || mb->totalCoeff[14] ? 2 : 0;
-}
-
 /*------------------------------------------------------------------------------
 
     Function: GetBoundaryStrengths
@@ -1197,10 +1145,6 @@ u32 GetBoundaryStrengths(mbStorage_t *mb, bS_t *bS, u32 flags)
     ASSERT(mb);
     ASSERT(bS);
     ASSERT(flags);
-
-//    if (sample ++ % (1024 * 128) == 0) {
-//        printf("Hash A: %d, Hash B: %d, Hash C: %d, Hash D: %d\n", hashA, hashB, hashC, hashD);
-//    }
 
     /* top edges */
     if (flags & FILTER_TOP_EDGE)
@@ -1268,7 +1212,31 @@ u32 GetBoundaryStrengths(mbStorage_t *mb, bS_t *bS, u32 flags)
          * only check if either of the blocks contain coefficients */
         if (h264bsdNumMbPart(mb->mbType) == 1)
         {
-            GetBoundaryStrengthsA(mb, bS);
+            bS[4].top = mb->totalCoeff[2] || mb->totalCoeff[0] ? 2 : 0;
+            bS[5].top = mb->totalCoeff[3] || mb->totalCoeff[1] ? 2 : 0;
+            bS[6].top = mb->totalCoeff[6] || mb->totalCoeff[4] ? 2 : 0;
+            bS[7].top = mb->totalCoeff[7] || mb->totalCoeff[5] ? 2 : 0;
+            bS[8].top = mb->totalCoeff[8] || mb->totalCoeff[2] ? 2 : 0;
+            bS[9].top = mb->totalCoeff[9] || mb->totalCoeff[3] ? 2 : 0;
+            bS[10].top = mb->totalCoeff[12] || mb->totalCoeff[6] ? 2 : 0;
+            bS[11].top = mb->totalCoeff[13] || mb->totalCoeff[7] ? 2 : 0;
+            bS[12].top = mb->totalCoeff[10] || mb->totalCoeff[8] ? 2 : 0;
+            bS[13].top = mb->totalCoeff[11] || mb->totalCoeff[9] ? 2 : 0;
+            bS[14].top = mb->totalCoeff[14] || mb->totalCoeff[12] ? 2 : 0;
+            bS[15].top = mb->totalCoeff[15] || mb->totalCoeff[13] ? 2 : 0;
+
+            bS[1].left = mb->totalCoeff[1] || mb->totalCoeff[0] ? 2 : 0;
+            bS[2].left = mb->totalCoeff[4] || mb->totalCoeff[1] ? 2 : 0;
+            bS[3].left = mb->totalCoeff[5] || mb->totalCoeff[4] ? 2 : 0;
+            bS[5].left = mb->totalCoeff[3] || mb->totalCoeff[2] ? 2 : 0;
+            bS[6].left = mb->totalCoeff[6] || mb->totalCoeff[3] ? 2 : 0;
+            bS[7].left = mb->totalCoeff[7] || mb->totalCoeff[6] ? 2 : 0;
+            bS[9].left = mb->totalCoeff[9] || mb->totalCoeff[8] ? 2 : 0;
+            bS[10].left = mb->totalCoeff[12] || mb->totalCoeff[9] ? 2 : 0;
+            bS[11].left = mb->totalCoeff[13] || mb->totalCoeff[12] ? 2 : 0;
+            bS[13].left = mb->totalCoeff[11] || mb->totalCoeff[10] ? 2 : 0;
+            bS[14].left = mb->totalCoeff[14] || mb->totalCoeff[11] ? 2 : 0;
+            bS[15].left = mb->totalCoeff[15] || mb->totalCoeff[14] ? 2 : 0;
         }
         /* 16x8 inter mb -> ref addresses and motion vectors can be different
          * only for the middle horizontal edge, for the other top edges it is
@@ -1336,31 +1304,55 @@ u32 GetBoundaryStrengths(mbStorage_t *mb, bS_t *bS, u32 flags)
         }
         else
         {
-            bS[4].top = InnerBoundaryStrength(mb, mb4x4Index[4], mb4x4Index[0]);
-            bS[5].top = InnerBoundaryStrength(mb, mb4x4Index[5], mb4x4Index[1]);
-            bS[6].top = InnerBoundaryStrength(mb, mb4x4Index[6], mb4x4Index[2]);
-            bS[7].top = InnerBoundaryStrength(mb, mb4x4Index[7], mb4x4Index[3]);
-            bS[8].top = InnerBoundaryStrength(mb, mb4x4Index[8], mb4x4Index[4]);
-            bS[9].top = InnerBoundaryStrength(mb, mb4x4Index[9], mb4x4Index[5]);
-            bS[10].top = InnerBoundaryStrength(mb, mb4x4Index[10], mb4x4Index[6]);
-            bS[11].top = InnerBoundaryStrength(mb, mb4x4Index[11], mb4x4Index[7]);
-            bS[12].top = InnerBoundaryStrength(mb, mb4x4Index[12], mb4x4Index[8]);
-            bS[13].top = InnerBoundaryStrength(mb, mb4x4Index[13], mb4x4Index[9]);
-            bS[14].top = InnerBoundaryStrength(mb, mb4x4Index[14], mb4x4Index[10]);
-            bS[15].top = InnerBoundaryStrength(mb, mb4x4Index[15], mb4x4Index[11]);
+            bS[4].top =
+                InnerBoundaryStrength(mb, mb4x4Index[4], mb4x4Index[0]);
+            bS[5].top =
+                InnerBoundaryStrength(mb, mb4x4Index[5], mb4x4Index[1]);
+            bS[6].top =
+                InnerBoundaryStrength(mb, mb4x4Index[6], mb4x4Index[2]);
+            bS[7].top =
+                InnerBoundaryStrength(mb, mb4x4Index[7], mb4x4Index[3]);
+            bS[8].top =
+                InnerBoundaryStrength(mb, mb4x4Index[8], mb4x4Index[4]);
+            bS[9].top =
+                InnerBoundaryStrength(mb, mb4x4Index[9], mb4x4Index[5]);
+            bS[10].top =
+                InnerBoundaryStrength(mb, mb4x4Index[10], mb4x4Index[6]);
+            bS[11].top =
+                InnerBoundaryStrength(mb, mb4x4Index[11], mb4x4Index[7]);
+            bS[12].top =
+                InnerBoundaryStrength(mb, mb4x4Index[12], mb4x4Index[8]);
+            bS[13].top =
+                InnerBoundaryStrength(mb, mb4x4Index[13], mb4x4Index[9]);
+            bS[14].top =
+                InnerBoundaryStrength(mb, mb4x4Index[14], mb4x4Index[10]);
+            bS[15].top =
+                InnerBoundaryStrength(mb, mb4x4Index[15], mb4x4Index[11]);
 
-            bS[1].left = InnerBoundaryStrength(mb, mb4x4Index[1], mb4x4Index[0]);
-            bS[2].left = InnerBoundaryStrength(mb, mb4x4Index[2], mb4x4Index[1]);
-            bS[3].left = InnerBoundaryStrength(mb, mb4x4Index[3], mb4x4Index[2]);
-            bS[5].left = InnerBoundaryStrength(mb, mb4x4Index[5], mb4x4Index[4]);
-            bS[6].left = InnerBoundaryStrength(mb, mb4x4Index[6], mb4x4Index[5]);
-            bS[7].left = InnerBoundaryStrength(mb, mb4x4Index[7], mb4x4Index[6]);
-            bS[9].left = InnerBoundaryStrength(mb, mb4x4Index[9], mb4x4Index[8]);
-            bS[10].left = InnerBoundaryStrength(mb, mb4x4Index[10], mb4x4Index[9]);
-            bS[11].left = InnerBoundaryStrength(mb, mb4x4Index[11], mb4x4Index[10]);
-            bS[13].left = InnerBoundaryStrength(mb, mb4x4Index[13], mb4x4Index[12]);
-            bS[14].left = InnerBoundaryStrength(mb, mb4x4Index[14], mb4x4Index[13]);
-            bS[15].left = InnerBoundaryStrength(mb, mb4x4Index[15], mb4x4Index[14]);
+            bS[1].left =
+                InnerBoundaryStrength(mb, mb4x4Index[1], mb4x4Index[0]);
+            bS[2].left =
+                InnerBoundaryStrength(mb, mb4x4Index[2], mb4x4Index[1]);
+            bS[3].left =
+                InnerBoundaryStrength(mb, mb4x4Index[3], mb4x4Index[2]);
+            bS[5].left =
+                InnerBoundaryStrength(mb, mb4x4Index[5], mb4x4Index[4]);
+            bS[6].left =
+                InnerBoundaryStrength(mb, mb4x4Index[6], mb4x4Index[5]);
+            bS[7].left =
+                InnerBoundaryStrength(mb, mb4x4Index[7], mb4x4Index[6]);
+            bS[9].left =
+                InnerBoundaryStrength(mb, mb4x4Index[9], mb4x4Index[8]);
+            bS[10].left =
+                InnerBoundaryStrength(mb, mb4x4Index[10], mb4x4Index[9]);
+            bS[11].left =
+                InnerBoundaryStrength(mb, mb4x4Index[11], mb4x4Index[10]);
+            bS[13].left =
+                InnerBoundaryStrength(mb, mb4x4Index[13], mb4x4Index[12]);
+            bS[14].left =
+                InnerBoundaryStrength(mb, mb4x4Index[14], mb4x4Index[13]);
+            bS[15].left =
+                InnerBoundaryStrength(mb, mb4x4Index[15], mb4x4Index[14]);
         }
         if (!nonZeroBs &&
             (bS[4].top || bS[5].top || bS[6].top || bS[7].top ||

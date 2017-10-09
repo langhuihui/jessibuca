@@ -60,6 +60,8 @@
 #include "h264bsd_util.h"
 #include "basetype.h"
 
+//#include <log/log.h>
+
 /*------------------------------------------------------------------------------
     2. External compiler flags
 --------------------------------------------------------------------------------
@@ -997,6 +999,13 @@ u32 h264bsdInitDpb(
     ASSERT(maxRefFrames <= dpbSize);
     ASSERT(maxFrameNum);
     ASSERT(dpbSize);
+
+    // see comment in loop below about size calculation
+    if (picSizeInMbs > (UINT32_MAX - 32 - 15) / 384) {
+        //ALOGE("b/28533562");
+        //android_errorWriteLog(0x534e4554, "28533562");
+        return(MEMORY_ALLOCATION_ERROR);
+    }
 
     dpb->maxLongTermFrameIdx = NO_LONG_TERM_FRAME_INDICES;
     dpb->maxRefFrames        = MAX(maxRefFrames, 1);

@@ -35,12 +35,19 @@
 /*------------------------------------------------------------------------------
     1. Include headers
 ------------------------------------------------------------------------------*/
+
 #include <stdlib.h>
+#include <string.h>
+
+//#include <log/log.h>
+
 #include "basetype.h"
 #include "h264bsd_container.h"
 #include "H264SwDecApi.h"
 #include "h264bsd_decoder.h"
 #include "h264bsd_util.h"
+
+#define UNUSED(x) (void)(x)
 
 /*------------------------------------------------------------------------------
        Version Information
@@ -72,12 +79,17 @@ H264DEC_EVALUATION      Compile evaluation version, restricts number of frames
 #define H264DEC_EVALUATION_LIMIT   500
 #endif
 
-/*
 void H264SwDecTrace(char *string) {
+    UNUSED(string);
 }
 
-void* H264SwDecMalloc(u32 size) {
-    return malloc(size);
+void* H264SwDecMalloc(u32 size, u32 num) {
+    if (size > UINT32_MAX / num) {
+        //ALOGE("can't allocate %u * %u bytes", size, num);
+        //android_errorWriteLog(0x534e4554, "27855419");
+        return NULL;
+    }
+    return malloc(size * num);
 }
 
 void H264SwDecFree(void *ptr) {
@@ -91,7 +103,7 @@ void H264SwDecMemcpy(void *dest, void *src, u32 count) {
 void H264SwDecMemset(void *ptr, i32 value, u32 count) {
     memset(ptr, value, count);
 }
-*/
+
 
 /*------------------------------------------------------------------------------
 
@@ -141,7 +153,7 @@ H264SwDecRet H264SwDecInit(H264SwDecInst *decInst, u32 noOutputReordering)
         return(H264SWDEC_PARAM_ERR);
     }
 
-    pDecCont = (decContainer_t *)H264SwDecMalloc(sizeof(decContainer_t));
+    pDecCont = (decContainer_t *)H264SwDecMalloc(sizeof(decContainer_t), 1);
 
     if (pDecCont == NULL)
     {

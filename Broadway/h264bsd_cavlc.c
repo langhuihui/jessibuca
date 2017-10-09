@@ -60,7 +60,7 @@
 #define INFO(vlc) (((vlc) >> 4) & 0xF)  /* 4 MSB bits contain information */
 /* macro to obtain trailing ones from the coeff token information word,
  * bits [5,10] */
-#define TRAILING_ONES(coeffToken) ((coeffToken>>5) & 0x3F)
+#define TRAILING_ONES(coeffToken) (((coeffToken)>>5) & 0x3F)
 /* macro to obtain total coeff from the coeff token information word,
  * bits [11,15] */
 #define TOTAL_COEFF(coeffToken) (((coeffToken) >> 11) & 0x1F)
@@ -323,45 +323,45 @@ static const u8 runBefore_1[2] = {0x11,0x01};
 /* macro to initialize stream buffer cache, fills the buffer (32 bits) */
 #define BUFFER_INIT(value, bits) \
 { \
-    bits = 32; \
-    value = h264bsdShowBits32(pStrmData); \
+    (bits) = 32; \
+    (value) = h264bsdShowBits32(pStrmData); \
 }
 
 /* macro to read numBits bits from the buffer, bits will be written to
  * outVal. Refills the buffer if not enough bits left */
 #define BUFFER_SHOW(value, bits, outVal, numBits) \
 { \
-    if (bits < (numBits)) \
+    if ((bits) < (numBits)) \
     { \
-        if(h264bsdFlushBits(pStrmData,32-bits) == END_OF_STREAM) \
+        if(h264bsdFlushBits(pStrmData,32-(bits)) == END_OF_STREAM) \
             return(HANTRO_NOK); \
-        value = h264bsdShowBits32(pStrmData); \
-        bits = 32; \
+        (value) = h264bsdShowBits32(pStrmData); \
+        (bits) = 32; \
     } \
-    (outVal) = value >> (32 - (numBits)); \
+    (outVal) = (value) >> (32 - (numBits)); \
 }
 
 /* macro to flush numBits bits from the buffer */
 #define BUFFER_FLUSH(value, bits, numBits) \
 { \
-    value <<= (numBits); \
-    bits -= (numBits); \
+    (value) <<= (numBits); \
+    (bits) -= (numBits); \
 }
 
 /* macro to read and flush  numBits bits from the buffer, bits will be written
  * to outVal. Refills the buffer if not enough bits left */
 #define BUFFER_GET(value, bits, outVal, numBits) \
 { \
-    if (bits < (numBits)) \
+    if ((bits) < (numBits)) \
     { \
-        if(h264bsdFlushBits(pStrmData,32-bits) == END_OF_STREAM) \
+        if(h264bsdFlushBits(pStrmData,32-(bits)) == END_OF_STREAM) \
             return(HANTRO_NOK); \
-        value = h264bsdShowBits32(pStrmData); \
-        bits = 32; \
+        (value) = h264bsdShowBits32(pStrmData); \
+        (bits) = 32; \
     } \
-    (outVal) = value >> (32 - (numBits)); \
-    value <<= (numBits); \
-    bits -= (numBits); \
+    (outVal) = (value) >> (32 - (numBits)); \
+    (value) <<= (numBits); \
+    (bits) -= (numBits); \
 }
 
 /*------------------------------------------------------------------------------
