@@ -110,7 +110,7 @@ public:
         //delete this;
     }
 	int initAudio(int frameCount, int channels) {
-		emscripten_log(0,"%d,%d",frameCount,channels);
+		emscripten_log(0,"initAudio,frameCount:%d,channels:%d",frameCount,channels);
 		return flvDecoder.initAudio(frameCount,channels);
 	}
 	void decodeVideoBuffer(){

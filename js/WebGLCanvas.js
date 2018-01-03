@@ -254,7 +254,7 @@
         var uTextureRef = this.uTextureRef;
         var vTextureRef = this.vTextureRef;
 
-        if (croppingParams === null) {
+        if (!croppingParams) {
             gl.viewport(0, 0, width, height);
         } else {
             gl.viewport(0, 0, croppingParams.width, croppingParams.height);
@@ -294,7 +294,7 @@
         //this.imageData = this.ctx2d.getImageData(0, 0, width, height);
         this.imageData.data.set(data);
         //Module.print(typeof this.imageData.data);
-        if (croppingParams === null) {
+        if (!croppingParams) {
             this.ctx2d.putImageData(this.imageData, 0, 0);
         } else {
             this.ctx2d.putImageData(this.imageData, -croppingParams.left, -croppingParams.top, 0, 0, croppingParams.width, croppingParams.height);

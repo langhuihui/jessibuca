@@ -167,6 +167,9 @@ emscripten_log(0, "audio init! %d", this);
 		// auto info = aacDecoder_GetStreamInfo(aacHandler);
 		// samplerate = info->sampleRate;
 		// channels = info->numChannels;
+		auto config = faacDecGetCurrentConfiguration(faacHandle);
+		config->defObjectType = LTP;
+		faacDecSetConfiguration(faacHandle,config);
 	    faacDecInit2(faacHandle, (unsigned char *)input.point(), 4, &samplerate, &channels);
 	    emscripten_log(0, "aac samplerate:%d channels:%d", samplerate, channels);
 	}

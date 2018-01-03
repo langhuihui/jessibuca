@@ -19,7 +19,7 @@ emcc_args = [
     '-O3',
     '--memory-init-file', '0',
     '--llvm-opts', '3',
-     '-s','WASM=1',
+    #'-s','WASM=1',
     #'-s', 'CORRECT_SIGNS=1',
     #'-s', 'CORRECT_OVERFLOWS=1',
     '-s', 'TOTAL_MEMORY=67108864',
@@ -34,9 +34,9 @@ emcc_args = [
     #'-Ispeex-1.2rc2/include',
     '-IBroadway', '-I.',
     #'-I../libid3tag',
-    #'-DUSE_MP3',
+    '-DUSE_MP3',
     #'-DUSE_H265',
-    '-DUSE_AAC',
+    #'-DUSE_AAC',
     '--js-library',  os.path.join('js', 'MonaMain.js')
     # '--js-transform', 'python appender.py'
 ]

@@ -130,6 +130,7 @@ mergeInto(LibraryManager.library, {
             if (this.onWsError) ws.onerror = this.onWsError;
             ws.onclose = function() {
                 _this.$close();
+                if (this.onWsClose) this.onWsClose();
             };
             this.close = function() {
                 ws.close();

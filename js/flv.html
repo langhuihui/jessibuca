@@ -25,20 +25,19 @@
             txt += "Error: " + msg + "\n";
             txt += "URL: " + url + "\n";
             txt += "Line: " + l + "\n\n";
-            txt += "Click OK to continue.\n\n";
             document.getElementById("logout").innerHTML += txt + "<br>";
             return true;
         }
 
         function test() {
             //mc.connect("182.16.68.70:81", "live", "")
-            fc.play("ws://10.25.8.118:8088/live/user1.flv", webGLCanvas)
-                //fc.play("ws://192.168.2.205:8088/live/user1.flv", document.getElementById("canvas"));
-                //fc.play("ws://182.16.68.41:8088/live/B06.flv", webGLCanvas);
-                //mc.connect("113.10.201.210:81", "live", "")
-                //mc.connect("123.108.249.106", "live");
-                //mc.connect('43.227.97.170:81', 'live');
-
+            //fc.play("ws://10.25.8.250:8088/live/user1.flv", webGLCanvas)
+            //fc.play("ws://192.168.2.205:8088/live/user1.flv", document.getElementById("canvas"));
+            //fc.play("ws://182.16.68.41:8088/live/test.flv", webGLCanvas);
+            //mc.connect("113.10.201.210:81", "live", "")
+            //mc.connect("123.108.249.106", "live");
+            //mc.connect('43.227.97.170:81', 'live');
+            fc.play("ws://localhost:8000/live/user1.flv", webGLCanvas)
         }
 
         function test2() {
@@ -68,7 +67,6 @@
                 }
             },
             postRun: function() {
-
                 webGLCanvas = new WebGLCanvas(document.getElementById("canvas"), Module["noWebGL"], {});
                 fc = new FlvClient();
                 fc.videoBuffer = 1;
