@@ -5,11 +5,6 @@
 #include <string>
 #include <functional>
 #include "basetype.h"
-#ifdef USE_H265
-#include "libde265/de265.h"
-#include "libde265/image.h"
-#else
-#include "H264SwDecApi.h"
 // void* H264SwDecMalloc(u32 size)
 // {
 // 	return malloc(size);
@@ -26,7 +21,6 @@
 // {
 // 	memset(ptr, value, count);
 // }
-#endif
 #include <time.h>
 #include <map>
 #include <queue>
@@ -138,6 +132,14 @@ inline void yuv420toRGB(u8*Y, u8*U, u8*V, u8* heap, u32 width, u32 height)
 		ystart += width;
 	}
 }
-
-
 #include "VideoDecoder.h"
+#ifdef USE_LIBDE265
+#include "libde265.h"
+#define VIDEO_DECODER Libde265
+#elif USE_FFMPEG
+#include "ffmpeg.h"
+#define VIDEO_DECODER FFmpeg
+#else
+#include "broadway.h"
+#define VIDEO_DECODER Broadway
+#endif

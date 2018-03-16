@@ -48,7 +48,7 @@ public:
 		if(videoDecoder==nullptr){
 			this->webgl = webgl;
 			emscripten_log(0, "webgl:%s", webgl ? "true" : "false");
-			videoDecoder = new VideoDecoder();
+			videoDecoder = new VIDEO_DECODER();
 			//consoleLog("webgl:%s",webgl?"true":"false");
 			if (!jsThis)jsThis = new val(_this);
 			videoDecoder->jsObject = jsThis;

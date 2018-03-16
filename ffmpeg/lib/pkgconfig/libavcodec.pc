@@ -1,0 +1,14 @@
+prefix=/home/fed/dexter/ffmpeg/../dist
+exec_prefix=${prefix}
+libdir=/home/fed/dexter/ffmpeg/../dist/lib
+includedir=/home/fed/dexter/ffmpeg/../dist/include
+
+Name: libavcodec
+Description: FFmpeg codec library
+Version: 58.14.100
+Requires: libavutil >= 56.9.100
+Requires.private: 
+Conflicts:
+Libs: -L${libdir}  -lavcodec -pthread -lm
+Libs.private: 
+Cflags: -I${includedir}
