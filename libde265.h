@@ -41,4 +41,4 @@ class Libde265 :public VideoDecoder{
 			}
 		}
     }
-}
+};

@@ -104,7 +104,7 @@ public:
 			_decode((const char*)data,pps);
 		}
 	}
-	void decode(MemoryStream& data) {
+	virtual void decode(MemoryStream& data) {
 		int NALUnitLength = 0;
 		data >>= 5;
 		while (data.length() > 4) {

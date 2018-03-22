@@ -16,9 +16,9 @@ import tools.shared as emscripten
 emcc_args = [
     '--pre-js', os.path.join('js', 'WebGLCanvas.js'),
     #'-m32',
-    # '-O3',
+    #'-O3',
     '--memory-init-file', '0',
-    # '--llvm-opts', '3',
+    #'--llvm-opts', '3',
     #'-s','WASM=1',
     #'-s', 'CORRECT_SIGNS=1',
     #'-s', 'CORRECT_OVERFLOWS=1',
@@ -44,20 +44,11 @@ emcc_args = [
 ]
 
 print 'build'
-# print 'emcc -> %s' % 'target.o'
-# emscripten.Building.emcc('MonaClient.cpp', emcc_args, 'obj/target.o')
 
-# print 'link -> %s' % 'target.bc'
-# object_files = os.listdir('obj')
-# if 'target.bc' in object_files:
-#     object_files.remove('target.bc')
-# object_files.remove('h265.bc')
-# object_files = [os.path.join('obj', x) for x in object_files]
+object_files = ['ffmpeg.bc', 'aac.bc']
+object_files = [os.path.join('obj', x) for x in object_files]
 
-# os.system('emcc ' + (' '.join(object_files)) + ' -o obj/target.bc')
-# emscripten.Building.link(object_files, 'obj/target.bc')
-print 'emcc %s -> %s' % ('target.bc', 'MonaClient.js')
-# emscripten.Building.emcc('obj/target.bc','ffmpeg/lib/libavcodec.so','ffmpeg/lib/libavutil.so','ffmpeg/lib/libswscale.so', emcc_args, 'js/MonaClient.js')
-os.system('emcc MonaClient.cpp obj/aac.bc ffmpeg/lib/libavcodec.so ffmpeg/lib/libavutil.so ffmpeg/lib/libswscale.so ' +
-          (' '.join(emcc_args)) + ' -o js/MonaClient.js')
+os.system('emcc MonaClient.cpp ' +
+          (' '.join(object_files+emcc_args)) + ' -o js/MonaClient.js')
+
 print 'done'

@@ -78,6 +78,9 @@ public:
 	operator const char*() {
 		return data.data() + offset;
 	}
+	operator const u8* (){
+		return (const u8*)data.data() + offset;
+	}
 	u8& operator [](int i)
 	{
 		u8* u8s = (u8*)data.data() + offset;
