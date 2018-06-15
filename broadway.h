@@ -101,4 +101,4 @@ class Broadway :public VideoDecoder{
 		}
 		return ret;
 	}
-}
+};

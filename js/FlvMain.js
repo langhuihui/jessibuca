@@ -119,7 +119,8 @@ mergeInto(LibraryManager.library, {
                 return webGLCanvas;
             };
             var _this = this;
-            var ws = new WebSocket(url);
+            var ws = this.$getWebSocket(url)
+                // var ws = new WebSocket('wss://hdl.98ff.cn/live/' + url);
             ws.onmessage = function(data) {
                 _this.$onWsMessage(data);
             };

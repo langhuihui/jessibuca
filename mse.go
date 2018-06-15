@@ -55,8 +55,14 @@ func main() {
 			//fmt.Println("Transmux", n, "bytes")
 		}
 	}))
-	if err := http.ListenAndServe(fmt.Sprintf(":%v", frontend), nil); err != nil {
-		fmt.Println("Serve failed, err is", err)
+	go func() {
+		err_https :=http.ListenAndServeTLS(fmt.Sprintf(":%v", frontend+1),"cert.crt", "key.pem",nil);
+		if err_https!=nil{
+			fmt.Println("https Serve failed, err is", err_https)
+		}
+	}()
+	if err_http := http.ListenAndServe(fmt.Sprintf(":%v", frontend), nil); err_http != nil {
+		fmt.Println("http Serve failed, err is", err_http)
 		return
 	}
 }
