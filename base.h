@@ -24,9 +24,9 @@
 #include <time.h>
 #include <map>
 #include <queue>
-#include <emscripten\emscripten.h>
-#include <emscripten\bind.h>
-#include <emscripten\val.h>
+#include <emscripten/emscripten.h>
+#include <emscripten/bind.h>
+#include <emscripten/val.h>
 #include <time.h>
 using namespace std;
 using namespace emscripten;
@@ -34,7 +34,8 @@ using namespace emscripten;
 //#define USEBUFFERARRAY
 #include "AudioDecoder.h"
 
-inline int yuv2rgbcalc(int y, int u, int v) {
+inline int yuv2rgbcalc(int y, int u, int v)
+{
 
 	int a0 = 1192 * (y - 16);
 	int a1 = 1634 * (v - 128);
@@ -46,18 +47,21 @@ inline int yuv2rgbcalc(int y, int u, int v) {
 	int g = (a0 - a2 - a3) >> 10;
 	int b = (a0 + a4) >> 10;
 
-	if ((r & 255) != r) {
+	if ((r & 255) != r)
+	{
 		r = min(255, max(0, r));
 	}
-	if ((g & 255) != g) {
+	if ((g & 255) != g)
+	{
 		g = min(255, max(0, g));
 	}
-	if ((b & 255) != b) {
+	if ((b & 255) != b)
+	{
 		b = min(255, max(0, b));
 	}
 	return (((((255 << 8) + b) << 8) + g) << 8) + r;
 }
-inline void yuv420toRGB(u8*Y, u8*U, u8*V, u8* heap, u32 width, u32 height)
+inline void yuv420toRGB(u8 *Y, u8 *U, u8 *V, u8 *heap, u32 width, u32 height)
 {
 	int ystart = 0;
 	int ustart = 0;
@@ -68,7 +72,7 @@ inline void yuv420toRGB(u8*Y, u8*U, u8*V, u8* heap, u32 width, u32 height)
 	int u = 0;
 	int v = 0;
 
-	u32* o = 0;
+	u32 *o = 0;
 
 	int line = 0;
 	int col = 0;
@@ -80,11 +84,13 @@ inline void yuv420toRGB(u8*Y, u8*U, u8*V, u8* heap, u32 width, u32 height)
 	int cacheAdr = 0;
 	ustart = 0;
 	vstart = 0;
-	u8* cacheStart = heap + (width * height << 2);
-	for (line = 0; line < height; line += 2) {
+	u8 *cacheStart = heap + (width * height << 2);
+	for (line = 0; line < height; line += 2)
+	{
 		usave = ustart;
 		vsave = vstart;
-		for (col = 0; col < width; col += 2) {
+		for (col = 0; col < width; col += 2)
+		{
 			y = Y[ystart];
 			yn = Y[ystart + width];
 
@@ -92,14 +98,16 @@ inline void yuv420toRGB(u8*Y, u8*U, u8*V, u8* heap, u32 width, u32 height)
 			v = V[vstart];
 
 			cacheAdr = (y << 16) + (u << 8) + v;
-			o = (u32*)(cacheStart + cacheAdr);
-			if (!*o) *o = yuv2rgbcalc(y, u, v);
-			*(u32*)(heap + ostart) = *o;
+			o = (u32 *)(cacheStart + cacheAdr);
+			if (!*o)
+				*o = yuv2rgbcalc(y, u, v);
+			*(u32 *)(heap + ostart) = *o;
 
 			cacheAdr = ((yn << 16) + (u << 8)) + v;
-			o = (u32*)(cacheStart + cacheAdr);
-			if (!*o) *o = yuv2rgbcalc(yn, u, v);
-			*(u32*)(heap + (ostart + (width << 2))) = *o;
+			o = (u32 *)(cacheStart + cacheAdr);
+			if (!*o)
+				*o = yuv2rgbcalc(yn, u, v);
+			*(u32 *)(heap + (ostart + (width << 2))) = *o;
 
 			//yuv2rgb5(y, u, v, ostart);
 			//yuv2rgb5(yn, u, v, (ostart + widthFour)|0);
@@ -112,15 +120,17 @@ inline void yuv420toRGB(u8*Y, u8*U, u8*V, u8* heap, u32 width, u32 height)
 
 			//yuv2rgb5(y, u, v, ostart);
 			cacheAdr = (y << 16) + (u << 8) + v;
-			o = (u32*)(cacheStart + cacheAdr);
-			if (!*o) *o = yuv2rgbcalc(y, u, v);
-			*(u32*)(heap + ostart) = *o;
+			o = (u32 *)(cacheStart + cacheAdr);
+			if (!*o)
+				*o = yuv2rgbcalc(y, u, v);
+			*(u32 *)(heap + ostart) = *o;
 
 			//yuv2rgb5(yn, u, v, (ostart + widthFour)|0);
 			cacheAdr = ((yn << 16) + (u << 8)) + v;
-			o = (u32*)(cacheStart + cacheAdr);
-			if (!*o) *o = yuv2rgbcalc(yn, u, v);
-			*(u32*)(heap + (ostart + (width << 2))) = *o;
+			o = (u32 *)(cacheStart + cacheAdr);
+			if (!*o)
+				*o = yuv2rgbcalc(yn, u, v);
+			*(u32 *)(heap + (ostart + (width << 2))) = *o;
 			ostart += 4;
 
 			//all positions inc 1
