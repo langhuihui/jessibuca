@@ -19,7 +19,10 @@ mergeInto(LibraryManager.library, {
         }
 
         fc.prototype.checkVideoBuffer = function(t) {
-            return setTimeout(this.decodeVideoBuffer.bind(this), t);
+            var _this = this;
+            return setTimeout(function() {
+                _this.decodeVideoBuffer();
+            }, t);
         };
         fc.prototype.onNetStatus = function(info) {
 
@@ -133,6 +136,7 @@ mergeInto(LibraryManager.library, {
                 _this.$close();
                 if (this.onWsClose) this.onWsClose();
             };
+            this.ws = ws;
             this.close = function() {
                 ws.close();
             };
