@@ -24,10 +24,16 @@ class FFmpeg : public VideoDecoder
         av_frame_free(&frame);
         av_packet_free(&pkt);
     }
+    void clear() override{
+        VideoDecoder::clear();
+        extradata.clear();
+         av_parser_close(parser);
+         avcodec_free_context(&dec_ctx);
+    }
     void decodeHeader(MemoryStream &data, int codec_id) override
     {
-        emscripten_log(0, "codec = %d", codec_id);
         codec = avcodec_find_decoder(codec_id == 7 ? AV_CODEC_ID_H264 : AV_CODEC_ID_H265);
+        emscripten_log(0, "codec = %d,ptr = %d", codec_id,codec);
         parser = av_parser_init(codec->id);
         dec_ctx = avcodec_alloc_context3(codec);
         if (codec_id == 7)

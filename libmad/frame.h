@@ -25,7 +25,7 @@
 # include "fixed.h"
 # include "timer.h"
 # include "stream.h"
-#include <emscripten\emscripten.h>
+#include <emscripten/emscripten.h>
 enum mad_layer {
   MAD_LAYER_I   = 1,			/* Layer I */
   MAD_LAYER_II  = 2,			/* Layer II */

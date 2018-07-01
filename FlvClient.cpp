@@ -17,6 +17,7 @@ class FlvClient
 	val *jsThis = nullptr;
 	string url;
 	int status = 0;
+	bool isPlaying = false;
 	int audioBuffer = 12;
 	MemoryStream buffer;
 	bool flvMode = false;
@@ -146,6 +147,7 @@ class FlvClient
 		if (!jsThis)
 			jsThis = new val(_this);
 		flvDecoder.attachCanvas(jsThis, webgl);
+		isPlaying = true;
 	}
 #ifndef WS_PREFIX
 #define WS_PREFIX ""
@@ -157,11 +159,16 @@ class FlvClient
 		//"wss://hdl.98ff.cn/live/"
 		return WebSocket.new_(WS_PREFIX + url);
 	}
-	void Close()
+	void Close(bool event)
 	{
-		buffer.clear();
-		flvDecoder.clear();
-		status = 0;
+		if(isPlaying){
+			flvDecoder.clear();
+			buffer.clear();
+			status = 0;
+			isPlaying = false;
+			if(event)
+				jsThis->call<void>("reconnect");
+		}
 		//delete this;
 	}
 	int initAudio(int frameCount, int channels)

@@ -44,13 +44,16 @@ class FlvDecoder
 		bufferIsPlaying = false;
 		videoTimeoutId = 0;
 		if (videoDecoder)
-			delete videoDecoder;
+			videoDecoder->clear();
 		if (audioDecoder)
-			delete audioDecoder;
-		videoDecoder = nullptr;
-		audioDecoder = nullptr;
+			audioDecoder->clear();
+		// if (videoDecoder)
+		// 	delete videoDecoder;
+		// if (audioDecoder)
+		// 	delete audioDecoder;
+		// videoDecoder = nullptr;
+		// audioDecoder = nullptr;
 		isFirstVideoReceived = true;
-		//videoBuffers = queue<VideoPacket>();
 	}
 	void attachCanvas(val *_this, bool webgl)
 	{
@@ -74,7 +77,6 @@ class FlvDecoder
 		u8 frame_type = data[0];
 		int codec_id = frame_type & 0x0f;
 		frame_type = (frame_type >> 4) & 0x0f;
-
 		if (codec_id == 7)
 		{
 		}
@@ -107,7 +109,7 @@ class FlvDecoder
 				if (_timestamp + bufferTime * 1000 > targetTime)
 				{
 					videoBuffers.emplace(_timestamp, move(data));
-					//emscripten_log(0,"add to video buffer %d", _timestamp);
+					// emscripten_log(0,"add to video buffer %d", _timestamp);
 					if (!bufferIsPlaying)
 					{
 						bufferIsPlaying = true;
@@ -173,7 +175,7 @@ class FlvDecoder
 	}
 	int initAudio(int frameCount, int channels)
 	{
-		audioDecoder = new AudioDecoder(frameCount * channels * 2);
+		if(!audioDecoder)audioDecoder = new AudioDecoder(frameCount * channels * 2);
 		return (int)audioDecoder->outputBuffer >> 1;
 	}
 

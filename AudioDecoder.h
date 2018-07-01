@@ -82,6 +82,9 @@ emscripten_log(0, "audio init! %d", this);
 	free(outputBuffer);
 		emscripten_log(0, "audio decoder release!\n");
     }
+	void clear(){
+		
+	}
     bool decode(int audioType, MemoryStream &data)
     {
 	int samplesBytes = 0;

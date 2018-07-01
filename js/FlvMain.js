@@ -96,8 +96,16 @@ mergeInto(LibraryManager.library, {
             this.playAudio = playAudio;
         };
         fc.prototype.play = function(url, webGLCanvas, croppingParams) {
-
+           
+            this.reconnect = function(){
+                this.play(url, webGLCanvas, croppingParams)
+            };
+            if(this.ws){
+                _this.$close(false);
+                this.ws.close();
+            }
             var canvas = webGLCanvas.canvasElement;
+            
             this.setVideoSize = function(w, h, dataPtr) {
                 canvas.width = w;
                 canvas.height = h;
@@ -133,12 +141,15 @@ mergeInto(LibraryManager.library, {
             ws.binaryType = "arraybuffer";
             if (this.onWsError) ws.onerror = this.onWsError;
             ws.onclose = function() {
-                _this.$close();
+                _this.$close(true);
+                _this.ws = null;
                 if (this.onWsClose) this.onWsClose();
             };
             this.ws = ws;
             this.close = function() {
+                this.$close(false);
                 ws.close();
+                this.ws = null
             };
             this.$play(this, webGLCanvas.isWebGL());
         };

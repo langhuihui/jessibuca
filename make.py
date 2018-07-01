@@ -19,7 +19,7 @@ emcc_args = [
     '-O3',
     '--memory-init-file', '0',
     '--llvm-opts', '3',
-    # '-s', 'WASM=1',
+    '-s', 'WASM=0',
     #'-s', 'CORRECT_SIGNS=1',
     #'-s', 'CORRECT_OVERFLOWS=1',
     '-s', 'TOTAL_MEMORY=67108864',
@@ -29,7 +29,8 @@ emcc_args = [
     #'-s DEMANGLE_SUPPORT=1',
     # '-s', 'RELOOP=1',
     #'-s', '''EXPORTED_FUNCTIONS=["_main"]''',
-    #'--closure', '1',
+    # '--closure', '1',
+    # '--llvm-lto','1',
     '-s', 'NO_EXIT_RUNTIME=1',
     '--bind',
     #'-Ispeex-1.2rc2/include',
@@ -46,27 +47,11 @@ emcc_args = [
 
 print 'build'
 
-object_files = ['mp3.bc']
+object_files = ['mp3.bc','avc.bc','aac.bc','ffmpeg.bc']
 object_files = [os.path.join('obj', x) for x in object_files]
-name = 'libavutil'
-
-libavutil_files = list(
-    filter(lambda file: file.endswith('.o'), os.listdir('ffmpeg/lib/'+name)))
-
-libavutil_files = [os.path.join('ffmpeg/lib/'+name, x)
-                   for x in libavutil_files]
-
-name = 'libavcodec'
-
-libavcodec_files = list(
-    filter(lambda file: file.endswith('.o'), os.listdir('ffmpeg/lib/'+name)))
-libavcodec_files.remove('reverse.o')
-libavcodec_files.remove('log2_tab.o')
-libavcodec_files = [os.path.join('ffmpeg/lib/'+name, x)
-                    for x in libavcodec_files]
 
 os.system('emcc FlvClient.cpp ' +
-          (' '.join(libavutil_files+libavcodec_files+object_files+emcc_args)) + ' -o js/FlvClient.js')
+          (' '.join(object_files+emcc_args)) + ' -o js/FlvClient.js')
 
 # os.system('emcc MonaClient.cpp ' +
 #           (' '.join(libavutil_files+libavcodec_files+object_files+emcc_args)) + ' -o js/MonaClient.js')

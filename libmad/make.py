@@ -56,14 +56,14 @@ build_files = source_files
 for file in build_files:
     target = file.replace('.c', '.o')
     print 'emcc %s -> %s' % (file, target)
-    os.system('emcc '+file+' ' + (' '.join(emcc_args)) + ' -o obj/'+target)
-    # emscripten.Building.emcc(file, emcc_args, os.path.join('obj', target))
+    #os.system('emcc '+file+' ' + (' '.join(emcc_args)) + ' -o obj/'+target)
+    emscripten.Building.emcc(file, emcc_args, os.path.join('obj', target))
 
 object_files = [os.path.join('obj', x.replace('.c', '.o'))
                 for x in source_files]
 print 'link -> %s' % 'mp3.bc'
-os.system('emcc ' + (' '.join(object_files)) + ' -o ../obj/mp3.bc')
-# emscripten.Building.link(object_files, '../obj/mp3.bc')
+# os.system('emcc ' + (' '.join(object_files)) + ' -o ../obj/mp3.bc')
+emscripten.Building.link(object_files, '../obj/mp3.bc')
 #print 'link -> %s' % 'MonaClient.bc'
 
 # object_files = os.listdir('../obj')

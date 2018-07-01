@@ -67,5 +67,5 @@ for file in source_files:
   emscripten.Building.emcc(file, emcc_args + ['-DHAVE_CONFIG_H','-D__SSE__','-Isrc', '-Iinc'], os.path.join('obj', target))
 object_files = [os.path.join('obj', x.replace('.c', '.o')) for x in source_files];
 print 'link -> %s' % 'avc.bc'
-#emscripten.Building.link(object_files, 'avc.bc')
-os.system('emcc '+ (' '.join(object_files)) +' -o ../obj/avc.bc')
+emscripten.Building.link(object_files, '../obj/avc.bc')
+#os.system('emcc '+ (' '.join(object_files)) +' -o ../obj/avc.bc')

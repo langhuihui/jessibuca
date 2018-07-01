@@ -33,6 +33,9 @@ public:
 		if(!webgl&&heap)free(heap);
 		emscripten_log(0, "video decoder release!\n");
 	}
+	virtual void clear(){
+		if(!webgl&&heap)free(heap);
+	}
 	void decodeVideoSize(u32 width, u32 height)
 	{
 		videoWidth = width;
