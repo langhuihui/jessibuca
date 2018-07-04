@@ -161,12 +161,13 @@ class FlvClient
 	}
 	void Close(bool event)
 	{
-		if(isPlaying){
+		if (isPlaying)
+		{
 			flvDecoder.clear();
 			buffer.clear();
 			status = 0;
 			isPlaying = false;
-			if(event)
+			if (event)
 				jsThis->call<void>("reconnect");
 		}
 		//delete this;

@@ -41,13 +41,14 @@ class FFmpeg : public VideoDecoder
             u8 lengthSizeMinusOne = data[9];
             lengthSizeMinusOne &= 0x03;
             NAL_unit_length = lengthSizeMinusOne;
-
             data >>= 5;
             extradata << data;
+            extradata.consoleHex();
             extradata.offset = data.offset;
             dec_ctx->extradata = (u8 *)(const u8 *)extradata;
             dec_ctx->extradata_size = extradata.length();
-            avcodec_open2(dec_ctx, codec, NULL);
+            auto ret = avcodec_open2(dec_ctx, codec, NULL);
+            emscripten_log(0, "avcodec_open2:%d",ret);
             // int spsLen = 0;
             // int ppsLen = 0;
             // data.read2B(spsLen);
@@ -82,7 +83,6 @@ class FFmpeg : public VideoDecoder
     }
     void decode(MemoryStream &data) override
     {
-        data >>= 5;
         _decode((const char *)data, data.length());
     }
     void _decode(const char *data, int len) override
@@ -100,10 +100,12 @@ class FFmpeg : public VideoDecoder
                 p_yuv[0] = (u32)frame->data[0];
                 p_yuv[1] = (u32)frame->data[1];
                 p_yuv[2] = (u32)frame->data[2];
-                if (videoWidth == 0)
+                if (videoWidth != frame->width || videoHeight!= frame->height)
                     decodeVideoSize(frame->width, frame->height);
                 decodeYUV420();
             }
+        }else{
+              emscripten_log(0,"ffmpeg decode ret:%d",ret);
         }
     }
 };

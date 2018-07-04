@@ -24,7 +24,7 @@
 #include <time.h>
 #include <map>
 #include <queue>
-#include <emscripten/emscripten.h>
+#include <emscripten.h>
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 #include <time.h>
