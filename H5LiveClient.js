@@ -314,6 +314,7 @@ mergeInto(LibraryManager.library, {
                     _this.decodeVideoBuffer();
                 }
                 this.playVideoBuffer = function(t) {
+                    // console.log("setTimeout:", t);
                     return setTimeout(playVideo, t, this)
                 }
             },

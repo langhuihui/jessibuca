@@ -1,5 +1,6 @@
 #pragma once
-extern "C" {
+extern "C"
+{
 #include <libavcodec/avcodec.h>
 }
 
@@ -11,7 +12,6 @@ class FFmpeg : public VideoDecoder
     AVCodecContext *dec_ctx = NULL;
     AVFrame *frame;
     AVPacket *pkt;
-    MemoryStream extradata;
     FFmpeg() : pkt(av_packet_alloc()), frame(av_frame_alloc())
     {
         emscripten_log(0, "FFMpeg init");
@@ -19,48 +19,32 @@ class FFmpeg : public VideoDecoder
     ~FFmpeg()
     {
         emscripten_log(0, "FFMpeg destory");
-        av_parser_close(parser);
-        avcodec_free_context(&dec_ctx);
+        clear();
         av_frame_free(&frame);
         av_packet_free(&pkt);
     }
-    void clear() override{
+    void clear() override
+    {
         VideoDecoder::clear();
-        extradata.clear();
-         av_parser_close(parser);
-         avcodec_free_context(&dec_ctx);
+        av_parser_close(parser);
+        free(dec_ctx->extradata);
+        avcodec_free_context(&dec_ctx);
     }
     void decodeHeader(MemoryStream &data, int codec_id) override
     {
         codec = avcodec_find_decoder(codec_id == 7 ? AV_CODEC_ID_H264 : AV_CODEC_ID_H265);
-        emscripten_log(0, "codec = %d,ptr = %d", codec_id,codec);
+        emscripten_log(0, "codec = %d,ptr = %d", codec_id, codec);
         parser = av_parser_init(codec->id);
         dec_ctx = avcodec_alloc_context3(codec);
         if (codec_id == 7)
         {
-            u8 lengthSizeMinusOne = data[9];
-            lengthSizeMinusOne &= 0x03;
-            NAL_unit_length = lengthSizeMinusOne;
             data >>= 5;
-            extradata << data;
-            extradata.consoleHex();
-            extradata.offset = data.offset;
-            dec_ctx->extradata = (u8 *)(const u8 *)extradata;
-            dec_ctx->extradata_size = extradata.length();
+            //dec_ctx->extradata = (u8 *)(const u8 *)data;
+            dec_ctx->extradata_size = data.length();
+            dec_ctx->extradata = (u8 *)malloc(dec_ctx->extradata_size);
+            memcpy( dec_ctx->extradata,(const u8 *)data,dec_ctx->extradata_size);
             auto ret = avcodec_open2(dec_ctx, codec, NULL);
-            emscripten_log(0, "avcodec_open2:%d",ret);
-            // int spsLen = 0;
-            // int ppsLen = 0;
-            // data.read2B(spsLen);
-            // if (spsLen > 0) {
-            // 	_decode((const char*)data,spsLen);
-            // 	data >>= spsLen;
-            // }
-            // data >>= 1;
-            // data.read2B(ppsLen);
-            // if (ppsLen > 0) {
-            // 	_decode((const char*)data,ppsLen);
-            // }
+            emscripten_log(0, "avcodec_open2:%d", ret);
         }
         else
         {
@@ -86,7 +70,7 @@ class FFmpeg : public VideoDecoder
         _decode((const char *)data, data.length());
     }
     void _decode(const char *data, int len) override
-    {
+    {  //emscripten_log(0, "len:%d", len);
         int ret = av_parser_parse2(parser, dec_ctx, &pkt->data, &pkt->size,
                                    (const u8 *)(data), len, AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
         if (ret >= 0 && pkt->size)
@@ -100,12 +84,14 @@ class FFmpeg : public VideoDecoder
                 p_yuv[0] = (u32)frame->data[0];
                 p_yuv[1] = (u32)frame->data[1];
                 p_yuv[2] = (u32)frame->data[2];
-                if (videoWidth != frame->width || videoHeight!= frame->height)
+                if (videoWidth != frame->width || videoHeight != frame->height)
                     decodeVideoSize(frame->width, frame->height);
                 decodeYUV420();
             }
-        }else{
-              emscripten_log(0,"ffmpeg decode ret:%d",ret);
+        }
+        else
+        {
+            emscripten_log(0, "ffmpeg decode ret:%d", ret);
         }
     }
 };

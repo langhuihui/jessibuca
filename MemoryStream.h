@@ -49,7 +49,7 @@ class MemoryStream
 		}
 		return *this;
 	}
-	MemoryStream(string &&right) : data(move(right)), offset(0)
+	MemoryStream(string &&right) : data(forward<string>(right)), offset(0)
 	{
 	}
 	MemoryStream(string &right) : data(move(right)), offset(0)

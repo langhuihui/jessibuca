@@ -54,8 +54,7 @@ struct H5LCBase
     {
         val::global("clearTimeout")(videoTimeoutId);
         emscripten_log(0, "FlvDecoder release!\n");
-        if (videoDecoder)
-            delete videoDecoder;
+
         if (audioDecoder)
             delete audioDecoder;
     }
@@ -108,14 +107,15 @@ struct H5LCBase
                     unsigned int timestamp = buffer.readUInt24B();
                     u8 ext = buffer.readu8();
                     buffer.readUInt24B();
-                    MemoryStream ms(buffer.readString(length));
+                    MemoryStream ms;
+                    ms << buffer.readString(length);
                     switch (type)
                     {
                     case 0x08:
-                        decodeAudio(timestamp, ms);
+                        decodeAudio(timestamp, move(ms));
                         break;
                     case 0x09:
-                        decodeVideo(timestamp, ms);
+                        decodeVideo(timestamp, move(ms));
                         break;
                     }
                     length = buffer.readUInt32B();
@@ -130,13 +130,13 @@ struct H5LCBase
             case 1:
             {
                 MemoryStream ms(data.substr(1));
-                decodeAudio(ms.readUInt32B(), ms);
+                decodeAudio(ms.readUInt32B(), move(ms));
             }
             break;
             case 2:
             {
                 MemoryStream ms(data.substr(1));
-                decodeVideo(ms.readUInt32B(), ms);
+                decodeVideo(ms.readUInt32B(), move(ms));
             }
             break;
             default:
@@ -145,7 +145,7 @@ struct H5LCBase
             }
         }
     }
-    void decodeAudio(clock_t timestamp, MemoryStream &ms)
+    void decodeAudio(clock_t timestamp, MemoryStream &&ms)
     {
         unsigned char flag = 0;
         ms.readB<1>(flag);
@@ -191,10 +191,8 @@ struct H5LCBase
             audioDecoder = new AudioDecoder(frameCount * channels * 2);
         call<void>("initAudio", frameCount, samplerate, channels, (int)audioDecoder->outputBuffer >> 1);
     }
-    void decodeVideo(clock_t _timestamp, MemoryStream &data)
+    void decodeVideo(clock_t _timestamp, MemoryStream &&data)
     {
-        if (videoDecoder == nullptr)
-            return;
         if (waitFirstVideo)
         {
             u8 frame_type = data[0];
@@ -224,15 +222,19 @@ struct H5LCBase
         else
         {
             data >>= 5;
-            if (videoBuffer && checkTimeout(_timestamp))
+            if (videoBuffer && (bufferIsPlaying || checkTimeout(_timestamp)))
             {
-                videoBuffers.emplace(_timestamp, move(data));
+                videoBuffers.emplace(_timestamp, forward<MemoryStream>(data));
+                // emscripten_log(0, "push timestamp:%d", _timestamp);
                 // auto &&info = val::object();
                 // info.set("code", "NetStream.Play.Start");
                 // call<void>("onNetStatus", info);
             }
             else
+            {
+                // emscripten_log(0, "play timestamp:%d", _timestamp);
                 videoDecoder->decode(data);
+            }
         }
     }
     void decodeVideoBuffer()
@@ -243,6 +245,7 @@ struct H5LCBase
             auto &v = videoBuffers.front();
             if (check && checkTimeout(v.timestamp))
                 return;
+            // emscripten_log(0, "play timestamp:%d", v.timestamp);
             videoDecoder->decode(v.data);
             videoBuffers.pop();
             check = true;
@@ -253,7 +256,7 @@ struct H5LCBase
     {
         auto timeout = getTimespan(timestamp);
         bool isTimeout = timeout > 0;
-        if (isTimeout && !bufferIsPlaying)
+        if (isTimeout)
         {
             bufferIsPlaying = true;
             videoTimeoutId = call<int>("playVideoBuffer", timeout);
@@ -262,17 +265,17 @@ struct H5LCBase
     }
     clock_t getTimespan(clock_t t)
     {
-        return call<clock_t>("timespan",t) + videoBuffer * 1000;
+        return call<clock_t>("timespan", t) + videoBuffer * 1000;
     }
     void $close()
     {
         val::global("clearTimeout")(videoTimeoutId);
-        while (!videoBuffers.empty())
-        {
-            videoBuffers.pop();
-        }
-        if (videoDecoder)
-            videoDecoder->clear();
+        videoBuffers = queue<VideoPacket>();
+        // while (!videoBuffers.empty())
+        // {
+        //     videoBuffers.pop();
+        // }
+        videoDecoder->clear();
         if (audioDecoder)
             audioDecoder->clear();
         videoTimeoutId = 0;

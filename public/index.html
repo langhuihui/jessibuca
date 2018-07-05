@@ -3,7 +3,7 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>FlvClient 1.0</title>
+    <title>H5LiveClient 1.0</title>
     <meta charset="utf-8" />
 </head>
 
@@ -17,9 +17,33 @@
         onerror = handleErr;
         var txt = "";
         var h5lc = null;
+        var canvas = document.getElementById("canvas");
+        disabledMouseWheel(canvas)
 
         function test() {
-            h5lc.play("ws://localhost:8080/live/user1", document.getElementById("canvas"))
+            // h5lc.play("ws://localhost:8080/live/user1", document.getElementById("canvas"))
+            h5lc.play("ws://test.qihaipi.com/gnddragon/h2642.flv", canvas)
+        }
+
+        function disabledMouseWheel(ele) {
+            if (ele.addEventListener) {
+                ele.addEventListener('DOMMouseScroll', scrollFunc, false);
+            } //W3C
+            ele.onmousewheel = scrollFunc; //IE/Opera/Chrome
+        }
+
+        function scrollFunc(evt) {
+            evt = evt || window.event;
+            if (evt.preventDefault) {
+                // Firefox
+                evt.preventDefault();
+                evt.stopPropagation();
+            } else {
+                // IE
+                evt.cancelBubble = true;
+                evt.returnValue = false;
+            }
+            return false;
         }
 
         function handleErr(msg, url, l) {
@@ -31,7 +55,6 @@
             return true;
         }
         var Module = {
-            noWebGL: false,
             print: (function() {
                 return function(text) {
                     if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
@@ -55,7 +78,7 @@
             },
             postRun: function() {
                 h5lc = new H5LiveClient();
-                h5lc.videoBuffer = 0;
+                h5lc.videoBuffer = 1;
             }
         };
     </script>

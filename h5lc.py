@@ -36,9 +36,9 @@ emcc_args = [
     '-IBroadway', '-I.',
     #'-I../libid3tag',
     '-Iffmpeg/include',
-    # '-DUSE_MP3',
+    '-DUSE_MP3',
     #'-DUSE_LIBDE265',
-    '-DUSE_AAC',
+    # '-DUSE_AAC',
     '-DUSE_FFMPEG',
     '--js-library', 'H5LiveClient.js'
 ]
