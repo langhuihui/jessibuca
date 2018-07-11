@@ -326,21 +326,34 @@ mergeInto(LibraryManager.library, {
                 if (!this.webGLCanvas || this.webGLCanvas.canvasElement != canvas) {
                     this.webGLCanvas = new H264bsdCanvas(canvas, forceNoGL, contextOptions);
                 }
-                this.$play(url);
                 var _this = this;
                 var reconnectCount = 0;
-                this.ws.onopen = function() {
-                    reconnectCount = 0;
-                    console.log("ws open")
-                };
-                this.ws.onclose = function() {
-                    _this.isPlaying = false;
-                    _this.ws = null;
-                    _this.$close();
-                    if (reconnectCount > 3) return;
-                    _this.$play(url);
-                    reconnectCount++;
-                };
+                var reconnectTime = 2000;
+                function setWebsocket(){
+                    this.$play(url);
+                    this.ws.onopen = function() {
+                        reconnectCount = 0;
+                        reconnectTime = 2000;
+                        console.log("ws open")
+                    };
+                    this.ws.onclose = function() {
+                        _this.isPlaying = false;
+                        _this.ws = null;
+                        _this.$close();
+                        if (reconnectCount > 3) return;
+                        reconnectCount++;
+                        console.warn("ws reconnecting :",reconnectCount);
+                        setWebsocket.call(_this);
+                    };
+                    this.ws.onerror = function(){
+                        console.warn("ws error");
+                        setTimeout(function(){
+                            reconnectTime*=2;
+                            // _this.ws.onclose();
+                        },reconnectTime)
+                    };
+                }
+                setWebsocket.call(this);
             },
             close: function() {
                 if (!this.isPlaying) return;

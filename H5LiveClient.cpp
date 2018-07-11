@@ -73,7 +73,7 @@ struct H5LCBase
         val ws = val::global("WebSocket").new_(WS_PREFIX + url);
         ws.set("binaryType", "arraybuffer");
         ws.set("onmessage", bind("onData"));
-        ws.set("onerror", bind("onError"));
+        // ws.set("onerror", bind("onError"));
         wrapped.set("ws", ws);
     }
     void onData(val evt)
