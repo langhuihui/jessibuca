@@ -342,15 +342,15 @@ mergeInto(LibraryManager.library, {
                         _this.$close();
                         if (reconnectCount > 3) return;
                         reconnectCount++;
-                        console.warn("ws reconnecting :",reconnectCount);
-                        setWebsocket.call(_this);
+                        console.warn("ws reconnect after "+(reconnectTime/1000>>0)+" second")
+                        setTimeout(function(){
+                            console.log("ws reconnecting :",reconnectCount);
+                            reconnectTime*=2;
+                            setWebsocket.call(_this);
+                        },reconnectTime)
                     };
                     this.ws.onerror = function(){
                         console.warn("ws error");
-                        setTimeout(function(){
-                            reconnectTime*=2;
-                            // _this.ws.onclose();
-                        },reconnectTime)
                     };
                 }
                 setWebsocket.call(this);
