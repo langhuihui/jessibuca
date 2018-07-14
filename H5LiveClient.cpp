@@ -37,10 +37,13 @@ struct H5LCBase
     bool bufferIsPlaying = false;
     int videoTimeoutId = 0;
     bool waitFirstVideo = true;
+    clock_t lastDataTime = 0;
+    int bytesCount = 0;
     PROP(isPlaying, bool)
     PROP(flvMode, bool)
     PROP(audioBuffer, int)
     PROP(videoBuffer, int)
+    PROP(bps, double)
     H5LCBase(val &&v) : wrapped(forward<val>(v)), isPlaying(false), flvMode(false), flvHeadRead(false), audioBuffer(12)
     {
         videoDecoder = new VIDEO_DECODER();
@@ -73,12 +76,21 @@ struct H5LCBase
         val ws = val::global("WebSocket").new_(WS_PREFIX + url);
         ws.set("binaryType", "arraybuffer");
         ws.set("onmessage", bind("onData"));
+        lastDataTime = clock();
         // ws.set("onerror", bind("onError"));
         wrapped.set("ws", ws);
     }
     void onData(val evt)
     {
         string data = evt["data"].as<string>();
+        bytesCount += data.length();
+        auto now = clock();
+        if (now > lastDataTime)
+        {
+            bps = bytesCount * 1000.0 / (now - lastDataTime);
+            lastDataTime = now;
+            bytesCount = 0;
+        }
         if (flvMode)
         {
             if (!flvHeadRead)
@@ -263,6 +275,14 @@ struct H5LCBase
         }
         return isTimeout;
     }
+    val getBufferInfo() const
+    {
+        val &&result = val::object();
+        result.set("front", videoBuffers.front().timestamp);
+        result.set("back", videoBuffers.back().timestamp);
+        result.set("size", videoBuffers.size());
+        return result;
+    }
     clock_t getTimespan(clock_t t)
     {
         return call<clock_t>("timespan", t) + videoBuffer * 1000;
@@ -313,6 +333,8 @@ EMSCRIPTEN_BINDINGS(H5LCBase)
         .PROP(flvMode)
         .PROP(audioBuffer)
         .PROP(videoBuffer)
+        .PROP(bps)
+        .property("bufferInfo", &H5LCBase::getBufferInfo)
         // .function("invoke", &H5LCBase::invoke, pure_virtual())
         .allow_subclass<H5LiveClient, val>("H5LiveClient", constructor<val>());
 }

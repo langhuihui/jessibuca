@@ -329,7 +329,8 @@ mergeInto(LibraryManager.library, {
                 var _this = this;
                 var reconnectCount = 0;
                 var reconnectTime = 2000;
-                function setWebsocket(){
+
+                function setWebsocket() {
                     this.$play(url);
                     this.ws.onopen = function() {
                         reconnectCount = 0;
@@ -342,14 +343,14 @@ mergeInto(LibraryManager.library, {
                         _this.$close();
                         if (reconnectCount > 3) return;
                         reconnectCount++;
-                        console.warn("ws reconnect after "+(reconnectTime/1000>>0)+" second")
-                        setTimeout(function(){
-                            console.log("ws reconnecting :",reconnectCount);
-                            reconnectTime*=2;
+                        console.warn("ws reconnect after " + (reconnectTime / 1000 >> 0) + " second")
+                        _this.reconnectId = setTimeout(function() {
+                            console.log("ws reconnecting :", reconnectCount);
+                            reconnectTime *= 2;
                             setWebsocket.call(_this);
-                        },reconnectTime)
+                        }, reconnectTime)
                     };
-                    this.ws.onerror = function(){
+                    this.ws.onerror = function() {
                         console.warn("ws error");
                     };
                 }
@@ -357,6 +358,7 @@ mergeInto(LibraryManager.library, {
             },
             close: function() {
                 if (!this.isPlaying) return;
+                clearTimeout(this.reconnectId)
                 this.isPlaying = false;
                 this.ws.onclose = null;
                 this.ws.close();
