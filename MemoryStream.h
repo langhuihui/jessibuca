@@ -191,12 +191,13 @@ class MemoryStream
 	~MemoryStream()
 	{
 	}
-	void consoleHex()
+	void consoleHex(int size)
 	{
-		string output(3 * size() + 1, '\0');
+		if(size == 0) size = data.length();
+		string output(3 * size + 1, '\0');
 		char *hex_buf = (char *)output.c_str();
 		bool hasOffset = false;
-		for (int i = 0; i < size(); ++i)
+		for (int i = 0; i < size; ++i)
 		{
 			unsigned char c = data[i];
 			unsigned int nIntVal = c;

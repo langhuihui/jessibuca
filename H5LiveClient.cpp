@@ -93,23 +93,22 @@ struct H5LCBase
         }
         if (flvMode)
         {
+            buffer << data;
             if (!flvHeadRead)
             {
-                buffer << data;
                 if (buffer.length() >= 13)
                 {
                     flvHeadRead = true;
+                    buffer.consoleHex(13);
                     buffer.offset = 13;
                     buffer.removeConsume();
                 }
             }
             else
             {
-                buffer << data;
                 while (buffer.length() > 3)
                 {
                     u8 type = buffer.readu8();
-
                     unsigned int length = buffer.readUInt24B();
                     if (buffer.length() < length + 4 + 7)
                     {
@@ -128,6 +127,9 @@ struct H5LCBase
                         break;
                     case 0x09:
                         decodeVideo(timestamp, move(ms));
+                        break;
+                    default:
+                        emscripten_log(0, "unknow type: %d",type);
                         break;
                     }
                     length = buffer.readUInt32B();
