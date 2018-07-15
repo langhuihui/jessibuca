@@ -99,9 +99,11 @@ struct H5LCBase
                 if (buffer.length() >= 13)
                 {
                     flvHeadRead = true;
+                    if(buffer[0] == 'F' && buffer[1] == 'L' && buffer[2] == 'V'){
+                        buffer.offset = 13;
+                        buffer.removeConsume();
+                    }
                     buffer.consoleHex(13);
-                    buffer.offset = 13;
-                    buffer.removeConsume();
                 }
             }
             else
