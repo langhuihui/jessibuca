@@ -98,10 +98,13 @@ struct H5LCBase
             {
                 if (buffer.length() >= 13)
                 {
-                    flvHeadRead = true;
                     if(buffer[0] == 'F' && buffer[1] == 'L' && buffer[2] == 'V'){
+                        flvHeadRead = true;
                         buffer.offset = 13;
                         buffer.removeConsume();
+                    }else{
+                        call<void>("replay");
+                        return;
                     }
                     buffer.consoleHex(13);
                 }
