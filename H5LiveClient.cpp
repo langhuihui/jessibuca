@@ -73,7 +73,11 @@ struct H5LCBase
         emscripten_log(0, "webgl:%s", webgl ? "true" : "false");
         videoDecoder->webgl = webgl;
         flvMode = url.find(".flv") != string::npos;
-        val ws = val::global("WebSocket").new_(WS_PREFIX + url);
+
+#define _URL(str) _TMP(str)
+#define _TMP(str) #str
+
+        val ws = val::global("WebSocket").new_(_URL(WS_PREFIX) + url);
         ws.set("binaryType", "arraybuffer");
         ws.set("onmessage", bind("onData"));
         lastDataTime = clock();
@@ -98,15 +102,9 @@ struct H5LCBase
             {
                 if (buffer.length() >= 13)
                 {
-                    if(buffer[0] == 'F' && buffer[1] == 'L' && buffer[2] == 'V'){
-                        flvHeadRead = true;
-                        buffer.offset = 13;
-                        buffer.removeConsume();
-                    }else{
-                        call<void>("replay");
-                        return;
-                    }
-                    buffer.consoleHex(13);
+                    flvHeadRead = true;
+                    buffer.offset = 13;
+                    buffer.removeConsume();
                 }
             }
             else
@@ -134,7 +132,7 @@ struct H5LCBase
                         decodeVideo(timestamp, move(ms));
                         break;
                     default:
-                        emscripten_log(0, "unknow type: %d",type);
+                        emscripten_log(0, "unknow type: %d", type);
                         break;
                     }
                     length = buffer.readUInt32B();
