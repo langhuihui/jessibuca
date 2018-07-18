@@ -40,7 +40,6 @@ emcc_args = [
     #'-DUSE_LIBDE265',
     # '-DUSE_AAC',
     '-DUSE_FFMPEG',
-    '-DWS_PREFIX=ws://test.qihaipi.com/gnddragon/',
     '--js-library', 'H5LiveClient.js'
 ]
 

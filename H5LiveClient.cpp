@@ -3,9 +3,6 @@
 #define __cplusplus 201703L
 #endif
 #include "base.h"
-#ifndef WS_PREFIX
-#define WS_PREFIX ""
-#endif
 #define PROP(name, type)         \
     type name;                   \
     val get##name() const        \
@@ -74,10 +71,13 @@ struct H5LCBase
         videoDecoder->webgl = webgl;
         flvMode = url.find(".flv") != string::npos;
 
-#define _URL(str) _TMP(str)
-#define _TMP(str) #str
+#define WS_PREFIX "ws://test.qihaipi.com/gnddragon/"
 
-        val ws = val::global("WebSocket").new_(_URL(WS_PREFIX) + url);
+#ifdef WS_PREFIX
+        val ws = val::global("WebSocket").new_(WS_PREFIX + url);
+#else
+        val ws = val::global("WebSocket").new_(url);
+#endif
         ws.set("binaryType", "arraybuffer");
         ws.set("onmessage", bind("onData"));
         lastDataTime = clock();
@@ -119,6 +119,7 @@ struct H5LCBase
                         break;
                     }
                     unsigned int timestamp = buffer.readUInt24B();
+                    // emscripten_log(0, "%d", timestamp);
                     u8 ext = buffer.readu8();
                     buffer.readUInt24B();
                     MemoryStream ms;

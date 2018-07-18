@@ -329,13 +329,7 @@ mergeInto(LibraryManager.library, {
                 var _this = this;
                 var reconnectCount = 0;
                 var reconnectTime = 2000;
-                // this.replay = function(){
-                //     this.ws.onmessage = null;
-                //     this.close();
-                //     setTimeout(function(){
-                //         _this.play(url,canvas,forceNoGL, contextOptions);
-                //     },1000);
-                // }
+
                 console.log('H5LiverClient play', url)
 
                 function setWebsocket() {
@@ -365,9 +359,9 @@ mergeInto(LibraryManager.library, {
                 setWebsocket.call(this);
             },
             close: function() {
+                clearTimeout(this.reconnectId)
                 if (!this.isPlaying) return;
                 console.log('close H5LiverClient')
-                clearTimeout(this.reconnectId)
                 this.isPlaying = false;
                 this.ws.onmessage = null;
                 this.ws.onclose = null;
