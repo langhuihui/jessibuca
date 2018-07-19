@@ -71,7 +71,7 @@ struct H5LCBase
         videoDecoder->webgl = webgl;
         flvMode = url.find(".flv") != string::npos;
 
-#define WS_PREFIX "ws://test.qihaipi.com/gnddragon/"
+// #define WS_PREFIX "ws://test.qihaipi.com/gnddragon/"
 
 #ifdef WS_PREFIX
         val ws = val::global("WebSocket").new_(WS_PREFIX + url);
@@ -119,7 +119,6 @@ struct H5LCBase
                         break;
                     }
                     unsigned int timestamp = buffer.readUInt24B();
-                    // emscripten_log(0, "%d", timestamp);
                     u8 ext = buffer.readu8();
                     buffer.readUInt24B();
                     MemoryStream ms;
@@ -211,6 +210,7 @@ struct H5LCBase
     }
     void decodeVideo(clock_t _timestamp, MemoryStream &&data)
     {
+        u8 avc_packet_type = data[1];//0为AVCSequence Header，1为AVC NALU，2为AVC end ofsequence
         if (waitFirstVideo)
         {
             u8 frame_type = data[0];
@@ -229,7 +229,7 @@ struct H5LCBase
                 emscripten_log(0, "Only support video h.264/avc or h.265/hevc codec. actual=%d", codec_id);
                 return;
             }
-            u8 avc_packet_type = data[1];
+            
             if (frame_type == 1 && avc_packet_type == 0)
             {
                 videoDecoder->decodeHeader(data, codec_id);
@@ -237,7 +237,7 @@ struct H5LCBase
                 emscripten_log(0, "video info set!");
             }
         }
-        else
+        else if(avc_packet_type==1)
         {
             data >>= 5;
             if (videoBuffer && (bufferIsPlaying || checkTimeout(_timestamp)))
@@ -253,6 +253,8 @@ struct H5LCBase
                 // emscripten_log(0, "play timestamp:%d", _timestamp);
                 videoDecoder->decode(data);
             }
+        }else{
+            call<void>("resetTimeSpan");
         }
     }
     void decodeVideoBuffer()

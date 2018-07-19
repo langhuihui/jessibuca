@@ -322,6 +322,9 @@ mergeInto(LibraryManager.library, {
                 this.setStartTime(t);
                 return this.timespan(t);
             },
+            resetTimeSpan:function(){
+                delete this.timespan;
+            },
             play: function(url, canvas, forceNoGL, contextOptions) {
                 if (!this.webGLCanvas || this.webGLCanvas.canvasElement != canvas) {
                     this.webGLCanvas = new H264bsdCanvas(canvas, forceNoGL, contextOptions);
