@@ -35,11 +35,11 @@ emcc_args = [
     #'-Ispeex-1.2rc2/include',
     '-IBroadway', '-I.',
     #'-I../libid3tag',
-    '-Iffmpeg/include',
+    # '-Iffmpeg/include',
     '-DUSE_MP3',
     #'-DUSE_LIBDE265',
     # '-DUSE_AAC',
-    '-DUSE_FFMPEG',
+    # '-DUSE_FFMPEG',
     '--js-library', 'H5LiveClient.js'
 ]
 
