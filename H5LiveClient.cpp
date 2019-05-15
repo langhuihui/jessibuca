@@ -71,7 +71,7 @@ struct H5LCBase
         videoDecoder->webgl = webgl;
         flvMode = url.find(".flv") != string::npos;
 
-// #define WS_PREFIX "ws://test.qihaipi.com/gnddragon/"
+        // #define WS_PREFIX "ws://test.qihaipi.com/gnddragon/"
 
 #ifdef WS_PREFIX
         val ws = val::global("WebSocket").new_(WS_PREFIX + url);
@@ -210,7 +210,7 @@ struct H5LCBase
     }
     void decodeVideo(clock_t _timestamp, MemoryStream &&data)
     {
-        u8 avc_packet_type = data[1];//0为AVCSequence Header，1为AVC NALU，2为AVC end ofsequence
+        u8 avc_packet_type = data[1]; //0为AVCSequence Header，1为AVC NALU，2为AVC end ofsequence
         if (waitFirstVideo)
         {
             u8 frame_type = data[0];
@@ -229,7 +229,7 @@ struct H5LCBase
                 emscripten_log(0, "Only support video h.264/avc or h.265/hevc codec. actual=%d", codec_id);
                 return;
             }
-            
+
             if (frame_type == 1 && avc_packet_type == 0)
             {
                 videoDecoder->decodeHeader(data, codec_id);
@@ -237,7 +237,7 @@ struct H5LCBase
                 emscripten_log(0, "video info set!");
             }
         }
-        else if(avc_packet_type==1)
+        else if (avc_packet_type == 1)
         {
             data >>= 5;
             if (videoBuffer && (bufferIsPlaying || checkTimeout(_timestamp)))
@@ -250,10 +250,12 @@ struct H5LCBase
             }
             else
             {
-                // emscripten_log(0, "play timestamp:%d", _timestamp);
+                emscripten_log(0, "play timestamp:%d", _timestamp);
                 videoDecoder->decode(data);
             }
-        }else{
+        }
+        else
+        {
             call<void>("resetTimeSpan");
         }
     }
@@ -265,7 +267,7 @@ struct H5LCBase
             auto &v = videoBuffers.front();
             if (check && checkTimeout(v.timestamp))
                 return;
-            // emscripten_log(0, "play timestamp:%d", v.timestamp);
+            emscripten_log(0, "play timestamp:%d", v.timestamp);
             videoDecoder->decode(v.data);
             videoBuffers.pop();
             check = true;

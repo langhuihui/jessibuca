@@ -1,0 +1,259 @@
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/gmake" "cmTC_71172/fast"
+/usr/bin/gmake -f CMakeFiles/cmTC_71172.dir/build.make CMakeFiles/cmTC_71172.dir/build
+gmake[1]: Entering directory '/mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_71172.dir/CheckSymbolExists.c.o
+/mnt/d/emsdk/emscripten/1.38.31/emcc    -s WASM=0   -o CMakeFiles/cmTC_71172.dir/CheckSymbolExists.c.o   -c /mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_71172.js
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_71172.dir/link.txt --verbose=1
+/mnt/d/emsdk/emscripten/1.38.31/emcc   -s WASM=0    @CMakeFiles/cmTC_71172.dir/objects1.rsp  -o cmTC_71172.js 
+Traceback (most recent call last):
+  File "/mnt/d/emsdk/emscripten/1.38.31/emcc.py", line 3308, in <module>
+    sys.exit(run(sys.argv))
+  File "/mnt/d/emsdk/emscripten/1.38.31/emcc.py", line 1776, in run
+    extra_files_to_link += system_libs.calculate([f for _, f in sorted(temp_files)] + extra_files_to_link, in_temp, stdout_=None, stderr_=None, forced=forced_stdlibs)
+  File "/mnt/d/emsdk/emscripten/1.38.31/tools/system_libs.py", line 594, in calculate
+    symbolses = shared.Building.parallel_llvm_nm([os.path.abspath(t) for t in temp_files])
+  File "/mnt/d/emsdk/emscripten/1.38.31/tools/shared.py", line 1712, in parallel_llvm_nm
+    object_contents = pool.map(g_llvm_nm_uncached, files)
+  File "/usr/lib64/python2.7/multiprocessing/pool.py", line 251, in map
+    return self.map_async(func, iterable, chunksize).get()
+  File "/usr/lib64/python2.7/multiprocessing/pool.py", line 567, in get
+    raise self._value
+OSError: [Errno 8] Exec format error
+CMakeFiles/cmTC_71172.dir/build.make:98: recipe for target 'cmTC_71172.js' failed
+gmake[1]: *** [cmTC_71172.js] Error 1
+gmake[1]: Leaving directory '/mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_71172/fast' failed
+gmake: *** [cmTC_71172/fast] Error 2
+
+File /mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/gmake" "cmTC_8d775/fast"
+/usr/bin/gmake -f CMakeFiles/cmTC_8d775.dir/build.make CMakeFiles/cmTC_8d775.dir/build
+gmake[1]: Entering directory '/mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_8d775.dir/CheckFunctionExists.c.o
+/mnt/d/emsdk/emscripten/1.38.31/emcc    -DCHECK_FUNCTION_EXISTS=pthread_create -s WASM=0   -o CMakeFiles/cmTC_8d775.dir/CheckFunctionExists.c.o   -c /usr/share/cmake/Modules/CheckFunctionExists.c
+Linking C executable cmTC_8d775.js
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8d775.dir/link.txt --verbose=1
+/mnt/d/emsdk/emscripten/1.38.31/emcc   -DCHECK_FUNCTION_EXISTS=pthread_create -s WASM=0    @CMakeFiles/cmTC_8d775.dir/objects1.rsp  -o cmTC_8d775.js @CMakeFiles/cmTC_8d775.dir/linklibs.rsp
+shared:ERROR: emcc: cannot find library "pthreads" (`-s ERROR_ON_MISSING_LIBRARIES=0` to disable this error)
+CMakeFiles/cmTC_8d775.dir/build.make:99: recipe for target 'cmTC_8d775.js' failed
+gmake[1]: *** [cmTC_8d775.js] Error 1
+gmake[1]: Leaving directory '/mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_8d775/fast' failed
+gmake: *** [cmTC_8d775/fast] Error 2
+
+
+Determining if the function pthread_create exists in the pthread failed with the following output:
+Change Dir: /mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/gmake" "cmTC_3316c/fast"
+/usr/bin/gmake -f CMakeFiles/cmTC_3316c.dir/build.make CMakeFiles/cmTC_3316c.dir/build
+gmake[1]: Entering directory '/mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_3316c.dir/CheckFunctionExists.c.o
+/mnt/d/emsdk/emscripten/1.38.31/emcc    -DCHECK_FUNCTION_EXISTS=pthread_create -s WASM=0   -o CMakeFiles/cmTC_3316c.dir/CheckFunctionExists.c.o   -c /usr/share/cmake/Modules/CheckFunctionExists.c
+Linking C executable cmTC_3316c.js
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3316c.dir/link.txt --verbose=1
+/mnt/d/emsdk/emscripten/1.38.31/emcc   -DCHECK_FUNCTION_EXISTS=pthread_create -s WASM=0    @CMakeFiles/cmTC_3316c.dir/objects1.rsp  -o cmTC_3316c.js @CMakeFiles/cmTC_3316c.dir/linklibs.rsp
+Traceback (most recent call last):
+  File "/mnt/d/emsdk/emscripten/1.38.31/emcc.py", line 3308, in <module>
+    sys.exit(run(sys.argv))
+  File "/mnt/d/emsdk/emscripten/1.38.31/emcc.py", line 1776, in run
+    extra_files_to_link += system_libs.calculate([f for _, f in sorted(temp_files)] + extra_files_to_link, in_temp, stdout_=None, stderr_=None, forced=forced_stdlibs)
+  File "/mnt/d/emsdk/emscripten/1.38.31/tools/system_libs.py", line 594, in calculate
+    symbolses = shared.Building.parallel_llvm_nm([os.path.abspath(t) for t in temp_files])
+  File "/mnt/d/emsdk/emscripten/1.38.31/tools/shared.py", line 1712, in parallel_llvm_nm
+    object_contents = pool.map(g_llvm_nm_uncached, files)
+  File "/usr/lib64/python2.7/multiprocessing/pool.py", line 251, in map
+    return self.map_async(func, iterable, chunksize).get()
+  File "/usr/lib64/python2.7/multiprocessing/pool.py", line 567, in get
+    raise self._value
+OSError: [Errno 8] Exec format error
+CMakeFiles/cmTC_3316c.dir/build.make:99: recipe for target 'cmTC_3316c.js' failed
+gmake[1]: *** [cmTC_3316c.js] Error 1
+gmake[1]: Leaving directory '/mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_3316c/fast' failed
+gmake: *** [cmTC_3316c/fast] Error 2
+
+
+Determining if compiler accepts -pthread failed with the following output:
+Change Dir: /mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/gmake" "cmTC_8893b/fast"
+/usr/bin/gmake -f CMakeFiles/cmTC_8893b.dir/build.make CMakeFiles/cmTC_8893b.dir/build
+gmake[1]: Entering directory '/mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_8893b.dir/CheckForPthreads.c.o
+/mnt/d/emsdk/emscripten/1.38.31/emcc     -o CMakeFiles/cmTC_8893b.dir/CheckForPthreads.c.o   -c /usr/share/cmake/Modules/CheckForPthreads.c
+Linking C executable cmTC_8893b.js
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8893b.dir/link.txt --verbose=1
+/mnt/d/emsdk/emscripten/1.38.31/emcc       @CMakeFiles/cmTC_8893b.dir/objects1.rsp  -o cmTC_8893b.js @CMakeFiles/cmTC_8893b.dir/linklibs.rsp
+Traceback (most recent call last):
+  File "/mnt/d/emsdk/emscripten/1.38.31/emcc.py", line 3308, in <module>
+    sys.exit(run(sys.argv))
+  File "/mnt/d/emsdk/emscripten/1.38.31/emcc.py", line 1776, in run
+    extra_files_to_link += system_libs.calculate([f for _, f in sorted(temp_files)] + extra_files_to_link, in_temp, stdout_=None, stderr_=None, forced=forced_stdlibs)
+  File "/mnt/d/emsdk/emscripten/1.38.31/tools/system_libs.py", line 594, in calculate
+    symbolses = shared.Building.parallel_llvm_nm([os.path.abspath(t) for t in temp_files])
+  File "/mnt/d/emsdk/emscripten/1.38.31/tools/shared.py", line 1712, in parallel_llvm_nm
+    object_contents = pool.map(g_llvm_nm_uncached, files)
+  File "/usr/lib64/python2.7/multiprocessing/pool.py", line 251, in map
+    return self.map_async(func, iterable, chunksize).get()
+  File "/usr/lib64/python2.7/multiprocessing/pool.py", line 567, in get
+    raise self._value
+OSError: [Errno 8] Exec format error
+CMakeFiles/cmTC_8893b.dir/build.make:99: recipe for target 'cmTC_8893b.js' failed
+gmake[1]: *** [cmTC_8893b.js] Error 1
+gmake[1]: Leaving directory '/mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_8893b/fast' failed
+gmake: *** [cmTC_8893b/fast] Error 2
+
+
+Determining if the include file malloc.h exists failed with the following output:
+Change Dir: /mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/gmake" "cmTC_91ea9/fast"
+/usr/bin/gmake -f CMakeFiles/cmTC_91ea9.dir/build.make CMakeFiles/cmTC_91ea9.dir/build
+gmake[1]: Entering directory '/mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_91ea9.dir/CheckIncludeFile.c.o
+/mnt/d/emsdk/emscripten/1.38.31/emcc    -s WASM=0   -o CMakeFiles/cmTC_91ea9.dir/CheckIncludeFile.c.o   -c /mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_91ea9.js
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_91ea9.dir/link.txt --verbose=1
+/mnt/d/emsdk/emscripten/1.38.31/emcc   -s WASM=0    @CMakeFiles/cmTC_91ea9.dir/objects1.rsp  -o cmTC_91ea9.js 
+Traceback (most recent call last):
+  File "/mnt/d/emsdk/emscripten/1.38.31/emcc.py", line 3308, in <module>
+    sys.exit(run(sys.argv))
+  File "/mnt/d/emsdk/emscripten/1.38.31/emcc.py", line 1776, in run
+    extra_files_to_link += system_libs.calculate([f for _, f in sorted(temp_files)] + extra_files_to_link, in_temp, stdout_=None, stderr_=None, forced=forced_stdlibs)
+  File "/mnt/d/emsdk/emscripten/1.38.31/tools/system_libs.py", line 594, in calculate
+    symbolses = shared.Building.parallel_llvm_nm([os.path.abspath(t) for t in temp_files])
+  File "/mnt/d/emsdk/emscripten/1.38.31/tools/shared.py", line 1712, in parallel_llvm_nm
+    object_contents = pool.map(g_llvm_nm_uncached, files)
+  File "/usr/lib64/python2.7/multiprocessing/pool.py", line 251, in map
+    return self.map_async(func, iterable, chunksize).get()
+  File "/usr/lib64/python2.7/multiprocessing/pool.py", line 567, in get
+    raise self._value
+OSError: [Errno 8] Exec format error
+CMakeFiles/cmTC_91ea9.dir/build.make:98: recipe for target 'cmTC_91ea9.js' failed
+gmake[1]: *** [cmTC_91ea9.js] Error 1
+gmake[1]: Leaving directory '/mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_91ea9/fast' failed
+gmake: *** [cmTC_91ea9/fast] Error 2
+
+
+Determining if the include file stdint.h exists failed with the following output:
+Change Dir: /mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/gmake" "cmTC_4b325/fast"
+/usr/bin/gmake -f CMakeFiles/cmTC_4b325.dir/build.make CMakeFiles/cmTC_4b325.dir/build
+gmake[1]: Entering directory '/mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_4b325.dir/CheckIncludeFile.c.o
+/mnt/d/emsdk/emscripten/1.38.31/emcc    -s WASM=0   -o CMakeFiles/cmTC_4b325.dir/CheckIncludeFile.c.o   -c /mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_4b325.js
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4b325.dir/link.txt --verbose=1
+/mnt/d/emsdk/emscripten/1.38.31/emcc   -s WASM=0    @CMakeFiles/cmTC_4b325.dir/objects1.rsp  -o cmTC_4b325.js 
+Traceback (most recent call last):
+  File "/mnt/d/emsdk/emscripten/1.38.31/emcc.py", line 3308, in <module>
+    sys.exit(run(sys.argv))
+  File "/mnt/d/emsdk/emscripten/1.38.31/emcc.py", line 1776, in run
+    extra_files_to_link += system_libs.calculate([f for _, f in sorted(temp_files)] + extra_files_to_link, in_temp, stdout_=None, stderr_=None, forced=forced_stdlibs)
+  File "/mnt/d/emsdk/emscripten/1.38.31/tools/system_libs.py", line 594, in calculate
+    symbolses = shared.Building.parallel_llvm_nm([os.path.abspath(t) for t in temp_files])
+  File "/mnt/d/emsdk/emscripten/1.38.31/tools/shared.py", line 1712, in parallel_llvm_nm
+    object_contents = pool.map(g_llvm_nm_uncached, files)
+  File "/usr/lib64/python2.7/multiprocessing/pool.py", line 251, in map
+    return self.map_async(func, iterable, chunksize).get()
+  File "/usr/lib64/python2.7/multiprocessing/pool.py", line 567, in get
+    raise self._value
+OSError: [Errno 8] Exec format error
+CMakeFiles/cmTC_4b325.dir/build.make:98: recipe for target 'cmTC_4b325.js' failed
+gmake[1]: *** [cmTC_4b325.js] Error 1
+gmake[1]: Leaving directory '/mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_4b325/fast' failed
+gmake: *** [cmTC_4b325/fast] Error 2
+
+
+Determining if the include file stdbool.h exists failed with the following output:
+Change Dir: /mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/gmake" "cmTC_adfd7/fast"
+/usr/bin/gmake -f CMakeFiles/cmTC_adfd7.dir/build.make CMakeFiles/cmTC_adfd7.dir/build
+gmake[1]: Entering directory '/mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_adfd7.dir/CheckIncludeFile.c.o
+/mnt/d/emsdk/emscripten/1.38.31/emcc    -s WASM=0   -o CMakeFiles/cmTC_adfd7.dir/CheckIncludeFile.c.o   -c /mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_adfd7.js
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_adfd7.dir/link.txt --verbose=1
+/mnt/d/emsdk/emscripten/1.38.31/emcc   -s WASM=0    @CMakeFiles/cmTC_adfd7.dir/objects1.rsp  -o cmTC_adfd7.js 
+Traceback (most recent call last):
+  File "/mnt/d/emsdk/emscripten/1.38.31/emcc.py", line 3308, in <module>
+    sys.exit(run(sys.argv))
+  File "/mnt/d/emsdk/emscripten/1.38.31/emcc.py", line 1776, in run
+    extra_files_to_link += system_libs.calculate([f for _, f in sorted(temp_files)] + extra_files_to_link, in_temp, stdout_=None, stderr_=None, forced=forced_stdlibs)
+  File "/mnt/d/emsdk/emscripten/1.38.31/tools/system_libs.py", line 594, in calculate
+    symbolses = shared.Building.parallel_llvm_nm([os.path.abspath(t) for t in temp_files])
+  File "/mnt/d/emsdk/emscripten/1.38.31/tools/shared.py", line 1712, in parallel_llvm_nm
+    object_contents = pool.map(g_llvm_nm_uncached, files)
+  File "/usr/lib64/python2.7/multiprocessing/pool.py", line 251, in map
+    return self.map_async(func, iterable, chunksize).get()
+  File "/usr/lib64/python2.7/multiprocessing/pool.py", line 567, in get
+    raise self._value
+OSError: [Errno 8] Exec format error
+CMakeFiles/cmTC_adfd7.dir/build.make:98: recipe for target 'cmTC_adfd7.js' failed
+gmake[1]: *** [cmTC_adfd7.js] Error 1
+gmake[1]: Leaving directory '/mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_adfd7/fast' failed
+gmake: *** [cmTC_adfd7/fast] Error 2
+
+
+Performing C SOURCE FILE Test SUPPORTS_SSE4_1 failed with the following output:
+Change Dir: /mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/gmake" "cmTC_7ec96/fast"
+/usr/bin/gmake -f CMakeFiles/cmTC_7ec96.dir/build.make CMakeFiles/cmTC_7ec96.dir/build
+gmake[1]: Entering directory '/mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_7ec96.dir/src.c.o
+/mnt/d/emsdk/emscripten/1.38.31/emcc    -DSUPPORTS_SSE4_1 -s WASM=0   -msse4.1 -o CMakeFiles/cmTC_7ec96.dir/src.c.o   -c /mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp/src.c
+clang: warning: argument unused during compilation: '-msse4.1' [-Wunused-command-line-argument]
+Linking C executable cmTC_7ec96.js
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7ec96.dir/link.txt --verbose=1
+/mnt/d/emsdk/emscripten/1.38.31/emcc   -DSUPPORTS_SSE4_1 -s WASM=0    @CMakeFiles/cmTC_7ec96.dir/objects1.rsp  -o cmTC_7ec96.js 
+Traceback (most recent call last):
+  File "/mnt/d/emsdk/emscripten/1.38.31/emcc.py", line 3308, in <module>
+    sys.exit(run(sys.argv))
+  File "/mnt/d/emsdk/emscripten/1.38.31/emcc.py", line 1776, in run
+    extra_files_to_link += system_libs.calculate([f for _, f in sorted(temp_files)] + extra_files_to_link, in_temp, stdout_=None, stderr_=None, forced=forced_stdlibs)
+  File "/mnt/d/emsdk/emscripten/1.38.31/tools/system_libs.py", line 594, in calculate
+    symbolses = shared.Building.parallel_llvm_nm([os.path.abspath(t) for t in temp_files])
+  File "/mnt/d/emsdk/emscripten/1.38.31/tools/shared.py", line 1712, in parallel_llvm_nm
+    object_contents = pool.map(g_llvm_nm_uncached, files)
+  File "/usr/lib64/python2.7/multiprocessing/pool.py", line 251, in map
+    return self.map_async(func, iterable, chunksize).get()
+  File "/usr/lib64/python2.7/multiprocessing/pool.py", line 567, in get
+    raise self._value
+OSError: [Errno 8] Exec format error
+CMakeFiles/cmTC_7ec96.dir/build.make:98: recipe for target 'cmTC_7ec96.js' failed
+gmake[1]: *** [cmTC_7ec96.js] Error 1
+gmake[1]: Leaving directory '/mnt/e/MonaWebSocketClient/libde265/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_7ec96/fast' failed
+gmake: *** [cmTC_7ec96/fast] Error 2
+
+Source file was:
+int main(void) { return 0; }

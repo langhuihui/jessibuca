@@ -1,0 +1,1 @@
+/mnt/d/emsdk/emscripten/1.38.31/em++   -std=c++11    @CMakeFiles/dec265.dir/objects1.rsp  -o dec265.js @CMakeFiles/dec265.dir/linklibs.rsp

@@ -1,0 +1,1 @@
+/mnt/d/emsdk/emscripten/1.38.31/em++   -std=c++11    @CMakeFiles/hdrcopy.dir/objects1.rsp  -o hdrcopy.js @CMakeFiles/hdrcopy.dir/linklibs.rsp

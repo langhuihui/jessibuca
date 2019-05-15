@@ -22,8 +22,8 @@
 
         function test() {
             // h5lc.play("ws://10.24.13.58:8088/live/user1.flv", canvas)
-            // h5lc.play("ws://localhost:8080/user1.flv", canvas)
-                h5lc.play("ws://test.qihaipi.com/gnddragon/test.flv", canvas)
+            h5lc.play("ws://localhost:8080/live/user1", canvas)
+            // h5lc.play("ws://test.qihaipi.com/gnddragon/test.flv", canvas)
         }
 
         function disabledMouseWheel(ele) {
@@ -56,8 +56,8 @@
             return true;
         }
         var Module = {
-            print: (function() {
-                return function(text) {
+            print: (function () {
+                return function (text) {
                     if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
                     document.getElementById("logout").innerHTML += text + "<br>";
                     // These replacements are necessary if you render to raw HTML
@@ -68,7 +68,7 @@
                     console.log(text);
                 };
             })(),
-            printErr: function(text) {
+            printErr: function (text) {
                 if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
                 document.getElementById("logout").innerHTML += text + "<br>";
                 if (0) { // XXX disabled for safety typeof dump == 'function') {
@@ -77,7 +77,7 @@
                     console.error(text);
                 }
             },
-            postRun: function() {
+            postRun: function () {
                 h5lc = new H5LiveClient();
                 h5lc.videoBuffer = 1;
             }

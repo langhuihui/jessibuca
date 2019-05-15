@@ -1,0 +1,1 @@
+/mnt/d/emsdk/emscripten/1.38.31/em++   -std=c++11    @CMakeFiles/enc265.dir/objects1.rsp  -o enc265.js @CMakeFiles/enc265.dir/linklibs.rsp

@@ -1,0 +1,43 @@
+# stats available at
+# https://ci.appveyor.com/project/strukturag/libde265
+version: #{build}
+
+os:
+  - Windows Server 2012 R2
+
+environment:
+  matrix:
+    - GENERATOR: "Visual Studio 11 2012"
+    - GENERATOR: "Visual Studio 12 2013"
+
+platform:
+  - x86
+  - x64
+
+configuration:
+  - Debug
+
+build:
+  verbosity: normal
+
+install:
+  - git clone https://github.com/strukturag/libde265-data.git
+
+build_script:
+  - ps: if($env:PLATFORM -eq "x64") { $env:CMAKE_GEN_SUFFIX=" Win64" }
+  - cmake "-G%GENERATOR%%CMAKE_GEN_SUFFIX%" -H. -Bbuild
+  - cmake --build build --config %CONFIGURATION%
+
+before_test:
+  - copy /y build\dec265\%CONFIGURATION%\dec265.exe build
+  - copy /y build\enc265\%CONFIGURATION%\enc265.exe build
+  - copy /y build\libde265\%CONFIGURATION%\libde265.dll build
+
+test_script:
+  - build\dec265.exe -q -c -f 100 libde265-data\IDR-only\paris-352x288-intra.bin
+  - build\dec265.exe -t 4 -q -c -f 100 libde265-data\IDR-only\paris-352x288-intra.bin
+  - build\dec265.exe -q -c -f 100 libde265-data\RandomAccess\paris-ra-wpp.bin
+  - build\dec265.exe -t 4 -q -c -f 100 libde265-data\RandomAccess\paris-ra-wpp.bin
+
+artifacts:
+  - path: build

@@ -1,0 +1,32 @@
+
+description of graphical overlays
+---------------------------------
+
+CB - Show Coding Block quadtree structure. Prediction modes are
+     signalled at this level. CBs can be further subdivided into
+     PBs for prediction and TBs for residual transforms.
+
+PB - Show Prediction Block structure. CB blocks may be further
+     subdivided, possibly using asymetric partitionings. This is
+     the level on which motion-compensation and intra-prediction is
+     performed.
+
+TB - Show Transformation Block structure. DCT/DSTs are carried out
+     on this level.
+
+QP - Quantization Parameter shown as greyscale value.
+     Brighter blocks for larger QP values (lower quality).
+
+IntraPred - Show intra prediction mode.
+  * Directional prediction is depicted with a line in the prediction direction
+    (out of 32 possible directions)
+  * Planar prediction is depicted by a square.
+  * DC prediction is depicted by a circle.
+
+PredMode - Show prediction mode.
+  * red:    intra
+  * blue:   inter
+  * green:  skip  = inter mode with no PB subdivision and candidate from merge list
+
+MV - Show motion vectors. Vectors from list L0 are drawn in red,
+     motion vectors from L1 are green. Vectors are magnified by a factor of 4.

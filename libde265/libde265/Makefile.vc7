@@ -1,0 +1,106 @@
+#
+# Makefile for Microsoft Visual Studio 2003
+#
+CFLAGS=/I..\extra /I.. /I.
+CC=cl /nologo
+LINK=link /nologo /subsystem:console
+DEFINES=/DWIN32 /D_WIN32_WINNT=0x0400 /DNDEBUG /DLIBDE265_EXPORTS /D_CRT_SECURE_NO_WARNINGS /DHAVE_SSE4_1 /DNOMINMAX /DHAVE_STDINT_H
+
+CFLAGS=$(CFLAGS) /MT /Ox /Ob2 /Oi /TP /W4 /GL /EHsc
+
+# type conversion, possible loss of data
+CFLAGS=$(CFLAGS) /wd4244
+# unreferenced formal parameter
+CFLAGS=$(CFLAGS) /wd4100
+# local variable is initialized but not referenced
+CFLAGS=$(CFLAGS) /wd4189
+# unreferenced local function has been removed
+CFLAGS=$(CFLAGS) /wd4505
+# padded structures
+CFLAGS=$(CFLAGS) /wd4324
+# conversion signed/unsigned
+CFLAGS=$(CFLAGS) /wd4245
+# comparison signed/unsigned
+CFLAGS=$(CFLAGS) /wd4018 /wd4389
+# possible loss of data with return
+CFLAGS=$(CFLAGS) /wd4267
+# forcing value to bool (performance warning)
+CFLAGS=$(CFLAGS) /wd4800
+
+CFLAGS=$(CFLAGS) $(DEFINES)
+
+OBJS=\
+	alloc_pool.obj \
+	bitstream.obj \
+	cabac.obj \
+	configparam.obj \
+	contextmodel.obj \
+	de265.obj \
+	deblock.obj \
+	decctx.obj \
+	dpb.obj \
+	en265.obj \
+	fallback-dct.obj \
+	fallback-motion.obj \
+	fallback.obj \
+	image.obj \
+	image-io.obj \
+	intrapred.obj \
+	md5.obj \
+	motion.obj \
+	nal.obj \
+	nal-parser.obj \
+	pps.obj \
+	quality.obj \
+	refpic.obj \
+	sao.obj \
+	scan.obj \
+	sei.obj \
+	slice.obj \
+	sps.obj \
+	threads.obj \
+	transform.obj \
+	util.obj \
+	visualize.obj \
+	vps.obj \
+        vui.obj \
+	encoder\encoder-core.obj \
+	encoder\encoder-types.obj \
+	encoder\encoder-context.obj \
+	encoder\encoder-params.obj \
+	encoder\encoder-syntax.obj \
+	encoder\encpicbuf.obj \
+	encoder\sop.obj \
+	encoder\algo\algo.obj \
+	encoder\algo\cb-interpartmode.obj \
+	encoder\algo\cb-intra-inter.obj \
+	encoder\algo\cb-intrapartmode.obj \
+	encoder\algo\cb-mergeindex.obj \
+	encoder\algo\cb-skip.obj \
+	encoder\algo\cb-split.obj \
+	encoder\algo\coding-options.obj \
+	encoder\algo\ctb-qscale.obj \
+	encoder\algo\pb-mv.obj \
+	encoder\algo\tb-intrapredmode.obj \
+	encoder\algo\tb-rateestim.obj \
+	encoder\algo\tb-split.obj \
+	encoder\algo\tb-transform.obj \
+	x86\sse.obj \
+	x86\sse-dct.obj \
+	x86\sse-motion.obj \
+	..\extra\win32cond.obj
+
+all: libde265.dll
+
+.c.obj:
+	$(CC) /c $*.c /Fo$*.obj $(CFLAGS)
+
+.cc.obj:
+	$(CC) /c $*.cc /Fo$*.obj $(CFLAGS)
+
+libde265.dll: $(OBJS)
+	$(LINK) /dll /out:libde265.dll $**
+
+clean:
+	del libde265.dll
+	del $(OBJS)

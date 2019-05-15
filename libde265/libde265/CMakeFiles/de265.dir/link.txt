@@ -1,0 +1,1 @@
+/mnt/d/emsdk/emscripten/1.38.31/emar rc libde265.a  @CMakeFiles/de265.dir/objects1.rsp

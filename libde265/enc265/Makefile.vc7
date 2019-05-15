@@ -1,0 +1,37 @@
+#
+# Makefile for Microsoft Visual Studio 2003
+#
+CFLAGS=/I.. /I..\libde265 /I..\extra
+CC=cl /nologo
+LINK=link /nologo /subsystem:console
+DEFINES=/DWIN32
+
+CFLAGS=$(CFLAGS) /MT /Ob2 /Oi /W4 /EHsc
+CFLAGS=$(CFLAGS) $(DEFINES)
+
+# unreferenced formal parameter
+CFLAGS=$(CFLAGS) /wd4100
+
+
+OBJS=\
+	..\extra\getopt_long.obj \
+	..\extra\getopt.obj \
+	enc265.obj
+
+all: enc265.exe
+
+enc265.obj: enc265.cc
+	$(CC) /c $*.cc /Fo$*.obj /TP $(CFLAGS)
+
+.c.obj:
+	$(CC) /c $*.c /Fo$*.obj $(CFLAGS)
+
+.cc.obj:
+	$(CC) /c $*.cc /Fo$*.obj $(CFLAGS)
+
+enc265.exe: $(OBJS) ..\libde265\libde265.lib
+	$(LINK) /out:enc265.exe $** ..\libde265\libde265.lib
+
+clean:
+	del enc265.exe
+	del $(OBJS)

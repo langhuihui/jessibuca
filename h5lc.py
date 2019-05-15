@@ -1,24 +1,28 @@
 
 #!/usr/bin/python
 
+# import tools.shared as emscripten
 import os
 import sys
 import re
 import json
 import shutil
+import getopt
 from subprocess import Popen, PIPE, STDOUT
-
 exec(open(os.path.expanduser('~/.emscripten'), 'r').read())
-
-sys.path.append(EMSCRIPTEN_ROOT)
-import tools.shared as emscripten
-
+# sys.path.append(EMSCRIPTEN_ROOT)
+opts, args = getopt.getopt(sys.argv[1:], "v:a:o:", ["wasm"])
+args = {}
+for op, value in opts:
+    args[op] = value
+video_codec = '-DUSE_'+(args['-v']).upper() if '-v' in args else ''
+audio_codec = '-DUSE_'+(args['-a']).upper() if '-a' in args else '-DUSE_MP3'
 emcc_args = [
-    #'-m32',
+    # '-m32',
     '-O3',
     '--memory-init-file', '0',
     '--llvm-opts', '3',
-    '-s', 'WASM=0',
+    '-s', 'WASM='+('1' if '--wasm' in args else '0'),
     #'-s', 'CORRECT_SIGNS=1',
     #'-s', 'CORRECT_OVERFLOWS=1',
     '-s', 'TOTAL_MEMORY=67108864',
@@ -32,23 +36,37 @@ emcc_args = [
     # '--llvm-lto','1',
     '-s', 'NO_EXIT_RUNTIME=1',
     '--bind',
-    #'-Ispeex-1.2rc2/include',
+    '-Ispeex-1.2rc2/include',
     '-IBroadway', '-I.',
-    #'-I../libid3tag',
-    # '-Iffmpeg/include',
-    '-DUSE_MP3',
-    #'-DUSE_LIBDE265',
+    # '-I../libid3tag',
+    '-Iffmpeg/include',
+    '-Ilibde265',
+    video_codec, audio_codec,
+    # '-DUSE_LIBDE265',
     # '-DUSE_AAC',
     # '-DUSE_FFMPEG',
-    '--js-library', 'H5LiveClient.js'
+    '--js-library', 'H5LiveClient.js', '-s ERROR_ON_UNDEFINED_SYMBOLS=0'
 ]
 
-print 'build'
+print 'building...'
+output_file = args['-o'] if '-o' in args else 'public/H5LiveClient.js'
 
-object_files = ['mp3.bc', 'avc.bc', 'aac.bc', 'ffmpeg.bc']
+object_files = []
+if video_codec == '-DUSE_LIBDE265':
+    object_files.append('libde265.bc')
+elif video_codec == '-DUSE_FFMPEG':
+    object_files.append('ffmpeg.bc')
+else:
+    object_files.append('avc.bc')
+if audio_codec == '-DUSE_AAC':
+    object_files.append('aac.bc')
+else:
+    object_files.append('mp3.bc')
+print object_files
+# emscripten.Building.emcc('H5LiveClient.cpp', [os.path.join(
+#     'obj', x) for x in object_files]+emcc_args, output_file)
 object_files = [os.path.join('obj', x) for x in object_files]
-
 os.system('emcc H5LiveClient.cpp ' +
-          (' '.join(object_files+emcc_args)) + ' -o public/H5LiveClient.js')
+          (' '.join(object_files+emcc_args)) + ' -o '+output_file)
 
 print 'done'
