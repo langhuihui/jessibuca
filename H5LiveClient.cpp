@@ -250,7 +250,6 @@ struct H5LCBase
             }
             else
             {
-                emscripten_log(0, "play timestamp:%d", _timestamp);
                 videoDecoder->decode(data);
             }
         }
