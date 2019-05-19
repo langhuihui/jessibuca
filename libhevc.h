@@ -3,7 +3,6 @@
 #include "iv.h"
 #include "ivd.h"
 #include "ihevcd_cxa.h"
-#define asm(x) EM_ASM(x)
 #define EXECUTE(ip, op, ...)                                      \
     if (ihevcd_cxa_api_function(codec_obj, ip, op) != IV_SUCCESS) \
         printf(__VA_ARGS__);
@@ -19,6 +18,7 @@ void ihevca_aligned_free(void *pv_ctxt, void *pv_buf)
     free(pv_buf);
     return;
 }
+
 class Libhevc : public VideoDecoder
 {
 public:

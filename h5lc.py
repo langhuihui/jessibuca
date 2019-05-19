@@ -37,6 +37,7 @@ emcc_args = [
     '-s', 'NO_EXIT_RUNTIME=1',
     '--bind',
     '-I.', '-IBroadway',
+
     video_codec, audio_codec,
     # '-DUSE_LIBDE265',
     # '-DUSE_AAC',
@@ -49,6 +50,7 @@ output_file = args['-o'] if '-o' in args else 'public/H5LiveClient.js'
 
 object_files = []
 if video_codec == '-DUSE_LIBHEVC':
+    emcc_args.append('-Dasm=printf')
     emcc_args.append('-Ilibhevc/decoder')
     emcc_args.append('-Ilibhevc/common')
     object_files.append('libhevc.bc')
