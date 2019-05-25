@@ -45,7 +45,7 @@ public:
         ihevcd_cxa_create_ip_t s_create_ip;
         ihevcd_cxa_create_op_t s_create_op;
         s_create_ip.s_ivd_create_ip_t.e_cmd = IVD_CMD_CREATE;
-        s_create_ip.s_ivd_create_ip_t.u4_share_disp_buf = 1;
+        s_create_ip.s_ivd_create_ip_t.u4_share_disp_buf = 0;
         s_create_ip.s_ivd_create_ip_t.e_output_format = IV_YUV_420P;
         s_create_ip.s_ivd_create_ip_t.pf_aligned_alloc = ihevca_aligned_malloc;
         s_create_ip.s_ivd_create_ip_t.pf_aligned_free = ihevca_aligned_free;
@@ -68,22 +68,6 @@ public:
         free((void *)p_yuv[0]);
     }
 
-    // void setNumOfCores(UWORD32 u4_num_cores)
-    // {
-    //     ihevcd_cxa_ctl_set_num_cores_ip_t s_ctl_set_cores_ip = {
-    //         sizeof(ihevcd_cxa_ctl_set_num_cores_ip_t), IVD_CMD_VIDEO_CTL, (IVD_CONTROL_API_COMMAND_TYPE_T)IHEVCD_CXA_CMD_CTL_SET_NUM_CORES, u4_num_cores};
-    //     ihevcd_cxa_ctl_set_num_cores_op_t s_ctl_set_cores_op = {sizeof(ihevcd_cxa_ctl_set_num_cores_op_t)};
-    //     EXECUTE(&s_ctl_set_cores_ip, &s_ctl_set_cores_op, "\nError in setting number of cores")
-    // }
-    // void setPocessor(IVD_ARCH_T arch, IVD_SOC_T soc)
-    // {
-    //     ihevcd_cxa_ctl_set_processor_ip_t s_ctl_set_num_processor_ip = {
-    //         sizeof(ihevcd_cxa_ctl_set_processor_ip_t), IVD_CMD_VIDEO_CTL, (IVD_CONTROL_API_COMMAND_TYPE_T)IHEVCD_CXA_CMD_CTL_SET_PROCESSOR,
-    //         arch, soc};
-    //     ihevcd_cxa_ctl_set_processor_op_t s_ctl_set_num_processor_op = {
-    //         sizeof(ihevcd_cxa_ctl_set_processor_op_t)};
-    //     EXECUTE(&s_ctl_set_num_processor_ip, &s_ctl_set_num_processor_op, "\nError in setting Processor type")
-    // }
     void decodeHeader(MemoryStream &data, int codec_id) override
     {
         CALL_API(ivd_ctl_set_config, "\nError in setting the codec in header decode mode", IVD_CMD_VIDEO_CTL, IVD_CMD_CTL_SETPARAMS, IVD_DECODE_HEADER, STRIDE, IVD_SKIP_NONE, IVD_DISPLAY_FRAME_OUT)
@@ -132,6 +116,6 @@ public:
             s_video_decode_ip.u4_num_Bytes -= s_video_decode_op.u4_num_bytes_consumed;
             s_video_decode_ip.pv_stream_buffer = (UWORD8 *)s_video_decode_ip.pv_stream_buffer + s_video_decode_op.u4_num_bytes_consumed;
             decodeYUV420();
-        } while (s_video_decode_op.u4_num_bytes_consumed);
+        } while (s_video_decode_op.u4_num_Bytes);
     }
 };
