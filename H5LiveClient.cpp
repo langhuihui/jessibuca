@@ -28,12 +28,13 @@ struct H5LCBase
     val wrapped;
     bool flvHeadRead;
     MemoryStream buffer;
-    AudioDecoder *audioDecoder = nullptr;
-    VideoDecoder *videoDecoder = nullptr;
+    AudioDecoder audioDecoder;
+    VIDEO_DECODER videoDecoder;
     queue<VideoPacket> videoBuffers;
     bool bufferIsPlaying = false;
     int videoTimeoutId = 0;
     bool waitFirstVideo = true;
+    bool waitFirstAudio = true;
     clock_t lastDataTime = 0;
     int bytesCount = 0;
     PROP(isPlaying, bool)
@@ -43,8 +44,7 @@ struct H5LCBase
     PROP(bps, double)
     H5LCBase(val &&v) : wrapped(forward<val>(v)), isPlaying(false), flvMode(false), flvHeadRead(false), audioBuffer(12)
     {
-        videoDecoder = new VIDEO_DECODER();
-        videoDecoder->jsObject = &wrapped;
+        videoDecoder.jsObject = &wrapped;
     }
     template <typename... Args>
     H5LCBase(Args &&... args) : wrapped(val::undefined())
@@ -54,9 +54,6 @@ struct H5LCBase
     {
         val::global("clearTimeout")(videoTimeoutId);
         emscripten_log(0, "FlvDecoder release!\n");
-
-        if (audioDecoder)
-            delete audioDecoder;
     }
 
     void $play(const string &url)
@@ -68,7 +65,7 @@ struct H5LCBase
         isPlaying = true;
         bool webgl = wrapped["webGLCanvas"].call<bool>("isWebGL");
         emscripten_log(0, "webgl:%s", webgl ? "true" : "false");
-        videoDecoder->webgl = webgl;
+        videoDecoder.webgl = webgl;
         flvMode = url.find(".flv") != string::npos;
 
         // #define WS_PREFIX "ws://test.qihaipi.com/gnddragon/"
@@ -167,7 +164,7 @@ struct H5LCBase
         unsigned char flag = 0;
         ms.readB<1>(flag);
         auto audioType = flag >> 4;
-        if (!audioDecoder)
+        if (waitFirstAudio)
         {
             int channels = (flag & 1) + 1;
             int rate = (flag >> 2) & 3;
@@ -196,17 +193,14 @@ struct H5LCBase
                 break;
             }
         }
-        if (audioDecoder)
-        {
-            if (audioDecoder->decode(audioType, ms))
-                call<void>("playAudio");
-        }
+        if (!waitFirstAudio && audioDecoder.decode(audioType, ms))
+            call<void>("playAudio");
     }
     void initAudio(int frameCount, int samplerate, int channels)
     {
-        if (!audioDecoder)
-            audioDecoder = new AudioDecoder(frameCount * channels * 2);
-        call<void>("initAudio", frameCount, samplerate, channels, (int)audioDecoder->outputBuffer >> 1);
+        waitFirstAudio = false;
+        audioDecoder.init(frameCount * channels * 2);
+        call<void>("initAudio", frameCount, samplerate, channels, (int)audioDecoder.outputBuffer >> 1);
     }
     void decodeVideo(clock_t _timestamp, MemoryStream &&data)
     {
@@ -232,25 +226,27 @@ struct H5LCBase
 
             if (frame_type == 1 && avc_packet_type == 0)
             {
-                videoDecoder->decodeHeader(data, codec_id);
+                videoDecoder.decodeHeader(data, codec_id);
                 waitFirstVideo = false;
                 emscripten_log(0, "video info set!");
             }
         }
         else if (avc_packet_type == 1)
         {
+            if (_timestamp == 0)
+                return;
             data >>= 5;
             if (videoBuffer && (bufferIsPlaying || checkTimeout(_timestamp)))
             {
                 videoBuffers.emplace(_timestamp, forward<MemoryStream>(data));
-                // emscripten_log(0, "push timestamp:%d", _timestamp);
+                emscripten_log(0, "push timestamp:%d", _timestamp);
                 // auto &&info = val::object();
                 // info.set("code", "NetStream.Play.Start");
                 // call<void>("onNetStatus", info);
             }
             else
             {
-                videoDecoder->decode(data);
+                videoDecoder.decode(data);
             }
         }
         else
@@ -266,8 +262,8 @@ struct H5LCBase
             auto &v = videoBuffers.front();
             if (check && checkTimeout(v.timestamp))
                 return;
-            emscripten_log(0, "play timestamp:%d", v.timestamp);
-            videoDecoder->decode(v.data);
+            //emscripten_log(0, "play timestamp:%d", v.timestamp);
+            videoDecoder.decode(v.data);
             videoBuffers.pop();
             check = true;
         }
@@ -304,9 +300,8 @@ struct H5LCBase
         // {
         //     videoBuffers.pop();
         // }
-        videoDecoder->clear();
-        if (audioDecoder)
-            audioDecoder->clear();
+        videoDecoder.clear();
+        audioDecoder.clear();
         videoTimeoutId = 0;
         waitFirstVideo = true;
         bufferIsPlaying = false;

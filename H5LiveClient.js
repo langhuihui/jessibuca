@@ -1,5 +1,5 @@
 mergeInto(LibraryManager.library, {
-    init: function() {
+    init: function () {
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         var context = new window.AudioContext();
         if (/(iPhone|iPad|iPod|iOS|Safari)/i.test(navigator.userAgent)) {
@@ -36,14 +36,14 @@ mergeInto(LibraryManager.library, {
         /**
          * Returns true if the canvas supports WebGL
          */
-        H264bsdCanvas.prototype.isWebGL = function() {
+        H264bsdCanvas.prototype.isWebGL = function () {
             return !!this.contextGL;
         };
 
         /**
          * Create the GL context from the canvas element
          */
-        H264bsdCanvas.prototype.initContextGL = function() {
+        H264bsdCanvas.prototype.initContextGL = function () {
             var canvas = this.canvasElement;
             var gl = null;
 
@@ -76,7 +76,7 @@ mergeInto(LibraryManager.library, {
         /**
          * Initialize GL shader program
          */
-        H264bsdCanvas.prototype.initProgram = function() {
+        H264bsdCanvas.prototype.initProgram = function () {
             var gl = this.contextGL;
 
             var vertexShaderScript = [
@@ -143,7 +143,7 @@ mergeInto(LibraryManager.library, {
         /**
          * Initialize vertex buffers and attach to shader program
          */
-        H264bsdCanvas.prototype.initBuffers = function() {
+        H264bsdCanvas.prototype.initBuffers = function () {
             var gl = this.contextGL;
             var program = this.shaderProgram;
 
@@ -169,7 +169,7 @@ mergeInto(LibraryManager.library, {
         /**
          * Initialize GL textures and attach to shader program
          */
-        H264bsdCanvas.prototype.initTextures = function() {
+        H264bsdCanvas.prototype.initTextures = function () {
             var gl = this.contextGL;
             var program = this.shaderProgram;
 
@@ -192,7 +192,7 @@ mergeInto(LibraryManager.library, {
         /**
          * Create and configure a single texture
          */
-        H264bsdCanvas.prototype.initTexture = function() {
+        H264bsdCanvas.prototype.initTexture = function () {
             var gl = this.contextGL;
 
             var textureRef = gl.createTexture();
@@ -211,7 +211,7 @@ mergeInto(LibraryManager.library, {
          * If this object is using WebGL, the data must be an I420 formatted ArrayBuffer,
          * Otherwise, data must be an RGBA formatted ArrayBuffer.
          */
-        H264bsdCanvas.prototype.drawNextOutputPicture = function(width, height, croppingParams, data) {
+        H264bsdCanvas.prototype.drawNextOutputPicture = function (width, height, croppingParams, data) {
             var gl = this.contextGL;
             if (gl) {
                 this.drawNextOuptutPictureGL(width, height, croppingParams, data);
@@ -223,7 +223,7 @@ mergeInto(LibraryManager.library, {
         /**
          * Draw the next output picture using WebGL
          */
-        H264bsdCanvas.prototype.drawNextOuptutPictureGL = function(width, height, croppingParams, data) {
+        H264bsdCanvas.prototype.drawNextOuptutPictureGL = function (width, height, croppingParams, data) {
             var gl = this.contextGL;
             var texturePosBuffer = this.texturePosBuffer;
             var yTextureRef = this.yTextureRef;
@@ -262,7 +262,7 @@ mergeInto(LibraryManager.library, {
         /**
          * Draw next output picture using ARGB data on a 2d canvas.
          */
-        H264bsdCanvas.prototype.drawNextOuptutPictureRGBA = function(width, height, croppingParams, data) {
+        H264bsdCanvas.prototype.drawNextOuptutPictureRGBA = function (width, height, croppingParams, data) {
             // var canvas = this.canvasElement;
             //var argbData = data;
             //var ctx = canvas.getContext('2d');
@@ -278,54 +278,54 @@ mergeInto(LibraryManager.library, {
         };
         H264bsdCanvas.prototype.ctx2d = null;
         H264bsdCanvas.prototype.imageData = null;
-        H264bsdCanvas.prototype.initRGB = function(width, height) {
+        H264bsdCanvas.prototype.initRGB = function (width, height) {
             this.ctx2d = this.canvasElement.getContext('2d');
             this.imageData = this.ctx2d.getImageData(0, 0, width, height);
-            this.clear = function() {
+            this.clear = function () {
                 this.ctx2d.clearRect(0, 0, width, height)
             };
             //Module.print(this.imageData);
         };
-        H264bsdCanvas.prototype.clear = function() {
+        H264bsdCanvas.prototype.clear = function () {
             this.contextGL.clear(this.contextGL.COLOR_BUFFER_BIT);
         }
         window.WebGLCanvas = H264bsdCanvas;
-        if (!Date.now) Date.now = function() {
+        if (!Date.now) Date.now = function () {
             return new Date().getTime();
         };
         window.H5LiveClient = Module.H5LCBase.extend("H5LC", {
-            __construct: function() {
+            __construct: function () {
                 this.__parent.__construct.call(this, this);
             },
-            __destruct: function() {
+            __destruct: function () {
                 this.__parent.__destruct.call(this);
             },
-            onError: function(err) {
+            onError: function (err) {
                 console.log(this, err)
             },
-            setStartTime: function(offset) {
+            setStartTime: function (offset) {
                 console.log("first timestamp:", offset)
                 var startTime = Date.now() - offset;
-                this.timespan = function(t) {
+                this.timespan = function (t) {
                     return t - (Date.now() - startTime);
                 }
 
                 function playVideo(_this) {
                     _this.decodeVideoBuffer();
                 }
-                this.playVideoBuffer = function(t) {
+                this.playVideoBuffer = function (t) {
                     // console.log("setTimeout:", t);
                     return setTimeout(playVideo, t, this)
                 }
             },
-            timespan: function(t) {
+            timespan: function (t) {
                 this.setStartTime(t);
                 return this.timespan(t);
             },
-            resetTimeSpan:function(){
+            resetTimeSpan: function () {
                 delete this.timespan;
             },
-            play: function(url, canvas, forceNoGL, contextOptions) {
+            play: function (url, canvas, forceNoGL, contextOptions) {
                 if (!this.webGLCanvas || this.webGLCanvas.canvasElement != canvas) {
                     this.webGLCanvas = new H264bsdCanvas(canvas, forceNoGL, contextOptions);
                 }
@@ -337,31 +337,31 @@ mergeInto(LibraryManager.library, {
 
                 function setWebsocket() {
                     this.$play(url);
-                    this.ws.onopen = function() {
+                    this.ws.onopen = function () {
                         reconnectCount = 0;
                         reconnectTime = 2000;
                         console.log("ws open")
                     };
-                    this.ws.onclose = function() {
+                    this.ws.onclose = function () {
                         _this.isPlaying = false;
                         _this.ws = null;
                         _this.$close();
                         if (reconnectCount > 3) return;
                         reconnectCount++;
                         console.warn("ws reconnect after " + (reconnectTime / 1000 >> 0) + " second")
-                        _this.reconnectId = setTimeout(function() {
+                        _this.reconnectId = setTimeout(function () {
                             console.log("ws reconnecting :", reconnectCount);
                             reconnectTime *= 2;
                             setWebsocket.call(_this);
                         }, reconnectTime)
                     };
-                    this.ws.onerror = function() {
+                    this.ws.onerror = function () {
                         console.warn("ws error");
                     };
                 }
                 setWebsocket.call(this);
             },
-            close: function() {
+            close: function () {
                 clearTimeout(this.reconnectId)
                 if (!this.isPlaying) return;
                 console.log('close H5LiverClient')
@@ -375,7 +375,7 @@ mergeInto(LibraryManager.library, {
                 this.$close();
                 delete this.timespan;
             },
-            initAudio: function(frameCount, samplerate, channels, outputPtr) {
+            initAudio: function (frameCount, samplerate, channels, outputPtr) {
                 var isPlaying = false;
                 var audioBuffers = [];
                 var allFrameCount = frameCount * channels;
@@ -383,7 +383,7 @@ mergeInto(LibraryManager.library, {
                 var resampled = samplerate < 22050;
                 var audioBuffer = resampled ? context.createBuffer(channels, frameCount << 1, samplerate << 1) : context.createBuffer(channels, frameCount, samplerate);
                 var audioOutputArray = HEAP16.subarray(outputPtr, outputPtr + allFrameCount);
-                var playNextBuffer = function() {
+                var playNextBuffer = function () {
                     isPlaying = false;
                     if (audioBuffers.length) {
                         playAudio(audioBuffers.shift());
@@ -391,18 +391,18 @@ mergeInto(LibraryManager.library, {
                     if (audioBuffers.length > 1) audioBuffers.shift();
                     //console.log(audioBuffers.length)
                 };
-                var copyAudioOutputArray = resampled ? function(target) {
+                var copyAudioOutputArray = resampled ? function (target) {
                     for (var i = 0; i < allFrameCount; i++) {
                         var j = i << 1;
                         target[j] = target[j + 1] = audioOutputArray[i] / 32768;
                     }
-                } : function(target) {
+                } : function (target) {
                     for (var i = 0; i < allFrameCount; i++) {
 
                         target[i] = audioOutputArray[i] / 32768;
                     }
                 };
-                var copyToCtxBuffer = channels > 1 ? function(fromBuffer) {
+                var copyToCtxBuffer = channels > 1 ? function (fromBuffer) {
                     for (var channel = 0; channel < channels; channel++) {
                         var nowBuffering = audioBuffer.getChannelData(channel);
                         if (fromBuffer) {
@@ -415,12 +415,12 @@ mergeInto(LibraryManager.library, {
                             }
                         }
                     }
-                } : function(fromBuffer) {
+                } : function (fromBuffer) {
                     var nowBuffering = audioBuffer.getChannelData(0);
                     if (fromBuffer) nowBuffering.set(fromBuffer);
                     else copyAudioOutputArray(nowBuffering);
                 };
-                var playAudio = function(fromBuffer) {
+                var playAudio = function (fromBuffer) {
                     if (isPlaying) {
                         var buffer = new Float32Array(resampled ? allFrameCount * 2 : allFrameCount);
                         copyAudioOutputArray(buffer);
@@ -438,11 +438,11 @@ mergeInto(LibraryManager.library, {
                 };
                 this.playAudio = playAudio;
             },
-            setVideoSize: function(w, h, dataPtr) {
-                this.webGLCanvas.canvasElement.width = w;
-                this.webGLCanvas.canvasElement.height = h;
+            setVideoSize: function (w, h, dataPtr) {
+                // this.webGLCanvas.canvasElement.width = w;
+                // this.webGLCanvas.canvasElement.height = h;
                 if (this.webGLCanvas.isWebGL()) {
-                    this.draw = function() {
+                    this.draw = function () {
                         var y = HEAPU32[dataPtr];
                         var u = HEAPU32[dataPtr + 1];
                         var v = HEAPU32[dataPtr + 2];
@@ -453,7 +453,7 @@ mergeInto(LibraryManager.library, {
                 } else {
                     var outputArray = HEAPU8.subarray(dataPtr, dataPtr + (w * h << 2));
                     this.webGLCanvas.initRGB(w, h);
-                    this.draw = function() {
+                    this.draw = function () {
                         this.webGLCanvas.drawNextOutputPicture(w, h, this.croppingParams, outputArray);
                     };
                 }

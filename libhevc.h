@@ -116,6 +116,6 @@ public:
             s_video_decode_ip.u4_num_Bytes -= s_video_decode_op.u4_num_bytes_consumed;
             s_video_decode_ip.pv_stream_buffer = (UWORD8 *)s_video_decode_ip.pv_stream_buffer + s_video_decode_op.u4_num_bytes_consumed;
             decodeYUV420();
-        } while (s_video_decode_op.u4_num_Bytes);
+        } while (s_video_decode_ip.u4_num_Bytes);
     }
 };

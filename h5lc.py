@@ -36,8 +36,8 @@ emcc_args = [
     # '--llvm-lto','1',
     '-s', 'NO_EXIT_RUNTIME=1',
     '--bind',
-    '-I.', '-IBroadway',
-
+    '-I.', '-Ithirdparty/Broadway',
+    '-Ithirdparty',
     video_codec, audio_codec,
     # '-DUSE_LIBDE265',
     # '-DUSE_AAC',
@@ -51,21 +51,21 @@ output_file = args['-o'] if '-o' in args else 'public/H5LiveClient.js'
 object_files = []
 if video_codec == '-DUSE_LIBHEVC':
     emcc_args.append('-Dasm=printf')
-    emcc_args.append('-Ilibhevc/decoder')
-    emcc_args.append('-Ilibhevc/common')
+    emcc_args.append('-Ithirdparty/libhevc/decoder')
+    emcc_args.append('-Ithirdparty/libhevc/common')
     object_files.append('libhevc.bc')
 elif video_codec == '-DUSE_LIBDE265':
-    emcc_args.append('-Ilibde265')
+    emcc_args.append('-Ithirdparty/libde265')
     object_files.append('libde265.bc')
 elif video_codec == '-DUSE_FFMPEG':
-    emcc_args.append('-Iffmpeg/include')
+    emcc_args.append('-Ithirdparty/ffmpeg/include')
     object_files.append('ffmpeg.bc')
 else:
     object_files.append('avc.bc')
 if audio_codec == '-DUSE_AAC':
     object_files.append('aac.bc')
 elif audio_codec == '-DUSE_SPEEX':
-    emcc_args.append('-Ispeex-1.2rc2/include')
+    emcc_args.append('-Ithirdparty/speex-1.2rc2/include')
     object_files.append('libspeex.bc')
 else:
     object_files.append('mp3.bc')
