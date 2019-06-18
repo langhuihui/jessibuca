@@ -229,21 +229,21 @@ mergeInto(LibraryManager.library, {
             var yTextureRef = this.yTextureRef;
             var uTextureRef = this.uTextureRef;
             var vTextureRef = this.vTextureRef;
+            this.contextGL.viewport(0, 0, this.canvasElement.width, this.canvasElement.height);
+            // if (!croppingParams) {
+            //     gl.viewport(0, 0, width, height);
+            // } else {
+            //     gl.viewport(0, 0, croppingParams.width, croppingParams.height);
 
-            if (!croppingParams) {
-                gl.viewport(0, 0, width, height);
-            } else {
-                gl.viewport(0, 0, croppingParams.width, croppingParams.height);
+            //     var tTop = croppingParams.top / height;
+            //     var tLeft = croppingParams.left / width;
+            //     var tBottom = croppingParams.height / height;
+            //     var tRight = croppingParams.width / width;
+            //     var texturePosValues = new Float32Array([tRight, tTop, tLeft, tTop, tRight, tBottom, tLeft, tBottom]);
 
-                var tTop = croppingParams.top / height;
-                var tLeft = croppingParams.left / width;
-                var tBottom = croppingParams.height / height;
-                var tRight = croppingParams.width / width;
-                var texturePosValues = new Float32Array([tRight, tTop, tLeft, tTop, tRight, tBottom, tLeft, tBottom]);
-
-                gl.bindBuffer(gl.ARRAY_BUFFER, texturePosBuffer);
-                gl.bufferData(gl.ARRAY_BUFFER, texturePosValues, gl.DYNAMIC_DRAW);
-            }
+            //     gl.bindBuffer(gl.ARRAY_BUFFER, texturePosBuffer);
+            //     gl.bufferData(gl.ARRAY_BUFFER, texturePosValues, gl.DYNAMIC_DRAW);
+            // }
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, yTextureRef);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width, height, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, data[0]);
@@ -439,8 +439,9 @@ mergeInto(LibraryManager.library, {
                 this.playAudio = playAudio;
             },
             setVideoSize: function (w, h, dataPtr) {
-                // this.webGLCanvas.canvasElement.width = w;
-                // this.webGLCanvas.canvasElement.height = h;
+
+                //this.webGLCanvas.canvasElement.width = w;
+                //this.webGLCanvas.canvasElement.height = h;
                 if (this.webGLCanvas.isWebGL()) {
                     this.draw = function () {
                         var y = HEAPU32[dataPtr];

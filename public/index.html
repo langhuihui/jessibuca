@@ -8,7 +8,7 @@
 </head>
 
 <body>
-    <canvas id="canvas" style="background-color: #0D0E1B"></canvas>
+    <canvas id="canvas" style="background-color: #0D0E1B" width="640" height="352"></canvas>
     <button id="connectbn" style="width: 100px;height: 100px" onclick="test()">播放1</button>
     <button onclick="h5lc.close()" style="width: 100px; height: 100px">结束</button>
     <div id="logout">
@@ -22,7 +22,8 @@
 
         function test() {
             // h5lc.play("ws://10.24.13.58:8088/live/user1.flv", canvas)
-            h5lc.play("ws://localhost:8080/live/user1", canvas)
+            h5lc.play("wss://pulls.1234326.cn/live/L01.flv", canvas)
+            // h5lc.play("ws://localhost:8080/live/user1", canvas)
             // h5lc.play("ws://test.qihaipi.com/gnddragon/test.flv", canvas)
         }
 

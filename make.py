@@ -11,42 +11,42 @@ import getopt
 from subprocess import Popen, PIPE, STDOUT
 exec(open(os.path.expanduser('~/.emscripten'), 'r').read())
 # sys.path.append(EMSCRIPTEN_ROOT)
-opts, args = getopt.getopt(sys.argv[1:], "v:a:o:", ["wasm"])
-args = {}
+opts, args = getopt.getopt(sys.argv[1:], "v:a:o:", [
+                           "wasm", "disable-audio", 'cocos'])
+args = {'-a': 'mp3', '-o': 'public/H5LiveClient.js'}
 for op, value in opts:
     args[op] = value
+
 video_codec = '-DUSE_'+(args['-v']).upper() if '-v' in args else ''
-audio_codec = '-DUSE_'+(args['-a']).upper() if '-a' in args else '-DUSE_MP3'
+audio_codec = '' if '--disable-audio' in args else '-DUSE_' + \
+    (args['-a']).upper()
+sargs = {
+    'USE_PTHREADS':  0 if '--cocos' in args else 1,
+    'WASM': 1 if '--wasm' in args else 0,
+    'TOTAL_MEMORY': 67108864,
+    'ASSERTIONS': 0,
+    'NO_EXIT_RUNTIME': 1,
+    'ERROR_ON_UNDEFINED_SYMBOLS': 0,
+    'DISABLE_EXCEPTION_CATCHING':1
+    # 'INVOKE_RUN':1
+    # 'DEMANGLE_SUPPORT':1
+}
 emcc_args = [
     # '-m32',
     '-O3',
     '--memory-init-file', '0',
-    '--llvm-opts', '3',
-    '-s', 'WASM='+('1' if '--wasm' in args else '0'),
-    #'-s', 'CORRECT_SIGNS=1',
-    #'-s', 'CORRECT_OVERFLOWS=1',
-    '-s', 'TOTAL_MEMORY=67108864',
-    #'-s', 'FAST_MEMORY=' + str(12*1024*1024),
-    #'-s', 'INVOKE_RUN=0',
-    '-s', 'ASSERTIONS=1',
-    #'-s DEMANGLE_SUPPORT=1',
-    # '-s', 'RELOOP=1',
-    #'-s', '''EXPORTED_FUNCTIONS=["_main"]''',
     # '--closure', '1',
     # '--llvm-lto','1',
-    '-s', 'NO_EXIT_RUNTIME=1',
     '--bind',
     '-I.', '-Ithirdparty/Broadway',
     '-Ithirdparty',
     video_codec, audio_codec,
-    # '-DUSE_LIBDE265',
-    # '-DUSE_AAC',
-    # '-DUSE_FFMPEG',
-    '--js-library', 'H5LiveClient.js', '-s ERROR_ON_UNDEFINED_SYMBOLS=0'
-]
+    '--js-library', 'cocos.js' if '--cocos' in args else 'H5LiveClient.js',
+]+["-s "+k+"="+str(v) for k, v in sargs.items()]
 
+# if '--cocos' in args:
+#     emcc_args.append('--post-js cocosCom.js')
 print 'building...'
-output_file = args['-o'] if '-o' in args else 'public/H5LiveClient.js'
 
 object_files = []
 if video_codec == '-DUSE_LIBHEVC':
@@ -67,13 +67,15 @@ if audio_codec == '-DUSE_AAC':
 elif audio_codec == '-DUSE_SPEEX':
     emcc_args.append('-Ithirdparty/speex-1.2rc2/include')
     object_files.append('libspeex.bc')
+elif '--disable-audio' in args:
+    print 'disable-audio'
 else:
     object_files.append('mp3.bc')
 print object_files
 # emscripten.Building.emcc('H5LiveClient.cpp', [os.path.join(
 #     'obj', x) for x in object_files]+emcc_args, output_file)
-object_files = [os.path.join('obj', x) for x in object_files]
+emcc_args = [os.path.join('obj', x) for x in object_files]+emcc_args
 os.system('emcc H5LiveClient.cpp ' +
-          (' '.join(object_files+emcc_args)) + ' -o '+output_file)
+          (' '.join(emcc_args)) + ' -o '+args['-o'])
 
 print 'done'

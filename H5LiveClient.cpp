@@ -239,7 +239,7 @@ struct H5LCBase
             if (videoBuffer && (bufferIsPlaying || checkTimeout(_timestamp)))
             {
                 videoBuffers.emplace(_timestamp, forward<MemoryStream>(data));
-                emscripten_log(0, "push timestamp:%d", _timestamp);
+                //emscripten_log(0, "push timestamp:%d", _timestamp);
                 // auto &&info = val::object();
                 // info.set("code", "NetStream.Play.Start");
                 // call<void>("onNetStatus", info);
