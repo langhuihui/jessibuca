@@ -5,26 +5,134 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>H5LiveClient 1.0</title>
     <meta charset="utf-8" />
+    <style>
+        .btn {
+            display: inline-block;
+            line-height: 1;
+            white-space: nowrap;
+            cursor: pointer;
+            -webkit-appearance: none;
+            text-align: center;
+            box-sizing: border-box;
+            outline: none;
+            margin: 0;
+            transition: .1s;
+            font-weight: 500;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            border-radius: 4px;
+            color: #fff;
+            background-color: #409eff;
+            border-color: #409eff;
+            width: 100%;
+        }
+
+        .btn-danger {
+            color: #fff;
+            background-color: #f56c6c;
+            border-color: #f56c6c;
+        }
+
+        .btn-success {
+            color: #fff;
+            background-color: #67c23a;
+            border-color: #67c23a;
+        }
+
+        .player-wrapper {
+            width: 900px;
+            height: 500px;
+            /*overflow-y: auto;*/
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .btn-wrapper {
+            width: 900px;
+            height: 50px;
+            margin: 0 auto;
+            margin-top: 10px;
+        }
+
+        .player-wrapper canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .logs {
+            border: 1px solid #333;
+            width: 900px;
+            height: 300px;
+            margin: 0 auto;
+            overflow-y: auto;
+            padding: 5px;
+        }
+    </style>
 </head>
 
 <body>
-    <canvas id="canvas" style="background-color: #0D0E1B" width="640" height="352"></canvas>
-    <button id="connectbn" style="width: 100px;height: 100px" onclick="test()">播放1</button>
-    <button onclick="h5lc.close()" style="width: 100px; height: 100px">结束</button>
-    <div id="logout">
+    <div class="player-wrapper">
+        <canvas id="canvas" style="background-color: #0D0E1B"></canvas>
     </div>
+    <div class="btn-wrapper">
+        <div id="playDom">
+            <button class="btn" id="play">播放</button>
+        </div>
+        <div id="stopDom" style="display: none">
+            <button class="btn btn-danger" id="stop">结束</button>
+        </div>
+    </div>
+
+    <div id="logout" class="logs">
+    </div>
+
+    <script src="./ajax.js"></script>
     <script>
         onerror = handleErr;
         var txt = "";
         var h5lc = null;
+        var $play = document.getElementById('play');
+        var $stop = document.getElementById('stop');
+        var $playDom = document.getElementById('playDom');
+        var $stopDom = document.getElementById('stopDom');
         var canvas = document.getElementById("canvas");
-        disabledMouseWheel(canvas)
+        var isPlaying = false;
+        disabledMouseWheel(canvas);
 
-        function test() {
+        $play.addEventListener('click', function () {
+            if (isPlaying) {
+                return;
+            }
+            isPlaying = true;
+            play();
+            $playDom.style.display = 'none';
+            $stopDom.style.display = 'block';
+        });
+
+        $stop.addEventListener('click', function () {
+            if (!isPlaying) {
+                return;
+            }
+
+            isPlaying = false;
+            stop();
+
+            $playDom.style.display = 'block';
+            $stopDom.style.display = 'none';
+        });
+
+        function play() {
             // h5lc.play("ws://10.24.13.58:8088/live/user1.flv", canvas)
-            h5lc.play("wss://pulls.1234326.cn/live/L01.flv", canvas)
             // h5lc.play("ws://localhost:8080/live/user1", canvas)
+            h5lc.play("ws://119.9.118.39:8080/live/user1", canvas)
             // h5lc.play("ws://test.qihaipi.com/gnddragon/test.flv", canvas)
+        }
+
+        function stop() {
+            h5lc.close()
         }
 
         function disabledMouseWheel(ele) {
@@ -56,6 +164,7 @@
             document.getElementById("logout").innerHTML += txt + "<br>";
             return true;
         }
+
         var Module = {
             print: (function () {
                 return function (text) {
@@ -84,7 +193,7 @@
             }
         };
     </script>
-    <script src="264_mp3.js"></script>
+    <script src="./H5LiveClient.js"></script>
 </body>
 
 </html>
