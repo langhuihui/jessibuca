@@ -155,8 +155,9 @@ struct H5LCBase
             break;
             case 10:
             {
-                wrapped["ws"].call<void>("send", "[\"__bandwidth\"]");
+                wrapped["ws"].call<void>("send", val("[\"__bandwidth\"]"));
             }
+            break;
             default:
                 emscripten_log(1, "error type :%d", data.at(0));
                 break;
