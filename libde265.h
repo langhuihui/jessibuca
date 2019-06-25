@@ -33,13 +33,8 @@ public:
 			{
 				//emscripten_log(0, "%d", img);
 				int out_stride;
-				//u8* y = (u8*)de265_get_image_plane(img, 0, &out_stride);
-				//u8* u = (u8*)de265_get_image_plane(img, 1, &out_stride);
-				//u8* v = (u8*)de265_get_image_plane(img, 2, &out_stride);
 				for (int i = 0; i < 3; i++)
 					p_yuv[i] = (u32)de265_get_image_plane(img, i, &out_stride);
-				//videoWidth = de265_get_image_width(img, 0);
-				//videoHeight = de265_get_image_height(img, 0);
 				if (videoWidth == 0)
 					decodeVideoSize(de265_get_image_width(img, 0), de265_get_image_height(img, 0));
 				decodeYUV420();

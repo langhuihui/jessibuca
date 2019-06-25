@@ -77,14 +77,15 @@ mergeInto(LibraryManager.library, {
                 this.updateHash();
                 sprite._state = 114;
                 sprite._material = sprite._renderData._material = this;
+                this.samplerOptions = [{ level: 0 }, { level: 0 }, { level: 0 }]
                 return this
             },
             isWebGL() { return true },
-            drawNextOutputPicture(width, height, croppingParams, data) {
+            drawNextOutputPicture() {
                 this.updateHash(Math.random().toString(36))
-                this.ySampler.updateImage({ level: 0, width, height, image: data[0] })
-                this.uSampler.updateImage({ level: 0, width: width / 2, height: height / 2, image: data[1] })
-                this.vSampler.updateImage({ level: 0, width: width / 2, height: height / 2, image: data[2] })
+                this.ySampler.updateImage(this.samplerOptions[0])
+                this.uSampler.updateImage(this.samplerOptions[1])
+                this.vSampler.updateImage(this.samplerOptions[2])
             }
         })
         Module.print = text => cc.log(text);
@@ -234,12 +235,21 @@ mergeInto(LibraryManager.library, {
                 this.playAudio = playAudio;
             },
             setVideoSize: function (w, h, dataPtr) {
+                const size = w * h;
+                const size4 = size >> 2;
+                const samplerOptions = this.webGLCanvas.samplerOptions
+                samplerOptions[0].width = w
+                samplerOptions[0].height = h
+                samplerOptions[1].width = samplerOptions[2].width = w >> 1
+                samplerOptions[1].height = samplerOptions[2].height = h >> 1
                 this.draw = function () {
                     var y = HEAPU32[dataPtr];
                     var u = HEAPU32[dataPtr + 1];
                     var v = HEAPU32[dataPtr + 2];
-                    var outputArray = [HEAPU8.subarray(y, y + w * h), HEAPU8.subarray(u, u + (w * h >> 2)), HEAPU8.subarray(v, v + (w * h >> 2))];
-                    this.webGLCanvas.drawNextOutputPicture(w, h, this.croppingParams, outputArray);
+                    samplerOptions[0].image = HEAPU8.subarray(y, y + size)
+                    samplerOptions[1].image = HEAPU8.subarray(u, u + size4)
+                    samplerOptions[2].image = HEAPU8.subarray(v, v + size4)
+                    this.webGLCanvas.drawNextOutputPicture();
                 };
             }
         });

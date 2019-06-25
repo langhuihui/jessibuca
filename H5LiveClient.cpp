@@ -153,6 +153,10 @@ struct H5LCBase
                 decodeVideo(ms.readUInt32B(), move(ms));
             }
             break;
+            case 10:
+            {
+                wrapped["ws"].call<void>("send", "[\"__bandwidth\"]");
+            }
             default:
                 emscripten_log(1, "error type :%d", data.at(0));
                 break;
