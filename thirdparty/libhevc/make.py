@@ -27,7 +27,7 @@ emcc_args = [
     '-Icommon/mips',
     '-Idecoder',
     '-Dasm=printf',
-    '-DDEBUG_PRINT'
+    #'-DDEBUG_PRINT'
 ]
 
 
@@ -59,7 +59,7 @@ object_files = compile('common')+compile('decoder') + \
     compile('decoder/mips')+compile('common/mips')
 
 print 'link -> %s' % 'libhevc.bc'
-os.system('emcc '+(' '.join(object_files))+' -o ../obj/libhevc.bc')
+os.system('emcc '+(' '.join(object_files))+' -o ../../obj/libhevc.bc')
 #emscripten.Building.link(object_files, '../obj/h265.bc')
 # print 'link -> %s' % 'MonaClient.bc'
 

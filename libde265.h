@@ -25,6 +25,7 @@ public:
 			auto err = de265_decode(h265DecContext, &more);
 			if (err != DE265_OK)
 			{
+				if (err!=DE265_ERROR_WAITING_FOR_INPUT_DATA)
 				emscripten_log(0, "de265_decode：%d", err);
 				break;
 			}

@@ -21,7 +21,7 @@ video_codec = '-DUSE_'+(args['-v']).upper() if '-v' in args else ''
 audio_codec = '' if '--disable-audio' in args else '-DUSE_' + \
     (args['-a']).upper()
 sargs = {
-    'USE_PTHREADS':  0 if '--cocos' in args else 1,
+    # 'USE_PTHREADS':  0 if '--cocos' in args else 1,
     'WASM': 1 if '--wasm' in args else 0,
     'TOTAL_MEMORY': 67108864,
     'ASSERTIONS': 0,
@@ -63,6 +63,7 @@ elif video_codec == '-DUSE_FFMPEG':
 else:
     object_files.append('avc.bc')
 if audio_codec == '-DUSE_AAC':
+    emcc_args.append('-Ithirdparty/aacDecoder/include')
     object_files.append('aac.bc')
 elif audio_codec == '-DUSE_SPEEX':
     emcc_args.append('-Ithirdparty/speex-1.2rc2/include')

@@ -3,7 +3,7 @@
 #include <speex/speex.h>
 #endif
 #ifdef USE_AAC
-#include "aacDecoder/include/neaacdec.h"
+#include "neaacdec.h"
 // #include "libfdk-aac/libAACdec/include/aacdecoder_lib.h"
 #endif
 #ifdef USE_MP3
@@ -53,6 +53,7 @@ public:
 #endif
 	void init(int bf)
 	{
+		bufferLength = bf;
 		outputBuffer = (u8 *)malloc(bufferLength);
 		emscripten_log(0, "set audio bufferLength:%d", bf);
 	}
