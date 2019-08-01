@@ -2,9 +2,9 @@
 <html>
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>H5LiveClient 1.0</title>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <style>
         .btn {
             display: inline-block;
@@ -57,10 +57,10 @@
             margin-top: 10px;
         }
 
-        .player-wrapper canvas {
-            width: 100%;
-            height: 100%;
-        }
+        /*.player-wrapper canvas {*/
+        /*    width: 100%;*/
+        /*    height: 100%;*/
+        /*}*/
 
         .logs {
             border: 1px solid #333;
@@ -74,126 +74,173 @@
 </head>
 
 <body>
-    <div class="player-wrapper">
-        <canvas id="canvas" style="background-color: #0D0E1B"></canvas>
+<div class="player-wrapper">
+    <canvas id="canvas" style="background-color: #0D0E1B"></canvas>
+</div>
+<div class="btn-wrapper" id="playDom">
+    <button class="btn" id="play">播放</button>
+</div>
+<div class="btn-wrapper btn-wrapper2" id="stopDom" style="display: none">
+    <div>
+        <button class="btn btn-success" id="saveVideo">录制视频</button>
     </div>
-    <div class="btn-wrapper">
-        <div id="playDom">
-            <button class="btn" id="play">播放</button>
-        </div>
-        <div id="stopDom" style="display: none">
-            <button class="btn btn-danger" id="stop">结束</button>
-        </div>
+    <div style="margin-top: 5px">
+        <button class="btn btn-danger" id="stop">结束</button>
     </div>
+</div>
 
-    <div id="logout" class="logs">
-    </div>
+<div id="logout" class="logs">
+</div>
 
-    <script src="./ajax.js"></script>
-    <script>
-        onerror = handleErr;
-        var txt = "";
-        var h5lc = null;
-        var $play = document.getElementById('play');
-        var $stop = document.getElementById('stop');
-        var $playDom = document.getElementById('playDom');
-        var $stopDom = document.getElementById('stopDom');
-        var canvas = document.getElementById("canvas");
-        var isPlaying = false;
-        disabledMouseWheel(canvas);
+<script src="./ajax.js"></script>
+<script>
+    onerror = handleErr;
+    var txt = "";
+    var h5lc = null;
+    var $play = document.getElementById('play');
+    var $stop = document.getElementById('stop');
+    var $playDom = document.getElementById('playDom');
+    var $stopDom = document.getElementById('stopDom');
+    var $save = document.getElementById('saveVideo');
+    var canvas = document.getElementById("canvas");
+    var isPlaying = false;
+    disabledMouseWheel(canvas);
+    canvas.width = 900;
+    canvas.height = 500;
 
-        $play.addEventListener('click', function () {
-            if (isPlaying) {
-                return;
+    $play.addEventListener('click', function () {
+        if (isPlaying) {
+            return;
+        }
+        isPlaying = true;
+        play();
+        $playDom.style.display = 'none';
+        $stopDom.style.display = 'block';
+    },false);
+
+    $stop.addEventListener('click', function () {
+        if (!isPlaying) {
+            return;
+        }
+
+        isPlaying = false;
+        stop();
+
+        $playDom.style.display = 'block';
+        $stopDom.style.display = 'none';
+    },false);
+
+    $save.addEventListener('click', function () {
+        if (!isPlaying) {
+            return;
+        }
+
+    }, false);
+
+    function play() {
+
+        let stream = queryParam('stream') || 'user1';
+        // h5lc.play("ws://10.24.13.58:8088/live/user1.flv", canvas)
+        h5lc.play("ws://localhost:8080/live/" + stream, canvas)
+        // h5lc.play("ws://119.9.118.39:8080/live/user1", canvas)
+        // h5lc.play("ws://test.qihaipi.com/gnddragon/test.flv", canvas)
+    }
+
+    function stop() {
+        h5lc.close()
+    }
+
+    function queryParam(name, url) {
+        var search = window.location.search;
+        var qArr = '';
+        var key = {};
+
+        if (url) {
+            qArr = url.split("?")[1].split("&")
+
+        } else {
+            if (!window.location.search) {
+                return
             }
-            isPlaying = true;
-            play();
-            $playDom.style.display = 'none';
-            $stopDom.style.display = 'block';
-        });
-
-        $stop.addEventListener('click', function () {
-            if (!isPlaying) {
-                return;
-            }
-
-            isPlaying = false;
-            stop();
-
-            $playDom.style.display = 'block';
-            $stopDom.style.display = 'none';
-        });
-
-        function play() {
-            // h5lc.play("ws://10.24.13.58:8088/live/user1.flv", canvas)
-            h5lc.play("ws://localhost:8080/live/user1", canvas)
-            // h5lc.play("ws://119.9.118.39:8080/live/user1", canvas)
-            // h5lc.play("ws://test.qihaipi.com/gnddragon/test.flv", canvas)
+            qArr = search.substr(1).split("&")
         }
 
-        function stop() {
-            h5lc.close()
+        for (var i = 0; i < qArr.length; i++) {
+
+            var firstPos = qArr[i].indexOf('=');
+            key[qArr[i].slice(0, firstPos)] = qArr[i].slice(firstPos + 1)
         }
 
-        function disabledMouseWheel(ele) {
-            if (ele.addEventListener) {
-                ele.addEventListener('DOMMouseScroll', scrollFunc, false);
-            } //W3C
-            ele.onmousewheel = scrollFunc; //IE/Opera/Chrome
-        }
-
-        function scrollFunc(evt) {
-            evt = evt || window.event;
-            if (evt.preventDefault) {
-                // Firefox
-                evt.preventDefault();
-                evt.stopPropagation();
+        if (name) {
+            return key[name]
+        } else {
+            if (url) {
+                return key[name]
             } else {
-                // IE
-                evt.cancelBubble = true;
-                evt.returnValue = false;
+                return key
             }
-            return false;
         }
+    }
 
-        function handleErr(msg, url, l) {
-            txt = "There was an error on this page.\n\n";
-            txt += "Error: " + msg + "\n";
-            txt += "URL: " + url + "\n";
-            txt += "Line: " + l + "\n\n";
-            document.getElementById("logout").innerHTML += txt + "<br>";
-            return true;
+    function disabledMouseWheel(ele) {
+        if (ele.addEventListener) {
+            ele.addEventListener('DOMMouseScroll', scrollFunc, false);
+        } //W3C
+        ele.onmousewheel = scrollFunc; //IE/Opera/Chrome
+    }
+
+    function scrollFunc(evt) {
+        evt = evt || window.event;
+        if (evt.preventDefault) {
+            // Firefox
+            evt.preventDefault();
+            evt.stopPropagation();
+        } else {
+            // IE
+            evt.cancelBubble = true;
+            evt.returnValue = false;
         }
+        return false;
+    }
 
-        var Module = {
-            print: (function () {
-                return function (text) {
-                    if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
-                    document.getElementById("logout").innerHTML += text + "<br>";
-                    // These replacements are necessary if you render to raw HTML
-                    //text = text.replace(/&/g, "&amp;");
-                    //text = text.replace(/</g, "&lt;");
-                    //text = text.replace(/>/g, "&gt;");
-                    //text = text.replace('\n', '<br>', 'g');
-                    console.log(text);
-                };
-            })(),
-            printErr: function (text) {
+    function handleErr(msg, url, l) {
+        txt = "There was an error on this page.\n\n";
+        txt += "Error: " + msg + "\n";
+        txt += "URL: " + url + "\n";
+        txt += "Line: " + l + "\n\n";
+        document.getElementById("logout").innerHTML += txt + "<br>";
+        return true;
+    }
+
+    var Module = {
+        print: (function () {
+            return function (text) {
                 if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
                 document.getElementById("logout").innerHTML += text + "<br>";
-                if (0) { // XXX disabled for safety typeof dump == 'function') {
-                    dump(text + '\n'); // fast, straight to the real console
-                } else {
-                    console.error(text);
-                }
-            },
-            postRun: function () {
-                h5lc = new H5LiveClient();
-                h5lc.videoBuffer = 1;
+                // These replacements are necessary if you render to raw HTML
+                //text = text.replace(/&/g, "&amp;");
+                //text = text.replace(/</g, "&lt;");
+                //text = text.replace(/>/g, "&gt;");
+                //text = text.replace('\n', '<br>', 'g');
+                console.log(text);
+            };
+        })(),
+        printErr: function (text) {
+            if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+            document.getElementById("logout").innerHTML += text + "<br>";
+            if (0) { // XXX disabled for safety typeof dump == 'function') {
+                dump(text + '\n'); // fast, straight to the real console
+            } else {
+                console.error(text);
             }
-        };
-    </script>
-    <script src="./264_aac.js"></script>
+        },
+        postRun: function () {
+            h5lc = new H5LiveClient();
+            h5lc.videoBuffer = 1;
+        }
+    };
+</script>
+<script src="./H5LiveClient.js"></script>
 </body>
 
 </html>
