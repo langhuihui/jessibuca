@@ -63,7 +63,7 @@ struct H5LCBase
             call<void>("close");
         }
         isPlaying = true;
-        bool webgl = wrapped["webGLCanvas"].call<bool>("isWebGL");
+        bool webgl = wrapped["isWebGL"].as<bool>();
         emscripten_log(0, "webgl:%s", webgl ? "true" : "false");
         videoDecoder.webgl = webgl;
         flvMode = url.find(".flv") != string::npos;

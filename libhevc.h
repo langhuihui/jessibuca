@@ -111,11 +111,10 @@ public:
         s_video_decode_ip.u4_num_Bytes = len;
         do
         {
-            EXECUTE(&s_video_decode_ip, &s_video_decode_op, "Error in video Frame decode : ret %x Error %x\n", ret,
-                    s_video_decode_op.u4_error_code);
+            ret = ihevcd_cxa_api_function(codec_obj, &s_video_decode_ip, &s_video_decode_op);
             s_video_decode_ip.u4_num_Bytes -= s_video_decode_op.u4_num_bytes_consumed;
             s_video_decode_ip.pv_stream_buffer = (UWORD8 *)s_video_decode_ip.pv_stream_buffer + s_video_decode_op.u4_num_bytes_consumed;
-            decodeYUV420();
+            if (ret==IV_SUCCESS)decodeYUV420();
         } while (s_video_decode_ip.u4_num_Bytes);
     }
 };
