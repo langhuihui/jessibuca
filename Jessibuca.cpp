@@ -23,11 +23,11 @@ int main()
     return 0;
 }
 
-struct H5LCBase
+struct Jessica
 {
     val wrapped;
     bool flvHeadRead;
-    MemoryStream buffer;
+    IOBuffer buffer;
     AudioDecoder audioDecoder;
     VIDEO_DECODER videoDecoder;
     queue<VideoPacket> videoBuffers;
@@ -42,15 +42,15 @@ struct H5LCBase
     PROP(audioBuffer, int)
     PROP(videoBuffer, int)
     PROP(bps, double)
-    H5LCBase(val &&v) : wrapped(forward<val>(v)), isPlaying(false), flvMode(false), flvHeadRead(false), audioBuffer(12)
+	Jessica(val &&v) : wrapped(forward<val>(v)), isPlaying(false), flvMode(false), flvHeadRead(false), audioBuffer(12)
     {
         videoDecoder.jsObject = &wrapped;
     }
     template <typename... Args>
-    H5LCBase(Args &&... args) : wrapped(val::undefined())
+	Jessica(Args &&... args) : wrapped(val::undefined())
     {
     }
-    virtual ~H5LCBase()
+    virtual ~Jessica()
     {
         val::global("clearTimeout")(videoTimeoutId);
         emscripten_log(0, "FlvDecoder release!\n");
@@ -94,23 +94,22 @@ struct H5LCBase
         }
         if (flvMode)
         {
-            buffer << data;
+            buffer << move(data);
             if (!flvHeadRead)
             {
-                if (buffer.length() >= 13)
+                if (buffer.length >= 13)
                 {
                     flvHeadRead = true;
-                    buffer.offset = 13;
-                    buffer.removeConsume();
+                    buffer.p = 13;
                 }
             }
             else
             {
-                while (buffer.length() > 3)
+                while (buffer.length > 3)
                 {
                     u8 type = buffer.readu8();
                     unsigned int length = buffer.readUInt24B();
-                    if (buffer.length() < length + 4 + 7)
+                    if (buffer.length < length + 4 + 7)
                     {
                         buffer <<= 4;
                         break;
@@ -118,20 +117,21 @@ struct H5LCBase
                     unsigned int timestamp = buffer.readUInt24B();
                     u8 ext = buffer.readu8();
                     buffer.readUInt24B();
-                    MemoryStream ms;
-                    ms << buffer.readString(length);
+                    //MemoryStream ms;
+                    //ms << buffer.readString(length);
                     switch (type)
                     {
                     case 0x08:
-                        decodeAudio(timestamp, move(ms));
+                        decodeAudio(timestamp, buffer(0, length));
                         break;
                     case 0x09:
-                        decodeVideo(timestamp, move(ms));
+                        decodeVideo(timestamp, buffer(0, length));
                         break;
                     default:
                         emscripten_log(0, "unknow type: %d", type);
                         break;
                     }
+					buffer >>= length;
                     length = buffer.readUInt32B();
                 }
                 buffer.removeConsume();
@@ -143,14 +143,16 @@ struct H5LCBase
             {
             case 1:
             {
-                MemoryStream ms(data.substr(1));
-                decodeAudio(ms.readUInt32B(), move(ms));
+				IOBuffer b(move(data));
+				b >>= 1;
+                decodeAudio(b.readUInt32B(),b);
             }
             break;
             case 2:
             {
-                MemoryStream ms(data.substr(1));
-                decodeVideo(ms.readUInt32B(), move(ms));
+				IOBuffer b(move(data));
+				b >>= 1;
+                decodeVideo(b.readUInt32B(),b);
             }
             break;
             case 10:
@@ -164,7 +166,7 @@ struct H5LCBase
             }
         }
     }
-    void decodeAudio(clock_t timestamp, MemoryStream &&ms)
+    void decodeAudio(clock_t timestamp, IOBuffer ms)
     {
         unsigned char flag = 0;
         ms.readB<1>(flag);
@@ -207,7 +209,7 @@ struct H5LCBase
         audioDecoder.init(frameCount * channels * 2);
         call<void>("initAudio", frameCount, samplerate, channels, (int)audioDecoder.outputBuffer >> 1);
     }
-    void decodeVideo(clock_t _timestamp, MemoryStream &&data)
+    void decodeVideo(clock_t _timestamp, IOBuffer data)
     {
         u8 avc_packet_type = data[1]; //0为AVCSequence Header，1为AVC NALU，2为AVC end ofsequence
         if (waitFirstVideo)
@@ -243,7 +245,7 @@ struct H5LCBase
             data >>= 5;
             if (videoBuffer && (bufferIsPlaying || checkTimeout(_timestamp)))
             {
-                videoBuffers.emplace(_timestamp, forward<MemoryStream>(data));
+                videoBuffers.emplace(_timestamp, data);
                 //emscripten_log(0, "push timestamp:%d", _timestamp);
                 // auto &&info = val::object();
                 // info.set("code", "NetStream.Play.Start");
@@ -324,16 +326,16 @@ struct H5LCBase
     }
 };
 
-struct H5LiveClient : public wrapper<H5LCBase>
+struct Jessibuca : public wrapper<Jessica>
 {
-    EMSCRIPTEN_WRAPPER(H5LiveClient)
+    EMSCRIPTEN_WRAPPER(Jessibuca)
 };
-#define FUNC(name) function(#name, &H5LCBase::name)
+#define FUNC(name) function(#name, &Jessica::name)
 #undef PROP
-#define PROP(name) property(#name, &H5LCBase::get##name, &H5LCBase::set##name)
-EMSCRIPTEN_BINDINGS(H5LCBase)
+#define PROP(name) property(#name, &Jessica::get##name, &Jessica::set##name)
+EMSCRIPTEN_BINDINGS(Jessica)
 {
-    class_<H5LCBase>("H5LCBase")
+    class_<Jessica>("Jessica")
         .FUNC($play)
         .FUNC(onData)
         .FUNC($close)
@@ -343,7 +345,7 @@ EMSCRIPTEN_BINDINGS(H5LCBase)
         .PROP(audioBuffer)
         .PROP(videoBuffer)
         .PROP(bps)
-        .property("bufferInfo", &H5LCBase::getBufferInfo)
+        .property("bufferInfo", &Jessica::getBufferInfo)
         // .function("invoke", &H5LCBase::invoke, pure_virtual())
-        .allow_subclass<H5LiveClient, val>("H5LiveClient", constructor<val>());
+        .allow_subclass<Jessibuca, val>("Jessibuca", constructor<val>());
 }

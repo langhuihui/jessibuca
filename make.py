@@ -13,7 +13,7 @@ exec(open(os.path.expanduser('~/.emscripten'), 'r').read())
 # sys.path.append(EMSCRIPTEN_ROOT)
 opts, args = getopt.getopt(sys.argv[1:], "v:a:o:", [
                            "wasm", "disable-audio", 'cocos'])
-args = {'-a': 'mp3', '-o': 'public/H5LiveClient.js'}
+args = {'-a': 'mp3', '-o': 'public/Jessibuca.js'}
 for op, value in opts:
     args[op] = value
 
@@ -41,7 +41,7 @@ emcc_args = [
     '-I.', '-Ithirdparty/Broadway',
     '-Ithirdparty',
     video_codec, audio_codec,
-    '--js-library', 'cocos.js' if '--cocos' in args else 'H5LiveClient.js',
+    '--js-library', 'cocos.js' if '--cocos' in args else 'Jessibuca.js',
 ]+["-s "+k+"="+str(v) for k, v in sargs.items()]
 
 # if '--cocos' in args:
@@ -73,10 +73,10 @@ elif '--disable-audio' in args:
 else:
     object_files.append('mp3.bc')
 print object_files
-# emscripten.Building.emcc('H5LiveClient.cpp', [os.path.join(
+# emscripten.Building.emcc('Jessibuca.cpp', [os.path.join(
 #     'obj', x) for x in object_files]+emcc_args, output_file)
 emcc_args = [os.path.join('obj', x) for x in object_files]+emcc_args
-os.system('emcc H5LiveClient.cpp ' +
+os.system('emcc Jessibuca.cpp ' +
           (' '.join(emcc_args)) + ' -o '+args['-o'])
 
 print 'done'

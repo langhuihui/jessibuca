@@ -3,8 +3,8 @@
 struct VideoPacket
 {
 	clock_t timestamp;
-	MemoryStream data;
-	VideoPacket(clock_t t, MemoryStream &&data) : timestamp(t), data(forward<MemoryStream>(data))
+	IOBuffer data;
+	VideoPacket(clock_t t, IOBuffer data) : timestamp(t), data(data)
 	{
 	}
 	VideoPacket() : timestamp(0), data()
@@ -70,30 +70,29 @@ class VideoDecoder
 		jsObject->call<void>("draw");
 	}
 
-	virtual void decodeHeader(MemoryStream &data, int codec_id)
+	virtual void decodeHeader(IOBuffer &data, int codec_id)
 	{
-		int index = data.offset;
 		emscripten_log(0, "codec = %d", codec_id);
 		if (codec_id == 7)
 		{
 			u8 lengthSizeMinusOne = data[9];
 			lengthSizeMinusOne &= 0x03;
 			NAL_unit_length = lengthSizeMinusOne;
-			data.offset = 11 + index;
+			data>>=11;
 			//data.consoleHex();
 			int spsLen = 0;
 			int ppsLen = 0;
 			data.read2B(spsLen);
 			if (spsLen > 0)
 			{
-				_decode((const char *)data, spsLen);
+				_decode(data(0,spsLen));
 				data >>= spsLen;
 			}
 			data >>= 1;
 			data.read2B(ppsLen);
 			if (ppsLen > 0)
 			{
-				_decode((const char *)data, ppsLen);
+				_decode(data(0,ppsLen));
 			}
 		}
 		else if (codec_id == 12)
@@ -101,25 +100,23 @@ class VideoDecoder
 			u8 lengthSizeMinusOne = data[27];
 			lengthSizeMinusOne &= 0x03;
 			NAL_unit_length = lengthSizeMinusOne;
-			data.offset = 31 + index;
+			data>>=31;
 			//data.consoleHex();
 			int vps = 0, sps = 0, pps = 0;
 			data.read2B(vps);
-			_decode((const char *)data, vps);
-			data >>= vps;
-			data >>= 3;
+			_decode(data(0, vps));
+			data >>= vps+3;
 			data.read2B(sps);
-			_decode((const char *)data, sps);
-			data >>= sps;
-			data >>= 3;
+			_decode(data(0, sps));
+			data >>= sps+3;
 			data.read2B(pps);
-			_decode((const char *)data, pps);
+			_decode(data(0, pps));
 		}
 	}
-	virtual void decode(MemoryStream &data)
+	virtual void decode(IOBuffer &data)
 	{
 		int NALUnitLength = 0;
-		while (data.length() > 4)
+		while (data.length > 4)
 		{
 			switch (NAL_unit_length)
 			{
@@ -135,9 +132,9 @@ class VideoDecoder
 			default:
 				data.read1(NALUnitLength);
 			}
-			_decode((const char *)data, NALUnitLength);
+			_decode(data(0, NALUnitLength));
 			data >>= NALUnitLength;
 		}
 	}
-	virtual void _decode(const char *data, int len) = 0;
+	virtual void _decode(IOBuffer data) = 0;
 };

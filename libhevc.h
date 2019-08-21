@@ -68,7 +68,7 @@ public:
         free((void *)p_yuv[0]);
     }
 
-    void decodeHeader(MemoryStream &data, int codec_id) override
+    void decodeHeader(IOBuffer&data, int codec_id) override
     {
         CALL_API(ivd_ctl_set_config, "\nError in setting the codec in header decode mode", IVD_CMD_VIDEO_CTL, IVD_CMD_CTL_SETPARAMS, IVD_DECODE_HEADER, STRIDE, IVD_SKIP_NONE, IVD_DISPLAY_FRAME_OUT)
         s_video_decode_ip.e_cmd = IVD_CMD_VIDEO_DECODE;
@@ -105,10 +105,10 @@ public:
         p_yuv[1] = (u32)(s_video_decode_ip.s_out_buffer.pu1_bufs[1] = (UWORD8 *)p_yuv[0] + s_video_decode_ip.s_out_buffer.u4_min_out_buf_size[0]);
         p_yuv[2] = (u32)(s_video_decode_ip.s_out_buffer.pu1_bufs[2] = (UWORD8 *)p_yuv[1] + s_video_decode_ip.s_out_buffer.u4_min_out_buf_size[1]);
     }
-    void _decode(const char *data, int len) override
+    void _decode(IOBuffer data) override
     {
-        s_video_decode_ip.pv_stream_buffer = (void *)data;
-        s_video_decode_ip.u4_num_Bytes = len;
+        s_video_decode_ip.pv_stream_buffer = (void *)data.point();
+        s_video_decode_ip.u4_num_Bytes = data.length;
         do
         {
             ret = ihevcd_cxa_api_function(codec_obj, &s_video_decode_ip, &s_video_decode_op);

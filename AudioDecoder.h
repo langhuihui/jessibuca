@@ -91,7 +91,7 @@ public:
 	void clear()
 	{
 	}
-	bool decode(int audioType, MemoryStream &data)
+	bool decode(int audioType, IOBuffer&data)
 	{
 		int samplesBytes = 0;
 		switch (audioType)
@@ -117,10 +117,10 @@ public:
 		}
 		return false;
 	}
-	int decodeSpeex(MemoryStream &input, u8 *output)
+	int decodeSpeex(IOBuffer&input, u8 *output)
 	{
 #ifdef USE_SPEEX
-		if (input.length() <= 11)
+		if (input.length <= 11)
 		{
 			memset(output, 0, 640);
 		}
@@ -134,7 +134,7 @@ public:
 #endif
 		return 0;
 	}
-	int decodeAAC(MemoryStream &input, u8 *output)
+	int decodeAAC(IOBuffer&input, u8 *output)
 	{
 #ifdef USE_AAC
 		//0 = AAC sequence header��1 = AAC raw��
@@ -142,7 +142,7 @@ public:
 		{
 			faacDecFrameInfo frame_info;
 
-			auto pcm_data = faacDecDecode(faacHandle, &frame_info, (unsigned char *)input.point(), input.length());
+			auto pcm_data = faacDecDecode(faacHandle, &frame_info, (unsigned char *)input, input.length);
 
 			if (frame_info.error > 0)
 			{
@@ -179,7 +179,7 @@ public:
 			auto config = faacDecGetCurrentConfiguration(faacHandle);
 			config->defObjectType = LTP;
 			faacDecSetConfiguration(faacHandle, config);
-			faacDecInit2(faacHandle, (unsigned char *)input.point(), 4, &samplerate, &channels);
+			faacDecInit2(faacHandle, (unsigned char *)input, 4, &samplerate, &channels);
 			emscripten_log(0, "aac samplerate:%d channels:%d", samplerate, channels);
 		}
 #endif
@@ -201,7 +201,7 @@ public:
 		return sample >> (MAD_F_FRACBITS + 1 - 16);
 	}
 #endif
-	int decodeMP3(MemoryStream &input, u8 *output, u8 *end)
+	int decodeMP3(IOBuffer&input, u8 *output, u8 *end)
 	{
 
 #ifdef USE_MP3

@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>H5LiveClient 1.0</title>
+    <title>Jessibuca 1.0</title>
     <meta charset="utf-8" />
     <style>
         .btn {
@@ -126,7 +126,8 @@
 
         function play() {
             // h5lc.play("ws://10.24.13.58:8088/live/user1.flv", canvas)
-            h5lc.play("ws://localhost:8080/live/user1", canvas)
+            //h5lc.play("ws://3.1.39.135:8080/live/3458", canvas)
+            h5lc.play("ws://localhost/live/user1",canvas)
             // h5lc.play("ws://119.9.118.39:8080/live/user1", canvas)
             // h5lc.play("ws://test.qihaipi.com/gnddragon/test.flv", canvas)
         }
@@ -188,7 +189,7 @@
                 }
             },
             postRun: function () {
-                h5lc = new H5LiveClient();
+                h5lc = new Jessibuca();
                 h5lc.videoBuffer = 1;
             }
         };

@@ -25,7 +25,7 @@ mergeInto(LibraryManager.library, {
         Module.postRun = function () {
             postMessage({ cmd: "init" })
         }
-        Module.H5LiveClient = Module.H5LCBase.extend("H5LC", {
+        Module.Jessibuca = Module.Jessica.extend("Jessibuca", {
             __construct: function () {
                 this.__parent.__construct.call(this, this);
             },
@@ -58,7 +58,7 @@ mergeInto(LibraryManager.library, {
                 delete this.timespan;
             },
             play: function (url) {
-                console.log('H5LiverClient play', url)
+                console.log('Jessibuca play', url)
                 var _this = this;
                 var reconnectCount = 0;
                 var reconnectTime = 2000;
@@ -91,7 +91,7 @@ mergeInto(LibraryManager.library, {
             close: function () {
                 clearTimeout(this.reconnectId)
                 if (!this.isPlaying) return;
-                console.log('close H5LiverClient')
+                console.log('close Jessibuca')
                 this.isPlaying = false;
                 this.ws.onmessage = null;
                 this.ws.onclose = null;
@@ -162,7 +162,7 @@ mergeInto(LibraryManager.library, {
             },
 
         });
-        var decoder = new Module.H5LiveClient()
+        var decoder = new Module.Jessibuca()
         decoder.videoBuffer = 1
         self.onmessage = function (event) {
             var msg = event.data

@@ -15,9 +15,9 @@ public:
 	{
 		de265_free_decoder(h265DecContext);
 	}
-	void _decode(const char *data, int len) override
+	void _decode(IOBuffer data) override
 	{
-		de265_push_NAL(h265DecContext, data, len, 0, nullptr);
+		de265_push_NAL(h265DecContext, (const unsigned char*)data, data.length, 0, nullptr);
 		int more = 1;
 		while (more)
 		{

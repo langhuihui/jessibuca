@@ -31,13 +31,13 @@ class Broadway : public VideoDecoder
 			decInst = nullptr;
 		}
 	}
-	void _decode(const char *data, int len) override
+	void _decode(IOBuffer data) override
 	{
 		u8 naluType = data[0] & 0x1f;
 		// if (!decInst || (naluType != 1 && naluType != 5))
 		// 	return;
 		decInput.pStream = (u8 *)data;
-		decInput.dataLen = len;
+		decInput.dataLen = data.length;
 		u32 i = 0;
 		do
 		{

@@ -44,8 +44,8 @@ class MP3Decoder
     mad_stream inputStream;
     mad_frame frame;
     mad_synth synth;
-    MemoryStream lastInput;
-    MemoryStream mainBuffer;
+	IOBuffer lastInput;
+	IOBuffer mainBuffer;
   public:
     MP3Decoder()
     {
@@ -161,11 +161,11 @@ class MP3Decoder
     }
     int decode()
     {
-        auto startPtr = (unsigned const char *)lastInput.point();
+        auto startPtr = (unsigned const char *)lastInput;
         int size = decodeHeader(startPtr);
         if(size==-1)return -1;
         lastInput >>= size;
-        if (lastInput.length() == 0)
+        if (lastInput.length == 0)
         {
             lastInput<<=size;
             return -1;
@@ -182,29 +182,30 @@ class MP3Decoder
         auto headerSize = main_begin - startPtr;
         int mainSize = size - headerSize;
         /* find main_data of next frame */
-        next_md_begin = get_main_data_begin((const unsigned char *)lastInput.point());
-        int oldSize = mainBuffer.length();
-        mainBuffer << MemoryStream((u8 *)main_begin, mainSize);
+        next_md_begin = get_main_data_begin((const unsigned char *)lastInput);
+        int oldSize = mainBuffer.length;
+        mainBuffer = mainBuffer.append((void*)main_begin, mainSize);
         lastInput.removeConsume();
-        int newSize = mainBuffer.length();
+        int newSize = mainBuffer.length;
         if (oldSize < si.main_data_begin || newSize < next_md_begin)
             return -1;
-        mainBuffer.offset = oldSize - si.main_data_begin;
-        int dataSize = newSize - next_md_begin - mainBuffer.offset;
+        mainBuffer.p = oldSize - si.main_data_begin;
+        int dataSize = newSize - next_md_begin - mainBuffer.p;
         struct mad_bitptr mainStreamBitPtr;
-        mad_bit_init(&mainStreamBitPtr, (unsigned const char *)mainBuffer.point());
+        mad_bit_init(&mainStreamBitPtr, (unsigned const char *)mainBuffer);
         III_decode(&mainStreamBitPtr, &frame, &si, nch);
         mad_synth_frame(&synth, &frame);
         mainBuffer >>= dataSize;
         mainBuffer.removeConsume();
         return 0;
     }
-    int decode(MemoryStream &input)
+    int decode(IOBuffer&input)
     {
         //frame.options = inputStream.options;
-        int oldSize=lastInput.size();
+        /*int oldSize=lastInput.size();
         lastInput.data.resize(lastInput.size()+input.length());
-        memcpy((void*)(lastInput.data.data()+oldSize), input.point(), input.length());
+        memcpy((void*)(lastInput.data.data()+oldSize), input.point(), input.length());*/
+		lastInput << input;
         return decode();
     }
 

@@ -31,6 +31,7 @@
 using namespace std;
 using namespace emscripten;
 #include "MemoryStream.h"
+#include "slice.h"
 //#define USEBUFFERARRAY
 #include "AudioDecoder.h"
 

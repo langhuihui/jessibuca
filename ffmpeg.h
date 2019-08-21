@@ -30,7 +30,7 @@ class FFmpeg : public VideoDecoder
         free(dec_ctx->extradata);
         avcodec_free_context(&dec_ctx);
     }
-    void decodeHeader(MemoryStream &data, int codec_id) override
+    void decodeHeader(IOBuffer& data, int codec_id) override
     {
         codec = avcodec_find_decoder(codec_id == 7 ? AV_CODEC_ID_H264 : AV_CODEC_ID_H265);
         emscripten_log(0, "codec = %d,ptr = %d", codec_id, codec);
@@ -40,7 +40,7 @@ class FFmpeg : public VideoDecoder
         {
             data >>= 5;
             //dec_ctx->extradata = (u8 *)(const u8 *)data;
-            dec_ctx->extradata_size = data.length();
+            dec_ctx->extradata_size = data.length;
             dec_ctx->extradata = (u8 *)malloc(dec_ctx->extradata_size);
             memcpy( dec_ctx->extradata,(const u8 *)data,dec_ctx->extradata_size);
             auto ret = avcodec_open2(dec_ctx, codec, NULL);
@@ -65,14 +65,14 @@ class FFmpeg : public VideoDecoder
             // _decode((const char*)data,pps);
         }
     }
-    void decode(MemoryStream &data) override
+    void decode(IOBuffer&data) override
     {
-        _decode((const char *)data, data.length());
+        _decode(data);
     }
-    void _decode(const char *data, int len) override
+    void _decode(IOBuffer data) override
     {  //emscripten_log(0, "len:%d", len);
         int ret = av_parser_parse2(parser, dec_ctx, &pkt->data, &pkt->size,
-                                   (const u8 *)(data), len, AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
+                                   (const u8 *)(data), data.length, AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
         if (ret >= 0 && pkt->size)
         {
             ret = avcodec_send_packet(dec_ctx, pkt);
