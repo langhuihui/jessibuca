@@ -1,9 +1,9 @@
 
 
-function H5LiveClient(opt) {
+function Jessibuca(opt) {
     this.canvasElement = opt.canvas;
     this.contextOptions = opt.contextOptions;
-
+	this.videoBuffer = opt.videoBuffer || 1
     if (!opt.forceNoGL) this.initContextGL();
 
     if (this.contextGL) {
@@ -18,6 +18,7 @@ function H5LiveClient(opt) {
         switch (msg.cmd) {
             case "init":
                 console.log("decoder worker init")
+				postMessage({cmd:"setVideoBuffer",time:_this.videoBuffer})
                 break
             case "initSize":
                 _this.width = msg.w
@@ -49,21 +50,22 @@ function H5LiveClient(opt) {
         }
     }
 };
-H5LiveClient.prototype.initAudioPlay = function (frameCount, samplerate, channels) {
-    window.AudioContext = window.AudioContext || window.webkitAudioContext;
-    var context = new window.AudioContext();
-    function _unlock() {
-        context.resume();
-        var source = context.createBufferSource();
-        source.buffer = context.createBuffer(1, 1, 22050);
-        source.connect(context.destination);
-        if (source.noteOn)
-            source.noteOn(0);
-        else
-            source.start(0);
-    }
-    document.addEventListener("mousedown", _unlock, true);
-    document.addEventListener("touchend", _unlock, true);
+window.AudioContext = window.AudioContext || window.webkitAudioContext;
+function _unlock() {
+	var context = Jessibuca.prototype.audioContext = Jessibuca.prototype.audioContext|| new window.AudioContext();
+    context.resume();
+    var source = context.createBufferSource();
+    source.buffer = context.createBuffer(1, 1, 22050);
+    source.connect(context.destination);
+    if (source.noteOn)
+        source.noteOn(0);
+    else
+        source.start(0);
+}
+document.addEventListener("mousedown", _unlock, true);
+document.addEventListener("touchend", _unlock, true);
+Jessibuca.prototype.initAudioPlay = function (frameCount, samplerate, channels) {
+	var context = this.audioContext;
     var isPlaying = false;
     var audioBuffers = [];
     if (!context) return false;
@@ -109,14 +111,14 @@ H5LiveClient.prototype.initAudioPlay = function (frameCount, samplerate, channel
 /**
  * Returns true if the canvas supports WebGL
  */
-H5LiveClient.prototype.isWebGL = function () {
+Jessibuca.prototype.isWebGL = function () {
     return !!this.contextGL;
 };
 
 /**
  * Create the GL context from the canvas element
  */
-H5LiveClient.prototype.initContextGL = function () {
+Jessibuca.prototype.initContextGL = function () {
     var canvas = this.canvasElement;
     var gl = null;
 
@@ -149,7 +151,7 @@ H5LiveClient.prototype.initContextGL = function () {
 /**
  * Initialize GL shader program
  */
-H5LiveClient.prototype.initProgram = function () {
+Jessibuca.prototype.initProgram = function () {
     var gl = this.contextGL;
 
     var vertexShaderScript = [
@@ -216,7 +218,7 @@ H5LiveClient.prototype.initProgram = function () {
 /**
  * Initialize vertex buffers and attach to shader program
  */
-H5LiveClient.prototype.initBuffers = function () {
+Jessibuca.prototype.initBuffers = function () {
     var gl = this.contextGL;
     var program = this.shaderProgram;
 
@@ -242,7 +244,7 @@ H5LiveClient.prototype.initBuffers = function () {
 /**
  * Initialize GL textures and attach to shader program
  */
-H5LiveClient.prototype.initTextures = function () {
+Jessibuca.prototype.initTextures = function () {
     var gl = this.contextGL;
     var program = this.shaderProgram;
 
@@ -265,7 +267,7 @@ H5LiveClient.prototype.initTextures = function () {
 /**
  * Create and configure a single texture
  */
-H5LiveClient.prototype.initTexture = function () {
+Jessibuca.prototype.initTexture = function () {
     var gl = this.contextGL;
 
     var textureRef = gl.createTexture();
@@ -284,7 +286,7 @@ H5LiveClient.prototype.initTexture = function () {
  * If this object is using WebGL, the data must be an I420 formatted ArrayBuffer,
  * Otherwise, data must be an RGBA formatted ArrayBuffer.
  */
-H5LiveClient.prototype.drawNextOutputPicture = function (width, height, croppingParams, data) {
+Jessibuca.prototype.drawNextOutputPicture = function (width, height, croppingParams, data) {
     var gl = this.contextGL;
     if (gl) {
         this.drawNextOuptutPictureGL(width, height, croppingParams, data);
@@ -296,7 +298,7 @@ H5LiveClient.prototype.drawNextOutputPicture = function (width, height, cropping
 /**
  * Draw the next output picture using WebGL
  */
-H5LiveClient.prototype.drawNextOuptutPictureGL = function (width, height, croppingParams, data) {
+Jessibuca.prototype.drawNextOuptutPictureGL = function (width, height, croppingParams, data) {
     var gl = this.contextGL;
     var texturePosBuffer = this.texturePosBuffer;
     var yTextureRef = this.yTextureRef;
@@ -335,7 +337,7 @@ H5LiveClient.prototype.drawNextOuptutPictureGL = function (width, height, croppi
 /**
  * Draw next output picture using ARGB data on a 2d canvas.
  */
-H5LiveClient.prototype.drawNextOuptutPictureRGBA = function (width, height, croppingParams, data) {
+Jessibuca.prototype.drawNextOuptutPictureRGBA = function (width, height, croppingParams, data) {
     // var canvas = this.canvasElement;
     //var argbData = data;
     //var ctx = canvas.getContext('2d');
@@ -349,9 +351,9 @@ H5LiveClient.prototype.drawNextOuptutPictureRGBA = function (width, height, crop
         this.ctx2d.putImageData(this.imageData, -croppingParams.left, -croppingParams.top, 0, 0, croppingParams.width, croppingParams.height);
     }
 };
-H5LiveClient.prototype.ctx2d = null;
-H5LiveClient.prototype.imageData = null;
-H5LiveClient.prototype.initRGB = function (width, height) {
+Jessibuca.prototype.ctx2d = null;
+Jessibuca.prototype.imageData = null;
+Jessibuca.prototype.initRGB = function (width, height) {
     this.ctx2d = this.canvasElement.getContext('2d');
     this.imageData = this.ctx2d.getImageData(0, 0, width, height);
     this.clear = function () {
@@ -359,10 +361,10 @@ H5LiveClient.prototype.initRGB = function (width, height) {
     };
     //Module.print(this.imageData);
 };
-H5LiveClient.prototype.close = function () {
+Jessibuca.prototype.close = function () {
     this.decoderWorker.postMessage({ cmd: "close" })
     this.contextGL.clear(this.contextGL.COLOR_BUFFER_BIT);
 }
-H5LiveClient.prototype.play = function (url) {
+Jessibuca.prototype.play = function (url) {
     this.decoderWorker.postMessage({ cmd: "play", url: url, isWebGL: this.isWebGL() })
 }

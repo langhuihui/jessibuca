@@ -176,6 +176,9 @@ mergeInto(LibraryManager.library, {
                     decoder.buffers[1].push(msg.buffers[1])
                     decoder.buffers[2].push(msg.buffers[2])
                     break
+				case "setVideoBuffer":
+					decoder.videoBuffer = msg.cmd*1000
+					break
                 case "close":
                     decoder.close()
                     break

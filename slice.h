@@ -1,4 +1,14 @@
 #pragma once
+#define readu8 readB<1, u8>
+#define readUInt16B readB<2, unsigned short>
+#define readUInt24B readB<3, unsigned int>
+#define readUInt32B readB<4, unsigned int>
+#define readDoubleB readB<8, double>
+#define read1 readB<1>
+#define read2B readB<2>
+#define read3B readB<3>
+#define read4B readB<4>
+#define read8B readB<8>
 #define OPERATOR_CHARS(x) \
 operator const char *()\
 {\
@@ -106,7 +116,7 @@ struct Slice
 	}
 	unsigned char operator[](int i)
 	{
-		return ((unsigned char*)(*sharedStr))[p];
+		return ((unsigned char*)(*sharedStr))[p+i];
 	}
 	Slice operator+(const Slice& right) {
 		return append((void*)right.point(), right.length);

@@ -297,7 +297,7 @@ struct Jessica
     }
     clock_t getTimespan(clock_t t)
     {
-        return call<clock_t>("timespan", t) + videoBuffer * 1000;
+        return call<clock_t>("timespan", t) + videoBuffer;
     }
     void $close()
     {

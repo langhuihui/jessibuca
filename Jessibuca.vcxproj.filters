@@ -47,10 +47,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="js\WebGLCanvas.js" />
     <None Include="make.py" />
     <None Include="public\ff_aac.html" />
     <None Include="Jessibuca.js" />
+    <None Include="cocos.js" />
+    <None Include="public\hevc_aac.html" />
+    <None Include="public\index.html" />
+    <None Include="public\renderer.js" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Jessibuca.cpp">

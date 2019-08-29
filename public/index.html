@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>H5LiveClient 1.0</title>
+    <title>Jessibuca 1.0</title>
     <meta charset="utf-8" />
     <style>
         .btn {
@@ -104,7 +104,7 @@
         disabledMouseWheel(canvas);
         canvas.width = 900;
         canvas.height = 500;
-        var h5lc = new H5LiveClient({ canvas, decoder: "H5LiveClient.js" });
+        var h5lc = new Jessibuca({ canvas, decoder: "ff_aac.js" });
         $play.addEventListener('click', function () {
             if (isPlaying) {
                 return;
@@ -131,8 +131,8 @@
         function play() {
 
             let stream = queryParam('stream') || 'user1';
-            // h5lc.play("ws://3.1.39.135:8080/live/user1.flv", canvas)
-            h5lc.play("ws://localhost:8080/live/" + stream)
+            h5lc.play("ws://3.1.39.135:8080/live/"+stream)
+            //h5lc.play("ws://localhost:8080/live/" + stream)
             // h5lc.play("ws://119.9.118.39:8080/live/user1", canvas)
             // h5lc.play("ws://test.qihaipi.com/gnddragon/test.flv", canvas)
         }

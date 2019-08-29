@@ -90,7 +90,7 @@ mergeInto(LibraryManager.library, {
         })
         Module.print = text => cc.log(text);
         Module.printErr = text => cc.error(text)
-        Module.H5LiveClient = Module.H5LCBase.extend("H5LC", {
+        Module.Jessibuca = Module.Jessica.extend("Jessibuca", {
             __construct: function (component) {
                 cc.dynamicAtlasManager.enabled = false;
                 let sprite = component.node.getComponent(cc.Sprite);
@@ -130,7 +130,7 @@ mergeInto(LibraryManager.library, {
                 var reconnectCount = 0;
                 var reconnectTime = 2000;
 
-                cc.log('H5LiverClient play', url)
+                cc.log('Jessibuca play', url)
 
                 function setWebsocket() {
                     this.$play(url);
@@ -161,7 +161,7 @@ mergeInto(LibraryManager.library, {
             close: function () {
                 clearTimeout(this.reconnectId)
                 if (!this.isPlaying) return;
-                cc.log('close H5LiverClient')
+                cc.log('close Jessibuca')
                 this.isPlaying = false;
                 this.ws.onmessage = null;
                 this.ws.onclose = null;
