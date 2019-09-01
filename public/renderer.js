@@ -3,7 +3,7 @@
 function Jessibuca(opt) {
     this.canvasElement = opt.canvas;
     this.contextOptions = opt.contextOptions;
-	this.videoBuffer = opt.videoBuffer || 1
+    this.videoBuffer = opt.videoBuffer || 1
     if (!opt.forceNoGL) this.initContextGL();
 
     if (this.contextGL) {
@@ -18,7 +18,7 @@ function Jessibuca(opt) {
         switch (msg.cmd) {
             case "init":
                 console.log("decoder worker init")
-				postMessage({cmd:"setVideoBuffer",time:_this.videoBuffer})
+                postMessage({ cmd: "setVideoBuffer", time: _this.videoBuffer })
                 break
             case "initSize":
                 _this.width = msg.w
@@ -33,7 +33,7 @@ function Jessibuca(opt) {
                 break
             case "render":
                 _this.drawNextOutputPicture(_this.width, _this.height, null, msg.output)
-                postMessage({ cmd: "setBuffer", buffer: msg.output }, [msg.output[0].buffer, msg.output[1].buffer, msg.output[2].buffer])
+                postMessage({ cmd: "setBuffer", buffer: msg.output }, '*', [msg.output[0].buffer, msg.output[1].buffer, msg.output[2].buffer])
                 break
             case "initAudio":
                 _this.initAudioPlay(msg.frameCount, msg.samplerate, msg.channels)
@@ -52,7 +52,7 @@ function Jessibuca(opt) {
 };
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 function _unlock() {
-	var context = Jessibuca.prototype.audioContext = Jessibuca.prototype.audioContext|| new window.AudioContext();
+    var context = Jessibuca.prototype.audioContext = Jessibuca.prototype.audioContext || new window.AudioContext();
     context.resume();
     var source = context.createBufferSource();
     source.buffer = context.createBuffer(1, 1, 22050);
@@ -65,7 +65,7 @@ function _unlock() {
 document.addEventListener("mousedown", _unlock, true);
 document.addEventListener("touchend", _unlock, true);
 Jessibuca.prototype.initAudioPlay = function (frameCount, samplerate, channels) {
-	var context = this.audioContext;
+    var context = this.audioContext;
     var isPlaying = false;
     var audioBuffers = [];
     if (!context) return false;
@@ -83,13 +83,21 @@ Jessibuca.prototype.initAudioPlay = function (frameCount, samplerate, channels) 
     var copyToCtxBuffer = channels > 1 ? function (fromBuffer) {
         for (var channel = 0; channel < channels; channel++) {
             var nowBuffering = audioBuffer.getChannelData(channel);
-            for (var i = 0; i < frameCount; i++) {
-                nowBuffering[i] = fromBuffer[i * (channel + 1)];
-            }
+            if (resampled) {
+                for (var i = 0; i < frameCount; i++) {
+                    nowBuffering[i * 2] = nowBuffering[i * 2 + 1] = fromBuffer[i * (channel + 1)] / 32768;
+                }
+            } else
+                for (var i = 0; i < frameCount; i++) {
+                    nowBuffering[i] = fromBuffer[i * (channel + 1)] / 32768;
+                }
         }
     } : function (fromBuffer) {
         var nowBuffering = audioBuffer.getChannelData(0);
-        nowBuffering.set(fromBuffer);
+        for (var i = 0; i < nowBuffering.length; i++) {
+            nowBuffering[i] = fromBuffer[i] / 32768;
+        }
+        // nowBuffering.set(fromBuffer);
     };
     var playAudio = function (fromBuffer) {
         if (isPlaying) {

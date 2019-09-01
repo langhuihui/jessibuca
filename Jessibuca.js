@@ -106,20 +106,21 @@ mergeInto(LibraryManager.library, {
                 var resampled = samplerate < 22050;
                 var audioOutputArray = HEAP16.subarray(outputPtr, outputPtr + allFrameCount);
                 postMessage({ cmd: "initAudio", frameCount: frameCount, samplerate: samplerate, channels: channels })
-                var copyAudioOutputArray = resampled ? function (target) {
-                    for (var i = 0; i < allFrameCount; i++) {
-                        var j = i << 1;
-                        target[j] = target[j + 1] = audioOutputArray[i] / 32768;
-                    }
-                } : function (target) {
-                    for (var i = 0; i < allFrameCount; i++) {
-                        target[i] = audioOutputArray[i] / 32768;
-                    }
-                };
+                // var copyAudioOutputArray = resampled ? function (target) {
+                //     for (var i = 0; i < allFrameCount; i++) {
+                //         var j = i << 1;
+                //         target[j] = target[j + 1] = audioOutputArray[i] / 32768;
+                //     }
+                // } : function (target) {
+                //     for (var i = 0; i < allFrameCount; i++) {
+                //         target[i] = audioOutputArray[i] / 32768;
+                //     }
+                // };
                 this.playAudio = function () {
-                    var buffer = new Float32Array(resampled ? allFrameCount * 2 : allFrameCount);
-                    copyAudioOutputArray(buffer)
-                    postMessage({ cmd: "playAudio", buffer: buffer }, [buffer.buffer])
+                    // var buffer = new Float32Array(resampled ? allFrameCount * 2 : allFrameCount);
+                    // copyAudioOutputArray(buffer)
+                    // postMessage({ cmd: "playAudio", buffer: buffer }, [buffer.buffer])
+                    postMessage({ cmd: "playAudio", buffer: audioOutputArray })
                 }
             },
             setBuffer: function (outputArray) {
@@ -163,7 +164,7 @@ mergeInto(LibraryManager.library, {
 
         });
         var decoder = new Module.Jessibuca()
-        decoder.videoBuffer = 1
+        decoder.videoBuffer = 1000
         self.onmessage = function (event) {
             var msg = event.data
             switch (msg.cmd) {
@@ -176,9 +177,9 @@ mergeInto(LibraryManager.library, {
                     decoder.buffers[1].push(msg.buffers[1])
                     decoder.buffers[2].push(msg.buffers[2])
                     break
-				case "setVideoBuffer":
-					decoder.videoBuffer = msg.cmd*1000
-					break
+                case "setVideoBuffer":
+                    decoder.videoBuffer = msg.cmd * 1000
+                    break
                 case "close":
                     decoder.close()
                     break

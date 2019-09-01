@@ -104,7 +104,10 @@
         disabledMouseWheel(canvas);
         canvas.width = 900;
         canvas.height = 500;
-        var h5lc = new Jessibuca({ canvas, decoder: "ff_aac.js" });
+        let stream = queryParam('stream') || 'user1';
+        let decoder = queryParam('decoder') || 'ff_aac';
+        let source = queryParam('source') || '27.124.42.33';
+        var h5lc = new Jessibuca({ canvas, decoder: decoder + ".js" });
         $play.addEventListener('click', function () {
             if (isPlaying) {
                 return;
@@ -130,8 +133,7 @@
 
         function play() {
 
-            let stream = queryParam('stream') || 'user1';
-            h5lc.play("ws://3.1.39.135:8080/live/"+stream)
+            h5lc.play("ws://" + source + ":8080/live/" + stream)
             //h5lc.play("ws://localhost:8080/live/" + stream)
             // h5lc.play("ws://119.9.118.39:8080/live/user1", canvas)
             // h5lc.play("ws://test.qihaipi.com/gnddragon/test.flv", canvas)

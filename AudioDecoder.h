@@ -36,6 +36,8 @@ class AudioDecoder
 
 public:
 	u8 *outputBuffer;
+	unsigned long samplerate;
+	unsigned char channels;
 #ifdef USE_AAC
 	faacDecHandle faacHandle;
 	// HANDLE_AACDECODER aacHandler;
@@ -91,7 +93,7 @@ public:
 	void clear()
 	{
 	}
-	bool decode(int audioType, IOBuffer&data)
+	bool decode(int audioType, IOBuffer &data)
 	{
 		int samplesBytes = 0;
 		switch (audioType)
@@ -117,7 +119,7 @@ public:
 		}
 		return false;
 	}
-	int decodeSpeex(IOBuffer&input, u8 *output)
+	int decodeSpeex(IOBuffer &input, u8 *output)
 	{
 #ifdef USE_SPEEX
 		if (input.length <= 11)
@@ -134,7 +136,7 @@ public:
 #endif
 		return 0;
 	}
-	int decodeAAC(IOBuffer&input, u8 *output)
+	int decodeAAC(IOBuffer &input, u8 *output)
 	{
 #ifdef USE_AAC
 		//0 = AAC sequence header��1 = AAC raw��
@@ -169,15 +171,13 @@ public:
 		}
 		else
 		{
-			unsigned long samplerate;
-			unsigned char channels;
 
 			// aacDecoder_ConfigRaw(aacHandler,(unsigned char *)input.point(), 4)
 			// auto info = aacDecoder_GetStreamInfo(aacHandler);
 			// samplerate = info->sampleRate;
 			// channels = info->numChannels;
 			auto config = faacDecGetCurrentConfiguration(faacHandle);
-			config->defObjectType = LTP;
+			config->defObjectType = LC;
 			faacDecSetConfiguration(faacHandle, config);
 			faacDecInit2(faacHandle, (unsigned char *)input, 4, &samplerate, &channels);
 			emscripten_log(0, "aac samplerate:%d channels:%d", samplerate, channels);
@@ -201,7 +201,7 @@ public:
 		return sample >> (MAD_F_FRACBITS + 1 - 16);
 	}
 #endif
-	int decodeMP3(IOBuffer&input, u8 *output, u8 *end)
+	int decodeMP3(IOBuffer &input, u8 *output, u8 *end)
 	{
 
 #ifdef USE_MP3

@@ -42,12 +42,12 @@ struct Jessica
     PROP(audioBuffer, int)
     PROP(videoBuffer, int)
     PROP(bps, double)
-	Jessica(val &&v) : wrapped(forward<val>(v)), isPlaying(false), flvMode(false), flvHeadRead(false), audioBuffer(12)
+    Jessica(val &&v) : wrapped(forward<val>(v)), isPlaying(false), flvMode(false), flvHeadRead(false), audioBuffer(12)
     {
         videoDecoder.jsObject = &wrapped;
     }
     template <typename... Args>
-	Jessica(Args &&... args) : wrapped(val::undefined())
+    Jessica(Args &&... args) : wrapped(val::undefined())
     {
     }
     virtual ~Jessica()
@@ -131,7 +131,7 @@ struct Jessica
                         emscripten_log(0, "unknow type: %d", type);
                         break;
                     }
-					buffer >>= length;
+                    buffer >>= length;
                     length = buffer.readUInt32B();
                 }
                 buffer.removeConsume();
@@ -143,16 +143,16 @@ struct Jessica
             {
             case 1:
             {
-				IOBuffer b(move(data));
-				b >>= 1;
-                decodeAudio(b.readUInt32B(),b);
+                IOBuffer b(move(data));
+                b >>= 1;
+                decodeAudio(b.readUInt32B(), b);
             }
             break;
             case 2:
             {
-				IOBuffer b(move(data));
-				b >>= 1;
-                decodeVideo(b.readUInt32B(),b);
+                IOBuffer b(move(data));
+                b >>= 1;
+                decodeVideo(b.readUInt32B(), b);
             }
             break;
             case 10:
@@ -190,8 +190,10 @@ struct Jessica
             switch (audioType)
             {
             case 10: //AAC
-                initAudio(audioBuffer * 1024, rate, channels);
-                break;
+                // initAudio(audioBuffer * 1024, rate, channels);
+                audioDecoder.decode(audioType, ms);
+                initAudio(audioBuffer * 1024, audioDecoder.samplerate, audioDecoder.channels);
+                return;
             case 11: //Speex
                 initAudio(50 * 320, 16000, channels);
                 break;
@@ -297,6 +299,10 @@ struct Jessica
     }
     clock_t getTimespan(clock_t t)
     {
+        if (videoBuffers.size() > 4)
+        {
+            videoBuffer = videoBuffer >> 1;
+        }
         return call<clock_t>("timespan", t) + videoBuffer;
     }
     void $close()
