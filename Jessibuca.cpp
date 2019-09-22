@@ -213,38 +213,19 @@ struct Jessica
     }
     void decodeVideo(clock_t _timestamp, IOBuffer data)
     {
-        u8 avc_packet_type = data[1]; //0为AVCSequence Header，1为AVC NALU，2为AVC end ofsequence
         if (waitFirstVideo)
         {
-            u8 frame_type = data[0];
-            int codec_id = frame_type & 0x0f;
-            frame_type = (frame_type >> 4) & 0x0f;
-            if (codec_id == 7)
+            if (videoDecoder.isAVCSequence(data))
             {
-                emscripten_log(0, "got h264 video");
-            }
-            else if (codec_id == 12)
-            {
-                emscripten_log(0, "got h265 video");
-            }
-            else
-            {
-                emscripten_log(0, "Only support video h.264/avc or h.265/hevc codec. actual=%d", codec_id);
-                return;
-            }
-
-            if (frame_type == 1 && avc_packet_type == 0)
-            {
-                videoDecoder.decodeHeader(data, codec_id);
+                videoDecoder.decode(data);
                 waitFirstVideo = false;
                 emscripten_log(0, "video info set!");
             }
         }
-        else if (avc_packet_type == 1)
+        else if (data[1] == 1 || data[1] == 0)
         {
             if (_timestamp == 0)
                 return;
-            data >>= 5;
             if (videoBuffer && (bufferIsPlaying || checkTimeout(_timestamp)))
             {
                 videoBuffers.emplace(_timestamp, data);

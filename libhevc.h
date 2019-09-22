@@ -68,17 +68,17 @@ public:
         free((void *)p_yuv[0]);
     }
 
-    void decodeHeader(IOBuffer&data, int codec_id) override
+    void decodeH265Header(IOBuffer &data) override
     {
         CALL_API(ivd_ctl_set_config, "\nError in setting the codec in header decode mode", IVD_CMD_VIDEO_CTL, IVD_CMD_CTL_SETPARAMS, IVD_DECODE_HEADER, STRIDE, IVD_SKIP_NONE, IVD_DISPLAY_FRAME_OUT)
         s_video_decode_ip.e_cmd = IVD_CMD_VIDEO_DECODE;
         s_video_decode_ip.u4_ts = u4_ip_frm_ts;
         s_video_decode_ip.u4_size = sizeof(ivd_video_decode_ip_t);
         s_video_decode_op.u4_size = sizeof(ivd_video_decode_op_t);
-        u8 lengthSizeMinusOne = data[27];
+        u8 lengthSizeMinusOne = data[22];
         lengthSizeMinusOne &= 0x03;
         NAL_unit_length = lengthSizeMinusOne;
-        data >>= 31;
+        data >>= 26;
         int vps = 0, sps = 0, pps = 0;
         data.read2B(vps);
         s_video_decode_ip.pv_stream_buffer = (void *)data.point();
@@ -114,7 +114,8 @@ public:
             ret = ihevcd_cxa_api_function(codec_obj, &s_video_decode_ip, &s_video_decode_op);
             s_video_decode_ip.u4_num_Bytes -= s_video_decode_op.u4_num_bytes_consumed;
             s_video_decode_ip.pv_stream_buffer = (UWORD8 *)s_video_decode_ip.pv_stream_buffer + s_video_decode_op.u4_num_bytes_consumed;
-            if (ret==IV_SUCCESS)decodeYUV420();
+            if (ret == IV_SUCCESS)
+                decodeYUV420();
         } while (s_video_decode_ip.u4_num_Bytes);
     }
 };

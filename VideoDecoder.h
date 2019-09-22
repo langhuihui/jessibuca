@@ -13,7 +13,7 @@ struct VideoPacket
 };
 class VideoDecoder
 {
-  public:
+public:
 	val *jsObject;
 	u8 *heap;
 	u32 videoWidth;
@@ -70,50 +70,76 @@ class VideoDecoder
 		jsObject->call<void>("draw");
 	}
 
-	virtual void decodeHeader(IOBuffer &data, int codec_id)
+	virtual void decodeH264Header(IOBuffer &data)
 	{
-		emscripten_log(0, "codec = %d", codec_id);
-		if (codec_id == 7)
+		u8 lengthSizeMinusOne = data[4];
+		lengthSizeMinusOne &= 0x03;
+		NAL_unit_length = lengthSizeMinusOne;
+		data >>= 6;
+		//data.consoleHex();
+		int spsLen = 0;
+		int ppsLen = 0;
+		data.read2B(spsLen);
+		if (spsLen > 0)
 		{
-			u8 lengthSizeMinusOne = data[9];
-			lengthSizeMinusOne &= 0x03;
-			NAL_unit_length = lengthSizeMinusOne;
-			data>>=11;
-			//data.consoleHex();
-			int spsLen = 0;
-			int ppsLen = 0;
-			data.read2B(spsLen);
-			if (spsLen > 0)
-			{
-				_decode(data(0,spsLen));
-				data >>= spsLen;
-			}
-			data >>= 1;
-			data.read2B(ppsLen);
-			if (ppsLen > 0)
-			{
-				_decode(data(0,ppsLen));
-			}
+			_decode(data(0, spsLen));
+			data >>= spsLen;
 		}
-		else if (codec_id == 12)
+		data >>= 1;
+		data.read2B(ppsLen);
+		if (ppsLen > 0)
 		{
-			u8 lengthSizeMinusOne = data[27];
-			lengthSizeMinusOne &= 0x03;
-			NAL_unit_length = lengthSizeMinusOne;
-			data>>=31;
-			//data.consoleHex();
-			int vps = 0, sps = 0, pps = 0;
-			data.read2B(vps);
-			_decode(data(0, vps));
-			data >>= vps+3;
-			data.read2B(sps);
-			_decode(data(0, sps));
-			data >>= sps+3;
-			data.read2B(pps);
-			_decode(data(0, pps));
+			_decode(data(0, ppsLen));
 		}
 	}
+	virtual void decodeH265Header(IOBuffer &data)
+	{
+		u8 lengthSizeMinusOne = data[22];
+		lengthSizeMinusOne &= 0x03;
+		NAL_unit_length = lengthSizeMinusOne;
+		data >>= 26;
+		//data.consoleHex();
+		int vps = 0, sps = 0, pps = 0;
+		data.read2B(vps);
+		_decode(data(0, vps));
+		data >>= vps + 3;
+		data.read2B(sps);
+		_decode(data(0, sps));
+		data >>= sps + 3;
+		data.read2B(pps);
+		_decode(data(0, pps));
+	}
+	bool isAVCSequence(IOBuffer &data)
+	{
+		return data[0] >> 4 == 1 && data[1] == 0; //0为AVCSequence Header，1为AVC NALU，2为AVC end ofsequence
+	}
 	virtual void decode(IOBuffer &data)
+	{
+		if (isAVCSequence(data))
+		{
+			int codec_id = data[0] & 0x0F;
+			data >>= 5;
+			emscripten_log(0, "codec = %d", codec_id);
+			switch (codec_id)
+			{
+			case 7:
+				decodeH264Header(data);
+				break;
+			case 12:
+				decodeH265Header(data);
+				break;
+			default:
+				emscripten_log(0, "codec not support: %d", codec_id);
+				break;
+			}
+		}
+		else
+		{
+			data >>= 5;
+			decodeBody(data);
+		}
+	}
+	virtual void decodeBody(IOBuffer &data)
 	{
 		int NALUnitLength = 0;
 		while (data.length > 4)
