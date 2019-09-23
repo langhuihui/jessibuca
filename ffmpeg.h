@@ -8,8 +8,8 @@ class FFmpeg : public VideoDecoder
 {
 public:
     AVCodec *codec;
-    AVCodecParserContext *parser;
-    AVCodecContext *dec_ctx = NULL;
+    AVCodecParserContext *parser = nullptr;
+    AVCodecContext *dec_ctx = nullptr;
     AVFrame *frame;
     AVPacket *pkt;
     FFmpeg() : pkt(av_packet_alloc()), frame(av_frame_alloc())
@@ -25,14 +25,16 @@ public:
     }
     void clear() override
     {
+        videoWidth = 0;
+        videoHeight = 0;
         VideoDecoder::clear();
         av_parser_close(parser);
-        free(dec_ctx->extradata);
+        // free(dec_ctx->extradata);
         avcodec_free_context(&dec_ctx);
     }
     void decodeH264Header(IOBuffer &data) override
     {
-        if (dec_ctx != NULL)
+        if (dec_ctx != nullptr)
             clear();
         codec = avcodec_find_decoder(AV_CODEC_ID_H264);
         parser = av_parser_init(codec->id);
