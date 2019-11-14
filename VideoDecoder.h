@@ -40,7 +40,7 @@ public:
 	{
 		videoWidth = width;
 		videoHeight = height;
-		emscripten_log(0, "canvas:%d,%d", videoWidth, videoHeight);
+		//emscripten_log(0, "canvas:%d,%d", videoWidth, videoHeight);
 		if (webgl)
 		{
 			heap = (u8 *)p_yuv;
@@ -119,7 +119,7 @@ public:
 		{
 			int codec_id = data[0] & 0x0F;
 			data >>= 5;
-			emscripten_log(0, "codec = %d", codec_id);
+			//emscripten_log(0, "codec = %d", codec_id);
 			switch (codec_id)
 			{
 			case 7:

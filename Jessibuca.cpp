@@ -168,6 +168,12 @@ struct Jessica
     }
     void decodeAudio(clock_t timestamp, IOBuffer ms)
     {
+        if (ms[0] == 0xFF && (ms[1] & 0xF0) == 0xF0)
+        {
+            //ADTS 头
+            call<void>("playAudio", int(ms.point()), ms.length);
+            return;
+        }
         unsigned char flag = 0;
         ms.readB<1>(flag);
         auto audioType = flag >> 4;

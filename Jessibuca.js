@@ -123,6 +123,9 @@ mergeInto(LibraryManager.library, {
                     postMessage({ cmd: "playAudio", buffer: audioOutputArray })
                 }
             },
+            playAudio(data, len) {
+                postMessage({ cmd: "playAudio", buffer: HEAP16.subarray(data, data + len) })
+            },
             setBuffer: function (outputArray) {
                 for (var i = 0; i < 3; i++) {
                     var buffer = this.buffers[i]

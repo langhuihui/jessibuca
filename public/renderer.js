@@ -64,6 +64,43 @@ function _unlock() {
 }
 document.addEventListener("mousedown", _unlock, true);
 document.addEventListener("touchend", _unlock, true);
+Jessibuca.prototype.playAudio = function (data) {
+    var context = this.audioContext;
+    var isPlaying = false;
+    if (!context) return false;
+    var audioBuffers = [];
+    var playNextBuffer = function () {
+        isPlaying = false;
+        if (audioBuffers.length) {
+            isPlaying = true;
+            var audioBufferSouceNode = context.createBufferSource();
+            audioBufferSouceNode.buffer = audioBuffers.shift();
+            audioBufferSouceNode.connect(context.destination);
+            audioBufferSouceNode.onended = playNextBuffer;
+            audioBufferSouceNode.start(0);
+        }
+        //if (audioBuffers.length > 1) audioBuffers.shift();
+    };
+    var playAudio = function (data) {
+        console.log(data.buffer[0].toString(16), data.buffer[1].toString(16), data.buffer[2].toString(16))
+        context.decodeAudioData(data.buffer, function (buffer) {//解码成pcm流
+            if (isPlaying) {
+                audioBuffers.push(buffer);
+                return;
+            }
+            isPlaying = true;
+            var audioBufferSouceNode = context.createBufferSource();
+            audioBufferSouceNode.buffer = buffer;
+            audioBufferSouceNode.connect(context.destination);
+            audioBufferSouceNode.onended = playNextBuffer;
+            audioBufferSouceNode.start(0);
+        }, function (e) {
+            alert("Fail to decode the file.");
+        });
+    }
+    this.playAudio = playAudio
+    playAudio(data)
+}
 Jessibuca.prototype.initAudioPlay = function (frameCount, samplerate, channels) {
     var context = this.audioContext;
     var isPlaying = false;
@@ -73,11 +110,11 @@ Jessibuca.prototype.initAudioPlay = function (frameCount, samplerate, channels) 
     var audioBuffer = resampled ? context.createBuffer(channels, frameCount << 1, samplerate << 1) : context.createBuffer(channels, frameCount, samplerate);
     var playNextBuffer = function () {
         isPlaying = false;
+        console.log("~", audioBuffers.length)
         if (audioBuffers.length) {
             playAudio(audioBuffers.shift());
         }
-        if (audioBuffers.length > 1) audioBuffers.shift();
-        //console.log(audioBuffers.length)
+        //if (audioBuffers.length > 1) audioBuffers.shift();
     };
 
     var copyToCtxBuffer = channels > 1 ? function (fromBuffer) {
@@ -101,8 +138,8 @@ Jessibuca.prototype.initAudioPlay = function (frameCount, samplerate, channels) 
     };
     var playAudio = function (fromBuffer) {
         if (isPlaying) {
-
             audioBuffers.push(fromBuffer);
+            console.log(audioBuffers.length)
             return;
         }
         isPlaying = true;

@@ -43,7 +43,7 @@ public:
         dec_ctx->extradata = (u8 *)malloc(dec_ctx->extradata_size);
         memcpy(dec_ctx->extradata, (const u8 *)data, dec_ctx->extradata_size);
         auto ret = avcodec_open2(dec_ctx, codec, NULL);
-        emscripten_log(0, "avcodec_open2:%d", ret);
+        //emscripten_log(0, "avcodec_open2:%d", ret);
     }
     void decodeBody(IOBuffer &data) override
     {

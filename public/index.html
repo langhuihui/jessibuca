@@ -131,14 +131,29 @@
         }, false);
 
 
-        function play() {
-
-            h5lc.play("ws://" + source + ":8080/live/" + stream)
+        function play(firstResponseIp) {
+            h5lc.play("ws://" + (firstResponseIp || source) + ":8080/live/" + stream)
             //h5lc.play("ws://localhost:8080/live/" + stream)
             // h5lc.play("ws://119.9.118.39:8080/live/user1", canvas)
             // h5lc.play("ws://test.qihaipi.com/gnddragon/test.flv", canvas)
         }
+        function getFastCdnFromList(ipList) {
+            ipList = ipList || [];
+            var firstResponseIp = '';
 
+            for (var i = 0, len = ipList.length; i < len; i++) {
+                var tempIp = ipList[i].name;
+                var reqHref = 'http://' + tempIp + '/test';
+                var request = _ajax.get(reqHref);
+                request.then(function (data) {
+                    if (!firstResponseIp) {
+                        firstResponseIp = tempIp;
+                        // 直接可以播放了。
+                        play(firstResponseIp);
+                    }
+                })
+            }
+        }
         function stop() {
             h5lc.close()
         }
