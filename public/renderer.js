@@ -62,8 +62,20 @@ function _unlock() {
     else
         source.start(0);
 }
-document.addEventListener("mousedown", _unlock, true);
-document.addEventListener("touchend", _unlock, true);
+// document.addEventListener("mousedown", _unlock, true);
+// document.addEventListener("touchend", _unlock, true);
+Jessibuca.prototype.audioEnabled = function (flag) {
+    if (flag) {
+        _unlock()
+        this.audioEnabled = function (flag) {
+            if (flag) {
+                this.audioContext.resume();
+            } else {
+                this.audioContext.suspend();
+            }
+        }
+    }
+}
 Jessibuca.prototype.playAudio = function (data) {
     var context = this.audioContext;
     var isPlaying = false;
