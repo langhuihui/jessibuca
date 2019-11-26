@@ -286,10 +286,10 @@ struct Jessica
     }
     clock_t getTimespan(clock_t t)
     {
-        if (videoBuffers.size() > 4)
-        {
-            videoBuffer = videoBuffer >> 1;
-        }
+        // if (videoBuffers.size() > 4)
+        // {
+        //     videoBuffer = videoBuffer >> 1;
+        // }
         return call<clock_t>("timespan", t) + videoBuffer;
     }
     void $close()

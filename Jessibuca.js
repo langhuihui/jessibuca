@@ -28,6 +28,7 @@ mergeInto(LibraryManager.library, {
         Module.Jessibuca = Module.Jessica.extend("Jessibuca", {
             __construct: function () {
                 this.__parent.__construct.call(this, this);
+                this.audioCache = []
             },
             __destruct: function () {
                 this.__parent.__destruct.call(this);
@@ -124,7 +125,12 @@ mergeInto(LibraryManager.library, {
                 }
             },
             playAudio(data, len) {
-                postMessage({ cmd: "playAudio", buffer: HEAP16.subarray(data, data + len) })
+                var buffer = HEAPU8.subarray(data, data + len);
+                this.audioCache.push(buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.length))
+                if (this.audioCache.length >= this.audioBuffer) {
+                    postMessage({ cmd: "playAudio", buffer: this.audioCache }, this.audioCache)
+                    this.audioCache.length = 0
+                }
             },
             setBuffer: function (outputArray) {
                 for (var i = 0; i < 3; i++) {

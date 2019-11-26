@@ -67,36 +67,48 @@ document.addEventListener("touchend", _unlock, true);
 Jessibuca.prototype.playAudio = function (data) {
     var context = this.audioContext;
     var isPlaying = false;
+    var isDecoding = false;
     if (!context) return false;
     var audioBuffers = [];
-    var playNextBuffer = function () {
-        isPlaying = false;
+    var decodeQueue = []
+    var _this = this
+    var playNextBuffer = function (e) {
+        // isPlaying = false;
         if (audioBuffers.length) {
-            isPlaying = true;
-            var audioBufferSouceNode = context.createBufferSource();
-            audioBufferSouceNode.buffer = audioBuffers.shift();
-            audioBufferSouceNode.connect(context.destination);
-            audioBufferSouceNode.onended = playNextBuffer;
-            audioBufferSouceNode.start(0);
+            playBuffer(audioBuffers.shift())
         }
         //if (audioBuffers.length > 1) audioBuffers.shift();
     };
+    var playBuffer = function (buffer) {
+        isPlaying = true;
+        var audioBufferSouceNode = context.createBufferSource();
+        audioBufferSouceNode.buffer = buffer;
+        audioBufferSouceNode.connect(context.destination);
+        // audioBufferSouceNode.onended = playNextBuffer;
+        audioBufferSouceNode.start();
+        if (!_this.audioInterval) {
+            _this.audioInterval = setInterval(playNextBuffer, buffer.duration * 1000 - 1);
+        }
+        // setTimeout(playNextBuffer, buffer.duration * 1000)
+    }
+    var tryPlay = function (buffer) {
+        if (decodeQueue.length) {
+            context.decodeAudioData(decodeQueue.shift(), tryPlay, console.error);
+        } else {
+            isDecoding = false
+        }
+        if (isPlaying) {
+            audioBuffers.push(buffer);
+        } else {
+            playBuffer(buffer)
+        }
+    }
     var playAudio = function (data) {
-        console.log(data.buffer[0].toString(16), data.buffer[1].toString(16), data.buffer[2].toString(16))
-        context.decodeAudioData(data.buffer, function (buffer) {//解码成pcm流
-            if (isPlaying) {
-                audioBuffers.push(buffer);
-                return;
-            }
-            isPlaying = true;
-            var audioBufferSouceNode = context.createBufferSource();
-            audioBufferSouceNode.buffer = buffer;
-            audioBufferSouceNode.connect(context.destination);
-            audioBufferSouceNode.onended = playNextBuffer;
-            audioBufferSouceNode.start(0);
-        }, function (e) {
-            alert("Fail to decode the file.");
-        });
+        decodeQueue.push(...data)
+        if (!isDecoding) {
+            isDecoding = true
+            context.decodeAudioData(decodeQueue.shift(), tryPlay, console.error);
+        }
     }
     this.playAudio = playAudio
     playAudio(data)
@@ -407,6 +419,9 @@ Jessibuca.prototype.initRGB = function (width, height) {
     //Module.print(this.imageData);
 };
 Jessibuca.prototype.close = function () {
+    if (this.audioInterval) {
+        clearInterval(this.audioInterval)
+    }
     this.decoderWorker.postMessage({ cmd: "close" })
     this.contextGL.clear(this.contextGL.COLOR_BUFFER_BIT);
 }
