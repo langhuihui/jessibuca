@@ -19,6 +19,10 @@ function Jessibuca(opt) {
             case "init":
                 console.log("decoder worker init")
                 postMessage({ cmd: "setVideoBuffer", time: _this.videoBuffer })
+                if (_this.onLoad) {
+                    _this.onLoad()
+                    delete _this.onLoad;
+                }
                 break
             case "initSize":
                 _this.width = msg.w
@@ -32,6 +36,10 @@ function Jessibuca(opt) {
                 }
                 break
             case "render":
+                if (_this.onPlay) {
+                    _this.onPlay()
+                    delete _this.onPlay;
+                }
                 _this.drawNextOutputPicture(_this.width, _this.height, null, msg.output)
                 postMessage({ cmd: "setBuffer", buffer: msg.output }, '*', [msg.output[0].buffer, msg.output[1].buffer, msg.output[2].buffer])
                 break

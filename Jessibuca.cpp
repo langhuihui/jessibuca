@@ -100,7 +100,7 @@ struct Jessica
                 if (buffer.length >= 13)
                 {
                     flvHeadRead = true;
-                    buffer.p = 13;
+                    buffer >>= 13;
                 }
             }
             else
@@ -115,17 +115,18 @@ struct Jessica
                         break;
                     }
                     unsigned int timestamp = buffer.readUInt24B();
-                    u8 ext = buffer.readu8();
-                    buffer.readUInt24B();
-                    //MemoryStream ms;
-                    //ms << buffer.readString(length);
+                    //u8 ext = buffer.readu8();
+                    // buffer.readUInt24B();
+                    buffer >>= 4;
+                    IOBuffer payload;
+                    payload << IOBuffer(&buffer, 0, length);
                     switch (type)
                     {
                     case 0x08:
-                        decodeAudio(timestamp, buffer(0, length));
+                        decodeAudio(timestamp, payload);
                         break;
                     case 0x09:
-                        decodeVideo(timestamp, buffer(0, length));
+                        decodeVideo(timestamp, payload);
                         break;
                     default:
                         emscripten_log(0, "unknow type: %d", type);
