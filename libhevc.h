@@ -84,18 +84,21 @@ public:
         s_video_decode_ip.pv_stream_buffer = (void *)data.point();
         s_video_decode_ip.u4_num_Bytes = vps;
         EXECUTE(&s_video_decode_ip, &s_video_decode_op, "\nError in header vps decode %x", s_video_decode_op.u4_error_code)
+        //emscripten_log(0, "vps %d", s_video_decode_op.u4_num_bytes_consumed);
         data >>= vps;
         data >>= 3;
         data.read2B(sps);
         s_video_decode_ip.pv_stream_buffer = (void *)data.point();
         s_video_decode_ip.u4_num_Bytes = sps;
         EXECUTE(&s_video_decode_ip, &s_video_decode_op, "\nError in header sps decode %x", s_video_decode_op.u4_error_code)
+        //emscripten_log(0, "sps %d", s_video_decode_op.u4_num_bytes_consumed);
         data >>= sps;
         data >>= 3;
         data.read2B(pps);
         s_video_decode_ip.pv_stream_buffer = (void *)data.point();
         s_video_decode_ip.u4_num_Bytes = pps;
         EXECUTE(&s_video_decode_ip, &s_video_decode_op, "\nError in header pps decode %x", s_video_decode_op.u4_error_code)
+        //emscripten_log(0, "pps %d", s_video_decode_op.u4_num_bytes_consumed);
         decodeVideoSize(s_video_decode_op.u4_pic_wd, s_video_decode_op.u4_pic_ht);
         CALL_API(ivd_ctl_set_config, "\nError in setting the codec in frame decode mode", IVD_CMD_VIDEO_CTL, IVD_CMD_CTL_SETPARAMS, IVD_DECODE_FRAME, STRIDE, IVD_SKIP_NONE, IVD_DISPLAY_FRAME_OUT)
         s_video_decode_ip.s_out_buffer.u4_num_bufs = 3;

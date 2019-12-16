@@ -152,7 +152,7 @@ mergeInto(LibraryManager.library, {
                 this.buffers = [[], [], []]
                 var size = w * h
                 if (this.isWebGL) {
-                    this.draw = function () {
+                    this.draw = function (compositionTime) {
                         var y = HEAPU32[dataPtr];
                         var u = HEAPU32[dataPtr + 1];
                         var v = HEAPU32[dataPtr + 2];
@@ -160,7 +160,7 @@ mergeInto(LibraryManager.library, {
                         var outputArray = [HEAPU8.subarray(y, y + size), HEAPU8.subarray(u, u + (size >> 2)), HEAPU8.subarray(v, v + (size >> 2))];
                         this.setBuffer(outputArray)
                         // var outputArray = [new Uint8Array(this.buffer, 0, size), new Uint8Array(this.buffer, size, size >> 2), new Uint8Array(this.buffer, size + (size >> 2), size >> 2)]
-                        postMessage({ cmd: "render", output: outputArray }, [outputArray[0].buffer, outputArray[1].buffer, outputArray[2].buffer])
+                        postMessage({ cmd: "render", output: outputArray, compositionTime: compositionTime }, [outputArray[0].buffer, outputArray[1].buffer, outputArray[2].buffer])
                     };
                 } else {
                     var outputArray = HEAPU8.subarray(dataPtr, dataPtr + (w * h << 2));

@@ -11,15 +11,15 @@ import getopt
 from subprocess import Popen, PIPE, STDOUT
 exec(open(os.path.expanduser('~/.emscripten'), 'r').read())
 # sys.path.append(EMSCRIPTEN_ROOT)
-opts, args = getopt.getopt(sys.argv[1:], "v:a:o:", [
-                           "wasm", "disable-audio", 'cocos'])
-args = {'-a': 'mp3', '-o': 'public/Jessibuca.js'}
+opts, args = getopt.getopt(sys.argv[1:], "v:a:o:", ["wasm", 'cocos'])
+args = {'-o': 'public/Jessibuca.js'}
 for op, value in opts:
+    if value == 'ff':
+        value = 'ffmpeg'
     args[op] = value
 
 video_codec = '-DUSE_'+(args['-v']).upper() if '-v' in args else ''
-audio_codec = '' if '--disable-audio' in args else '-DUSE_' + \
-    (args['-a']).upper()
+audio_codec = '-DUSE_'+(args['-a']).upper() if '-a' in args else ''
 sargs = {
     # 'USE_PTHREADS':  0 if '--cocos' in args else 1,
     'WASM': 1 if '--wasm' in args else 0,
@@ -27,7 +27,7 @@ sargs = {
     'ASSERTIONS': 0,
     'NO_EXIT_RUNTIME': 1,
     'ERROR_ON_UNDEFINED_SYMBOLS': 0,
-    'DISABLE_EXCEPTION_CATCHING':1
+    'DISABLE_EXCEPTION_CATCHING': 1
     # 'INVOKE_RUN':1
     # 'DEMANGLE_SUPPORT':1
 }
@@ -68,9 +68,7 @@ if audio_codec == '-DUSE_AAC':
 elif audio_codec == '-DUSE_SPEEX':
     emcc_args.append('-Ithirdparty/speex-1.2rc2/include')
     object_files.append('libspeex.bc')
-elif '--disable-audio' in args:
-    print 'disable-audio'
-else:
+elif audio_codec == '-DUSE_MP3':
     object_files.append('mp3.bc')
 print object_files
 # emscripten.Building.emcc('Jessibuca.cpp', [os.path.join(

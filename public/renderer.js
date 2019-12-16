@@ -1,5 +1,3 @@
-
-
 function Jessibuca(opt) {
     this.canvasElement = opt.canvas;
     this.contextOptions = opt.contextOptions;
@@ -13,6 +11,10 @@ function Jessibuca(opt) {
     };
     this.decoderWorker = new Worker(opt.decoder || '264_mp3.js')
     var _this = this
+    function draw(output) {
+        _this.drawNextOutputPicture(_this.width, _this.height, null, output)
+        postMessage({ cmd: "setBuffer", buffer: output }, '*', [output[0].buffer, output[1].buffer, output[2].buffer])
+    }
     this.decoderWorker.onmessage = function (event) {
         var msg = event.data
         switch (msg.cmd) {
@@ -40,8 +42,11 @@ function Jessibuca(opt) {
                     _this.onPlay()
                     delete _this.onPlay;
                 }
-                _this.drawNextOutputPicture(_this.width, _this.height, null, msg.output)
-                postMessage({ cmd: "setBuffer", buffer: msg.output }, '*', [msg.output[0].buffer, msg.output[1].buffer, msg.output[2].buffer])
+                if (msg.compositionTime) {
+                    setTimeout(draw, msg.compositionTime, msg.output)
+                } else {
+                    draw(msg.output)
+                }
                 break
             case "initAudio":
                 _this.initAudioPlay(msg.frameCount, msg.samplerate, msg.channels)
