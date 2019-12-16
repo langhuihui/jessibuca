@@ -108,6 +108,14 @@
         let decoder = queryParam('decoder') || 'ff_aac';
         let source = queryParam('source') || '27.124.42.33';
         var h5lc = new Jessibuca({ canvas, decoder: decoder + ".js" });
+        h5lc.onLoad = function () {
+            this.play("ws://" + source + ":8080/live/" + stream)
+        }
+        h5lc.onPlay = function () {
+            isPlaying = true;
+            $playDom.style.display = 'none';
+            $stopDom.style.display = 'block';
+        }
         $play.addEventListener('click', function () {
             if (isPlaying) {
                 return;

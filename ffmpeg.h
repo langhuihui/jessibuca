@@ -64,6 +64,7 @@ public:
                 p_yuv[0] = (u32)frame->data[0];
                 p_yuv[1] = (u32)frame->data[1];
                 p_yuv[2] = (u32)frame->data[2];
+                emscripten_log(0, "pict_type:%d", frame->pict_type);
                 if (videoWidth != frame->width || videoHeight != frame->height)
                     decodeVideoSize(frame->width, frame->height);
                 decodeYUV420();
