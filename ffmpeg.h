@@ -47,14 +47,27 @@ public:
     }
     void decodeBody(IOBuffer &data) override
     {
+		// int NALUnitLength = 0;
+		// while (data.length > 4)
+		// {
+		// 	data.read4B(NALUnitLength);
+        //     data<<=4;
+		// 	_decode(data(0, NALUnitLength+4));
+		// 	data >>= NALUnitLength+4;
+		// }
         _decode(data);
     }
     void _decode(IOBuffer data) override
-    { //emscripten_log(0, "len:%d", len);
-        int ret = av_parser_parse2(parser, dec_ctx, &pkt->data, &pkt->size,
-                                   (const u8 *)(data), data.length, AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
-        if (ret >= 0 && pkt->size)
-        {
+    { 
+        // emscripten_log(0, "len:%d", data.length);
+        // int ret = av_parser_parse2(parser, dec_ctx, &pkt->data, &pkt->size,
+        //                            (const u8 *)(data), data.length, AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
+        //                            emscripten_log(0, "ffmpeg pkt->size:%d", pkt->size);
+        // if (ret >= 0 && pkt->size)
+        // {
+            int ret = 0;
+            pkt->data = (u8 *)(data);
+            pkt->size = data.length;
             ret = avcodec_send_packet(dec_ctx, pkt);
             while (ret >= 0)
             {
@@ -64,15 +77,14 @@ public:
                 p_yuv[0] = (u32)frame->data[0];
                 p_yuv[1] = (u32)frame->data[1];
                 p_yuv[2] = (u32)frame->data[2];
-                emscripten_log(0, "pict_type:%d", frame->pict_type);
                 if (videoWidth != frame->width || videoHeight != frame->height)
                     decodeVideoSize(frame->width, frame->height);
                 decodeYUV420();
             }
-        }
-        else
-        {
-            emscripten_log(0, "ffmpeg decode ret:%d", ret);
-        }
+        // }
+        // else
+        // {
+        //     emscripten_log(0, "ffmpeg decode ret:%d", ret);
+        // }
     }
 };

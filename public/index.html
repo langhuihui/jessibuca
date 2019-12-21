@@ -110,6 +110,7 @@
         var h5lc = new Jessibuca({ canvas, decoder: decoder + ".js" });
         h5lc.onLoad = function () {
             this.play("ws://" + source + ":8080/live/" + stream)
+            //h5lc.play("ws://pull2.afb1188.com/live/" + stream + ".flv")
         }
         h5lc.onPlay = function () {
             isPlaying = true;
@@ -140,8 +141,8 @@
 
 
         function play(firstResponseIp) {
-            h5lc.play("ws://" + (firstResponseIp || source) + ":8080/live/" + stream)
-            //h5lc.play("ws://pull.afb1188.com/live/404.flv")
+            //h5lc.play("ws://" + (firstResponseIp || source) + ":8080/live/" + stream)
+            h5lc.play("ws://pull2.afb1188.com/live/" + stream + ".flv")
             //h5lc.play("ws://localhost:8080/live/" + stream)
             // h5lc.play("ws://119.9.118.39:8080/live/user1", canvas)
             // h5lc.play("ws://test.qihaipi.com/gnddragon/test.flv", canvas)

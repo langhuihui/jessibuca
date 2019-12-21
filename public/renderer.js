@@ -20,7 +20,7 @@ function Jessibuca(opt) {
         switch (msg.cmd) {
             case "init":
                 console.log("decoder worker init")
-                postMessage({ cmd: "setVideoBuffer", time: _this.videoBuffer })
+                postMessage({ cmd: "setVideoBuffer", time: _this.videoBuffer }, "*")
                 if (_this.onLoad) {
                     _this.onLoad()
                     delete _this.onLoad;
@@ -42,11 +42,12 @@ function Jessibuca(opt) {
                     _this.onPlay()
                     delete _this.onPlay;
                 }
-                if (msg.compositionTime) {
-                    setTimeout(draw, msg.compositionTime, msg.output)
-                } else {
-                    draw(msg.output)
-                }
+                draw(msg.output)
+                // if (msg.compositionTime) {
+                //     setTimeout(draw, msg.compositionTime, msg.output)
+                // } else {
+                //     draw(msg.output)
+                // }
                 break
             case "initAudio":
                 _this.initAudioPlay(msg.frameCount, msg.samplerate, msg.channels)
