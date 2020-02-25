@@ -305,6 +305,7 @@ struct Jessica
         audioDecoder.clear();
         videoTimeoutId = 0;
         waitFirstVideo = true;
+        waitFirstAudio = true;
         bufferIsPlaying = false;
         buffer.clear();
         flvHeadRead = false;
