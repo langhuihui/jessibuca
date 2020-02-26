@@ -5,6 +5,10 @@ function Jessibuca(opt) {
     this.videoBuffer = opt.videoBuffer || 1
     if (!opt.forceNoGL) this.initContextGL();
     this.audioContext = new window.AudioContext();
+    if (opt.mute) {
+        this.audioEnabled(true)
+        this.audioEnabled(false)
+    }
     if (this.contextGL) {
         this.initProgram();
         this.initBuffers();
@@ -122,7 +126,7 @@ Jessibuca.prototype.playAudio = function (data) {
     }
     var decodeAudio = function () {
         if (decodeQueue.length) {
-            context.decodeAudioData(decodeQueue.shift(), tryPlay,decodeAudio);
+            context.decodeAudioData(decodeQueue.shift(), tryPlay, decodeAudio);
         } else {
             isDecoding = false
         }
@@ -152,7 +156,7 @@ Jessibuca.prototype.initAudioPlay = function (frameCount, samplerate, channels) 
     if (!context) return false;
     var _this = this
     var resampled = samplerate < 22050;
-    if(resampled){
+    if (resampled) {
         console.log("resampled!")
     }
     var audioBuffer = resampled ? context.createBuffer(channels, frameCount << 1, samplerate << 1) : context.createBuffer(channels, frameCount, samplerate);
@@ -176,7 +180,7 @@ Jessibuca.prototype.initAudioPlay = function (frameCount, samplerate, channels) 
                 for (var i = 0; i < frameCount; i++) {
                     nowBuffering[i] = fromBuffer[i * (channel + 1)] / 32768;
                 }
-                
+
         }
     } : function (fromBuffer) {
         var nowBuffering = audioBuffer.getChannelData(0);
