@@ -46,7 +46,7 @@ emcc_args = [
 
 # if '--cocos' in args:
 #     emcc_args.append('--post-js cocosCom.js')
-print 'building...'
+print ('building...')
 
 object_files = []
 if video_codec == '-DUSE_LIBHEVC':
@@ -59,7 +59,8 @@ elif video_codec == '-DUSE_LIBDE265':
     object_files.append('libde265.bc')
 elif video_codec == '-DUSE_FFMPEG':
     emcc_args.append('-Ithirdparty/ffmpeg/include')
-    object_files.append('ffmpeg.bc')
+    object_files.append('obj/ffmpeg.bc')
+    
 else:
     object_files.append('avc.bc')
 if audio_codec == '-DUSE_AAC':
@@ -70,11 +71,11 @@ elif audio_codec == '-DUSE_SPEEX':
     object_files.append('libspeex.bc')
 elif audio_codec == '-DUSE_MP3':
     object_files.append('mp3.bc')
-print object_files
+print (object_files)
 # emscripten.Building.emcc('Jessibuca.cpp', [os.path.join(
 #     'obj', x) for x in object_files]+emcc_args, output_file)
-emcc_args = [os.path.join('obj', x) for x in object_files]+emcc_args
+emcc_args = object_files+emcc_args
 os.system('emcc Jessibuca.cpp ' +
           (' '.join(emcc_args)) + ' -o '+args['-o'])
 
-print 'done'
+print ('done')

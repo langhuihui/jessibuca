@@ -149,7 +149,8 @@ inline void yuv420toRGB(u8 *Y, u8 *U, u8 *V, u8 *heap, u32 width, u32 height)
 #define VIDEO_DECODER Libde265
 #elif USE_FFMPEG
 #include "ffmpeg.h"
-#define VIDEO_DECODER FFmpeg
+#define VIDEO_DECODER FFmpegAVC
+#define AUDIO_DECODER FFmpegAAC
 #elif USE_LIBHEVC
 #include "libhevc.h"
 #define VIDEO_DECODER Libhevc

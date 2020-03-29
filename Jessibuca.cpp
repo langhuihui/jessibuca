@@ -28,7 +28,7 @@ struct Jessica
     val wrapped;
     bool flvHeadRead;
     IOBuffer buffer;
-    AudioDecoder audioDecoder;
+    AUDIO_DECODER audioDecoder;
     VIDEO_DECODER videoDecoder;
     queue<VideoPacket> videoBuffers;
     bool bufferIsPlaying = false;

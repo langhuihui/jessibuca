@@ -75,7 +75,7 @@ public:
 #endif
 		emscripten_log(0, "audio init! %d", this);
 	}
-	~AudioDecoder()
+	virtual ~AudioDecoder()
 	{
 		emscripten_log(0, "audio decoder release\n");
 #ifdef USE_AAC
@@ -90,24 +90,24 @@ public:
 		free(outputBuffer);
 		emscripten_log(0, "audio decoder release!\n");
 	}
-	void clear()
-	{
+	virtual int _decode(IOBuffer &data ,u8* output){
+		return 0;
 	}
 	bool decode(int audioType, IOBuffer &data)
 	{
-		int samplesBytes = 0;
-		switch (audioType)
-		{
-		case Codec_AAC:
-			samplesBytes = decodeAAC(data, outputBuffer + bufferFilled);
-			break;
-		case Codec_MP3:
-			samplesBytes = decodeMP3(data, outputBuffer + bufferFilled, outputBuffer + bufferLength);
-			break;
-		case Codec_Speex:
-			samplesBytes = decodeSpeex(data, outputBuffer + bufferFilled);
-			break;
-		}
+		int samplesBytes = _decode(data,outputBuffer + bufferFilled);
+		// switch (audioType)
+		// {
+		// case Codec_AAC:
+		// 	samplesBytes = decodeAAC(data, outputBuffer + bufferFilled);
+		// 	break;
+		// case Codec_MP3:
+		// 	samplesBytes = decodeMP3(data, outputBuffer + bufferFilled, outputBuffer + bufferLength);
+		// 	break;
+		// case Codec_Speex:
+		// 	samplesBytes = decodeSpeex(data, outputBuffer + bufferFilled);
+		// 	break;
+		// }
 		if (samplesBytes)
 		{
 			bufferFilled += samplesBytes;
@@ -177,7 +177,7 @@ public:
 			// samplerate = info->sampleRate;
 			// channels = info->numChannels;
 			auto config = faacDecGetCurrentConfiguration(faacHandle);
-			config->defObjectType = LC;
+			config->defObjectType = HE_AAC;
 			faacDecSetConfiguration(faacHandle, config);
 			faacDecInit2(faacHandle, (unsigned char *)input, 4, &samplerate, &channels);
 			emscripten_log(0, "aac samplerate:%d channels:%d", samplerate, channels);
