@@ -132,6 +132,28 @@ mergeInto(LibraryManager.library, {
                     this.audioCache.length = 0
                 }
             },
+            initAudioPlanar(channels, samplerate) {
+                this.buffersA = [];
+                for (var i = 0; i < channels; i++) {
+                    this.bufferA.push([]);
+                }
+                postMessage({ cmd: "initAudioPlanar", samplerate: samplerate, channels: channels })
+            },
+            playAudioPlanar(data, len) {
+                var outputArray = [];
+                var frameCount = len / 4 / this.buffersA.length;
+                for (var i = 0; i < this.buffersA.length; i++) {
+                    var buffer = this.buffersA[i]
+                    if (buffer.length) {
+                        buffer = buffer.pop();
+                        arrayBufferCopy(outputArray, buffer, 0, buffer.byteLength);
+                    } else {
+                        buffer = Float32Array.from(HEAPF32.subarray(HEAPU8[data + i], HEAPU8[data + i] + frameCount));
+                    }
+                    outputArray[i] = buffer;
+                }
+                postMessage({ cmd: "playAudioPlanar", output: outputArray, }, outputArray.map(x => x.buffer))
+            },
             setBuffer: function (outputArray) {
                 for (var i = 0; i < 3; i++) {
                     var buffer = this.buffers[i]
@@ -186,6 +208,8 @@ mergeInto(LibraryManager.library, {
                     decoder.buffers[1].push(msg.buffers[1])
                     decoder.buffers[2].push(msg.buffers[2])
                     break
+                case "setBufferA":
+                    decoder.bufferA.forEach((array, i) => array.push(msg.buffers[i]))
                 case "setVideoBuffer":
                     decoder.videoBuffer = msg.cmd * 1000
                     break

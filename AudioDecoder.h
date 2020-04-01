@@ -90,24 +90,25 @@ public:
 		free(outputBuffer);
 		emscripten_log(0, "audio decoder release!\n");
 	}
-	virtual int _decode(IOBuffer &data ,u8* output){
+	virtual int _decode(IOBuffer &data, u8 *output)
+	{
 		return 0;
 	}
 	bool decode(int audioType, IOBuffer &data)
 	{
-		int samplesBytes = _decode(data,outputBuffer + bufferFilled);
-		// switch (audioType)
-		// {
-		// case Codec_AAC:
-		// 	samplesBytes = decodeAAC(data, outputBuffer + bufferFilled);
-		// 	break;
-		// case Codec_MP3:
-		// 	samplesBytes = decodeMP3(data, outputBuffer + bufferFilled, outputBuffer + bufferLength);
-		// 	break;
-		// case Codec_Speex:
-		// 	samplesBytes = decodeSpeex(data, outputBuffer + bufferFilled);
-		// 	break;
-		// }
+		int samplesBytes = _decode(data, outputBuffer + bufferFilled);
+		switch (audioType)
+		{
+		case Codec_AAC:
+			samplesBytes = decodeAAC(data, outputBuffer + bufferFilled);
+			break;
+		case Codec_MP3:
+			samplesBytes = decodeMP3(data, outputBuffer + bufferFilled, outputBuffer + bufferLength);
+			break;
+		case Codec_Speex:
+			samplesBytes = decodeSpeex(data, outputBuffer + bufferFilled);
+			break;
+		}
 		if (samplesBytes)
 		{
 			bufferFilled += samplesBytes;

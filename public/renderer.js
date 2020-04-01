@@ -67,9 +67,61 @@ function Jessibuca(opt) {
             case "printErr":
                 console.error(msg.text);
                 break
+            default:
+                _this[msg.cmd](msg)
         }
     }
 };
+Jessibuca.prototype.initAudioPlanar = function (msg) {
+    var channels = msg.channels
+    var samplerate = msg.samplerate
+    var context = this.audioContext;
+    var isPlaying = false;
+    var audioBuffers = [];
+    if (!context) return false;
+    var _this = this
+    this.playAudioPlanar = function (msg) {
+        var frameCount = msg.output[0].length
+        var audioBuffer = context.createBuffer(channels, frameCount, samplerate);
+        var copyToCtxBuffer = function (fromBuffer) {
+            for (var channel = 0; channel < channels; channel++) {
+                var nowBuffering = audioBuffer.getChannelData(channel);
+                for (var i = 0; i < frameCount; i++) {
+                    nowBuffering[i] = fromBuffer[channel][i]
+                }
+            }
+            postMessage({ cmd: "setBufferA", buffer: fromBuffer }, '*', fromBuffer.map(x => x.buffer))
+        }
+        var playNextBuffer = function () {
+            isPlaying = false;
+            //console.log("~", audioBuffers.length)
+            if (audioBuffers.length) {
+                playAudio(audioBuffers.shift());
+            }
+            //if (audioBuffers.length > 1) audioBuffers.shift();
+        };
+        var playAudio = function (msg) {
+            var fromBuffer = msg.output
+            if (isPlaying) {
+                audioBuffers.push(fromBuffer);
+                //console.log(audioBuffers.length)
+                return;
+            }
+            isPlaying = true;
+            copyToCtxBuffer(fromBuffer);
+            var source = context.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(context.destination);
+            // source.onended = playNextBuffer;
+            if (!_this.audioInterval) {
+                _this.audioInterval = setInterval(playNextBuffer, audioBuffer.duration * 1000);
+            }
+            source.start();
+        };
+        this.playAudioPlanar = playAudio
+        playAudio(msg)
+    };
+}
 
 function _unlock(context) {
     context.resume();

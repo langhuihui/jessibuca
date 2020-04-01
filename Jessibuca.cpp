@@ -167,6 +167,22 @@ struct Jessica
             }
         }
     }
+#ifdef USE_FFMPEG
+    void decodeAudio(clock_t timestamp, IOBuffer ms)
+    {
+        unsigned char flag = 0;
+        ms.readB<1>(flag);
+        int bytesCount = audioDecoder.decode(ms);
+        if (bytesCount)
+        {
+            call<void>("playAudioPlanar", int(audioDecoder.frame->data), bytesCount);
+        }
+        else
+        {
+            call<void>("initAudioPlanar", audioDecoder.dec_ctx->channels, audioDecoder.dec_ctx->sample_rate);
+        }
+    }
+#else
     void decodeAudio(clock_t timestamp, IOBuffer ms)
     {
         if (ms[0] == 0xFF && (ms[1] & 0xF0) == 0xF0)
@@ -218,6 +234,7 @@ struct Jessica
         audioDecoder.init(frameCount * channels * 2);
         call<void>("initAudio", frameCount, samplerate, channels, (int)audioDecoder.outputBuffer >> 1);
     }
+#endif
     void decodeVideo(clock_t _timestamp, IOBuffer data)
     {
         if (waitFirstVideo)
