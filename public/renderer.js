@@ -80,9 +80,9 @@ Jessibuca.prototype.initAudioPlanar = function (msg) {
     var audioBuffers = [];
     if (!context) return false;
     var _this = this
-    this.playAudioPlanar = function (msg) {
-        var frameCount = msg.output[0].length
-        var audioBuffer = context.createBuffer(channels, frameCount, samplerate);
+    this.playAudio = function (buffer) {
+        var frameCount = buffer[0][0].length
+        var audioBuffer = context.createBuffer(channels, frameCount, samplerate*channels);
         var copyToCtxBuffer = function (fromBuffer) {
             for (var channel = 0; channel < channels; channel++) {
                 var nowBuffering = audioBuffer.getChannelData(channel);
@@ -100,8 +100,8 @@ Jessibuca.prototype.initAudioPlanar = function (msg) {
             }
             //if (audioBuffers.length > 1) audioBuffers.shift();
         };
-        var playAudio = function (msg) {
-            var fromBuffer = msg.output
+        var playAudio = function (fromBuffer) {
+            if(!fromBuffer)return
             if (isPlaying) {
                 audioBuffers.push(fromBuffer);
                 //console.log(audioBuffers.length)
@@ -118,8 +118,10 @@ Jessibuca.prototype.initAudioPlanar = function (msg) {
             }
             source.start();
         };
-        this.playAudioPlanar = playAudio
-        playAudio(msg)
+        _this.playAudio = function(buffer){
+            buffer.forEach(playAudio)
+        }
+        buffer.forEach(playAudio)
     };
 }
 

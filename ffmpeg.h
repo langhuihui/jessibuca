@@ -51,7 +51,7 @@ public:
         swr_free(&au_convert_ctx);
         emscripten_log(0, "FFMpegAAC destory");
     }
-    bool decode(IOBuffer &input)
+    int decode(IOBuffer &input)
     {
         if (input.readB<1, u8>())
         {
@@ -99,8 +99,8 @@ public:
             u8 config2 = input[1];
             initCodec(AV_CODEC_ID_AAC);
             dec_ctx->codec_type = AVMEDIA_TYPE_AUDIO;
-            dec_ctx->sample_rate = SamplingFrequencies[((config1 & 0x7) << 1) | (config2 >> 7)];
             dec_ctx->channels = (config2 >> 3) & 0x0F;
+            dec_ctx->sample_rate = SamplingFrequencies[((config1 & 0x7) << 1) | (config2 >> 7)];
             dec_ctx->channel_layout = AV_CH_LAYOUT_STEREO;
             // dec_ctx->request_sample_fmt = AV_SAMPLE_FMT_S16;
 

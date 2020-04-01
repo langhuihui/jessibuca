@@ -135,7 +135,7 @@ mergeInto(LibraryManager.library, {
             initAudioPlanar(channels, samplerate) {
                 this.buffersA = [];
                 for (var i = 0; i < channels; i++) {
-                    this.bufferA.push([]);
+                    this.buffersA.push([]);
                 }
                 postMessage({ cmd: "initAudioPlanar", samplerate: samplerate, channels: channels })
             },
@@ -143,16 +143,24 @@ mergeInto(LibraryManager.library, {
                 var outputArray = [];
                 var frameCount = len / 4 / this.buffersA.length;
                 for (var i = 0; i < this.buffersA.length; i++) {
+                    var fp = HEAPU32[(data>>2) + i]>>2;
+                    var float32 = HEAPF32.subarray(fp, fp + frameCount);
                     var buffer = this.buffersA[i]
                     if (buffer.length) {
                         buffer = buffer.pop();
-                        arrayBufferCopy(outputArray, buffer, 0, buffer.byteLength);
+                        for (var j = 0; j < buffer.length; j++) {
+                            buffer[j] = float32[j];
+                        }
                     } else {
-                        buffer = Float32Array.from(HEAPF32.subarray(HEAPU8[data + i], HEAPU8[data + i] + frameCount));
+                        buffer = Float32Array.from(float32);
                     }
                     outputArray[i] = buffer;
                 }
-                postMessage({ cmd: "playAudioPlanar", output: outputArray, }, outputArray.map(x => x.buffer))
+                this.audioCache.push(outputArray)
+                if (this.audioCache.length >= this.audioBuffer) {
+                    postMessage({ cmd: "playAudio", buffer: this.audioCache }, this.audioCache.flatMap(outputArray=>outputArray.map(x=>x.buffer)))
+                    this.audioCache.length = 0
+                }
             },
             setBuffer: function (outputArray) {
                 for (var i = 0; i < 3; i++) {
@@ -209,7 +217,7 @@ mergeInto(LibraryManager.library, {
                     decoder.buffers[2].push(msg.buffers[2])
                     break
                 case "setBufferA":
-                    decoder.bufferA.forEach((array, i) => array.push(msg.buffers[i]))
+                    decoder.buffersA.forEach((array, i) => array.push(msg.buffers[i]))
                 case "setVideoBuffer":
                     decoder.videoBuffer = msg.cmd * 1000
                     break
