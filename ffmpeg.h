@@ -5,7 +5,7 @@ extern "C"
 #include <libswresample/swresample.h>
 }
 const int SamplingFrequencies[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350, 0, 0, 0};
-
+const int AudioObjectTypes [] = {};
 class FFmpeg
 {
 public:
@@ -95,16 +95,17 @@ public:
         }
         else
         {
-            u8 config1 = input[0];
-            u8 config2 = input[1];
+            // u8 config1 = input[0];
+            // u8 config2 = input[1];
             initCodec(AV_CODEC_ID_AAC);
-            dec_ctx->codec_type = AVMEDIA_TYPE_AUDIO;
-            dec_ctx->channels = (config2 >> 3) & 0x0F;
-            dec_ctx->sample_rate = SamplingFrequencies[((config1 & 0x7) << 1) | (config2 >> 7)];
-            dec_ctx->channel_layout = AV_CH_LAYOUT_STEREO;
-            // dec_ctx->request_sample_fmt = AV_SAMPLE_FMT_S16;
-
-            emscripten_log(0, "aac samplerate:%d channels:%d", dec_ctx->sample_rate, dec_ctx->channels);
+            // dec_ctx->codec_type = AVMEDIA_TYPE_AUDIO;
+            // dec_ctx->channels = (config2 >> 3) & 0x0F;
+            // dec_ctx->sample_rate = SamplingFrequencies[((config1 & 0x7) << 1) | (config2 >> 7)];
+            // dec_ctx->channel_layout = AV_CH_LAYOUT_STEREO;
+            // emscripten_log(0, "aac samplerate:%d channels:%d", dec_ctx->sample_rate, dec_ctx->channels);
+            dec_ctx->extradata_size = input.length;
+            dec_ctx->extradata = (u8 *)malloc(dec_ctx->extradata_size);
+            memcpy(dec_ctx->extradata, (const u8 *)input, dec_ctx->extradata_size);
             auto ret = avcodec_open2(dec_ctx, codec, NULL);
         }
         return 0;

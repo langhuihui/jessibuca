@@ -75,6 +75,7 @@ function Jessibuca(opt) {
 Jessibuca.prototype.initAudioPlanar = function (msg) {
     var channels = msg.channels
     var samplerate = msg.samplerate
+    console.log("initAudioPlanar:","channles:",channels,"samplerate:",samplerate)
     var context = this.audioContext;
     var isPlaying = false;
     var audioBuffers = [];
@@ -82,7 +83,7 @@ Jessibuca.prototype.initAudioPlanar = function (msg) {
     var _this = this
     this.playAudio = function (buffer) {
         var frameCount = buffer[0][0].length
-        var audioBuffer = context.createBuffer(channels, frameCount, samplerate*channels);
+        var audioBuffer = context.createBuffer(channels, frameCount, samplerate);
         var copyToCtxBuffer = function (fromBuffer) {
             for (var channel = 0; channel < channels; channel++) {
                 var nowBuffering = audioBuffer.getChannelData(channel);

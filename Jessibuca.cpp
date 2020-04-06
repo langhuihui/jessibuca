@@ -3,6 +3,7 @@
 #define __cplusplus 201703L
 #endif
 #include "base.h"
+#include <regex>
 #define PROP(name, type)         \
     type name;                   \
     val get##name() const        \
@@ -36,6 +37,7 @@ struct Jessica
     bool waitFirstVideo = true;
     bool waitFirstAudio = true;
     clock_t lastDataTime = 0;
+    clock_t lastVideoTimeStamp = 0;
     int bytesCount = 0;
     PROP(isPlaying, bool)
     PROP(flvMode, bool)
@@ -62,14 +64,18 @@ struct Jessica
         {
             call<void>("close");
         }
+        smatch urlm;
+        regex_match(url, urlm, regex("wss?://(.+)(:\\d+)(/.+)?"));
+        if (!regex_match(urlm.str(1),  regex("(demo\\.monibuca\\.com|localhost|[\\d\\.]+)"))){
+            emscripten_log(1, "%s Unauthorized",urlm.str(1).c_str());
+            return;
+        }
         isPlaying = true;
         bool webgl = wrapped["isWebGL"].as<bool>();
         emscripten_log(0, "webgl:%s", webgl ? "true" : "false");
         videoDecoder.webgl = webgl;
         flvMode = url.find(".flv") != string::npos;
-
         // #define WS_PREFIX "ws://test.qihaipi.com/gnddragon/"
-
 #ifdef WS_PREFIX
         val ws = val::global("WebSocket").new_(WS_PREFIX + url);
 #else
@@ -173,13 +179,15 @@ struct Jessica
         unsigned char flag = 0;
         ms.readB<1>(flag);
         int bytesCount = audioDecoder.decode(ms);
-        if (bytesCount)
+        if(!bytesCount)return;
+        if (!waitFirstAudio)
         {
             call<void>("playAudioPlanar", int(audioDecoder.frame->data), bytesCount);
         }
         else
         {
             call<void>("initAudioPlanar", audioDecoder.dec_ctx->channels, audioDecoder.dec_ctx->sample_rate);
+            waitFirstAudio = false;
         }
     }
 #else
@@ -248,7 +256,7 @@ struct Jessica
         }
         else if (data[1] == 1 || data[1] == 0)
         {
-            if (_timestamp == 0)
+            if (_timestamp == 0 && lastVideoTimeStamp != 0)
                 return;
             if (videoBuffer && (bufferIsPlaying || checkTimeout(_timestamp)))
             {
@@ -267,6 +275,7 @@ struct Jessica
         {
             call<void>("resetTimeSpan");
         }
+        lastVideoTimeStamp = _timestamp;
     }
     void decodeVideoBuffer()
     {
@@ -324,6 +333,7 @@ struct Jessica
         waitFirstVideo = true;
         waitFirstAudio = true;
         bufferIsPlaying = false;
+        lastVideoTimeStamp = 0;
         buffer.clear();
         flvHeadRead = false;
     }
