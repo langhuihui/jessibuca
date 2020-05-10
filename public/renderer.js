@@ -16,10 +16,6 @@ function Jessibuca(opt) {
     };
     this.decoderWorker = new Worker(opt.decoder || 'ff.js')
     var _this = this
-    function draw(output) {
-        _this.drawNextOutputPicture(_this.width, _this.height, null, output)
-        postMessage({ cmd: "setBuffer", buffer: output }, '*', [output[0].buffer, output[1].buffer, output[2].buffer])
-    }
     this.decoderWorker.onmessage = function (event) {
         var msg = event.data
         switch (msg.cmd) {
@@ -53,7 +49,12 @@ function Jessibuca(opt) {
                 // } else {
                 //     draw(msg.output)
                 // }
-                draw(msg.output)
+                if (_this.contextGL) {
+                    _this.drawNextOuptutPictureGL(_this.width, _this.height, null, msg.output);
+                    postMessage({ cmd: "setBuffer", buffer: msg.output }, '*', [msg.output[0].buffer, msg.output[1].buffer, msg.output[2].buffer])
+                } else {
+                    _this.drawNextOuptutPictureRGBA(_this.width, _this.height, null, msg.buffer);
+                }
                 break
             case "initAudio":
                 _this.initAudioPlay(msg.frameCount, msg.samplerate, msg.channels)
@@ -83,15 +84,17 @@ Jessibuca.prototype.initAudioPlanar = function (msg) {
     var _this = this
     this.playAudio = function (buffer) {
         var frameCount = buffer[0][0].length
-        var audioBuffer = context.createBuffer(channels, frameCount, samplerate);
+        var audioBuffer = context.createBuffer(channels, frameCount*buffer.length, samplerate);
         var copyToCtxBuffer = function (fromBuffer) {
             for (var channel = 0; channel < channels; channel++) {
                 var nowBuffering = audioBuffer.getChannelData(channel);
-                for (var i = 0; i < frameCount; i++) {
-                    nowBuffering[i] = fromBuffer[channel][i]
+                for( var j=0;j<buffer.length;j++){
+                    for (var i = 0; i < frameCount; i++) {
+                        nowBuffering[i+j*frameCount] = fromBuffer[j][channel][i]
+                    }
+                    //postMessage({ cmd: "setBufferA", buffer: fromBuffer[j] }, '*', fromBuffer[j].map(x => x.buffer))
                 }
             }
-            postMessage({ cmd: "setBufferA", buffer: fromBuffer }, '*', fromBuffer.map(x => x.buffer))
         }
         var playNextBuffer = function () {
             isPlaying = false;
@@ -114,15 +117,11 @@ Jessibuca.prototype.initAudioPlanar = function (msg) {
             source.buffer = audioBuffer;
             source.connect(context.destination);
             // source.onended = playNextBuffer;
-            if (!_this.audioInterval) {
-                _this.audioInterval = setInterval(playNextBuffer, audioBuffer.duration * 1000);
-            }
             source.start();
         };
-        _this.playAudio = function(buffer){
-            buffer.forEach(playAudio)
-        }
-        buffer.forEach(playAudio)
+        _this.playAudio = playAudio
+        _this.audioInterval = setInterval(playNextBuffer, audioBuffer.duration * 1000);
+        playAudio(buffer)
     };
 }
 
