@@ -28,7 +28,7 @@ struct Jessica
 {
     val wrapped;
     bool flvHeadRead;
-    IOBuffer buffer;
+    string buffer;
     AUDIO_DECODER audioDecoder;
     VIDEO_DECODER videoDecoder;
     queue<VideoPacket> videoBuffers;
@@ -65,9 +65,10 @@ struct Jessica
             call<void>("close");
         }
         smatch urlm;
-        regex_match(url, urlm, regex("wss?://(.+)(:\\d+)(/.+)?"));
-        if (!regex_match(urlm.str(1),  regex("(demo\\.monibuca\\.com|localhost|[\\d\\.]+)"))){
-            emscripten_log(1, "%s Unauthorized",urlm.str(1).c_str());
+        regex_match(url, urlm, regex("(ws|http)s?://([^/:]+)(:\\d+)?(/.*)?"));
+        string protocol(urlm.str(1));
+        if (!regex_match(urlm.str(2),  regex("(demo\\.monibuca\\.com|localhost|[\\d\\.]+)"))){
+            emscripten_log(1, "%s Unauthorized",urlm.str(2).c_str());
             return;
         }
         isPlaying = true;
@@ -76,6 +77,10 @@ struct Jessica
         videoDecoder.webgl = webgl;
         flvMode = url.find(".flv") != string::npos;
         // #define WS_PREFIX "ws://test.qihaipi.com/gnddragon/"
+        lastDataTime = clock();
+        if(protocol == "http") {
+            call<void>("fetch",url);
+        }else{
 #ifdef WS_PREFIX
         val ws = val::global("WebSocket").new_(WS_PREFIX + url);
 #else
@@ -83,9 +88,28 @@ struct Jessica
 #endif
         ws.set("binaryType", "arraybuffer");
         ws.set("onmessage", bind("onData"));
-        lastDataTime = clock();
         // ws.set("onerror", bind("onError"));
         wrapped.set("ws", ws);
+        }
+    }
+    void onAudio(val t,val data){
+        IOBuffer payload;
+        payload << data.as<string>();
+        decodeAudio(u32(t.as<int>()), payload);
+    }
+    void onVideo(val t,val data){
+        IOBuffer payload;
+        payload << data.as<string>();
+        decodeVideo(u32(t.as<int>()), payload);
+    }
+  
+    void onFetchData(val evt){
+        if(evt["done"].as<bool>()){
+            call<void>("close");
+        }else{
+            onData(evt);
+            wrapped.call<void>("fetchNext");
+        }
     }
     void onData(val evt)
     {
@@ -100,48 +124,48 @@ struct Jessica
         }
         if (flvMode)
         {
-            buffer << move(data);
+            buffer.append(data);
             if (!flvHeadRead)
             {
-                if (buffer.length >= 13)
+                if (buffer.length() >= 13)
                 {
                     flvHeadRead = true;
-                    buffer >>= 13;
+                    buffer = buffer.substr(13);
                 }
             }
             else
             {
-                while (buffer.length > 3)
+                while (buffer.length() > 3)
                 {
-                    u8 type = buffer.readu8();
-                    unsigned int length = buffer.readUInt24B();
-                    if (buffer.length < length + 4 + 7)
+                    size_t length = 0;
+                    auto attr = (u8*)(&length);
+                    attr[2] = buffer[1];
+                    attr[1] = buffer[2];
+                    attr[0] = buffer[3];
+                    if (buffer.length() < length + 15)
                     {
-                        buffer <<= 4;
                         break;
                     }
-                    unsigned int timestamp = buffer.readUInt24B();
-                    //u8 ext = buffer.readu8();
-                    // buffer.readUInt24B();
-                    buffer >>= 4;
-                    IOBuffer payload;
-                    payload << IOBuffer(&buffer, 0, length);
-                    switch (type)
+                    unsigned int timestamp = 0;
+                    attr = (u8*)(&timestamp);
+                    attr[2] = buffer[4];
+                    attr[1] = buffer[5];
+                    attr[0] = buffer[6];
+                    IOBuffer payload(buffer.substr(11,length));
+                    switch (buffer[0])
                     {
-                    case 0x08:
+                    case 8:
                         decodeAudio(timestamp, payload);
                         break;
-                    case 0x09:
+                    case 9:
                         decodeVideo(timestamp, payload);
                         break;
                     default:
-                        emscripten_log(0, "unknow type: %d", type);
+                        emscripten_log(0, "unknow type: %d", buffer[0]);
                         break;
                     }
-                    buffer >>= length;
-                    length = buffer.readUInt32B();
+                    buffer = buffer.substr(length+15);
                 }
-                buffer.removeConsume();
             }
         }
         else
@@ -261,7 +285,7 @@ struct Jessica
             if (videoBuffer && (bufferIsPlaying || checkTimeout(_timestamp)))
             {
                 videoBuffers.emplace(_timestamp, data);
-                //emscripten_log(0, "push timestamp:%d", _timestamp);
+                // emscripten_log(0, "push timestamp:%d", _timestamp);
                 // auto &&info = val::object();
                 // info.set("code", "NetStream.Play.Start");
                 // call<void>("onNetStatus", info);
@@ -285,7 +309,7 @@ struct Jessica
             auto &v = videoBuffers.front();
             if (check && checkTimeout(v.timestamp))
                 return;
-            //emscripten_log(0, "play timestamp:%d", v.timestamp);
+            // emscripten_log(0, "play timestamp:%d", v.timestamp);
             videoDecoder.decode(v.data);
             videoBuffers.pop();
             check = true;
@@ -359,6 +383,9 @@ EMSCRIPTEN_BINDINGS(Jessica)
 {
     class_<Jessica>("Jessica")
         .FUNC($play)
+        .FUNC(onAudio)
+        .FUNC(onVideo)
+        .FUNC(onFetchData)
         .FUNC(onData)
         .FUNC($close)
         .FUNC(decodeVideoBuffer)

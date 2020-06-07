@@ -60,6 +60,10 @@ mergeInto(LibraryManager.library, {
             },
             play: function (url) {
                 console.log('Jessibuca play', url)
+                if(url.indexOf("http")==0){
+                    this.$play(url);
+                    return;
+                }
                 var _this = this;
                 var reconnectCount = 0;
                 var reconnectTime = 2000;
@@ -89,16 +93,64 @@ mergeInto(LibraryManager.library, {
                 }
                 setWebsocket.call(this);
             },
+            fetch: function(url){
+                var _this = this;
+                this.controller = new AbortController();
+                var signal = this.controller.signal;
+                fetch(url,{signal}).then(function(res){
+                    var reader = res.body.getReader();
+                    _this.fetchNext = function(){
+                        reader.read().then(({done, value})=>_this.onFetchData({done,data:value}))
+                    }
+                    _this.fetchNext()
+                    // var flvHeadRead = false
+                    // var buffer = []
+                    // reader.read().then(function processData({done, value}){
+                    //     if(done){
+                    //         _this.isPlaying = false;
+                    //     } else {
+                    //         buffer = Uint8Array.of(...buffer,...value)
+                    //         if(!flvHeadRead){
+                    //             if(buffer.byteLength>=13){
+                    //                 flvHeadRead = true;
+                    //                 buffer = buffer.subarray(13)
+                    //             }
+                    //         }else{
+                    //             while(buffer.length>3){
+                    //                 var type = buffer[0]
+                    //                 var length = (buffer[1]<<16)|(buffer[2]<<8)|(buffer[3])
+                    //                 if(buffer.length-4<length+11){
+                    //                     break
+                    //                 }
+                    //                 var timestamp = (buffer[4]<<16)|(buffer[5]<<8)|(buffer[6])
+                    //                 //var payload = buffer.subarray(11,11+length)
+                    //                 switch(type){
+                    //                     case 8:
+                    //                         _this.onAudio(timestamp,buffer.buffer.slice(buffer.byteOffset+11,buffer.byteOffset+11+length))
+                    //                     case 9:
+                    //                         _this.onVideo(timestamp,buffer.buffer.slice(buffer.byteOffset+11,buffer.byteOffset+11+length))
+                    //                 }
+                    //                 buffer = buffer.subarray(11+length+4)
+                    //             }
+                    //         }
+                    //     }
+                    //     reader.read().then(processData)
+                    // })
+                }).catch(console.error)
+            },
             close: function () {
                 clearTimeout(this.reconnectId)
                 if (!this.isPlaying) return;
                 console.log('close Jessibuca')
                 this.isPlaying = false;
-                this.ws.onmessage = null;
-                this.ws.onclose = null;
-                this.ws.onerror = null;
-                this.ws.close();
-                this.ws = null;
+                if(this.ws){
+                    this.ws.onmessage = null;
+                    this.ws.onclose = null;
+                    this.ws.onerror = null;
+                    this.ws.close();
+                    this.ws = null;
+                }
+                if(this.controller)this.controller.abort();
                 this.$close();
                 delete this.timespan;
             },
