@@ -13,6 +13,7 @@
     void set##name(val value)    \
     {                            \
         name = value.as<type>(); \
+        emscripten_log(0, #name" = %d", name);\
     }
 extern "C"
 {
@@ -91,16 +92,6 @@ struct Jessica
         // ws.set("onerror", bind("onError"));
         wrapped.set("ws", ws);
         }
-    }
-    void onAudio(val t,val data){
-        IOBuffer payload;
-        payload << data.as<string>();
-        decodeAudio(u32(t.as<int>()), payload);
-    }
-    void onVideo(val t,val data){
-        IOBuffer payload;
-        payload << data.as<string>();
-        decodeVideo(u32(t.as<int>()), payload);
     }
   
     void onFetchData(val evt){
@@ -275,57 +266,43 @@ struct Jessica
             {
                 videoDecoder.decode(data);
                 waitFirstVideo = false;
-                emscripten_log(0, "video info set!");
+                emscripten_log(0, "video info set! video buffer: %dms",videoBuffer);
             }
         }
         else if (data[1] == 1 || data[1] == 0)
         {
             if (_timestamp == 0 && lastVideoTimeStamp != 0)
                 return;
-            if (videoBuffer && (bufferIsPlaying || checkTimeout(_timestamp)))
-            {
-                videoBuffers.emplace(_timestamp, data);
-                // emscripten_log(0, "push timestamp:%d", _timestamp);
-                // auto &&info = val::object();
-                // info.set("code", "NetStream.Play.Start");
-                // call<void>("onNetStatus", info);
-            }
-            else
-            {
+            if(videoBuffer == 0){
                 videoDecoder.decode(data);
+            }else{
+                videoBuffers.emplace(_timestamp, data);
+                auto &v = videoBuffers.front();
+                if(lastVideoTimeStamp - v.timestamp > videoBuffer){
+                    if(!bufferIsPlaying){
+                        bufferIsPlaying = true;
+                        decodeVideoBuffer();
+                    }
+                }
             }
-        }
-        else
-        {
-            call<void>("resetTimeSpan");
         }
         lastVideoTimeStamp = _timestamp;
     }
     void decodeVideoBuffer()
     {
-        bool check = false;
-        while (!videoBuffers.empty())
+        if (videoBuffers.size()>1)
         {
             auto &v = videoBuffers.front();
-            if (check && checkTimeout(v.timestamp))
-                return;
-            // emscripten_log(0, "play timestamp:%d", v.timestamp);
             videoDecoder.decode(v.data);
             videoBuffers.pop();
-            check = true;
+            auto timeout = videoBuffers.front().timestamp - v.timestamp;
+             if(lastVideoTimeStamp - videoBuffers.front().timestamp > videoBuffer){
+                timeout=timeout>>1;
+             }
+            val::global("setTimeout")(bind("decodeVideoBuffer"),timeout);
+            return;
         }
         bufferIsPlaying = false;
-    }
-    bool checkTimeout(clock_t timestamp)
-    {
-        auto timeout = getTimespan(timestamp);
-        bool isTimeout = timeout > 0;
-        if (isTimeout)
-        {
-            bufferIsPlaying = true;
-            videoTimeoutId = call<int>("playVideoBuffer", timeout);
-        }
-        return isTimeout;
     }
     val getBufferInfo() const
     {
@@ -335,22 +312,10 @@ struct Jessica
         result.set("size", videoBuffers.size());
         return result;
     }
-    clock_t getTimespan(clock_t t)
-    {
-        // if (videoBuffers.size() > 4)
-        // {
-        //     videoBuffer = videoBuffer >> 1;
-        // }
-        return call<clock_t>("timespan", t) + videoBuffer;
-    }
     void $close()
     {
         val::global("clearTimeout")(videoTimeoutId);
         videoBuffers = queue<VideoPacket>();
-        // while (!videoBuffers.empty())
-        // {
-        //     videoBuffers.pop();
-        // }
         videoDecoder.clear();
         audioDecoder.clear();
         videoTimeoutId = 0;
@@ -383,8 +348,6 @@ EMSCRIPTEN_BINDINGS(Jessica)
 {
     class_<Jessica>("Jessica")
         .FUNC($play)
-        .FUNC(onAudio)
-        .FUNC(onVideo)
         .FUNC(onFetchData)
         .FUNC(onData)
         .FUNC($close)

@@ -2,7 +2,7 @@ window.AudioContext = window.AudioContext || window.webkitAudioContext;
 function Jessibuca(opt) {
     this.canvasElement = opt.canvas;
     this.contextOptions = opt.contextOptions;
-    this.videoBuffer = opt.videoBuffer || 1
+    this.videoBuffer = opt.videoBuffer || 0
     if (!opt.forceNoGL) this.initContextGL();
     this.audioContext = new window.AudioContext();
     if (opt.mute) {
@@ -21,7 +21,7 @@ function Jessibuca(opt) {
         switch (msg.cmd) {
             case "init":
                 console.log("decoder worker init")
-                postMessage({ cmd: "setVideoBuffer", time: _this.videoBuffer }, "*")
+                this.postMessage({ cmd: "setVideoBuffer", time: _this.videoBuffer })
                 if (_this.onLoad) {
                     _this.onLoad()
                     delete _this.onLoad;
@@ -51,7 +51,7 @@ function Jessibuca(opt) {
                 // }
                 if (_this.contextGL) {
                     _this.drawNextOuptutPictureGL(_this.width, _this.height, null, msg.output);
-                    postMessage({ cmd: "setBuffer", buffer: msg.output }, '*', [msg.output[0].buffer, msg.output[1].buffer, msg.output[2].buffer])
+                   // this.postMessage({ cmd: "setBuffer", buffer: msg.output }, [msg.output[0].buffer, msg.output[1].buffer, msg.output[2].buffer])
                 } else {
                     _this.drawNextOuptutPictureRGBA(_this.width, _this.height, null, msg.buffer);
                 }

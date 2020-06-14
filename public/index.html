@@ -107,10 +107,11 @@
         let stream = queryParam('stream') || 'user1';
         let decoder = queryParam('decoder') || 'ff';
         let source = queryParam('source') || 'localhost';
-        var h5lc = new Jessibuca({ canvas, decoder: decoder + ".js" });
+        var h5lc = new Jessibuca({ canvas, decoder: decoder + ".js" ,videoBuffer:0});
+
         h5lc.onLoad = function () {
-            this.play("http://localhost:2020/live/user1.flv")
-            // this.play("ws://" + source + ":8080/live/" + stream)
+            // this.play("http://localhost/live/user1.flv")
+            this.play("ws://" + source + ":8080/live/" + stream)
             //this.play("ws://pull3.afb1188.com/live/" + stream + ".flv")
             //this.play("ws://pull2.afb1188.com/live/" + stream + ".flv")
         }

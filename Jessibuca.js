@@ -36,28 +36,6 @@ mergeInto(LibraryManager.library, {
             onError: function (err) {
                 console.log(this, err)
             },
-            setStartTime: function (offset) {
-                console.log("first timestamp:", offset)
-                var startTime = Date.now() - offset;
-                this.timespan = function (t) {
-                    return t - (Date.now() - startTime);
-                }
-
-                function playVideo(_this) {
-                    _this.decodeVideoBuffer();
-                }
-                this.playVideoBuffer = function (t) {
-                    // console.log("setTimeout:", t);
-                    return setTimeout(playVideo, t, this)
-                }
-            },
-            timespan: function (t) {
-                this.setStartTime(t);
-                return this.timespan(t);
-            },
-            resetTimeSpan: function () {
-                delete this.timespan;
-            },
             play: function (url) {
                 console.log('Jessibuca play', url)
                 if(url.indexOf("http")==0){
@@ -103,39 +81,6 @@ mergeInto(LibraryManager.library, {
                         reader.read().then(({done, value})=>_this.onFetchData({done,data:value}))
                     }
                     _this.fetchNext()
-                    // var flvHeadRead = false
-                    // var buffer = []
-                    // reader.read().then(function processData({done, value}){
-                    //     if(done){
-                    //         _this.isPlaying = false;
-                    //     } else {
-                    //         buffer = Uint8Array.of(...buffer,...value)
-                    //         if(!flvHeadRead){
-                    //             if(buffer.byteLength>=13){
-                    //                 flvHeadRead = true;
-                    //                 buffer = buffer.subarray(13)
-                    //             }
-                    //         }else{
-                    //             while(buffer.length>3){
-                    //                 var type = buffer[0]
-                    //                 var length = (buffer[1]<<16)|(buffer[2]<<8)|(buffer[3])
-                    //                 if(buffer.length-4<length+11){
-                    //                     break
-                    //                 }
-                    //                 var timestamp = (buffer[4]<<16)|(buffer[5]<<8)|(buffer[6])
-                    //                 //var payload = buffer.subarray(11,11+length)
-                    //                 switch(type){
-                    //                     case 8:
-                    //                         _this.onAudio(timestamp,buffer.buffer.slice(buffer.byteOffset+11,buffer.byteOffset+11+length))
-                    //                     case 9:
-                    //                         _this.onVideo(timestamp,buffer.buffer.slice(buffer.byteOffset+11,buffer.byteOffset+11+length))
-                    //                 }
-                    //                 buffer = buffer.subarray(11+length+4)
-                    //             }
-                    //         }
-                    //     }
-                    //     reader.read().then(processData)
-                    // })
                 }).catch(console.error)
             },
             close: function () {
@@ -255,7 +200,6 @@ mergeInto(LibraryManager.library, {
 
         });
         var decoder = new Module.Jessibuca()
-        decoder.videoBuffer = 1000
         self.onmessage = function (event) {
             var msg = event.data
             switch (msg.cmd) {
@@ -264,14 +208,15 @@ mergeInto(LibraryManager.library, {
                     decoder.play(msg.url)
                     break
                 case "setBuffer":
-                    decoder.buffers[0].push(msg.buffers[0])
-                    decoder.buffers[1].push(msg.buffers[1])
-                    decoder.buffers[2].push(msg.buffers[2])
+                    decoder.buffers[0].push(msg.buffer[0])
+                    decoder.buffers[1].push(msg.buffer[1])
+                    decoder.buffers[2].push(msg.buffer[2])
                     break
                 case "setBufferA":
                     decoder.buffersA.forEach((array, i) => array.push(msg.buffers[i]))
+                    break
                 case "setVideoBuffer":
-                    decoder.videoBuffer = msg.cmd * 1000
+                    decoder.videoBuffer =(msg.time * 1000)|0
                     break
                 case "close":
                     decoder.close()
