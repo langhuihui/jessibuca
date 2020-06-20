@@ -68,7 +68,7 @@ struct Jessica
         smatch urlm;
         regex_match(url, urlm, regex("(ws|http)s?://([^/:]+)(:\\d+)?(/.*)?"));
         string protocol(urlm.str(1));
-        if (!regex_match(urlm.str(2),  regex("(demo\\.monibuca\\.com|localhost|[\\d\\.]+)"))){
+        if (!regex_match(urlm.str(2),  regex("(.+\\.monibuca\\.com|localhost|[0-9\\.]+)"))){
             emscripten_log(1, "%s Unauthorized",urlm.str(2).c_str());
             return;
         }
@@ -77,7 +77,6 @@ struct Jessica
         emscripten_log(0, "webgl:%s", webgl ? "true" : "false");
         videoDecoder.webgl = webgl;
         flvMode = url.find(".flv") != string::npos;
-        // #define WS_PREFIX "ws://test.qihaipi.com/gnddragon/"
         lastDataTime = clock();
         if(protocol == "http") {
             call<void>("fetch",url);
