@@ -1,0 +1,7 @@
+title= 'Jessibuca'
+description= '一款纯H5直播流播放器'
+[themeConfig]
+repo = "langhuihui/jessibuca"
+docsBranch = "worker"
+sidebar = "auto"
+logo = 'logo.png'
