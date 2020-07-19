@@ -1,6 +1,23 @@
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 function Jessibuca(opt) {
-    this.canvasElement = opt.canvas;
+    this.canvasElement = document.createElement("canvas");
+    this.canvasElement.style.position = "absolute"
+    this.canvasElement.style.top = 0
+    this.canvasElement.style.left = 0
+    opt.container.appendChild(this.canvasElement)
+    this.width = opt.container.clientWidth
+    this.height = opt.container.clientHeight
+    this.container = opt.container
+    this.container.style.overflow = "hidden"
+    this.containerOldPostion = {
+        position: this.container.style.position,
+        top: this.container.style.top,
+        left: this.container.style.left,
+        width: this.container.style.width,
+        height: this.container.style.height
+    }
+    if (this.containerOldPostion.position != "absolute")
+        this.container.style.position = "relative"
     this.contextOptions = opt.contextOptions;
     this.videoBuffer = opt.videoBuffer || 0
     if (!opt.forceNoGL) this.initContextGL();
@@ -28,8 +45,10 @@ function Jessibuca(opt) {
                 }
                 break
             case "initSize":
-                _this.width = msg.w
-                _this.height = msg.h
+                _this.canvasElement.width = msg.w
+                _this.canvasElement.height = msg.h
+                _this.resize()
+                console.log("video size:", msg.w, msg.h)
                 if (_this.isWebGL()) {
                     // var buffer = new ArrayBuffer(msg.w * msg.h + (msg.w * msg.h >> 1))
                     // this.postMessage({ cmd: "setBuffer", buffer: buffer }, [buffer])
@@ -50,10 +69,10 @@ function Jessibuca(opt) {
                 //     draw(msg.output)
                 // }
                 if (_this.contextGL) {
-                    _this.drawNextOuptutPictureGL(_this.width, _this.height, null, msg.output);
-                   // this.postMessage({ cmd: "setBuffer", buffer: msg.output }, [msg.output[0].buffer, msg.output[1].buffer, msg.output[2].buffer])
+                    _this.drawNextOuptutPictureGL(msg.output);
+                    // this.postMessage({ cmd: "setBuffer", buffer: msg.output }, [msg.output[0].buffer, msg.output[1].buffer, msg.output[2].buffer])
                 } else {
-                    _this.drawNextOuptutPictureRGBA(_this.width, _this.height, null, msg.buffer);
+                    _this.drawNextOuptutPictureRGBA(msg.buffer);
                 }
                 break
             case "initAudio":
@@ -76,7 +95,7 @@ function Jessibuca(opt) {
 Jessibuca.prototype.initAudioPlanar = function (msg) {
     var channels = msg.channels
     var samplerate = msg.samplerate
-    console.log("initAudioPlanar:","channles:",channels,"samplerate:",samplerate)
+    console.log("initAudioPlanar:", "channles:", channels, "samplerate:", samplerate)
     var context = this.audioContext;
     var isPlaying = false;
     var audioBuffers = [];
@@ -84,13 +103,13 @@ Jessibuca.prototype.initAudioPlanar = function (msg) {
     var _this = this
     this.playAudio = function (buffer) {
         var frameCount = buffer[0][0].length
-        var audioBuffer = context.createBuffer(channels, frameCount*buffer.length, samplerate);
+        var audioBuffer = context.createBuffer(channels, frameCount * buffer.length, samplerate);
         var copyToCtxBuffer = function (fromBuffer) {
             for (var channel = 0; channel < channels; channel++) {
                 var nowBuffering = audioBuffer.getChannelData(channel);
-                for( var j=0;j<buffer.length;j++){
+                for (var j = 0; j < buffer.length; j++) {
                     for (var i = 0; i < frameCount; i++) {
-                        nowBuffering[i+j*frameCount] = fromBuffer[j][channel][i]
+                        nowBuffering[i + j * frameCount] = fromBuffer[j][channel][i]
                     }
                     //postMessage({ cmd: "setBufferA", buffer: fromBuffer[j] }, '*', fromBuffer[j].map(x => x.buffer))
                 }
@@ -105,7 +124,7 @@ Jessibuca.prototype.initAudioPlanar = function (msg) {
             //if (audioBuffers.length > 1) audioBuffers.shift();
         };
         var playAudio = function (fromBuffer) {
-            if(!fromBuffer)return
+            if (!fromBuffer) return
             if (isPlaying) {
                 audioBuffers.push(fromBuffer);
                 //console.log(audioBuffers.length)
@@ -440,39 +459,39 @@ Jessibuca.prototype.initTexture = function () {
  * If this object is using WebGL, the data must be an I420 formatted ArrayBuffer,
  * Otherwise, data must be an RGBA formatted ArrayBuffer.
  */
-Jessibuca.prototype.drawNextOutputPicture = function (width, height, croppingParams, data) {
-    var gl = this.contextGL;
-    if (gl) {
-        this.drawNextOuptutPictureGL(width, height, croppingParams, data);
+Jessibuca.prototype.drawNextOutputPicture = function (data) {
+    if (this.contextGL) {
+        this.drawNextOuptutPictureGL(data);
     } else {
-        this.drawNextOuptutPictureRGBA(width, height, croppingParams, data);
+        this.drawNextOuptutPictureRGBA(data);
     }
 };
 
 /**
  * Draw the next output picture using WebGL
  */
-Jessibuca.prototype.drawNextOuptutPictureGL = function (width, height, croppingParams, data) {
+Jessibuca.prototype.drawNextOuptutPictureGL = function (data) {
     var gl = this.contextGL;
     var texturePosBuffer = this.texturePosBuffer;
     var yTextureRef = this.yTextureRef;
     var uTextureRef = this.uTextureRef;
     var vTextureRef = this.vTextureRef;
-    this.contextGL.viewport(0, 0, this.canvasElement.width, this.canvasElement.height);
-    // if (!croppingParams) {
-    //     gl.viewport(0, 0, width, height);
-    // } else {
-    //     gl.viewport(0, 0, croppingParams.width, croppingParams.height);
+    var croppingParams = this.croppingParams
+    var width = this.canvasElement.width
+    var height = this.canvasElement.height
+    if (croppingParams) {
+        gl.viewport(0, 0, croppingParams.width, croppingParams.height);
+        var tTop = croppingParams.top / height;
+        var tLeft = croppingParams.left / width;
+        var tBottom = croppingParams.height / height;
+        var tRight = croppingParams.width / width;
+        var texturePosValues = new Float32Array([tRight, tTop, tLeft, tTop, tRight, tBottom, tLeft, tBottom]);
 
-    //     var tTop = croppingParams.top / height;
-    //     var tLeft = croppingParams.left / width;
-    //     var tBottom = croppingParams.height / height;
-    //     var tRight = croppingParams.width / width;
-    //     var texturePosValues = new Float32Array([tRight, tTop, tLeft, tTop, tRight, tBottom, tLeft, tBottom]);
-
-    //     gl.bindBuffer(gl.ARRAY_BUFFER, texturePosBuffer);
-    //     gl.bufferData(gl.ARRAY_BUFFER, texturePosValues, gl.DYNAMIC_DRAW);
-    // }
+        gl.bindBuffer(gl.ARRAY_BUFFER, texturePosBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, texturePosValues, gl.DYNAMIC_DRAW);
+    } else {
+        gl.viewport(0, 0, this.canvasElement.width, this.canvasElement.height);
+    }
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, yTextureRef);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width, height, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, data[0]);
@@ -491,7 +510,7 @@ Jessibuca.prototype.drawNextOuptutPictureGL = function (width, height, croppingP
 /**
  * Draw next output picture using ARGB data on a 2d canvas.
  */
-Jessibuca.prototype.drawNextOuptutPictureRGBA = function (width, height, croppingParams, data) {
+Jessibuca.prototype.drawNextOuptutPictureRGBA = function (data) {
     // var canvas = this.canvasElement;
     //var argbData = data;
     //var ctx = canvas.getContext('2d');
@@ -499,6 +518,7 @@ Jessibuca.prototype.drawNextOuptutPictureRGBA = function (width, height, croppin
     //this.imageData = this.ctx2d.getImageData(0, 0, width, height);
     this.imageData.data.set(data);
     //Module.print(typeof this.imageData.data);
+    let croppingParams = this.croppingParams
     if (!croppingParams) {
         this.ctx2d.putImageData(this.imageData, 0, 0);
     } else {
@@ -528,4 +548,28 @@ Jessibuca.prototype.destroy = function () {
 }
 Jessibuca.prototype.play = function (url) {
     this.decoderWorker.postMessage({ cmd: "play", url: url, isWebGL: this.isWebGL() })
+}
+Object.defineProperty(Jessibuca.prototype, "fullscreen", {
+    set(value) {
+        if (value) {
+            this.container.style.position = "fixed"
+            this.container.style.width = "100vw"
+            this.container.style.height = "100vh"
+            this.container.style.top = 0;
+            this.container.style.left = 0;
+        } else {
+            Object.assign(this.container.style, this.containerOldPostion)
+        }
+        this.resize()
+    }
+})
+Jessibuca.prototype.resize = function () {
+    this.width = this.container.clientWidth
+    this.height = this.container.clientHeight
+    let wScale = this.width / this.canvasElement.width
+    let hScale = this.height / this.canvasElement.height
+    let scale = wScale > hScale ? hScale : wScale
+    this.canvasElement.style.transform = "scale(" + scale + ")"
+    this.canvasElement.style.left = ((this.width - this.canvasElement.width) / 2) + "px"
+    this.canvasElement.style.top = ((this.height - this.canvasElement.height) / 2) + "px"
 }

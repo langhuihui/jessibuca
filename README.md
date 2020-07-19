@@ -4,7 +4,7 @@ heroImage: /logo.png
 heroText: Jessibuca
 tagline: 纯H5直播流播放器
 actionText: 打开播放器
-actionLink: /zh/guide/
+actionLink: javascript:alert(1)
 sidebarDepth: 2
 sidebar: auto
 features:

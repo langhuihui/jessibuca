@@ -65,20 +65,20 @@ struct Jessica
         {
             call<void>("close");
         }
-        smatch urlm;
-        regex_match(url, urlm, regex("(ws|http)s?://([^/:]+)(:\\d+)?(/.*)?"));
-        string protocol(urlm.str(1));
-        if (!regex_match(urlm.str(2),  regex("(.+\\.monibuca\\.com|localhost|[0-9\\.]+)"))){
-            emscripten_log(1, "%s Unauthorized",urlm.str(2).c_str());
-            return;
-        }
+        // smatch urlm;
+        // regex_match(url, urlm, regex("(ws|http)s?://([^/:]+)(:\\d+)?(/.*)?"));
+        // string protocol(urlm.str(1));
+        // if (!regex_match(urlm.str(2),  regex("(.+\\.monibuca\\.com|localhost|[0-9\\.]+)"))){
+        //     emscripten_log(1, "%s Unauthorized",urlm.str(2).c_str());
+        //     return;
+        // }
         isPlaying = true;
         bool webgl = wrapped["isWebGL"].as<bool>();
         emscripten_log(0, "webgl:%s", webgl ? "true" : "false");
         videoDecoder.webgl = webgl;
         flvMode = url.find(".flv") != string::npos;
         lastDataTime = clock();
-        if(protocol == "http") {
+        if(url.find("http") == 0) {
             call<void>("fetch",url);
         }else{
 #ifdef WS_PREFIX

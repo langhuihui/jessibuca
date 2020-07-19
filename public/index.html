@@ -74,8 +74,7 @@
 </head>
 
 <body>
-    <div class="player-wrapper">
-        <canvas id="canvas" style="background-color: #0D0E1B"></canvas>
+    <div class="player-wrapper" id="container" style="background-color: #0D0E1B;width:900px;height:500px">
     </div>
     <div class="btn-wrapper" id="playDom">
         <button class="btn" id="play">播放</button>
@@ -85,7 +84,7 @@
             <button class="btn btn-danger" id="stop">结束</button>
         </div>
     </div>
-
+    <button class="btn" onclick="h5lc.fullscreen=true">全屏</button>
     <div id="logout" class="logs">
     </div>
 
@@ -94,24 +93,25 @@
     <script>
         onerror = handleErr;
         var txt = "";
-
+        window.onkeydown = function(){
+            h5lc.fullscreen=false
+        }
         var $play = document.getElementById('play');
         var $stop = document.getElementById('stop');
         var $playDom = document.getElementById('playDom');
         var $stopDom = document.getElementById('stopDom');
-        var canvas = document.getElementById("canvas");
+        var container = document.getElementById("container");
         var isPlaying = false;
-        disabledMouseWheel(canvas);
-        canvas.width = 900;
-        canvas.height = 500;
+        disabledMouseWheel(container);
         let stream = queryParam('stream') || 'user1';
         let decoder = queryParam('decoder') || 'ff';
         let source = queryParam('source') || 'localhost';
-        var h5lc = new Jessibuca({ canvas, decoder: decoder + ".js" ,videoBuffer:0});
+        var h5lc = new Jessibuca({ container, decoder: decoder + ".js" ,videoBuffer:0});
 
         h5lc.onLoad = function () {
-            // this.play("http://localhost/live/user1.flv")
-            this.play("ws://" + source + ":8080/live/" + stream)
+            this.play("wss://pulls.1234326.cn/live/L01.flv")
+            //this.play("ws://localhost:8080/live/rtc.flv")
+            //this.play("ws://" + source + ":8080/live/" + stream)
             //this.play("ws://pull3.afb1188.com/live/" + stream + ".flv")
             //this.play("ws://pull2.afb1188.com/live/" + stream + ".flv")
         }
@@ -232,7 +232,6 @@
             document.getElementById("logout").innerHTML += txt + "<br>";
             return true;
         }
-
     </script>
 
 </body>
