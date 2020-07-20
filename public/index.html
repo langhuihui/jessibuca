@@ -93,8 +93,8 @@
     <script>
         onerror = handleErr;
         var txt = "";
-        window.onkeydown = function(){
-            h5lc.fullscreen=false
+        window.onkeydown = function () {
+            h5lc.fullscreen = false
         }
         var $play = document.getElementById('play');
         var $stop = document.getElementById('stop');
@@ -106,10 +106,10 @@
         let stream = queryParam('stream') || 'user1';
         let decoder = queryParam('decoder') || 'ff';
         let source = queryParam('source') || 'localhost';
-        var h5lc = new Jessibuca({ container, decoder: decoder + ".js" ,videoBuffer:0});
+        var h5lc = new Jessibuca({ container, decoder: decoder + ".js", videoBuffer: 0 });
 
         h5lc.onLoad = function () {
-            this.play("wss://pulls.1234326.cn/live/L01.flv")
+            //this.play("wss://pulls.1234326.cn/live/L01.flv")
             //this.play("ws://localhost:8080/live/rtc.flv")
             //this.play("ws://" + source + ":8080/live/" + stream)
             //this.play("ws://pull3.afb1188.com/live/" + stream + ".flv")
