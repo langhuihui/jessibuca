@@ -57,7 +57,7 @@ export default {
       this.err = "loading";
     },
     stop() {
-      this.jessibuca.stop();
+      this.jessibuca.close();
       this.playing = false;
       this.err = "";
     },

@@ -1,4 +1,3 @@
-window.AudioContext = window.AudioContext || window.webkitAudioContext;
 function Jessibuca(opt) {
     this.canvasElement = document.createElement("canvas");
     this.canvasElement.style.position = "absolute"
@@ -21,7 +20,7 @@ function Jessibuca(opt) {
     this.contextOptions = opt.contextOptions;
     this.videoBuffer = opt.videoBuffer || 0
     if (!opt.forceNoGL) this.initContextGL();
-    this.audioContext = new window.AudioContext();
+    this.audioContext = new AudioContext();
     if (opt.mute) {
         this.audioEnabled(true)
         this.audioEnabled(false)
