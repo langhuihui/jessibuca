@@ -11,6 +11,13 @@
         <button @click="fullscreen">全屏</button>
       </div>
       <div class="err" v-show="!playing">{{err}}</div>
+      <div class="option">
+        <input type="checkbox" ref="wasm" @change="changeWasm"><span class="wasm">wasm</span>
+        <select ref="vc" @change="changeVC">
+          <option selected>h264</option>
+          <option>h265</option>
+        </select>
+      </div>
     </div>
   </div>
 </template>
@@ -21,10 +28,16 @@ export default {
   data() {
     return {
       jessibuca: null,
-      decoder: "ff",
+      wasm:false,
+      vc:"ff",
       playing: false,
       err: ""
     };
+  },
+  computed:{
+    decoder(){
+      return this.vc+(this.wasm?"_wasm":"")+".js"
+    }
   },
   watch: {
     decoder(v) {
@@ -33,16 +46,17 @@ export default {
       }
       this.jessibuca = new Jessibuca({
         container: this.$refs.container,
-        decoder: v + ".js",
+        decoder: v,
         videoBuffer: 0.2
       });
       this.jessibuca.onPlay = () => (this.playing = true);
+      this.playing = false;
     }
   },
   mounted() {
     this.jessibuca = new Jessibuca({
       container: this.$refs.container,
-      decoder: this.decoder + ".js",
+      decoder: this.decoder,
       videoBuffer: 0.2
     });
     this.jessibuca.onPlay = () => (this.playing = true);
@@ -63,7 +77,13 @@ export default {
     },
     fullscreen() {
       this.jessibuca.fullscreen = true;
-    }
+    },
+    changeVC(){
+      this.vc = ["ff","libhevc_aac"][this.$refs.vc.selectedIndex]
+    },
+    changeWasm(){
+      this.wasm = this.$refs.wasm.checked
+    },
   }
 };
 </script>
@@ -111,6 +131,16 @@ export default {
   top: 40px;
   left: 10px;
   color: red;
+}
+.option {
+  position: absolute;
+  top:4px;
+  right:10px;
+  display: flex;
+  place-content: center;
+}
+.wasm{
+  color: white;
 }
 @media (max-width: 720px) {
   #container {

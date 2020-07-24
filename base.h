@@ -158,3 +158,15 @@ inline void yuv420toRGB(u8 *Y, u8 *U, u8 *V, u8 *heap, u32 width, u32 height)
 #include "broadway.h"
 #define VIDEO_DECODER Broadway
 #endif
+#ifndef AUDIO_DECODER
+#ifdef USE_AAC
+#include "libfaac.h"
+#define AUDIO_DECODER AACDecoder
+#elif USE_MP3
+#include "mp3Decoder.h"
+#define AUDIO_DECODER MP3Decoder
+#elif USE_SPEEX
+#include "speex.h"
+#define AUDIO_DECODER SpeexDecoder
+#endif
+#endif

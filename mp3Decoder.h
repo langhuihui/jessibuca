@@ -1,3 +1,4 @@
+#include "libmad/mad.h"
 extern "C"
 {
     int decode_header(struct mad_header * header, struct mad_stream * stream);
@@ -39,7 +40,7 @@ extern "C"
                                      struct sideinfo * si, unsigned int nch);
 }
 
-class MP3Decoder
+class MP3Decoder : public AudioDecoder
 {
     mad_stream inputStream;
     mad_frame frame;
@@ -47,17 +48,31 @@ class MP3Decoder
 	IOBuffer lastInput;
 	IOBuffer mainBuffer;
   public:
-    MP3Decoder()
+    MP3Decoder():AudioDecoder()
     {
         mad_stream_init(&inputStream);
         mad_frame_init(&frame);
         mad_synth_init(&synth);
         emscripten_log(0, "mp3 init!");
     }
-    ~MP3Decoder()
+    virtual ~MP3Decoder()
     {
         mad_synth_finish(&synth);
         mad_frame_finish(&frame);
+    }
+    signed int scale(mad_fixed_t sample)
+    {
+        /* round */
+        sample += (1L << (MAD_F_FRACBITS - 16));
+
+        /* clip */
+        if (sample >= MAD_F_ONE)
+            sample = MAD_F_ONE - 1;
+        else if (sample < -MAD_F_ONE)
+            sample = -MAD_F_ONE;
+
+        /* quantize */
+        return sample >> (MAD_F_FRACBITS + 1 - 16);
     }
     int decodeHeader(unsigned const char *headerPtr)
     {
@@ -199,18 +214,60 @@ class MP3Decoder
         mainBuffer.removeConsume();
         return 0;
     }
-    int decode(IOBuffer&input)
+    int _decode(IOBuffer&input) override
     {
+        u8* output = outputBuffer + bufferFilled;
+        u8* end = outputBuffer + bufferLength;
         //frame.options = inputStream.options;
         /*int oldSize=lastInput.size();
         lastInput.data.resize(lastInput.size()+input.length());
         memcpy((void*)(lastInput.data.data()+oldSize), input.point(), input.length());*/
 		lastInput << input;
-        return decode();
-    }
-
-    mad_pcm &getPCM()
-    {
-        return synth.pcm;
+        int ret = decode();
+        int samplesBytes = 0;
+		while (ret != -1)
+		{
+			mad_pcm &pcm = synth.pcm;
+			unsigned int nchannels, nsamples;
+			mad_fixed_t const *left_ch, *right_ch;
+			nchannels = pcm.channels;
+			nsamples = pcm.length;
+			left_ch = pcm.samples[0];
+			right_ch = pcm.samples[1];
+			samplesBytes += nsamples * 2 * nchannels;
+			//i16 left_output[576];
+			//emscripten_log(0,"%d %d",left_ch[0],left_ch[1])
+			while (nsamples--)
+			{
+				signed int sample;
+				/* output sample(s) in 16-bit signed little-endian PCM */
+				sample = scale(*left_ch++);
+				(*output++) = ((sample >> 0) & 0xff);
+				(*output++) = ((sample >> 8) & 0xff);
+				if (nchannels == 2)
+				{
+					sample = scale(*right_ch++);
+					(*output++) = ((sample >> 0) & 0xff);
+					(*output++) = ((sample >> 8) & 0xff);
+				}
+				//memcpy(output, &sample, 2);
+				//output+=2;
+				//*(left_output++) = (i16)sample;
+				// if (nchannels == 2) {
+				//   sample = scale(*right_ch++);
+				//   putchar((sample >> 0) & 0xff);
+				//   putchar((sample >> 8) & 0xff);
+				// }
+			}
+			//memcpy(output, left_output, 1152);
+			// output += 1152;
+			if (output >= end)
+			{
+				return samplesBytes;
+			}
+			//emscripten_log(0, "mad_frame_decode channels:%d nsamples:%d",nchannels,nsamples);
+			ret = decode();
+		}
+        return samplesBytes;
     }
 };

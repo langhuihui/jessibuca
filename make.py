@@ -53,7 +53,7 @@ if video_codec == '-DUSE_LIBHEVC':
     emcc_args.append('-Dasm=printf')
     emcc_args.append('-Ithirdparty/libhevc/decoder')
     emcc_args.append('-Ithirdparty/libhevc/common')
-    object_files.append('libhevc.bc')
+    object_files.append('obj/libhevc.bc')
 elif video_codec == '-DUSE_LIBDE265':
     emcc_args.append('-Ithirdparty/libde265')
     object_files.append('libde265.bc')
@@ -65,12 +65,12 @@ else:
     object_files.append('avc.bc')
 if audio_codec == '-DUSE_AAC':
     emcc_args.append('-Ithirdparty/aacDecoder/include')
-    object_files.append('aac.bc')
+    object_files.append('obj/aac.bc')
 elif audio_codec == '-DUSE_SPEEX':
     emcc_args.append('-Ithirdparty/speex-1.2rc2/include')
-    object_files.append('libspeex.bc')
+    object_files.append('obj/libspeex.bc')
 elif audio_codec == '-DUSE_MP3':
-    object_files.append('mp3.bc')
+    object_files.append('obj/mp3.bc')
 print (object_files)
 # emscripten.Building.emcc('Jessibuca.cpp', [os.path.join(
 #     'obj', x) for x in object_files]+emcc_args, output_file)

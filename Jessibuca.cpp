@@ -236,7 +236,7 @@ struct Jessica
             {
             case 10: //AAC
                 // initAudio(audioBuffer * 1024, rate, channels);
-                audioDecoder.decode(audioType, ms);
+                audioDecoder.decode(ms);
                 initAudio(audioBuffer * 1024, audioDecoder.samplerate, audioDecoder.channels);
                 return;
             case 11: //Speex
@@ -247,7 +247,7 @@ struct Jessica
                 break;
             }
         }
-        if (!waitFirstAudio && audioDecoder.decode(audioType, ms))
+        if (!waitFirstAudio && audioDecoder.decode(ms))
             call<void>("playAudio");
     }
     void initAudio(int frameCount, int samplerate, int channels)

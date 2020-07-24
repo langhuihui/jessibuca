@@ -43,10 +43,10 @@ def compile(path):
     build_files = source_files
     for file in build_files:
         target = file.replace('.c', '.o')
-        if not os.path.exists(os.path.join('obj', target)):
-            print 'emcc %s -> %s' % (file, target)
+        # if not os.path.exists(os.path.join('obj', target)):
+        #     print('emcc %s -> %s' % (file, target))
             
-            os.system('emcc '+os.path.join(path, file)+' ' + (' '.join(emcc_args)) +
+        os.system('emcc '+os.path.join(path, file)+' ' + (' '.join(emcc_args)) +
                     ' -o '+os.path.join('obj', target))
 
         #emscripten.Building.emcc(file, emcc_args, os.path.join('obj', target))
@@ -58,7 +58,7 @@ def compile(path):
 object_files = compile('common')+compile('decoder') + \
     compile('decoder/mips')+compile('common/mips')
 
-print 'link -> %s' % 'libhevc.bc'
+print('link -> %s' % 'libhevc.bc')
 os.system('emcc '+(' '.join(object_files))+' -o ../../obj/libhevc.bc')
 #emscripten.Building.link(object_files, '../obj/h265.bc')
 # print 'link -> %s' % 'MonaClient.bc'
@@ -70,4 +70,4 @@ os.system('emcc '+(' '.join(object_files))+' -o ../../obj/libhevc.bc')
 # emscripten.Building.link(object_files, '../obj/MonaClient.bc')
 # print 'emcc -> %s' % 'MonaClient.js'
 # emscripten.Building.emcc('../obj/MonaClient.bc', emcc_args, '../js/MonaClient.js')
-print 'done'
+print('done')

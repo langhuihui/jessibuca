@@ -88,15 +88,15 @@ source_files =[
 build_files =source_files
 for file in build_files:
   target = file.replace('.c', '.o')
-  print 'emcc %s -> %s' % (file, target)
+  print('emcc %s -> %s' % (file, target)) 
   emscripten.Building.emcc(file, emcc_args, os.path.join('obj', target))
 
 object_files = [os.path.join('obj', x.replace('.c', '.o')) for x in source_files]
-print 'link -> %s' % 'aac.bc'
-os.system('emcc '+ (' '.join(object_files)) +' -o ../obj/aac.bc')
+print('link -> %s' % 'aac.bc')
+os.system('emcc '+ (' '.join(object_files)) +' -o ../../obj/aac.bc')
 # emscripten.Building.link(object_files, '../obj/aac.bc')
 # print 'link -> %s' % 'MonaClient.bc'
 # emscripten.Building.link(['../obj/avc.bc','../obj/aac.bc','../obj/libspeex.bc','../obj/MonaClient.o'], '../obj/MonaClient.bc')
 # print 'emcc -> %s' % 'MonaClient.js'
 # emscripten.Building.emcc('../obj/MonaClient.bc', emcc_args, '../js/MonaClient.js')
-print 'done'
+print('done')
