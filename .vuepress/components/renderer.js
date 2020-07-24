@@ -20,7 +20,7 @@ function Jessibuca(opt) {
     this.contextOptions = opt.contextOptions;
     this.videoBuffer = opt.videoBuffer || 0
     if (!opt.forceNoGL) this.initContextGL();
-    this.audioContext = new AudioContext();
+    this.audioContext = new (window.AudioContext||window.webkitAudioContext)();
     if (opt.mute) {
         this.audioEnabled(true)
         this.audioEnabled(false)
@@ -83,9 +83,15 @@ function Jessibuca(opt) {
                 _this.playAudio(msg.buffer)
                 break
             case "print":
+                if(_this.onLog){
+                    _this.onLog(msg.text)
+                }
                 console.log(msg.text);
                 break
             case "printErr":
+                if(_this.onLog){
+                    _this.onLog(msg.text)
+                }
                 console.error(msg.text);
                 break
             default:
@@ -519,7 +525,7 @@ Jessibuca.prototype.drawNextOuptutPictureRGBA = function (data) {
     //this.imageData = this.ctx2d.getImageData(0, 0, width, height);
     this.imageData.data.set(data);
     //Module.print(typeof this.imageData.data);
-    let croppingParams = this.croppingParams
+    var croppingParams = this.croppingParams
     if (!croppingParams) {
         this.ctx2d.putImageData(this.imageData, 0, 0);
     } else {
@@ -570,9 +576,9 @@ Object.defineProperty(Jessibuca.prototype, "fullscreen", {
 Jessibuca.prototype.resize = function () {
     this.width = this.container.clientWidth
     this.height = this.container.clientHeight
-    let wScale = this.width / this.canvasElement.width
-    let hScale = this.height / this.canvasElement.height
-    let scale = wScale > hScale ? hScale : wScale
+    var wScale = this.width / this.canvasElement.width
+    var hScale = this.height / this.canvasElement.height
+    var scale = wScale > hScale ? hScale : wScale
     this.canvasElement.style.transform = "scale(" + scale + ")"
     this.canvasElement.style.left = ((this.width - this.canvasElement.width) / 2) + "px"
     this.canvasElement.style.top = ((this.height - this.canvasElement.height) / 2) + "px"

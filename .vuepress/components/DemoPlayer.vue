@@ -44,28 +44,27 @@ export default {
       if (this.jessibuca) {
         this.jessibuca.destroy();
       }
-      this.jessibuca = new Jessibuca({
-        container: this.$refs.container,
-        decoder: v,
-        videoBuffer: 0.2
-      });
-      this.jessibuca.onPlay = () => (this.playing = true);
+      this.create()
       this.playing = false;
     }
   },
   mounted() {
-    this.jessibuca = new Jessibuca({
-      container: this.$refs.container,
-      decoder: this.decoder,
-      videoBuffer: 0.2
-    });
-    this.jessibuca.onPlay = () => (this.playing = true);
-    onerror = msg => (this.err = msg);
+    this.create()
+    window.onerror = msg => (this.err = msg);
   },
   destroyed() {
     this.jessibuca.destroy();
   },
   methods: {
+    create(){
+      this.jessibuca = new Jessibuca({
+        container: this.$refs.container,
+        decoder: this.decoder,
+        videoBuffer: 0.2
+      });
+      this.jessibuca.onPlay = () => (this.playing = true);
+      this.jessibuca.onLog = msg=>(this.err=msg);
+    },
     play() {
       this.jessibuca.play(this.$refs.playUrl.value);
       this.err = "loading";
