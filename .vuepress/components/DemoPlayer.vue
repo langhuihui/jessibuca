@@ -12,7 +12,9 @@
       </div>
       <div class="err" v-show="!playing">{{err}}</div>
       <div class="option">
-        <input type="checkbox" ref="wasm" @change="changeWasm"><span class="wasm">wasm</span>
+        <span>缓冲:</span>
+        <input style="width:50px" type="number" ref="buffer" value="0.2" @change="changeBuffer">
+        <input type="checkbox" ref="wasm" @change="changeWasm"><span>wasm</span>
         <select ref="vc" @change="changeVC">
           <option selected>h264</option>
           <option>h265</option>
@@ -60,12 +62,12 @@ export default {
       this.jessibuca = new Jessibuca({
         container: this.$refs.container,
         decoder: this.decoder,
-        videoBuffer: 0.2
+        videoBuffer: Number(this.$refs.buffer.value)
       });
-      this.jessibuca.onPlay = () => (this.playing = true);
       this.jessibuca.onLog = msg=>(this.err=msg);
     },
     play() {
+      this.jessibuca.onPlay = () => (this.playing = true);
       this.jessibuca.play(this.$refs.playUrl.value);
       this.err = "loading";
     },
@@ -83,6 +85,9 @@ export default {
     changeWasm(){
       this.wasm = this.$refs.wasm.checked
     },
+    changeBuffer(){
+      this.jessibuca.decoderWorker.postMessage({ cmd: "setVideoBuffer", time: Number(this.$refs.buffer.value) })
+    }
   }
 };
 </script>
@@ -138,7 +143,7 @@ export default {
   display: flex;
   place-content: center;
 }
-.wasm{
+.option span{
   color: white;
 }
 @media (max-width: 720px) {
