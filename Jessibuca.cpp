@@ -196,7 +196,7 @@ struct Jessica
         if(!bytesCount)return;
         if (!waitFirstAudio)
         {
-            call<void>("playAudioPlanar", int(audioDecoder.frame->data), bytesCount);
+            call<void>("playAudioPlanar", int(audioDecoder.frame->data), bytesCount,timestamp);
         }
         else
         {
@@ -248,7 +248,7 @@ struct Jessica
             }
         }
         if (!waitFirstAudio && audioDecoder.decode(ms))
-            call<void>("playAudio");
+            call<void>("playAudio",timestamp);
     }
     void initAudio(int frameCount, int samplerate, int channels)
     {
@@ -292,6 +292,7 @@ struct Jessica
         if (videoBuffers.size()>1)
         {
             auto &v = videoBuffers.front();
+            videoDecoder.timestamp = v.timestamp;
             videoDecoder.decode(v.data);
             videoBuffers.pop();
             auto timeout = videoBuffers.front().timestamp - v.timestamp;

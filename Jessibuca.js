@@ -114,11 +114,11 @@ mergeInto(LibraryManager.library, {
                 //         target[i] = audioOutputArray[i] / 32768;
                 //     }
                 // };
-                this.playAudio = function () {
+                this.playAudio = function (ts) {
                     // var buffer = new Float32Array(resampled ? allFrameCount * 2 : allFrameCount);
                     // copyAudioOutputArray(buffer)
                     // postMessage({ cmd: "playAudio", buffer: buffer }, [buffer.buffer])
-                    postMessage({ cmd: "playAudio", buffer: audioOutputArray })
+                    postMessage({ cmd: "playAudio", buffer: audioOutputArray ,ts:ts})
                 }
             },
             playAudio(data, len) {
@@ -136,7 +136,7 @@ mergeInto(LibraryManager.library, {
                 }
                 postMessage({ cmd: "initAudioPlanar", samplerate: samplerate, channels: channels })
             },
-            playAudioPlanar(data, len) {
+            playAudioPlanar(data, len,ts) {
                 var outputArray = [];
                 var frameCount = len / 4 / this.buffersA.length;
                 for (var i = 0; i < this.buffersA.length; i++) {
@@ -155,7 +155,7 @@ mergeInto(LibraryManager.library, {
                 }
                 this.audioCache.push(outputArray)
                 if (this.audioCache.length >= this.audioBuffer) {
-                    postMessage({ cmd: "playAudio", buffer: this.audioCache }, this.audioCache.flatMap(outputArray=>outputArray.map(x=>x.buffer)))
+                    postMessage({ cmd: "playAudio", buffer: this.audioCache,ts:ts }, this.audioCache.flatMap(outputArray=>outputArray.map(x=>x.buffer)))
                     this.audioCache.length = 0
                 }
             },
@@ -179,7 +179,7 @@ mergeInto(LibraryManager.library, {
                 this.buffers = [[], [], []]
                 var size = w * h
                 if (this.isWebGL) {
-                    this.draw = function (compositionTime) {
+                    this.draw = function (compositionTime,ts) {
                         var y = HEAPU32[dataPtr];
                         var u = HEAPU32[dataPtr + 1];
                         var v = HEAPU32[dataPtr + 2];
@@ -187,7 +187,7 @@ mergeInto(LibraryManager.library, {
                         var outputArray = [HEAPU8.subarray(y, y + size), HEAPU8.subarray(u, u + (size >> 2)), HEAPU8.subarray(v, v + (size >> 2))];
                         this.setBuffer(outputArray)
                         // var outputArray = [new Uint8Array(this.buffer, 0, size), new Uint8Array(this.buffer, size, size >> 2), new Uint8Array(this.buffer, size + (size >> 2), size >> 2)]
-                        postMessage({ cmd: "render", output: outputArray, compositionTime: compositionTime }, [outputArray[0].buffer, outputArray[1].buffer, outputArray[2].buffer])
+                        postMessage({ cmd: "render", output: outputArray, compositionTime: compositionTime,ts :ts}, [outputArray[0].buffer, outputArray[1].buffer, outputArray[2].buffer])
                     };
                 } else {
                     var outputArray = HEAPU8.subarray(dataPtr, dataPtr + (w * h << 2));

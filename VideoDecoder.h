@@ -22,6 +22,7 @@ public:
 	int NAL_unit_length;
 	bool webgl;
 	u32 compositionTime;
+	u32 timestamp;
 	VideoDecoder() : heap(nullptr), webgl(false), NAL_unit_length(0), videoWidth(0), videoHeight(0)
 	{
 	}
@@ -67,7 +68,7 @@ public:
 		{
 			yuv420toRGB((u8 *)p_yuv[0], (u8 *)p_yuv[1], (u8 *)p_yuv[2], heap, videoWidth, videoHeight);
 		}
-		jsObject->call<void>("draw", compositionTime);
+		jsObject->call<void>("draw", compositionTime,timestamp);
 	}
 
 	virtual void decodeH264Header(IOBuffer &data)
