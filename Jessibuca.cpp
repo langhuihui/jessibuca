@@ -273,6 +273,7 @@ struct Jessica
             if (_timestamp == 0 && lastVideoTimeStamp != 0)
                 return;
             if(videoBuffer == 0){
+                videoDecoder.timestamp = _timestamp;
                 videoDecoder.decode(data);
             }else{
                 videoBuffers.emplace(_timestamp, data);
