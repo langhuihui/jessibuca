@@ -5,31 +5,14 @@
       <div id="container" ref="container"></div>
       <div class="input">
         <div>输入URL：</div>
-        <input autocomplete="on" ref="playUrl" />
+        <input autocomplete="on" ref="playUrl" value="ws://219.138.126.226:18250/34020000001110000101/34020000001320000101"/>
         <button v-if="!playing" @click="play">播放</button>
-        <button v-else @click="stop">停止</button>
-        <button @click="fullscreen">全屏</button>
-        <button v-if="!quieting" @click="quiet">静音</button>
-        <button v-else @click="playAudio">声音</button>
-        <button @click="screenshots">截图</button>
-        <button @click="record">录像</button>
-        <div class="speed">速率：{{speed}}</div>
-      </div>
-      <div class="err" v-show="!playing">{{err}}</div>
-      <div class="option">
-        <span>缓冲:</span>
-        <input style="width:50px" type="number" ref="buffer" value="0.2" @change="changeBuffer">
-        <input type="checkbox" ref="wasm" @change="changeWasm"><span>wasm</span>
-        <select ref="vc" @change="changeVC">
-          <option selected>h264</option>
-          <option>h265</option>
-        </select>
       </div>
     </div>
   </div>
 </template>
 <script>
-import Jessibuca from "./renderer";
+import Jessibuca from "./renderer2";
 export default {
   name: "DemoPlayer",
   props:{
@@ -75,7 +58,7 @@ export default {
       this.jessibuca = new Jessibuca({
         container: this.$refs.container,
         decoder: this.decoder,
-        videoBuffer: Number(this.$refs.buffer.value),
+        videoBuffer: 0.2,
         contextOptions:{
           preserveDrawingBuffer:true // 是否保留缓冲区数据
         }
@@ -83,7 +66,7 @@ export default {
       this.jessibuca.onLog = msg=>(this.err=msg);
     },
     play() {
-      this.jessibuca.onPlay = () => (this.playing = true);
+      // this.jessibuca.onPlay = () => (this.playing = true);
       this.jessibuca.play(this.$refs.playUrl.value);
       this.err = "loading";
     },
@@ -138,6 +121,7 @@ export default {
     changeWasm(){
       this.wasm = this.$refs.wasm.checked
     },
+
     changeBuffer(){
       this.jessibuca.decoderWorker.postMessage({ cmd: "setVideoBuffer", time: Number(this.$refs.buffer.value) })
     }
