@@ -43,7 +43,6 @@ function Jessibuca(opt) {
     this.onresize = () => this.resize();
     this.onesc = () => this.esc();
     window.addEventListener("resize", this.onresize);
-    window.addEventListener('keyup', this.onesc);
     this.decoderWorker = new Worker(opt.decoder || 'ff.js')
     var _this = this;
     this._hasInitBtn = false;
@@ -403,6 +402,14 @@ function _throttle(fn, wait) {
             pre = new Date();
         }
     };
+}
+
+function _checkFull() {
+    var isFull = document.fullscreenEnabled || window.fullScreen || document.webkitIsFullScreen || document.msFullscreenEnabled;
+
+    //to fix : false || undefined == undefined
+    if (isFull === undefined) isFull = false;
+    return isFull;
 }
 
 Jessibuca.prototype._updateBPS = _throttle(function (bps) {
@@ -905,7 +912,7 @@ Jessibuca.prototype.close = function () {
 Jessibuca.prototype.destroy = function () {
     this.decoderWorker.terminate()
     window.removeEventListener("resize", this.onresize);
-    window.removeEventListener('keyup',this.onesc);
+    window.removeEventListener('keyup', this.onesc);
 }
 /**
  * play
@@ -945,10 +952,8 @@ Jessibuca.prototype.resize = function () {
     this.canvasElement.style.transform = "scale(" + scale + ")"
     this.canvasElement.style.left = ((this.width - this.canvasElement.width) / 2) + "px"
     this.canvasElement.style.top = ((this.height - this.canvasElement.height) / 2) + "px"
-}
 
-Jessibuca.prototype.esc = function (e) {
-    if (e.keyCode === 27) {
+    if(!_checkFull()){
         this.fullscreen = false;
         _domToggle(this.doms.minScreenDom, false);
         _domToggle(this.doms.fullscreenDom, true);
