@@ -5,7 +5,7 @@
       <div id="container" ref="container"></div>
       <div class="input">
         <div>输入URL：</div>
-        <input autocomplete="on" ref="playUrl" value="ws://219.138.126.226:18250/34020000001110000101/34020000001320000101"/>
+        <input autocomplete="on" ref="playUrl" value="ws://219.138.126.226:18250/34020000001110000103/34020000001320000119"/>
         <button v-if="!playing" @click="play">播放</button>
       </div>
     </div>
