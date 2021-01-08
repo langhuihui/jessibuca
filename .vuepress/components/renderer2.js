@@ -331,16 +331,16 @@ Jessibuca.prototype._initEventListener = function () {
     //
     this.doms.fullscreenDom.addEventListener('click', function (e) {
         e.stopPropagation();
-        this.fullscreen = true;
+        _this.fullscreen = true;
         _domToggle(_this.doms.minScreenDom, true);
-        _domToggle(_this.doms.screenshotsDom, false);
+        _domToggle(_this.doms.fullscreenDom, false);
     }, false);
     //
     this.doms.minScreenDom.addEventListener('click', function (e) {
         e.stopPropagation();
-        this.fullscreen = false;
+        _this.fullscreen = false;
         _domToggle(_this.doms.minScreenDom, false);
-        _domToggle(_this.doms.screenshotsDom, true);
+        _domToggle(_this.doms.fullscreenDom, true);
     }, false);
     //
     this.doms.recordDom.addEventListener('click', function (e) {
