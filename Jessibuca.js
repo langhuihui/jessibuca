@@ -38,7 +38,7 @@ mergeInto(LibraryManager.library, {
             },
             play: function (url) {
                 console.log('Jessibuca play', url)
-                if(url.indexOf("http")==0){
+                if (url.indexOf("http") == 0) {
                     this.$play(url);
                     return;
                 }
@@ -71,14 +71,14 @@ mergeInto(LibraryManager.library, {
                 }
                 setWebsocket.call(this);
             },
-            fetch: function(url){
+            fetch: function (url) {
                 var _this = this;
                 this.controller = new AbortController();
                 var signal = this.controller.signal;
-                fetch(url,{signal}).then(function(res){
+                fetch(url, { signal }).then(function (res) {
                     var reader = res.body.getReader();
-                    _this.fetchNext = function(){
-                        reader.read().then(({done, value})=>_this.onFetchData({done,data:value}))
+                    _this.fetchNext = function () {
+                        reader.read().then(({ done, value }) => _this.onFetchData({ done, data: value }))
                     }
                     _this.fetchNext()
                 }).catch(console.error)
@@ -88,14 +88,14 @@ mergeInto(LibraryManager.library, {
                 if (!this.isPlaying) return;
                 console.log('close Jessibuca')
                 this.isPlaying = false;
-                if(this.ws){
+                if (this.ws) {
                     this.ws.onmessage = null;
                     this.ws.onclose = null;
                     this.ws.onerror = null;
                     this.ws.close();
                     this.ws = null;
                 }
-                if(this.controller)this.controller.abort();
+                if (this.controller) this.controller.abort();
                 this.$close();
                 delete this.timespan;
             },
@@ -118,7 +118,7 @@ mergeInto(LibraryManager.library, {
                     // var buffer = new Float32Array(resampled ? allFrameCount * 2 : allFrameCount);
                     // copyAudioOutputArray(buffer)
                     // postMessage({ cmd: "playAudio", buffer: buffer }, [buffer.buffer])
-                    postMessage({ cmd: "playAudio", buffer: audioOutputArray ,ts:ts})
+                    postMessage({ cmd: "playAudio", buffer: audioOutputArray, ts: ts })
                 }
             },
             playAudio(data, len) {
@@ -136,11 +136,11 @@ mergeInto(LibraryManager.library, {
                 }
                 postMessage({ cmd: "initAudioPlanar", samplerate: samplerate, channels: channels })
             },
-            playAudioPlanar(data, len,ts) {
+            playAudioPlanar(data, len, ts) {
                 var outputArray = [];
                 var frameCount = len / 4 / this.buffersA.length;
                 for (var i = 0; i < this.buffersA.length; i++) {
-                    var fp = HEAPU32[(data>>2) + i]>>2;
+                    var fp = HEAPU32[(data >> 2) + i] >> 2;
                     var float32 = HEAPF32.subarray(fp, fp + frameCount);
                     var buffer = this.buffersA[i]
                     if (buffer.length) {
@@ -155,7 +155,7 @@ mergeInto(LibraryManager.library, {
                 }
                 this.audioCache.push(outputArray)
                 if (this.audioCache.length >= this.audioBuffer) {
-                    postMessage({ cmd: "playAudio", buffer: this.audioCache,ts:ts }, this.audioCache.flatMap(outputArray=>outputArray.map(x=>x.buffer)))
+                    postMessage({ cmd: "playAudio", buffer: this.audioCache, ts: ts }, this.audioCache.flatMap(outputArray => outputArray.map(x => x.buffer)))
                     this.audioCache.length = 0
                 }
             },
@@ -179,7 +179,7 @@ mergeInto(LibraryManager.library, {
                 this.buffers = [[], [], []]
                 var size = w * h
                 if (this.isWebGL) {
-                    this.draw = function (compositionTime,ts) {
+                    this.draw = function (compositionTime, ts) {
                         var y = HEAPU32[dataPtr];
                         var u = HEAPU32[dataPtr + 1];
                         var v = HEAPU32[dataPtr + 2];
@@ -187,7 +187,7 @@ mergeInto(LibraryManager.library, {
                         var outputArray = [HEAPU8.subarray(y, y + size), HEAPU8.subarray(u, u + (size >> 2)), HEAPU8.subarray(v, v + (size >> 2))];
                         this.setBuffer(outputArray)
                         // var outputArray = [new Uint8Array(this.buffer, 0, size), new Uint8Array(this.buffer, size, size >> 2), new Uint8Array(this.buffer, size + (size >> 2), size >> 2)]
-                        postMessage({ cmd: "render", output: outputArray, compositionTime: compositionTime,ts :ts}, [outputArray[0].buffer, outputArray[1].buffer, outputArray[2].buffer])
+                        postMessage({ cmd: "render", output: outputArray, compositionTime: compositionTime, ts: ts, bps: this.bps }, [outputArray[0].buffer, outputArray[1].buffer, outputArray[2].buffer])
                     };
                 } else {
                     var outputArray = HEAPU8.subarray(dataPtr, dataPtr + (w * h << 2));
@@ -216,7 +216,7 @@ mergeInto(LibraryManager.library, {
                     decoder.buffersA.forEach((array, i) => array.push(msg.buffers[i]))
                     break
                 case "setVideoBuffer":
-                    decoder.videoBuffer =(msg.time * 1000)|0
+                    decoder.videoBuffer = (msg.time * 1000) | 0
                     break
                 case "close":
                     decoder.close()

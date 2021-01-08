@@ -20,7 +20,7 @@ function Jessibuca(opt) {
     this.contextOptions = opt.contextOptions;
     this.videoBuffer = opt.videoBuffer || 0
     if (!opt.forceNoGL) this.initContextGL();
-    this.audioContext = new (window.AudioContext||window.webkitAudioContext)();
+    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
     if (opt.mute) {
         this.audioEnabled(true)
         this.audioEnabled(false)
@@ -69,6 +69,9 @@ function Jessibuca(opt) {
                 // } else {
                 //     draw(msg.output)
                 // }
+                if (_this.onTimeUpdate) {
+                    _this.onTimeUpdate(msg.ts)
+                }
                 if (_this.contextGL) {
                     _this.drawNextOuptutPictureGL(msg.output);
                     // this.postMessage({ cmd: "setBuffer", buffer: msg.output }, [msg.output[0].buffer, msg.output[1].buffer, msg.output[2].buffer])
@@ -83,13 +86,13 @@ function Jessibuca(opt) {
                 _this.playAudio(msg.buffer)
                 break
             case "print":
-                if(_this.onLog){
+                if (_this.onLog) {
                     _this.onLog(msg.text)
                 }
                 console.log(msg.text);
                 break
             case "printErr":
-                if(_this.onLog){
+                if (_this.onLog) {
                     _this.onLog(msg.text)
                 }
                 console.error(msg.text);
