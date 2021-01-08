@@ -40,8 +40,10 @@ function Jessibuca(opt) {
         this.initBuffers();
         this.initTextures();
     }
-    this.onresize = () => this.resize()
-    window.addEventListener("resize", this.onresize)
+    this.onresize = () => this.resize();
+    this.onesc = () => this.esc();
+    window.addEventListener("resize", this.onresize);
+    window.addEventListener('keyup', this.onesc);
     this.decoderWorker = new Worker(opt.decoder || 'ff.js')
     var _this = this;
     this._hasInitBtn = false;
@@ -106,10 +108,11 @@ function Jessibuca(opt) {
                 _this[msg.cmd](msg)
         }
     }
-    this.container.addEventListener('dblclick', function () {
-        _this.fullscreen = !_this.fullscreen;
-        _domToggle(_this.doms.minScreenDom, _this.fullscreen);
-        _domToggle(_this.doms.fullscreenDom, !_this.fullscreen);
+    this._isFullscreen = false;
+    this.canvasElement.addEventListener('dblclick', function () {
+        _this.fullscreen = !_this._isFullscreen;
+        _domToggle(_this.doms.minScreenDom, _this._isFullscreen);
+        _domToggle(_this.doms.fullscreenDom, !_this._isFullscreen);
     }, false);
     this.doms = _initDom(this.container, opt);
 
@@ -330,14 +333,14 @@ Jessibuca.prototype._initEventListener = function () {
     //
     this.doms.fullscreenDom.addEventListener('click', function (e) {
         e.stopPropagation();
-        _this.fullscreen = true;
+        _this.container.requestFullscreen();
         _domToggle(_this.doms.minScreenDom, true);
         _domToggle(_this.doms.fullscreenDom, false);
     }, false);
     //
     this.doms.minScreenDom.addEventListener('click', function (e) {
         e.stopPropagation();
-        _this.fullscreen = false;
+        document.exitFullscreen();
         _domToggle(_this.doms.minScreenDom, false);
         _domToggle(_this.doms.fullscreenDom, true);
     }, false);
@@ -901,7 +904,8 @@ Jessibuca.prototype.close = function () {
 }
 Jessibuca.prototype.destroy = function () {
     this.decoderWorker.terminate()
-    window.removeEventListener("resize", this.onresize)
+    window.removeEventListener("resize", this.onresize);
+    window.removeEventListener('keyup',this.onesc);
 }
 /**
  * play
@@ -926,6 +930,7 @@ Object.defineProperty(Jessibuca.prototype, "fullscreen", {
         } else {
             document.exitFullscreen();
         }
+        this._isFullscreen = value;
     }
 })
 /**
@@ -941,6 +946,15 @@ Jessibuca.prototype.resize = function () {
     this.canvasElement.style.left = ((this.width - this.canvasElement.width) / 2) + "px"
     this.canvasElement.style.top = ((this.height - this.canvasElement.height) / 2) + "px"
 }
+
+Jessibuca.prototype.esc = function (e) {
+    if (e.keyCode === 27) {
+        this.fullscreen = false;
+        _domToggle(this.doms.minScreenDom, false);
+        _domToggle(this.doms.fullscreenDom, true);
+    }
+}
+
 /**
  * change buffer
  * @param buffer
