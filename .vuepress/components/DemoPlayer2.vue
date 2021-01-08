@@ -64,6 +64,7 @@ export default {
         }
       });
       this.jessibuca.onLog = msg=>(this.err=msg);
+      this.jessibuca.onRecord = msg => console.log(msg);
     },
     play() {
       // this.jessibuca.onPlay = () => (this.playing = true);

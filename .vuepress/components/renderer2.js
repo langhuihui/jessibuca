@@ -108,9 +108,8 @@ function Jessibuca(opt) {
     }
     this.container.addEventListener('dblclick', function () {
         _this.fullscreen = !_this.fullscreen;
-
-        _this.doms.minScreenDom.style.display = _this.fullscreen ? 'block' : 'none';
-        _this.doms.fullscreenDom.style.display = _this.fullscreen ? 'none' : 'block';
+        _domToggle(_this.doms.minScreenDom, _this.fullscreen);
+        _domToggle(_this.doms.fullscreenDom, !_this.fullscreen);
     }, false);
     this.doms = _initDom(this.container, opt);
 
