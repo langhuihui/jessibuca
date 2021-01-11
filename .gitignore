@@ -6,3 +6,5 @@ Debug
 .vscode
 *.zip
 *.rar
+
+node_modules

@@ -1,193 +1,203 @@
-
 <template>
-  <div class="root">
-    <div class="container-shell">
-      <div id="container" ref="container"></div>
-      <div class="input">
-        <div>输入URL：</div>
-        <input autocomplete="on" ref="playUrl" value="ws://219.138.126.226:18250/34020000001110000103/34020000001320000119"/>
-        <button v-if="!playing" @click="play">播放</button>
-      </div>
+    <div class="root">
+        <div class="container-shell">
+            <div id="container" ref="container"></div>
+            <div class="input">
+                <div>输入URL：</div>
+                <input autocomplete="on" ref="playUrl"
+                       value="ws://219.138.126.226:18250/34020000001110000101/34020000001320000101"/>
+                <button v-if="!playing" @click="play">播放</button>
+            </div>
+        </div>
     </div>
-  </div>
 </template>
 <script>
-import Jessibuca from "./renderer2";
-export default {
-  name: "DemoPlayer",
-  props:{
+    import Jessibuca from "./renderer2";
 
-  },
-  data() {
-    return {
-      jessibuca: null,
-      wasm:false,
-      vc:"ff",
-      playing: false,
-      quieting:true, // mute
-      err: "",
-      speed:0
-    };
-  },
-  computed:{
-    decoder(){
-      return this.vc+(this.wasm?"_wasm":"")+".js"
-    },
-    speedShow(){
+    export default {
+        name: "DemoPlayer",
+        props: {},
+        data() {
+            return {
+                jessibuca: null,
+                wasm: false,
+                vc: "ff",
+                playing: false,
+                quieting: true, // mute
+                err: "",
+                speed: 0
+            };
+        },
+        computed: {
+            decoder() {
+                return this.vc + (this.wasm ? "_wasm" : "") + ".js"
+            },
+            speedShow() {
 
-    }
-  },
-  watch: {
-    decoder(v) {
-      if (this.jessibuca) {
-        this.jessibuca.destroy();
-      }
-      this.create()
-      this.playing = false;
-    }
-  },
-  mounted() {
-    this.create()
-    window.onerror = msg => (this.err = msg);
-  },
-  destroyed() {
-    this.jessibuca.destroy();
-  },
-  methods: {
-    create(){
-      this.jessibuca = new Jessibuca({
-        container: this.$refs.container,
-        decoder: this.decoder,
-        videoBuffer: 0.2,
-        contextOptions:{
-          preserveDrawingBuffer:true // 是否保留缓冲区数据
+            }
+        },
+        watch: {
+            decoder(v) {
+                if (this.jessibuca) {
+                    this.jessibuca.destroy();
+                }
+                this.create()
+                this.playing = false;
+            }
+        },
+        mounted() {
+            this.create()
+            window.onerror = msg => (this.err = msg);
+        },
+        destroyed() {
+            this.jessibuca.destroy();
+        },
+        methods: {
+            create() {
+                this.jessibuca = new Jessibuca({
+                    container: this.$refs.container,
+                    decoder: this.decoder,
+                    videoBuffer: 0.2,
+                    contextOptions: {
+                        preserveDrawingBuffer: true // 是否保留缓冲区数据
+                    },
+                    background: 'https://seopic.699pic.com/photo/40011/0709.jpg_wh1200.jpg',
+                    loadingText: '加载中'
+                });
+                this.jessibuca.onLog = msg => (this.err = msg);
+                this.jessibuca.onRecord = msg => console.log(msg);
+            },
+            play() {
+                // this.jessibuca.onPlay = () => (this.playing = true);
+                this.jessibuca.play(this.$refs.playUrl.value);
+                this.err = "loading";
+            },
+            stop() {
+                this.jessibuca.close();
+                this.playing = false;
+                this.err = "";
+            },
+            fullscreen() {
+                this.jessibuca.fullscreen = true;
+            },
+            quiet() {
+                this.quieting = true;
+                this.jessibuca.audioEnabled(false);
+            },
+            playAudio() {
+                this.quieting = false;
+                this.jessibuca.audioEnabled(true);
+            },
+            screenshots() {
+                if (!(this.jessibuca && this.jessibuca.canvasElement)) {
+                    return;
+                }
+                const dataURL = this.jessibuca.canvasElement.toDataURL('image/png');
+                this._downloadImg(this._dataURLToFile(dataURL));
+            },
+            record() {
+
+            },
+            _dataURLToFile(dataURL) {
+                const arr = dataURL.split(",");
+                const bstr = atob(arr[1]);
+                const type = arr[0].replace("data:", "").replace(";base64", "")
+                let n = bstr.length, u8arr = new Uint8Array(n);
+                while (n--) {
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                return new File([u8arr], 'file', {type});
+            },
+
+            _downloadImg(content) {
+                const aLink = document.createElement("a");
+                aLink.download = '' + new Date().getTime();
+                aLink.href = URL.createObjectURL(content);
+                aLink.click();
+                URL.revokeObjectURL(content);
+            },
+
+            changeVC() {
+                this.vc = ["ff", "libhevc_aac"][this.$refs.vc.selectedIndex]
+            },
+            changeWasm() {
+                this.wasm = this.$refs.wasm.checked
+            },
+
+            changeBuffer() {
+                this.jessibuca.decoderWorker.postMessage({cmd: "setVideoBuffer", time: Number(this.$refs.buffer.value)})
+            }
         }
-      });
-      this.jessibuca.onLog = msg=>(this.err=msg);
-      this.jessibuca.onRecord = msg => console.log(msg);
-    },
-    play() {
-      // this.jessibuca.onPlay = () => (this.playing = true);
-      this.jessibuca.play(this.$refs.playUrl.value);
-      this.err = "loading";
-    },
-    stop() {
-      this.jessibuca.close();
-      this.playing = false;
-      this.err = "";
-    },
-    fullscreen() {
-      this.jessibuca.fullscreen = true;
-    },
-    quiet(){
-      this.quieting = true;
-      this.jessibuca.audioEnabled(false);
-    },
-    playAudio(){
-      this.quieting = false;
-      this.jessibuca.audioEnabled(true);
-    },
-    screenshots(){
-      if (!(this.jessibuca && this.jessibuca.canvasElement)) {
-        return;
-      }
-      const dataURL = this.jessibuca.canvasElement.toDataURL('image/png');
-      this._downloadImg(this._dataURLToFile(dataURL));
-    },
-    record(){
-
-    },
-    _dataURLToFile(dataURL){
-      const arr = dataURL.split(",");
-      const bstr = atob(arr[1]);
-      const type = arr[0].replace("data:", "").replace(";base64", "")
-      let n = bstr.length, u8arr = new Uint8Array(n);
-      while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-      }
-      return new File([u8arr], 'file', {type});
-    },
-
-    _downloadImg(content){
-      const aLink = document.createElement("a");
-      aLink.download = '' + new Date().getTime();
-      aLink.href = URL.createObjectURL(content);
-      aLink.click();
-      URL.revokeObjectURL(content);
-    },
-
-    changeVC(){
-      this.vc = ["ff","libhevc_aac"][this.$refs.vc.selectedIndex]
-    },
-    changeWasm(){
-      this.wasm = this.$refs.wasm.checked
-    },
-
-    changeBuffer(){
-      this.jessibuca.decoderWorker.postMessage({ cmd: "setVideoBuffer", time: Number(this.$refs.buffer.value) })
-    }
-  }
-};
+    };
 </script>
 <style>
-.root {
-  display: flex;
-  place-content: center;
-}
-.container-shell {
-  background: gray;
-  padding: 30px 4px 50px 4px;
-  border: 2px solid black;
-  width: auto;
-  position: relative;
-  border-radius: 5px;
-  box-shadow: 0 10px 20px;
-}
-.container-shell:before {
-  content: "jessibuca demo player";
-  position: absolute;
-  color: darkgray;
-  top: 4px;
-  left: 10px;
-  text-shadow: 1px 1px black;
-}
-#container {
-  background: rgb(13, 14, 27);
-  width: 640px;
-  height: 375px;
-}
-.input {
-  position: absolute;
-  display: flex;
-  bottom: 15px;
-  left: 10px;
-  right: 10px;
-  color: white;
-  place-content: stretch;
-}
-.input input {
-  flex: auto;
-}
-.err {
-  position: absolute;
-  top: 40px;
-  left: 10px;
-  color: red;
-}
-.option {
-  position: absolute;
-  top:4px;
-  right:10px;
-  display: flex;
-  place-content: center;
-}
-.option span{
-  color: white;
-}
-@media (max-width: 720px) {
-  #container {
-    width: 90vw;
-    height: 52.7vw;
-  }
-}
+    .root {
+        display: flex;
+        place-content: center;
+    }
+
+    .container-shell {
+        background: gray;
+        padding: 30px 4px 50px 4px;
+        border: 2px solid black;
+        width: auto;
+        position: relative;
+        border-radius: 5px;
+        box-shadow: 0 10px 20px;
+    }
+
+    .container-shell:before {
+        content: "jessibuca demo player";
+        position: absolute;
+        color: darkgray;
+        top: 4px;
+        left: 10px;
+        text-shadow: 1px 1px black;
+    }
+
+    #container {
+        background: rgb(13, 14, 27);
+        width: 640px;
+        height: 375px;
+    }
+
+    .input {
+        position: absolute;
+        display: flex;
+        bottom: 15px;
+        left: 10px;
+        right: 10px;
+        color: white;
+        place-content: stretch;
+    }
+
+    .input input {
+        flex: auto;
+    }
+
+    .err {
+        position: absolute;
+        top: 40px;
+        left: 10px;
+        color: red;
+    }
+
+    .option {
+        position: absolute;
+        top: 4px;
+        right: 10px;
+        display: flex;
+        place-content: center;
+    }
+
+    .option span {
+        color: white;
+    }
+
+    @media (max-width: 720px) {
+        #container {
+            width: 90vw;
+            height: 52.7vw;
+        }
+    }
 </style>
