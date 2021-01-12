@@ -78,9 +78,7 @@ function Jessibuca(opt) {
                 if (!_this._hasInitBtn) {
                     _this._hasInitBtn = true;
                     _this._initBtns();
-                    if (_this.onPlay) {
-                        _this.onPlay()
-                    }
+                    _this.onPlay()
                 }
                 _this._updateBPS(msg.bps);
                 break
@@ -110,11 +108,16 @@ function Jessibuca(opt) {
     this.canvasElement.addEventListener('dblclick', function () {
         _this.fullscreen = !_this._isFullscreen;
     }, false);
+    this.onPlay = noop;
+    this.onPause = noop;
+    this.onRecord = noop;
     this.doms = _initDom(this.container, opt);
-
     this._initEventListener();
 };
 
+function noop() {
+
+}
 function _initDom(container, opt) {
     var playBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQEAYAAABPYyMiAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAZiS0dEAAAAAAAA+UO7fwAAAAlwSFlzAAAASAAAAEgARslrPgAAARVJREFUSMe9laEOglAUhs+5k9lJFpsJ5QWMJoNGbEY0mEy+gr6GNo0a3SiQCegMRILzGdw4hl+Cd27KxPuXb2zA/91z2YXoGRERkX4fvN3A2QxUiv4dFM3n8jZRBLbbVfd+ubJuF4xjiCyXkksueb1uSKCIZYGLBTEx8ekEoV7PkICeVgs8HiGyXoO2bUigCDM4HoPnM7bI8wwJ6Gk0sEXbLSay30Oo2TQkoGcwgFCSQMhxDAvoETEscDiQkJC4LjMz8+XyZ4HrFYWjEQqHQ1asWGWZfmdFAsVINxuw00HhbvfpydpvxWkKTqdYaRCUfUPJCdzv4Gr1uqfli0tOIAzByUT/iCrL6+84y3Bw+D6ui5Ou+jwA8FnIO++FACgAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjEtMDEtMDhUMTY6NDI6NTMrMDg6MDCKP7wnAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIxLTAxLTA4VDE2OjQyOjUzKzA4OjAw+2IEmwAAAEl0RVh0c3ZnOmJhc2UtdXJpAGZpbGU6Ly8vaG9tZS9hZG1pbi9pY29uLWZvbnQvdG1wL2ljb25fZ2Y3MDBzN2IzZncvYm9mYW5nLnN2Z8fICi0AAAAASUVORK5CYII=';
     var stopBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQEAYAAABPYyMiAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAZiS0dEAAAAAAAA+UO7fwAAAAlwSFlzAAAASAAAAEgARslrPgAAAHVJREFUSMftkCESwCAMBEOnCtdXVMKHeC7oInkEeQJXkRoEZWraipxZc8lsQqQZBACAlIS1oqGhhTCdu3oyxyyMcdRf79c5J7SWDBky+z4173rbJvR+VF/e/qwKqIAKqMBDgZyFzAQCoZTpxq7HLDyOrw/9b07l3z4dDnI2IAAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyMS0wMS0wOFQxNjo0Mjo1MyswODowMIo/vCcAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjEtMDEtMDhUMTY6NDI6NTMrMDg6MDD7YgSbAAAASnRFWHRzdmc6YmFzZS11cmkAZmlsZTovLy9ob21lL2FkbWluL2ljb24tZm9udC90bXAvaWNvbl9nZjcwMHM3YjNmdy96YW50aW5nLnN2ZxqNZJkAAAAASUVORK5CYII=';
@@ -153,7 +156,7 @@ function _initDom(container, opt) {
     var bgDom = document.createElement('div');
 
     loadingTextDom.innerText = opt.loadingText || '加载中......';
-    textDom.innerText = opt.content || 'DB';
+    textDom.innerText = opt.text || 'DB';
     speedDom.innerText = '';
     playDom.title = '播放';
     stopDom.title = '暂停';
@@ -349,7 +352,7 @@ Jessibuca.prototype._initEventListener = function () {
     this.doms.stopDom.addEventListener('click', function (e) {
         e.stopPropagation();
         _this.close();
-        _this._updateBPS();
+        _this.doms.speedDom.innerText = '';
         _domToggle(_this.doms.playDom, true);
         _domToggle(_this.doms.stopDom, false);
     }, false);
@@ -373,18 +376,14 @@ Jessibuca.prototype._initEventListener = function () {
     //
     this.doms.recordDom.addEventListener('click', function (e) {
         e.stopPropagation();
-        if (_this.onRecord) {
-            _this.onRecord(true);
-        }
+        _this.onRecord(true);
         _domToggle(_this.doms.recordDom, false);
         _domToggle(_this.doms.recordingDom, true);
     }, false);
     //
     this.doms.recordingDom.addEventListener('click', function (e) {
         e.stopPropagation();
-        if (_this.onRecord) {
-            _this.onRecord(false);
-        }
+        _this.onRecord(false);
         _domToggle(_this.doms.recordDom, true);
         _domToggle(_this.doms.recordingDom, false);
     }, false);
@@ -433,7 +432,6 @@ function _throttle(fn, wait) {
 
 function _checkFull() {
     var isFull = document.fullscreenElement || window.webkitFullscreenElement || document.msFullscreenElement;
-    console.log(isFull);
     if (isFull === undefined) isFull = false;
     return !!isFull;
 }
@@ -949,9 +947,8 @@ Jessibuca.prototype.close = function () {
     this.decoderWorker.postMessage({cmd: "close"})
     this.contextGL.clear(this.contextGL.COLOR_BUFFER_BIT);
 
-    if (this.onClose) {
-        this.onClose();
-        // delete this.onClose;
+    if (this.onPause) {
+        this.onPause();
     }
 }
 Jessibuca.prototype.destroy = function () {
@@ -965,11 +962,11 @@ Jessibuca.prototype.destroy = function () {
 Jessibuca.prototype.play = function (url) {
     if (url) {
         this.playUrl = url;
-        // show loading
         _domToggle(this.doms.loadingDom, true);
         _domToggle(this.doms.bgDom, false);
     } else if (this.playUrl) {
-        url = this.playUrl
+        url = this.playUrl;
+        this.onPlay();
     }
 
     this.decoderWorker.postMessage({cmd: "play", url: url, isWebGL: this.isWebGL()})
