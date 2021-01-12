@@ -58,21 +58,19 @@
                     container: this.$refs.container,
                     decoder: this.decoder,
                     videoBuffer: 0.2,
-                    contextOptions: {
-                        preserveDrawingBuffer: true // 是否保留缓冲区数据
-                    },
-                    text:'DNB',
+                    isResize: false,
+                    text: 'DNB',
                     background: 'https://seopic.699pic.com/photo/40011/0709.jpg_wh1200.jpg',
                     loadingText: '加载中'
                 });
                 this.jessibuca.onLog = msg => (this.err = msg);
-                this.jessibuca.onRecord = msg => console.log('onRecord',msg);
-                this.jessibuca.onPause = msg => console.log('onPause',msg);
-                this.jessibuca.onPlay = msg=>console.log('onPlay',msg);
+                this.jessibuca.onRecord = msg => console.log('onRecord', msg);
+                this.jessibuca.onPause = msg => console.log('onPause', msg);
+                this.jessibuca.onPlay = msg => console.log('onPlay', msg);
             },
             play() {
                 // this.jessibuca.onPlay = () => (this.playing = true);
-                if(this.$refs.playUrl.value){
+                if (this.$refs.playUrl.value) {
                     this.jessibuca.play(this.$refs.playUrl.value);
                     // this.err = "loading";
                 }
@@ -163,7 +161,7 @@
     #container {
         background: rgb(13, 14, 27);
         width: 640px;
-        height: 375px;
+        height: 385px;
     }
 
     .input {

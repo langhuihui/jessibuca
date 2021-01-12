@@ -31,6 +31,7 @@ function Jessibuca(opt) {
     this.contextOptions = opt.contextOptions;
     this.videoBuffer = opt.videoBuffer || 0;
     this.text = opt.text || '';
+    this.isResize = opt.isResize === false ? opt.isResize : true;
     if (!opt.forceNoGL) this.initContextGL();
     this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
     this.audioEnabled(true);
@@ -69,7 +70,6 @@ function Jessibuca(opt) {
                 }
                 break
             case "render":
-                console.log(msg);
                 if (_this.contextGL) {
                     _this.drawNextOuptutPictureGL(msg.output);
                 } else {
@@ -1110,14 +1110,22 @@ Object.defineProperty(Jessibuca.prototype, 'loading', {
  * resize
  */
 Jessibuca.prototype.resize = function () {
-    this.width = this.container.clientWidth
+    this.width = this.container.clientWidth;
     this.height = this.container.clientHeight - 25;
-    var wScale = this.width / this.canvasElement.width
-    var hScale = this.height / this.canvasElement.height
-    var scale = wScale > hScale ? hScale : wScale
+    var resizeWidth = this.canvasElement.width;
+    var resizeHeight = this.canvasElement.height;
+    var wScale = this.width / resizeWidth;
+    var hScale = this.height / resizeHeight;
+    var scale = wScale > hScale ? hScale : wScale;
+    if (!this.isResize) {
+        if (wScale !== hScale) {
+            scale = wScale + ',' + hScale;
+        }
+    }
+    console.log('wScale', wScale, 'hScale', hScale);
     this.canvasElement.style.transform = "scale(" + scale + ")"
-    this.canvasElement.style.left = ((this.width - this.canvasElement.width) / 2) + "px"
-    this.canvasElement.style.top = ((this.height - this.canvasElement.height) / 2) + "px"
+    this.canvasElement.style.left = ((this.width - resizeWidth) / 2) + "px"
+    this.canvasElement.style.top = ((this.height - resizeHeight) / 2) + "px"
 
     if (!_checkFull()) {
         this.fullscreen = false;
