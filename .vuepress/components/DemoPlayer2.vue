@@ -65,9 +65,10 @@
                 });
                 this.jessibuca.onLog = msg => (this.err = msg);
                 this.jessibuca.onRecord = msg => console.log('onRecord', msg);
-                this.jessibuca.onPause = msg => console.log('onPause', msg);
-                this.jessibuca.onPlay = msg => console.log('onPlay', msg);
-            },
+                this.jessibuca.onPause = () => console.log('onPause');
+                this.jessibuca.onPlay = () => console.log('onPlay');
+                this.jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
+                },
             play() {
                 // this.jessibuca.onPlay = () => (this.playing = true);
                 if (this.$refs.playUrl.value) {

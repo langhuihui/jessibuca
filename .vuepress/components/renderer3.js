@@ -105,9 +105,9 @@
                     _this[msg.cmd](msg)
             }
         };
-        // this.canvasElement.addEventListener('dblclick', function () {
-        //     _this.fullscreen = !_this.fullscreen;
-        // }, false);
+        this.canvasElement.addEventListener('dblclick', function () {
+            _this.fullscreen = !_this.fullscreen;
+        }, false);
         this.onPlay = noop;
         this.onPause = noop;
         this.onRecord = noop;
@@ -783,23 +783,24 @@
      */
     Jessibuca.prototype.initProgram = function () {
         var gl = this.contextGL;
-
+        // 顶点着色器vertexShader
         var vertexShaderScript = [
-            'attribute vec4 vertexPos;',
-            'attribute vec4 texturePos;',
-            'varying vec2 textureCoord;',
+            'attribute vec4 vertexPos;', // 通过 js 传递顶点坐标
+            'attribute vec4 texturePos;', // 通过 js 传递纹理坐标
+            'varying vec2 textureCoord;', // 传递纹理坐标给片元着色器
 
             'void main()',
             '{',
-            'gl_Position = vertexPos;',
-            'textureCoord = texturePos.xy;',
+            'gl_Position = vertexPos;', // 设置顶点坐标
+            'textureCoord = texturePos.xy;', // 设置纹理坐标
             '}'
         ].join('\n');
 
+        // 片元着色器fragmentShader
         var fragmentShaderScript = [
-            'precision highp float;',
+            'precision highp float;', // lowp代表计算精度，考虑节约性能使用了最低精度
             'varying highp vec2 textureCoord;',
-            'uniform sampler2D ySampler;',
+            'uniform sampler2D ySampler;', // sampler2D是取样器类型，图片纹理最终存储在该类型对象中
             'uniform sampler2D uSampler;',
             'uniform sampler2D vSampler;',
             'const mat4 YUV2RGB = mat4',
@@ -817,9 +818,11 @@
             'gl_FragColor = vec4(y, u, v, 1) * YUV2RGB;',
             '}'
         ].join('\n');
-
+        // 创建着色器程序
         var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+        // 设置着色器的源码
         gl.shaderSource(vertexShader, vertexShaderScript);
+        // 编译着色器
         gl.compileShader(vertexShader);
         if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
             console.log('Vertex shader failed to compile: ' + gl.getShaderInfoLog(vertexShader));
@@ -831,15 +834,16 @@
         if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
             console.log('Fragment shader failed to compile: ' + gl.getShaderInfoLog(fragmentShader));
         }
-
+        // 从 2 个着色器中创建一个程序
         var program = gl.createProgram();
+        // 附上着色器
         gl.attachShader(program, vertexShader);
         gl.attachShader(program, fragmentShader);
         gl.linkProgram(program);
         if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
             console.log('Program failed to compile: ' + gl.getProgramInfoLog(program));
         }
-
+        // 将 WebGLProgram 对象添加到当前的渲染状态中
         gl.useProgram(program);
 
         this.shaderProgram = program;
@@ -854,14 +858,18 @@
 
         var vertexPosBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
+        //  向缓冲区写入数据
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([1, 1, -1, 1, 1, -1, -1, -1]), gl.STATIC_DRAW);
-
+        // 找到顶点的位置
         var vertexPosRef = gl.getAttribLocation(program, 'vertexPos');
+        // 连接vertexPosition 变量与分配给它的缓冲区对象
         gl.enableVertexAttribArray(vertexPosRef);
+        // 告诉显卡从当前绑定的缓冲区中读取顶点数据
         gl.vertexAttribPointer(vertexPosRef, 2, gl.FLOAT, false, 0, 0);
 
         var texturePosBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, texturePosBuffer);
+        // 声明纹理坐标
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([1, 0, 0, 0, 1, 1, 0, 1]), gl.STATIC_DRAW);
 
         var texturePosRef = gl.getAttribLocation(program, 'texturePos');
@@ -879,16 +887,19 @@
         var program = this.shaderProgram;
 
         var yTextureRef = this.initTexture();
+        //获取samplerY变量的存储位置，指定纹理单元编号0将纹理对象传递给samplerY
         var ySamplerRef = gl.getUniformLocation(program, 'ySampler');
         gl.uniform1i(ySamplerRef, 0);
         this.yTextureRef = yTextureRef;
 
         var uTextureRef = this.initTexture();
+        //获取samplerU变量的存储位置，指定纹理单元编号1将纹理对象传递给samplerU
         var uSamplerRef = gl.getUniformLocation(program, 'uSampler');
         gl.uniform1i(uSamplerRef, 1);
         this.uTextureRef = uTextureRef;
 
         var vTextureRef = this.initTexture();
+        //获取samplerV变量的存储位置，指定纹理单元编号2将纹理对象传递给samplerV
         var vSamplerRef = gl.getUniformLocation(program, 'vSampler');
         gl.uniform1i(vSamplerRef, 2);
         this.vTextureRef = vTextureRef;
@@ -896,14 +907,18 @@
 
     /**
      * Create and configure a single texture
+     * 设置纹理
      */
     Jessibuca.prototype.initTexture = function () {
         var gl = this.contextGL;
 
         var textureRef = gl.createTexture();
+        // 将给定的 glTexture 绑定到目标（绑定点
         gl.bindTexture(gl.TEXTURE_2D, textureRef);
+        // 纹理包装 参考https://github.com/fem-d/webGL/blob/master/blog/WebGL基础学习篇（Lesson%207）.md -> Texture wrapping
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        // 设置纹理过滤方式
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         gl.bindTexture(gl.TEXTURE_2D, null);
@@ -937,6 +952,7 @@
         var width = this.canvasElement.width
         var height = this.canvasElement.height
         if (croppingParams) {
+            // 设置视口，即指定从标准设备到窗口坐标的x、y仿射变换
             gl.viewport(0, 0, croppingParams.width, croppingParams.height);
             var tTop = croppingParams.top / height;
             var tLeft = croppingParams.left / width;
@@ -947,20 +963,25 @@
             gl.bindBuffer(gl.ARRAY_BUFFER, texturePosBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, texturePosValues, gl.DYNAMIC_DRAW);
         } else {
+            // 设置视口，即指定从标准设备到窗口坐标的x、y仿射变换
             gl.viewport(0, 0, this.canvasElement.width, this.canvasElement.height);
         }
+        //激活指定的纹理单元
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, yTextureRef);
+        // 填充Y纹理,Y 的宽度和高度就是 width，和 height，存储的位置就是data.subarray(0, width * height)
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width, height, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, data[0]);
 
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, uTextureRef);
+        // 填充U纹理,Y 的宽度和高度就是 width/2 和 height/2，存储的位置就是data.subarray(width * height, width/2 * height/2 + width * height)
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width / 2, height / 2, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, data[1]);
 
         gl.activeTexture(gl.TEXTURE2);
         gl.bindTexture(gl.TEXTURE_2D, vTextureRef);
+        // 填充U纹理,Y 的宽度和高度就是 width/2 和 height/2，存储的位置就是data.subarray(width/2 * height/2 + width * height, data.length)
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width / 2, height / 2, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, data[2]);
-
+        // 绘制四个点，也就是长方形
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     };
 
@@ -1024,6 +1045,9 @@
             if (this.playUrl) {
                 this.close();
                 needDelay = true;
+                // 设置清空颜色缓冲时的颜色值
+                // this.contextGL.clearColor(0, 0, 0, 0);
+                // 清空缓冲
                 this.contextGL.clear(this.contextGL.COLOR_BUFFER_BIT);
             }
             this.loading = true;
