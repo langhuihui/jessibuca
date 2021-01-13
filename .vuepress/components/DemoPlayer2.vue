@@ -7,6 +7,8 @@
                 <input autocomplete="on" ref="playUrl"
                        value=""/>
                 <button v-if="!playing" @click="play">播放</button>
+                <button v-else @click="pause">停止</button>
+
             </div>
         </div>
     </div>
@@ -70,11 +72,16 @@
                 this.jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
                 },
             play() {
-                // this.jessibuca.onPlay = () => (this.playing = true);
+                this.jessibuca.onPlay = () => (this.playing = true);
                 if (this.$refs.playUrl.value) {
                     this.jessibuca.play(this.$refs.playUrl.value);
                     // this.err = "loading";
                 }
+            },
+            stop() {
+                this.jessibuca.pause();
+                this.playing = false;
+                this.err = "";
             },
 
             changeVC() {

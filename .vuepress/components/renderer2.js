@@ -112,6 +112,7 @@
         this.onPause = noop;
         this.onRecord = noop;
         this.onFullscreen = noop;
+        this.onQuiet = noop;
         this.doms = _initDom(this.container, opt);
         this._initStatus();
         this._initEventListener();
@@ -366,20 +367,17 @@
         this.doms.playDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.play();
-            _this.playing = true;
         }, false);
 
         this.doms.playBigDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.play();
-            _this.playing = true;
         }, false);
 
 
         this.doms.pauseDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.pause();
-            _this.playing = false;
         }, false);
 
         // screenshots
@@ -413,15 +411,23 @@
 
         this.doms.quietAudioDom.addEventListener('click', function (e) {
             e.stopPropagation();
-            _this.audioEnabled(true);
-            _this.quieting = false;
+            _this.cancelMute();
         }, false);
 
         this.doms.playAudioDom.addEventListener('click', function (e) {
             e.stopPropagation();
-            _this.audioEnabled(false);
-            _this.quieting = true;
+            _this.mute();
         }, false);
+    };
+
+    Jessibuca.prototype.mute = function () {
+        this.audioEnabled(false);
+        this.quieting = true;
+    };
+
+    Jessibuca.prototype.cancelMute = function () {
+        this.audioEnabled(true);
+        this.quieting = false;
     };
 
     Jessibuca.prototype._initStatus = function () {
@@ -452,7 +458,6 @@
             _domToggle(_this.doms[dom], false);
         })
     };
-
 
     function _throttle(fn, wait) {
         var pre = new Date();
@@ -620,10 +625,12 @@
                 if (flag) {
                     // 恢复
                     this.audioContext.resume();
+
                 } else {
                     // 暂停
                     this.audioContext.suspend();
                 }
+                this.onQuiet(!flag);
             }
         } else {
             this.audioContext.suspend();
@@ -993,6 +1000,7 @@
 
     Jessibuca.prototype.pause = function () {
         this.close();
+        this.playing = false;
         this.onPause();
     };
 
@@ -1028,6 +1036,7 @@
             this.playUrl = url;
         } else if (this.playUrl) {
             url = this.playUrl;
+            this.playing = true;
             this.onPlay();
         }
         this._initCheckVariable();
