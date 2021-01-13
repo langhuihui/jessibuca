@@ -75,54 +75,11 @@
                     // this.err = "loading";
                 }
             },
-            stop() {
-                this.jessibuca.close();
-                this.playing = false;
-                this.err = "";
-            },
-            fullscreen() {
-                this.jessibuca.fullscreen = true;
-            },
-            quiet() {
-                this.quieting = true;
-                this.jessibuca.audioEnabled(false);
-            },
-            playAudio() {
-                this.quieting = false;
-                this.jessibuca.audioEnabled(true);
-            },
-            screenshots() {
-                if (!(this.jessibuca && this.jessibuca.canvasElement)) {
-                    return;
-                }
-                const dataURL = this.jessibuca.canvasElement.toDataURL('image/png');
-                this._downloadImg(this._dataURLToFile(dataURL));
-            },
-            record() {
-
-            },
-            _dataURLToFile(dataURL) {
-                const arr = dataURL.split(",");
-                const bstr = atob(arr[1]);
-                const type = arr[0].replace("data:", "").replace(";base64", "")
-                let n = bstr.length, u8arr = new Uint8Array(n);
-                while (n--) {
-                    u8arr[n] = bstr.charCodeAt(n);
-                }
-                return new File([u8arr], 'file', {type});
-            },
-
-            _downloadImg(content) {
-                const aLink = document.createElement("a");
-                aLink.download = '' + new Date().getTime();
-                aLink.href = URL.createObjectURL(content);
-                aLink.click();
-                URL.revokeObjectURL(content);
-            },
 
             changeVC() {
                 this.vc = ["ff", "libhevc_aac"][this.$refs.vc.selectedIndex]
             },
+
             changeWasm() {
                 this.wasm = this.$refs.wasm.checked
             },
@@ -161,7 +118,7 @@
     #container {
         background: rgb(13, 14, 27);
         width: 640px;
-        height: 385px;
+        height: 398px;
     }
 
     .input {
