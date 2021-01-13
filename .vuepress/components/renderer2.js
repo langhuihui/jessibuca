@@ -473,43 +473,41 @@
         return !!isFull;
     }
 
-    var _startBpsTime = '';
-    var _bps = 0;
     Jessibuca.prototype._updateBPS = function (bps) {
-        if (!_startBpsTime) {
-            _startBpsTime = new Date().getTime();
+        if (!this._startBpsTime) {
+            this._startBpsTime = new Date().getTime();
         }
         var _now = new Date().getTime();
-        var timestamp = _now - _startBpsTime;
+        var timestamp = _now - this._startBpsTime;
 
         if (timestamp < 1 * 1000) {
-            _bps += bps;
+            this._bps += bps;
             return;
         }
-        this.doms.speedDom.innerText = _bpsSize(_bps);
-        _bps = 0;
-        _startBpsTime = _now;
+        this.doms.speedDom.innerText = _bpsSize(this._bps);
+        this._bps = 0;
+        this._startBpsTime = _now;
     }
 
-    var _checkHeartTimeout = null;
     Jessibuca.prototype._checkHeart = function () {
-        if (_checkHeartTimeout) {
-            clearTimeout(_checkHeartTimeout);
-            _checkHeartTimeout = null;
+        if (this._checkHeartTimeout) {
+            clearTimeout(this._checkHeartTimeout);
+            this._checkHeartTimeout = null;
         }
         var _this = this;
-        _checkHeartTimeout = setTimeout(function () {
+        this._checkHeartTimeout = setTimeout(function () {
             console.log('check heart break');
             _this.playing = false;
         }, 3000);
         // console.log('check heart');
     };
 
-    function _initCheckVariable() {
-        _startBpsTime = '';
-        if (_checkHeartTimeout) {
-            clearTimeout(_checkHeartTimeout);
-            _checkHeartTimeout = null;
+    Jessibuca.prototype._initCheckVariable = function () {
+        this._startBpsTime = '';
+        this._bps = 0;
+        if (this._checkHeartTimeout) {
+            clearTimeout(this._checkHeartTimeout);
+            this._checkHeartTimeout = null;
         }
     }
 
@@ -1005,14 +1003,14 @@
         delete this.playAudio
         this.decoderWorker.postMessage({cmd: "close"})
         // this.contextGL.clear(this.contextGL.COLOR_BUFFER_BIT);
-        _initCheckVariable();
+        this._initCheckVariable();
     }
     Jessibuca.prototype.destroy = function () {
         // destroy
         this.decoderWorker.terminate()
         window.removeEventListener("resize", this.onresize);
         window.removeEventListener('fullscreenchange', this.onfullscreenchange);
-        _initCheckVariable();
+        this._initCheckVariable();
     }
     /**
      * play
@@ -1032,7 +1030,7 @@
             url = this.playUrl;
             this.onPlay();
         }
-        _initCheckVariable();
+        this._initCheckVariable();
         if (needDelay) {
             var _this = this;
             setTimeout(function () {
@@ -1136,7 +1134,6 @@
             return this._loading;
         }
     });
-
 
     /**
      * resize
