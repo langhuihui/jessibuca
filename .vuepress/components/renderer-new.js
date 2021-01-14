@@ -111,9 +111,9 @@
                     _this[msg.cmd](msg)
             }
         };
-        // this.canvasElement.addEventListener('dblclick', function () {
-        //     _this.fullscreen = !_this.fullscreen;
-        // }, false);
+        this.canvasElement.addEventListener('dblclick', function () {
+            _this.fullscreen = !_this.fullscreen;
+        }, false);
         this.onPlay = noop;
         this.onPause = noop;
         this.onRecord = noop;
@@ -257,7 +257,7 @@
             lineHeight: '20px',
             marginLeft: '5px',
             marginRight: '5px',
-            userSelect: 'none'
+            userSelect:'none'
         };
         var styleObj2 = {
             display: 'none',
@@ -325,8 +325,8 @@
         control1.appendChild(speedDom);
 
         // record
-        control2.appendChild(recordingDom);
-        control2.appendChild(recordDom);
+        //control2.appendChild(recordingDom);
+        //control2.appendChild(recordDom);
 
         // screenshots
         control2.appendChild(screenshotsDom);
@@ -426,11 +426,13 @@
     Jessibuca.prototype.mute = function () {
         this._audioEnabled(false);
         this.quieting = true;
+        this.onMute(true);
     };
 
     Jessibuca.prototype.cancelMute = function () {
         this._audioEnabled(true);
         this.quieting = false;
+        this.onMute(false);
     };
 
     Jessibuca.prototype._initStatus = function (opt) {
@@ -1053,13 +1055,13 @@
         set(value) {
             if (value) {
                 if (!_checkFull()) {
-                    // this.container.requestFullscreen();
+                    this.container.requestFullscreen();
                 }
                 _domToggle(this.doms.minScreenDom, true);
                 _domToggle(this.doms.fullscreenDom, false);
             } else {
                 if (_checkFull()) {
-                    // document.exitFullscreen();
+                    document.exitFullscreen();
                 }
                 _domToggle(this.doms.minScreenDom, false);
                 _domToggle(this.doms.fullscreenDom, true);

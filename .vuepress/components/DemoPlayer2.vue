@@ -8,7 +8,15 @@
                        value=""/>
                 <button v-if="!playing" @click="play">播放</button>
                 <button v-else @click="pause">停止</button>
-
+            </div>
+            <div class="option">
+                <span>缓冲:</span>
+                <input style="width:50px" type="number" ref="buffer" value="0.2" @change="changeBuffer">
+                <input type="checkbox" ref="wasm" @change="changeWasm"><span>wasm</span>
+                <select ref="vc" @change="changeVC">
+                    <option selected>h264</option>
+                    <option>h265</option>
+                </select>
             </div>
         </div>
     </div>
@@ -27,7 +35,8 @@
                 playing: false,
                 quieting: true, // mute
                 err: "",
-                speed: 0
+                speed: 0,
+                muting: true,
             };
         },
         computed: {
@@ -59,9 +68,9 @@
                 this.jessibuca = new Jessibuca({
                     container: this.$refs.container,
                     decoder: this.decoder,
-                    videoBuffer: 0.2,
+                    videoBuffer: Number(this.$refs.buffer.value),
                     isResize: false,
-                    text: 'DNB',
+                    text: '',
                     background: 'https://seopic.699pic.com/photo/40011/0709.jpg_wh1200.jpg',
                     loadingText: '加载中'
                 });
@@ -70,19 +79,55 @@
                 this.jessibuca.onPause = () => console.log('onPause');
                 this.jessibuca.onPlay = () => console.log('onPlay');
                 this.jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
-                },
+                this.jessibuca.onMute = msg => console.log('onMute', msg);
+
+                this.jessibuca.on('log', function (msg) {
+                    console.log('on log', msg);
+                });
+                this.jessibuca.on('record', function (msg) {
+                    console.log('on record:', msg);
+                });
+                this.jessibuca.on('pause', function () {
+                    console.log('on pause');
+                });
+                this.jessibuca.on('play', function () {
+                    console.log('on play');
+                });
+                this.jessibuca.on('fullscreen', function (msg) {
+                    console.log('on fullscreen',msg);
+                });
+
+                this.jessibuca.on('mute', function (msg) {
+                    console.log('on mute',msg);
+                });
+
+                this.jessibuca.on('mute', function (msg) {
+                    console.log('on mute2',msg);
+                });
+
+                console.log(this.jessibuca);
+            },
             play() {
                 this.jessibuca.onPlay = () => (this.playing = true);
                 if (this.$refs.playUrl.value) {
                     this.jessibuca.play(this.$refs.playUrl.value);
-                    // this.err = "loading";
                 }
             },
-            stop() {
+            mute() {
+                this.jessibuca.mute();
+                this.muting = true;
+            },
+            cancelMute() {
+                this.jessibuca.cancelMute();
+                this.muting = false;
+            },
+
+            pause() {
                 this.jessibuca.pause();
                 this.playing = false;
                 this.err = "";
             },
+
 
             changeVC() {
                 this.vc = ["ff", "libhevc_aac"][this.$refs.vc.selectedIndex]
