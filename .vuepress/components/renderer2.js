@@ -79,6 +79,7 @@
                     if (_this.loading) {
                         _this.loading = false;
                         _this.playing = true;
+                        _this._clearCheckLoading();
                     }
                     _this._updateBPS(msg.bps);
                     _this._checkHeart();
@@ -497,11 +498,30 @@
         }
         var _this = this;
         this._checkHeartTimeout = setTimeout(function () {
-            console.log('check heart break');
+            console.log('check loading timeout');
             _this.recording = false
             _this.playing = false;
-        }, 3000);
-        // console.log('check heart');
+        }, 30 * 1000);
+    };
+
+    Jessibuca.prototype._checkLoading = function () {
+        if (this._checkLoadingTimeout) {
+            clearTimeout(this._checkLoadingTimeout);
+            this._checkLoadingTimeout = null;
+        }
+        var _this = this;
+        this._checkLoadingTimeout = setTimeout(function () {
+            console.log('check loading timeout');
+            _this.playing = false;
+            _domToggle(_this.doms.loadingDom, false);
+        }, 30 * 1000);
+    };
+
+    Jessibuca.prototype._clearCheckLoading = function () {
+        if (this._checkLoadingTimeout) {
+            clearTimeout(this._checkLoadingTimeout);
+            this._checkLoadingTimeout = null;
+        }
     };
 
     Jessibuca.prototype._initCheckVariable = function () {
@@ -1011,6 +1031,7 @@
         window.removeEventListener("resize", this._onresize);
         window.removeEventListener('fullscreenchange', this._onfullscreenchange);
         this._initCheckVariable();
+        this._clearCheckLoading();
         this.off();
     }
     /**
@@ -1021,7 +1042,6 @@
         if (!this.playUrl && !url) {
             return;
         }
-
         var needDelay = false;
         if (url) {
             if (this.playUrl) {
@@ -1030,22 +1050,29 @@
                 this.contextGL.clear(this.contextGL.COLOR_BUFFER_BIT);
             }
             this.loading = true;
+            this._checkLoading();
             this.playUrl = url;
         } else if (this.playUrl) {
+            // retry
             if (this.loading) {
+                this._hideBtns();
+                _domToggle(this.doms.fullscreenDom, true);
+                _domToggle(this.doms.pauseDom, true);
                 _domToggle(this.doms.loadingDom, true);
+                this._checkLoading();
+            } else {
+                this.playing = true;
             }
-            url = this.playUrl;
-            this.playing = true;
         }
         this._initCheckVariable();
+
         if (needDelay) {
             var _this = this;
             setTimeout(function () {
-                _this.decoderWorker.postMessage({cmd: "play", url: url, isWebGL: _this.isWebGL()})
+                _this.decoderWorker.postMessage({cmd: "play", url: _this.playUrl, isWebGL: _this.isWebGL()})
             }, 300);
         } else {
-            this.decoderWorker.postMessage({cmd: "play", url: url, isWebGL: this.isWebGL()})
+            this.decoderWorker.postMessage({cmd: "play", url: this.playUrl, isWebGL: this.isWebGL()})
         }
     };
 
