@@ -48,15 +48,17 @@
         document.addEventListener('fullscreenchange', this._onfullscreenchange);
         this.decoderWorker = new Worker(opt.decoder || 'ff.js')
         var _this = this;
+        this._hasLoaded = false;
         this.decoderWorker.onmessage = function (event) {
             var msg = event.data
             switch (msg.cmd) {
                 case "init":
                     console.log("decoder worker init")
                     this.postMessage({cmd: "setVideoBuffer", time: _this._opt.videoBuffer})
-                    if (_this.onLoad) {
-                        _this.onLoad()
-                        delete _this.onLoad;
+                    if (!_this._hasLoaded) {
+                        _this._hasLoaded = true;
+                        _this.onLoad();
+                        _this.trigger('load');
                     }
                     break
                 case "initSize":
@@ -79,6 +81,7 @@
                     if (_this.loading) {
                         _this.loading = false;
                         _this.playing = true;
+                        _this._clearCheckLoading();
                     }
                     _this._updateBPS(msg.bps);
                     _this._checkHeart();
@@ -119,6 +122,7 @@
         this.onRecord = noop;
         this.onFullscreen = noop;
         this.onMute = noop;
+        this.onLoad = noop;
         this.doms = {};
         if (!opt.noControls) {
             this.doms = _initDom(this.container, opt);
@@ -426,13 +430,11 @@
     Jessibuca.prototype.mute = function () {
         this._audioEnabled(false);
         this.quieting = true;
-        this.onMute(true);
     };
 
     Jessibuca.prototype.cancelMute = function () {
         this._audioEnabled(true);
         this.quieting = false;
-        this.onMute(false);
     };
 
     Jessibuca.prototype._initStatus = function (opt) {
@@ -499,11 +501,30 @@
         }
         var _this = this;
         this._checkHeartTimeout = setTimeout(function () {
-            console.log('check heart break');
+            console.log('check loading timeout');
             _this.recording = false
             _this.playing = false;
-        }, 3000);
-        // console.log('check heart');
+        }, 30 * 1000);
+    };
+
+    Jessibuca.prototype._checkLoading = function () {
+        if (this._checkLoadingTimeout) {
+            clearTimeout(this._checkLoadingTimeout);
+            this._checkLoadingTimeout = null;
+        }
+        var _this = this;
+        this._checkLoadingTimeout = setTimeout(function () {
+            console.log('check loading timeout');
+            _this.playing = false;
+            _domToggle(_this.doms.loadingDom, false);
+        }, 30 * 1000);
+    };
+
+    Jessibuca.prototype._clearCheckLoading = function () {
+        if (this._checkLoadingTimeout) {
+            clearTimeout(this._checkLoadingTimeout);
+            this._checkLoadingTimeout = null;
+        }
     };
 
     Jessibuca.prototype._initCheckVariable = function () {
@@ -1013,7 +1034,9 @@
         window.removeEventListener("resize", this._onresize);
         window.removeEventListener('fullscreenchange', this._onfullscreenchange);
         this._initCheckVariable();
+        this._clearCheckLoading();
         this.off();
+        this._hasLoaded = false;
     }
     /**
      * play
@@ -1032,23 +1055,34 @@
                 this.contextGL.clear(this.contextGL.COLOR_BUFFER_BIT);
             }
             this.loading = true;
+            this._checkLoading();
             this.playUrl = url;
         } else if (this.playUrl) {
+            // retry
             if (this.loading) {
+                this._hideBtns();
+                _domToggle(this.doms.fullscreenDom, true);
+                _domToggle(this.doms.pauseDom, true);
                 _domToggle(this.doms.loadingDom, true);
+                this._checkLoading();
+            } else {
+                this.playing = true;
             }
-            url = this.playUrl;
-            this.playing = true;
         }
         this._initCheckVariable();
+
         if (needDelay) {
             var _this = this;
             setTimeout(function () {
-                _this.decoderWorker.postMessage({cmd: "play", url: url, isWebGL: _this.isWebGL()})
+                _this.decoderWorker.postMessage({cmd: "play", url: _this.playUrl, isWebGL: _this.isWebGL()})
             }, 300);
         } else {
-            this.decoderWorker.postMessage({cmd: "play", url: url, isWebGL: this.isWebGL()})
+            this.decoderWorker.postMessage({cmd: "play", url: this.playUrl, isWebGL: this.isWebGL()})
         }
+    };
+
+    Jessibuca.prototype.hasLoaded = function () {
+        return this._hasLoaded;
     };
 
     Object.defineProperty(Jessibuca.prototype, "fullscreen", {

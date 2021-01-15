@@ -22,7 +22,7 @@
     </div>
 </template>
 <script>
-    import Jessibuca from "./renderer2";
+    import Jessibuca from "./renderer-new";
 
     export default {
         name: "DemoPlayer",
@@ -75,11 +75,16 @@
                     loadingText: '加载中'
                 });
                 this.jessibuca.onLog = msg => (this.err = msg);
+                this.jessibuca.onLoad = msg => console.log('onLoad');
                 this.jessibuca.onRecord = msg => console.log('onRecord', msg);
                 this.jessibuca.onPause = () => console.log('onPause');
                 this.jessibuca.onPlay = () => console.log('onPlay');
                 this.jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
                 this.jessibuca.onMute = msg => console.log('onMute', msg);
+
+                this.jessibuca.on('load',function () {
+                    console.log('on load');
+                });
 
                 this.jessibuca.on('log', function (msg) {
                     console.log('on log', msg);

@@ -48,15 +48,17 @@
         document.addEventListener('fullscreenchange', this._onfullscreenchange);
         this.decoderWorker = new Worker(opt.decoder || 'ff.js')
         var _this = this;
+        this._hasLoaded = false;
         this.decoderWorker.onmessage = function (event) {
             var msg = event.data
             switch (msg.cmd) {
                 case "init":
                     console.log("decoder worker init")
                     this.postMessage({cmd: "setVideoBuffer", time: _this._opt.videoBuffer})
-                    if (_this.onLoad) {
-                        _this.onLoad()
-                        delete _this.onLoad;
+                    if (!_this._hasLoaded) {
+                        _this._hasLoaded = true;
+                        _this.onLoad();
+                        _this.trigger('load');
                     }
                     break
                 case "initSize":
@@ -120,6 +122,7 @@
         this.onRecord = noop;
         this.onFullscreen = noop;
         this.onMute = noop;
+        this.onLoad = noop;
         this.doms = {};
         if (!opt.noControls) {
             this.doms = _initDom(this.container, opt);
@@ -498,8 +501,8 @@
         }
         var _this = this;
         this._checkHeartTimeout = setTimeout(function () {
-            console.log('check loading timeout');
-            _this.recording = false
+            console.log('check heart timeout');
+            _this.recording = false;
             _this.playing = false;
         }, 30 * 1000);
     };
@@ -1033,6 +1036,7 @@
         this._initCheckVariable();
         this._clearCheckLoading();
         this.off();
+        this._hasLoaded = false;
     }
     /**
      * play
@@ -1074,6 +1078,10 @@
         } else {
             this.decoderWorker.postMessage({cmd: "play", url: this.playUrl, isWebGL: this.isWebGL()})
         }
+    };
+
+    Jessibuca.prototype.hasLoaded = function () {
+        return this._hasLoaded;
     };
 
     Object.defineProperty(Jessibuca.prototype, "fullscreen", {
