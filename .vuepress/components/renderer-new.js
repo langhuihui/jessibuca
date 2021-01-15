@@ -33,6 +33,7 @@
         this._opt.videoBuffer = opt.videoBuffer || 0;
         this._opt.text = opt.text || '';
         this._opt.isResize = opt.isResize === false ? opt.isResize : true;
+        this._opt.isDebug = opt.debug === true ? true : false;
         if (!opt.forceNoGL) this._initContextGL();
         this._audioContext = new (window.AudioContext || window.webkitAudioContext)();
         this._audioEnabled(true);
@@ -53,9 +54,10 @@
             var msg = event.data
             switch (msg.cmd) {
                 case "init":
-                    console.log("decoder worker init")
+                    _this._opt.isDebug && console.log("decoder worker init")
                     this.postMessage({cmd: "setVideoBuffer", time: _this._opt.videoBuffer})
                     if (!_this._hasLoaded) {
+                        _this._opt.isDebug && console.log("has loaded");
                         _this._hasLoaded = true;
                         _this.onLoad();
                         _this.trigger('load');
@@ -65,7 +67,7 @@
                     _this.canvasElement.width = msg.w
                     _this.canvasElement.height = msg.h
                     _this.resize()
-                    console.log("video size:", msg.w, msg.h)
+                    _this._opt.isDebug && console.log("init size , video size:", msg.w, msg.h)
                     if (_this.isWebGL()) {
 
                     } else {
@@ -81,6 +83,7 @@
                     if (_this.loading) {
                         _this.loading = false;
                         _this.playing = true;
+                        _this._opt.isDebug && console.log("clear check loading timeout");
                         _this._clearCheckLoading();
                     }
                     _this._updateBPS(msg.bps);
@@ -97,20 +100,20 @@
                         _this.onLog(msg.text)
                         this.trigger('log', msg.text);
                     }
-                    console.log(msg.text);
+                    _this._opt.isDebug && console.log(msg.text);
                     break
                 case "printErr":
                     if (_this.onLog) {
                         _this.onLog(msg.text);
                         this.trigger('log', msg.text);
                     }
-                    console.error(msg.text);
+                    _this._opt.isDebug && console.error(msg.text);
                     break;
                 case "initAudioPlanar":
                     _this._initAudioPlanar(msg);
                     break;
                 default:
-                    console.log(msg);
+                    _this._opt.isDebug && console.log(msg);
                     _this[msg.cmd](msg)
             }
         };
@@ -261,7 +264,7 @@
             lineHeight: '20px',
             marginLeft: '5px',
             marginRight: '5px',
-            userSelect:'none'
+            userSelect: 'none'
         };
         var styleObj2 = {
             display: 'none',
@@ -427,6 +430,10 @@
         }, false);
     };
 
+    Jessibuca.prototype.setDebug = function (flag) {
+        this._opt.isDebug = !!flag;
+    };
+
     Jessibuca.prototype.mute = function () {
         this._audioEnabled(false);
         this.quieting = true;
@@ -501,8 +508,8 @@
         }
         var _this = this;
         this._checkHeartTimeout = setTimeout(function () {
-            console.log('check loading timeout');
-            _this.recording = false
+            _this._opt.isDebug && console.log('check heart timeout');
+            _this.recording = false;
             _this.playing = false;
         }, 30 * 1000);
     };
@@ -514,8 +521,9 @@
         }
         var _this = this;
         this._checkLoadingTimeout = setTimeout(function () {
-            console.log('check loading timeout');
+            _this._opt.isDebug && console.log('check loading timeout');
             _this.playing = false;
+            _this._close();
             _domToggle(_this.doms.loadingDom, false);
         }, 30 * 1000);
     };
@@ -539,7 +547,7 @@
     Jessibuca.prototype._initAudioPlanar = function (msg) {
         var channels = msg.channels
         var samplerate = msg.samplerate
-        console.log("initAudioPlanar:", "channles:", channels, "samplerate:", samplerate)
+        this._opt.isDebug && console.log("initAudioPlanar:", "channles:", channels, "samplerate:", samplerate)
         var context = this._audioContext;
         var isPlaying = false;
         var audioBuffers = [];
@@ -713,7 +721,7 @@
         var _this = this
         var resampled = samplerate < 22050;
         if (resampled) {
-            console.log("resampled!")
+            _this._opt.isDebug && console.log("resampled!")
         }
         var audioBuffer = resampled ? context.createBuffer(channels, frameCount << 1, samplerate << 1) : context.createBuffer(channels, frameCount, samplerate);
         var playNextBuffer = function () {
@@ -846,14 +854,14 @@
         gl.shaderSource(vertexShader, vertexShaderScript);
         gl.compileShader(vertexShader);
         if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
-            console.log('Vertex shader failed to compile: ' + gl.getShaderInfoLog(vertexShader));
+            this._opt.isDebug && console.log('Vertex shader failed to compile: ' + gl.getShaderInfoLog(vertexShader));
         }
 
         var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
         gl.shaderSource(fragmentShader, fragmentShaderScript);
         gl.compileShader(fragmentShader);
         if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
-            console.log('Fragment shader failed to compile: ' + gl.getShaderInfoLog(fragmentShader));
+            this._opt.isDebug && console.log('Fragment shader failed to compile: ' + gl.getShaderInfoLog(fragmentShader));
         }
 
         var program = gl.createProgram();
@@ -861,7 +869,7 @@
         gl.attachShader(program, fragmentShader);
         gl.linkProgram(program);
         if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-            console.log('Program failed to compile: ' + gl.getProgramInfoLog(program));
+            this._opt.isDebug && console.log('Program failed to compile: ' + gl.getProgramInfoLog(program));
         }
 
         gl.useProgram(program);
@@ -1237,7 +1245,7 @@
                 scale = wScale + ',' + hScale;
             }
         }
-        console.log('wScale', wScale, 'hScale', hScale);
+        this._opt.isDebug && console.log('wScale', wScale, 'hScale', hScale);
         this.canvasElement.style.transform = "scale(" + scale + ")"
         this.canvasElement.style.left = ((width - resizeWidth) / 2) + "px"
         this.canvasElement.style.top = ((height - resizeHeight) / 2) + "px"

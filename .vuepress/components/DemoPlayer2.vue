@@ -72,7 +72,8 @@
                     isResize: false,
                     text: '',
                     background: 'https://seopic.699pic.com/photo/40011/0709.jpg_wh1200.jpg',
-                    loadingText: '加载中'
+                    loadingText: '加载中',
+                    debug:true
                 });
                 this.jessibuca.onLog = msg => (this.err = msg);
                 this.jessibuca.onLoad = msg => console.log('onLoad');
@@ -81,6 +82,7 @@
                 this.jessibuca.onPlay = () => console.log('onPlay');
                 this.jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
                 this.jessibuca.onMute = msg => console.log('onMute', msg);
+                this.jessibuca.setDebug(false);
 
                 this.jessibuca.on('load',function () {
                     console.log('on load');
