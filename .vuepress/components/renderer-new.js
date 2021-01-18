@@ -470,12 +470,15 @@
         _domToggle(this.doms.loadingDom, false);
         _domToggle(this.doms.playDom, false);
         _domToggle(this.doms.playBigDom, false);
+        _domToggle(this.doms.bgDom, false);
     };
 
     Jessibuca.prototype._hideBtns = function () {
         var _this = this;
         Object.keys(this.doms).forEach(function (dom) {
-            _domToggle(_this.doms[dom], false);
+            if (dom !== 'bgDom') {
+                _domToggle(_this._doms[dom], false);
+            }
         })
     };
 
@@ -563,23 +566,19 @@
                         for (var i = 0; i < frameCount; i++) {
                             nowBuffering[i + j * frameCount] = fromBuffer[j][channel][i]
                         }
-                        //postMessage({ cmd: "setBufferA", buffer: fromBuffer[j] }, '*', fromBuffer[j].map(x => x.buffer))
                     }
                 }
             }
             var playNextBuffer = function () {
                 isPlaying = false;
-                //console.log("~", audioBuffers.length)
                 if (audioBuffers.length) {
                     playAudio(audioBuffers.shift());
                 }
-                //if (audioBuffers.length > 1) audioBuffers.shift();
             };
             var playAudio = function (fromBuffer) {
                 if (!fromBuffer) return
                 if (isPlaying) {
                     audioBuffers.push(fromBuffer);
-                    //console.log(audioBuffers.length)
                     return;
                 }
                 isPlaying = true;
@@ -587,7 +586,6 @@
                 var source = context.createBufferSource();
                 source.buffer = audioBuffer;
                 source.connect(context.destination);
-                // source.onended = playNextBuffer;
                 source.start();
             };
             _this.playAudio = playAudio
@@ -1054,7 +1052,6 @@
         if (!this.playUrl && !url) {
             return;
         }
-
         var needDelay = false;
         if (url) {
             if (this.playUrl) {

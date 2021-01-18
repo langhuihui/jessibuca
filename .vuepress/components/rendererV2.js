@@ -327,17 +327,17 @@
         btnWrap.appendChild(control2);
 
         fragment.appendChild(bgDom);
+        doms.bgDom = bgDom;
         fragment.appendChild(loadingDom);
         doms.loadingDom = loadingDom;
-        fragment.appendChild(btnWrap);
+        if (this._showControl()) {
+            fragment.appendChild(btnWrap);
+        }
         if (this._opt.operateBtns.play) {
             fragment.appendChild(playBigDom);
             doms.playBigDom = playBigDom;
         }
-
-        if (this._showControl()) {
-            this._container.appendChild(fragment);
-        }
+        this._container.appendChild(fragment);
         this._doms = doms;
     };
 
@@ -564,12 +564,15 @@
         _domToggle(this._doms.loadingDom, false);
         _domToggle(this._doms.playDom, false);
         _domToggle(this._doms.playBigDom, false);
+        _domToggle(this._doms.bgDom, false);
     };
 
     Jessibuca.prototype._hideBtns = function () {
         var _this = this;
         Object.keys(this._doms).forEach(function (dom) {
-            _domToggle(_this._doms[dom], false);
+            if (dom !== 'bgDom') {
+                _domToggle(_this._doms[dom], false);
+            }
         })
     };
 
@@ -1188,6 +1191,7 @@
                 this._contextGL.clear(this._contextGL.COLOR_BUFFER_BIT);
             }
             this.loading = true;
+
             this._checkLoading();
             this.playUrl = url;
         } else if (this.playUrl) {

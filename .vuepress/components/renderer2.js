@@ -470,12 +470,15 @@
         _domToggle(this.doms.loadingDom, false);
         _domToggle(this.doms.playDom, false);
         _domToggle(this.doms.playBigDom, false);
+        _domToggle(this.doms.bgDom, false);
     };
 
     Jessibuca.prototype._hideBtns = function () {
         var _this = this;
         Object.keys(this.doms).forEach(function (dom) {
-            _domToggle(_this.doms[dom], false);
+            if (dom !== 'bgDom') {
+                _domToggle(_this._doms[dom], false);
+            }
         })
     };
 
