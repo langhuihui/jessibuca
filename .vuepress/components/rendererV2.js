@@ -328,6 +328,7 @@
 
         fragment.appendChild(bgDom);
         fragment.appendChild(loadingDom);
+        doms.loadingDom = loadingDom;
         fragment.appendChild(btnWrap);
         if (this._opt.operateBtns.play) {
             fragment.appendChild(playBigDom);
@@ -435,7 +436,7 @@
                     });
                     break
                 case "playAudio":
-                    _this.playAudio(msg.buffer)
+                    _this._playAudio(msg.buffer)
                     break
                 case "print":
                     _this.onLog(msg.text)
@@ -462,54 +463,54 @@
     Jessibuca.prototype._initEventListener = function () {
         var _this = this;
 
-        this._doms.playDom.addEventListener('click', function (e) {
+        this._doms.playDom && this._doms.playDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.play();
         }, false);
 
-        this._doms.playBigDom.addEventListener('click', function (e) {
+        this._doms.playBigDom && this._doms.playBigDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.play();
         }, false);
 
-        this._doms.pauseDom.addEventListener('click', function (e) {
+        this._doms.pauseDom && this._doms.pauseDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.pause();
         }, false);
 
         // screenshots
-        this._doms.screenshotsDom.addEventListener('click', function (e) {
+        this._doms.screenshotsDom && this._doms.screenshotsDom.addEventListener('click', function (e) {
             e.stopPropagation();
             var filename = _this._opt.text + '' + _now();
             _screenshot(filename);
         }, false);
         //
-        this._doms.fullscreenDom.addEventListener('click', function (e) {
+        this._doms.fullscreenDom && this._doms.fullscreenDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.fullscreen = true;
         }, false);
         //
-        this._doms.minScreenDom.addEventListener('click', function (e) {
+        this._doms.minScreenDom && this._doms.minScreenDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.fullscreen = false;
         }, false);
         //
-        this._doms.recordDom.addEventListener('click', function (e) {
+        this._doms.recordDom && this._doms.recordDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.recording = true;
         }, false);
         //
-        this._doms.recordingDom.addEventListener('click', function (e) {
+        this._doms.recordingDom && this._doms.recordingDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.recording = false;
         }, false);
 
-        this._doms.quietAudioDom.addEventListener('click', function (e) {
+        this._doms.quietAudioDom && this._doms.quietAudioDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.cancelMute();
         }, false);
 
-        this._doms.playAudioDom.addEventListener('click', function (e) {
+        this._doms.playAudioDom && this._doms.playAudioDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.mute();
         }, false);
@@ -649,7 +650,7 @@
         var audioBuffers = [];
         if (!context) return false;
         var _this = this
-        this.playAudio = function (buffer) {
+        this._playAudio = function (buffer) {
             var frameCount = buffer[0][0].length
             var audioBuffer = context.createBuffer(channels, frameCount * buffer.length, samplerate);
             var copyToCtxBuffer = function (fromBuffer) {
@@ -686,7 +687,7 @@
                 // source.onended = playNextBuffer;
                 source.start();
             };
-            _this.playAudio = playAudio
+            _this._playAudio = playAudio
             _this.audioInterval = setInterval(playNextBuffer, audioBuffer.duration * 1000);
             playAudio(buffer)
         };
@@ -760,7 +761,7 @@
         }
     }
 
-    Jessibuca.prototype.playAudio = function (data) {
+    Jessibuca.prototype._playAudio = function (data) {
         var context = this._audioContext;
         var isPlaying = false;
         var isDecoding = false;
@@ -806,7 +807,7 @@
                 decodeAudio()
             }
         }
-        this.playAudio = playAudio
+        this._playAudio = playAudio
         playAudio(data)
     }
     Jessibuca.prototype._initAudioPlay = function (frameCount, samplerate, channels) {
@@ -862,7 +863,7 @@
             }
             source.start();
         };
-        this.playAudio = playAudio;
+        this._playAudio = playAudio;
     }
     /**
      * Returns true if the canvas supports WebGL
@@ -1136,7 +1137,7 @@
         if (this.audioInterval) {
             clearInterval(this.audioInterval)
         }
-        delete this.playAudio
+        delete this._playAudio
         this._decoderWorker.postMessage({cmd: "close"})
 
         if (this._wakeLock) {
@@ -1374,11 +1375,11 @@
             }
         }
         //
-        // if (this._opt.isFullResize) {
-        //     scale = wScale > hScale ? wScale : hScale;
-        // }
+        if (this._opt.isFullResize) {
+            scale = wScale > hScale ? wScale : hScale;
+        }
 
-        this._opt.isDebug && console.log('wScale', wScale, 'hScale', hScale);
+        this._opt.isDebug && console.log('wScale', wScale, 'hScale', hScale, 'scale', scale);
         this._canvasElement.style.transform = "scale(" + scale + ")"
         this._canvasElement.style.left = ((width - resizeWidth) / 2) + "px"
         this._canvasElement.style.top = ((height - resizeHeight) / 2) + "px"

@@ -69,12 +69,12 @@
                     container: this.$refs.container,
                     decoder: this.decoder,
                     videoBuffer: Number(this.$refs.buffer.value),
-                    isResize: true,
+                    isResize: false,
                     text: '',
                     background: 'https://seopic.699pic.com/photo/40011/0709.jpg_wh1200.jpg',
                     loadingText: '加载中',
                     debug: true,
-                    isFullResize: true
+                    // isFullResize: true
                 });
                 this.jessibuca.onLog = msg => console.log('onLog', msg);
                 this.jessibuca.onLoad = msg => console.log('onLoad');
