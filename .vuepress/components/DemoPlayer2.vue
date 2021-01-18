@@ -22,7 +22,7 @@
     </div>
 </template>
 <script>
-    import Jessibuca from "./rendererV2";
+    import Jessibuca from "./renderer2";
 
     export default {
         name: "DemoPlayer",

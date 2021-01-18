@@ -1182,7 +1182,6 @@
         if (!this.playUrl && !url) {
             return;
         }
-
         var needDelay = false;
         if (url) {
             if (this.playUrl) {
@@ -1191,7 +1190,7 @@
                 this._contextGL.clear(this._contextGL.COLOR_BUFFER_BIT);
             }
             this.loading = true;
-
+            _domToggle(this._doms.bgDom, false);
             this._checkLoading();
             this.playUrl = url;
         } else if (this.playUrl) {
@@ -1362,7 +1361,6 @@
      * resize
      */
     Jessibuca.prototype.resize = function () {
-        debugger;
         var width = this._container.clientWidth;
         var height = this._container.clientHeight;
         if (this._showControl()) {

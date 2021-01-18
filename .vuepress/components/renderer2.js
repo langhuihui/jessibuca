@@ -477,7 +477,7 @@
         var _this = this;
         Object.keys(this.doms).forEach(function (dom) {
             if (dom !== 'bgDom') {
-                _domToggle(_this._doms[dom], false);
+                _domToggle(_this.doms[dom], false);
             }
         })
     };
@@ -1060,6 +1060,7 @@
                 this.contextGL.clear(this.contextGL.COLOR_BUFFER_BIT);
             }
             this.loading = true;
+            _domToggle(this.doms.bgDom, false);
             this._checkLoading();
             this.playUrl = url;
         } else if (this.playUrl) {
