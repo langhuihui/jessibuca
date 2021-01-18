@@ -22,7 +22,7 @@
     </div>
 </template>
 <script>
-    import Jessibuca from "./renderer-new";
+    import Jessibuca from "./rendererV2";
 
     export default {
         name: "DemoPlayer",
@@ -69,22 +69,22 @@
                     container: this.$refs.container,
                     decoder: this.decoder,
                     videoBuffer: Number(this.$refs.buffer.value),
-                    isResize: false,
+                    isResize: true,
                     text: '',
                     background: 'https://seopic.699pic.com/photo/40011/0709.jpg_wh1200.jpg',
                     loadingText: '加载中',
-                    debug:true
+                    debug: true,
+                    isFullResize: true
                 });
-                this.jessibuca.onLog = msg => (this.err = msg);
+                this.jessibuca.onLog = msg => console.log('onLog', msg);
                 this.jessibuca.onLoad = msg => console.log('onLoad');
                 this.jessibuca.onRecord = msg => console.log('onRecord', msg);
                 this.jessibuca.onPause = () => console.log('onPause');
                 this.jessibuca.onPlay = () => console.log('onPlay');
                 this.jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
                 this.jessibuca.onMute = msg => console.log('onMute', msg);
-                this.jessibuca.setDebug(false);
 
-                this.jessibuca.on('load',function () {
+                this.jessibuca.on('load', function () {
                     console.log('on load');
                 });
 
@@ -101,15 +101,23 @@
                     console.log('on play');
                 });
                 this.jessibuca.on('fullscreen', function (msg) {
-                    console.log('on fullscreen',msg);
+                    console.log('on fullscreen', msg);
                 });
 
                 this.jessibuca.on('mute', function (msg) {
-                    console.log('on mute',msg);
+                    console.log('on mute', msg);
                 });
 
                 this.jessibuca.on('mute', function (msg) {
-                    console.log('on mute2',msg);
+                    console.log('on mute2', msg);
+                });
+
+                this.jessibuca.on('audioInfo', function (msg) {
+                    console.log('audioInfo', msg);
+                });
+
+                this.jessibuca.on('bps', function (bps) {
+                    console.log('bps', bps);
                 });
 
                 console.log(this.jessibuca);
@@ -145,7 +153,7 @@
             },
 
             changeBuffer() {
-                this.jessibuca.decoderWorker.postMessage({cmd: "setVideoBuffer", time: Number(this.$refs.buffer.value)})
+                this.jessibuca.setBufferTime(Number(this.$refs.buffer.value));
             }
         }
     };

@@ -10,35 +10,46 @@
      * @constructor
      */
     function Jessibuca(opt) {
-        this.canvasElement = document.createElement("canvas");
-        this.canvasElement.style.position = "absolute";
-        this.canvasElement.style.top = 0;
-        this.canvasElement.style.left = 0;
+        this._canvasElement = document.createElement("canvas");
+        this._canvasElement.style.position = "absolute";
+        this._canvasElement.style.top = 0;
+        this._canvasElement.style.left = 0;
         this._opt = opt;
-        opt.container.appendChild(this.canvasElement);
-        // this.width = opt.container.clientWidth;
-        // this.height = opt.container.clientHeight;
-        this.container = opt.container;
-        this.container.style.overflow = "hidden";
+        opt.container.appendChild(this._canvasElement);
+        this._container = opt.container;
+        this._container.style.overflow = "hidden";
         this._containerOldPostion = {
-            position: this.container.style.position,
-            top: this.container.style.top,
-            left: this.container.style.left,
-            width: this.container.style.width,
-            height: this.container.style.height
+            position: this._container.style.position,
+            top: this._container.style.top,
+            left: this._container.style.left,
+            width: this._container.style.width,
+            height: this._container.style.height
         }
         if (this._containerOldPostion.position != "absolute") {
-            this.container.style.position = "relative"
+            this._container.style.position = "relative"
         }
         this._opt.videoBuffer = opt.videoBuffer || 0;
         this._opt.text = opt.text || '';
+        //
         this._opt.isResize = opt.isResize === false ? opt.isResize : true;
+        this._opt.isFullResize = opt.isFullResize === true ? opt.isFullResize : false;
         this._opt.isDebug = opt.debug === true ? true : false;
+        this._opt.timeout = typeof opt.timeout === 'number' ? opt.timeout : 30;
+        this._opt.supportDblclickFullscreen = opt.supportDblclickFullscreen === true ? true : false;
+        this._opt.showBandwidth = opt.bandwidth === true ? true : false;
+        this._opt.operateBtns = Object.assign({
+            fullscreen: false,
+            screenshot: false,
+            play: false,
+            audio: false
+        }, opt.operateBtns || {});
+        this._opt.keepScreenOn = opt.keepScreenOn === true ? true : false;
+
         if (!opt.forceNoGL) this._initContextGL();
         this._audioContext = new (window.AudioContext || window.webkitAudioContext)();
         this._audioEnabled(true);
         if (!opt.isNotMute) this._audioEnabled(false);
-        if (this.contextGL) {
+        if (this._contextGL) {
             this._initProgram();
             this._initBuffers();
             this._initTextures();
@@ -47,99 +58,38 @@
         this._onfullscreenchange = () => this._fullscreenchange();
         window.addEventListener("resize", this._onresize);
         document.addEventListener('fullscreenchange', this._onfullscreenchange);
-        this.decoderWorker = new Worker(opt.decoder || 'ff.js')
+        this._decoderWorker = new Worker(opt.decoder || 'ff.js')
         var _this = this;
         this._hasLoaded = false;
-        this.decoderWorker.onmessage = function (event) {
-            var msg = event.data
-            switch (msg.cmd) {
-                case "init":
-                    _this._opt.isDebug && console.log("decoder worker init")
-                    this.postMessage({cmd: "setVideoBuffer", time: _this._opt.videoBuffer})
-                    if (!_this._hasLoaded) {
-                        _this._opt.isDebug && console.log("has loaded");
-                        _this._hasLoaded = true;
-                        _this.onLoad();
-                        _this.trigger('load');
-                    }
-                    break
-                case "initSize":
-                    _this.canvasElement.width = msg.w
-                    _this.canvasElement.height = msg.h
-                    _this.resize()
-                    _this._opt.isDebug && console.log("init size , video size:", msg.w, msg.h)
-                    if (_this.isWebGL()) {
 
-                    } else {
-                        _this._initRGB(msg.w, msg.h)
-                    }
-                    break
-                case "render":
-                    if (_this.contextGL) {
-                        _this._drawNextOutputPictureGL(msg.output);
-                    } else {
-                        _this._drawNextOutputPictureRGBA(msg.buffer);
-                    }
-                    if (_this.loading) {
-                        _this.loading = false;
-                        _this.playing = true;
-                        _this._opt.isDebug && console.log("clear check loading timeout");
-                        _this._clearCheckLoading();
-                    }
-                    _this._updateBPS(msg.bps);
-                    _this._checkHeart();
-                    break
-                case "initAudio":
-                    _this._initAudioPlay(msg.frameCount, msg.samplerate, msg.channels)
-                    break
-                case "playAudio":
-                    _this.playAudio(msg.buffer)
-                    break
-                case "print":
-                    if (_this.onLog) {
-                        _this.onLog(msg.text)
-                        this.trigger('log', msg.text);
-                    }
-                    _this._opt.isDebug && console.log(msg.text);
-                    break
-                case "printErr":
-                    if (_this.onLog) {
-                        _this.onLog(msg.text);
-                        this.trigger('log', msg.text);
-                    }
-                    _this._opt.isDebug && console.error(msg.text);
-                    break;
-                case "initAudioPlanar":
-                    _this._initAudioPlanar(msg);
-                    break;
-                default:
-                    _this._opt.isDebug && console.log(msg);
-                    _this[msg.cmd](msg)
-            }
-        };
-        this.canvasElement.addEventListener('dblclick', function () {
-            _this.fullscreen = !_this.fullscreen;
-        }, false);
+        if (this._opt.supportDblclickFullscreen) {
+            this._canvasElement.addEventListener('dblclick', function () {
+                _this.fullscreen = !_this.fullscreen;
+            }, false);
+        }
         this.onPlay = noop;
         this.onPause = noop;
         this.onRecord = noop;
         this.onFullscreen = noop;
         this.onMute = noop;
         this.onLoad = noop;
-        this.doms = {};
-        if (!opt.noControls) {
-            this.doms = _initDom(this.container, opt);
-            this._initStatus(opt);
-            this._initEventListener();
-            this._hideBtns();
-        }
+        this.onLog = noop;
+        this.onError = noop;
+        this._onMessage();
+        this._initDom();
+        this._initStatus();
+        this._initEventListener();
+        this._hideBtns();
+        //
+        this._initWakeLock();
+        this._enableWakeLock();
     };
 
     function noop() {
 
     }
 
-    function _initDom(container, opt) {
+    Jessibuca.prototype._initDom = function () {
         var playBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQEAYAAABPYyMiAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAZiS0dEAAAAAAAA+UO7fwAAAAlwSFlzAAAASAAAAEgARslrPgAAARVJREFUSMe9laEOglAUhs+5k9lJFpsJ5QWMJoNGbEY0mEy+gr6GNo0a3SiQCegMRILzGdw4hl+Cd27KxPuXb2zA/91z2YXoGRERkX4fvN3A2QxUiv4dFM3n8jZRBLbbVfd+ubJuF4xjiCyXkksueb1uSKCIZYGLBTEx8ekEoV7PkICeVgs8HiGyXoO2bUigCDM4HoPnM7bI8wwJ6Gk0sEXbLSay30Oo2TQkoGcwgFCSQMhxDAvoETEscDiQkJC4LjMz8+XyZ4HrFYWjEQqHQ1asWGWZfmdFAsVINxuw00HhbvfpydpvxWkKTqdYaRCUfUPJCdzv4Gr1uqfli0tOIAzByUT/iCrL6+84y3Bw+D6ui5Ou+jwA8FnIO++FACgAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjEtMDEtMDhUMTY6NDI6NTMrMDg6MDCKP7wnAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIxLTAxLTA4VDE2OjQyOjUzKzA4OjAw+2IEmwAAAEl0RVh0c3ZnOmJhc2UtdXJpAGZpbGU6Ly8vaG9tZS9hZG1pbi9pY29uLWZvbnQvdG1wL2ljb25fZ2Y3MDBzN2IzZncvYm9mYW5nLnN2Z8fICi0AAAAASUVORK5CYII=';
         var pauseBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQEAYAAABPYyMiAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAZiS0dEAAAAAAAA+UO7fwAAAAlwSFlzAAAASAAAAEgARslrPgAAAHVJREFUSMftkCESwCAMBEOnCtdXVMKHeC7oInkEeQJXkRoEZWraipxZc8lsQqQZBACAlIS1oqGhhTCdu3oyxyyMcdRf79c5J7SWDBky+z4173rbJvR+VF/e/qwKqIAKqMBDgZyFzAQCoZTpxq7HLDyOrw/9b07l3z4dDnI2IAAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyMS0wMS0wOFQxNjo0Mjo1MyswODowMIo/vCcAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjEtMDEtMDhUMTY6NDI6NTMrMDg6MDD7YgSbAAAASnRFWHRzdmc6YmFzZS11cmkAZmlsZTovLy9ob21lL2FkbWluL2ljb24tZm9udC90bXAvaWNvbl9nZjcwMHM3YjNmdy96YW50aW5nLnN2ZxqNZJkAAAAASUVORK5CYII=';
         var screenshotBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQEAYAAABPYyMiAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAZiS0dEAAAAAAAA+UO7fwAAAAlwSFlzAAAASAAAAEgARslrPgAAAaxJREFUSMfNlLFOAkEQhmevAZMjR6OGRBJKsFBzdkYNpYSaWkopIOFRCBWh1ieA+ALGRgutjK0HzV2H5SX7W/zsmY3cnTEhcZovOzcz9+/s7Ir8d4OGht7fBwAgjvEri2OTl1ffSf0xAMBxRIkS1e3Se3+vcszEMe/6OqmT/aN2m1wsNu/o5YVsNHI7BgA4PCRfXzfXCwKy1RLbcXZG9nrkzc12jvT8nPU/PtatOThgAx8fuS4WyZ0de2e+T87n5OcnuVqRsxl5cpImQDnKUc7DA1fVqpimZCu+vCSjiNH9PlmpJNTQ0INBErfeafZRAakC6FWKfH9nwU7H/l6rGdqCOx3y7c3U+aOARsMMp+1vNskwTLjulB23XJL1epqA9OshIiKeJxAIoug7UyA4OuLi6Ynr52deu+NjOy4MSc9Ln8rMDpTLybBpaOjdXbJUIqdTm8a/t2fn/RSQewR24HicTLmGhnbdzcPquvYtGY3+PIR24UKBUXd35v6Sk4lN47+9NXm/FBAEedfGTjw9JYdDm76fm6+hoS8ujGAxT6L9Im7bTKeurvIEb92+AES1b6x283XSAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDIxLTAxLTA4VDE2OjQyOjUzKzA4OjAwij+8JwAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyMS0wMS0wOFQxNjo0Mjo1MyswODowMPtiBJsAAABJdEVYdHN2ZzpiYXNlLXVyaQBmaWxlOi8vL2hvbWUvYWRtaW4vaWNvbi1mb250L3RtcC9pY29uX2dmNzAwczdiM2Z3L2NhbWVyYS5zdmeyubWEAAAAAElFTkSuQmCC';
@@ -157,6 +107,8 @@
                 dom.style[key] = cssObj[key];
             })
         }
+
+        var doms = {};
 
         var fragment = document.createDocumentFragment();
         var btnWrap = document.createElement('div');
@@ -178,8 +130,8 @@
         var recordingDom = document.createElement('div');
         var bgDom = document.createElement('div');
 
-        loadingTextDom.innerText = opt.loadingText || '加载中......';
-        textDom.innerText = opt.text || '';
+        loadingTextDom.innerText = this._opt.loadingText || '';
+        textDom.innerText = this._opt.text || '';
         speedDom.innerText = '';
         playDom.title = '播放';
         pauseDom.title = '暂停';
@@ -207,12 +159,12 @@
             height: '100%',
         };
 
-        if (opt.background) {
+        if (this._opt.background) {
             bgStyle = Object.assign({}, bgStyle, {
                 backgroundRepeat: "no-repeat",
                 backgroundPosition: "center",
                 backgroundSize: '100%',
-                backgroundImage: "url('" + opt.background + "')"
+                backgroundImage: "url('" + this._opt.background + "')"
             })
         }
 
@@ -328,24 +280,48 @@
         }));
 
         loadingDom.appendChild(loadingTextDom);
-        control1.appendChild(textDom);
-        control1.appendChild(speedDom);
+        if (this._opt.text) {
+            control1.appendChild(textDom);
+            doms.textDom = textDom;
+        }
+        if (this._opt.showBandwidth) {
+            control1.appendChild(speedDom);
+            doms.speedDom = speedDom;
+        }
 
         // record
         //control2.appendChild(recordingDom);
         //control2.appendChild(recordDom);
 
         // screenshots
-        control2.appendChild(screenshotsDom);
+        if (this._opt.operateBtns.screenshot) {
+            control2.appendChild(screenshotsDom);
+            doms.screenshotsDom = screenshotsDom;
+        }
+
         // play stop
-        control2.appendChild(playDom);
-        control2.appendChild(pauseDom);
+        if (this._opt.operateBtns.play) {
+            control2.appendChild(playDom);
+            control2.appendChild(pauseDom);
+            doms.playDom = playDom;
+            doms.pauseDom = pauseDom;
+        }
+
         // audio
-        control2.appendChild(playAudioDom);
-        control2.appendChild(quietAudioDom);
+        if (this._opt.operateBtns.audio) {
+            control2.appendChild(playAudioDom);
+            control2.appendChild(quietAudioDom);
+            doms.playAudioDom = playAudioDom;
+            doms.quietAudioDom = quietAudioDom;
+        }
+
         // fullscreen
-        control2.appendChild(fullscreenDom);
-        control2.appendChild(minScreenDom);
+        if (this._opt.operateBtns.fullscreen) {
+            control2.appendChild(fullscreenDom);
+            control2.appendChild(minScreenDom);
+            doms.fullscreenDom = fullscreenDom;
+            doms.minScreenDom = minScreenDom;
+        }
 
         btnWrap.appendChild(control1);
         btnWrap.appendChild(control2);
@@ -353,129 +329,246 @@
         fragment.appendChild(bgDom);
         fragment.appendChild(loadingDom);
         fragment.appendChild(btnWrap);
-        fragment.appendChild(playBigDom);
+        if (this._opt.operateBtns.play) {
+            fragment.appendChild(playBigDom);
+            doms.playBigDom = playBigDom;
+        }
 
-        container.appendChild(fragment);
-        return {
-            textDom,
-            speedDom,
-            playDom,
-            pauseDom,
-            loadingDom,
-            screenshotsDom,
-            fullscreenDom,
-            minScreenDom,
-            playAudioDom,
-            quietAudioDom,
-            recordDom,
-            recordingDom,
-            bgDom,
-            playBigDom
+        if (this._showControl()) {
+            this._container.appendChild(fragment);
+        }
+        this._doms = doms;
+    };
+
+    Jessibuca.prototype._initWakeLock = function () {
+        this._wakeLock = null;
+        var _this = this;
+        var handleWakeLock = () => {
+            if (this._wakeLock !== null && "visible" === document.visibilityState) {
+                _this._enableWakeLock();
+            }
         };
-    }
+
+        document.addEventListener('visibilitychange', handleWakeLock);
+        document.addEventListener('fullscreenchange', handleWakeLock);
+    };
+
+    Jessibuca.prototype._enableWakeLock = function () {
+        if (this._opt.keepScreenOn) {
+            if ("wakeLock" in navigator) {
+                var _this = this;
+                navigator.wakeLock.request("screen").then((lock) => {
+                    _this._wakeLock = lock;
+                    _this._wakeLock.addEventListener('release', function () {
+                    });
+                })
+            }
+        }
+    };
+
+
+    Jessibuca.prototype._showControl = function () {
+        var result = false;
+
+        var hasBtnShow = false;
+        Object.keys(this._opt.operateBtns).forEach((key) => {
+            if (this._opt.operateBtns[key]) {
+                hasBtnShow = true;
+            }
+        });
+
+        if (this._opt.showBandwidth || this._opt.text || hasBtnShow) {
+            result = true;
+        }
+
+        return result;
+    };
+
+    Jessibuca.prototype._onMessage = function () {
+        var _this = this;
+        this._decoderWorker.onmessage = function (event) {
+            var msg = event.data;
+            switch (msg.cmd) {
+                case "init":
+                    _this._opt.isDebug && console.log("decoder worker init")
+                    this.postMessage({cmd: "setVideoBuffer", time: _this._opt.videoBuffer})
+                    if (!_this._hasLoaded) {
+                        _this._opt.isDebug && console.log("has loaded");
+                        _this._hasLoaded = true;
+                        _this.onLoad();
+                        _this._trigger('load');
+                    }
+                    break
+                case "initSize":
+                    _this._canvasElement.width = msg.w
+                    _this._canvasElement.height = msg.h
+                    _this.resize()
+                    _this._opt.isDebug && console.log("init size , video size:", msg.w, msg.h)
+                    _this._trigger('videoInfo', {w: msg.w, h: msg.h});
+                    if (_this.isWebGL()) {
+
+                    } else {
+                        _this._initRGB(msg.w, msg.h)
+                    }
+                    break
+                case "render":
+                    if (_this._contextGL) {
+                        _this._drawNextOutputPictureGL(msg.output);
+                    } else {
+                        _this._drawNextOutputPictureRGBA(msg.buffer);
+                    }
+                    if (_this.loading) {
+                        _this.loading = false;
+                        _this.playing = true;
+                        _this._opt.isDebug && console.log("clear check loading timeout");
+                        _this._clearCheckLoading();
+                    }
+                    _this._updateBPS(msg.bps);
+                    _this._checkHeart();
+                    break
+                case "initAudio":
+                    _this._initAudioPlay(msg.frameCount, msg.samplerate, msg.channels)
+                    _this._trigger('audioInfo', {
+                        numOfChannels: msg.channels, // 声频通道
+                        length: msg.frameCount, // 帧数
+                        sampleRate: msg.samplerate // 采样率
+                    });
+                    break
+                case "playAudio":
+                    _this.playAudio(msg.buffer)
+                    break
+                case "print":
+                    _this.onLog(msg.text)
+                    this._trigger('log', msg.text);
+                    _this._opt.isDebug && console.log(msg.text);
+                    break
+                case "printErr":
+                    _this.onLog(msg.text);
+                    this._trigger('log', msg.text);
+                    _this.onError(msg.text);
+                    this._trigger('error', msg.text);
+                    _this._opt.isDebug && console.error(msg.text);
+                    break;
+                case "initAudioPlanar":
+                    _this._initAudioPlanar(msg);
+                    break;
+                default:
+                    _this._opt.isDebug && console.log(msg);
+                    _this[msg.cmd](msg)
+            }
+        };
+    };
 
     Jessibuca.prototype._initEventListener = function () {
         var _this = this;
 
-        this.doms.playDom.addEventListener('click', function (e) {
+        this._doms.playDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.play();
         }, false);
 
-        this.doms.playBigDom.addEventListener('click', function (e) {
+        this._doms.playBigDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.play();
         }, false);
 
-        this.doms.pauseDom.addEventListener('click', function (e) {
+        this._doms.pauseDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.pause();
         }, false);
 
         // screenshots
-        this.doms.screenshotsDom.addEventListener('click', function (e) {
+        this._doms.screenshotsDom.addEventListener('click', function (e) {
             e.stopPropagation();
-            const dataURL = _this.canvasElement.toDataURL('image/png');
-            _downloadImg(_dataURLToFile(dataURL), _this._opt.text);
+            var filename = _this._opt.text + '' + _now();
+            _screenshot(filename);
         }, false);
         //
-        this.doms.fullscreenDom.addEventListener('click', function (e) {
+        this._doms.fullscreenDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.fullscreen = true;
         }, false);
         //
-        this.doms.minScreenDom.addEventListener('click', function (e) {
+        this._doms.minScreenDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.fullscreen = false;
         }, false);
         //
-        this.doms.recordDom.addEventListener('click', function (e) {
+        this._doms.recordDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.recording = true;
         }, false);
         //
-        this.doms.recordingDom.addEventListener('click', function (e) {
+        this._doms.recordingDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.recording = false;
         }, false);
 
-        this.doms.quietAudioDom.addEventListener('click', function (e) {
+        this._doms.quietAudioDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.cancelMute();
         }, false);
 
-        this.doms.playAudioDom.addEventListener('click', function (e) {
+        this._doms.playAudioDom.addEventListener('click', function (e) {
             e.stopPropagation();
             _this.mute();
         }, false);
     };
-
+    /**
+     * set debug
+     * @param flag
+     */
     Jessibuca.prototype.setDebug = function (flag) {
         this._opt.isDebug = !!flag;
     };
-
+    /**
+     * mute
+     */
     Jessibuca.prototype.mute = function () {
         this._audioEnabled(false);
         this.quieting = true;
     };
 
+    /**
+     * cancel mute
+     */
     Jessibuca.prototype.cancelMute = function () {
         this._audioEnabled(true);
         this.quieting = false;
     };
 
-    Jessibuca.prototype._initStatus = function (opt) {
+    Jessibuca.prototype._initStatus = function () {
         this._loading = true;
         this.loading = true;
         this._recording = false;
         this.recording = false;
         this._playing = false;
         this.playing = false;
-        this._quieting = opt.isNotMute ? false : true;
-        this.quieting = opt.isNotMute ? false : true;
+        this._quieting = this._opt.isNotMute ? false : true;
+        this.quieting = this._opt.isNotMute ? false : true;
         this._fullscreen = false;
         this.fullscreen = false;
     }
 
     Jessibuca.prototype._initBtns = function () {
         // show
-        _domToggle(this.doms.pauseDom, true);
-        _domToggle(this.doms.screenshotsDom, true);
-        _domToggle(this.doms.fullscreenDom, true);
-        _domToggle(this.doms.quietAudioDom, true);
-        _domToggle(this.doms.textDom, true);
-        _domToggle(this.doms.speedDom, true);
-        _domToggle(this.doms.recordDom, true);
+        _domToggle(this._doms.pauseDom, true);
+        _domToggle(this._doms.screenshotsDom, true);
+        _domToggle(this._doms.fullscreenDom, true);
+        _domToggle(this._doms.quietAudioDom, true);
+        _domToggle(this._doms.textDom, true);
+        _domToggle(this._doms.speedDom, true);
+        _domToggle(this._doms.recordDom, true);
         // hide
-        _domToggle(this.doms.loadingDom, false);
-        _domToggle(this.doms.playDom, false);
-        _domToggle(this.doms.playBigDom, false);
+        _domToggle(this._doms.loadingDom, false);
+        _domToggle(this._doms.playDom, false);
+        _domToggle(this._doms.playBigDom, false);
     };
 
     Jessibuca.prototype._hideBtns = function () {
         var _this = this;
-        Object.keys(this.doms).forEach(function (dom) {
-            _domToggle(_this.doms[dom], false);
+        Object.keys(this._doms).forEach(function (dom) {
+            _domToggle(_this._doms[dom], false);
         })
     };
 
@@ -487,18 +580,19 @@
 
     Jessibuca.prototype._updateBPS = function (bps) {
         if (!this._startBpsTime) {
-            this._startBpsTime = new Date().getTime();
+            this._startBpsTime = _now();
         }
-        var _now = new Date().getTime();
-        var timestamp = _now - this._startBpsTime;
+        var _nowTime = _now();
+        var timestamp = _nowTime - this._startBpsTime;
 
         if (timestamp < 1 * 1000) {
             this._bps += bps;
             return;
         }
-        this.doms.speedDom && (this.doms.speedDom.innerText = _bpsSize(this._bps));
+        this._doms.speedDom && (this._doms.speedDom.innerText = _bpsSize(this._bps));
+        this._trigger('bps', this._bps);
         this._bps = 0;
-        this._startBpsTime = _now;
+        this._startBpsTime = _nowTime;
     }
 
     Jessibuca.prototype._checkHeart = function () {
@@ -509,9 +603,10 @@
         var _this = this;
         this._checkHeartTimeout = setTimeout(function () {
             _this._opt.isDebug && console.log('check heart timeout');
+            _this._trigger('timeout');
             _this.recording = false;
             _this.playing = false;
-        }, 30 * 1000);
+        }, this._opt.timeout * 1000);
     };
 
     Jessibuca.prototype._checkLoading = function () {
@@ -522,10 +617,11 @@
         var _this = this;
         this._checkLoadingTimeout = setTimeout(function () {
             _this._opt.isDebug && console.log('check loading timeout');
+            _this._trigger('timeout');
             _this.playing = false;
             _this._close();
-            _domToggle(_this.doms.loadingDom, false);
-        }, 30 * 1000);
+            _domToggle(_this._doms.loadingDom, false);
+        }, this._opt.timeout * 1000);
     };
 
     Jessibuca.prototype._clearCheckLoading = function () {
@@ -624,9 +720,9 @@
         return new File([u8arr], 'file', {type});
     }
 
-    function _downloadImg(content, text) {
+    function _downloadImg(content, fileName) {
         const aLink = document.createElement("a");
-        aLink.download = text + '' + new Date().getTime();
+        aLink.download = fileName;
         aLink.href = URL.createObjectURL(content);
         aLink.click();
         URL.revokeObjectURL(content);
@@ -772,14 +868,23 @@
      * Returns true if the canvas supports WebGL
      */
     Jessibuca.prototype.isWebGL = function () {
-        return !!this.contextGL;
+        return !!this._contextGL;
+    };
+    /**
+     * set timeout
+     * @param time
+     */
+    Jessibuca.prototype.setTimeout = function (time) {
+        if (typeof time === 'number') {
+            this._opt.timeout = Number(time);
+        }
     };
 
     /**
      * Create the GL context from the canvas element
      */
     Jessibuca.prototype._initContextGL = function () {
-        var canvas = this.canvasElement;
+        var canvas = this._canvasElement;
         var gl = null;
 
         var validContextNames = ["webgl", "experimental-webgl", "moz-webgl", "webkit-3d"];
@@ -807,14 +912,14 @@
         }
         ;
 
-        this.contextGL = gl;
+        this._contextGL = gl;
     };
 
     /**
      * Initialize GL shader program
      */
     Jessibuca.prototype._initProgram = function () {
-        var gl = this.contextGL;
+        var gl = this._contextGL;
 
         var vertexShaderScript = [
             'attribute vec4 vertexPos;',
@@ -874,15 +979,15 @@
 
         gl.useProgram(program);
 
-        this.shaderProgram = program;
+        this._shaderProgram = program;
     };
 
     /**
      * Initialize vertex buffers and attach to shader program
      */
     Jessibuca.prototype._initBuffers = function () {
-        var gl = this.contextGL;
-        var program = this.shaderProgram;
+        var gl = this._contextGL;
+        var program = this._shaderProgram;
 
         var vertexPosBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
@@ -900,37 +1005,37 @@
         gl.enableVertexAttribArray(texturePosRef);
         gl.vertexAttribPointer(texturePosRef, 2, gl.FLOAT, false, 0, 0);
 
-        this.texturePosBuffer = texturePosBuffer;
+        this._texturePosBuffer = texturePosBuffer;
     };
 
     /**
      * Initialize GL textures and attach to shader program
      */
     Jessibuca.prototype._initTextures = function () {
-        var gl = this.contextGL;
-        var program = this.shaderProgram;
+        var gl = this._contextGL;
+        var program = this._shaderProgram;
 
         var yTextureRef = this._initTexture();
         var ySamplerRef = gl.getUniformLocation(program, 'ySampler');
         gl.uniform1i(ySamplerRef, 0);
-        this.yTextureRef = yTextureRef;
+        this._yTextureRef = yTextureRef;
 
         var uTextureRef = this._initTexture();
         var uSamplerRef = gl.getUniformLocation(program, 'uSampler');
         gl.uniform1i(uSamplerRef, 1);
-        this.uTextureRef = uTextureRef;
+        this._uTextureRef = uTextureRef;
 
         var vTextureRef = this._initTexture();
         var vSamplerRef = gl.getUniformLocation(program, 'vSampler');
         gl.uniform1i(vSamplerRef, 2);
-        this.vTextureRef = vTextureRef;
+        this._vTextureRef = vTextureRef;
     };
 
     /**
      * Create and configure a single texture
      */
     Jessibuca.prototype._initTexture = function () {
-        var gl = this.contextGL;
+        var gl = this._contextGL;
 
         var textureRef = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, textureRef);
@@ -949,7 +1054,7 @@
      * Otherwise, data must be an RGBA formatted ArrayBuffer.
      */
     Jessibuca.prototype._drawNextOutputPicture = function (data) {
-        if (this.contextGL) {
+        if (this._contextGL) {
             this._drawNextOutputPictureGL(data);
         } else {
             this._drawNextOutputPictureRGBA(data);
@@ -960,14 +1065,14 @@
      * Draw the next output picture using WebGL
      */
     Jessibuca.prototype._drawNextOutputPictureGL = function (data) {
-        var gl = this.contextGL;
-        var texturePosBuffer = this.texturePosBuffer;
-        var yTextureRef = this.yTextureRef;
-        var uTextureRef = this.uTextureRef;
-        var vTextureRef = this.vTextureRef;
+        var gl = this._contextGL;
+        var texturePosBuffer = this._texturePosBuffer;
+        var yTextureRef = this._yTextureRef;
+        var uTextureRef = this._uTextureRef;
+        var vTextureRef = this._vTextureRef;
         var croppingParams = this.croppingParams
-        var width = this.canvasElement.width
-        var height = this.canvasElement.height
+        var width = this._canvasElement.width
+        var height = this._canvasElement.height
         if (croppingParams) {
             gl.viewport(0, 0, croppingParams.width, croppingParams.height);
             var tTop = croppingParams.top / height;
@@ -979,7 +1084,7 @@
             gl.bindBuffer(gl.ARRAY_BUFFER, texturePosBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, texturePosValues, gl.DYNAMIC_DRAW);
         } else {
-            gl.viewport(0, 0, this.canvasElement.width, this.canvasElement.height);
+            gl.viewport(0, 0, this._canvasElement.width, this._canvasElement.height);
         }
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, yTextureRef);
@@ -1011,7 +1116,7 @@
     Jessibuca.prototype.ctx2d = null;
     Jessibuca.prototype.imageData = null;
     Jessibuca.prototype._initRGB = function (width, height) {
-        this.ctx2d = this.canvasElement.getContext('2d');
+        this.ctx2d = this._canvasElement.getContext('2d');
         this.imageData = this.ctx2d.getImageData(0, 0, width, height);
         this.clear = function () {
             this.ctx2d.clearRect(0, 0, width, height)
@@ -1021,7 +1126,7 @@
     Jessibuca.prototype.pause = function () {
         this._close();
         if (this.loading) {
-            _domToggle(this.doms.loadingDom, false);
+            _domToggle(this._doms.loadingDom, false);
         }
         this.recording = false;
         this.playing = false;
@@ -1032,19 +1137,38 @@
             clearInterval(this.audioInterval)
         }
         delete this.playAudio
-        this.decoderWorker.postMessage({cmd: "close"})
-        // this.contextGL.clear(this.contextGL.COLOR_BUFFER_BIT);
+        this._decoderWorker.postMessage({cmd: "close"})
+
+        if (this._wakeLock) {
+            this._wakeLock.release();
+            this._wakeLock = null;
+        }
+
+        // this._contextGL.clear(this._contextGL.COLOR_BUFFER_BIT);
         this._initCheckVariable();
     }
     Jessibuca.prototype.destroy = function () {
         // destroy
-        this.decoderWorker.terminate()
+        this._decoderWorker.terminate()
         window.removeEventListener("resize", this._onresize);
         window.removeEventListener('fullscreenchange', this._onfullscreenchange);
         this._initCheckVariable();
         this._clearCheckLoading();
-        this.off();
+        this._off();
         this._hasLoaded = false;
+
+        if (this._wakeLock) {
+            this._wakeLock.release();
+        }
+    }
+
+    /**
+     * 清理画布为黑色背景
+     * 用于canvas重用进行多个流切换播放时，将上一个画面清理
+     * 避免后一个视频播放之前出现前一个视频最后一个画面
+     */
+    Jessibuca.prototype.clearView = function () {
+        this._contextGL.clear(this._contextGL.COLOR_BUFFER_BIT);
     }
     /**
      * play
@@ -1060,7 +1184,7 @@
             if (this.playUrl) {
                 this._close();
                 needDelay = true;
-                this.contextGL.clear(this.contextGL.COLOR_BUFFER_BIT);
+                this._contextGL.clear(this._contextGL.COLOR_BUFFER_BIT);
             }
             this.loading = true;
             this._checkLoading();
@@ -1069,9 +1193,9 @@
             // retry
             if (this.loading) {
                 this._hideBtns();
-                _domToggle(this.doms.fullscreenDom, true);
-                _domToggle(this.doms.pauseDom, true);
-                _domToggle(this.doms.loadingDom, true);
+                _domToggle(this._doms.fullscreenDom, true);
+                _domToggle(this._doms.pauseDom, true);
+                _domToggle(this._doms.loadingDom, true);
                 this._checkLoading();
             } else {
                 this.playing = true;
@@ -1082,13 +1206,16 @@
         if (needDelay) {
             var _this = this;
             setTimeout(function () {
-                _this.decoderWorker.postMessage({cmd: "play", url: _this.playUrl, isWebGL: _this.isWebGL()})
+                _this._decoderWorker.postMessage({cmd: "play", url: _this.playUrl, isWebGL: _this.isWebGL()})
             }, 300);
         } else {
-            this.decoderWorker.postMessage({cmd: "play", url: this.playUrl, isWebGL: this.isWebGL()})
+            this._decoderWorker.postMessage({cmd: "play", url: this.playUrl, isWebGL: this.isWebGL()})
         }
     };
-
+    /**
+     *
+     * @returns {boolean}
+     */
     Jessibuca.prototype.hasLoaded = function () {
         return this._hasLoaded;
     };
@@ -1097,21 +1224,21 @@
         set(value) {
             if (value) {
                 if (!_checkFull()) {
-                    this.container.requestFullscreen();
+                    this._container.requestFullscreen();
                 }
-                _domToggle(this.doms.minScreenDom, true);
-                _domToggle(this.doms.fullscreenDom, false);
+                _domToggle(this._doms.minScreenDom, true);
+                _domToggle(this._doms.fullscreenDom, false);
             } else {
                 if (_checkFull()) {
                     document.exitFullscreen();
                 }
-                _domToggle(this.doms.minScreenDom, false);
-                _domToggle(this.doms.fullscreenDom, true);
+                _domToggle(this._doms.minScreenDom, false);
+                _domToggle(this._doms.fullscreenDom, true);
             }
 
             if (this._fullscreen !== value) {
                 this.onFullscreen(value);
-                this.trigger('fullscreen', value);
+                this._trigger('fullscreen', value);
             }
             this._fullscreen = value;
         },
@@ -1123,42 +1250,42 @@
     Object.defineProperty(Jessibuca.prototype, 'playing', {
         set(value) {
             if (value) {
-                _domToggle(this.doms.playBigDom, false);
-                _domToggle(this.doms.playDom, false);
-                _domToggle(this.doms.pauseDom, true);
+                _domToggle(this._doms.playBigDom, false);
+                _domToggle(this._doms.playDom, false);
+                _domToggle(this._doms.pauseDom, true);
 
-                _domToggle(this.doms.screenshotsDom, true);
-                _domToggle(this.doms.recordDom, true);
+                _domToggle(this._doms.screenshotsDom, true);
+                _domToggle(this._doms.recordDom, true);
                 if (this._quieting) {
-                    _domToggle(this.doms.quietAudioDom, true);
-                    _domToggle(this.doms.playAudioDom, false);
+                    _domToggle(this._doms.quietAudioDom, true);
+                    _domToggle(this._doms.playAudioDom, false);
                 } else {
-                    _domToggle(this.doms.quietAudioDom, false);
-                    _domToggle(this.doms.playAudioDom, true);
+                    _domToggle(this._doms.quietAudioDom, false);
+                    _domToggle(this._doms.playAudioDom, true);
                 }
             } else {
-                this.doms.speedDom && (this.doms.speedDom.innerText = '');
+                this._doms.speedDom && (this._doms.speedDom.innerText = '');
                 if (this.playUrl) {
-                    _domToggle(this.doms.playDom, true);
-                    _domToggle(this.doms.playBigDom, true);
-                    _domToggle(this.doms.pauseDom, false);
+                    _domToggle(this._doms.playDom, true);
+                    _domToggle(this._doms.playBigDom, true);
+                    _domToggle(this._doms.pauseDom, false);
                 }
 
                 // 在停止状态下录像，截屏，音量是非激活，只有播放,最大化时可点击
-                _domToggle(this.doms.recordDom, false);
-                _domToggle(this.doms.recordingDom, false);
-                _domToggle(this.doms.screenshotsDom, false);
-                _domToggle(this.doms.quietAudioDom, false);
-                _domToggle(this.doms.playAudioDom, false);
+                _domToggle(this._doms.recordDom, false);
+                _domToggle(this._doms.recordingDom, false);
+                _domToggle(this._doms.screenshotsDom, false);
+                _domToggle(this._doms.quietAudioDom, false);
+                _domToggle(this._doms.playAudioDom, false);
             }
 
             if (this._playing !== value) {
                 if (value) {
                     this.onPlay();
-                    this.trigger('play');
+                    this._trigger('play');
                 } else {
                     this.onPause();
-                    this.trigger('pause');
+                    this._trigger('pause');
                 }
             }
             this._playing = value;
@@ -1171,16 +1298,16 @@
     Object.defineProperty(Jessibuca.prototype, 'recording', {
         set(value) {
             if (value) {
-                _domToggle(this.doms.recordDom, false);
-                _domToggle(this.doms.recordingDom, true);
+                _domToggle(this._doms.recordDom, false);
+                _domToggle(this._doms.recordingDom, true);
             } else {
-                _domToggle(this.doms.recordDom, true);
-                _domToggle(this.doms.recordingDom, false);
+                _domToggle(this._doms.recordDom, true);
+                _domToggle(this._doms.recordingDom, false);
 
             }
             if (this._recording !== value) {
                 this.onRecord(value);
-                this.trigger('record', value);
+                this._trigger('record', value);
                 this._recording = value;
             }
         },
@@ -1192,15 +1319,15 @@
     Object.defineProperty(Jessibuca.prototype, 'quieting', {
         set(value) {
             if (value) {
-                _domToggle(this.doms.quietAudioDom, true);
-                _domToggle(this.doms.playAudioDom, false);
+                _domToggle(this._doms.quietAudioDom, true);
+                _domToggle(this._doms.playAudioDom, false);
             } else {
-                _domToggle(this.doms.quietAudioDom, false);
-                _domToggle(this.doms.playAudioDom, true);
+                _domToggle(this._doms.quietAudioDom, false);
+                _domToggle(this._doms.playAudioDom, true);
             }
             if (this._quieting !== value) {
                 this.onMute(value);
-                this.trigger('mute', value);
+                this._trigger('mute', value);
             }
             this._quieting = value;
         },
@@ -1213,9 +1340,9 @@
         set(value) {
             if (value) {
                 this._hideBtns();
-                _domToggle(this.doms.fullscreenDom, true);
-                _domToggle(this.doms.pauseDom, true);
-                _domToggle(this.doms.loadingDom, true);
+                _domToggle(this._doms.fullscreenDom, true);
+                _domToggle(this._doms.pauseDom, true);
+                _domToggle(this._doms.loadingDom, true);
             } else {
                 this._initBtns();
             }
@@ -1230,13 +1357,14 @@
      * resize
      */
     Jessibuca.prototype.resize = function () {
-        var width = this.container.clientWidth;
-        var height = this.container.clientHeight;
-        if (!this._opt.noControls) {
+        debugger;
+        var width = this._container.clientWidth;
+        var height = this._container.clientHeight;
+        if (this._showControl()) {
             height -= 38;
         }
-        var resizeWidth = this.canvasElement.width;
-        var resizeHeight = this.canvasElement.height;
+        var resizeWidth = this._canvasElement.width;
+        var resizeHeight = this._canvasElement.height;
         var wScale = width / resizeWidth;
         var hScale = height / resizeHeight;
         var scale = wScale > hScale ? hScale : wScale;
@@ -1245,10 +1373,15 @@
                 scale = wScale + ',' + hScale;
             }
         }
+        //
+        // if (this._opt.isFullResize) {
+        //     scale = wScale > hScale ? wScale : hScale;
+        // }
+
         this._opt.isDebug && console.log('wScale', wScale, 'hScale', hScale);
-        this.canvasElement.style.transform = "scale(" + scale + ")"
-        this.canvasElement.style.left = ((width - resizeWidth) / 2) + "px"
-        this.canvasElement.style.top = ((height - resizeHeight) / 2) + "px"
+        this._canvasElement.style.transform = "scale(" + scale + ")"
+        this._canvasElement.style.left = ((width - resizeWidth) / 2) + "px"
+        this._canvasElement.style.top = ((height - resizeHeight) / 2) + "px"
     }
 
     Jessibuca.prototype._fullscreenchange = function () {
@@ -1260,8 +1393,78 @@
      * @param buffer
      */
     Jessibuca.prototype.changeBuffer = function (buffer) {
-        this.decoderWorker.postMessage({cmd: "setVideoBuffer", time: Number(buffer)});
+        this._decoderWorker.postMessage({cmd: "setVideoBuffer", time: Number(buffer)});
+    };
+    /**
+     * 设置最大缓冲时长，单位毫秒，播放器会自动消除延迟。
+     * @param buffer
+     */
+    Jessibuca.prototype.setBufferTime = function (buffer) {
+        this.changeBuffer(buffer);
+    };
+
+    /**
+     * 设置音量大小，取值0.0 — 1.0
+     * 当为0.0时，完全无声
+     * 当为1.0时，最大音量，默认值
+     * @param volume
+     */
+    Jessibuca.prototype.setVolume = function (volume) {
+
+    };
+
+    /**
+     * 开启屏幕常亮, 在play前调用
+     * 在手机浏览器上, canvas标签渲染视频并不会像video标签那样保持屏幕常亮
+     * H5目前在chrome\edge 84, android chrome 84及以上有原生亮屏API, 需要是https页面
+     * 其余平台为模拟实现，此时为兼容实现，并不保证所有浏览器都支持
+     */
+    Jessibuca.prototype.setKeepScreenOn = function () {
+        this._opt.keepScreenOn = true;
+    };
+
+
+    /**
+     * set fullscreen
+     * @param flag
+     */
+    Jessibuca.prototype.setFullscreen = function (flag) {
+        var fullscreen = !!flag;
+        if (this.fullscreen !== fullscreen) {
+            this.fullscreen = fullscreen;
+        }
+    };
+
+    function _now() {
+        return new Date().getTime();
     }
+
+    function _screenshot(filename, format, quality) {
+        filename = filename || _now();
+        var formatType = {
+            png: 'image/png',
+            jpeg: 'image/jpeg',
+            webp: 'image/webp'
+        };
+        var encoderOptions = 0.92;
+
+        if (typeof quality !== 'undefined') {
+            encoderOptions = Number(quality);
+        }
+
+        var dataURL = _this._canvasElement.toDataURL(formatType[format] || formatType.png, encoderOptions);
+        _downloadImg(_dataURLToFile(dataURL), filename);
+    }
+
+    /**
+     * 截图，调用后弹出下载框保存截图
+     * @param filename  保存的文件名 默认时间戳
+     * @param format 截图的格式，可选png或jpeg或者webp
+     * @param quality 可选参数，当格式是jpeg或者webp时，压缩质量，取值0.0 ~ 1.0
+     */
+    Jessibuca.prototype.screenshot = function (filename, format, quality) {
+        _screenshot(filename, format, quality);
+    };
 
 
     var eventSplitter = /\s+/;
@@ -1287,7 +1490,7 @@
         return this;
     };
 
-    Jessibuca.prototype.off = function (events, callback) {
+    Jessibuca.prototype._off = function (events, callback) {
         var cache, event, list, i;
         // No events, or removing *all* events.
         if (!(cache = this.__events)) return this;
@@ -1314,7 +1517,7 @@
     }
 
 
-    Jessibuca.prototype.trigger = function (events) {
+    Jessibuca.prototype._trigger = function (events) {
         var cache, event, all, list, i, len, rest = [], args, returned = {
             status: true
         };
