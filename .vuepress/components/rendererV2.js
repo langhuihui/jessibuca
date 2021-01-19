@@ -10,13 +10,22 @@
      * @constructor
      */
     function Jessibuca(opt) {
+        this._opt = opt;
+
+        if (typeof opt.container === "string") {
+            this._opt.container = document.getElementById(opt.container);
+        }
+        if (!this._opt.container) {
+            throw new Error('Jessibuca need container option');
+            return;
+        }
+
         this._canvasElement = document.createElement("canvas");
         this._canvasElement.style.position = "absolute";
         this._canvasElement.style.top = 0;
         this._canvasElement.style.left = 0;
-        this._opt = opt;
-        opt.container.appendChild(this._canvasElement);
-        this._container = opt.container;
+        this._opt.container.appendChild(this._canvasElement);
+        this._container = this._opt.container;
         this._container.style.overflow = "hidden";
         this._containerOldPostion = {
             position: this._container.style.position,
@@ -33,17 +42,17 @@
         //
         this._opt.isResize = opt.isResize === false ? opt.isResize : true;
         this._opt.isFullResize = opt.isFullResize === true ? opt.isFullResize : false;
-        this._opt.isDebug = opt.debug === true ? true : false;
+        this._opt.isDebug = opt.debug === true;
         this._opt.timeout = typeof opt.timeout === 'number' ? opt.timeout : 30;
-        this._opt.supportDblclickFullscreen = opt.supportDblclickFullscreen === true ? true : false;
-        this._opt.showBandwidth = opt.bandwidth === true ? true : false;
+        this._opt.supportDblclickFullscreen = opt.supportDblclickFullscreen === true;
+        this._opt.showBandwidth = opt.showBandwidth === true;
         this._opt.operateBtns = Object.assign({
             fullscreen: false,
             screenshot: false,
             play: false,
             audio: false
         }, opt.operateBtns || {});
-        this._opt.keepScreenOn = opt.keepScreenOn === true ? true : false;
+        this._opt.keepScreenOn = opt.keepScreenOn === true;
 
         if (!opt.forceNoGL) this._initContextGL();
         this._audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -367,6 +376,35 @@
         }
     };
 
+    Jessibuca.prototype._initGainNode = function () {
+        var gainNode = this._audioContext.createGain();
+        var _this = this;
+        var source;
+        if (!navigator.mediaDevices.getUserMedia) {
+            console.log('getUserMedia not supported on your browser!');
+            return;
+        }
+
+        navigator.mediaDevices.getUserMedia(
+            // constraints - only audio needed for this app
+            {
+                audio: true
+            },
+
+            // Success callback
+            function (stream) {
+                source = _this._audioContext.createMediaStreamSource(stream);
+                source.connect(gainNode);
+                gainNode.connect(_this._audioContext.destination);
+                _this._gainNode = gainNode;
+            },
+
+            // Error callback
+            function (err) {
+                console.log('The following gUM error occurred: ' + err);
+            }
+        );
+    };
 
     Jessibuca.prototype._showControl = function () {
         var result = false;
@@ -610,6 +648,7 @@
             _this._trigger('timeout');
             _this.recording = false;
             _this.playing = false;
+            _this._close();
         }, this._opt.timeout * 1000);
     };
 
@@ -882,6 +921,27 @@
         if (typeof time === 'number') {
             this._opt.timeout = Number(time);
         }
+    };
+
+    /**
+     * @desc 视频缩放模式, 当视频分辨率比例与canvas显示区域比例不同时,缩放效果不同:
+     0 视频画面完全填充canvas区域,画面会被拉伸
+     1 视频画面做等比缩放后,高或宽对齐canvas区域,画面不被拉伸,但有黑边(默认)
+     2 视频画面做等比缩放后,完全填充canvas区域,画面不被拉伸,没有黑边,但画面显示不全
+     * @param type
+     *
+     */
+    Jessibuca.prototype.setScaleMode = function (type) {
+        if (type === 0) {
+            this._opt.isFullResize = false;
+            this._opt.isResize = false;
+        } else if (type === 1) {
+            this._opt.isFullResize = false;
+            this._opt.isResize = true;
+        } else if (type === 2) {
+            this._opt.isFullResize = true;
+        }
+        this.resize();
     };
 
     /**
@@ -1173,7 +1233,7 @@
      */
     Jessibuca.prototype.clearView = function () {
         this._contextGL.clear(this._contextGL.COLOR_BUFFER_BIT);
-    }
+    };
     /**
      * play
      * @param url
@@ -1413,7 +1473,9 @@
      * @param volume
      */
     Jessibuca.prototype.setVolume = function (volume) {
-
+        if (this._gainNode) {
+            this._gainNode.gain.setValueAtTime(volume, this._audioContext.currentTime);
+        }
     };
 
     /**

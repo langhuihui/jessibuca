@@ -2,7 +2,7 @@
 <template>
   <div class="root">
     <div class="container-shell">
-      <div id="container" ref="container"></div>
+      <div id="container" class="container" ref="container"></div>
       <div class="input">
         <div>输入URL：</div>
         <input autocomplete="on" ref="playUrl" />
@@ -166,7 +166,7 @@ export default {
   left: 10px;
   text-shadow: 1px 1px black;
 }
-#container {
+.container {
   background: rgb(13, 14, 27);
   width: 640px;
   height: 375px;
@@ -200,7 +200,7 @@ export default {
   color: white;
 }
 @media (max-width: 720px) {
-  #container {
+  .container {
     width: 90vw;
     height: 52.7vw;
   }

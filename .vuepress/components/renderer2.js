@@ -75,16 +75,18 @@
                     }
                     break
                 case "render":
-                    if (_this.contextGL) {
-                        _this._drawNextOutputPictureGL(msg.output);
-                    } else {
-                        _this._drawNextOutputPictureRGBA(msg.buffer);
-                    }
                     if (_this.loading) {
                         _this.loading = false;
                         _this.playing = true;
                         _this._opt.isDebug && console.log("clear check loading timeout");
                         _this._clearCheckLoading();
+                    }
+                    if (_this.playing) {
+                        if (_this.contextGL) {
+                            _this._drawNextOutputPictureGL(msg.output);
+                        } else {
+                            _this._drawNextOutputPictureRGBA(msg.buffer);
+                        }
                     }
                     _this._updateBPS(msg.bps);
                     _this._checkHeart();
@@ -514,6 +516,7 @@
             _this._opt.isDebug && console.log('check heart timeout');
             _this.recording = false;
             _this.playing = false;
+            _this._close();
         }, 30 * 1000);
     };
 
@@ -1017,12 +1020,12 @@
     };
 
     Jessibuca.prototype.pause = function () {
+        this.recording = false;
+        this.playing = false;
         this._close();
         if (this.loading) {
             _domToggle(this.doms.loadingDom, false);
         }
-        this.recording = false;
-        this.playing = false;
     };
 
     Jessibuca.prototype._close = function () {
@@ -1031,7 +1034,8 @@
         }
         delete this.playAudio
         this.decoderWorker.postMessage({cmd: "close"})
-        // this.contextGL.clear(this.contextGL.COLOR_BUFFER_BIT);
+        // this.contextGL.clearColor(0.0, 0.0, 0.0, 1.0);
+        this.contextGL.clear(this.contextGL.COLOR_BUFFER_BIT);
         this._initCheckVariable();
     }
     Jessibuca.prototype.destroy = function () {
@@ -1057,7 +1061,7 @@
             if (this.playUrl) {
                 this._close();
                 needDelay = true;
-                this.contextGL.clear(this.contextGL.COLOR_BUFFER_BIT);
+                // this.contextGL.clear(this.contextGL.COLOR_BUFFER_BIT);
             }
             this.loading = true;
             _domToggle(this.doms.bgDom, false);

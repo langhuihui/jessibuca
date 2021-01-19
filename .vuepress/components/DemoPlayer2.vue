@@ -1,7 +1,7 @@
 <template>
     <div class="root">
         <div class="container-shell">
-            <div id="container" ref="container"></div>
+            <div id="container" class="container" ref="container"></div>
             <div class="input">
                 <div>输入URL：</div>
                 <input autocomplete="on" ref="playUrl"
@@ -17,12 +17,13 @@
                     <option selected>h264</option>
                     <option>h265</option>
                 </select>
+                <input type="checkbox" ref="resize" @change="changeResize"><span>自适应</span>
             </div>
         </div>
     </div>
 </template>
 <script>
-    import Jessibuca from "./renderer2";
+    import Jessibuca from "./renderer-new";
 
     export default {
         name: "DemoPlayer",
@@ -76,6 +77,8 @@
                     debug: true,
                     // isFullResize: true
                 });
+                // this.jessibuca.setScaleMode(2);
+                // this.jessibuca.setBufferTime(0.3);
                 this.jessibuca.onLog = msg => console.log('onLog', msg);
                 this.jessibuca.onLoad = msg => console.log('onLoad');
                 this.jessibuca.onRecord = msg => console.log('onRecord', msg);
@@ -120,6 +123,32 @@
                     console.log('bps', bps);
                 });
 
+                this.jessibuca.on('audioInfo', function (info) {
+                    console.log('audioInfo', info);
+                });
+
+                this.jessibuca.on('videoInfo', function (info) {
+                    console.log('videoInfo', info);
+                })
+
+                this.jessibuca.on('error', function (error) {
+                    console.log('error', error)
+                });
+
+                this.jessibuca.on('timeout', function () {
+                    console.log('timeout');
+                });
+
+                // if(this.jessibuca.hasLoaded()){
+                //     this.jessibuca.play('url')
+                // }
+                // else {
+                //     this.jessibuca.onLoad = function () {
+                //         this.jessibuca.play('url')
+                //     }
+                // }
+
+
                 console.log(this.jessibuca);
             },
             play() {
@@ -154,6 +183,11 @@
 
             changeBuffer() {
                 this.jessibuca.setBufferTime(Number(this.$refs.buffer.value));
+            },
+
+            changeResize(){
+                this.jessibuca._opt.isResize = this.$refs.resize.checked;
+                this.jessibuca.resize();
             }
         }
     };
@@ -183,7 +217,7 @@
         text-shadow: 1px 1px black;
     }
 
-    #container {
+    .container {
         background: rgb(13, 14, 27);
         width: 640px;
         height: 398px;
@@ -223,7 +257,7 @@
     }
 
     @media (max-width: 720px) {
-        #container {
+        .container {
             width: 90vw;
             height: 52.7vw;
         }
