@@ -5,7 +5,7 @@ extern "C"
 #include <libswresample/swresample.h>
 }
 const int SamplingFrequencies[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350, 0, 0, 0};
-const int AudioObjectTypes [] = {};
+const int AudioObjectTypes[] = {};
 class FFmpeg
 {
 public:
@@ -128,6 +128,12 @@ public:
         videoHeight = 0;
         VideoDecoder::clear();
         FFmpeg::clear();
+        if (p_yuv[0])
+            free((void *)p_yuv[0]);
+        if (p_yuv[1])
+            free((void *)p_yuv[1]);
+        if (p_yuv[2])
+            free((void *)p_yuv[2]);
     }
     void decodeH264Header(IOBuffer &data) override
     {
@@ -167,11 +173,39 @@ public:
             ret = avcodec_receive_frame(dec_ctx, frame);
             if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
                 return;
-            p_yuv[0] = (u32)frame->data[0];
-            p_yuv[1] = (u32)frame->data[1];
-            p_yuv[2] = (u32)frame->data[2];
             if (videoWidth != frame->width || videoHeight != frame->height)
+            {
                 decodeVideoSize(frame->width, frame->height);
+                int size = videoWidth * videoHeight;
+                p_yuv[0] = (u32)malloc(size * 3 >> 1);
+                p_yuv[1] = p_yuv[0] + size;
+                p_yuv[2] = p_yuv[1] + (size >> 2);
+            }
+            u32 dst = p_yuv[0];
+            for (int i = 0; i < videoHeight; i++)
+            {
+                memcpy((u8 *)dst, (const u8 *)(frame->data[0] + i * frame->linesize[0]), videoWidth);
+                dst += videoWidth;
+            }
+            dst = p_yuv[1];
+            int halfh = videoHeight >> 1;
+            int halfw = videoWidth >> 1;
+            for (int i = 0; i < halfh; i++)
+            {
+                memcpy((u8 *)dst, (const u8 *)(frame->data[1] + i * frame->linesize[1]), halfw);
+                dst += halfw;
+            }
+
+            for (int i = 0; i < halfh; i++)
+            {
+                memcpy((u8 *)dst, (const u8 *)(frame->data[2] + i * frame->linesize[2]), halfw);
+                dst += halfw;
+            }
+
+            // p_yuv[0] = (u32)frame->data[0];
+            // p_yuv[1] = (u32)frame->data[1];
+            // p_yuv[2] = (u32)frame->data[2];
+
             decodeYUV420();
         }
         // }
