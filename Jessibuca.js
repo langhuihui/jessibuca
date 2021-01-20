@@ -78,7 +78,7 @@ mergeInto(LibraryManager.library, {
                 fetch(url, { signal }).then(function (res) {
                     var reader = res.body.getReader();
                     _this.fetchNext = function () {
-                        reader.read().then(({ done, value }) => _this.onFetchData({ done, data: value }))
+                        reader.read().then(({ done, value }) => _this.onFetchData({ done, data: value })).catch(console.error)
                     }
                     _this.fetchNext()
                 }).catch(console.error)
@@ -197,7 +197,6 @@ mergeInto(LibraryManager.library, {
                     };
                 }
             },
-
         });
         var decoder = new Module.Jessibuca()
         self.onmessage = function (event) {

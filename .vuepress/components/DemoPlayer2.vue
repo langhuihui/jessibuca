@@ -8,6 +8,7 @@
                        value=""/>
                 <button v-if="!playing" @click="play">播放</button>
                 <button v-else @click="pause">停止</button>
+                <button @click="destroy">销毁</button>
             </div>
             <div class="option">
                 <span>缓冲:</span>
@@ -23,7 +24,7 @@
     </div>
 </template>
 <script>
-    import Jessibuca from "./renderer-new";
+    import Jessibuca from "./renderer2";
 
     export default {
         name: "DemoPlayer",
@@ -86,7 +87,7 @@
                 this.jessibuca.onPlay = () => console.log('onPlay');
                 this.jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
                 this.jessibuca.onMute = msg => console.log('onMute', msg);
-
+                var _this = this;
                 this.jessibuca.on('load', function () {
                     console.log('on load');
                 });
@@ -99,9 +100,11 @@
                 });
                 this.jessibuca.on('pause', function () {
                     console.log('on pause');
+                    _this.playing = false;
                 });
                 this.jessibuca.on('play', function () {
                     console.log('on play');
+                    _this.playing = true;
                 });
                 this.jessibuca.on('fullscreen', function (msg) {
                     console.log('on fullscreen', msg);
@@ -172,6 +175,9 @@
                 this.err = "";
             },
 
+            destroy(){
+              this.jessibuca.destroy();
+            },
 
             changeVC() {
                 this.vc = ["ff", "libhevc_aac"][this.$refs.vc.selectedIndex]

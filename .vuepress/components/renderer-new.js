@@ -1046,6 +1046,10 @@
         this._initCheckVariable();
         this._clearCheckLoading();
         this.off();
+        // remove dom
+        while (this.container.firstChild) {
+            this.container.removeChild(this.container.firstChild);
+        }
         this._hasLoaded = false;
     }
     /**

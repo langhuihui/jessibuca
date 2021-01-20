@@ -430,7 +430,7 @@
             switch (msg.cmd) {
                 case "init":
                     _this._opt.isDebug && console.log("decoder worker init")
-                    this.postMessage({cmd: "setVideoBuffer", time: _this._opt.videoBuffer})
+                    _this.setBufferTime(_this._opt.videoBuffer);
                     if (!_this._hasLoaded) {
                         _this._opt.isDebug && console.log("has loaded");
                         _this._hasLoaded = true;
@@ -1211,6 +1211,10 @@
         // this._contextGL.clear(this._contextGL.COLOR_BUFFER_BIT);
         this._initCheckVariable();
     }
+    /**
+     * destroy
+     * @desc delete worker,
+     */
     Jessibuca.prototype.destroy = function () {
         // destroy
         this._decoderWorker.terminate()
@@ -1220,7 +1224,10 @@
         this._clearCheckLoading();
         this._off();
         this._hasLoaded = false;
-
+        // remove dom
+        while (this._container.firstChild) {
+            this._container.removeChild(this._container.firstChild);
+        }
         if (this._wakeLock) {
             this._wakeLock.release();
         }
@@ -1277,7 +1284,7 @@
         }
     };
     /**
-     *
+     * has loaded
      * @returns {boolean}
      */
     Jessibuca.prototype.hasLoaded = function () {
@@ -1459,7 +1466,7 @@
         this._decoderWorker.postMessage({cmd: "setVideoBuffer", time: Number(buffer)});
     };
     /**
-     * 设置最大缓冲时长，单位毫秒，播放器会自动消除延迟。
+     * 设置最大缓冲时长，单位秒，播放器会自动消除延迟。
      * @param buffer
      */
     Jessibuca.prototype.setBufferTime = function (buffer) {
@@ -1535,7 +1542,7 @@
     var eventSplitter = /\s+/;
 
     // Execute callbacks
-    function _callEach(list, args, context, returned) {
+    function _callEach(list, args, context) {
         if (list) {
             for (var i = 0, len = list.length; i < len; i += 1) {
                 list[i].apply(context, args);
@@ -1543,6 +1550,12 @@
         }
     }
 
+    /**
+     *
+     * @param events
+     * @param callback
+     * @returns {Jessibuca}
+     */
     Jessibuca.prototype.on = function (events, callback) {
         var cache, event, list;
         if (!callback) return this;
@@ -1554,38 +1567,28 @@
         }
         return this;
     };
-
-    Jessibuca.prototype._off = function (events, callback) {
-        var cache, event, list, i;
-        // No events, or removing *all* events.
+    /**
+     *
+     * @param events
+     * @param callback
+     * @returns {Jessibuca}
+     * @private
+     */
+    Jessibuca.prototype._off = function () {
+        var cache;
         if (!(cache = this.__events)) return this;
-        if (!(events || callback)) {
-            delete this.__events;
-            return this;
-        }
-        events = events ? events.split(eventSplitter) : Object.keys(cache);
-        // Loop through the callback list, splicing where appropriate.
-        while (event = events.shift()) {
-            list = cache[event];
-            if (!list) continue;
-            if (!(callback)) {
-                delete cache[event];
-                continue;
-            }
-            for (i = list.length - 2; i >= 0; i -= 2) {
-                if (!(callback && list[i] !== callback)) {
-                    list.splice(i, 2);
-                }
-            }
-        }
+        delete this.__events;
         return this;
-    }
+    };
 
-
+    /**
+     *
+     * @param events
+     * @returns {Jessibuca}
+     * @private
+     */
     Jessibuca.prototype._trigger = function (events) {
-        var cache, event, all, list, i, len, rest = [], args, returned = {
-            status: true
-        };
+        var cache, event, all, list, i, len, rest = [], args;
         if (!(cache = this.__events)) return this;
         events = events.split(eventSplitter);
         // Fill up `rest` with the callback arguments.  Since we're only copying
@@ -1598,9 +1601,9 @@
         while (event = events.shift()) {
             if (list = cache[event]) list = list.slice();
             // Execute event callbacks.
-            _callEach(list, rest, this, returned);
+            _callEach(list, rest, this);
         }
-        return returned.status;
+        return this;
     }
 
     if (typeof define === 'function') {
