@@ -576,6 +576,13 @@
         this.quieting = false;
     };
 
+    /**
+     * 设置旋转角度
+     */
+    Jessibuca.prototype.setRotate = function (deg) {
+
+    };
+
     Jessibuca.prototype._initStatus = function () {
         this._loading = true;
         this.loading = true;

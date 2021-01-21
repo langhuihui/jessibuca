@@ -231,6 +231,22 @@ jessibuca.play()
 jessibuca.setBufferTime(0.2)
 ```
 
+### setRotate(deg)
+- **参数**：
+   - `{number} deg`  
+- **用法**：
+设置旋转角度，只支持，0 ，90，180，270 四个值。
+
+```js
+jessibuca.setRotate(0)
+
+jessibuca.setRotate(90)
+
+jessibuca.setRotate(180)
+
+jessibuca.setRotate(270)
+```
+
 ### setVolume(volume)
 - **参数**：
    - `{number} volume`  
