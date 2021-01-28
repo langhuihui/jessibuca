@@ -1,7 +1,7 @@
 ---
 sidebar: false
 ---
-<DemoPlayer2/>
+<DemoPlayer/>
 - 支持3种格式：
 1. ws-raw 即ws://localhost/live/test (该协议只能对接[monibuca服务器](https://monibuca.com))
 2. ws-flv 即ws://localhost/live/test.flv
