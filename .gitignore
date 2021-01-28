@@ -8,3 +8,5 @@ Debug
 *.rar
 
 node_modules
+.vuepress/dist
+dist
