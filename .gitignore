@@ -6,3 +6,7 @@ Debug
 .vscode
 *.zip
 *.rar
+
+node_modules
+.vuepress/dist
+dist

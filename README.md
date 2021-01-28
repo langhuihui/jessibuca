@@ -59,6 +59,8 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
   }
 </script>
 ```
+## API
+[API](/api.md)
 
 ## 源码目录结构
 
