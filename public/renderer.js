@@ -84,6 +84,8 @@
         this.onLoad = noop;
         this.onLog = noop;
         this.onError = noop;
+        this.onTimeUpdate = noop;
+        this.onInitSize = noop;
         this._onMessage();
         this._initDom();
         this._initStatus();
@@ -439,9 +441,10 @@
                     }
                     break
                 case "initSize":
-                    _this._canvasElement.width = msg.w
-                    _this._canvasElement.height = msg.h
-                    _this.resize()
+                    _this._canvasElement.width = msg.w;
+                    _this._canvasElement.height = msg.h;
+                    _this.onInitSize();
+                    _this.resize();
                     _this._opt.isDebug && console.log("init size , video size:", msg.w, msg.h)
                     _this._trigger('videoInfo', {w: msg.w, h: msg.h});
                     if (_this.isWebGL()) {
@@ -462,6 +465,8 @@
                         _this._opt.isDebug && console.log("clear check loading timeout");
                         _this._clearCheckLoading();
                     }
+                    _this._trigger('timeUpdate', msg.ts);
+                    _this.onTimeUpdate(msg.ts);
                     _this._updateBPS(msg.bps);
                     _this._checkHeart();
                     break
@@ -520,7 +525,7 @@
         this._doms.screenshotsDom && this._doms.screenshotsDom.addEventListener('click', function (e) {
             e.stopPropagation();
             var filename = _this._opt.text + '' + _now();
-            _screenshot(filename);
+            _this._screenshot(filename);
         }, false);
         //
         this._doms.fullscreenDom && this._doms.fullscreenDom.addEventListener('click', function (e) {
@@ -1518,7 +1523,7 @@
         return new Date().getTime();
     }
 
-    function _screenshot(filename, format, quality) {
+    Jessibuca.prototype._screenshot = function (filename, format, quality) {
         filename = filename || _now();
         var formatType = {
             png: 'image/png',
@@ -1542,7 +1547,7 @@
      * @param quality 可选参数，当格式是jpeg或者webp时，压缩质量，取值0.0 ~ 1.0
      */
     Jessibuca.prototype.screenshot = function (filename, format, quality) {
-        _screenshot(filename, format, quality);
+        this._screenshot(filename, format, quality);
     };
 
 

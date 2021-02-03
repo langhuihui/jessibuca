@@ -99,6 +99,8 @@
                 this.jessibuca.onPlay = () => console.log('onPlay');
                 this.jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
                 this.jessibuca.onMute = msg => console.log('onMute', msg);
+                this.jessibuca.onInitSize = ()=>console.log('onInitSize');
+                this.jessibuca.onTimeUpdate = (ts)=> console.log('onTimeUpdate',ts);
                 var _this = this;
                 this.jessibuca.on('load', function () {
                     console.log('on load');
@@ -134,9 +136,14 @@
                     console.log('audioInfo', msg);
                 });
 
+
                 this.jessibuca.on('bps', function (bps) {
                     console.log('bps', bps);
                 });
+
+                this.jessibuca.on('timeUpdate',function (ts) {
+                    console.log('timeUpdate',ts);
+                })
 
                 this.jessibuca.on('audioInfo', function (info) {
                     console.log('audioInfo', info);
