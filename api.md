@@ -335,6 +335,12 @@ jessibuca.on("load",function(){console.log('load')})
 jessibuca.on("load",function(){console.log('load')})
 ```
 
+### timeUpdate
+视频播放持续时间，单位ms
+```js
+jessibuca.on('timeUpdate',function (ts) {console.log('timeUpdate',ts);})
+```
+
 ### videoInfo
 当解析出视频信息时回调，2个回调参数
 1. w：视频宽

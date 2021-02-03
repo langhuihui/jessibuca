@@ -84,6 +84,8 @@
         this.onLoad = noop;
         this.onLog = noop;
         this.onError = noop;
+        this.onTimeUpdate = noop;
+        this.onInitSize = noop;
         this._onMessage();
         this._initDom();
         this._initStatus();
@@ -439,9 +441,10 @@
                     }
                     break
                 case "initSize":
-                    _this._canvasElement.width = msg.w
-                    _this._canvasElement.height = msg.h
-                    _this.resize()
+                    _this._canvasElement.width = msg.w;
+                    _this._canvasElement.height = msg.h;
+                    _this.onInitSize();
+                    _this.resize();
                     _this._opt.isDebug && console.log("init size , video size:", msg.w, msg.h)
                     _this._trigger('videoInfo', {w: msg.w, h: msg.h});
                     if (_this.isWebGL()) {
@@ -462,6 +465,8 @@
                         _this._opt.isDebug && console.log("clear check loading timeout");
                         _this._clearCheckLoading();
                     }
+                    _this._trigger('timeUpdate', msg.ts);
+                    _this.onTimeUpdate(msg.ts);
                     _this._updateBPS(msg.bps);
                     _this._checkHeart();
                     break
@@ -1518,7 +1523,7 @@
         return new Date().getTime();
     }
 
-    Jessibuca.prototype._screenshot = function(filename, format, quality) {
+    Jessibuca.prototype._screenshot = function (filename, format, quality) {
         filename = filename || _now();
         var formatType = {
             png: 'image/png',
