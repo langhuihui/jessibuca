@@ -20,7 +20,7 @@
 
             </div>
             <div class="option">
-                <span>缓冲:</span>
+                <span>缓冲(秒):</span>
                 <input style="width:50px" type="number" ref="buffer" value="0.2" @change="changeBuffer">
                 <input type="checkbox" ref="wasm" @change="changeWasm"><span>wasm</span>
                 <select ref="vc" @change="changeVC">
@@ -100,7 +100,7 @@
                 this.jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
                 this.jessibuca.onMute = msg => console.log('onMute', msg);
                 this.jessibuca.onInitSize = ()=>console.log('onInitSize');
-                this.jessibuca.onTimeUpdate = (ts)=> console.log('onTimeUpdate',ts);
+                // this.jessibuca.onTimeUpdate = (ts)=> console.log('onTimeUpdate',ts);
                 var _this = this;
                 this.jessibuca.on('load', function () {
                     console.log('on load');
@@ -138,16 +138,12 @@
 
 
                 this.jessibuca.on('bps', function (bps) {
-                    console.log('bps', bps);
+                    // console.log('bps', bps);
                 });
 
                 this.jessibuca.on('timeUpdate',function (ts) {
-                    console.log('timeUpdate',ts);
+                    // console.log('timeUpdate',ts);
                 })
-
-                this.jessibuca.on('audioInfo', function (info) {
-                    console.log('audioInfo', info);
-                });
 
                 this.jessibuca.on('videoInfo', function (info) {
                     console.log('videoInfo', info);
@@ -160,6 +156,10 @@
                 this.jessibuca.on('timeout', function () {
                     console.log('timeout');
                 });
+
+                this.jessibuca.on('stats',function (stats) {
+                    console.log('stats',JSON.stringify(stats));
+                })
 
                 console.log(this.jessibuca);
             },
