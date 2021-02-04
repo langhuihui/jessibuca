@@ -663,6 +663,7 @@
         this._doms.speedDom && (this._doms.speedDom.innerText = _bpsSize(this._bps));
         this._trigger('bps', this._bps);
         this._trigger('stats', this._stats);
+        this._trigger('performance', _fpsStatus(this._stats.fps));
         this._bps = 0;
         this._stats.fps = 0;
         this._stats.vbps = 0;
@@ -811,6 +812,17 @@
         var size = srcsize / 1024;
         size = size.toFixed(2);
         return size + 'KB/S';
+    }
+
+    function _fpsStatus(fps) {
+        var result = 0;
+        if (fps >= 24) {
+            result = 2;
+        } else if (fps >= 15) {
+            result = 1;
+        }
+
+        return result;
     }
 
     /**
