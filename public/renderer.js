@@ -70,6 +70,13 @@
         this._decoderWorker = new Worker(opt.decoder || 'ff.js')
         var _this = this;
         this._hasLoaded = false;
+        this._stats = {
+            buf: 0,
+            fps: 0,
+            abps: '',
+            vbps: '',
+            ts: ''
+        };
 
         if (this._opt.supportDblclickFullscreen) {
             this._canvasElement.addEventListener('dblclick', function () {
@@ -378,6 +385,7 @@
         }
     };
 
+
     Jessibuca.prototype._initGainNode = function () {
         var gainNode = this._audioContext.createGain();
         var _this = this;
@@ -445,7 +453,6 @@
                     _this._canvasElement.height = msg.h;
                     _this.onInitSize();
                     _this.resize();
-                    _this._opt.isDebug && console.log("init size , video size:", msg.w, msg.h)
                     _this._trigger('videoInfo', {w: msg.w, h: msg.h});
                     if (_this.isWebGL()) {
 
@@ -467,7 +474,7 @@
                     }
                     _this._trigger('timeUpdate', msg.ts);
                     _this.onTimeUpdate(msg.ts);
-                    _this._updateBPS(msg.bps);
+                    _this._updateStats({bps: msg.bps, ts: msg.ts});
                     _this._checkHeart();
                     break
                 case "initAudio":
@@ -495,6 +502,11 @@
                     break;
                 case "initAudioPlanar":
                     _this._initAudioPlanar(msg);
+                    _this._trigger('audioInfo', {
+                        numOfChannels: msg.channels, // 声频通道
+                        length: undefined, // 帧数
+                        sampleRate: msg.samplerate // 采样率
+                    });
                     break;
                 default:
                     _this._opt.isDebug && console.log(msg);
@@ -632,7 +644,9 @@
         return !!isFull;
     }
 
-    Jessibuca.prototype._updateBPS = function (bps) {
+    Jessibuca.prototype._updateStats = function (options) {
+        options = options || {};
+
         if (!this._startBpsTime) {
             this._startBpsTime = _now();
         }
@@ -640,14 +654,21 @@
         var timestamp = _nowTime - this._startBpsTime;
 
         if (timestamp < 1 * 1000) {
-            this._bps += bps;
+            this._bps += (options.bps || 0);
+            this._stats.fps += 1;
+            this._stats.vbps += parseInt((options.bps || 0));
             return;
         }
+        this._stats.ts = options.ts;
         this._doms.speedDom && (this._doms.speedDom.innerText = _bpsSize(this._bps));
         this._trigger('bps', this._bps);
+        this._trigger('stats', this._stats);
         this._bps = 0;
+        this._stats.fps = 0;
+        this._stats.vbps = 0;
         this._startBpsTime = _nowTime;
-    }
+    };
+
 
     Jessibuca.prototype._checkHeart = function () {
         if (this._checkHeartTimeout) {
@@ -698,7 +719,6 @@
     Jessibuca.prototype._initAudioPlanar = function (msg) {
         var channels = msg.channels
         var samplerate = msg.samplerate
-        this._opt.isDebug && console.log("initAudioPlanar:", "channles:", channels, "samplerate:", samplerate)
         var context = this._audioContext;
         var isPlaying = false;
         var audioBuffers = [];
@@ -1475,6 +1495,7 @@
      * @param buffer
      */
     Jessibuca.prototype.changeBuffer = function (buffer) {
+        this._stats.buf = Number(buffer) * 1000;
         this._decoderWorker.postMessage({cmd: "setVideoBuffer", time: Number(buffer)});
     };
     /**

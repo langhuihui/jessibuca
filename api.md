@@ -409,6 +409,17 @@ jessibuca.on("pause",function(flag){console.log('pause')})
 ```js
 jessibuca.on("mute",function(flag){console.log('is mute',flag)})
 ```
+### stats
+流状态统计，流开始播放后回调，每秒1次。
+
+1. buf: 当前缓冲区时长，单位毫秒,
+2. fps: 当前视频帧率,
+3. abps: 当前音频码率，单位bit,
+4. vbps: 当前视频码率，单位bit，
+5. ts:当前视频帧pts，单位毫秒
+```js
+jessibuca.on("stats",function(s){console.log("stats is",s)})
+```
 
 
 
