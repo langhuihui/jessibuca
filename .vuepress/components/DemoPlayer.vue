@@ -16,6 +16,7 @@
                 <div style="line-height: 30px">
                     <input type="checkbox" ref="operateBtns" v-model="showOperateBtns" @change="restartPlay"><span>操作按钮</span>
                     <input type="checkbox" ref="operateBtns" v-model="showBandwidth" @change="restartPlay"><span>网速</span>
+                    <span v-if="performance">性能：{{performance}}</span>
                 </div>
 
             </div>
@@ -50,6 +51,7 @@
                 err: "",
                 speed: 0,
                 muting: true,
+                performance:''
             };
         },
         computed: {
@@ -161,6 +163,18 @@
                     console.log('stats',JSON.stringify(stats));
                 })
 
+                this.jessibuca.on('performance',function (performance) {
+                    var show = '卡顿';
+                    if(performance === 2){
+                        show = '非常流畅'
+                    }
+                    else if(performance === 1){
+                        show = '流畅'
+                    }
+                    console.log('stats',show);
+                    _this.performance = show;
+                })
+
                 console.log(this.jessibuca);
             },
             play() {
@@ -194,6 +208,7 @@
                 this.jessibuca.pause();
                 this.playing = false;
                 this.err = "";
+                this.performance = '';
             },
 
             destroy() {
@@ -203,6 +218,7 @@
                 this.create();
                 this.playing = false;
                 this.loaded = false;
+                this.performance = '';
             },
 
             fullscreen() {

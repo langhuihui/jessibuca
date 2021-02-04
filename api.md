@@ -420,6 +420,17 @@ jessibuca.on("mute",function(flag){console.log('is mute',flag)})
 ```js
 jessibuca.on("stats",function(s){console.log("stats is",s)})
 ```
+### performance
+渲染性能统计，流开始播放后回调，每秒1次。
+
+- 0: 表示卡顿
+- 1: 表示流畅
+- 2: 表示非常流程
+
+```js
+jessibuca.on("performance",function(performance){console.log("performance is",performance)})
+```
+
 
 
 
