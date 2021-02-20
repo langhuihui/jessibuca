@@ -187,10 +187,17 @@ jessibuca.play()
 ```
 可以在pause 之后，再调用 `play()`方法就继续播放之前的流。
 
+### close()
+- **用法**：
+关闭视频,不释放底层资源
+```js
+jessibuca.close();
+```
+
 
 ### destroy()
 - **用法**：
-释放底层资源
+关闭视频，释放底层资源
 ```js
 jessibuca.destroy()
 ```
@@ -404,6 +411,7 @@ jessibuca.on("play",function(flag){console.log('play')})
 ```js
 jessibuca.on("pause",function(flag){console.log('pause')})
 ```
+
 ### mute
 触发声音事件，返回boolean值
 ```js
