@@ -77,6 +77,7 @@
             vbps: '',
             ts: ''
         };
+        this._audioPlayBuffers = [];
 
         if (this._opt.supportDblclickFullscreen) {
             this._canvasElement.addEventListener('dblclick', function () {
@@ -461,16 +462,18 @@
                     }
                     break
                 case "render":
-                    if (_this._contextGL) {
-                        _this._drawNextOutputPictureGL(msg.output);
-                    } else {
-                        _this._drawNextOutputPictureRGBA(msg.buffer);
-                    }
                     if (_this.loading) {
                         _this.loading = false;
                         _this.playing = true;
                         _this._opt.isDebug && console.log("clear check loading timeout");
                         _this._clearCheckLoading();
+                    }
+                    if (_this.playing) {
+                        if (_this.isWebGL()) {
+                            _this._drawNextOutputPictureGL(msg.output);
+                        } else {
+                            _this._drawNextOutputPictureRGBA(msg.buffer);
+                        }
                     }
                     _this._trigger('timeUpdate', msg.ts);
                     _this.onTimeUpdate(msg.ts);
@@ -478,6 +481,7 @@
                     _this._checkHeart();
                     break
                 case "initAudio":
+                    _this._opt.isDebug && console.log('initAudio');
                     _this._initAudioPlay(msg.frameCount, msg.samplerate, msg.channels)
                     _this._trigger('audioInfo', {
                         numOfChannels: msg.channels, // 声频通道
@@ -486,7 +490,10 @@
                     });
                     break
                 case "playAudio":
-                    _this._playAudio(msg.buffer)
+                    if (_this.playing) {
+                        _this._opt.isDebug && console.log('playAudio');
+                        _this._playAudio(msg.buffer)
+                    }
                     break
                 case "print":
                     _this.onLog(msg.text)
@@ -501,6 +508,7 @@
                     _this._opt.isDebug && console.error(msg.text);
                     break;
                 case "initAudioPlanar":
+                    _this._opt.isDebug && console.log('initAudioPlanar');
                     _this._initAudioPlanar(msg);
                     _this._trigger('audioInfo', {
                         numOfChannels: msg.channels, // 声频通道
@@ -607,6 +615,7 @@
         this.recording = false;
         this._playing = false;
         this.playing = false;
+        this._audioPlaying = false;
         this._quieting = this._opt.isNotMute ? false : true;
         this.quieting = this._opt.isNotMute ? false : true;
         this._fullscreen = false;
@@ -716,16 +725,24 @@
             this._checkHeartTimeout = null;
         }
     }
+
+    Jessibuca.prototype._limitAudioPlayBufferSize = function () {
+        if (this._audioPlayBuffers.length > 2) {
+            this._audioPlayBuffers.shift();
+        }
+    };
+
     //
     Jessibuca.prototype._initAudioPlanar = function (msg) {
         var channels = msg.channels
         var samplerate = msg.samplerate
         var context = this._audioContext;
-        var isPlaying = false;
-        var audioBuffers = [];
+        this._audioPlaying = false;
+        this._audioPlayBuffers = [];
         if (!context) return false;
         var _this = this
         this._playAudio = function (buffer) {
+            _this._isDebug() && console.log('_initAudioPlanar-_playAudio');
             var frameCount = buffer[0][0].length
             var audioBuffer = context.createBuffer(channels, frameCount * buffer.length, samplerate);
             var copyToCtxBuffer = function (fromBuffer) {
@@ -740,21 +757,21 @@
                 }
             }
             var playNextBuffer = function () {
-                isPlaying = false;
-                //console.log("~", audioBuffers.length)
-                if (audioBuffers.length) {
-                    playAudio(audioBuffers.shift());
+                _this._audioPlaying = false;
+                //console.log("~", _this._audioPlayBuffers.length)
+                if (_this._audioPlayBuffers.length) {
+                    playAudio(_this._audioPlayBuffers.shift());
                 }
-                //if (audioBuffers.length > 1) audioBuffers.shift();
             };
             var playAudio = function (fromBuffer) {
+                _this._isDebug() && console.log('_initAudioPlanar-playAudio');
                 if (!fromBuffer) return
-                if (isPlaying) {
-                    audioBuffers.push(fromBuffer);
-                    //console.log(audioBuffers.length)
+                if (_this._audioPlaying) {
+                    _this._limitAudioPlayBufferSize();
+                    _this._audioPlayBuffers.push(fromBuffer);
                     return;
                 }
-                isPlaying = true;
+                _this._audioPlaying = true;
                 copyToCtxBuffer(fromBuffer);
                 var source = context.createBufferSource();
                 source.buffer = audioBuffer;
@@ -763,7 +780,9 @@
                 source.start();
             };
             _this._playAudio = playAudio
-            _this.audioInterval = setInterval(playNextBuffer, audioBuffer.duration * 1000);
+            if (!_this._audioInterval) {
+                _this._audioInterval = setInterval(playNextBuffer, audioBuffer.duration * 1000);
+            }
             playAudio(buffer)
         };
     }
@@ -848,27 +867,28 @@
     }
 
     Jessibuca.prototype._playAudio = function (data) {
+        this._isDebug() && console.log('_playAudio');
         var context = this._audioContext;
-        var isPlaying = false;
+        this._audioPlaying = false;
         var isDecoding = false;
         if (!context) return false;
-        var audioBuffers = [];
+        this._audioPlayBuffers = [];
         var decodeQueue = []
         var _this = this
         var playNextBuffer = function (e) {
-            if (audioBuffers.length) {
-                playBuffer(audioBuffers.shift())
+            if (_this._audioPlayBuffers.length) {
+                playBuffer(_this._audioPlayBuffers.shift())
             }
         };
         var playBuffer = function (buffer) {
-            isPlaying = true;
+            _this._audioPlaying = true;
             var audioBufferSouceNode = context.createBufferSource();
             audioBufferSouceNode.buffer = buffer;
             audioBufferSouceNode.connect(context.destination);
             // audioBufferSouceNode.onended = playNextBuffer;
             audioBufferSouceNode.start();
-            if (!_this.audioInterval) {
-                _this.audioInterval = setInterval(playNextBuffer, buffer.duration * 1000 - 1);
+            if (!_this._audioInterval) {
+                _this._audioInterval = setInterval(playNextBuffer, buffer.duration * 1000 - 1);
             }
         }
         var decodeAudio = function () {
@@ -880,13 +900,15 @@
         }
         var tryPlay = function (buffer) {
             decodeAudio()
-            if (isPlaying) {
-                audioBuffers.push(buffer);
+            if (_this._audioPlaying) {
+                _this._limitAudioPlayBufferSize();
+                _this._audioPlayBuffers.push(buffer);
             } else {
                 playBuffer(buffer)
             }
         }
         var playAudio = function (data) {
+            _this._isDebug() && console.log('_playAudio-playAudio');
             decodeQueue.push(...data)
             if (!isDecoding) {
                 isDecoding = true
@@ -896,10 +918,14 @@
         this._playAudio = playAudio
         playAudio(data)
     }
+
+    Jessibuca.prototype._isDebug = function () {
+        return this._opt.isDebug;
+    }
     Jessibuca.prototype._initAudioPlay = function (frameCount, samplerate, channels) {
         var context = this._audioContext;
-        var isPlaying = false;
-        var audioBuffers = [];
+        this._audioPlaying = false;
+        this._audioPlayBuffers = [];
         if (!context) return false;
         var _this = this
         var resampled = samplerate < 22050;
@@ -908,10 +934,10 @@
         }
         var audioBuffer = resampled ? context.createBuffer(channels, frameCount << 1, samplerate << 1) : context.createBuffer(channels, frameCount, samplerate);
         var playNextBuffer = function () {
-            isPlaying = false;
-            //console.log("~", audioBuffers.length)
-            if (audioBuffers.length) {
-                playAudio(audioBuffers.shift());
+            _this._audioPlaying = false;
+            _this._isDebug() && console.log("playNextBuffer:", _this._audioPlayBuffers.length)
+            if (_this._audioPlayBuffers.length) {
+                playAudio(_this._audioPlayBuffers.shift());
             }
         };
 
@@ -935,17 +961,19 @@
             }
         };
         var playAudio = function (fromBuffer) {
-            if (isPlaying) {
-                audioBuffers.push(fromBuffer);
+            _this._isDebug() && console.log('_initAudioPlay-playAudio,_audioPlaying', _this._audioPlaying);
+            if (_this._audioPlaying) {
+                _this._limitAudioPlayBufferSize();
+                _this._audioPlayBuffers.push(fromBuffer);
                 return;
             }
-            isPlaying = true;
+            _this._audioPlaying = true;
             copyToCtxBuffer(fromBuffer);
             var source = context.createBufferSource();
             source.buffer = audioBuffer;
             source.connect(context.destination);
-            if (!_this.audioInterval) {
-                _this.audioInterval = setInterval(playNextBuffer, audioBuffer.duration * 1000);
+            if (!_this._audioInterval) {
+                _this._audioInterval = setInterval(playNextBuffer, audioBuffer.duration * 1000);
             }
             source.start();
         };
@@ -1241,10 +1269,13 @@
     };
 
     Jessibuca.prototype._close = function () {
-        if (this.audioInterval) {
-            clearInterval(this.audioInterval)
+        if (this._audioInterval) {
+            clearInterval(this._audioInterval)
+            this._audioInterval = null;
         }
-        delete this._playAudio
+        this._audioPlayBuffers = [];
+        this._audioPlaying = false;
+        delete this._playAudio;
         this._decoderWorker.postMessage({cmd: "close"})
 
         if (this._wakeLock) {
@@ -1261,6 +1292,7 @@
      */
     Jessibuca.prototype.destroy = function () {
         // destroy
+        this._close();
         this._decoderWorker.terminate()
         window.removeEventListener("resize", this._onresize);
         window.removeEventListener('fullscreenchange', this._onfullscreenchange);
@@ -1298,7 +1330,7 @@
             if (this.playUrl) {
                 this._close();
                 needDelay = true;
-                this._contextGL.clear(this._contextGL.COLOR_BUFFER_BIT);
+                this.clearView();
             }
             this.loading = true;
             _domToggle(this._doms.bgDom, false);

@@ -160,7 +160,7 @@
                 });
 
                 this.jessibuca.on('stats',function (stats) {
-                    console.log('stats',JSON.stringify(stats));
+                    // console.log('stats',JSON.stringify(stats));
                 })
 
                 this.jessibuca.on('performance',function (performance) {
@@ -171,7 +171,7 @@
                     else if(performance === 1){
                         show = '流畅'
                     }
-                    console.log('stats',show);
+                    // console.log('stats',show);
                     _this.performance = show;
                 })
 
