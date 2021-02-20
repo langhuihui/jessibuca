@@ -1259,6 +1259,9 @@
         };
     };
 
+    /**
+     *
+     */
     Jessibuca.prototype.pause = function () {
         this._close();
         if (this.loading) {
@@ -1268,6 +1271,10 @@
         this.playing = false;
     };
 
+    /**
+     *
+     * @private
+     */
     Jessibuca.prototype._close = function () {
         if (this._audioInterval) {
             clearInterval(this._audioInterval)
@@ -1286,6 +1293,15 @@
         // this._contextGL.clear(this._contextGL.COLOR_BUFFER_BIT);
         this._initCheckVariable();
     }
+
+    /**
+     * close
+     */
+    Jessibuca.prototype.close = function(){
+      this._close();
+      this.clearView();
+    };
+
     /**
      * destroy
      * @desc delete worker,

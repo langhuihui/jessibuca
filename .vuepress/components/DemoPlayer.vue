@@ -11,11 +11,15 @@
             </div>
             <div class="input" v-if="loaded">
                 <button @click="destroy">销毁</button>
+                <button v-if="isMute" @click="cancelMute">取消静音</button>
+                <button v-else @click="mute">静音</button>
                 <button @click="fullscreen">全屏</button>
                 <button @click="screenShot">截图</button>
                 <div style="line-height: 30px">
-                    <input type="checkbox" ref="operateBtns" v-model="showOperateBtns" @change="restartPlay"><span>操作按钮</span>
-                    <input type="checkbox" ref="operateBtns" v-model="showBandwidth" @change="restartPlay"><span>网速</span>
+                    <input type="checkbox" ref="operateBtns" v-model="showOperateBtns"
+                           @change="restartPlay"><span>操作按钮</span>
+                    <input type="checkbox" ref="operateBtns" v-model="showBandwidth"
+                           @change="restartPlay"><span>网速</span>
                     <span v-if="performance">性能：{{performance}}</span>
                 </div>
 
@@ -46,20 +50,23 @@
                 vc: "ff",
                 playing: false,
                 loaded: false, // mute
-                showOperateBtns:false,
-                showBandwidth:false,
+                showOperateBtns: false,
+                showBandwidth: false,
                 err: "",
                 speed: 0,
-                muting: true,
-                performance:''
+                performance: ''
             };
         },
         computed: {
             decoder() {
                 return this.vc + (this.wasm ? "_wasm" : "") + ".js"
             },
-            speedShow() {
-
+            isMute() {
+                let result = true;
+                if (this.jessibuca) {
+                    result = this.jessibuca.quieting;
+                }
+                return result;
             }
         },
         watch: {
@@ -101,7 +108,7 @@
                 this.jessibuca.onPlay = () => console.log('onPlay');
                 this.jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
                 this.jessibuca.onMute = msg => console.log('onMute', msg);
-                this.jessibuca.onInitSize = ()=>console.log('onInitSize');
+                this.jessibuca.onInitSize = () => console.log('onInitSize');
                 // this.jessibuca.onTimeUpdate = (ts)=> console.log('onTimeUpdate',ts);
                 var _this = this;
                 this.jessibuca.on('load', function () {
@@ -143,7 +150,7 @@
                     // console.log('bps', bps);
                 });
 
-                this.jessibuca.on('timeUpdate',function (ts) {
+                this.jessibuca.on('timeUpdate', function (ts) {
                     // console.log('timeUpdate',ts);
                 })
 
@@ -159,16 +166,15 @@
                     console.log('timeout');
                 });
 
-                this.jessibuca.on('stats',function (stats) {
+                this.jessibuca.on('stats', function (stats) {
                     // console.log('stats',JSON.stringify(stats));
                 })
 
-                this.jessibuca.on('performance',function (performance) {
+                this.jessibuca.on('performance', function (performance) {
                     var show = '卡顿';
-                    if(performance === 2){
+                    if (performance === 2) {
                         show = '非常流畅'
-                    }
-                    else if(performance === 1){
+                    } else if (performance === 1) {
                         show = '流畅'
                     }
                     // console.log('stats',show);
@@ -197,11 +203,9 @@
             },
             mute() {
                 this.jessibuca.mute();
-                this.muting = true;
             },
             cancelMute() {
                 this.jessibuca.cancelMute();
-                this.muting = false;
             },
 
             pause() {
