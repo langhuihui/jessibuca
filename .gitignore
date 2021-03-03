@@ -10,3 +10,6 @@ Debug
 node_modules
 .vuepress/dist
 dist
+.idea
+yarn.lock
+package.json
