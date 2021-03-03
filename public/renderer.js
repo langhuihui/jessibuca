@@ -57,7 +57,9 @@
         if (!opt.forceNoGL) this._initContextGL();
         this._audioContext = new (window.AudioContext || window.webkitAudioContext)();
         this._audioEnabled(true);
-        if (!opt.isNotMute) this._audioEnabled(false);
+        if (!opt.isNotMute) {
+            this._audioEnabled(false);
+        }
         if (this._contextGL) {
             this._initProgram();
             this._initBuffers();
@@ -99,6 +101,7 @@
         this._initStatus();
         this._initEventListener();
         this._hideBtns();
+        this._initGainNode();
         //
         this._initWakeLock();
         this._enableWakeLock();
@@ -391,7 +394,7 @@
         var gainNode = this._audioContext.createGain();
         var _this = this;
         var source;
-        if (!navigator.mediaDevices.getUserMedia) {
+        if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
             console.log('getUserMedia not supported on your browser!');
             return;
         }
@@ -490,7 +493,7 @@
                     });
                     break
                 case "playAudio":
-                    if (_this.playing) {
+                    if (_this.playing && !_this.quieting) {
                         _this._opt.isDebug && console.log('playAudio');
                         _this._playAudio(msg.buffer)
                     }
@@ -590,6 +593,7 @@
      */
     Jessibuca.prototype.mute = function () {
         this._audioEnabled(false);
+        this._audioPlayBuffers = [];
         this.quieting = true;
     };
 
@@ -764,7 +768,7 @@
                 }
             };
             var playAudio = function (fromBuffer) {
-                _this._isDebug() && console.log('_initAudioPlanar-playAudio');
+                // _this._isDebug() && console.log('_initAudioPlanar-playAudio');
                 if (!fromBuffer) return
                 if (_this._audioPlaying) {
                     _this._limitAudioPlayBufferSize();
@@ -1297,9 +1301,9 @@
     /**
      * close
      */
-    Jessibuca.prototype.close = function(){
-      this._close();
-      this.clearView();
+    Jessibuca.prototype.close = function () {
+        this._close();
+        this.clearView();
     };
 
     /**
