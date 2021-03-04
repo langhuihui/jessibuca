@@ -56,6 +56,7 @@
 
         if (!opt.forceNoGL) this._initContextGL();
         this._audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this._gainNode = this._audioContext.createGain();
         this._audioEnabled(true);
         if (!opt.isNotMute) {
             this._audioEnabled(false);
@@ -101,7 +102,6 @@
         this._initStatus();
         this._initEventListener();
         this._hideBtns();
-        this._initGainNode();
         //
         this._initWakeLock();
         this._enableWakeLock();
@@ -387,37 +387,6 @@
                 })
             }
         }
-    };
-
-
-    Jessibuca.prototype._initGainNode = function () {
-        var gainNode = this._audioContext.createGain();
-        var _this = this;
-        var source;
-        if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
-            console.log('getUserMedia not supported on your browser!');
-            return;
-        }
-
-        navigator.mediaDevices.getUserMedia(
-            // constraints - only audio needed for this app
-            {
-                audio: true
-            },
-
-            // Success callback
-            function (stream) {
-                source = _this._audioContext.createMediaStreamSource(stream);
-                source.connect(gainNode);
-                gainNode.connect(_this._audioContext.destination);
-                _this._gainNode = gainNode;
-            },
-
-            // Error callback
-            function (err) {
-                console.log('The following gUM error occurred: ' + err);
-            }
-        );
     };
 
     Jessibuca.prototype._showControl = function () {
@@ -778,9 +747,10 @@
                 _this._audioPlaying = true;
                 copyToCtxBuffer(fromBuffer);
                 var source = context.createBufferSource();
+
                 source.buffer = audioBuffer;
-                source.connect(context.destination);
-                // source.onended = playNextBuffer;
+                source.connect(_this._gainNode);
+                _this._gainNode.connect(context.destination);
                 source.start();
             };
             _this._playAudio = playAudio
@@ -888,8 +858,8 @@
             _this._audioPlaying = true;
             var audioBufferSouceNode = context.createBufferSource();
             audioBufferSouceNode.buffer = buffer;
-            audioBufferSouceNode.connect(context.destination);
-            // audioBufferSouceNode.onended = playNextBuffer;
+            audioBufferSouceNode.connect(_this._gainNode);
+            _this._gainNode.connect(context.destination);
             audioBufferSouceNode.start();
             if (!_this._audioInterval) {
                 _this._audioInterval = setInterval(playNextBuffer, buffer.duration * 1000 - 1);
@@ -975,14 +945,15 @@
             copyToCtxBuffer(fromBuffer);
             var source = context.createBufferSource();
             source.buffer = audioBuffer;
-            source.connect(context.destination);
+            source.connect(_this._gainNode);
+            _this._gainNode.connect(context.destination);
             if (!_this._audioInterval) {
                 _this._audioInterval = setInterval(playNextBuffer, audioBuffer.duration * 1000);
             }
             source.start();
         };
         this._playAudio = playAudio;
-    }
+    };
     /**
      * Returns true if the canvas supports WebGL
      */
@@ -1578,6 +1549,11 @@
      */
     Jessibuca.prototype.setVolume = function (volume) {
         if (this._gainNode) {
+            volume = parseFloat(volume);
+            if (isNaN(volume)) {
+                return;
+            }
+            this._isDebug() && console.log('set volume:', volume);
             this._gainNode.gain.setValueAtTime(volume, this._audioContext.currentTime);
         }
     };

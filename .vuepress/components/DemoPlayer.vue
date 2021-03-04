@@ -9,10 +9,20 @@
                 <button v-if="!playing" @click="play">播放</button>
                 <button v-else @click="pause">停止</button>
             </div>
-            <div class="input" v-if="loaded">
+            <div class="input" v-if="loaded" style="line-height: 30px">
                 <button @click="destroy">销毁</button>
                 <button v-if="isMute" @click="cancelMute">取消静音</button>
-                <button v-else @click="mute">静音</button>
+                <template v-else>
+                    <button  @click="mute">静音</button>
+                    音量
+                    <select v-model="volume" @change="volumeChange">
+                        <option value="1">100</option>
+                        <option value="0.75">75</option>
+                        <option value="0.5">50</option>
+                        <option value="0.25">25</option>
+                    </select>
+                </template>
+
                 <button @click="fullscreen">全屏</button>
                 <button @click="screenShot">截图</button>
                 <div style="line-height: 30px">
@@ -54,7 +64,8 @@
                 showBandwidth: false,
                 err: "",
                 speed: 0,
-                performance: ''
+                performance: '',
+                volume: 1
             };
         },
         computed: {
@@ -213,6 +224,9 @@
                 this.playing = false;
                 this.err = "";
                 this.performance = '';
+            },
+            volumeChange() {
+                this.jessibuca.setVolume(this.volume);
             },
 
             destroy() {
