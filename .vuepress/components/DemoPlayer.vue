@@ -13,7 +13,7 @@
                 <button @click="destroy">销毁</button>
                 <button v-if="isMute" @click="cancelMute">取消静音</button>
                 <template v-else>
-                    <button  @click="mute">静音</button>
+                    <button @click="mute">静音</button>
                     音量
                     <select v-model="volume" @change="volumeChange">
                         <option value="1">100</option>
@@ -22,6 +22,12 @@
                         <option value="0.25">25</option>
                     </select>
                 </template>
+                <span>旋转</span>
+                <select v-model="rotate" @change="rotateChange">
+                    <option value="0">0</option>
+                    <option value="90">90</option>
+                    <option value="270">270</option>
+                </select>
 
                 <button @click="fullscreen">全屏</button>
                 <button @click="screenShot">截图</button>
@@ -65,7 +71,8 @@
                 err: "",
                 speed: 0,
                 performance: '',
-                volume: 1
+                volume: 1,
+                rotate: 0
             };
         },
         computed: {
@@ -98,7 +105,7 @@
                 this.jessibuca = new Jessibuca(Object.assign({
                     container: this.$refs.container,
                     decoder: this.decoder,
-                    videoBuffer: Number(this.$refs.buffer.value),
+                    videoBuffer: Number(this.$refs.buffer.value), // 缓存时长
                     isResize: false,
                     text: '',
                     background: 'https://seopic.699pic.com/photo/40011/0709.jpg_wh1200.jpg',
@@ -160,9 +167,10 @@
                 this.jessibuca.on('bps', function (bps) {
                     // console.log('bps', bps);
                 });
-
+                let _ts = 0;
                 this.jessibuca.on('timeUpdate', function (ts) {
-                    // console.log('timeUpdate',ts);
+                    // console.log('timeUpdate,old,new,timestamp', _ts, ts, ts - _ts);
+                    _ts = ts;
                 })
 
                 this.jessibuca.on('videoInfo', function (info) {
@@ -228,7 +236,9 @@
             volumeChange() {
                 this.jessibuca.setVolume(this.volume);
             },
-
+            rotateChange() {
+                this.jessibuca.setRotate(this.rotate);
+            },
             destroy() {
                 if (this.jessibuca) {
                     this.jessibuca.destroy();

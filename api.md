@@ -134,6 +134,15 @@ jessibuca.mute()
 jessibuca.cancelMute()
 ```
 
+### audioResume()
+- **用法**：
+留给上层用户操作来触发音频恢复的方法。
+
+iPhone，chrome等要求自动播放时，音频必须静音，需要由一个真实的用户交互操作来恢复，不能使用代码。
+
+https://developers.google.com/web/updates/2017/09/autoplay-policy-changes
+
+
 ### isWebGL()
 - **返回值**：`boolean`
 - **用法**：
@@ -233,6 +242,8 @@ jessibuca.play()
 - **用法**：
 设置最大缓冲时长，单位秒，播放器会自动消除延迟。
 
+等同于 `videoBuffer` 参数。
+
 ```js
 // 设置 200ms 缓冲
 jessibuca.setBufferTime(0.2)
@@ -242,17 +253,20 @@ jessibuca.setBufferTime(0.2)
 - **参数**：
    - `{number} deg`  
 - **用法**：
-设置旋转角度，只支持，0 ，90，180，270 四个值。
+设置旋转角度，只支持，0(默认) ，180，270 三个值。
+
+> 可用于实现监控画面小窗和全屏效果，由于iOS没有全屏API，此方法可以模拟页面内全屏效果而且多端效果一致。
 
 ```js
 jessibuca.setRotate(0)
 
 jessibuca.setRotate(90)
 
-jessibuca.setRotate(180)
 
 jessibuca.setRotate(270)
 ```
+
+
 
 ### setVolume(volume)
 - **参数**：
@@ -263,6 +277,8 @@ jessibuca.setRotate(270)
 1. 设置音量大小，取值0 — 1
 2. 当为0时，完全无声
 3. 当为1时，最大音量，默认值
+
+> 区别于 mute 和 cancelMute 方法，虽然设置setVolume(0) 也能达到 mute方法，但是mute 方法是不调用底层播放音频的，能提高性能。而setVolume(0)只是把声音设置为0 ，以达到效果。
 
 ```js
 jessibuca.setVolume(0.2)
@@ -284,6 +300,8 @@ console.log(result) // true
 ### setKeepScreenOn()
 - **用法**：
 开启屏幕常亮，在手机浏览器上, canvas标签渲染视频并不会像video标签那样保持屏幕常亮。
+H5目前在chrome\edge 84, android chrome 84及以上有原生亮屏API, 需要是https页面
+其余平台为模拟实现，此时为兼容实现，并不保证所有浏览器都支持
 
 ```js
 jessibuca.setKeepScreenOn()
@@ -319,6 +337,7 @@ jessibuca.setFullscreen(false)
 jessibuca.screenshot("test","png",0.5)
 
 ```
+
    
 ### on(event, callback)
 - **参数**：

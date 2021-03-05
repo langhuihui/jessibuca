@@ -53,6 +53,7 @@
             audio: false
         }, opt.operateBtns || {});
         this._opt.keepScreenOn = opt.keepScreenOn === true;
+        this._opt.rotate = typeof opt.rotate === 'number' ? opt.rotate : 0;
 
         if (!opt.forceNoGL) this._initContextGL();
         this._audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -463,7 +464,7 @@
                     break
                 case "playAudio":
                     if (_this.playing && !_this.quieting) {
-                        _this._opt.isDebug && console.log('playAudio');
+                        _this._opt.isDebug && console.log('playAudio,ts', msg.ts);
                         _this._playAudio(msg.buffer)
                     }
                     break
@@ -575,10 +576,23 @@
     };
 
     /**
+     * link to cancelMute
+     */
+    Jessibuca.prototype.audioResume = function () {
+        this.cancelMute();
+    };
+
+    /**
      * 设置旋转角度
      */
     Jessibuca.prototype.setRotate = function (deg) {
-
+        deg = parseInt(deg, 10)
+        const list = [0, 90, 270];
+        if (this._opt.rotate === deg || list.indexOf(deg) === -1) {
+            return;
+        }
+        this._opt.rotate = deg;
+        this.resize();
     };
 
     Jessibuca.prototype._initStatus = function () {
@@ -715,7 +729,7 @@
         if (!context) return false;
         var _this = this
         this._playAudio = function (buffer) {
-            _this._isDebug() && console.log('_initAudioPlanar-_playAudio');
+            // _this._isDebug() && console.log('_initAudioPlanar-_playAudio');
             var frameCount = buffer[0][0].length
             var audioBuffer = context.createBuffer(channels, frameCount * buffer.length, samplerate);
             var copyToCtxBuffer = function (fromBuffer) {
@@ -725,19 +739,16 @@
                         for (var i = 0; i < frameCount; i++) {
                             nowBuffering[i + j * frameCount] = fromBuffer[j][channel][i]
                         }
-                        //postMessage({ cmd: "setBufferA", buffer: fromBuffer[j] }, '*', fromBuffer[j].map(x => x.buffer))
                     }
                 }
             }
             var playNextBuffer = function () {
                 _this._audioPlaying = false;
-                //console.log("~", _this._audioPlayBuffers.length)
                 if (_this._audioPlayBuffers.length) {
                     playAudio(_this._audioPlayBuffers.shift());
                 }
             };
             var playAudio = function (fromBuffer) {
-                // _this._isDebug() && console.log('_initAudioPlanar-playAudio');
                 if (!fromBuffer) return
                 if (_this._audioPlaying) {
                     _this._limitAudioPlayBufferSize();
@@ -747,8 +758,8 @@
                 _this._audioPlaying = true;
                 copyToCtxBuffer(fromBuffer);
                 var source = context.createBufferSource();
-
                 source.buffer = audioBuffer;
+                // _this._isDebug() && console.log('audioBuffer', audioBuffer.duration * 1000)
                 source.connect(_this._gainNode);
                 _this._gainNode.connect(context.destination);
                 source.start();
@@ -1502,6 +1513,7 @@
         }
         var resizeWidth = this._canvasElement.width;
         var resizeHeight = this._canvasElement.height;
+        var rotate = this._opt.rotate;
         var wScale = width / resizeWidth;
         var hScale = height / resizeHeight;
         var scale = wScale > hScale ? hScale : wScale;
@@ -1515,8 +1527,14 @@
             scale = wScale > hScale ? wScale : hScale;
         }
 
-        this._opt.isDebug && console.log('wScale', wScale, 'hScale', hScale, 'scale', scale);
-        this._canvasElement.style.transform = "scale(" + scale + ")"
+        let transform = "scale(" + scale + ")";
+
+        if (rotate) {
+            transform += ' rotate(' + rotate + 'deg)'
+        }
+
+        this._opt.isDebug && console.log('wScale', wScale, 'hScale', hScale, 'scale', scale, 'rotate', rotate);
+        this._canvasElement.style.transform = transform;
         this._canvasElement.style.left = ((width - resizeWidth) / 2) + "px"
         this._canvasElement.style.top = ((height - resizeHeight) / 2) + "px"
     }
