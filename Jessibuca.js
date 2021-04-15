@@ -197,11 +197,21 @@ mergeInto(LibraryManager.library, {
                     };
                 }
             },
+            firstVideo: function (timestamp) {
+                this.firstVideoTimestamp = timestamp
+                this.firstTimestamp = Date.now()
+            },
+            getDelay: function (timestamp) {
+                return this.delay = (timestamp - this.firstVideoTimestamp) - (Date.now() - this.firstTimestamp)
+            }
         });
         var decoder = new Module.Jessibuca()
         self.onmessage = function (event) {
             var msg = event.data
             switch (msg.cmd) {
+                case "getProp":
+                    postMessage({ cmd: "getProp", value: decoder[msg.prop] })
+                    break
                 case "play":
                     decoder.isWebGL = msg.isWebGL
                     decoder.play(msg.url)

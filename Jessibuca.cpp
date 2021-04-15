@@ -4,16 +4,16 @@
 #endif
 #include "base.h"
 #include <regex>
-#define PROP(name, type)         \
-    type name;                   \
-    val get##name() const        \
-    {                            \
-        return val(name);        \
-    }                            \
-    void set##name(val value)    \
-    {                            \
-        name = value.as<type>(); \
-        emscripten_log(0, #name" = %d", name);\
+#define PROP(name, type)                        \
+    type name;                                  \
+    val get##name() const                       \
+    {                                           \
+        return val(name);                       \
+    }                                           \
+    void set##name(val value)                   \
+    {                                           \
+        name = value.as<type>();                \
+        emscripten_log(0, #name " = %d", name); \
     }
 extern "C"
 {
@@ -39,6 +39,9 @@ struct Jessica
     bool waitFirstAudio = true;
     clock_t lastDataTime = 0;
     clock_t lastVideoTimeStamp = 0;
+    clock_t firstVideoTimeStamp = 0;
+    clock_t firstTimeStamp = 0;
+    bool dropping = false; //是否正在丢帧
     int bytesCount = 0;
     PROP(isPlaying, bool)
     PROP(flvMode, bool)
@@ -50,7 +53,7 @@ struct Jessica
         videoDecoder.jsObject = &wrapped;
     }
     template <typename... Args>
-    Jessica(Args &&... args) : wrapped(val::undefined())
+    Jessica(Args &&...args) : wrapped(val::undefined())
     {
     }
     virtual ~Jessica()
@@ -78,25 +81,32 @@ struct Jessica
         videoDecoder.webgl = webgl;
         flvMode = url.find(".flv") != string::npos;
         lastDataTime = clock();
-        if(url.find("http") == 0) {
-            call<void>("fetch",url);
-        }else{
+        if (url.find("http") == 0)
+        {
+            call<void>("fetch", url);
+        }
+        else
+        {
 #ifdef WS_PREFIX
-        val ws = val::global("WebSocket").new_(WS_PREFIX + url);
+            val ws = val::global("WebSocket").new_(WS_PREFIX + url);
 #else
-        val ws = val::global("WebSocket").new_(url);
+            val ws = val::global("WebSocket").new_(url);
 #endif
-        ws.set("binaryType", "arraybuffer");
-        ws.set("onmessage", bind("onData"));
-        // ws.set("onerror", bind("onError"));
-        wrapped.set("ws", ws);
+            ws.set("binaryType", "arraybuffer");
+            ws.set("onmessage", bind("onData"));
+            // ws.set("onerror", bind("onError"));
+            wrapped.set("ws", ws);
         }
     }
-  
-    void onFetchData(val evt){
-        if(evt["done"].as<bool>()){
+
+    void onFetchData(val evt)
+    {
+        if (evt["done"].as<bool>())
+        {
             call<void>("close");
-        }else{
+        }
+        else
+        {
             onData(evt);
             wrapped.call<void>("fetchNext");
         }
@@ -128,7 +138,7 @@ struct Jessica
                 while (buffer.length() > 3)
                 {
                     size_t length = 0;
-                    auto attr = (u8*)(&length);
+                    auto attr = (u8 *)(&length);
                     attr[2] = buffer[1];
                     attr[1] = buffer[2];
                     attr[0] = buffer[3];
@@ -137,11 +147,11 @@ struct Jessica
                         break;
                     }
                     unsigned int timestamp = 0;
-                    attr = (u8*)(&timestamp);
+                    attr = (u8 *)(&timestamp);
                     attr[2] = buffer[4];
                     attr[1] = buffer[5];
                     attr[0] = buffer[6];
-                    IOBuffer payload(buffer.substr(11,length));
+                    IOBuffer payload(buffer.substr(11, length));
                     switch (buffer[0])
                     {
                     case 8:
@@ -154,7 +164,7 @@ struct Jessica
                         emscripten_log(0, "unknow type: %d", buffer[0]);
                         break;
                     }
-                    buffer = buffer.substr(length+15);
+                    buffer = buffer.substr(length + 15);
                 }
             }
         }
@@ -193,10 +203,11 @@ struct Jessica
         unsigned char flag = 0;
         ms.readB<1>(flag);
         int bytesCount = audioDecoder.decode(ms);
-        if(!bytesCount)return;
+        if (!bytesCount)
+            return;
         if (!waitFirstAudio)
         {
-            call<void>("playAudioPlanar", int(audioDecoder.frame->data), bytesCount,timestamp);
+            call<void>("playAudioPlanar", int(audioDecoder.frame->data), bytesCount, timestamp);
         }
         else
         {
@@ -248,7 +259,7 @@ struct Jessica
             }
         }
         if (!waitFirstAudio && audioDecoder.decode(ms))
-            call<void>("playAudio",timestamp);
+            call<void>("playAudio", timestamp);
     }
     void initAudio(int frameCount, int samplerate, int channels)
     {
@@ -263,23 +274,33 @@ struct Jessica
         {
             if (videoDecoder.isAVCSequence(data))
             {
+                call<void>("firstVideo", u32(_timestamp));
                 videoDecoder.decode(data);
                 waitFirstVideo = false;
-                emscripten_log(0, "video info set! video buffer: %dms",videoBuffer);
+                emscripten_log(0, "video info set! video buffer: %dms", videoBuffer);
             }
         }
         else if (data[1] == 1 || data[1] == 0)
         {
             if (_timestamp == 0 && lastVideoTimeStamp != 0)
                 return;
-            if(videoBuffer == 0){
+            if (videoBuffer == 0)
+            {
+                if (call<u32>("getDelay", _timestamp) > 1000)
+                {
+                    return;
+                }
                 videoDecoder.timestamp = _timestamp;
                 videoDecoder.decode(data);
-            }else{
+            }
+            else
+            {
                 videoBuffers.emplace(_timestamp, data);
                 auto &v = videoBuffers.front();
-                if(lastVideoTimeStamp - v.timestamp > videoBuffer){
-                    if(!bufferIsPlaying){
+                if (lastVideoTimeStamp - v.timestamp > videoBuffer)
+                {
+                    if (!bufferIsPlaying)
+                    {
                         bufferIsPlaying = true;
                         decodeVideoBuffer();
                     }
@@ -290,18 +311,32 @@ struct Jessica
     }
     void decodeVideoBuffer()
     {
-        if (videoBuffers.size()>1)
+        if (videoBuffers.size() > 1)
         {
             auto &v = videoBuffers.front();
+            if (lastVideoTimeStamp - v.timestamp > videoBuffer)
+            {
+                videoBuffers.pop();
+                while (videoBuffers.size() > 0 && !videoDecoder.isAVCSequence(videoBuffers.front().data))
+                {
+                    videoBuffers.pop();
+                }
+                if (videoBuffers.size()==0)
+                {
+                    bufferIsPlaying = false;
+                    return;
+                }
+                v = videoBuffers.front();
+            }
             videoDecoder.timestamp = v.timestamp;
-            videoDecoder.decode(v.data);
             videoBuffers.pop();
-            auto timeout = videoBuffers.front().timestamp - v.timestamp;
-             if(lastVideoTimeStamp - videoBuffers.front().timestamp > videoBuffer){
-                timeout=timeout>>1;
-             }
-            val::global("setTimeout")(bind("decodeVideoBuffer"),timeout);
-            return;
+            if (videoBuffers.size() > 1)
+            {
+                auto timeout = videoBuffers.front().timestamp - v.timestamp;
+                val::global("setTimeout")(bind("decodeVideoBuffer"), timeout);
+                return;
+            }
+            videoDecoder.decode(v.data);
         }
         bufferIsPlaying = false;
     }
@@ -332,7 +367,7 @@ struct Jessica
         return wrapped[name].call<val>("bind", wrapped);
     }
     template <typename ReturnType, typename... Args>
-    ReturnType call(const char *name, Args &&... args) const
+    ReturnType call(const char *name, Args &&...args) const
     {
         return wrapped.call<ReturnType>(name, forward<Args>(args)...);
     }
