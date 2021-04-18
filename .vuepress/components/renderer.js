@@ -55,7 +55,7 @@
         this._opt.keepScreenOn = opt.keepScreenOn === true;
         this._opt.rotate = typeof opt.rotate === 'number' ? opt.rotate : 0;
 
-        if (!opt.forceNoGL) this._initContextGL();
+        if (!opt.forceNoGL && !this.supportOffscreen()) this._initContextGL();
         this._audioContext = new (window.AudioContext || window.webkitAudioContext)();
         this._gainNode = this._audioContext.createGain();
         this._audioEnabled(true);
@@ -414,6 +414,7 @@
             switch (msg.cmd) {
                 case "init":
                     _this._opt.isDebug && console.log("decoder worker init")
+
                     _this.setBufferTime(_this._opt.videoBuffer);
                     if (!_this._hasLoaded) {
                         _this._opt.isDebug && console.log("has loaded");
@@ -427,7 +428,11 @@
                     _this._canvasElement.height = msg.h;
                     _this.onInitSize();
                     _this.resize();
-                    _this._trigger('videoInfo', {w: msg.w, h: msg.h});
+                    _this._trigger('videoInfo', { w: msg.w, h: msg.h });
+                    if (_this.supportOffscreen()) {
+                        const offscreen = _this._canvasElement.transferControlToOffscreen();
+                        this.postMessage({ cmd: "init", canvas: offscreen }, [offscreen])
+                    }
                     if (_this.isWebGL()) {
 
                     } else {
@@ -441,16 +446,17 @@
                         _this._opt.isDebug && console.log("clear check loading timeout");
                         _this._clearCheckLoading();
                     }
-                    if (_this.playing) {
+                    if (_this.playing && !_this.supportOffscreen()) {
                         if (_this.isWebGL()) {
                             _this._drawNextOutputPictureGL(msg.output);
                         } else {
                             _this._drawNextOutputPictureRGBA(msg.buffer);
                         }
                     }
+                    // _this._decoderWorker.postMessage({ cmd: "setBuffer", buffer: msg.output }, msg.output.map(x => x.buffer))
                     _this._trigger('timeUpdate', msg.ts);
                     _this.onTimeUpdate(msg.ts);
-                    _this._updateStats({bps: msg.bps, ts: msg.ts});
+                    _this._updateStats({ bps: msg.bps, ts: msg.ts });
                     _this._checkHeart();
                     break
                 case "initAudio":
@@ -797,7 +803,7 @@
         while (n--) {
             u8arr[n] = bstr.charCodeAt(n);
         }
-        return new File([u8arr], 'file', {type});
+        return new File([u8arr], 'file', { type });
     }
 
     function _downloadImg(content, fileName) {
@@ -969,8 +975,11 @@
      * Returns true if the canvas supports WebGL
      */
     Jessibuca.prototype.isWebGL = function () {
-        return !!this._contextGL;
+        return this.supportOffscreen() || !!this._contextGL;
     };
+    Jessibuca.prototype.supportOffscreen = function () {
+        return typeof this._canvasElement.transferControlToOffscreen == 'function'
+    }
     /**
      * set timeout
      * @param time
@@ -1016,7 +1025,7 @@
             var contextName = validContextNames[nameIndex];
 
             try {
-                var contextOptions = {preserveDrawingBuffer: true};
+                var contextOptions = { preserveDrawingBuffer: true };
                 if (this._opt.contextOptions) {
                     contextOptions = Object.assign(contextOptions, this._opt.contextOptions);
                 }
@@ -1269,7 +1278,7 @@
         this._audioPlayBuffers = [];
         this._audioPlaying = false;
         delete this._playAudio;
-        this._decoderWorker.postMessage({cmd: "close"})
+        this._decoderWorker.postMessage({ cmd: "close" })
 
         if (this._wakeLock) {
             this._wakeLock.release();
@@ -1355,10 +1364,10 @@
         if (needDelay) {
             var _this = this;
             setTimeout(function () {
-                _this._decoderWorker.postMessage({cmd: "play", url: _this.playUrl, isWebGL: _this.isWebGL()})
+                _this._decoderWorker.postMessage({ cmd: "play", url: _this.playUrl, isWebGL: _this.isWebGL() })
             }, 300);
         } else {
-            this._decoderWorker.postMessage({cmd: "play", url: this.playUrl, isWebGL: this.isWebGL()})
+            this._decoderWorker.postMessage({ cmd: "play", url: this.playUrl, isWebGL: this.isWebGL() })
         }
     };
     /**
@@ -1549,7 +1558,7 @@
      */
     Jessibuca.prototype.changeBuffer = function (buffer) {
         this._stats.buf = Number(buffer) * 1000;
-        this._decoderWorker.postMessage({cmd: "setVideoBuffer", time: Number(buffer)});
+        this._decoderWorker.postMessage({ cmd: "setVideoBuffer", time: Number(buffer) });
     };
     /**
      * 设置最大缓冲时长，单位秒，播放器会自动消除延迟。

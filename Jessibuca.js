@@ -26,6 +26,120 @@ mergeInto(LibraryManager.library, {
             postMessage({ cmd: "init" })
         }
         Module.Jessibuca = Module.Jessica.extend("Jessibuca", {
+            _initProgram: function () {
+                var gl = this._contextGL;
+
+                var vertexShaderScript = [
+                    'attribute vec4 vertexPos;',
+                    'attribute vec4 texturePos;',
+                    'varying vec2 textureCoord;',
+
+                    'void main()',
+                    '{',
+                    'gl_Position = vertexPos;',
+                    'textureCoord = texturePos.xy;',
+                    '}'
+                ].join('\n');
+
+                var fragmentShaderScript = [
+                    'precision highp float;',
+                    'varying highp vec2 textureCoord;',
+                    'uniform sampler2D ySampler;',
+                    'uniform sampler2D uSampler;',
+                    'uniform sampler2D vSampler;',
+                    'const mat4 YUV2RGB = mat4',
+                    '(',
+                    '1.1643828125, 0, 1.59602734375, -.87078515625,',
+                    '1.1643828125, -.39176171875, -.81296875, .52959375,',
+                    '1.1643828125, 2.017234375, 0, -1.081390625,',
+                    '0, 0, 0, 1',
+                    ');',
+
+                    'void main(void) {',
+                    'highp float y = texture2D(ySampler,  textureCoord).r;',
+                    'highp float u = texture2D(uSampler,  textureCoord).r;',
+                    'highp float v = texture2D(vSampler,  textureCoord).r;',
+                    'gl_FragColor = vec4(y, u, v, 1) * YUV2RGB;',
+                    '}'
+                ].join('\n');
+
+                var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+                gl.shaderSource(vertexShader, vertexShaderScript);
+                gl.compileShader(vertexShader);
+                if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+                    console.log('Vertex shader failed to compile: ' + gl.getShaderInfoLog(vertexShader));
+                }
+
+                var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+                gl.shaderSource(fragmentShader, fragmentShaderScript);
+                gl.compileShader(fragmentShader);
+                if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+                    console.log('Fragment shader failed to compile: ' + gl.getShaderInfoLog(fragmentShader));
+                }
+
+                var program = gl.createProgram();
+                gl.attachShader(program, vertexShader);
+                gl.attachShader(program, fragmentShader);
+                gl.linkProgram(program);
+                if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                    console.log('Program failed to compile: ' + gl.getProgramInfoLog(program));
+                }
+
+                gl.useProgram(program);
+
+                this._shaderProgram = program;
+            }, _initBuffers: function () {
+                var gl = this._contextGL;
+                var program = this._shaderProgram;
+
+                var vertexPosBuffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([1, 1, -1, 1, 1, -1, -1, -1]), gl.STATIC_DRAW);
+
+                var vertexPosRef = gl.getAttribLocation(program, 'vertexPos');
+                gl.enableVertexAttribArray(vertexPosRef);
+                gl.vertexAttribPointer(vertexPosRef, 2, gl.FLOAT, false, 0, 0);
+
+                var texturePosBuffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, texturePosBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([1, 0, 0, 0, 1, 1, 0, 1]), gl.STATIC_DRAW);
+
+                var texturePosRef = gl.getAttribLocation(program, 'texturePos');
+                gl.enableVertexAttribArray(texturePosRef);
+                gl.vertexAttribPointer(texturePosRef, 2, gl.FLOAT, false, 0, 0);
+
+                this._texturePosBuffer = texturePosBuffer;
+            }, _initTexture: function () {
+                var gl = this._contextGL;
+
+                var textureRef = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_2D, textureRef);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                gl.bindTexture(gl.TEXTURE_2D, null);
+
+                return textureRef;
+            }, _initTextures: function () {
+                var gl = this._contextGL;
+                var program = this._shaderProgram;
+
+                var yTextureRef = this._initTexture();
+                var ySamplerRef = gl.getUniformLocation(program, 'ySampler');
+                gl.uniform1i(ySamplerRef, 0);
+                this._yTextureRef = yTextureRef;
+
+                var uTextureRef = this._initTexture();
+                var uSamplerRef = gl.getUniformLocation(program, 'uSampler');
+                gl.uniform1i(uSamplerRef, 1);
+                this._uTextureRef = uTextureRef;
+
+                var vTextureRef = this._initTexture();
+                var vSamplerRef = gl.getUniformLocation(program, 'vSampler');
+                gl.uniform1i(vSamplerRef, 2);
+                this._vTextureRef = vTextureRef;
+            },
             __construct: function () {
                 this.__parent.__construct.call(this, this);
                 this.audioCache = []
@@ -178,16 +292,41 @@ mergeInto(LibraryManager.library, {
                 postMessage({ cmd: "initSize", w: w, h: h })
                 this.buffers = [[], [], []]
                 var size = w * h
+                var qsize = size >> 2
+                //this.sharedBuffer = new SharedArrayBuffer(size * 3 >> 1);
                 if (this.isWebGL) {
                     this.draw = function (compositionTime, ts) {
+                        var gl = this._contextGL
+
                         var y = HEAPU32[dataPtr];
                         var u = HEAPU32[dataPtr + 1];
                         var v = HEAPU32[dataPtr + 2];
                         // console.log(y, u, v);
-                        var outputArray = [HEAPU8.subarray(y, y + size), HEAPU8.subarray(u, u + (size >> 2)), HEAPU8.subarray(v, v + (size >> 2))];
+                        var outputArray = [HEAPU8.subarray(y, y + size), HEAPU8.subarray(u, u + qsize), HEAPU8.subarray(v, v + (qsize))];
+                        //arrayBufferCopy(HEAPU8.subarray(y, y + size), this.sharedBuffer, 0, size)
+                        //arrayBufferCopy(HEAPU8.subarray(u, u + (qsize)), this.sharedBuffer, size, qsize)
+                        //arrayBufferCopy(HEAPU8.subarray(v, v + (qsize)), this.sharedBuffer, size + qsize, qsize)
                         this.setBuffer(outputArray)
-                        // var outputArray = [new Uint8Array(this.buffer, 0, size), new Uint8Array(this.buffer, size, size >> 2), new Uint8Array(this.buffer, size + (size >> 2), size >> 2)]
-                        postMessage({ cmd: "render", output: outputArray, compositionTime: compositionTime, ts: ts, bps: this.bps }, [outputArray[0].buffer, outputArray[1].buffer, outputArray[2].buffer])
+                        //var outputArray = [new Uint8Array(this.sharedBuffer, 0, size), new Uint8Array(this.sharedBuffer, size, qsize), new Uint8Array(this.sharedBuffer, size + (qsize), qsize)]
+                        if (gl) {
+                            var yTextureRef = this._yTextureRef;
+                            var uTextureRef = this._uTextureRef;
+                            var vTextureRef = this._vTextureRef;
+                            gl.viewport(0, 0, w, h);
+                            gl.activeTexture(gl.TEXTURE0);
+                            gl.bindTexture(gl.TEXTURE_2D, yTextureRef);
+                            gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, w, h, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, HEAPU8.subarray(y, y + size));
+                            gl.activeTexture(gl.TEXTURE1);
+                            gl.bindTexture(gl.TEXTURE_2D, uTextureRef);
+                            gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, w / 2, h / 2, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, HEAPU8.subarray(u, u + qsize));
+                            gl.activeTexture(gl.TEXTURE2);
+                            gl.bindTexture(gl.TEXTURE_2D, vTextureRef);
+                            gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, w / 2, h / 2, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, HEAPU8.subarray(v, v + (qsize)));
+                            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                            postMessage({ cmd: "render", compositionTime: compositionTime, ts: ts, bps: this.bps, delay: this.delay })
+                        } else {
+                            postMessage({ cmd: "render", compositionTime: compositionTime, ts: ts, bps: this.bps, delay: this.delay, output: outputArray }, outputArray.map(x => x.buffer))
+                        }
                     };
                 } else {
                     var outputArray = HEAPU8.subarray(dataPtr, dataPtr + (w * h << 2));
@@ -202,13 +341,25 @@ mergeInto(LibraryManager.library, {
                 this.firstTimestamp = Date.now()
             },
             getDelay: function (timestamp) {
-                return this.delay = (timestamp - this.firstVideoTimestamp) - (Date.now() - this.firstTimestamp)
+                this.delay = (timestamp - this.firstVideoTimestamp) - (Date.now() - this.firstTimestamp)
+                return this.delay
+            },
+            init: function (msg) {
+                var canvas = msg.canvas
+                var gl = canvas.getContext("webgl");
+                this._contextGL = gl
+                this._initProgram();
+                this._initBuffers();
+                this._initTextures();
             }
         });
         var decoder = new Module.Jessibuca()
         self.onmessage = function (event) {
             var msg = event.data
             switch (msg.cmd) {
+                case "init":
+                    decoder.init(msg)
+                    break
                 case "getProp":
                     postMessage({ cmd: "getProp", value: decoder[msg.prop] })
                     break

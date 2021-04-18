@@ -41,7 +41,7 @@ struct Jessica
     clock_t lastVideoTimeStamp = 0;
     clock_t firstVideoTimeStamp = 0;
     clock_t firstTimeStamp = 0;
-    bool dropping = false; //是否正在丢帧
+    int idr_count = 0; //是否正在丢帧
     int bytesCount = 0;
     PROP(isPlaying, bool)
     PROP(flvMode, bool)
@@ -118,7 +118,7 @@ struct Jessica
         auto now = clock();
         if (now > lastDataTime)
         {
-            bps = bytesCount * 1000.0 / (now - lastDataTime);
+            bps = bytesCount * 1000000.0 / (now - lastDataTime);
             lastDataTime = now;
             bytesCount = 0;
         }
@@ -274,7 +274,7 @@ struct Jessica
         {
             if (videoDecoder.isAVCSequence(data))
             {
-                call<void>("firstVideo", u32(_timestamp));
+                call<void>("firstVideo", int(_timestamp));
                 videoDecoder.decode(data);
                 waitFirstVideo = false;
                 emscripten_log(0, "video info set! video buffer: %dms", videoBuffer);
@@ -286,8 +286,9 @@ struct Jessica
                 return;
             if (videoBuffer == 0)
             {
-                if (call<u32>("getDelay", _timestamp) > 1000)
+                if (call<int>("getDelay", int(_timestamp)) > 5000)
                 {
+                    emscripten_log(0, "delay: %dms", call<int>("getDelay", int(_timestamp)));
                     return;
                 }
                 videoDecoder.timestamp = _timestamp;
@@ -296,6 +297,10 @@ struct Jessica
             else
             {
                 videoBuffers.emplace(_timestamp, data);
+                if (videoDecoder.isAVCSequence(data))
+                {
+                    idr_count++;
+                }
                 auto &v = videoBuffers.front();
                 if (lastVideoTimeStamp - v.timestamp > videoBuffer)
                 {
@@ -309,34 +314,40 @@ struct Jessica
         }
         lastVideoTimeStamp = _timestamp;
     }
+    void popVBuffer()
+    {
+        if (videoDecoder.isAVCSequence(videoBuffers.front().data))
+        {
+            idr_count--;
+        }
+        videoBuffers.pop();
+    }
     void decodeVideoBuffer()
     {
         if (videoBuffers.size() > 1)
         {
             auto &v = videoBuffers.front();
-            if (lastVideoTimeStamp - v.timestamp > videoBuffer)
+            videoDecoder.timestamp = v.timestamp;
+            auto start = clock();
+            videoDecoder.decode(v.data);
+            auto cost = clock() - start;
+            popVBuffer();
+            auto timeout = videoBuffers.front().timestamp - v.timestamp;
+            if (timeout > cost)
             {
-                videoBuffers.pop();
+                timeout = timeout - cost * 1000;
+            }
+            if (idr_count > 10)
+            {
                 while (videoBuffers.size() > 0 && !videoDecoder.isAVCSequence(videoBuffers.front().data))
                 {
-                    videoBuffers.pop();
+                    popVBuffer();
                 }
-                if (videoBuffers.size()==0)
-                {
-                    bufferIsPlaying = false;
-                    return;
-                }
-                v = videoBuffers.front();
-            }
-            videoDecoder.timestamp = v.timestamp;
-            videoBuffers.pop();
-            if (videoBuffers.size() > 1)
-            {
-                auto timeout = videoBuffers.front().timestamp - v.timestamp;
-                val::global("setTimeout")(bind("decodeVideoBuffer"), timeout);
+                decodeVideoBuffer();
                 return;
             }
-            videoDecoder.decode(v.data);
+            val::global("setTimeout")(bind("decodeVideoBuffer"), timeout);
+            return;
         }
         bufferIsPlaying = false;
     }
