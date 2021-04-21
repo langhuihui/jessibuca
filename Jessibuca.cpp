@@ -274,7 +274,6 @@ struct Jessica
         {
             if (videoDecoder.isAVCSequence(data))
             {
-                call<void>("firstVideo", int(_timestamp));
                 videoDecoder.decode(data);
                 waitFirstVideo = false;
                 emscripten_log(0, "video info set! video buffer: %dms", videoBuffer);

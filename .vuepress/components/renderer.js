@@ -430,8 +430,8 @@
                     _this.resize();
                     _this._trigger('videoInfo', { w: msg.w, h: msg.h });
                     if (_this.supportOffscreen()) {
-                        const offscreen = _this._canvasElement.transferControlToOffscreen();
-                        this.postMessage({ cmd: "init", canvas: offscreen }, [offscreen])
+                        //const offscreen = _this._canvasElement.transferControlToOffscreen();
+                        //this.postMessage({ cmd: "init", canvas: offscreen }, [offscreen])
                     }
                     if (_this.isWebGL()) {
 
@@ -446,11 +446,16 @@
                         _this._opt.isDebug && console.log("clear check loading timeout");
                         _this._clearCheckLoading();
                     }
-                    if (_this.playing && !_this.supportOffscreen()) {
-                        if (_this.isWebGL()) {
-                            _this._drawNextOutputPictureGL(msg.output);
-                        } else {
-                            _this._drawNextOutputPictureRGBA(msg.buffer);
+                    if (_this.playing ) {
+                        if (!_this.supportOffscreen()){
+                            if (_this.isWebGL()) {
+                                _this._drawNextOutputPictureGL(msg.output);
+                            } else {
+                                _this._drawNextOutputPictureRGBA(msg.buffer);
+                            }
+                        }else{
+                            let bitmap_context = _this._canvasElement.getContext("bitmaprenderer");
+                            bitmap_context.transferFromImageBitmap(msg.buffer);
                         }
                     }
                     // _this._decoderWorker.postMessage({ cmd: "setBuffer", buffer: msg.output }, msg.output.map(x => x.buffer))

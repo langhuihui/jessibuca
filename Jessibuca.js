@@ -290,6 +290,12 @@ mergeInto(LibraryManager.library, {
             },
             setVideoSize: function (w, h, dataPtr) {
                 postMessage({ cmd: "initSize", w: w, h: h })
+                var canvas = new OffscreenCanvas(w, h);
+                var gl = canvas.getContext("webgl");
+                this._contextGL = gl
+                this._initProgram();
+                this._initBuffers();
+                this._initTextures();
                 this.buffers = [[], [], []]
                 var size = w * h
                 var qsize = size >> 2
@@ -323,7 +329,8 @@ mergeInto(LibraryManager.library, {
                             gl.bindTexture(gl.TEXTURE_2D, vTextureRef);
                             gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, w / 2, h / 2, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, HEAPU8.subarray(v, v + (qsize)));
                             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-                            postMessage({ cmd: "render", compositionTime: compositionTime, ts: ts, bps: this.bps, delay: this.delay })
+                            let image_bitmap = canvas.transferToImageBitmap();
+                            postMessage({ cmd: "render", compositionTime: compositionTime, ts: ts, bps: this.bps, delay: this.delay, buffer: image_bitmap }, [image_bitmap])
                         } else {
                             postMessage({ cmd: "render", compositionTime: compositionTime, ts: ts, bps: this.bps, delay: this.delay, output: outputArray }, outputArray.map(x => x.buffer))
                         }
@@ -336,13 +343,14 @@ mergeInto(LibraryManager.library, {
                     };
                 }
             },
-            firstVideo: function (timestamp) {
+            getDelay: function (timestamp) {
                 this.firstVideoTimestamp = timestamp
                 this.firstTimestamp = Date.now()
-            },
-            getDelay: function (timestamp) {
-                this.delay = (timestamp - this.firstVideoTimestamp) - (Date.now() - this.firstTimestamp)
-                return this.delay
+                this.getDelay = function (timestamp) {
+                    this.delay = (timestamp - this.firstVideoTimestamp) - (Date.now() - this.firstTimestamp)
+                    return this.delay
+                }
+                return 0
             },
             init: function (msg) {
                 var canvas = msg.canvas
