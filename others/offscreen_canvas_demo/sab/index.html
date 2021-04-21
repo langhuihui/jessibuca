@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, height=device-height">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+    <title>Offscreen SAB</title>
+    <style type="text/css">
+    body {
+        margin :0px;
+        padding: 0px;
+        line-height: 0px;
+        overflow: hidden;
+        background-color: #9e9e9e;
+    }
+
+    canvas {
+        margin :0px;
+        padding: 0px;
+    }
+    </style>
+    <script type="text/javascript" src="../common/helper.js"></script>
+    <script type="text/javascript" src="../common/lock.js"></script>
+    <script type="text/javascript" src="./main.js"></script>
+</head>
+<body onload="main()">
+    <canvas id="offscreen"></canvas>
+</body></html>
