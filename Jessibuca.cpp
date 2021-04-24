@@ -43,6 +43,7 @@ struct Jessica
     clock_t firstTimeStamp = 0;
     int idr_count = 0; //是否正在丢帧
     int bytesCount = 0;
+    int delay = 0;
     PROP(isPlaying, bool)
     PROP(flvMode, bool)
     PROP(audioBuffer, int)
@@ -283,11 +284,12 @@ struct Jessica
         {
             if (_timestamp == 0 && lastVideoTimeStamp != 0)
                 return;
+            delay = call<int>("getDelay", int(_timestamp));
             if (videoBuffer == 0)
             {
-                if (call<int>("getDelay", int(_timestamp)) > 5000)
+                if (delay > 3000)
                 {
-                    emscripten_log(0, "delay: %dms", call<int>("getDelay", int(_timestamp)));
+                    emscripten_log(0, "delay: %dms", delay);
                     return;
                 }
                 videoDecoder.timestamp = _timestamp;
@@ -296,12 +298,8 @@ struct Jessica
             else
             {
                 videoBuffers.emplace(_timestamp, data);
-                if (videoDecoder.isAVCSequence(data))
-                {
-                    idr_count++;
-                }
                 auto &v = videoBuffers.front();
-                if (lastVideoTimeStamp - v.timestamp > videoBuffer)
+                if (delay + (lastVideoTimeStamp - v.timestamp) > videoBuffer)
                 {
                     if (!bufferIsPlaying)
                     {
@@ -313,14 +311,7 @@ struct Jessica
         }
         lastVideoTimeStamp = _timestamp;
     }
-    void popVBuffer()
-    {
-        if (videoDecoder.isAVCSequence(videoBuffers.front().data))
-        {
-            idr_count--;
-        }
-        videoBuffers.pop();
-    }
+
     void decodeVideoBuffer()
     {
         if (videoBuffers.size() > 1)
@@ -329,23 +320,28 @@ struct Jessica
             videoDecoder.timestamp = v.timestamp;
             auto start = clock();
             videoDecoder.decode(v.data);
-            auto cost = clock() - start;
-            popVBuffer();
+            auto cost = (clock() - start) / 1000;
+            videoBuffers.pop();
             auto timeout = videoBuffers.front().timestamp - v.timestamp;
             if (timeout > cost)
             {
-                timeout = timeout - cost * 1000;
+                timeout = timeout - cost;
             }
-            if (idr_count > 10)
+            // if (idr_count > 5)
+            // {
+            //     while (videoBuffers.size() > 0 && !videoBuffers.front().isKeyFrame)
+            //     {
+            //         videoBuffers.pop();
+            //     }
+            //     decodeVideoBuffer();
+            //     return;
+            // }
+            if (delay + (lastVideoTimeStamp - v.timestamp) > videoBuffer)
             {
-                while (videoBuffers.size() > 0 && !videoDecoder.isAVCSequence(videoBuffers.front().data))
-                {
-                    popVBuffer();
-                }
                 decodeVideoBuffer();
-                return;
             }
-            val::global("setTimeout")(bind("decodeVideoBuffer"), timeout);
+            else
+                val::global("setTimeout")(bind("decodeVideoBuffer"), timeout);
             return;
         }
         bufferIsPlaying = false;

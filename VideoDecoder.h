@@ -4,8 +4,10 @@ struct VideoPacket
 {
 	clock_t timestamp;
 	IOBuffer data;
+	bool isKeyFrame;
 	VideoPacket(clock_t t, IOBuffer data) : timestamp(t), data(data)
 	{
+		isKeyFrame = data[0] >> 4 == 1;
 	}
 	VideoPacket() : timestamp(0), data()
 	{
@@ -68,7 +70,7 @@ public:
 		{
 			yuv420toRGB((u8 *)p_yuv[0], (u8 *)p_yuv[1], (u8 *)p_yuv[2], heap, videoWidth, videoHeight);
 		}
-		jsObject->call<void>("draw", compositionTime,timestamp);
+		jsObject->call<void>("draw", compositionTime, timestamp);
 	}
 
 	virtual void decodeH264Header(IOBuffer &data)

@@ -308,11 +308,11 @@ mergeInto(LibraryManager.library, {
                         var u = HEAPU32[dataPtr + 1];
                         var v = HEAPU32[dataPtr + 2];
                         // console.log(y, u, v);
-                        var outputArray = [HEAPU8.subarray(y, y + size), HEAPU8.subarray(u, u + qsize), HEAPU8.subarray(v, v + (qsize))];
+                        //var outputArray = [HEAPU8.subarray(y, y + size), HEAPU8.subarray(u, u + qsize), HEAPU8.subarray(v, v + (qsize))];
                         //arrayBufferCopy(HEAPU8.subarray(y, y + size), this.sharedBuffer, 0, size)
                         //arrayBufferCopy(HEAPU8.subarray(u, u + (qsize)), this.sharedBuffer, size, qsize)
                         //arrayBufferCopy(HEAPU8.subarray(v, v + (qsize)), this.sharedBuffer, size + qsize, qsize)
-                        this.setBuffer(outputArray)
+                        //this.setBuffer(outputArray)
                         //var outputArray = [new Uint8Array(this.sharedBuffer, 0, size), new Uint8Array(this.sharedBuffer, size, qsize), new Uint8Array(this.sharedBuffer, size + (qsize), qsize)]
                         if (gl) {
                             var yTextureRef = this._yTextureRef;
@@ -332,7 +332,7 @@ mergeInto(LibraryManager.library, {
                             let image_bitmap = canvas.transferToImageBitmap();
                             postMessage({ cmd: "render", compositionTime: compositionTime, ts: ts, bps: this.bps, delay: this.delay, buffer: image_bitmap }, [image_bitmap])
                         } else {
-                            postMessage({ cmd: "render", compositionTime: compositionTime, ts: ts, bps: this.bps, delay: this.delay, output: outputArray }, outputArray.map(x => x.buffer))
+                            //postMessage({ cmd: "render", compositionTime: compositionTime, ts: ts, bps: this.bps, delay: this.delay, output: outputArray }, outputArray.map(x => x.buffer))
                         }
                     };
                 } else {

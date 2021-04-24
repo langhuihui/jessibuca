@@ -7,7 +7,7 @@
     <meta name="generator" content="VuePress 1.5.2">
     
     <meta name="description" content="一款纯H5直播流播放器">
-    <link rel="preload" href="/assets/css/0.styles.ec4ebe92.css" as="style"><link rel="preload" href="/assets/js/app.eb99ed10.js" as="script"><link rel="preload" href="/assets/js/3.3ee7d097.js" as="script"><link rel="preload" href="/assets/js/7.1ab7a624.js" as="script"><link rel="prefetch" href="/assets/js/10.29853e43.js"><link rel="prefetch" href="/assets/js/2.849b2e0c.js"><link rel="prefetch" href="/assets/js/4.933f8743.js"><link rel="prefetch" href="/assets/js/5.e2ceafd2.js"><link rel="prefetch" href="/assets/js/6.6537cf06.js"><link rel="prefetch" href="/assets/js/8.10f6a2dc.js"><link rel="prefetch" href="/assets/js/9.29612853.js">
+    <link rel="preload" href="/assets/css/0.styles.ec4ebe92.css" as="style"><link rel="preload" href="/assets/js/app.5bce587a.js" as="script"><link rel="preload" href="/assets/js/3.3ee7d097.js" as="script"><link rel="preload" href="/assets/js/7.ab989bb2.js" as="script"><link rel="prefetch" href="/assets/js/10.124c16f4.js"><link rel="prefetch" href="/assets/js/11.e72c1f7b.js"><link rel="prefetch" href="/assets/js/2.849b2e0c.js"><link rel="prefetch" href="/assets/js/4.a2e36152.js"><link rel="prefetch" href="/assets/js/5.0d3effdf.js"><link rel="prefetch" href="/assets/js/6.6537cf06.js"><link rel="prefetch" href="/assets/js/8.10f6a2dc.js"><link rel="prefetch" href="/assets/js/9.2ef39937.js">
     <link rel="stylesheet" href="/assets/css/0.styles.ec4ebe92.css">
   </head>
   <body>
@@ -42,12 +42,12 @@
   <span class="token punctuation">}</span>
 </span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">&gt;</span></span>
 </code></pre></div><h2 id="api"><a href="#api" class="header-anchor">#</a> API</h2> <p><a href="/api.html">API</a></p> <h2 id="源码目录结构"><a href="#源码目录结构" class="header-anchor">#</a> 源码目录结构</h2> <ul><li>obj 存放emscripten编译好的各种解码库的字节码库</li> <li>public 存放编译输出的js和wasm文件以及renderer.js</li> <li>thirdparty 各种第三方解码库的代码（已修改）和编译脚本</li></ul> <h2 id="编译"><a href="#编译" class="header-anchor">#</a> 编译</h2> <p>编译命令是python make.py 加上参数构成</p> <p>参数包括</p> <ul><li>-v 视频解码库，有效值为ff（ffmpeg）、libhevc、libde265 如果不传参数代表使用avc库（只支持h264 的baseline）</li> <li>-a 音频解码库，有效值为mp3、speex、aac，如果不传参数则无音频解码（ffmpeg自带aac解码）</li> <li>--wasm 表示编译成WebAssembly格式</li> <li>-o 代表输出文件路径，默认值是public/Jessibuca.js</li></ul> <p>示例:
-ffmpeg（h264-aac）</p> <div class="language-bash extra-class"><pre class="language-bash"><code>python make.py -v ff -o public/ff.js
-</code></pre></div><p>avc-mp3组合</p> <div class="language-bash extra-class"><pre class="language-bash"><code>python make.py -a mp3 -o public/avc_mp3.js
-</code></pre></div><p>libhevc-aac组合</p> <div class="language-bash extra-class"><pre class="language-bash"><code>python make.py -v libhevc -a aac -o public/h265_aac.js
+ffmpeg（h264-aac）</p> <div class="language-bash extra-class"><pre class="language-bash"><code>python make.py -v ff -o .vuepress/public/ff.js
+</code></pre></div><p>avc-mp3组合</p> <div class="language-bash extra-class"><pre class="language-bash"><code>python make.py -a mp3 -o .vuepress/public/avc_mp3.js
+</code></pre></div><p>libhevc-aac组合</p> <div class="language-bash extra-class"><pre class="language-bash"><code>python make.py -v libhevc -a aac -o .vuepress/public/h265_aac.js
 </code></pre></div><h2 id="基本原理"><a href="#基本原理" class="header-anchor">#</a> 基本原理</h2> <img src="/tech.png"></div> <div class="footer">
     GPL Licensed | Copyright © 2020-present dexter
   </div></main></div><div class="global-ui"></div></div>
-    <script src="/assets/js/app.eb99ed10.js" defer></script><script src="/assets/js/3.3ee7d097.js" defer></script><script src="/assets/js/7.1ab7a624.js" defer></script>
+    <script src="/assets/js/app.5bce587a.js" defer></script><script src="/assets/js/3.3ee7d097.js" defer></script><script src="/assets/js/7.ab989bb2.js" defer></script>
   </body>
 </html>

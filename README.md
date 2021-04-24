@@ -81,15 +81,15 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 示例:
 ffmpeg（h264-aac）
 ```bash
-python make.py -v ff -o public/ff.js
+python make.py -v ff -o .vuepress/public/ff.js
 ```
 avc-mp3组合
 ```bash
-python make.py -a mp3 -o public/avc_mp3.js
+python make.py -a mp3 -o .vuepress/public/avc_mp3.js
 ```
 libhevc-aac组合
 ```bash
-python make.py -v libhevc -a aac -o public/h265_aac.js
+python make.py -v libhevc -a aac -o .vuepress/public/h265_aac.js
 ```
 ## 基本原理
 
