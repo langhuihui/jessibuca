@@ -267,11 +267,12 @@ mergeInto(LibraryManager.library, {
                     }
                     outputArray[i] = buffer;
                 }
-                this.audioCache.push(outputArray)
-                if (this.audioCache.length >= this.audioBuffer) {
-                    postMessage({ cmd: "playAudio", buffer: this.audioCache, ts: ts }, this.audioCache.flatMap(outputArray => outputArray.map(x => x.buffer)))
-                    this.audioCache.length = 0
-                }
+                postMessage({ cmd: "playAudio", buffer: outputArray, ts: ts }, outputArray.map(x => x.buffer))
+                // this.audioCache.push(outputArray)
+                // if (this.audioCache.length >= this.audioBuffer) {
+                //     postMessage({ cmd: "playAudio", buffer: this.audioCache, ts: ts }, this.audioCache.flatMap(outputArray => outputArray.map(x => x.buffer)))
+                //     this.audioCache.length = 0
+                // }
             },
             setBuffer: function (outputArray) {
                 for (var i = 0; i < 3; i++) {
