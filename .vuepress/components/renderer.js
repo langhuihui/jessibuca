@@ -433,11 +433,6 @@
                         //const offscreen = _this._canvasElement.transferControlToOffscreen();
                         //this.postMessage({ cmd: "init", canvas: offscreen }, [offscreen])
                     }
-                    if (_this.isWebGL()) {
-
-                    } else {
-                        _this._initRGB(msg.w, msg.h)
-                    }
                     break
                 case "render":
                     if (_this.loading) {
@@ -448,11 +443,7 @@
                     }
                     if (_this.playing) {
                         if (!_this.supportOffscreen()) {
-                            if (_this.isWebGL()) {
-                                _this._drawNextOutputPictureGL(msg.output);
-                            } else {
-                                _this._drawNextOutputPictureRGBA(msg.buffer);
-                            }
+                            _this._drawNextOutputPictureGL(msg.output);
                         } else {
                             _this._canvasElement.getContext("bitmaprenderer").transferFromImageBitmap(msg.buffer);
                         }
@@ -1217,10 +1208,10 @@
         if (needDelay) {
             var _this = this;
             setTimeout(function () {
-                _this._decoderWorker.postMessage({ cmd: "play", url: _this.playUrl, isWebGL: _this.isWebGL() })
+                _this._decoderWorker.postMessage({ cmd: "play", url: _this.playUrl })
             }, 300);
         } else {
-            this._decoderWorker.postMessage({ cmd: "play", url: this.playUrl, isWebGL: this.isWebGL() })
+            this._decoderWorker.postMessage({ cmd: "play", url: this.playUrl })
         }
     };
     /**

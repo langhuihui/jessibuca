@@ -45,12 +45,12 @@ public:
     struct SwrContext *au_convert_ctx = nullptr;
     FFmpegAudioDecoder()
     {
-        emscripten_log(0, "FFMpegAAC init");
+        emscripten_log(0, "FFMpegAudioDecoder init");
     }
     ~FFmpegAudioDecoder()
     {
         swr_free(&au_convert_ctx);
-        emscripten_log(0, "FFMpegAAC destory");
+        emscripten_log(0, "FFMpegAudioDecoder destory");
     }
     int decode(IOBuffer &input)
     {
@@ -117,11 +117,11 @@ class FFmpegVideoDecoder : public FFmpeg, public VideoDecoder
 public:
     FFmpegVideoDecoder()
     {
-        emscripten_log(0, "FFMpegAVC init");
+        emscripten_log(0, "FFMpegVideoDecoder init");
     }
     ~FFmpegVideoDecoder()
     {
-        emscripten_log(0, "FFMpegAVC destory");
+        emscripten_log(0, "FFMpegVideoDecoder destory");
     }
     void clear() override
     {
@@ -142,7 +142,14 @@ public:
         dec_ctx->extradata_size = data.length;
         dec_ctx->extradata = (u8 *)malloc(dec_ctx->extradata_size);
         memcpy(dec_ctx->extradata, (const u8 *)data, dec_ctx->extradata_size);
-        auto ret = avcodec_open2(dec_ctx, codec, NULL);
+        avcodec_open2(dec_ctx, codec, NULL);
+    }
+    void decodeH265Header(IOBuffer &data) override{
+        initCodec(AV_CODEC_ID_H265);
+        dec_ctx->extradata_size = data.length;
+        dec_ctx->extradata = (u8 *)malloc(dec_ctx->extradata_size);
+        memcpy(dec_ctx->extradata, (const u8 *)data, dec_ctx->extradata_size);
+        avcodec_open2(dec_ctx, codec, NULL);
     }
     void decodeBody(IOBuffer &data) override
     {

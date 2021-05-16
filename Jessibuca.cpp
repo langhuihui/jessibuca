@@ -338,6 +338,7 @@ struct Jessica
 EMSCRIPTEN_BINDINGS(Jessica)
 {
     class_<Jessica>("Jessica")
+        .constructor<val>()
         .FUNC(onData)
         .FUNC($close)
         .FUNC(decodeVideoBuffer)

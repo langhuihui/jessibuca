@@ -10,6 +10,8 @@ exec(open(os.path.expanduser('~/.emscripten'), 'r').read())
 # sys.path.append(EMSCRIPTEN_ROOT)
 opts, args = getopt.getopt(sys.argv[1:], "o:", ["wasm"])
 args = {'-o': '.vuepress/public/ff.js'}
+for op, value in opts:
+    args[op] = value
 
 sargs = {
     # 'USE_PTHREADS':  0 if '--cocos' in args else 1,

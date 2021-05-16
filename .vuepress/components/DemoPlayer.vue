@@ -5,7 +5,7 @@
             <div class="input">
                 <div>输入URL：</div>
                 <input autocomplete="on" ref="playUrl"
-                       value=""/>
+                       value="ws://localhost:8080/jessica/live/rtc"/>
                 <button v-if="!playing" @click="play">播放</button>
                 <button v-else @click="pause">停止</button>
             </div>
@@ -77,7 +77,7 @@
         },
         computed: {
             decoder() {
-                return this.vc + (this.wasm ? "_wasm" : "") + ".js"
+                return "worker.js"
             },
             isMute() {
                 let result = true;

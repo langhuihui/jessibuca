@@ -3,10 +3,11 @@
 import os
 
 args = [
-    'extra-cflags="-c -Oz -fPIC -pthread"',
-    'cc="emcc"',
-    'cxx="em++"',
-    'ar="emar"',
+    'extra-cflags="-c -Oz -fPIC"',
+    'cc=emcc',
+    'cxx=em++',
+    'ar=emar',
+    'ranlib=emranlib',
     'prefix=../obj',
     'target-os=none',
     'arch=x86_32',
@@ -14,10 +15,10 @@ args = [
     ]
 disables = [
     'everything','all','avdevice','avformat','postproc','avfilter','programs','asm','parsers','muxers','demuxers','filters',
-    'doc','devices','network','bsfs','shared','hwaccels','debug','protocols','indevs','outdevs','runtime-cpudetect'
+    'doc','devices','network','bsfs','shared','hwaccels','debug','protocols','indevs','outdevs','runtime-cpudetect','pthreads'
 ]
 enables = [
-    'small','cross-compile','gpl','avcodec','swresample',
+    'small','cross-compile','gpl','avcodec','swresample','ffmpeg',
     'parser=h264',
     'parser=hevc',
     'parser=aac',
