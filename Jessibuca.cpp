@@ -30,6 +30,19 @@ using namespace emscripten;
         emscripten_log(0, #name " = %d", name); \
     }
 
+struct VideoPacket
+{
+    clock_t timestamp;
+    IOBuffer data;
+    bool isKeyFrame;
+    VideoPacket(clock_t t, IOBuffer data) : timestamp(t), data(data)
+    {
+        isKeyFrame = data[0] >> 4 == 1;
+    }
+    VideoPacket() : timestamp(0), data()
+    {
+    }
+};
 struct Jessica
 {
     val wrapped;
@@ -41,7 +54,6 @@ struct Jessica
     bool bufferIsPlaying = false;
     int videoTimeoutId = 0;
     bool waitFirstVideo = true;
-    bool waitFirstAudio = true;
     clock_t lastDataTime = 0;
     clock_t lastVideoTimeStamp = 0;
     clock_t firstVideoTimeStamp = 0;
@@ -53,9 +65,10 @@ struct Jessica
     PROP(audioBuffer, int)
     PROP(videoBuffer, int)
     PROP(bps, double)
-    Jessica(val &&v) : wrapped(forward<val>(v)),flvMode(false), flvHeadRead(false), audioBuffer(12)
+    Jessica(val &&v) : wrapped(forward<val>(v)), flvMode(false), flvHeadRead(false), audioBuffer(12)
     {
         videoDecoder.jsObject = &wrapped;
+        audioDecoder.jsObject = &wrapped;
     }
     template <typename... Args>
     Jessica(Args &&...args) : wrapped(val::undefined())
@@ -111,7 +124,8 @@ struct Jessica
                     switch (buffer[0])
                     {
                     case 8:
-                        decodeAudio(timestamp, payload);
+                        audioDecoder.timestamp = timestamp;
+                        audioDecoder.decode(payload);
                         break;
                     case 9:
                         decodeVideo(timestamp, payload);
@@ -132,7 +146,8 @@ struct Jessica
             {
                 IOBuffer b(move(data));
                 b >>= 1;
-                decodeAudio(b.readUInt32B(), b);
+                audioDecoder.timestamp = b.readUInt32B();
+                audioDecoder.decode(b);
             }
             break;
             case 2:
@@ -151,24 +166,6 @@ struct Jessica
                 emscripten_log(1, "error type :%d", data.at(0));
                 break;
             }
-        }
-    }
-    void decodeAudio(clock_t timestamp, IOBuffer ms)
-    {
-        unsigned char flag = 0;
-        ms.readB<1>(flag);
-        unsigned char audioType = flag >> 4;
-        int bytesCount = audioDecoder.decode(ms);
-        if (!bytesCount)
-            return;
-        if (!waitFirstAudio)
-        {
-            call<void>("playAudioPlanar", int(audioDecoder.frame->data), bytesCount, timestamp);
-        }
-        else
-        {
-            call<void>("initAudioPlanar", audioDecoder.dec_ctx->channels, audioDecoder.dec_ctx->sample_rate);
-            waitFirstAudio = false;
         }
     }
     // void decodeAudio(clock_t timestamp, IOBuffer ms)
@@ -315,7 +312,6 @@ struct Jessica
         audioDecoder.clear();
         videoTimeoutId = 0;
         waitFirstVideo = true;
-        waitFirstAudio = true;
         bufferIsPlaying = false;
         lastVideoTimeStamp = 0;
         buffer.clear();

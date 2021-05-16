@@ -4,7 +4,7 @@
      *        container: DOM 容器
      *        contextOptions：
      *        videoBuffer：
-     *        forceNoGL：
+     *        forceNoOffscreen：
      *        isNotMute：
      *        decoder：
      * @constructor
@@ -414,8 +414,8 @@
             switch (msg.cmd) {
                 case "init":
                     _this._opt.isDebug && console.log("decoder worker init")
-
                     _this.setBufferTime(_this._opt.videoBuffer);
+                    _this._decoderWorker.postMessage({ cmd: "init", opt: _this._opt })
                     if (!_this._hasLoaded) {
                         _this._opt.isDebug && console.log("has loaded");
                         _this._hasLoaded = true;
@@ -453,15 +453,6 @@
                     _this.onTimeUpdate(msg.ts);
                     _this._updateStats({ bps: msg.bps, ts: msg.ts });
                     _this._checkHeart();
-                    break
-                case "initAudio":
-                    _this._opt.isDebug && console.log('initAudio');
-                    _this._initAudioPlay(msg.frameCount, msg.samplerate, msg.channels)
-                    _this._trigger('audioInfo', {
-                        numOfChannels: msg.channels, // 声频通道
-                        length: msg.frameCount, // 帧数
-                        sampleRate: msg.samplerate // 采样率
-                    });
                     break
                 case "playAudio":
                     if (_this.playing && !_this.quieting) {
@@ -843,7 +834,7 @@
     }
 
     Jessibuca.prototype.supportOffscreen = function () {
-        return typeof this._canvasElement.transferControlToOffscreen == 'function'
+        return !this._opt.forceNoOffscreen && typeof this._canvasElement.transferControlToOffscreen == 'function'
     }
     /**
      * set timeout
@@ -1170,7 +1161,8 @@
      * 避免后一个视频播放之前出现前一个视频最后一个画面
      */
     Jessibuca.prototype.clearView = function () {
-        this._contextGL.clear(this._contextGL.COLOR_BUFFER_BIT);
+        if (this._contextGL)
+            this._contextGL.clear(this._contextGL.COLOR_BUFFER_BIT);
     };
     /**
      * play

@@ -36,6 +36,7 @@ Module.printErr = function (text) {
 }
 Module.postRun = function () {
     var decoder = {
+        opt: {},
         initAudioPlanar: function (channels, samplerate) {
             var buffersA = [];
             for (var i = 0; i < channels; i++) {
@@ -111,7 +112,7 @@ Module.postRun = function () {
                 postMessage({ cmd: "initSize", w: w, h: h })
                 var size = w * h
                 var qsize = size >> 2
-                if (typeof OffscreenCanvas != 'undefined') {
+                if (!this.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined') {
                     var canvas = new OffscreenCanvas(w, h);
                     var gl = canvas.getContext("webgl");
                     var render = createWebGL(gl)
@@ -132,14 +133,15 @@ Module.postRun = function () {
                 }
             }
         },
-        close: function () {
-        },
     }
     Object.setPrototypeOf(decoder, new Module.Jessica(decoder))
     postMessage({ cmd: "init" })
     self.onmessage = function (event) {
         var msg = event.data
         switch (msg.cmd) {
+            case "init":
+                decoder.opt = msg.opt
+                break
             case "getProp":
                 postMessage({ cmd: "getProp", value: decoder[msg.prop] })
                 break
@@ -153,7 +155,7 @@ Module.postRun = function () {
                 decoder.videoBuffer = (msg.time * 1000) | 0
                 break
             case "close":
-                decoder.close()
+                if (decoder.close) decoder.close()
                 break
         }
     }

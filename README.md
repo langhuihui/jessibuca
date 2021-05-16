@@ -13,7 +13,7 @@ features:
 - title: 低延时
   details: 能够在 PC\Android\iOS 浏览器Webview 内实现2秒以内低延迟直播播放
 - title: 支持H265
-  details: 软解码H.264/H.265+AAC/MP3/Speex流，WebGL视频渲染，WebAudio音频播放。
+  details: 软解码H.264/H.265+AAC/PCMA/PCMU流，WebGL视频渲染，WebAudio音频播放。
 footer: GPL Licensed | Copyright © 2020-present dexter
 ---
 # 简介
@@ -24,7 +24,7 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 支持解码H.264视频(Baseline, Main, High Profile全支持，支持解码B帧视频)
 - 支持解码H.265视频（flv id == 12）
 - 支持解码AAC音频(LC,HE,HEv2 Profile全支持)
-- 支持解码MP3音频以及Speex音频格式
+- 支持解码PCMA音频以及PCMU音频格式
 - 可设置播放缓冲区时长，可设置0缓冲极限低延迟（网络抖动会造成卡顿现象）
 - 支持智能不花屏丢帧，长时间播放绝不累积延迟。
 - 可创建多个播放实例
