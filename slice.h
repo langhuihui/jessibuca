@@ -1,4 +1,10 @@
 #pragma once
+typedef unsigned char u8;
+typedef signed char i8;
+typedef unsigned short u16;
+typedef signed short i16;
+typedef unsigned int u32;
+typedef signed int i32;
 #define readu8 readB<1, u8>
 #define readUInt16B readB<2, unsigned short>
 #define readUInt24B readB<3, unsigned int>

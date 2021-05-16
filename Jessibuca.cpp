@@ -2,8 +2,22 @@
 #undef __cplusplus
 #define __cplusplus 201703L
 #endif
-#include "base.h"
-#include <regex>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <functional>
+#include <map>
+#include <queue>
+#include <emscripten.h>
+#include <emscripten/bind.h>
+#include <emscripten/val.h>
+#include <time.h>
+// #include <regex>
+using namespace std;
+using namespace emscripten;
+#include "slice.h"
+#include "ffmpeg.h"
 #define PROP(name, type)                        \
     type name;                                  \
     val get##name() const                       \
@@ -15,23 +29,14 @@
         name = value.as<type>();                \
         emscripten_log(0, #name " = %d", name); \
     }
-extern "C"
-{
-    extern void init(void);
-}
-int main()
-{
-    init();
-    return 0;
-}
 
 struct Jessica
 {
     val wrapped;
     bool flvHeadRead;
     string buffer;
-    AUDIO_DECODER audioDecoder;
-    VIDEO_DECODER videoDecoder;
+    FFmpegAudioDecoder audioDecoder;
+    FFmpegVideoDecoder videoDecoder;
     queue<VideoPacket> videoBuffers;
     bool bufferIsPlaying = false;
     int videoTimeoutId = 0;
@@ -44,12 +49,11 @@ struct Jessica
     int idr_count = 0; //是否正在丢帧
     int bytesCount = 0;
     int delay = 0;
-    PROP(isPlaying, bool)
     PROP(flvMode, bool)
     PROP(audioBuffer, int)
     PROP(videoBuffer, int)
     PROP(bps, double)
-    Jessica(val &&v) : wrapped(forward<val>(v)), isPlaying(false), flvMode(false), flvHeadRead(false), audioBuffer(12)
+    Jessica(val &&v) : wrapped(forward<val>(v)),flvMode(false), flvHeadRead(false), audioBuffer(12)
     {
         videoDecoder.jsObject = &wrapped;
     }
@@ -63,58 +67,9 @@ struct Jessica
         emscripten_log(0, "FlvDecoder release!\n");
     }
 
-    void $play(const string &url)
-    {
-        if (isPlaying)
-        {
-            call<void>("close");
-        }
-        // smatch urlm;
-        // regex_match(url, urlm, regex("(ws|http)s?://([^/:]+)(:\\d+)?(/.*)?"));
-        // string protocol(urlm.str(1));
-        // if (!regex_match(urlm.str(2),  regex("(.+\\.monibuca\\.com|localhost|[0-9\\.]+)"))){
-        //     emscripten_log(1, "%s Unauthorized",urlm.str(2).c_str());
-        //     return;
-        // }
-        isPlaying = true;
-        bool webgl = wrapped["isWebGL"].as<bool>();
-        emscripten_log(0, "webgl:%s", webgl ? "true" : "false");
-        videoDecoder.webgl = webgl;
-        flvMode = url.find(".flv") != string::npos;
-        lastDataTime = clock();
-        if (url.find("http") == 0)
-        {
-            call<void>("fetch", url);
-        }
-        else
-        {
-#ifdef WS_PREFIX
-            val ws = val::global("WebSocket").new_(WS_PREFIX + url);
-#else
-            val ws = val::global("WebSocket").new_(url);
-#endif
-            ws.set("binaryType", "arraybuffer");
-            ws.set("onmessage", bind("onData"));
-            // ws.set("onerror", bind("onError"));
-            wrapped.set("ws", ws);
-        }
-    }
-
-    void onFetchData(val evt)
-    {
-        if (evt["done"].as<bool>())
-        {
-            call<void>("close");
-        }
-        else
-        {
-            onData(evt);
-            wrapped.call<void>("fetchNext");
-        }
-    }
     void onData(val evt)
     {
-        string data = evt["data"].as<string>();
+        string data = evt.as<string>();
         bytesCount += data.length();
         auto now = clock();
         if (now > lastDataTime)
@@ -198,11 +153,11 @@ struct Jessica
             }
         }
     }
-#ifdef USE_FFMPEG
     void decodeAudio(clock_t timestamp, IOBuffer ms)
     {
         unsigned char flag = 0;
         ms.readB<1>(flag);
+        unsigned char audioType = flag >> 4;
         int bytesCount = audioDecoder.decode(ms);
         if (!bytesCount)
             return;
@@ -216,59 +171,57 @@ struct Jessica
             waitFirstAudio = false;
         }
     }
-#else
-    void decodeAudio(clock_t timestamp, IOBuffer ms)
-    {
-        if (ms[0] == 0xFF && (ms[1] & 0xF0) == 0xF0)
-        {
-            //ADTS 头
-            call<void>("playAudio", int(ms.point()), ms.length);
-            return;
-        }
-        unsigned char flag = 0;
-        ms.readB<1>(flag);
-        auto audioType = flag >> 4;
-        if (waitFirstAudio)
-        {
-            int channels = (flag & 1) + 1;
-            int rate = (flag >> 2) & 3;
-            switch (rate)
-            {
-            case 1:
-                rate = 11025;
-                break;
-            case 2:
-                rate = 22050;
-                break;
-            case 3:
-                rate = 44100;
-                break;
-            }
-            switch (audioType)
-            {
-            case 10: //AAC
-                // initAudio(audioBuffer * 1024, rate, channels);
-                audioDecoder.decode(ms);
-                initAudio(audioBuffer * 1024, audioDecoder.samplerate, audioDecoder.channels);
-                return;
-            case 11: //Speex
-                initAudio(50 * 320, 16000, channels);
-                break;
-            case 2: //MP3
-                initAudio(audioBuffer * 576, rate, channels);
-                break;
-            }
-        }
-        if (!waitFirstAudio && audioDecoder.decode(ms))
-            call<void>("playAudio", timestamp);
-    }
-    void initAudio(int frameCount, int samplerate, int channels)
-    {
-        waitFirstAudio = false;
-        audioDecoder.init(frameCount * channels * 2);
-        call<void>("initAudio", frameCount, samplerate, channels, (int)audioDecoder.outputBuffer >> 1);
-    }
-#endif
+    // void decodeAudio(clock_t timestamp, IOBuffer ms)
+    // {
+    //     if (ms[0] == 0xFF && (ms[1] & 0xF0) == 0xF0)
+    //     {
+    //         //ADTS 头
+    //         call<void>("playAudio", int(ms.point()), ms.length);
+    //         return;
+    //     }
+    //     unsigned char flag = 0;
+    //     ms.readB<1>(flag);
+    //     auto audioType = flag >> 4;
+    //     if (waitFirstAudio)
+    //     {
+    //         int channels = (flag & 1) + 1;
+    //         int rate = (flag >> 2) & 3;
+    //         switch (rate)
+    //         {
+    //         case 1:
+    //             rate = 11025;
+    //             break;
+    //         case 2:
+    //             rate = 22050;
+    //             break;
+    //         case 3:
+    //             rate = 44100;
+    //             break;
+    //         }
+    //         switch (audioType)
+    //         {
+    //         case 10: //AAC
+    //             // initAudio(audioBuffer * 1024, rate, channels);
+    //             audioDecoder.decode(ms);
+    //             initAudio(audioBuffer * 1024, audioDecoder.samplerate, audioDecoder.channels);
+    //             return;
+    //         case 11: //Speex
+    //             initAudio(50 * 320, 16000, channels);
+    //             break;
+    //         case 2: //MP3
+    //             initAudio(audioBuffer * 576, rate, channels);
+    //             break;
+    //         }
+    //     }
+    //     if (!waitFirstAudio && audioDecoder.decode(ms))
+    //         call<void>("playAudio", timestamp);
+    // }
+    // void initAudio(int frameCount, int samplerate, int channels)
+    // {
+    //     waitFirstAudio = false;
+    //     audioDecoder.init(frameCount * channels * 2);
+    //     call<void>("initAudio", frameCount, samplerate, channels, (int)audioDecoder.outputBuffer >> 1);
+    // }
     void decodeVideo(clock_t _timestamp, IOBuffer data)
     {
         if (waitFirstVideo)
@@ -379,27 +332,18 @@ struct Jessica
     }
 };
 
-struct Jessibuca : public wrapper<Jessica>
-{
-    EMSCRIPTEN_WRAPPER(Jessibuca)
-};
 #define FUNC(name) function(#name, &Jessica::name)
 #undef PROP
 #define PROP(name) property(#name, &Jessica::get##name, &Jessica::set##name)
 EMSCRIPTEN_BINDINGS(Jessica)
 {
     class_<Jessica>("Jessica")
-        .FUNC($play)
-        .FUNC(onFetchData)
         .FUNC(onData)
         .FUNC($close)
         .FUNC(decodeVideoBuffer)
-        .PROP(isPlaying)
         .PROP(flvMode)
         .PROP(audioBuffer)
         .PROP(videoBuffer)
         .PROP(bps)
-        .property("bufferInfo", &Jessica::getBufferInfo)
-        // .function("invoke", &H5LCBase::invoke, pure_virtual())
-        .allow_subclass<Jessibuca, val>("Jessibuca", constructor<val>());
+        .property("bufferInfo", &Jessica::getBufferInfo);
 }

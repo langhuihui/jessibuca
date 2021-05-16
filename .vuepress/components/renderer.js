@@ -55,7 +55,7 @@
         this._opt.keepScreenOn = opt.keepScreenOn === true;
         this._opt.rotate = typeof opt.rotate === 'number' ? opt.rotate : 0;
 
-        if (!opt.forceNoGL && !this.supportOffscreen()) this._initContextGL();
+        if (!this.supportOffscreen()) this._initContextGL();
         this._audioContext = new (window.AudioContext || window.webkitAudioContext)();
         this._gainNode = this._audioContext.createGain();
         this._audioEnabled(true);
@@ -71,7 +71,7 @@
         this._onfullscreenchange = () => this._fullscreenchange();
         window.addEventListener("resize", this._onresize);
         document.addEventListener('fullscreenchange', this._onfullscreenchange);
-        this._decoderWorker = new Worker(opt.decoder || 'ff.js')
+        this._decoderWorker = new Worker(opt.decoder || 'worker.js')
         var _this = this;
         this._hasLoaded = false;
         this._stats = {
@@ -723,12 +723,7 @@
         }
     }
 
-    Jessibuca.prototype._limitAudioPlayBufferSize = function () {
-        console.log(this._audioPlayBuffers.length)
-        // if (this._audioPlayBuffers.length > 2) {
-        //     this._audioPlayBuffers.shift();
-        // }
-    };
+
     Jessibuca.prototype._closeAudio = function () {
 
     }
@@ -766,6 +761,9 @@
             _this._gainNode.connect(context.destination);
             _this._playAudio = function (fromBuffer) {
                 _audioPlayBuffers.push(fromBuffer);
+                if (_audioPlayBuffers.length > 5) {
+                    _audioPlayBuffers.shift();
+                }
             }
         };
     }
@@ -849,126 +847,10 @@
         }
     }
 
-    Jessibuca.prototype._playAudio = function (data) {
-        this._isDebug() && console.log('_playAudio');
-        var context = this._audioContext;
-        this._audioPlaying = false;
-        var isDecoding = false;
-        if (!context) return false;
-        this._audioPlayBuffers = [];
-        var decodeQueue = []
-        var _this = this
-        var playNextBuffer = function (e) {
-            if (_this._audioPlayBuffers.length) {
-                playBuffer(_this._audioPlayBuffers.shift())
-            }
-        };
-        var playBuffer = function (buffer) {
-            _this._audioPlaying = true;
-            var audioBufferSouceNode = context.createBufferSource();
-            audioBufferSouceNode.buffer = buffer;
-            audioBufferSouceNode.connect(_this._gainNode);
-            _this._gainNode.connect(context.destination);
-            audioBufferSouceNode.start();
-            if (!_this._audioInterval) {
-                _this._audioInterval = setInterval(playNextBuffer, buffer.duration * 1000 - 1);
-            }
-        }
-        var decodeAudio = function () {
-            if (decodeQueue.length) {
-                context.decodeAudioData(decodeQueue.shift(), tryPlay, decodeAudio);
-            } else {
-                isDecoding = false
-            }
-        }
-        var tryPlay = function (buffer) {
-            decodeAudio()
-            if (_this._audioPlaying) {
-                _this._limitAudioPlayBufferSize();
-                _this._audioPlayBuffers.push(buffer);
-            } else {
-                playBuffer(buffer)
-            }
-        }
-        var playAudio = function (data) {
-            _this._isDebug() && console.log('_playAudio-playAudio');
-            decodeQueue.push(...data)
-            if (!isDecoding) {
-                isDecoding = true
-                decodeAudio()
-            }
-        }
-        this._playAudio = playAudio
-        playAudio(data)
-    }
-
     Jessibuca.prototype._isDebug = function () {
         return this._opt.isDebug;
     }
-    Jessibuca.prototype._initAudioPlay = function (frameCount, samplerate, channels) {
-        var context = this._audioContext;
-        this._audioPlaying = false;
-        this._audioPlayBuffers = [];
-        if (!context) return false;
-        var _this = this
-        var resampled = samplerate < 22050;
-        if (resampled) {
-            _this._opt.isDebug && console.log("resampled!")
-        }
-        var audioBuffer = resampled ? context.createBuffer(channels, frameCount << 1, samplerate << 1) : context.createBuffer(channels, frameCount, samplerate);
-        var playNextBuffer = function () {
-            _this._audioPlaying = false;
-            _this._isDebug() && console.log("playNextBuffer:", _this._audioPlayBuffers.length)
-            if (_this._audioPlayBuffers.length) {
-                playAudio(_this._audioPlayBuffers.shift());
-            }
-        };
 
-        var copyToCtxBuffer = channels > 1 ? function (fromBuffer) {
-            for (var channel = 0; channel < channels; channel++) {
-                var nowBuffering = audioBuffer.getChannelData(channel);
-                if (resampled) {
-                    for (var i = 0; i < frameCount; i++) {
-                        nowBuffering[i * 2] = nowBuffering[i * 2 + 1] = fromBuffer[i * (channel + 1)] / 32768;
-                    }
-                } else
-                    for (var i = 0; i < frameCount; i++) {
-                        nowBuffering[i] = fromBuffer[i * (channel + 1)] / 32768;
-                    }
-
-            }
-        } : function (fromBuffer) {
-            var nowBuffering = audioBuffer.getChannelData(0);
-            for (var i = 0; i < nowBuffering.length; i++) {
-                nowBuffering[i] = fromBuffer[i] / 32768;
-            }
-        };
-        var playAudio = function (fromBuffer) {
-            _this._isDebug() && console.log('_initAudioPlay-playAudio,_audioPlaying', _this._audioPlaying);
-            if (_this._audioPlaying) {
-                _this._limitAudioPlayBufferSize();
-                _this._audioPlayBuffers.push(fromBuffer);
-                return;
-            }
-            _this._audioPlaying = true;
-            copyToCtxBuffer(fromBuffer);
-            var source = context.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(_this._gainNode);
-            _this._gainNode.connect(context.destination);
-            if (!_this._audioInterval) {
-                _this._audioInterval = setInterval(playNextBuffer, audioBuffer.duration * 1000);
-            }
-            source.start();
-        };
-        this._playAudio = playAudio;
-    };
-    /**
-     * Returns true if the canvas supports WebGL
-     */
-    Jessibuca.prototype.isWebGL = function () {
-        return this.supportOffscreen() || !!this._contextGL;
-    };
     Jessibuca.prototype.supportOffscreen = function () {
         return typeof this._canvasElement.transferControlToOffscreen == 'function'
     }
@@ -1222,28 +1104,6 @@
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width / 2, height / 2, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, data[2]);
 
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    };
-
-    /**
-     * Draw next output picture using ARGB data on a 2d canvas.
-     */
-    Jessibuca.prototype._drawNextOutputPictureRGBA = function (data) {
-        this.imageData.data.set(data);
-        var croppingParams = this.croppingParams
-        if (!croppingParams) {
-            this.ctx2d.putImageData(this.imageData, 0, 0);
-        } else {
-            this.ctx2d.putImageData(this.imageData, -croppingParams.left, -croppingParams.top, 0, 0, croppingParams.width, croppingParams.height);
-        }
-    };
-    Jessibuca.prototype.ctx2d = null;
-    Jessibuca.prototype.imageData = null;
-    Jessibuca.prototype._initRGB = function (width, height) {
-        this.ctx2d = this._canvasElement.getContext('2d');
-        this.imageData = this.ctx2d.getImageData(0, 0, width, height);
-        this.clear = function () {
-            this.ctx2d.clearRect(0, 0, width, height)
-        };
     };
 
     /**

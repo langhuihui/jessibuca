@@ -4,6 +4,7 @@ extern "C"
 #include <libavcodec/avcodec.h>
 #include <libswresample/swresample.h>
 }
+#include "VideoDecoder.h"
 const int SamplingFrequencies[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350, 0, 0, 0};
 const int AudioObjectTypes[] = {};
 class FFmpeg
@@ -38,15 +39,15 @@ public:
     }
 };
 
-class FFmpegAAC : public FFmpeg
+class FFmpegAudioDecoder : public FFmpeg
 {
 public:
     struct SwrContext *au_convert_ctx = nullptr;
-    FFmpegAAC()
+    FFmpegAudioDecoder()
     {
         emscripten_log(0, "FFMpegAAC init");
     }
-    ~FFmpegAAC()
+    ~FFmpegAudioDecoder()
     {
         swr_free(&au_convert_ctx);
         emscripten_log(0, "FFMpegAAC destory");
@@ -111,14 +112,14 @@ public:
         return 0;
     }
 };
-class FFmpegAVC : public FFmpeg, public VideoDecoder
+class FFmpegVideoDecoder : public FFmpeg, public VideoDecoder
 {
 public:
-    FFmpegAVC()
+    FFmpegVideoDecoder()
     {
         emscripten_log(0, "FFMpegAVC init");
     }
-    ~FFmpegAVC()
+    ~FFmpegVideoDecoder()
     {
         emscripten_log(0, "FFMpegAVC destory");
     }
@@ -142,28 +143,13 @@ public:
         dec_ctx->extradata = (u8 *)malloc(dec_ctx->extradata_size);
         memcpy(dec_ctx->extradata, (const u8 *)data, dec_ctx->extradata_size);
         auto ret = avcodec_open2(dec_ctx, codec, NULL);
-        //emscripten_log(0, "avcodec_open2:%d", ret);
     }
     void decodeBody(IOBuffer &data) override
     {
-        // int NALUnitLength = 0;
-        // while (data.length > 4)
-        // {
-        // 	data.read4B(NALUnitLength);
-        //     data<<=4;
-        // 	_decode(data(0, NALUnitLength+4));
-        // 	data >>= NALUnitLength+4;
-        // }
         _decode(data);
     }
     void _decode(IOBuffer data) override
     {
-        // emscripten_log(0, "len:%d", data.length);
-        // int ret = av_parser_parse2(parser, dec_ctx, &pkt->data, &pkt->size,
-        //                            (const u8 *)(data), data.length, AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
-        //                            emscripten_log(0, "ffmpeg pkt->size:%d", pkt->size);
-        // if (ret >= 0 && pkt->size)
-        // {
         int ret = 0;
         pkt->data = (u8 *)(data);
         pkt->size = data.length;
@@ -201,17 +187,7 @@ public:
                 memcpy((u8 *)dst, (const u8 *)(frame->data[2] + i * frame->linesize[2]), halfw);
                 dst += halfw;
             }
-
-            // p_yuv[0] = (u32)frame->data[0];
-            // p_yuv[1] = (u32)frame->data[1];
-            // p_yuv[2] = (u32)frame->data[2];
-
             decodeYUV420();
         }
-        // }
-        // else
-        // {
-        //     emscripten_log(0, "ffmpeg decode ret:%d", ret);
-        // }
     }
 };

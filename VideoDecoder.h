@@ -17,60 +17,31 @@ class VideoDecoder
 {
 public:
 	val *jsObject;
-	u8 *heap;
-	u32 videoWidth;
-	u32 videoHeight;
+	u32 videoWidth = 0;
+	u32 videoHeight = 0;
 	u32 p_yuv[3];
-	int NAL_unit_length;
-	bool webgl;
-	u32 compositionTime;
-	u32 timestamp;
-	VideoDecoder() : heap(nullptr), webgl(false), NAL_unit_length(0), videoWidth(0), videoHeight(0)
+	int NAL_unit_length = 0;
+	u32 compositionTime = 0;
+	u32 timestamp = 0;
+	VideoDecoder()
 	{
 	}
 	virtual ~VideoDecoder()
 	{
-		if (!webgl && heap)
-			free(heap);
 		emscripten_log(0, "video decoder release!\n");
 	}
 	virtual void clear()
 	{
-		if (!webgl && heap)
-			free(heap);
 	}
 	void decodeVideoSize(u32 width, u32 height)
 	{
 		videoWidth = width;
 		videoHeight = height;
-		//emscripten_log(0, "canvas:%d,%d", videoWidth, videoHeight);
-		if (webgl)
-		{
-			heap = (u8 *)p_yuv;
-			jsObject->call<void>("setVideoSize", videoWidth, videoHeight, (int)heap >> 2);
-		}
-		else
-		{
-			auto outSize = videoHeight * videoHeight << 2;
-			auto cacheSize = 0x2000000;
-			auto size = outSize + cacheSize;
-			auto chunkSize = 0x1000000;
-			auto heapSize = chunkSize;
-			while (heapSize < size)
-			{
-				heapSize += chunkSize;
-			}
-			heap = (u8 *)malloc(heapSize);
-			jsObject->call<void>("setVideoSize", videoWidth, videoHeight, (int)heap);
-		}
+		jsObject->call<void>("setVideoSize", videoWidth, videoHeight);
 	}
 	void decodeYUV420()
 	{
-		if (!webgl)
-		{
-			yuv420toRGB((u8 *)p_yuv[0], (u8 *)p_yuv[1], (u8 *)p_yuv[2], heap, videoWidth, videoHeight);
-		}
-		jsObject->call<void>("draw", compositionTime, timestamp);
+		jsObject->call<void>("draw", compositionTime, timestamp, p_yuv[0], p_yuv[1], p_yuv[2]);
 	}
 
 	virtual void decodeH264Header(IOBuffer &data)

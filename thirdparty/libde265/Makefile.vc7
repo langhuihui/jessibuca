@@ -1,4 +1,0 @@
-clean all:
-    cd libde265 && $(MAKE) -f Makefile.vc7 $*
-    cd dec265 && $(MAKE) -f Makefile.vc7 $*
-    cd enc265 && $(MAKE) -f Makefile.vc7 $*
