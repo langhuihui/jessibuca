@@ -35,6 +35,25 @@ Module.printErr = function (text) {
     postMessage({ cmd: "printErr", text: text })
 }
 Module.postRun = function () {
+    var buffer = new ArrayBuffer(2048 * 1024)
+    var dv = new DataView(buffer)
+    var start = 0
+    var end = 0
+    function freeSpace() {
+        return buffer.byteLength - end
+    }
+    function append(data) {
+        if (freeSpace() < data.byteLength) {
+
+        }
+        new Uint8Array(buffer, end, data.byteLength).set(new Uint8Array(data))
+        end += data.byteLength
+    }
+    function consume() {
+        new Uint8Array(buffer, 0, end).copyWithin(0, start, end)
+        start = 0
+        end = end - start
+    }
     var decoder = {
         opt: {},
         initAudioPlanar: function (channels, samplerate) {
@@ -133,6 +152,48 @@ Module.postRun = function () {
                 }
             }
         },
+        demuxer: function (data) {
+            if (this.flvMode) {
+                append(data)
+                if (!this.flvHeadRead) {
+                    if (data.byteLength >= 13) {
+                        this.flvHeadRead = true
+                        start += 13
+                    }
+                }
+                while (end - start > 3) {
+                    var length = (dv.getUint8(start + 1) << 16) + (dv.getUint8(start + 2) << 8) + dv.getUint8(start + 3)
+                    if (end - start < length + 15) {
+                        break
+                    }
+                    var timestamp = (dv.getUint8(start + 4) << 16) + (dv.getUint8(start + 5) << 8) + dv.getUint8(start + 6)
+                    var payload = new ArrayBuffer(length)
+                    new Uint8Array(payload).set(new Uint8Array(buffer, start + 11, length))
+                    switch (dv.getUint8(start)) {
+                        case 8:
+                            this.decodeAudio(timestamp, payload)
+                            break
+                        case 9:
+                            this.decodeVideo(timestamp, payload)
+                            break
+                    }
+                    start += length + 15
+                }
+                consume()
+            } else {
+                var dv = new DataView(data)
+                switch (dv.getUint8(0)) {
+                    case 1:
+                        var ts = dv.getUint32(1, false)
+                        this.decodeAudio(ts, new Uint8Array(data, 5))
+                        break
+                    case 2:
+                        var ts = dv.getUint32(1, false)
+                        this.decodeVideo(ts, new Uint8Array(data, 5))
+                        break
+                }
+            }
+        }
     }
     Object.setPrototypeOf(decoder, new Module.Jessica(decoder))
     postMessage({ cmd: "init" })
