@@ -25,6 +25,18 @@ function arrayBufferCopy(src, dst, dstByteOffset, numBytes) {
         dst[dstByteOffset + i] = src[i];
     }
 }
+function dispatchData(input) {
+    let need = input.next()
+    return (value) => {
+        var data = new Uint8Array(value)
+        while (data.length >= need) {
+            var remain = data.slice(need)
+            need = input.next(need > 1 ? data.slice(0, need) : data[0])
+            data = remain
+        }
+        console.log(data.length)
+    }
+}
 if (!Date.now) Date.now = function () {
     return new Date().getTime();
 };
@@ -82,6 +94,30 @@ Module.postRun = function () {
                 postMessage({ cmd: "playAudio", buffer: outputArray, ts: ts }, outputArray.map(x => x.buffer))
             }
         },
+        inputFlv: function* () {
+            yield 13
+            var tmp = new ArrayBuffer(4)
+            var tmp8 = new Uint8Array(tmp)
+            var tmp32 = new Uint32Array(tmp)
+            while (true) {
+                var type = yield 1
+                tmp8.set(yield 3, 1)
+                var length = tmp32[0]
+                tmp8.set(yield 3, 1)
+                var ts = tmp32[0]
+                yield 4
+                var payload = yield length
+                switch (type) {
+                    case 8:
+                        this.decodeAudio(ts, payload)
+                        break
+                    case 9:
+                        this.decodeVideo(ts, payload)
+                        break
+                }
+
+            }
+        },
         play: function (url) {
             console.log('Jessibuca play', url)
             this.getDelay = function (timestamp) {
@@ -99,15 +135,16 @@ Module.postRun = function () {
                 this.controller = new AbortController();
                 fetch(url, { signal: this.controller.signal }).then(function (res) {
                     var reader = res.body.getReader();
+                    var dispatch = dispatchData(this.inputFlv())
                     var fetchNext = function () {
                         reader.read().then(({ done, value }) => {
                             if (done) {
                                 _this.close()
                             } else {
-                                _this.onData(value)
+                                dispatch(value)
                                 fetchNext()
                             }
-                        }).catch(console.error)
+                        }).catch((e) => dispatch.return(e))
                     }
                     fetchNext()
                 }).catch(console.error)
@@ -120,7 +157,24 @@ Module.postRun = function () {
                 this.flvMode = url.indexOf(".flv") != -1
                 this.ws = new WebSocket(url)
                 this.ws.binaryType = "arraybuffer"
-                this.ws.onmessage = evt => this.onData(evt.data)
+                if (this.flvMode) {
+                    var dispatch = dispatchData(this.inputFlv())
+                    this.ws.onmessage = evt => dispatch(evt.data)
+                } else {
+                    this.ws.onmessage = evt => {
+                        var dv = new DataView(evt.data)
+                        switch (dv.getUint8(0)) {
+                            case 1:
+                                var ts = dv.getUint32(1, false)
+                                this.decodeAudio(ts, new Uint8Array(data, 5))
+                                break
+                            case 2:
+                                var ts = dv.getUint32(1, false)
+                                this.decodeVideo(ts, new Uint8Array(data, 5))
+                                break
+                        }
+                    }
+                }
                 this.close = function () {
                     this.ws.close()
                     this.$close();
@@ -152,48 +206,6 @@ Module.postRun = function () {
                 }
             }
         },
-        demuxer: function (data) {
-            if (this.flvMode) {
-                append(data)
-                if (!this.flvHeadRead) {
-                    if (data.byteLength >= 13) {
-                        this.flvHeadRead = true
-                        start += 13
-                    }
-                }
-                while (end - start > 3) {
-                    var length = (dv.getUint8(start + 1) << 16) + (dv.getUint8(start + 2) << 8) + dv.getUint8(start + 3)
-                    if (end - start < length + 15) {
-                        break
-                    }
-                    var timestamp = (dv.getUint8(start + 4) << 16) + (dv.getUint8(start + 5) << 8) + dv.getUint8(start + 6)
-                    var payload = new ArrayBuffer(length)
-                    new Uint8Array(payload).set(new Uint8Array(buffer, start + 11, length))
-                    switch (dv.getUint8(start)) {
-                        case 8:
-                            this.decodeAudio(timestamp, payload)
-                            break
-                        case 9:
-                            this.decodeVideo(timestamp, payload)
-                            break
-                    }
-                    start += length + 15
-                }
-                consume()
-            } else {
-                var dv = new DataView(data)
-                switch (dv.getUint8(0)) {
-                    case 1:
-                        var ts = dv.getUint32(1, false)
-                        this.decodeAudio(ts, new Uint8Array(data, 5))
-                        break
-                    case 2:
-                        var ts = dv.getUint32(1, false)
-                        this.decodeVideo(ts, new Uint8Array(data, 5))
-                        break
-                }
-            }
-        }
     }
     Object.setPrototypeOf(decoder, new Module.Jessica(decoder))
     postMessage({ cmd: "init" })
