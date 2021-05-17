@@ -43,11 +43,6 @@
             <div class="option">
                 <span>缓冲(秒):</span>
                 <input style="width:50px" type="number" ref="buffer" value="0.2" @change="changeBuffer">
-                <input type="checkbox" ref="wasm" @change="changeWasm"><span>wasm</span>
-                <select ref="vc" @change="changeVC">
-                    <option selected>h264</option>
-                    <option>h265</option>
-                </select>
                 <input type="checkbox" ref="resize" @change="changeResize"><span>自适应</span>
             </div>
         </div>
@@ -255,10 +250,6 @@
 
             screenShot() {
                 this.jessibuca.screenshot();
-            },
-
-            changeVC() {
-                this.vc = ["ff", "libhevc_aac"][this.$refs.vc.selectedIndex]
             },
 
             changeWasm() {
