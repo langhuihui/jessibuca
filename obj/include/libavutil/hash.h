@@ -27,7 +27,6 @@
 #ifndef AVUTIL_HASH_H
 #define AVUTIL_HASH_H
 
-#include <stddef.h>
 #include <stdint.h>
 
 #include "version.h"

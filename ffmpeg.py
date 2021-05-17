@@ -15,10 +15,10 @@ args = [
     ]
 disables = [
     'everything','all','avdevice','avformat','postproc','avfilter','programs','asm','parsers','muxers','demuxers','filters',
-    'doc','devices','network','bsfs','shared','hwaccels','debug','protocols','indevs','outdevs','runtime-cpudetect','pthreads'
+    'doc','devices','network','bsfs','shared','hwaccels','debug','protocols','indevs','outdevs','runtime-cpudetect'
 ]
 enables = [
-    'small','cross-compile','gpl','avcodec','swresample','ffmpeg',
+    'small','cross-compile','gpl','avcodec','swresample','pthreads','ffmpeg',
     'parser=h264',
     'parser=hevc',
     'parser=aac',

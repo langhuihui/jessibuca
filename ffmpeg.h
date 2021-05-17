@@ -220,6 +220,7 @@ public:
             compositionTime = data.readUInt24B();
             return FFmpeg::decode(data);
         }
+        return 0;
     }
     void _decode() override
     {
