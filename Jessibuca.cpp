@@ -52,7 +52,6 @@ public:
     AVPacket *pkt;
     val jsObject;
     bool initialized = false;
-    u32 timestamp = 0;
     FFmpeg(val &&v) : jsObject(forward<val>(v)), pkt(av_packet_alloc()), frame(av_frame_alloc())
     {
     }
@@ -192,7 +191,7 @@ public:
         //memcpy(output+samplesBytes,frame->data[1],samplesBytes);
         //    memcpy(output,frame->data[0],frame->nb_samples<<1);
         int bytesCount = frame->nb_samples * bytes_per_sample * dec_ctx->channels;
-        jsObject.call<void>("playAudioPlanar", int(frame->data), bytesCount, timestamp);
+        jsObject.call<void>("playAudioPlanar", int(frame->data), bytesCount);
     }
 };
 class FFmpegVideoDecoder : public FFmpeg
@@ -288,7 +287,7 @@ public:
             memcpy((u8 *)dst, (const u8 *)(frame->data[2] + i * frame->linesize[2]), halfw);
             dst += halfw;
         }
-        jsObject.call<void>("draw", compositionTime, timestamp, y, u, v);
+        jsObject.call<void>("draw", compositionTime, y, u, v);
     }
 };
 
@@ -299,6 +298,7 @@ EMSCRIPTEN_BINDINGS(FFmpegAudioDecoder)
 {
     class_<FFmpegAudioDecoder>("AudioDecoder")
         .constructor<val>()
+        .FUNC(clear)
         .FUNC(decode);
 }
 #undef FUNC
@@ -309,5 +309,6 @@ EMSCRIPTEN_BINDINGS(FFmpegVideoDecoder)
 {
     class_<FFmpegVideoDecoder>("VideoDecoder")
         .constructor<val>()
+        .FUNC(clear)
         .FUNC(decode);
 }

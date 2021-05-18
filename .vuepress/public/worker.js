@@ -141,7 +141,6 @@ Module.postRun = function () {
                 }).catch(console.error)
                 this.close = function () {
                     this.controller.abort();
-                    this.$close();
                     delete this.close
                 }
             } else {
@@ -168,7 +167,6 @@ Module.postRun = function () {
                 }
                 this.close = function () {
                     this.ws.close()
-                    this.$close();
                     delete this.close
                 }
             }
