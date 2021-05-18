@@ -94,7 +94,7 @@ public:
         }
         return 0;
     }
-    virtual void _decode() {};
+    virtual void _decode(){};
     virtual void clear()
     {
         if (parser)
@@ -105,7 +105,6 @@ public:
         if (dec_ctx)
         {
             avcodec_free_context(&dec_ctx);
-            dec_ctx = nullptr;
         }
     }
 };
@@ -122,6 +121,10 @@ public:
     {
         swr_free(&au_convert_ctx);
         emscripten_log(0, "FFMpegAudioDecoder destory");
+    }
+    void clear() override
+    {
+        FFmpeg::clear();
     }
     int decode(string input) override
     {

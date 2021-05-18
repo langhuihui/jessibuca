@@ -35,7 +35,7 @@ function dispatchData(input) {
             combine.set(buffer)
             combine.set(data, buffer.length)
             data = combine
-            buffer=null
+            buffer = null
         }
         while (data.length >= need.value) {
             var remain = data.slice(need.value)
@@ -57,6 +57,9 @@ Module.printErr = function (text) {
     postMessage({ cmd: "printErr", text: text })
 }
 Module.postRun = function () {
+    var buffer = []
+    var firstTimestamp
+    var startTimestamp
     var decoder = {
         opt: {},
         initAudioPlanar: function (channels, samplerate) {
@@ -65,7 +68,7 @@ Module.postRun = function () {
                 buffersA.push([]);
             }
             postMessage({ cmd: "initAudioPlanar", samplerate: samplerate, channels: channels })
-            this.playAudioPlanar = function (data, len, ts) {
+            this.playAudioPlanar = function (data, len) {
                 var outputArray = [];
                 var frameCount = len / 4 / buffersA.length;
                 for (var i = 0; i < buffersA.length; i++) {
@@ -82,7 +85,7 @@ Module.postRun = function () {
                     }
                     outputArray[i] = buffer;
                 }
-                postMessage({ cmd: "playAudio", buffer: outputArray, ts: ts }, outputArray.map(x => x.buffer))
+                postMessage({ cmd: "playAudio", buffer: outputArray }, outputArray.map(x => x.buffer))
             }
         },
         inputFlv: function* () {
@@ -100,10 +103,16 @@ Module.postRun = function () {
                 var payload = yield length
                 switch (type) {
                     case 8:
-                        audioDecoder.decode(payload)
+                        if (this.videoBuffer) {
+                            buffer.push({ ts, payload, decoder: audioDecoder })
+                        } else
+                            audioDecoder.decode(payload)
                         break
                     case 9:
-                        videoDecoder.decode(payload)
+                        if (this.videoBuffer) {
+                            buffer.push({ ts, payload, decoder: videoDecoder })
+                        } else
+                            videoDecoder.decode(payload)
                         break
                 }
                 yield 4
@@ -120,6 +129,22 @@ Module.postRun = function () {
                 }
                 return 0
             }
+            var loop = () => {
+                if (buffer.length) {
+                    var data = buffer[0]
+                    if (!firstTimestamp) {
+                        firstTimestamp = data.ts
+                        startTimestamp = Date.now()
+                        buffer.shift()
+                        data.decoder.decode(data.payload)
+                    } else if (data.ts - firstTimestamp + this.videoBuffer < Date.now() - startTimestamp) {
+                        buffer.shift()
+                        data.decoder.decode(data.payload)
+                    }
+                }
+                this.stopId = requestAnimationFrame(loop)
+            }
+            this.stopId = requestAnimationFrame(loop)
             if (url.indexOf("http") == 0) {
                 this.flvMode = true
                 var _this = this;
@@ -141,6 +166,9 @@ Module.postRun = function () {
                 }).catch(console.error)
                 this.close = function () {
                     this.controller.abort();
+                    audioDecoder.clear()
+                    videoDecoder.clear()
+                    cancelAnimationFrame(this.stopId)
                     delete this.close
                 }
             } else {
@@ -155,18 +183,27 @@ Module.postRun = function () {
                         var dv = new DataView(evt.data)
                         switch (dv.getUint8(0)) {
                             case 1:
-                                var ts = dv.getUint32(1, false)
-                                audioDecoder.decode(new Uint8Array(data, 5))
+                                if (this.videoBuffer) {
+                                    buffer.push({ ts: dv.getUint32(1, false), payload: new Uint8Array(evt.data, 5), decoder: audioDecoder })
+                                } else {
+                                    audioDecoder.decode(new Uint8Array(evt.data, 5))
+                                }
                                 break
                             case 2:
-                                var ts = dv.getUint32(1, false)
-                                videoDecoder.decode(new Uint8Array(data, 5))
+                                if (this.videoBuffer) {
+                                    buffer.push({ ts: dv.getUint32(1, false), payload: new Uint8Array(evt.data, 5), decoder: videoDecoder })
+                                } else {
+                                    videoDecoder.decode(new Uint8Array(evt.data, 5))
+                                }
                                 break
                         }
                     }
                 }
                 this.close = function () {
                     this.ws.close()
+                    audioDecoder.clear()
+                    videoDecoder.clear()
+                    cancelAnimationFrame(this.stopId)
                     delete this.close
                 }
             }
@@ -178,10 +215,10 @@ Module.postRun = function () {
                     var canvas = new OffscreenCanvas(w, h);
                     var gl = canvas.getContext("webgl");
                     var render = createWebGL(gl)
-                    this.draw = function (compositionTime, ts, y, u, v) {
+                    this.draw = function (compositionTime, y, u, v) {
                         render(w, h, HEAPU8.subarray(y, y + size), HEAPU8.subarray(u, u + qsize), HEAPU8.subarray(v, v + (qsize)))
                         let image_bitmap = canvas.transferToImageBitmap();
-                        postMessage({ cmd: "render", compositionTime: compositionTime, ts: ts, bps: this.bps, delay: this.delay, buffer: image_bitmap }, [image_bitmap])
+                        postMessage({ cmd: "render", compositionTime: compositionTime, bps: this.bps, delay: this.delay, buffer: image_bitmap }, [image_bitmap])
                     }
                 } else {
                     this.draw = function (compositionTime, ts, y, u, v) {
@@ -190,7 +227,7 @@ Module.postRun = function () {
                         // arrayBufferCopy(HEAPU8.subarray(y, y + size), this.sharedBuffer, 0, size)
                         // arrayBufferCopy(HEAPU8.subarray(u, u + (qsize)), this.sharedBuffer, size, qsize)
                         // arrayBufferCopy(HEAPU8.subarray(v, v + (qsize)), this.sharedBuffer, size + qsize, qsize)
-                        postMessage({ cmd: "render", compositionTime: compositionTime, ts: ts, bps: this.bps, delay: this.delay, output: outputArray }, outputArray.map(x => x.buffer))
+                        postMessage({ cmd: "render", compositionTime: compositionTime, bps: this.bps, delay: this.delay, output: outputArray }, outputArray.map(x => x.buffer))
                     }
                 }
             }
