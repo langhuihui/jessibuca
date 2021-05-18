@@ -28,7 +28,7 @@ sargs = {
 }
 emcc_args = [
     # '-m32',
-    '-Oz',
+    # '-O3',
     '--memory-init-file', '0',
     # '--closure', '1',
     # '--llvm-lto','1',

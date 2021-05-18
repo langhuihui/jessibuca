@@ -27,14 +27,24 @@ function arrayBufferCopy(src, dst, dstByteOffset, numBytes) {
 }
 function dispatchData(input) {
     let need = input.next()
+    let buffer = null
     return (value) => {
         var data = new Uint8Array(value)
-        while (data.length >= need) {
-            var remain = data.slice(need)
-            need = input.next(need > 1 ? data.slice(0, need) : data[0])
+        if (buffer) {
+            var combine = new Uint8Array(buffer.length + data.length)
+            combine.set(buffer)
+            combine.set(data, buffer.length)
+            data = combine
+            buffer=null
+        }
+        while (data.length >= need.value) {
+            var remain = data.slice(need.value)
+            need = input.next(need.value > 1 ? data.slice(0, need.value) : data[0])
             data = remain
         }
-        console.log(data.length)
+        if (data.length > 0) {
+            buffer = data
+        }
     }
 }
 if (!Date.now) Date.now = function () {
@@ -47,25 +57,6 @@ Module.printErr = function (text) {
     postMessage({ cmd: "printErr", text: text })
 }
 Module.postRun = function () {
-    var buffer = new ArrayBuffer(2048 * 1024)
-    var dv = new DataView(buffer)
-    var start = 0
-    var end = 0
-    function freeSpace() {
-        return buffer.byteLength - end
-    }
-    function append(data) {
-        if (freeSpace() < data.byteLength) {
-
-        }
-        new Uint8Array(buffer, end, data.byteLength).set(new Uint8Array(data))
-        end += data.byteLength
-    }
-    function consume() {
-        new Uint8Array(buffer, 0, end).copyWithin(0, start, end)
-        start = 0
-        end = end - start
-    }
     var decoder = {
         opt: {},
         initAudioPlanar: function (channels, samplerate) {
@@ -101,21 +92,21 @@ Module.postRun = function () {
             var tmp32 = new Uint32Array(tmp)
             while (true) {
                 var type = yield 1
-                tmp8.set(yield 3, 1)
+                tmp8.set((yield 3).reverse())
                 var length = tmp32[0]
-                tmp8.set(yield 3, 1)
+                tmp8.set((yield 3).reverse())
                 var ts = tmp32[0]
                 yield 4
                 var payload = yield length
                 switch (type) {
                     case 8:
-                        this.decodeAudio(ts, payload)
+                        audioDecoder.decode(payload)
                         break
                     case 9:
-                        this.decodeVideo(ts, payload)
+                        videoDecoder.decode(payload)
                         break
                 }
-
+                yield 4
             }
         },
         play: function (url) {
@@ -135,7 +126,7 @@ Module.postRun = function () {
                 this.controller = new AbortController();
                 fetch(url, { signal: this.controller.signal }).then(function (res) {
                     var reader = res.body.getReader();
-                    var dispatch = dispatchData(this.inputFlv())
+                    var dispatch = dispatchData(_this.inputFlv())
                     var fetchNext = function () {
                         reader.read().then(({ done, value }) => {
                             if (done) {
@@ -166,11 +157,11 @@ Module.postRun = function () {
                         switch (dv.getUint8(0)) {
                             case 1:
                                 var ts = dv.getUint32(1, false)
-                                this.decodeAudio(ts, new Uint8Array(data, 5))
+                                audioDecoder.decode(new Uint8Array(data, 5))
                                 break
                             case 2:
                                 var ts = dv.getUint32(1, false)
-                                this.decodeVideo(ts, new Uint8Array(data, 5))
+                                videoDecoder.decode(new Uint8Array(data, 5))
                                 break
                         }
                     }
@@ -207,7 +198,8 @@ Module.postRun = function () {
             }
         },
     }
-    Object.setPrototypeOf(decoder, new Module.Jessica(decoder))
+    var audioDecoder = new Module.AudioDecoder(decoder)
+    var videoDecoder = new Module.VideoDecoder(decoder)
     postMessage({ cmd: "init" })
     self.onmessage = function (event) {
         var msg = event.data

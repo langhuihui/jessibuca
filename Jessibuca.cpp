@@ -6,18 +6,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-#include <functional>
-#include <map>
-#include <queue>
+// #include <functional>
+// #include <map>
+// #include <queue>
 #include <emscripten.h>
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
-#include <time.h>
+// #include <time.h>
 // #include <regex>
 using namespace std;
 using namespace emscripten;
-#include "slice.h"
-#include "ffmpeg.h"
+// #include "slice.h"
+typedef unsigned char u8;
+// typedef signed char i8;
+// typedef unsigned short u16;
+// typedef signed short i16;
+typedef unsigned int u32;
+// typedef signed int i32;
 #define PROP(name, type)                        \
     type name;                                  \
     val get##name() const                       \
@@ -30,317 +35,279 @@ using namespace emscripten;
         emscripten_log(0, #name " = %d", name); \
     }
 
-struct VideoPacket
+extern "C"
 {
-    clock_t timestamp;
-    IOBuffer data;
-    bool isKeyFrame;
-    VideoPacket(clock_t t, IOBuffer data) : timestamp(t), data(data)
+#include <libavcodec/avcodec.h>
+#include <libswresample/swresample.h>
+}
+const int SamplingFrequencies[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350, 0, 0, 0};
+const int AudioObjectTypes[] = {};
+class FFmpeg
+{
+public:
+    AVCodec *codec = nullptr;
+    AVCodecParserContext *parser = nullptr;
+    AVCodecContext *dec_ctx = nullptr;
+    AVFrame *frame;
+    AVPacket *pkt;
+    val jsObject;
+    bool initialized = false;
+    u32 timestamp = 0;
+    FFmpeg(val &&v) : jsObject(forward<val>(v)), pkt(av_packet_alloc()), frame(av_frame_alloc())
     {
-        isKeyFrame = data[0] >> 4 == 1;
     }
-    VideoPacket() : timestamp(0), data()
+    void initCodec(enum AVCodecID id)
     {
+        if (dec_ctx != nullptr)
+            clear();
+        codec = avcodec_find_decoder(id);
+        parser = av_parser_init(codec->id);
+        dec_ctx = avcodec_alloc_context3(codec);
+    }
+    void initCodec(enum AVCodecID id, string input)
+    {
+        initCodec(id);
+        dec_ctx->extradata_size = input.length();
+        dec_ctx->extradata = (u8 *)input.data();
+        // // dec_ctx->extradata = (u8 *)malloc(dec_ctx->extradata_size);
+        // // memcpy(dec_ctx->extradata, input.c_str(), dec_ctx->extradata_size);
+        avcodec_open2(dec_ctx, codec, NULL);
+        initialized = true;
+    }
+    virtual ~FFmpeg()
+    {
+        av_frame_free(&frame);
+        av_packet_free(&pkt);
+        clear();
+    }
+    virtual int decode(string input)
+    {
+        int ret = 0;
+        pkt->data = (u8 *)(input.data());
+        pkt->size = input.length();
+        ret = avcodec_send_packet(dec_ctx, pkt);
+        while (ret >= 0)
+        {
+            ret = avcodec_receive_frame(dec_ctx, frame);
+            if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+                return 0;
+            _decode();
+        }
+        return 0;
+    }
+    virtual void _decode() {};
+    virtual void clear()
+    {
+        if (parser)
+        {
+            av_parser_close(parser);
+            parser = nullptr;
+        }
+        if (dec_ctx)
+        {
+            avcodec_free_context(&dec_ctx);
+            dec_ctx = nullptr;
+        }
     }
 };
-struct Jessica
-{
-    val wrapped;
-    bool flvHeadRead;
-    string buffer;
-    FFmpegAudioDecoder audioDecoder;
-    FFmpegVideoDecoder videoDecoder;
-    queue<VideoPacket> videoBuffers;
-    bool bufferIsPlaying = false;
-    int videoTimeoutId = 0;
-    bool waitFirstVideo = true;
-    clock_t lastDataTime = 0;
-    clock_t lastVideoTimeStamp = 0;
-    clock_t firstVideoTimeStamp = 0;
-    clock_t firstTimeStamp = 0;
-    int idr_count = 0; //是否正在丢帧
-    int bytesCount = 0;
-    int delay = 0;
-    PROP(flvMode, bool)
-    PROP(audioBuffer, int)
-    PROP(videoBuffer, int)
-    PROP(bps, double)
-    Jessica(val &&v) : wrapped(forward<val>(v)), flvMode(false), flvHeadRead(false), audioBuffer(12)
-    {
-        videoDecoder.jsObject = &wrapped;
-        audioDecoder.jsObject = &wrapped;
-    }
-    template <typename... Args>
-    Jessica(Args &&...args) : wrapped(val::undefined())
-    {
-    }
-    virtual ~Jessica()
-    {
-        val::global("clearTimeout")(videoTimeoutId);
-        emscripten_log(0, "FlvDecoder release!\n");
-    }
 
-    void onData(val evt)
+class FFmpegAudioDecoder : public FFmpeg
+{
+public:
+    struct SwrContext *au_convert_ctx = nullptr;
+    FFmpegAudioDecoder(val &&v) : FFmpeg(move(v))
     {
-        string data = evt.as<string>();
-        bytesCount += data.length();
-        auto now = clock();
-        if (now > lastDataTime)
+        emscripten_log(0, "FFMpegAudioDecoder init");
+    }
+    ~FFmpegAudioDecoder()
+    {
+        swr_free(&au_convert_ctx);
+        emscripten_log(0, "FFMpegAudioDecoder destory");
+    }
+    int decode(string input) override
+    {
+        u8 flag = (u8)input[0];
+        u8 audioType = flag >> 4;
+        if (initialized)
         {
-            bps = bytesCount * 1000000.0 / (now - lastDataTime);
-            lastDataTime = now;
-            bytesCount = 0;
-        }
-        if (flvMode)
-        {
-            buffer.append(data);
-            if (!flvHeadRead)
+            if (audioType == 10)
             {
-                if (buffer.length() >= 13)
-                {
-                    flvHeadRead = true;
-                    buffer = buffer.substr(13);
-                }
+                return FFmpeg::decode(input.substr(2));
             }
-            else
+            return FFmpeg::decode(input.substr(1));
+        }
+        else
+        {
+            switch (audioType)
             {
-                while (buffer.length() > 3)
+            case 10:
+                if (!input[1])
                 {
-                    size_t length = 0;
-                    auto attr = (u8 *)(&length);
-                    attr[2] = buffer[1];
-                    attr[1] = buffer[2];
-                    attr[0] = buffer[3];
-                    if (buffer.length() < length + 15)
-                    {
-                        break;
-                    }
-                    unsigned int timestamp = 0;
-                    attr = (u8 *)(&timestamp);
-                    attr[2] = buffer[4];
-                    attr[1] = buffer[5];
-                    attr[0] = buffer[6];
-                    IOBuffer payload(buffer.substr(11, length));
-                    switch (buffer[0])
-                    {
-                    case 8:
-                        audioDecoder.timestamp = timestamp;
-                        audioDecoder.decode(payload);
-                        break;
-                    case 9:
-                        decodeVideo(timestamp, payload);
-                        break;
-                    default:
-                        emscripten_log(0, "unknow type: %d", buffer[0]);
-                        break;
-                    }
-                    buffer = buffer.substr(length + 15);
+                    initCodec(AV_CODEC_ID_AAC, input.substr(2));
+                }
+                break;
+            case 7:
+                initCodec(AV_CODEC_ID_PCM_ALAW);
+                break;
+            case 8:
+                initCodec(AV_CODEC_ID_PCM_MULAW);
+                break;
+            default:
+                emscripten_log(0, "audio type not support:%d", audioType);
+                break;
+            }
+            if (initialized)
+            {
+                jsObject.call<void>("initAudioPlanar", dec_ctx->channels, dec_ctx->sample_rate);
+            }
+        }
+        return 0;
+    }
+    void _decode() override
+    {
+        // emscripten_log(0, "aac channel_layout:%d", dec_ctx->channel_layout);
+        //  if(au_convert_ctx==nullptr){
+        //    // out_buffer = (uint8_t *)av_malloc(av_get_bytes_per_sample(dec_ctx->sample_fmt)*dec_ctx->channels*dec_ctx->frame_size);
+        //    au_convert_ctx = swr_alloc();
+        //     au_convert_ctx = swr_alloc_set_opts(au_convert_ctx,
+        //                                         AV_CH_LAYOUT_STEREO, AV_SAMPLE_FMT_S16, dec_ctx->sample_rate,
+        //                                         dec_ctx->channel_layout, dec_ctx->sample_fmt, dec_ctx->sample_rate,
+        //                                         0, NULL);
+        //     swr_init(au_convert_ctx);
+        // }
+        // // // 转换
+        // swr_convert(au_convert_ctx, &output, frame->nb_samples, (const uint8_t **)frame->data , frame->nb_samples);
+
+        int bytes_per_sample = av_get_bytes_per_sample(dec_ctx->sample_fmt);
+        // int samplesBytes = frame->nb_samples<<1;
+        // int outputInterval = bytes_per_sample*dec_ctx->channels;
+        // for(int i =0;i<frame->nb_samples;i++){
+        //     u8* start = &output[i*4];
+        //     start[0] = out_buffer[0][i*2];
+        //     start[1] = out_buffer[0][i*2+1];
+        //     start[2] = out_buffer[1][i*2];
+        //     start[3] = out_buffer[1][i*2+1];
+        // }
+        //memcpy(output,frame->data[0],samplesBytes);
+        //memcpy(output+samplesBytes,frame->data[1],samplesBytes);
+        //    memcpy(output,frame->data[0],frame->nb_samples<<1);
+        int bytesCount = frame->nb_samples * bytes_per_sample * dec_ctx->channels;
+        jsObject.call<void>("playAudioPlanar", int(frame->data), bytesCount, timestamp);
+    }
+};
+class FFmpegVideoDecoder : public FFmpeg
+{
+public:
+    u32 videoWidth = 0;
+    u32 videoHeight = 0;
+    u32 y = 0;
+    u32 u = 0;
+    u32 v = 0;
+    int NAL_unit_length = 0;
+    u32 compositionTime = 0;
+
+    FFmpegVideoDecoder(val &&v) : FFmpeg(move(v))
+    {
+        emscripten_log(0, "FFMpegVideoDecoder init");
+    }
+    ~FFmpegVideoDecoder()
+    {
+        emscripten_log(0, "FFMpegVideoDecoder destory");
+    }
+    void clear() override
+    {
+        videoWidth = 0;
+        videoHeight = 0;
+        FFmpeg::clear();
+        if (y)
+        {
+            free((void *)y);
+            y = 0;
+        }
+    }
+    int decode(string data) override
+    {
+        if (!initialized)
+        {
+            int codec_id = ((int)data[0]) & 0x0F;
+            if (((int)(data[0]) >> 4) == 1 && data[1] == 0)
+            {
+                emscripten_log(0, "codec = %d", codec_id);
+                switch (codec_id)
+                {
+                case 7:
+                    initCodec(AV_CODEC_ID_H264, data.substr(5));
+                    break;
+                case 12:
+                    initCodec(AV_CODEC_ID_H265, data.substr(5));
+                    break;
+                default:
+                    emscripten_log(0, "codec not support: %d", codec_id);
+                    return -1;
                 }
             }
         }
         else
         {
-            switch (data.at(0))
-            {
-            case 1:
-            {
-                IOBuffer b(move(data));
-                b >>= 1;
-                audioDecoder.timestamp = b.readUInt32B();
-                audioDecoder.decode(b);
-            }
-            break;
-            case 2:
-            {
-                IOBuffer b(move(data));
-                b >>= 1;
-                decodeVideo(b.readUInt32B(), b);
-            }
-            break;
-            case 10:
-            {
-                wrapped["ws"].call<void>("send", val("[\"__bandwidth\"]"));
-            }
-            break;
-            default:
-                emscripten_log(1, "error type :%d", data.at(0));
-                break;
-            }
+            compositionTime = (((u32)data[2]) << 16) + (((u32)data[3]) << 8) + (u32)data[4];
+            return FFmpeg::decode(data.substr(5));
         }
+        return 0;
     }
-    // void decodeAudio(clock_t timestamp, IOBuffer ms)
-    // {
-    //     if (ms[0] == 0xFF && (ms[1] & 0xF0) == 0xF0)
-    //     {
-    //         //ADTS 头
-    //         call<void>("playAudio", int(ms.point()), ms.length);
-    //         return;
-    //     }
-    //     unsigned char flag = 0;
-    //     ms.readB<1>(flag);
-    //     auto audioType = flag >> 4;
-    //     if (waitFirstAudio)
-    //     {
-    //         int channels = (flag & 1) + 1;
-    //         int rate = (flag >> 2) & 3;
-    //         switch (rate)
-    //         {
-    //         case 1:
-    //             rate = 11025;
-    //             break;
-    //         case 2:
-    //             rate = 22050;
-    //             break;
-    //         case 3:
-    //             rate = 44100;
-    //             break;
-    //         }
-    //         switch (audioType)
-    //         {
-    //         case 10: //AAC
-    //             // initAudio(audioBuffer * 1024, rate, channels);
-    //             audioDecoder.decode(ms);
-    //             initAudio(audioBuffer * 1024, audioDecoder.samplerate, audioDecoder.channels);
-    //             return;
-    //         case 11: //Speex
-    //             initAudio(50 * 320, 16000, channels);
-    //             break;
-    //         case 2: //MP3
-    //             initAudio(audioBuffer * 576, rate, channels);
-    //             break;
-    //         }
-    //     }
-    //     if (!waitFirstAudio && audioDecoder.decode(ms))
-    //         call<void>("playAudio", timestamp);
-    // }
-    // void initAudio(int frameCount, int samplerate, int channels)
-    // {
-    //     waitFirstAudio = false;
-    //     audioDecoder.init(frameCount * channels * 2);
-    //     call<void>("initAudio", frameCount, samplerate, channels, (int)audioDecoder.outputBuffer >> 1);
-    // }
-    void decodeVideo(clock_t _timestamp, IOBuffer data)
+    void _decode() override
     {
-        if (waitFirstVideo)
+        if (videoWidth != frame->width || videoHeight != frame->height)
         {
-            if (videoDecoder.isAVCSequence(data))
-            {
-                videoDecoder.decode(data);
-                waitFirstVideo = false;
-                emscripten_log(0, "video info set! video buffer: %dms", videoBuffer);
-            }
+            videoWidth = frame->width;
+            videoHeight = frame->height;
+            jsObject.call<void>("setVideoSize", videoWidth, videoHeight);
+            int size = videoWidth * videoHeight;
+            if (y)
+                free((void *)y);
+            y = (u32)malloc(size * 3 >> 1);
+            u = y + size;
+            v = u + (size >> 2);
         }
-        else if (data[1] == 1 || data[1] == 0)
+        u32 dst = y;
+        for (int i = 0; i < videoHeight; i++)
         {
-            if (_timestamp == 0 && lastVideoTimeStamp != 0)
-                return;
-            delay = call<int>("getDelay", int(_timestamp));
-            if (videoBuffer == 0)
-            {
-                if (delay > 3000)
-                {
-                    emscripten_log(0, "delay: %dms", delay);
-                    return;
-                }
-                videoDecoder.timestamp = _timestamp;
-                videoDecoder.decode(data);
-            }
-            else
-            {
-                videoBuffers.emplace(_timestamp, data);
-                auto &v = videoBuffers.front();
-                if (delay + (lastVideoTimeStamp - v.timestamp) > videoBuffer)
-                {
-                    if (!bufferIsPlaying)
-                    {
-                        bufferIsPlaying = true;
-                        decodeVideoBuffer();
-                    }
-                }
-            }
+            memcpy((u8 *)dst, (const u8 *)(frame->data[0] + i * frame->linesize[0]), videoWidth);
+            dst += videoWidth;
         }
-        lastVideoTimeStamp = _timestamp;
-    }
+        dst = u;
+        int halfh = videoHeight >> 1;
+        int halfw = videoWidth >> 1;
+        for (int i = 0; i < halfh; i++)
+        {
+            memcpy((u8 *)dst, (const u8 *)(frame->data[1] + i * frame->linesize[1]), halfw);
+            dst += halfw;
+        }
 
-    void decodeVideoBuffer()
-    {
-        if (videoBuffers.size() > 1)
+        for (int i = 0; i < halfh; i++)
         {
-            auto &v = videoBuffers.front();
-            videoDecoder.timestamp = v.timestamp;
-            auto start = clock();
-            videoDecoder.decode(v.data);
-            auto cost = (clock() - start) / 1000;
-            videoBuffers.pop();
-            auto timeout = videoBuffers.front().timestamp - v.timestamp;
-            if (timeout > cost)
-            {
-                timeout = timeout - cost;
-            }
-            // if (idr_count > 5)
-            // {
-            //     while (videoBuffers.size() > 0 && !videoBuffers.front().isKeyFrame)
-            //     {
-            //         videoBuffers.pop();
-            //     }
-            //     decodeVideoBuffer();
-            //     return;
-            // }
-            if (delay + (lastVideoTimeStamp - v.timestamp) > videoBuffer)
-            {
-                decodeVideoBuffer();
-            }
-            else
-                val::global("setTimeout")(bind("decodeVideoBuffer"), timeout);
-            return;
+            memcpy((u8 *)dst, (const u8 *)(frame->data[2] + i * frame->linesize[2]), halfw);
+            dst += halfw;
         }
-        bufferIsPlaying = false;
-    }
-    val getBufferInfo() const
-    {
-        val &&result = val::object();
-        result.set("front", videoBuffers.front().timestamp);
-        result.set("back", videoBuffers.back().timestamp);
-        result.set("size", videoBuffers.size());
-        return result;
-    }
-    void $close()
-    {
-        val::global("clearTimeout")(videoTimeoutId);
-        videoBuffers = queue<VideoPacket>();
-        videoDecoder.clear();
-        audioDecoder.clear();
-        videoTimeoutId = 0;
-        waitFirstVideo = true;
-        bufferIsPlaying = false;
-        lastVideoTimeStamp = 0;
-        buffer.clear();
-        flvHeadRead = false;
-    }
-    val bind(const char *name)
-    {
-        return wrapped[name].call<val>("bind", wrapped);
-    }
-    template <typename ReturnType, typename... Args>
-    ReturnType call(const char *name, Args &&...args) const
-    {
-        return wrapped.call<ReturnType>(name, forward<Args>(args)...);
+        jsObject.call<void>("draw", compositionTime, timestamp, y, u, v);
     }
 };
 
-#define FUNC(name) function(#name, &Jessica::name)
+#define FUNC(name) function(#name, &FFmpegAudioDecoder::name)
 #undef PROP
-#define PROP(name) property(#name, &Jessica::get##name, &Jessica::set##name)
-EMSCRIPTEN_BINDINGS(Jessica)
+#define PROP(name) property(#name, &FFmpegAudioDecoder::get##name, &FFmpegAudioDecoder::set##name)
+EMSCRIPTEN_BINDINGS(FFmpegAudioDecoder)
 {
-    class_<Jessica>("Jessica")
+    class_<FFmpegAudioDecoder>("AudioDecoder")
         .constructor<val>()
-        .FUNC(onData)
-        .FUNC($close)
-        .FUNC(decodeVideoBuffer)
-        .PROP(flvMode)
-        .PROP(audioBuffer)
-        .PROP(videoBuffer)
-        .PROP(bps)
-        .property("bufferInfo", &Jessica::getBufferInfo);
+        .FUNC(decode);
+}
+#undef FUNC
+#define FUNC(name) function(#name, &FFmpegVideoDecoder::name)
+#undef PROP
+#define PROP(name) property(#name, &FFmpegVideoDecoder::get##name, &FFmpegVideoDecoder::set##name)
+EMSCRIPTEN_BINDINGS(FFmpegVideoDecoder)
+{
+    class_<FFmpegVideoDecoder>("VideoDecoder")
+        .constructor<val>()
+        .FUNC(decode);
 }

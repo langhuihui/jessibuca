@@ -10,7 +10,7 @@ args = [
     'ranlib=emranlib',
     'prefix=../obj',
     'target-os=none',
-    'arch=x86_32',
+    'arch=x86_64',
     'cpu=generic'
     ]
 disables = [
@@ -35,4 +35,4 @@ enables = ['enable-'+item for i,item in enumerate(enables)]
 disables = ['disable-'+item for i,item in enumerate(disables)]
 os.system('emconfigure ./configure --' +
           (' --'.join(args+disables+enables)))
-os.system('make clean && emmake make && make install')
+os.system('make clean && emmake make -j && make install')
