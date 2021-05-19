@@ -11,6 +11,7 @@
      */
     function Jessibuca(opt) {
         this._opt = opt;
+
         this._container = opt.container;
         if (typeof opt.container === "string") {
             this._container = document.querySelector(opt.container);
@@ -54,18 +55,11 @@
         }, opt.operateBtns || {});
         this._opt.keepScreenOn = opt.keepScreenOn === true;
         this._opt.rotate = typeof opt.rotate === 'number' ? opt.rotate : 0;
-
-        if (!this.supportOffscreen()) this._initContextGL();
         this._audioContext = new (window.AudioContext || window.webkitAudioContext)();
         this._gainNode = this._audioContext.createGain();
         this._audioEnabled(true);
         if (!opt.isNotMute) {
             this._audioEnabled(false);
-        }
-        if (this._contextGL) {
-            this._initProgram();
-            this._initBuffers();
-            this._initTextures();
         }
         this._onresize = () => this.resize();
         this._onfullscreenchange = () => this._fullscreenchange();
@@ -106,6 +100,7 @@
         //
         this._initWakeLock();
         this._enableWakeLock();
+
     };
 
     function noop() {
@@ -415,7 +410,7 @@
                 case "init":
                     _this._opt.isDebug && console.log("decoder worker init")
                     _this.setBufferTime(_this._opt.videoBuffer);
-                    _this._decoderWorker.postMessage({cmd: "init", opt: _this._opt})
+                    _this._decoderWorker.postMessage({ cmd: "init", opt: _this._opt })
                     if (!_this._hasLoaded) {
                         _this._opt.isDebug && console.log("has loaded");
                         _this._hasLoaded = true;
@@ -428,11 +423,15 @@
                     _this._canvasElement.height = msg.h;
                     _this.onInitSize();
                     _this.resize();
-                    _this._trigger('videoInfo', {w: msg.w, h: msg.h});
-                    if (_this.supportOffscreen()) {
+                    _this._trigger('videoInfo', { w: msg.w, h: msg.h });
+                    if (!_this.supportOffscreen()) {
+                        if (!_this.render) _this.render = createWebGL(_this._initContextGL())
                         //const offscreen = _this._canvasElement.transferControlToOffscreen();
                         //this.postMessage({ cmd: "init", canvas: offscreen }, [offscreen])
+                    } else {
+                        _this.bitmaprenderer = _this._canvasElement.getContext("bitmaprenderer")
                     }
+
                     break
                 case "render":
                     if (_this.loading) {
@@ -443,15 +442,15 @@
                     }
                     if (_this.playing) {
                         if (!_this.supportOffscreen()) {
-                            _this._drawNextOutputPictureGL(msg.output);
+                            _this.render(_this._canvasElement.width, _this._canvasElement.height, msg.output[0], msg.output[1], msg.output[2])
                         } else {
-                            _this._canvasElement.getContext("bitmaprenderer").transferFromImageBitmap(msg.buffer);
+                            _this.bitmaprenderer.transferFromImageBitmap(msg.buffer);
                         }
                     }
                     // _this._decoderWorker.postMessage({ cmd: "setBuffer", buffer: msg.output }, msg.output.map(x => x.buffer))
                     _this._trigger('timeUpdate', msg.ts);
                     _this.onTimeUpdate(msg.ts);
-                    _this._updateStats({bps: msg.bps, ts: msg.ts});
+                    _this._updateStats({ bps: msg.bps, ts: msg.ts });
                     _this._checkHeart();
                     break
                 case "playAudio":
@@ -775,7 +774,7 @@
         while (n--) {
             u8arr[n] = bstr.charCodeAt(n);
         }
-        return new File([u8arr], 'file', {type});
+        return new File([u8arr], 'file', { type });
     }
 
     function _downloadImg(content, fileName) {
@@ -866,7 +865,14 @@
         }
         this.resize();
     };
-
+    Jessibuca.prototype.setVod = function (value) {
+        this._opt.vod = value
+        this._decoderWorker.postMessage({ cmd: "init", opt: this._opt })
+    }
+    Jessibuca.prototype.setNoOffscreen = function (value) {
+        this._opt.forceNoOffscreen = value
+        this._decoderWorker.postMessage({ cmd: "init", opt: this._opt })
+    }
     /**
      * Create the GL context from the canvas element
      */
@@ -881,7 +887,7 @@
             var contextName = validContextNames[nameIndex];
 
             try {
-                var contextOptions = {preserveDrawingBuffer: true};
+                var contextOptions = { preserveDrawingBuffer: true };
                 if (this._opt.contextOptions) {
                     contextOptions = Object.assign(contextOptions, this._opt.contextOptions);
                 }
@@ -899,193 +905,7 @@
         }
         ;
 
-        this._contextGL = gl;
-    };
-
-    /**
-     * Initialize GL shader program
-     */
-    Jessibuca.prototype._initProgram = function () {
-        var gl = this._contextGL;
-
-        var vertexShaderScript = [
-            'attribute vec4 vertexPos;',
-            'attribute vec4 texturePos;',
-            'varying vec2 textureCoord;',
-
-            'void main()',
-            '{',
-            'gl_Position = vertexPos;',
-            'textureCoord = texturePos.xy;',
-            '}'
-        ].join('\n');
-
-        var fragmentShaderScript = [
-            'precision highp float;',
-            'varying highp vec2 textureCoord;',
-            'uniform sampler2D ySampler;',
-            'uniform sampler2D uSampler;',
-            'uniform sampler2D vSampler;',
-            'const mat4 YUV2RGB = mat4',
-            '(',
-            '1.1643828125, 0, 1.59602734375, -.87078515625,',
-            '1.1643828125, -.39176171875, -.81296875, .52959375,',
-            '1.1643828125, 2.017234375, 0, -1.081390625,',
-            '0, 0, 0, 1',
-            ');',
-
-            'void main(void) {',
-            'highp float y = texture2D(ySampler,  textureCoord).r;',
-            'highp float u = texture2D(uSampler,  textureCoord).r;',
-            'highp float v = texture2D(vSampler,  textureCoord).r;',
-            'gl_FragColor = vec4(y, u, v, 1) * YUV2RGB;',
-            '}'
-        ].join('\n');
-
-        var vertexShader = gl.createShader(gl.VERTEX_SHADER);
-        gl.shaderSource(vertexShader, vertexShaderScript);
-        gl.compileShader(vertexShader);
-        if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
-            this._opt.isDebug && console.log('Vertex shader failed to compile: ' + gl.getShaderInfoLog(vertexShader));
-        }
-
-        var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-        gl.shaderSource(fragmentShader, fragmentShaderScript);
-        gl.compileShader(fragmentShader);
-        if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
-            this._opt.isDebug && console.log('Fragment shader failed to compile: ' + gl.getShaderInfoLog(fragmentShader));
-        }
-
-        var program = gl.createProgram();
-        gl.attachShader(program, vertexShader);
-        gl.attachShader(program, fragmentShader);
-        gl.linkProgram(program);
-        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-            this._opt.isDebug && console.log('Program failed to compile: ' + gl.getProgramInfoLog(program));
-        }
-
-        gl.useProgram(program);
-
-        this._shaderProgram = program;
-    };
-
-    /**
-     * Initialize vertex buffers and attach to shader program
-     */
-    Jessibuca.prototype._initBuffers = function () {
-        var gl = this._contextGL;
-        var program = this._shaderProgram;
-
-        var vertexPosBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([1, 1, -1, 1, 1, -1, -1, -1]), gl.STATIC_DRAW);
-
-        var vertexPosRef = gl.getAttribLocation(program, 'vertexPos');
-        gl.enableVertexAttribArray(vertexPosRef);
-        gl.vertexAttribPointer(vertexPosRef, 2, gl.FLOAT, false, 0, 0);
-
-        var texturePosBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, texturePosBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([1, 0, 0, 0, 1, 1, 0, 1]), gl.STATIC_DRAW);
-
-        var texturePosRef = gl.getAttribLocation(program, 'texturePos');
-        gl.enableVertexAttribArray(texturePosRef);
-        gl.vertexAttribPointer(texturePosRef, 2, gl.FLOAT, false, 0, 0);
-
-        this._texturePosBuffer = texturePosBuffer;
-    };
-
-    /**
-     * Initialize GL textures and attach to shader program
-     */
-    Jessibuca.prototype._initTextures = function () {
-        var gl = this._contextGL;
-        var program = this._shaderProgram;
-
-        var yTextureRef = this._initTexture();
-        var ySamplerRef = gl.getUniformLocation(program, 'ySampler');
-        gl.uniform1i(ySamplerRef, 0);
-        this._yTextureRef = yTextureRef;
-
-        var uTextureRef = this._initTexture();
-        var uSamplerRef = gl.getUniformLocation(program, 'uSampler');
-        gl.uniform1i(uSamplerRef, 1);
-        this._uTextureRef = uTextureRef;
-
-        var vTextureRef = this._initTexture();
-        var vSamplerRef = gl.getUniformLocation(program, 'vSampler');
-        gl.uniform1i(vSamplerRef, 2);
-        this._vTextureRef = vTextureRef;
-    };
-
-    /**
-     * Create and configure a single texture
-     */
-    Jessibuca.prototype._initTexture = function () {
-        var gl = this._contextGL;
-
-        var textureRef = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, textureRef);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.bindTexture(gl.TEXTURE_2D, null);
-
-        return textureRef;
-    };
-
-    /**
-     * Draw picture data to the canvas.
-     * If this object is using WebGL, the data must be an I420 formatted ArrayBuffer,
-     * Otherwise, data must be an RGBA formatted ArrayBuffer.
-     */
-    Jessibuca.prototype._drawNextOutputPicture = function (data) {
-        if (this._contextGL) {
-            this._drawNextOutputPictureGL(data);
-        } else {
-            this._drawNextOutputPictureRGBA(data);
-        }
-    };
-
-    /**
-     * Draw the next output picture using WebGL
-     */
-    Jessibuca.prototype._drawNextOutputPictureGL = function (data) {
-        var gl = this._contextGL;
-        var texturePosBuffer = this._texturePosBuffer;
-        var yTextureRef = this._yTextureRef;
-        var uTextureRef = this._uTextureRef;
-        var vTextureRef = this._vTextureRef;
-        var croppingParams = this.croppingParams
-        var width = this._canvasElement.width
-        var height = this._canvasElement.height
-        if (croppingParams) {
-            gl.viewport(0, 0, croppingParams.width, croppingParams.height);
-            var tTop = croppingParams.top / height;
-            var tLeft = croppingParams.left / width;
-            var tBottom = croppingParams.height / height;
-            var tRight = croppingParams.width / width;
-            var texturePosValues = new Float32Array([tRight, tTop, tLeft, tTop, tRight, tBottom, tLeft, tBottom]);
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, texturePosBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, texturePosValues, gl.DYNAMIC_DRAW);
-        } else {
-            gl.viewport(0, 0, this._canvasElement.width, this._canvasElement.height);
-        }
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, yTextureRef);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width, height, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, data[0]);
-
-        gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_2D, uTextureRef);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width / 2, height / 2, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, data[1]);
-
-        gl.activeTexture(gl.TEXTURE2);
-        gl.bindTexture(gl.TEXTURE_2D, vTextureRef);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width / 2, height / 2, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, data[2]);
-
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        return gl;
     };
 
     /**
@@ -1113,7 +933,7 @@
         this._audioPlayBuffers = [];
         this._audioPlaying = false;
         delete this._playAudio;
-        this._decoderWorker.postMessage({cmd: "close"})
+        this._decoderWorker.postMessage({ cmd: "close" })
 
         if (this._wakeLock) {
             this._wakeLock.release();
@@ -1200,10 +1020,10 @@
         if (needDelay) {
             var _this = this;
             setTimeout(function () {
-                _this._decoderWorker.postMessage({cmd: "play", url: _this.playUrl})
+                _this._decoderWorker.postMessage({ cmd: "play", url: _this.playUrl })
             }, 300);
         } else {
-            this._decoderWorker.postMessage({cmd: "play", url: this.playUrl})
+            this._decoderWorker.postMessage({ cmd: "play", url: this.playUrl })
         }
     };
     /**
@@ -1394,7 +1214,7 @@
      */
     Jessibuca.prototype.changeBuffer = function (buffer) {
         this._stats.buf = Number(buffer) * 1000;
-        this._decoderWorker.postMessage({cmd: "setVideoBuffer", time: Number(buffer)});
+        this._decoderWorker.postMessage({ cmd: "setVideoBuffer", time: Number(buffer) });
     };
     /**
      * 设置最大缓冲时长，单位秒，播放器会自动消除延迟。

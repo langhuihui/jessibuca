@@ -101,3 +101,6 @@ function createWebGL(gl) {
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
 }
+if (typeof exports !== 'undefined') {
+    module.exports = createWebGL;
+}

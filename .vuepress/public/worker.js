@@ -101,10 +101,10 @@ Module.postRun = function () {
                 var payload = yield length
                 switch (type) {
                     case 8:
-                        buffer.push({ ts, payload, decoder: audioDecoder, decoder: audioDecoder, type: 0 })
+                        buffer.push({ ts, payload, decoder: audioDecoder, type: 0 })
                         break
                     case 9:
-                        buffer.push({ ts, payload, decoder: videoDecoder, decoder: videoDecoder, type: payload[0] >> 4 })
+                        buffer.push({ ts, payload, decoder: videoDecoder, type: payload[0] >> 4 })
                         break
                 }
                 yield 4
@@ -122,21 +122,39 @@ Module.postRun = function () {
                 }
                 return -1
             }
-            var loop = () => {
+            var loop = this.opt.vod ? () => {
                 if (buffer.length) {
                     var data = buffer[0]
                     if (this.getDelay(data.ts) === -1) {
                         buffer.shift()
                         data.decoder.decode(data.payload)
-                    } else if (this.delay > this.videoBuffer + 1000) {
-                        buffer.shift()
-                        if (data.type == 1) {
-                            data.decoder.decode(data.payload)
-                        }
-                        return loop()
                     } else if (this.delay > this.videoBuffer) {
                         buffer.shift()
                         data.decoder.decode(data.payload)
+                    }
+                }
+                this.stopId = requestAnimationFrame(loop)
+            } : () => {
+                if (buffer.length) {
+                    if (this.dropping) {
+                        data = buffer.shift()
+                        if (data.type == 1) {
+                            this.dropping = false
+                            data.decoder.decode(data.payload)
+                        } else if (data.type == 0) {
+                            data.decoder.decode(data.payload)
+                        }
+                    } else {
+                        var data = buffer[0]
+                        if (this.getDelay(data.ts) === -1) {
+                            buffer.shift()
+                            data.decoder.decode(data.payload)
+                        } else if (this.delay > this.videoBuffer + 1000) {
+                            this.dropping = true
+                        } else if (this.delay > this.videoBuffer) {
+                            buffer.shift()
+                            data.decoder.decode(data.payload)
+                        }
                     }
                 }
                 this.stopId = requestAnimationFrame(loop)
@@ -148,16 +166,17 @@ Module.postRun = function () {
                 var controller = new AbortController();
                 fetch(url, { signal: controller.signal }).then(function (res) {
                     var reader = res.body.getReader();
-                    var dispatch = dispatchData(_this.inputFlv())
+                    var input = _this.inputFlv()
+                    var dispatch = dispatchData(input)
                     var fetchNext = function () {
                         reader.read().then(({ done, value }) => {
                             if (done) {
-                                _this.close()
+                                input.return(null)
                             } else {
                                 dispatch(value)
                                 fetchNext()
                             }
-                        }).catch((e) => dispatch.return(e))
+                        }).catch((e) => input.throw(e))
                     }
                     fetchNext()
                 }).catch(console.error)
@@ -202,7 +221,7 @@ Module.postRun = function () {
                         postMessage({ cmd: "render", compositionTime: compositionTime, bps: this.bps, delay: this.delay, buffer: image_bitmap }, [image_bitmap])
                     }
                 } else {
-                    this.draw = function (compositionTime, ts, y, u, v) {
+                    this.draw = function (compositionTime, y, u, v) {
                         var yuv = [HEAPU8.subarray(y, y + size), HEAPU8.subarray(u, u + qsize), HEAPU8.subarray(v, v + (qsize))];
                         var outputArray = yuv.map(buffer => Uint8Array.from(buffer))
                         // arrayBufferCopy(HEAPU8.subarray(y, y + size), this.sharedBuffer, 0, size)
@@ -214,6 +233,7 @@ Module.postRun = function () {
             }
         }, close: function () {
             if (this._close) {
+                console.log("jessibuca closed")
                 this._close()
                 audioDecoder.clear()
                 videoDecoder.clear()
