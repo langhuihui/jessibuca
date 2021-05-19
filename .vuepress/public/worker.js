@@ -58,8 +58,6 @@ Module.printErr = function (text) {
 }
 Module.postRun = function () {
     var buffer = []
-    var firstTimestamp
-    var startTimestamp
     var decoder = {
         opt: {},
         initAudioPlanar: function (channels, samplerate) {
@@ -103,16 +101,10 @@ Module.postRun = function () {
                 var payload = yield length
                 switch (type) {
                     case 8:
-                        if (this.videoBuffer) {
-                            buffer.push({ ts, payload, decoder: audioDecoder })
-                        } else
-                            audioDecoder.decode(payload)
+                        buffer.push({ ts, payload, decoder: audioDecoder, decoder: audioDecoder, type: 0 })
                         break
                     case 9:
-                        if (this.videoBuffer) {
-                            buffer.push({ ts, payload, decoder: videoDecoder })
-                        } else
-                            videoDecoder.decode(payload)
+                        buffer.push({ ts, payload, decoder: videoDecoder, decoder: videoDecoder, type: payload[0] >> 4 })
                         break
                 }
                 yield 4
@@ -121,23 +113,28 @@ Module.postRun = function () {
         play: function (url) {
             console.log('Jessibuca play', url)
             this.getDelay = function (timestamp) {
-                this.firstVideoTimestamp = timestamp
-                this.firstTimestamp = Date.now()
+                if (!timestamp) return -1
+                this.firstTimestamp = timestamp
+                this.startTimestamp = Date.now()
                 this.getDelay = function (timestamp) {
-                    this.delay = (timestamp - this.firstVideoTimestamp) - (Date.now() - this.firstTimestamp)
+                    this.delay = (Date.now() - this.startTimestamp) - (timestamp - this.firstTimestamp)
                     return this.delay
                 }
-                return 0
+                return -1
             }
             var loop = () => {
                 if (buffer.length) {
                     var data = buffer[0]
-                    if (!firstTimestamp) {
-                        firstTimestamp = data.ts
-                        startTimestamp = Date.now()
+                    if (this.getDelay(data.ts) === -1) {
                         buffer.shift()
                         data.decoder.decode(data.payload)
-                    } else if (data.ts - firstTimestamp + this.videoBuffer < Date.now() - startTimestamp) {
+                    } else if (this.delay > this.videoBuffer + 1000) {
+                        buffer.shift()
+                        if (data.type == 1) {
+                            data.decoder.decode(data.payload)
+                        }
+                        return loop()
+                    } else if (this.delay > this.videoBuffer) {
                         buffer.shift()
                         data.decoder.decode(data.payload)
                     }
@@ -148,8 +145,8 @@ Module.postRun = function () {
             if (url.indexOf("http") == 0) {
                 this.flvMode = true
                 var _this = this;
-                this.controller = new AbortController();
-                fetch(url, { signal: this.controller.signal }).then(function (res) {
+                var controller = new AbortController();
+                fetch(url, { signal: controller.signal }).then(function (res) {
                     var reader = res.body.getReader();
                     var dispatch = dispatchData(_this.inputFlv())
                     var fetchNext = function () {
@@ -164,12 +161,8 @@ Module.postRun = function () {
                     }
                     fetchNext()
                 }).catch(console.error)
-                this.close = function () {
-                    this.controller.abort();
-                    audioDecoder.clear()
-                    videoDecoder.clear()
-                    cancelAnimationFrame(this.stopId)
-                    delete this.close
+                this._close = function () {
+                    controller.abort()
                 }
             } else {
                 this.flvMode = url.indexOf(".flv") != -1
@@ -183,28 +176,16 @@ Module.postRun = function () {
                         var dv = new DataView(evt.data)
                         switch (dv.getUint8(0)) {
                             case 1:
-                                if (this.videoBuffer) {
-                                    buffer.push({ ts: dv.getUint32(1, false), payload: new Uint8Array(evt.data, 5), decoder: audioDecoder })
-                                } else {
-                                    audioDecoder.decode(new Uint8Array(evt.data, 5))
-                                }
+                                buffer.push({ ts: dv.getUint32(1, false), payload: new Uint8Array(evt.data, 5), decoder: audioDecoder, type: 0 })
                                 break
                             case 2:
-                                if (this.videoBuffer) {
-                                    buffer.push({ ts: dv.getUint32(1, false), payload: new Uint8Array(evt.data, 5), decoder: videoDecoder })
-                                } else {
-                                    videoDecoder.decode(new Uint8Array(evt.data, 5))
-                                }
+                                buffer.push({ ts: dv.getUint32(1, false), payload: new Uint8Array(evt.data, 5), decoder: videoDecoder, type: dv.getUint8(5) >> 4 })
                                 break
                         }
                     }
                 }
-                this.close = function () {
+                this._close = function () {
                     this.ws.close()
-                    audioDecoder.clear()
-                    videoDecoder.clear()
-                    cancelAnimationFrame(this.stopId)
-                    delete this.close
                 }
             }
             this.setVideoSize = function (w, h) {
@@ -231,7 +212,17 @@ Module.postRun = function () {
                     }
                 }
             }
-        },
+        }, close: function () {
+            if (this._close) {
+                this._close()
+                audioDecoder.clear()
+                videoDecoder.clear()
+                cancelAnimationFrame(this.stopId)
+                this.firstTimestamp = 0
+                this.startTimestamp = 0
+                delete this.getDelay
+            }
+        }
     }
     var audioDecoder = new Module.AudioDecoder(decoder)
     var videoDecoder = new Module.VideoDecoder(decoder)
@@ -255,7 +246,7 @@ Module.postRun = function () {
                 decoder.videoBuffer = (msg.time * 1000) | 0
                 break
             case "close":
-                if (decoder.close) decoder.close()
+                decoder.close()
                 break
         }
     }

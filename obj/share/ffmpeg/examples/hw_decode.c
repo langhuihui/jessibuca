@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
     }
 
     /* open the file to dump raw data */
-    output_file = fopen(argv[3], "w+b");
+    output_file = fopen(argv[3], "w+");
 
     /* actual decoding and dump the raw data */
     while (ret >= 0) {
