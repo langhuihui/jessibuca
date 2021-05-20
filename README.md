@@ -33,6 +33,12 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 注：以http-flv请求时，存在跨域请求的问题，需要设置access-control-allow-origin, websocket-flv默认不存在此问题
 - 支持HTTPS/WSS加密视频传输，保证视频内容传输安全
 - 手机浏览器内打开视频不会变成全屏播放
+
+## 本地测试
+
+安装 vuepress (npm install -g vuepress)
+执行 vuepress dev .
+
 ## 使用方法
 自动播放http-flv格式
 ```html
@@ -40,7 +46,7 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 <script src="./renderer.js"></script>
 <script>
   var container = document.getElementById("container");
-  var jessibuca = new Jessibuca({ container, decoder: "ff.js" ,videoBuffer:0.2});
+  var jessibuca = new Jessibuca({ container, decoder: "worker.js" ,videoBuffer:0.2});
   jessibuca.onLoad = function () {
       this.play("http://localhost/live/user1.flv")
   }
@@ -53,7 +59,7 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 <button onclick="play">播放</button>
 <script>
   var container = document.getElementById("container");
-  var jessibuca = new Jessibuca({ container, decoder: "ff.js" ,videoBuffer:0.2});
+  var jessibuca = new Jessibuca({ container, decoder: "worker.js" ,videoBuffer:0.2});
   function play(){
     jessibuca.play("ws://localhost/live/user1")
   }
@@ -64,33 +70,13 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 
 ## 源码目录结构
 
-- obj 存放emscripten编译好的各种解码库的字节码库
-- public 存放编译输出的js和wasm文件以及renderer.js
-- thirdparty 各种第三方解码库的代码（已修改）和编译脚本 
+- obj 存放emscripten编译好的ffmpeg解码库的字节码库
+- .vuepress/public 存放编译输出的js和wasm文件
 
 ## 编译
 
-编译命令是python make.py 加上参数构成
+编译命令是 python make.py --wasm
 
-参数包括
-- -v 视频解码库，有效值为ff（ffmpeg）、libhevc、libde265 如果不传参数代表使用avc库（只支持h264 的baseline）
-- -a 音频解码库，有效值为mp3、speex、aac，如果不传参数则无音频解码（ffmpeg自带aac解码）
-- --wasm 表示编译成WebAssembly格式
-- -o 代表输出文件路径，默认值是public/Jessibuca.js
-
-示例:
-ffmpeg（h264-aac）
-```bash
-python make.py -v ff -o .vuepress/public/ff.js
-```
-avc-mp3组合
-```bash
-python make.py -a mp3 -o .vuepress/public/avc_mp3.js
-```
-libhevc-aac组合
-```bash
-python make.py -v libhevc -a aac -o .vuepress/public/h265_aac.js
-```
 ## 基本原理
 
 <img src="/tech.png">
