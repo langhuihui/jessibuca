@@ -93,11 +93,19 @@ Module.postRun = function () {
             var tmp32 = new Uint32Array(tmp)
             while (true) {
                 var type = yield 1
+
                 tmp8.set((yield 3).reverse())
                 var length = tmp32[0]
                 tmp8.set((yield 3).reverse())
+                var tsEx = yield 1
                 var ts = tmp32[0]
-                yield 4
+                if (ts === 0xFFFFFF) {
+                    tmp8[3] = yield 1
+                    ts = tmp32[0]
+                    yield 3
+                } else {
+                    yield 4
+                }
                 var payload = yield length
                 switch (type) {
                     case 8:
@@ -118,6 +126,7 @@ Module.postRun = function () {
                 this.startTimestamp = Date.now()
                 this.getDelay = function (timestamp) {
                     this.delay = (Date.now() - this.startTimestamp) - (timestamp - this.firstTimestamp)
+                    //console.log((Date.now() - this.startTimestamp), timestamp, (timestamp - this.firstTimestamp))
                     return this.delay
                 }
                 return -1
