@@ -128,9 +128,16 @@ Module.postRun = function () {
                     if (this.getDelay(data.ts) === -1) {
                         buffer.shift()
                         data.decoder.decode(data.payload)
-                    } else if (this.delay > this.videoBuffer) {
-                        buffer.shift()
-                        data.decoder.decode(data.payload)
+                    } else {
+                        while (buffer.length) {
+                            data = buffer[0]
+                            if (this.getDelay(data.ts) > this.videoBuffer) {
+                                buffer.shift()
+                                data.decoder.decode(data.payload)
+                            } else {
+                                break
+                            }
+                        }
                     }
                 }
                 this.stopId = requestAnimationFrame(loop)
@@ -151,9 +158,16 @@ Module.postRun = function () {
                             data.decoder.decode(data.payload)
                         } else if (this.delay > this.videoBuffer + 1000) {
                             this.dropping = true
-                        } else if (this.delay > this.videoBuffer) {
-                            buffer.shift()
-                            data.decoder.decode(data.payload)
+                        } else {
+                            while (buffer.length) {
+                                data = buffer[0]
+                                if (this.getDelay(data.ts) > this.videoBuffer) {
+                                    buffer.shift()
+                                    data.decoder.decode(data.payload)
+                                } else {
+                                    break
+                                }
+                            }
                         }
                     }
                 }
