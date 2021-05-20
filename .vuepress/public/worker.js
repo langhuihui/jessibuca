@@ -87,24 +87,25 @@ Module.postRun = function () {
             }
         },
         inputFlv: function* () {
-            yield 13
+            yield 9
             var tmp = new ArrayBuffer(4)
             var tmp8 = new Uint8Array(tmp)
             var tmp32 = new Uint32Array(tmp)
             while (true) {
-                var type = yield 1
-
-                tmp8.set((yield 3).reverse())
+                tmp8[3] = 0
+                var t = yield 15
+                var type = t[4]
+                tmp8[0] = t[7]
+                tmp8[1] = t[6]
+                tmp8[2] = t[5]
                 var length = tmp32[0]
-                tmp8.set((yield 3).reverse())
-                var tsEx = yield 1
+                tmp8[0] = t[10]
+                tmp8[1] = t[9]
+                tmp8[2] = t[8]
                 var ts = tmp32[0]
                 if (ts === 0xFFFFFF) {
-                    tmp8[3] = yield 1
+                    tmp8[3] = t[11]
                     ts = tmp32[0]
-                    yield 3
-                } else {
-                    yield 4
                 }
                 var payload = yield length
                 switch (type) {
@@ -115,7 +116,6 @@ Module.postRun = function () {
                         buffer.push({ ts, payload, decoder: videoDecoder, type: payload[0] >> 4 })
                         break
                 }
-                yield 4
             }
         },
         play: function (url) {
@@ -126,7 +126,6 @@ Module.postRun = function () {
                 this.startTimestamp = Date.now()
                 this.getDelay = function (timestamp) {
                     this.delay = (Date.now() - this.startTimestamp) - (timestamp - this.firstTimestamp)
-                    //console.log((Date.now() - this.startTimestamp), timestamp, (timestamp - this.firstTimestamp))
                     return this.delay
                 }
                 return -1
