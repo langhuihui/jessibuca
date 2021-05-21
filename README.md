@@ -1,21 +1,3 @@
----
-home: true
-heroImage: /logo.png
-heroText: Jessibuca
-tagline: 纯H5直播流播放器
-actionText: 打开播放器
-actionLink: /player.md
-sidebarDepth: 2
-sidebar: auto
-features:
-- title: 无插件
-  details: 基于ASM.js/WebAssembly(wasm)实现的纯JavaScript直播播放器
-- title: 低延时
-  details: 能够在 PC\Android\iOS 浏览器Webview 内实现2秒以内低延迟直播播放
-- title: 支持H265
-  details: 软解码H.264/H.265+AAC/PCMA/PCMU流，WebGL视频渲染，WebAudio音频播放。
-footer: GPL Licensed | Copyright © 2020-present dexter
----
 # 简介
 
 Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视频解码库编译成Js（ams.js/wasm)运行于浏览器之中。兼容几乎所有浏览器，可以运行在PC、手机、微信中，无需额外安装插件。
@@ -36,8 +18,8 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 
 ## 本地测试
 
-安装 vuepress (npm install -g vuepress)
-执行 vuepress dev .
+安装 vitepress (npm install -g vitepress)
+执行 vitepress dev .
 
 ## 使用方法
 自动播放http-flv格式
