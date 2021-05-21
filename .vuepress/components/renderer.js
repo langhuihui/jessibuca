@@ -461,14 +461,21 @@
                     break
                 case "print":
                     _this.onLog(msg.text)
-                    this._trigger('log', msg.text);
+                    _this._trigger('log', msg.text);
                     _this._opt.isDebug && console.log(msg.text);
                     break
                 case "printErr":
                     _this.onLog(msg.text);
-                    this._trigger('log', msg.text);
+                    _this._trigger('log', msg.text);
                     _this.onError(msg.text);
-                    this._trigger('error', msg.text);
+                    _this._trigger('error', msg.text);
+                    _this._opt.isDebug && console.error(msg.text);
+                    break;
+                case "fetchErr":
+                    _this.onLog(msg.text);
+                    _this._trigger('log', msg.text);
+                    _this.onError(msg.text);
+                    _this._trigger('error', msg.text);
                     _this._opt.isDebug && console.error(msg.text);
                     break;
                 case "initAudioPlanar":
