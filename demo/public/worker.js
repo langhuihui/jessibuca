@@ -199,8 +199,8 @@ Module.postRun = function () {
                         }).catch((e) => input.throw(e))
                     }
                     fetchNext()
-                }).catch((err)=>{
-                    postMessage({ cmd: "fetchErr", text: err.message })
+                }).catch((err) => {
+                    postMessage({ cmd: "printErr", text: err.message })
                 })
                 this._close = function () {
                     controller.abort()

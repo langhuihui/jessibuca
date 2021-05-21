@@ -1,7 +1,7 @@
 <template>
     <div class="root">
         <div class="container-shell">
-            <div id="container" class="container" ref="container"></div>
+            <div id="container" ref="container"></div>
             <div class="input">
                 <div>输入URL：</div>
                 <input
@@ -99,9 +99,6 @@ export default {
         };
     },
     computed: {
-        decoder() {
-            return "worker.js";
-        },
         isMute() {
             let result = true;
             if (this.jessibuca) {
@@ -110,19 +107,14 @@ export default {
             return result;
         },
     },
-    watch: {
-        decoder(v) {
-            this.restartPlay();
-        },
-    },
     mounted() {
-        let script = document.createElement("script")
-        script.src = 'webgl.js'
-        document.body.appendChild(script)
+        let script = document.createElement("script");
+        script.src = "webgl.js";
+        document.body.appendChild(script);
         this.create();
         window.onerror = (msg) => (this.err = msg);
     },
-    destroyed() {
+    unmounted() {
         this.jessibuca.destroy();
     },
     methods: {
@@ -132,11 +124,10 @@ export default {
                 Object.assign(
                     {
                         container: this.$refs.container,
-                        decoder: this.decoder,
                         videoBuffer: Number(this.$refs.buffer.value), // 缓存时长
                         isResize: false,
                         text: "",
-                        background: "bg.jpg",
+                        // background: "bg.jpg",
                         loadingText: "加载中",
                         debug: true,
                         showBandwidth: this.showBandwidth, // 显示网速
@@ -319,12 +310,14 @@ export default {
 .root {
     display: flex;
     place-content: center;
+    margin-top: 3rem;
 }
 
 .container-shell {
-    background: gray;
+    backdrop-filter: blur(5px);
+    background: hsla(0, 0%, 50%, 0.5);
     padding: 30px 4px 10px 4px;
-    border: 2px solid black;
+    /* border: 2px solid black; */
     width: auto;
     position: relative;
     border-radius: 5px;
@@ -340,8 +333,8 @@ export default {
     text-shadow: 1px 1px black;
 }
 
-.container {
-    background: rgb(13, 14, 27);
+#container {
+    background: rgba(13, 14, 27, 0.7);
     width: 640px;
     height: 398px;
 }
@@ -380,9 +373,13 @@ export default {
 .option span {
     color: white;
 }
-
+.page {
+    background: url(/bg.jpg);
+    background-repeat: no-repeat;
+    background-position: top;
+}
 @media (max-width: 720px) {
-    .container {
+    #container {
         width: 90vw;
         height: 52.7vw;
     }
