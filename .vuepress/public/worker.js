@@ -39,7 +39,7 @@ function dispatchData(input) {
         }
         while (data.length >= need.value) {
             var remain = data.slice(need.value)
-            need = input.next(need.value > 1 ? data.slice(0, need.value) : data[0])
+            need = input.next(data.slice(0, need.value))
             data = remain
         }
         if (data.length > 0) {
@@ -148,7 +148,6 @@ Module.postRun = function () {
                         }
                     }
                 }
-                this.stopId = requestAnimationFrame(loop)
             } : () => {
                 if (buffer.length) {
                     if (this.dropping) {
@@ -179,9 +178,8 @@ Module.postRun = function () {
                         }
                     }
                 }
-                this.stopId = requestAnimationFrame(loop)
             }
-            this.stopId = requestAnimationFrame(loop)
+            this.stopId = setInterval(loop, 10)
             if (url.indexOf("http") == 0) {
                 this.flvMode = true
                 var _this = this;
@@ -259,7 +257,7 @@ Module.postRun = function () {
                 this._close()
                 audioDecoder.clear()
                 videoDecoder.clear()
-                cancelAnimationFrame(this.stopId)
+                clearInterval(this.stopId)
                 this.firstTimestamp = 0
                 this.startTimestamp = 0
                 delete this.getDelay
