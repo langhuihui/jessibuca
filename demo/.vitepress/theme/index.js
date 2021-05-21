@@ -1,5 +1,5 @@
 import DefaultTheme from 'vitepress/theme'
-import DemoPlayer from '../../components/DemoPlayer.vue'
+import DemoPlayer from "../../components/DemoPlayer.vue"
 export default {
     ...DefaultTheme,
     enhanceApp({ app }) {

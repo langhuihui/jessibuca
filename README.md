@@ -21,32 +21,6 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 安装 vitepress (npm install -g vitepress)
 执行 vitepress dev .
 
-## 使用方法
-自动播放http-flv格式
-```html
-<div id="container" style="width:800px;height:600px"></div>
-<script src="./renderer.js"></script>
-<script>
-  var container = document.getElementById("container");
-  var jessibuca = new Jessibuca({ container, decoder: "worker.js" ,videoBuffer:0.2});
-  jessibuca.onLoad = function () {
-      this.play("http://localhost/live/user1.flv")
-  }
-</script>
-```
-程序控制播放websocket-raw格式
-```html
-<div id="container" style="width:800px;height:600px"></div>
-<script src="./renderer.js"></script>
-<button onclick="play">播放</button>
-<script>
-  var container = document.getElementById("container");
-  var jessibuca = new Jessibuca({ container, decoder: "worker.js" ,videoBuffer:0.2});
-  function play(){
-    jessibuca.play("ws://localhost/live/user1")
-  }
-</script>
-```
 ## API
 [API](/api.md)
 

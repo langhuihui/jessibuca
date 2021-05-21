@@ -1,15 +1,8 @@
-小程序
-cheerp
-x64
 Debug
 .vs
 .vscode
 *.zip
 *.rar
-
 node_modules
-.vuepress/dist
 dist
 .idea
-yarn.lock
-package.json

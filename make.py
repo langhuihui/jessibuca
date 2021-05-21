@@ -9,7 +9,7 @@ from subprocess import Popen, PIPE, STDOUT
 # exec(open(os.path.expanduser('~/.emscripten'), 'r').read())
 # sys.path.append(EMSCRIPTEN_ROOT)
 opts, args = getopt.getopt(sys.argv[1:], "o:", ["wasm"])
-args = {'-o': '.vuepress/public/ff'}
+args = {'-o': 'public/ff'}
 for op, value in opts:
     args[op] = value
 args['-o'] = args['-o'] + ('_wasm' if '--wasm' in args else '')
