@@ -20,16 +20,26 @@ options 支持的参数有：
 
 ### decoder
 - **类型**：`string`
-- **默认值**：`ff.js`
+- **默认值**：`worker.js`
 - **用法**：
-支持 `ff.js` 和`ff_wasm.js` 和`libhevc_aac.js`和`libhevc_aac_wasm.js`
 
-其中
-- ff.js  h264的 asm.js版本
-- ff_wasm.js  h264的 wasm 版本
-- libhevc_aac.js  h265的asm.js版本
-- libhevc_aac_wasm.js h265的wasm版本
+worker 地址。
 
+
+### vod
+- **类型**：`boolean`
+- **默认值**：false
+- **用法**：
+
+是否设置点播模式，点播模式无视延迟。
+
+### rotate
+- **类型**：`number`
+- **默认值**：0
+- **用法**：
+
+设置旋转角度，只支持，0(默认) ，180，270 三个值。
+  
 ### isResize
 - **类型**：`boolean`
 - **默认值**：`true`
