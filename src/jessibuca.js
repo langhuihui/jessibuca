@@ -5,7 +5,23 @@ import initDecodeWorker from './worker/decodeWorker';
 import initCore from './core/index';
 import {DEFAULT_OPTIONS, EVEMTS, POST_MESSAGE} from "./constant";
 import {$domToggle, $hideBtns, $initBtns, checkFull} from "./utils";
-
+import 'regenerator-runtime/runtime'
+import createWebGL from './utils/webgl';
+var supportedWasm = (() => {
+    try {
+        if (typeof WebAssembly === "object"
+            && typeof WebAssembly.instantiate === "function") {
+            const module = new WebAssembly.Module(Uint8Array.of(0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00));
+            if (module instanceof WebAssembly.Module)
+                return new WebAssembly.Instance(module) instanceof WebAssembly.Instance;
+        }
+    } catch (e) {
+    }
+    return false;
+})();
+if (!Date.now) Date.now = function () {
+    return new Date().getTime();
+};
 class Jessibuca {
     constructor(options) {
         this._opt = Object.assign(DEFAULT_OPTIONS, options);

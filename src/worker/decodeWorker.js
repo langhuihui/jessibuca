@@ -1,10 +1,8 @@
-import {CMD_TYPE, EVEMTS, POST_MESSAGE} from "../constant";
+import { CMD_TYPE, EVEMTS, POST_MESSAGE } from "../constant";
 import createWebGL from '../utils/webgl';
 
 export default (jessibuca) => {
     const decoderWorker = new Worker(jessibuca._opt.decoder);
-
-    //
     decoderWorker.onmessage = (event) => {
         const msg = event.data;
         switch (msg.cmd) {
@@ -25,7 +23,7 @@ export default (jessibuca) => {
                 jessibuca.$canvasElement.height = msg.h;
                 jessibuca.onInitSize();
                 jessibuca._resize();
-                jessibuca._trigger(EVEMTS.videoInfo, {w: msg.w, h: msg.h});
+                jessibuca._trigger(EVEMTS.videoInfo, { w: msg.w, h: msg.h });
                 if (jessibuca._supportOffscreen()) {
                     jessibuca._bitmaprenderer = jessibuca.$canvasElement.getContext("bitmaprenderer");
 
@@ -46,7 +44,7 @@ export default (jessibuca) => {
                 }
                 jessibuca._trigger(EVEMTS.timeUpdate, msg.ts);
                 jessibuca.onTimeUpdate(msg.ts);
-                jessibuca._updateStats({bps: msg.bps, ts: msg.ts});
+                jessibuca._updateStats({ bps: msg.bps, ts: msg.ts });
                 jessibuca._checkHeart();
                 break;
             case CMD_TYPE.playAudio:

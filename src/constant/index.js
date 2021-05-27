@@ -17,7 +17,7 @@ export const DEFAULT_OPTIONS = {
     },
     loadingText: '',
     background: '',
-    decoder: 'worker.js',
+    decoder: 'index.js',
     rotate: 0,
     forceNoOffscreen: false
 }

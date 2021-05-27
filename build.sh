@@ -2,4 +2,4 @@
 
 set -x
 npm run build
-mv dist/* ../demo/public
+mv dist/* ./demo/public

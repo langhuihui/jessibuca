@@ -6,5 +6,5 @@ Debug
 node_modules
 dist
 .idea
-jessibuca/.cache
+.cache
 

@@ -1,0 +1,18 @@
+{
+  "name": "jessibuca",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "parcel build src/index.js --no-source-maps --target browser",
+    "build:wasm": "python make.py --wasm",
+    "build:demo": "vitepress build demo",
+    "dev": "vitepress dev demo"
+  },
+  "devDependencies": {
+    "parcel-bundler": "1.12.5",
+    "vitepress": "^0.14.0"
+  },
+  "browserslist": [
+    "last 3 chrome versions",
+    "last 3 safari versions"
+  ]
+}
