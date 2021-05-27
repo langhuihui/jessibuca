@@ -1,5 +1,5 @@
-import {setStyle} from "../utils";
-
+import {$domToggle, $hideBtns, dataURLToFile, downloadImg, now, setStyle} from "../utils";
+import initEventListener from './eventListener';
 
 export default (jessibuca) => {
 
@@ -14,18 +14,12 @@ export default (jessibuca) => {
             }
         });
 
-        if (jessibuca._opt.showBandwidth || this._opt.text || hasBtnShow) {
+        if (jessibuca._opt.showBandwidth || jessibuca._opt.text || hasBtnShow) {
             result = true;
         }
 
         return result;
     }
-
-
-
-
-
-
 
     const playBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQEAYAAABPYyMiAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAZiS0dEAAAAAAAA+UO7fwAAAAlwSFlzAAAASAAAAEgARslrPgAAARVJREFUSMe9laEOglAUhs+5k9lJFpsJ5QWMJoNGbEY0mEy+gr6GNo0a3SiQCegMRILzGdw4hl+Cd27KxPuXb2zA/91z2YXoGRERkX4fvN3A2QxUiv4dFM3n8jZRBLbbVfd+ubJuF4xjiCyXkksueb1uSKCIZYGLBTEx8ekEoV7PkICeVgs8HiGyXoO2bUigCDM4HoPnM7bI8wwJ6Gk0sEXbLSay30Oo2TQkoGcwgFCSQMhxDAvoETEscDiQkJC4LjMz8+XyZ4HrFYWjEQqHQ1asWGWZfmdFAsVINxuw00HhbvfpydpvxWkKTqdYaRCUfUPJCdzv4Gr1uqfli0tOIAzByUT/iCrL6+84y3Bw+D6ui5Ou+jwA8FnIO++FACgAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjEtMDEtMDhUMTY6NDI6NTMrMDg6MDCKP7wnAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIxLTAxLTA4VDE2OjQyOjUzKzA4OjAw+2IEmwAAAEl0RVh0c3ZnOmJhc2UtdXJpAGZpbGU6Ly8vaG9tZS9hZG1pbi9pY29uLWZvbnQvdG1wL2ljb25fZ2Y3MDBzN2IzZncvYm9mYW5nLnN2Z8fICi0AAAAASUVORK5CYII=';
     const pauseBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQEAYAAABPYyMiAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAZiS0dEAAAAAAAA+UO7fwAAAAlwSFlzAAAASAAAAEgARslrPgAAAHVJREFUSMftkCESwCAMBEOnCtdXVMKHeC7oInkEeQJXkRoEZWraipxZc8lsQqQZBACAlIS1oqGhhTCdu3oyxyyMcdRf79c5J7SWDBky+z4173rbJvR+VF/e/qwKqIAKqMBDgZyFzAQCoZTpxq7HLDyOrw/9b07l3z4dDnI2IAAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyMS0wMS0wOFQxNjo0Mjo1MyswODowMIo/vCcAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjEtMDEtMDhUMTY6NDI6NTMrMDg6MDD7YgSbAAAASnRFWHRzdmc6YmFzZS11cmkAZmlsZTovLy9ob21lL2FkbWluL2ljb24tZm9udC90bXAvaWNvbl9nZjcwMHM3YjNmdy96YW50aW5nLnN2ZxqNZJkAAAAASUVORK5CYII=';
@@ -226,13 +220,13 @@ export default (jessibuca) => {
     }
 
     // screenshots
-    if (this._opt.operateBtns.screenshot) {
+    if (jessibuca._opt.operateBtns.screenshot) {
         control2.appendChild(screenshotsDom);
         doms.screenshotsDom = screenshotsDom;
     }
 
     // play stop
-    if (this._opt.operateBtns.play) {
+    if (jessibuca._opt.operateBtns.play) {
         control2.appendChild(playDom);
         control2.appendChild(pauseDom);
         doms.playDom = playDom;
@@ -240,7 +234,7 @@ export default (jessibuca) => {
     }
 
     // audio
-    if (this._opt.operateBtns.audio) {
+    if (jessibuca._opt.operateBtns.audio) {
         control2.appendChild(playAudioDom);
         control2.appendChild(quietAudioDom);
         doms.playAudioDom = playAudioDom;
@@ -248,7 +242,7 @@ export default (jessibuca) => {
     }
 
     // fullscreen
-    if (this._opt.operateBtns.fullscreen) {
+    if (jessibuca._opt.operateBtns.fullscreen) {
         control2.appendChild(fullscreenDom);
         control2.appendChild(minScreenDom);
         doms.fullscreenDom = fullscreenDom;
@@ -273,11 +267,19 @@ export default (jessibuca) => {
     //
     jessibuca.$doms = doms;
 
-    jessibuca._resize = () => jessibuca.resize();
 
-    jessibuca._onfullscreenchange = () => jessibuca.onfullscreenchange();
+    jessibuca._removeContainerChild=()=>{
+        while (jessibuca.$container.firstChild) {
+            jessibuca.$container.removeChild(jessibuca.$container.firstChild);
+        }
+    }
 
-    window.addEventListener('resize', jessibuca._resize);
-    window.addEventListener('fullscreenchange', jessibuca._onfullscreenchange);
+
+
+    initEventListener(jessibuca);
+
+    $hideBtns(jessibuca.$doms);
+
+
 
 }

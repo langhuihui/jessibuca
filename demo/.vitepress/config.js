@@ -6,5 +6,8 @@ module.exports = {
         docsBranch: "v2",
         sidebar: "auto",
         logo: 'logo.png'
-    }
+    },
+    head: [
+        ['script', {src: '/jessibuca.js'}]
+    ]
 }

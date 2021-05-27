@@ -72,9 +72,33 @@ export function checkFull() {
     return !!isFull;
 }
 
-export function noop(){}
+export function noop() {
+}
 
 
 export function now() {
     return new Date().getTime();
+}
+
+export function $hideBtns(doms) {
+    Object.keys(doms || {}).forEach((dom) => {
+        if (dom !== 'bgDom') {
+            $domToggle(doms[dom], false);
+        }
+    })
+}
+
+export function $initBtns($doms) {
+    // show
+    $domToggle($doms.pauseDom, true);
+    $domToggle($doms.screenshotsDom, true);
+    $domToggle($doms.fullscreenDom, true);
+    $domToggle($doms.quietAudioDom, true);
+    $domToggle($doms.textDom, true);
+    $domToggle($doms.speedDom, true);
+    // hide
+    $domToggle($doms.loadingDom, false);
+    $domToggle($doms.playDom, false);
+    $domToggle($doms.playBigDom, false);
+    $domToggle($doms.bgDom, false);
 }

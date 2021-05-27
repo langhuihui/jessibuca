@@ -1,3 +1,5 @@
+import 'regenerator-runtime/runtime'
+import createWebGL from './utils/webgl';
 var supportedWasm = (() => {
     try {
         if (typeof WebAssembly === "object"
@@ -10,8 +12,10 @@ var supportedWasm = (() => {
     }
     return false;
 })();
-importScripts(supportedWasm ? 'ff_wasm.js' : 'ff.js')
-importScripts('webgl.js')
+
+importScripts('ff_wasm.js');
+
+
 function arrayBufferCopy(src, dst, dstByteOffset, numBytes) {
     var i;
     var dst32Offset = dstByteOffset / 4;
@@ -273,7 +277,7 @@ Module.postRun = function () {
         var msg = event.data
         switch (msg.cmd) {
             case "init":
-                decoder.opt = msg.opt
+                decoder.opt = JSON.parse(msg.opt)
                 break
             case "getProp":
                 postMessage({ cmd: "getProp", value: decoder[msg.prop] })

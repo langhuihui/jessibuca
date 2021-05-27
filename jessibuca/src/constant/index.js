@@ -18,7 +18,8 @@ export const DEFAULT_OPTIONS = {
     loadingText: '',
     background: '',
     decoder: 'worker.js',
-    rotate: 0
+    rotate: 0,
+    forceNoOffscreen: false
 }
 
 export const CMD_TYPE = {
@@ -28,7 +29,8 @@ export const CMD_TYPE = {
     playAudio: 'playAudio',
     print: 'print',
     printErr: 'printErr',
-    initAudioPlanar: 'initAudioPlanar'
+    initAudioPlanar: 'initAudioPlanar',
+
 }
 
 export const POST_MESSAGE = {
@@ -36,4 +38,22 @@ export const POST_MESSAGE = {
     play: 'play',
     setVideoBuffer: 'setVideoBuffer',
     init: 'init'
+}
+
+//
+export const EVEMTS = {
+    fullscreen: 'fullscreen',
+    play: 'play',
+    pause: 'pause',
+    mute: 'mute',
+    load: 'load',
+    videoInfo: 'videoInfo',
+    timeUpdate: 'timeUpdate',
+    audioInfo: "audioInfo",
+    log: 'log',
+    error: "error",
+    bps: 'bps',
+    timeout: 'timeout',
+    stats: 'stats',
+    performance: "performance"
 }

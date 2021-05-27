@@ -153,14 +153,6 @@ iPhone，chrome等要求自动播放时，音频必须静音，需要由一个�
 https://developers.google.com/web/updates/2017/09/autoplay-policy-changes
 
 
-### isWebGL()
-- **返回值**：`boolean`
-- **用法**：
-返回是否采用的webgl
-```js
-var result = jessibuca.isWebGL()
-console.log(result) // true
-```
 
 ### setTimeout(time)
 - **参数**：
