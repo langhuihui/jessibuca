@@ -14,7 +14,7 @@
       </div>
       <div class="input" v-if="loaded" style="line-height: 30px">
         <button @click="destroy">销毁</button>
-        <button v-if="isMute" @click="cancelMute">取消静音</button>
+        <button v-if="quieting" @click="cancelMute">取消静音</button>
         <template v-else>
           <button @click="mute">静音</button>
           音量
@@ -88,6 +88,7 @@ export default {
       wasm: false,
       vc: "ff",
       playing: false,
+      quieting:true,
       loaded: false, // mute
       showOperateBtns: false,
       showBandwidth: false,
@@ -99,15 +100,6 @@ export default {
       vod: false,
       forceNoOffscreen: false,
     };
-  },
-  computed: {
-    isMute() {
-      let result = true;
-      if (this.jessibuca) {
-        result = this.jessibuca.quieting;
-      }
-      return result;
-    },
   },
   mounted() {
     this.create();
@@ -126,7 +118,7 @@ export default {
                 videoBuffer: Number(this.$refs.buffer.value), // 缓存时长
                 isResize: false,
                 text: "",
-                // background: "bg.jpg",
+                background: "bg.jpg",
                 loadingText: "加载中",
                 debug: true,
                 showBandwidth: this.showBandwidth, // 显示网速
@@ -137,7 +129,8 @@ export default {
                   audio: this.showOperateBtns,
                 },
                 vod: this.vod,
-                forceNoOffscreen:this.forceNoOffscreen
+                forceNoOffscreen:this.forceNoOffscreen,
+                isNotMute:true
               },
               options
           )
@@ -151,7 +144,6 @@ export default {
           console.log("onFullscreen", msg);
       this.jessibuca.onMute = (msg) => console.log("onMute", msg);
       this.jessibuca.onInitSize = () => console.log("onInitSize");
-      // this.jessibuca.onTimeUpdate = (ts)=> console.log('onTimeUpdate',ts);
       var _this = this;
       this.jessibuca.on("load", function () {
         console.log("on load");
@@ -177,6 +169,7 @@ export default {
 
       this.jessibuca.on("mute", function (msg) {
         console.log("on mute", msg);
+        _this.quieting = msg;
       });
 
       this.jessibuca.on("mute", function (msg) {
@@ -230,6 +223,7 @@ export default {
       this.jessibuca.on("play", () => {
         this.playing = true;
         this.loaded = true;
+        this.quieting = this.jessibuca.quieting;
       });
 
       if (this.$refs.playUrl.value) {

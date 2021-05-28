@@ -25,8 +25,10 @@ export default (jessibuca) => {
 
     jessibuca._audioEnabled(true);
 
+    // 静音
     if (!jessibuca._opt.isNotMute) {
         jessibuca._audioEnabled(false);
+        jessibuca.quieting = false;
     }
 
 

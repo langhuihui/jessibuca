@@ -96,6 +96,7 @@ export function $initBtns($doms) {
     $domToggle($doms.quietAudioDom, true);
     $domToggle($doms.textDom, true);
     $domToggle($doms.speedDom, true);
+    $domToggle($doms.recordDom, true);
     // hide
     $domToggle($doms.loadingDom, false);
     $domToggle($doms.playDom, false);

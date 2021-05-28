@@ -55,5 +55,6 @@ export const EVEMTS = {
     bps: 'bps',
     timeout: 'timeout',
     stats: 'stats',
-    performance: "performance"
+    performance: "performance",
+    record:'record'
 }

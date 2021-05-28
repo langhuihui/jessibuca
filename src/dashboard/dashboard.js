@@ -214,9 +214,17 @@ export default (jessibuca) => {
         control1.appendChild(textDom);
         doms.textDom = textDom;
     }
+
     if (jessibuca._opt.showBandwidth) {
         control1.appendChild(speedDom);
         doms.speedDom = speedDom;
+    }
+
+    if (jessibuca._opt.operateBtns.record) {
+        control2.appendChild(recordingDom);
+        control2.appendChild(recordDom);
+        doms.recordingDom = recordingDom;
+        doms.recordDom = recordDom;
     }
 
     // screenshots
@@ -268,18 +276,16 @@ export default (jessibuca) => {
     jessibuca.$doms = doms;
 
 
-    jessibuca._removeContainerChild=()=>{
+    jessibuca._removeContainerChild = () => {
         while (jessibuca.$container.firstChild) {
             jessibuca.$container.removeChild(jessibuca.$container.firstChild);
         }
     }
 
 
-
     initEventListener(jessibuca);
 
     $hideBtns(jessibuca.$doms);
-
 
 
 }

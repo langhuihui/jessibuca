@@ -7,6 +7,7 @@ import {DEFAULT_OPTIONS, EVEMTS, POST_MESSAGE} from "./constant";
 import {$domToggle, $hideBtns, $initBtns, checkFull} from "./utils";
 import 'regenerator-runtime/runtime'
 import createWebGL from './utils/webgl';
+
 var supportedWasm = (() => {
     try {
         if (typeof WebAssembly === "object"
@@ -22,6 +23,7 @@ var supportedWasm = (() => {
 if (!Date.now) Date.now = function () {
     return new Date().getTime();
 };
+
 class Jessibuca {
     constructor(options) {
         this._opt = Object.assign(DEFAULT_OPTIONS, options);
@@ -82,6 +84,7 @@ class Jessibuca {
             $domToggle(this.$doms.pauseDom, true);
 
             $domToggle(this.$doms.screenshotsDom, true);
+            $domToggle(this.$doms.recordDom, true);
             if (this._quieting) {
                 $domToggle(this.$doms.quietAudioDom, true);
                 $domToggle(this.$doms.playAudioDom, false);
@@ -154,6 +157,26 @@ class Jessibuca {
 
     get loading() {
         return this._loading;
+    }
+
+    set recording(value) {
+        if (value) {
+            $domToggle(this.$doms.recordDom, false);
+            $domToggle(this.$doms.recordingDom, true);
+        } else {
+            $domToggle(this.$doms.recordDom, true);
+            $domToggle(this.$doms.recordingDom, false);
+
+        }
+        if (this._recording !== value) {
+            this.onRecord(value);
+            this._trigger(EVEMTS.record, value);
+            this._recording = value;
+        }
+    }
+
+    get recording() {
+        return this._recording;
     }
 
     /**

@@ -65,6 +65,17 @@ export default (jessibuca) => {
         jessibuca.fullscreen = false;
     }, false);
 
+    jessibuca.$doms.recordDom && jessibuca.$doms.recordDom.addEventListener('click', (e) => {
+        e.stopPropagation();
+        jessibuca.recording = true;
+    }, false);
+    //
+    jessibuca.$doms.recordingDom && jessibuca.$doms.recordingDom.addEventListener('click', (e) => {
+        e.stopPropagation();
+        jessibuca.recording = false;
+    }, false);
+
+
     jessibuca.$doms.quietAudioDom && jessibuca.$doms.quietAudioDom.addEventListener('click', (e) => {
         e.stopPropagation();
         jessibuca._cancelMute();
