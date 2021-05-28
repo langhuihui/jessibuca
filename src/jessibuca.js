@@ -36,7 +36,6 @@ class Jessibuca {
             return;
         }
         delete this._opt.container;
-
         // core
         initCore(this);
         // video

@@ -10,26 +10,23 @@ export default (jessibuca) => {
             audioContextUnlock(jessibuca._audioContext)
             jessibuca._audioEnabled = (flag) => {
                 if (flag) {
-                    // 恢复
+                    // resume
                     jessibuca._audioContext.resume();
 
                 } else {
-                    // 暂停
+                    // suspend
                     jessibuca._audioContext.suspend();
                 }
             }
+            jessibuca._audioContext.resume();
         } else {
+            // suspend
             jessibuca._audioContext.suspend();
         }
     }
 
+    // default not mute
     jessibuca._audioEnabled(true);
-
-    // 静音
-    if (!jessibuca._opt.isNotMute) {
-        jessibuca._audioEnabled(false);
-        jessibuca.quieting = false;
-    }
 
 
     jessibuca._mute = () => {
@@ -83,4 +80,5 @@ export default (jessibuca) => {
             }
         };
     }
+
 }

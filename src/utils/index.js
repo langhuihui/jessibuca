@@ -57,7 +57,7 @@ export function fpsStatus(fps) {
 }
 
 export function setStyle(dom, cssObj) {
-    Object.keys(cssObj).forEach(function (key) {
+    Object.keys(cssObj || {}).forEach(function (key) {
         dom.style[key] = cssObj[key];
     })
 }

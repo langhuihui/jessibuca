@@ -7,7 +7,7 @@ export default (jessibuca) => {
     jessibuca._recording = false;
     jessibuca._playing = false;
     jessibuca._audioPlaying = false;
-    jessibuca._quieting = true;
+    jessibuca._quieting = false;
     jessibuca._fullscreen = false;
 
     jessibuca._stats = {

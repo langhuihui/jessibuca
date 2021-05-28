@@ -282,10 +282,13 @@ export default (jessibuca) => {
         }
     }
 
-
     initEventListener(jessibuca);
 
     $hideBtns(jessibuca.$doms);
 
 
+    // mute
+    if (!jessibuca._opt.isNotMute) {
+        jessibuca._mute();
+    }
 }

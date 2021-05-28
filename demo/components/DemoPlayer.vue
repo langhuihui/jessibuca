@@ -88,7 +88,7 @@ export default {
       wasm: false,
       vc: "ff",
       playing: false,
-      quieting:true,
+      quieting: true,
       loaded: false, // mute
       showOperateBtns: false,
       showBandwidth: false,
@@ -129,8 +129,8 @@ export default {
                   audio: this.showOperateBtns,
                 },
                 vod: this.vod,
-                forceNoOffscreen:this.forceNoOffscreen,
-                isNotMute:true
+                forceNoOffscreen: this.forceNoOffscreen,
+                isNotMute: false
               },
               options
           )
