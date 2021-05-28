@@ -12,7 +12,7 @@ opts, args = getopt.getopt(sys.argv[1:], "o:", ["wasm"])
 args = {'-o': 'demo/public/ff'}
 for op, value in opts:
     args[op] = value
-args['-o'] = args['-o'] + ('_wasm' if '--wasm' in args else '')
+# args['-o'] = args['-o'] + ('_wasm' if '--wasm' in args else '')
 sargs = {
     # 'USE_PTHREADS':  0 if '--cocos' in args else 1,
     'WASM': 1 if '--wasm' in args else 0,
@@ -33,7 +33,8 @@ emcc_args = [
     # '--closure', '1',
     # '--llvm-lto','1',
     '--bind',
-    '-I.', '-Iobj/include'
+    '-I.', '-Iobj/include',
+    '--post-js','src/post.js'
 ]+["-s "+k+"="+str(v) for k, v in sargs.items()]
 
 # if '--cocos' in args:

@@ -18,8 +18,8 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 
 ## 本地测试
 
-安装 vitepress (npm install -g vitepress)
-执行 vitepress dev .
+- 执行yarn 或者npm i
+- 执行yarn dev 或者 npm run dev
 
 ## API
 [API](/api.md)
@@ -27,11 +27,20 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 ## 源码目录结构
 
 - obj 存放emscripten编译好的ffmpeg解码库的字节码库
-- .vuepress/public 存放编译输出的js和wasm文件
+- demo/public 存放编译输出的js和wasm文件
+- src 存放js源码
 
-## 编译
+## 打包js
 
-编译命令是 python make.py --wasm
+执行yarn build 或者 npm run build
+
+## 引用关系
+src/index.js 引用了jessibuca.js和worker.js 目的是将两个js打包到一起，实际执行中会根据当前是否为主线程来判断是否加载worker线程（把自己加载到webworker中）
+worker.js 会引用 demo/public/ff.js （该文件由编译C++文件所得，用于加载wasm）
+
+## 编译C++代码
+
+执行yarn build:wasm 或者 npm run build:wasm
 
 ## 基本原理
 

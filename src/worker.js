@@ -1,4 +1,5 @@
 import 'regenerator-runtime/runtime'
+import Module from '../demo/public/ff'
 import createWebGL from './utils/webgl';
 var supportedWasm = (() => {
     try {
@@ -12,9 +13,8 @@ var supportedWasm = (() => {
     }
     return false;
 })();
-
-importScripts('ff_wasm.js');
-
+// const wasm = 'ff_wasm.js'
+// importScripts(wasm);
 
 function arrayBufferCopy(src, dst, dstByteOffset, numBytes) {
     var i;

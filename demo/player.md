@@ -10,5 +10,5 @@ sidebar: false
 3. http-flv 即http://localhost/live/test.flv
 - 注意http协议会有跨域问题，需要设置cors头
 - 协议同时支持https、wss
-- demo播放器只提供AAC的解码演示
+- 同时支持H264和H265编码格式
 

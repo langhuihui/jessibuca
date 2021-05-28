@@ -5,9 +5,9 @@
       <div class="input">
         <div>输入URL：</div>
         <input
-            autocomplete="on"
-            ref="playUrl"
-            value="ws://localhost:8080/jessica/live/rtc"
+          autocomplete="on"
+          ref="playUrl"
+          value="ws://localhost:8080/jessica/live/rtc"
         />
         <button v-if="!playing" @click="play">播放</button>
         <button v-else @click="pause">停止</button>
@@ -36,16 +36,16 @@
         <button @click="screenShot">截图</button>
         <div style="line-height: 30px">
           <input
-              type="checkbox"
-              ref="operateBtns"
-              v-model="showOperateBtns"
-              @change="restartPlay"
+            type="checkbox"
+            ref="operateBtns"
+            v-model="showOperateBtns"
+            @change="restartPlay"
           /><span>操作按钮</span>
           <input
-              type="checkbox"
-              ref="operateBtns"
-              v-model="showBandwidth"
-              @change="restartPlay"
+            type="checkbox"
+            ref="operateBtns"
+            v-model="showBandwidth"
+            @change="restartPlay"
           /><span>网速</span>
           <span v-if="performance">性能：{{ performance }}</span>
         </div>
@@ -53,32 +53,32 @@
       <div class="option">
         <span>缓冲(秒):</span>
         <input
-            style="width: 50px"
-            type="number"
-            ref="buffer"
-            value="0.2"
-            @change="changeBuffer"
+          style="width: 50px"
+          type="number"
+          ref="buffer"
+          value="0.2"
+          @change="changeBuffer"
         />
-        <input type="checkbox" v-model="vod" ref="vod" @change="restartPlay"/><span
-      >点播模式</span
-      >
+        <!-- <input
+          type="checkbox"
+          v-model="vod"
+          ref="vod"
+          @change="restartPlay"
+        /><span>点播模式</span> -->
         <input
-            type="checkbox"
-            ref="offscreen"
-            v-model="forceNoOffscreen"
-            @change="restartPlay"
+          type="checkbox"
+          ref="offscreen"
+          v-model="forceNoOffscreen"
+          @change="restartPlay"
         /><span>禁用离屏渲染</span>
-        <input
-            type="checkbox"
-            ref="resize"
-            @change="changeResize"
-        /><span>自适应</span>
+        <input type="checkbox" ref="resize" @change="changeResize" /><span
+          >禁止画面拉伸</span
+        >
       </div>
     </div>
   </div>
 </template>
 <script>
-
 export default {
   name: "DemoPlayer",
   props: {},
@@ -112,36 +112,35 @@ export default {
     create(options) {
       options = options || {};
       this.jessibuca = new window.Jessibuca(
-          Object.assign(
-              {
-                container: this.$refs.container,
-                videoBuffer: Number(this.$refs.buffer.value), // 缓存时长
-                isResize: false,
-                text: "",
-                background: "bg.jpg",
-                loadingText: "加载中",
-                debug: true,
-                showBandwidth: this.showBandwidth, // 显示网速
-                operateBtns: {
-                  fullscreen: this.showOperateBtns,
-                  screenshot: this.showOperateBtns,
-                  play: this.showOperateBtns,
-                  audio: this.showOperateBtns,
-                },
-                vod: this.vod,
-                forceNoOffscreen: this.forceNoOffscreen,
-                isNotMute: false
-              },
-              options
-          )
+        Object.assign(
+          {
+            container: this.$refs.container,
+            videoBuffer: Number(this.$refs.buffer.value), // 缓存时长
+            isResize: false,
+            text: "",
+            // background: "bg.jpg",
+            loadingText: "加载中",
+            debug: true,
+            showBandwidth: this.showBandwidth, // 显示网速
+            operateBtns: {
+              fullscreen: this.showOperateBtns,
+              screenshot: this.showOperateBtns,
+              play: this.showOperateBtns,
+              audio: this.showOperateBtns,
+            },
+            vod: this.vod,
+            forceNoOffscreen: this.forceNoOffscreen,
+            isNotMute: false,
+          },
+          options
+        )
       );
       this.jessibuca.onLog = (msg) => console.log("onLog", msg);
       this.jessibuca.onLoad = (msg) => console.log("onLoad");
       this.jessibuca.onRecord = (msg) => console.log("onRecord", msg);
       this.jessibuca.onPause = () => console.log("onPause");
       this.jessibuca.onPlay = () => console.log("onPlay");
-      this.jessibuca.onFullscreen = (msg) =>
-          console.log("onFullscreen", msg);
+      this.jessibuca.onFullscreen = (msg) => console.log("onFullscreen", msg);
       this.jessibuca.onMute = (msg) => console.log("onMute", msg);
       this.jessibuca.onInitSize = () => console.log("onInitSize");
       var _this = this;
