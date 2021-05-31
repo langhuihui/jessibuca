@@ -74,8 +74,8 @@ Module.postRun = function () {
                 var outputArray = [];
                 var frameCount = len / 4 / buffersA.length;
                 for (var i = 0; i < buffersA.length; i++) {
-                    var fp = HEAPU32[(data >> 2) + i] >> 2;
-                    var float32 = HEAPF32.subarray(fp, fp + frameCount);
+                    var fp = Module.HEAPU32[(data >> 2) + i] >> 2;
+                    var float32 = Module.HEAPF32.subarray(fp, fp + frameCount);
                     var buffer = buffersA[i]
                     if (buffer.length) {
                         buffer = buffer.pop();
@@ -242,13 +242,13 @@ Module.postRun = function () {
                     var gl = canvas.getContext("webgl");
                     var render = createWebGL(gl)
                     this.draw = function (compositionTime, y, u, v) {
-                        render(w, h, HEAPU8.subarray(y, y + size), HEAPU8.subarray(u, u + qsize), HEAPU8.subarray(v, v + (qsize)))
+                        render(w, h, Module.HEAPU8.subarray(y, y + size), Module.HEAPU8.subarray(u, u + qsize), Module.HEAPU8.subarray(v, v + (qsize)))
                         let image_bitmap = canvas.transferToImageBitmap();
                         postMessage({ cmd: "render", compositionTime: compositionTime, bps: this.bps, delay: this.delay, buffer: image_bitmap }, [image_bitmap])
                     }
                 } else {
                     this.draw = function (compositionTime, y, u, v) {
-                        var yuv = [HEAPU8.subarray(y, y + size), HEAPU8.subarray(u, u + qsize), HEAPU8.subarray(v, v + (qsize))];
+                        var yuv = [Module.HEAPU8.subarray(y, y + size), Module.HEAPU8.subarray(u, u + qsize), Module.HEAPU8.subarray(v, v + (qsize))];
                         var outputArray = yuv.map(buffer => Uint8Array.from(buffer))
                         // arrayBufferCopy(HEAPU8.subarray(y, y + size), this.sharedBuffer, 0, size)
                         // arrayBufferCopy(HEAPU8.subarray(u, u + (qsize)), this.sharedBuffer, size, qsize)
