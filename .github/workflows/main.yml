@@ -31,7 +31,9 @@ jobs:
           # Version Spec of the version to use.  Examples: 12.x, 10.15.1, >=10.15.0
           node-version: 14.x
     
-      # Runs a single command using the runners shell
+      - name: npm install
+        run: npm install
+        
       - name: build
         run: npm run build:demo
 
