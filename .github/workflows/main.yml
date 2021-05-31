@@ -40,8 +40,8 @@ jobs:
       - name: Deploy
         uses: garygrossgarten/github-action-scp@release
         with:
-            local: /home/runner/work/langhuihui/jessibuca/demo/.vitepress/dist/
-            remote: /opt/jessibuca/demo/.vitepress/dist/
+            local: /home/runner/work/langhuihui/jessibuca/demo/.vitepress/dist
+            remote: /opt/jessibuca/demo/.vitepress/dist
             host: monibuca.com
             username: root
             privateKey: ${{ secrets.PEM }}
