@@ -1,6 +1,7 @@
 import 'regenerator-runtime/runtime'
 import Module from '../demo/public/ff'
 import createWebGL from './utils/webgl';
+
 var supportedWasm = (() => {
     try {
         if (typeof WebAssembly === "object"
@@ -29,6 +30,7 @@ function arrayBufferCopy(src, dst, dstByteOffset, numBytes) {
         dst[dstByteOffset + i] = src[i];
     }
 }
+
 function dispatchData(input) {
     let need = input.next()
     let buffer = null
@@ -51,17 +53,70 @@ function dispatchData(input) {
         }
     }
 }
+
 if (!Date.now) Date.now = function () {
     return new Date().getTime();
 };
 Module.print = function (text) {
-    postMessage({ cmd: "print", text: text })
+    postMessage({cmd: "print", text: text})
 }
 Module.printErr = function (text) {
-    postMessage({ cmd: "printErr", text: text })
+    postMessage({cmd: "printErr", text: text})
 }
 Module.postRun = function () {
     var buffer = []
+    var speedSampler = {
+        _firstCheckpoint: 0,
+        _lastCheckpoint: 0,
+        _intervalBytes: 0,
+        _totalBytes: 0,
+        _lastSecondBytes: 0,
+        addBytes: function (bytes) {
+            if (speedSampler._firstCheckpoint === 0) {
+                speedSampler._firstCheckpoint = Date.now();
+                speedSampler._lastCheckpoint = speedSampler._firstCheckpoint;
+                speedSampler._intervalBytes += bytes;
+                speedSampler._totalBytes += bytes;
+            }
+            else if (Date.now() - speedSampler._lastCheckpoint < 1000) {
+                speedSampler._intervalBytes += bytes;
+                speedSampler._totalBytes += bytes;
+
+            } else {
+                speedSampler._lastSecondBytes = speedSampler._intervalBytes;
+                speedSampler._intervalBytes = bytes;
+                speedSampler._totalBytes += bytes;
+                speedSampler._lastCheckpoint = Date.now();
+            }
+        },
+        reset: function () {
+            speedSampler._firstCheckpoint = speedSampler._lastCheckpoint = 0;
+            speedSampler._totalBytes = speedSampler._intervalBytes = 0;
+            speedSampler._lastSecondBytes = 0;
+        },
+        getCurrentKBps: function () {
+            speedSampler.addBytes(0);
+            var durationSeconds = (Date.now() - speedSampler._lastCheckpoint) / 1000;
+            if (durationSeconds == 0) durationSeconds = 1;
+            return (speedSampler._intervalBytes / durationSeconds) / 1024;
+        },
+        getLastSecondKBps: function () {
+            speedSampler.addBytes(0);
+            if (speedSampler._lastSecondBytes !== 0) {
+                return speedSampler._lastSecondBytes / 1024;
+            } else {
+                if (Date.now() - speedSampler._lastCheckpoint >= 500) {
+                    return speedSampler.getCurrentKBps();
+                } else {
+                    return 0;
+                }
+            }
+        },
+        getAverageKBps: function () {
+            var durationSeconds = (Date.now() - speedSampler._firstCheckpoint) / 1000;
+            return (speedSampler._totalBytes / durationSeconds) / 1024;
+        }
+    }
     var decoder = {
         opt: {},
         initAudioPlanar: function (channels, samplerate) {
@@ -69,7 +124,7 @@ Module.postRun = function () {
             for (var i = 0; i < channels; i++) {
                 buffersA.push([]);
             }
-            postMessage({ cmd: "initAudioPlanar", samplerate: samplerate, channels: channels })
+            postMessage({cmd: "initAudioPlanar", samplerate: samplerate, channels: channels})
             this.playAudioPlanar = function (data, len) {
                 var outputArray = [];
                 var frameCount = len / 4 / buffersA.length;
@@ -87,7 +142,7 @@ Module.postRun = function () {
                     }
                     outputArray[i] = buffer;
                 }
-                postMessage({ cmd: "playAudio", buffer: outputArray }, outputArray.map(x => x.buffer))
+                postMessage({cmd: "playAudio", buffer: outputArray}, outputArray.map(x => x.buffer))
             }
         },
         inputFlv: function* () {
@@ -114,10 +169,10 @@ Module.postRun = function () {
                 var payload = yield length
                 switch (type) {
                     case 8:
-                        buffer.push({ ts, payload, decoder: audioDecoder, type: 0 })
+                        buffer.push({ts, payload, decoder: audioDecoder, type: 0})
                         break
                     case 9:
-                        buffer.push({ ts, payload, decoder: videoDecoder, type: payload[0] >> 4 })
+                        buffer.push({ts, payload, decoder: videoDecoder, type: payload[0] >> 4})
                         break
                 }
             }
@@ -188,12 +243,12 @@ Module.postRun = function () {
                 this.flvMode = true
                 var _this = this;
                 var controller = new AbortController();
-                fetch(url, { signal: controller.signal }).then(function (res) {
+                fetch(url, {signal: controller.signal}).then(function (res) {
                     var reader = res.body.getReader();
                     var input = _this.inputFlv()
                     var dispatch = dispatchData(input)
                     var fetchNext = function () {
-                        reader.read().then(({ done, value }) => {
+                        reader.read().then(({done, value}) => {
                             if (done) {
                                 input.return(null)
                             } else {
@@ -204,7 +259,7 @@ Module.postRun = function () {
                     }
                     fetchNext()
                 }).catch((err) => {
-                    postMessage({ cmd: "printErr", text: err.message })
+                    postMessage({cmd: "printErr", text: err.message})
                 })
                 this._close = function () {
                     controller.abort()
@@ -221,10 +276,20 @@ Module.postRun = function () {
                         var dv = new DataView(evt.data)
                         switch (dv.getUint8(0)) {
                             case 1:
-                                buffer.push({ ts: dv.getUint32(1, false), payload: new Uint8Array(evt.data, 5), decoder: audioDecoder, type: 0 })
+                                buffer.push({
+                                    ts: dv.getUint32(1, false),
+                                    payload: new Uint8Array(evt.data, 5),
+                                    decoder: audioDecoder,
+                                    type: 0
+                                })
                                 break
                             case 2:
-                                buffer.push({ ts: dv.getUint32(1, false), payload: new Uint8Array(evt.data, 5), decoder: videoDecoder, type: dv.getUint8(5) >> 4 })
+                                buffer.push({
+                                    ts: dv.getUint32(1, false),
+                                    payload: new Uint8Array(evt.data, 5),
+                                    decoder: videoDecoder,
+                                    type: dv.getUint8(5) >> 4
+                                })
                                 break
                         }
                     }
@@ -234,7 +299,7 @@ Module.postRun = function () {
                 }
             }
             this.setVideoSize = function (w, h) {
-                postMessage({ cmd: "initSize", w: w, h: h })
+                postMessage({cmd: "initSize", w: w, h: h})
                 var size = w * h
                 var qsize = size >> 2
                 if (!this.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined') {
@@ -244,7 +309,13 @@ Module.postRun = function () {
                     this.draw = function (compositionTime, y, u, v) {
                         render(w, h, Module.HEAPU8.subarray(y, y + size), Module.HEAPU8.subarray(u, u + qsize), Module.HEAPU8.subarray(v, v + (qsize)))
                         let image_bitmap = canvas.transferToImageBitmap();
-                        postMessage({ cmd: "render", compositionTime: compositionTime, bps: this.bps, delay: this.delay, buffer: image_bitmap }, [image_bitmap])
+                        postMessage({
+                            cmd: "render",
+                            compositionTime: compositionTime,
+                            bps: this.bps,
+                            delay: this.delay,
+                            buffer: image_bitmap
+                        }, [image_bitmap])
                     }
                 } else {
                     this.draw = function (compositionTime, y, u, v) {
@@ -253,11 +324,18 @@ Module.postRun = function () {
                         // arrayBufferCopy(HEAPU8.subarray(y, y + size), this.sharedBuffer, 0, size)
                         // arrayBufferCopy(HEAPU8.subarray(u, u + (qsize)), this.sharedBuffer, size, qsize)
                         // arrayBufferCopy(HEAPU8.subarray(v, v + (qsize)), this.sharedBuffer, size + qsize, qsize)
-                        postMessage({ cmd: "render", compositionTime: compositionTime, bps: this.bps, delay: this.delay, output: outputArray }, outputArray.map(x => x.buffer))
+                        postMessage({
+                            cmd: "render",
+                            compositionTime: compositionTime,
+                            bps: this.bps,
+                            delay: this.delay,
+                            output: outputArray
+                        }, outputArray.map(x => x.buffer))
                     }
                 }
             }
-        }, close: function () {
+        },
+        close: function () {
             if (this._close) {
                 console.log("jessibuca closed")
                 this._close()
@@ -273,7 +351,7 @@ Module.postRun = function () {
     }
     var audioDecoder = new Module.AudioDecoder(decoder)
     var videoDecoder = new Module.VideoDecoder(decoder)
-    postMessage({ cmd: "init" })
+    postMessage({cmd: "init"})
     self.onmessage = function (event) {
         var msg = event.data
         switch (msg.cmd) {
@@ -281,7 +359,7 @@ Module.postRun = function () {
                 decoder.opt = JSON.parse(msg.opt)
                 break
             case "getProp":
-                postMessage({ cmd: "getProp", value: decoder[msg.prop] })
+                postMessage({cmd: "getProp", value: decoder[msg.prop]})
                 break
             case "setProp":
                 decoder[msg.prop] = msg.value
