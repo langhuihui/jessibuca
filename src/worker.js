@@ -261,6 +261,7 @@ Module.postRun = function () {
             if (this._close) {
                 console.log("jessibuca closed")
                 this._close()
+                buffer = [];
                 audioDecoder.clear()
                 videoDecoder.clear()
                 clearInterval(this.stopId)

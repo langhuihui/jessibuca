@@ -106,6 +106,7 @@ public:
         {
             avcodec_free_context(&dec_ctx);
         }
+        initialized = false;
     }
 };
 
