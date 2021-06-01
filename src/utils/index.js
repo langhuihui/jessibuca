@@ -38,8 +38,7 @@ export function bpsSize(value) {
     if (null == value || value === '') {
         return "0 KB/S";
     }
-    const srcsize = parseFloat(value);
-    let size = srcsize / 1024;
+    let size = parseFloat(value);
     size = size.toFixed(2);
     return size + 'KB/S';
 }

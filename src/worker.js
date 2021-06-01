@@ -69,29 +69,24 @@ Module.postRun = function () {
         _firstCheckpoint: 0,
         _lastCheckpoint: 0,
         _intervalBytes: 0,
-        _totalBytes: 0,
         _lastSecondBytes: 0,
         addBytes: function (bytes) {
             if (speedSampler._firstCheckpoint === 0) {
                 speedSampler._firstCheckpoint = Date.now();
                 speedSampler._lastCheckpoint = speedSampler._firstCheckpoint;
                 speedSampler._intervalBytes += bytes;
-                speedSampler._totalBytes += bytes;
-            }
-            else if (Date.now() - speedSampler._lastCheckpoint < 1000) {
+            } else if (Date.now() - speedSampler._lastCheckpoint < 1000) {
                 speedSampler._intervalBytes += bytes;
-                speedSampler._totalBytes += bytes;
 
             } else {
                 speedSampler._lastSecondBytes = speedSampler._intervalBytes;
                 speedSampler._intervalBytes = bytes;
-                speedSampler._totalBytes += bytes;
                 speedSampler._lastCheckpoint = Date.now();
             }
         },
         reset: function () {
             speedSampler._firstCheckpoint = speedSampler._lastCheckpoint = 0;
-            speedSampler._totalBytes = speedSampler._intervalBytes = 0;
+            speedSampler._intervalBytes = 0;
             speedSampler._lastSecondBytes = 0;
         },
         getCurrentKBps: function () {
@@ -111,10 +106,6 @@ Module.postRun = function () {
                     return 0;
                 }
             }
-        },
-        getAverageKBps: function () {
-            var durationSeconds = (Date.now() - speedSampler._firstCheckpoint) / 1000;
-            return (speedSampler._totalBytes / durationSeconds) / 1024;
         }
     }
     var decoder = {
@@ -238,7 +229,10 @@ Module.postRun = function () {
                     }
                 }
             }
-            this.stopId = setInterval(loop, 10)
+            this.stopId = setInterval(loop, 10);
+            this.speedSamplerId = setInterval(() => {
+                postMessage({cmd: "kBps", kBps: speedSampler.getLastSecondKBps()})
+            }, 1000);
             if (url.indexOf("http") == 0) {
                 this.flvMode = true
                 var _this = this;
@@ -252,6 +246,7 @@ Module.postRun = function () {
                             if (done) {
                                 input.return(null)
                             } else {
+                                speedSampler.addBytes(value.byteLength);
                                 dispatch(value)
                                 fetchNext()
                             }
@@ -270,9 +265,13 @@ Module.postRun = function () {
                 this.ws.binaryType = "arraybuffer"
                 if (this.flvMode) {
                     var dispatch = dispatchData(this.inputFlv())
-                    this.ws.onmessage = evt => dispatch(evt.data)
+                    this.ws.onmessage = evt => {
+                        speedSampler.addBytes(evt.data.byteLength);
+                        dispatch(evt.data)
+                    }
                 } else {
                     this.ws.onmessage = evt => {
+                        speedSampler.addBytes(evt.data.byteLength);
                         var dv = new DataView(evt.data)
                         switch (dv.getUint8(0)) {
                             case 1:
@@ -343,6 +342,7 @@ Module.postRun = function () {
                 audioDecoder.clear()
                 videoDecoder.clear()
                 clearInterval(this.stopId)
+                clearInterval(this.speedSamplerId);
                 this.firstTimestamp = 0
                 this.startTimestamp = 0
                 delete this.getDelay

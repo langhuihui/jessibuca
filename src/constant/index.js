@@ -30,7 +30,7 @@ export const CMD_TYPE = {
     print: 'print',
     printErr: 'printErr',
     initAudioPlanar: 'initAudioPlanar',
-
+    kBps: 'kBps',
 }
 
 export const POST_MESSAGE = {
@@ -52,9 +52,9 @@ export const EVEMTS = {
     audioInfo: "audioInfo",
     log: 'log',
     error: "error",
-    bps: 'bps',
+    kBps: 'kBps',
     timeout: 'timeout',
     stats: 'stats',
     performance: "performance",
-    record:'record'
+    record: 'record'
 }

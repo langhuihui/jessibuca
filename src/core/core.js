@@ -160,20 +160,14 @@ export default (jessibuca) => {
         const timestamp = _nowTime - jessibuca._startBpsTime;
 
         if (timestamp < 1 * 1000) {
-            jessibuca._bps += (options.bps || 0);
             jessibuca._stats.fps += 1;
-            jessibuca._stats.vbps += parseInt((options.bps || 0));
             return;
         }
         jessibuca._stats.ts = options.ts;
-        jessibuca.$doms.speedDom && (jessibuca.$doms.speedDom.innerText = bpsSize(jessibuca._bps));
-        jessibuca._trigger(EVEMTS.bps, jessibuca._bps);
         jessibuca._trigger(EVEMTS.stats, jessibuca._stats);
         jessibuca._trigger(EVEMTS.performance, fpsStatus(jessibuca._stats.fps));
 
-        jessibuca._bps = 0;
         jessibuca._stats.fps = 0;
-        jessibuca._stats.vbps = 0;
         jessibuca._startBpsTime = _nowTime;
     }
 

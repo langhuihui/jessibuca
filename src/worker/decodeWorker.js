@@ -1,5 +1,6 @@
 import { CMD_TYPE, EVEMTS, POST_MESSAGE } from "../constant";
 import createWebGL from '../utils/webgl';
+import {bpsSize} from "../utils";
 
 export default (jessibuca) => {
     const decoderWorker = new Worker(jessibuca._opt.decoder);
@@ -70,8 +71,12 @@ export default (jessibuca) => {
                     sampleRate: msg.samplerate // 采样率
                 });
                 break;
+            case CMD_TYPE.kBps:
+                jessibuca.$doms.speedDom && (jessibuca.$doms.speedDom.innerText = bpsSize(msg.kBps));
+                jessibuca._trigger(EVEMTS.kBps, msg.kBps);
             default:
-                jessibuca[msg.cmd] && jessibuca[msg.cmd](msg)
+                jessibuca[msg.cmd] && jessibuca[msg.cmd](msg);
+
         }
     }
 

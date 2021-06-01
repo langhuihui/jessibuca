@@ -403,11 +403,11 @@ jessibuca.on("load",function(data){console.log('data:',data)})
 
 jessibuca.on("load",function(data){console.log('error:',data)})
 ```
-### bps
-当前网速， 单位bytes 每秒1次,
+### kBps
+当前网速， 单位KB 每秒1次,
 ```js
 
-jessibuca.on("bps",function(data){console.log('bps:',data)})
+jessibuca.on("kBps",function(data){console.log('kBps:',data)})
 ```
 
 ### timeout
