@@ -52,13 +52,17 @@ public:
     AVPacket *pkt;
     val jsObject;
     bool initialized = false;
-    FFmpeg(val &&v) : jsObject(forward<val>(v)), pkt(av_packet_alloc()), frame(av_frame_alloc())
+    FFmpeg(val &&v) : jsObject(forward<val>(v))
     {
     }
     void initCodec(enum AVCodecID id)
     {
         if (dec_ctx != nullptr)
+        {
             clear();
+        }
+        pkt = av_packet_alloc();
+        frame = av_frame_alloc();
         codec = avcodec_find_decoder(id);
         parser = av_parser_init(codec->id);
         dec_ctx = avcodec_alloc_context3(codec);
@@ -75,8 +79,6 @@ public:
     }
     virtual ~FFmpeg()
     {
-        av_frame_free(&frame);
-        av_packet_free(&pkt);
         clear();
     }
     virtual int decode(string input)
@@ -97,16 +99,28 @@ public:
     virtual void _decode(){};
     virtual void clear()
     {
+        if(frame)
+        {
+           av_frame_free(&frame);
+        }
+        if(pkt)
+        {
+          av_packet_free(&pkt);
+        }
         if (parser)
         {
             av_parser_close(parser);
             parser = nullptr;
+            emscripten_log(0, "FFmpeg clear parser nullptr");
+
         }
         if (dec_ctx)
         {
             avcodec_free_context(&dec_ctx);
         }
+        codec = nullptr;
         initialized = false;
+        emscripten_log(0, "FFmpeg clear end");
     }
 };
 

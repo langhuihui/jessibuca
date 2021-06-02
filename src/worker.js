@@ -250,9 +250,12 @@ Module.postRun = function () {
                                 dispatch(value)
                                 fetchNext()
                             }
-                        }).catch((e) => input.throw(e))
+                        }).catch(function (e) {
+                            input.return(null);
+                            postMessage({cmd: "printErr", text: e.toString()});
+                        })
                     }
-                    fetchNext()
+                    fetchNext();
                 }).catch((err) => {
                     postMessage({cmd: "printErr", text: err.message})
                 })
@@ -264,10 +267,15 @@ Module.postRun = function () {
                 this.ws = new WebSocket(url)
                 this.ws.binaryType = "arraybuffer"
                 if (this.flvMode) {
-                    var dispatch = dispatchData(this.inputFlv())
+                    let input = this.inputFlv();
+                    var dispatch = dispatchData(input);
                     this.ws.onmessage = evt => {
                         speedSampler.addBytes(evt.data.byteLength);
                         dispatch(evt.data)
+                    }
+                    this.ws.onerror = (e) => {
+                        input.return(null);
+                        postMessage({cmd: "printErr", text: e.toString()});
                     }
                 } else {
                     this.ws.onmessage = evt => {
@@ -336,16 +344,24 @@ Module.postRun = function () {
         },
         close: function () {
             if (this._close) {
-                console.log("jessibuca closed")
-                this._close()
-                buffer = [];
-                audioDecoder.clear()
-                videoDecoder.clear()
-                clearInterval(this.stopId)
+                console.log("jessibuca closed");
+                this._close();
+                clearInterval(this.stopId);
+                this.stopId = null;
                 clearInterval(this.speedSamplerId);
-                this.firstTimestamp = 0
-                this.startTimestamp = 0
-                delete this.getDelay
+                this.speedSamplerId = null;
+                speedSampler.reset();
+                this.ws = null;
+                audioDecoder.clear();
+                videoDecoder.clear();
+                this.firstTimestamp = 0;
+                this.startTimestamp = 0;
+                this.delay = 0;
+                this.flvMode = false;
+                buffer = [];
+                delete this.playAudioPlanar;
+                delete this.draw;
+                delete this.getDelay;
             }
         }
     }
