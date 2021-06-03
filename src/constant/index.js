@@ -1,5 +1,5 @@
 export const DEFAULT_OPTIONS = {
-    videoBuffer: 0,
+    videoBuffer: 0.5,
     vod: false,
     isResize: true,
     isFullSize: false,
@@ -56,5 +56,15 @@ export const EVEMTS = {
     timeout: 'timeout',
     stats: 'stats',
     performance: "performance",
-    record: 'record'
+    record: 'record',
+    buffer: 'buffer',
+    videoFrame: 'videoFrame',
+    start: 'start',
+    metadata: 'metadata'
+}
+
+export const BUFFER_STATUS = {
+    empty: 'empty',
+    buffering: 'buffering',
+    full: 'full'
 }

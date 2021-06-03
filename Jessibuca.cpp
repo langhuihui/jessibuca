@@ -62,10 +62,10 @@ public:
             clear();
         }
         pkt = av_packet_alloc();
-        frame = av_frame_alloc();
         codec = avcodec_find_decoder(id);
         parser = av_parser_init(codec->id);
         dec_ctx = avcodec_alloc_context3(codec);
+        frame = av_frame_alloc();
     }
     void initCodec(enum AVCodecID id, string input)
     {
@@ -99,6 +99,15 @@ public:
     virtual void _decode(){};
     virtual void clear()
     {
+        if (parser)
+        {
+            av_parser_close(parser);
+            parser = nullptr;
+        }
+        if (dec_ctx)
+        {
+            avcodec_free_context(&dec_ctx);
+        }
         if(frame)
         {
            av_frame_free(&frame);
@@ -107,20 +116,8 @@ public:
         {
           av_packet_free(&pkt);
         }
-        if (parser)
-        {
-            av_parser_close(parser);
-            parser = nullptr;
-            emscripten_log(0, "FFmpeg clear parser nullptr");
-
-        }
-        if (dec_ctx)
-        {
-            avcodec_free_context(&dec_ctx);
-        }
         codec = nullptr;
         initialized = false;
-        emscripten_log(0, "FFmpeg clear end");
     }
 };
 

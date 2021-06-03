@@ -319,7 +319,6 @@ Module.postRun = function () {
                         postMessage({
                             cmd: "render",
                             compositionTime: compositionTime,
-                            bps: this.bps,
                             delay: this.delay,
                             buffer: image_bitmap
                         }, [image_bitmap])
@@ -334,7 +333,6 @@ Module.postRun = function () {
                         postMessage({
                             cmd: "render",
                             compositionTime: compositionTime,
-                            bps: this.bps,
                             delay: this.delay,
                             output: outputArray
                         }, outputArray.map(x => x.buffer))

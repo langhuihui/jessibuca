@@ -286,7 +286,6 @@ class Jessibuca {
      */
     setBufferTime(buffer) {
         buffer = Number(buffer)
-        this._stats.buf = buffer * 1000;
         this._decoderWorker.postMessage({
             cmd: POST_MESSAGE.setVideoBuffer,
             time: buffer

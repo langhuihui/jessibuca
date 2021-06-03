@@ -1,4 +1,4 @@
-import {$domToggle, bpsSize, checkFull, dataURLToFile, downloadImg, fpsStatus, now} from "../utils";
+import {$domToggle, bpsSize, bufferStatus, checkFull, dataURLToFile, downloadImg, fpsStatus, now} from "../utils";
 import {EVEMTS, POST_MESSAGE} from "../constant";
 
 export default (jessibuca) => {
@@ -164,9 +164,10 @@ export default (jessibuca) => {
             return;
         }
         jessibuca._stats.ts = options.ts;
+        jessibuca._stats.buf = options.buf;
         jessibuca._trigger(EVEMTS.stats, jessibuca._stats);
         jessibuca._trigger(EVEMTS.performance, fpsStatus(jessibuca._stats.fps));
-
+        jessibuca._trigger(EVEMTS.buffer, bufferStatus(jessibuca._stats.buf, jessibuca._opt.videoBuffer * 1000));
         jessibuca._stats.fps = 0;
         jessibuca._startBpsTime = _nowTime;
     }

@@ -1,5 +1,4 @@
-import { CMD_TYPE, EVEMTS, POST_MESSAGE } from "../constant";
-import createWebGL from '../utils/webgl';
+import {CMD_TYPE, EVEMTS, POST_MESSAGE} from "../constant";
 import {bpsSize} from "../utils";
 
 export default (jessibuca) => {
@@ -24,7 +23,8 @@ export default (jessibuca) => {
                 jessibuca.$canvasElement.height = msg.h;
                 jessibuca.onInitSize();
                 jessibuca._resize();
-                jessibuca._trigger(EVEMTS.videoInfo, { w: msg.w, h: msg.h });
+                jessibuca._trigger(EVEMTS.videoInfo, {w: msg.w, h: msg.h});
+                jessibuca._trigger(EVEMTS.start);
                 if (jessibuca._supportOffscreen()) {
                     jessibuca._bitmaprenderer = jessibuca.$canvasElement.getContext("bitmaprenderer");
 
@@ -43,9 +43,9 @@ export default (jessibuca) => {
                         jessibuca._bitmaprenderer.transferFromImageBitmap(msg.buffer);
                     }
                 }
-                jessibuca._trigger(EVEMTS.timeUpdate, msg.ts);
-                jessibuca.onTimeUpdate(msg.ts);
-                jessibuca._updateStats({ bps: msg.bps, ts: msg.ts });
+                // jessibuca._trigger(EVEMTS.timeUpdate, msg.compositionTime);
+                // jessibuca.onTimeUpdate(msg.compositionTime);
+                jessibuca._updateStats({ buf: msg.delay});
                 jessibuca._checkHeart();
                 break;
             case CMD_TYPE.playAudio:

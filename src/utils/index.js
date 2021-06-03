@@ -1,3 +1,5 @@
+import {BUFFER_STATUS} from "../constant";
+
 export function audioContextUnlock(context) {
     context.resume();
     const source = context.createBufferSource();
@@ -52,6 +54,16 @@ export function fpsStatus(fps) {
         result = 1;
     }
 
+    return result;
+}
+
+export function bufferStatus(buffer, settingBuffer) {
+    let result = BUFFER_STATUS.buffering;
+    if (buffer === 0) {
+        result = BUFFER_STATUS.empty
+    } else if (buffer >= settingBuffer) {
+        result = BUFFER_STATUS.full;
+    }
     return result;
 }
 

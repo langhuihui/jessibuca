@@ -410,6 +410,14 @@ jessibuca.on("load",function(data){console.log('error:',data)})
 jessibuca.on("kBps",function(data){console.log('kBps:',data)})
 ```
 
+### start
+渲染开始
+```js
+
+jessibuca.on("start",function(){console.log('start render')})
+```
+
+
 ### timeout
 当设定的超时时间内无数据返回,则回调
 ```js
