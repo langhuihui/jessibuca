@@ -38,10 +38,10 @@ typedef unsigned int u32;
 extern "C"
 {
 #include <libavcodec/avcodec.h>
-#include <libswresample/swresample.h>
+//#include <libswresample/swresample.h>
 }
-const int SamplingFrequencies[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350, 0, 0, 0};
-const int AudioObjectTypes[] = {};
+//const int SamplingFrequencies[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350, 0, 0, 0};
+//const int AudioObjectTypes[] = {};
 class FFmpeg
 {
 public:
@@ -124,14 +124,14 @@ public:
 class FFmpegAudioDecoder : public FFmpeg
 {
 public:
-    struct SwrContext *au_convert_ctx = nullptr;
+//    struct SwrContext *au_convert_ctx = nullptr;
     FFmpegAudioDecoder(val &&v) : FFmpeg(move(v))
     {
         emscripten_log(0, "FFMpegAudioDecoder init");
     }
     ~FFmpegAudioDecoder()
     {
-        swr_free(&au_convert_ctx);
+//        swr_free(&au_convert_ctx);
         emscripten_log(0, "FFMpegAudioDecoder destory");
     }
     void clear() override
