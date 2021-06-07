@@ -45,7 +45,7 @@ export default (jessibuca) => {
                 }
                 // jessibuca._trigger(EVEMTS.timeUpdate, msg.compositionTime);
                 // jessibuca.onTimeUpdate(msg.compositionTime);
-                jessibuca._updateStats({ buf: msg.delay});
+                jessibuca._updateStats({buf: msg.delay});
                 jessibuca._checkHeart();
                 break;
             case CMD_TYPE.playAudio:
@@ -72,11 +72,12 @@ export default (jessibuca) => {
                 });
                 break;
             case CMD_TYPE.kBps:
-                jessibuca.$doms.speedDom && (jessibuca.$doms.speedDom.innerText = bpsSize(msg.kBps));
-                jessibuca._trigger(EVEMTS.kBps, msg.kBps);
+                if (jessibuca.playing) {
+                    jessibuca.$doms.speedDom && (jessibuca.$doms.speedDom.innerText = bpsSize(msg.kBps));
+                    jessibuca._trigger(EVEMTS.kBps, msg.kBps);
+                }
             default:
                 jessibuca[msg.cmd] && jessibuca[msg.cmd](msg);
-
         }
     }
 
