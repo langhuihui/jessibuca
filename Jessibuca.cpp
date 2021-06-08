@@ -127,12 +127,12 @@ public:
 //    struct SwrContext *au_convert_ctx = nullptr;
     FFmpegAudioDecoder(val &&v) : FFmpeg(move(v))
     {
-        emscripten_log(0, "FFMpegAudioDecoder init");
+//        emscripten_log(0, "FFMpegAudioDecoder init");
     }
     ~FFmpegAudioDecoder()
     {
 //        swr_free(&au_convert_ctx);
-        emscripten_log(0, "FFMpegAudioDecoder destory");
+//        emscripten_log(0, "FFMpegAudioDecoder destory");
     }
     void clear() override
     {
@@ -222,11 +222,11 @@ public:
 
     FFmpegVideoDecoder(val &&v) : FFmpeg(move(v))
     {
-        emscripten_log(0, "FFMpegVideoDecoder init");
+//        emscripten_log(0, "FFMpegVideoDecoder init");
     }
     ~FFmpegVideoDecoder()
     {
-        emscripten_log(0, "FFMpegVideoDecoder destory");
+//        emscripten_log(0, "FFMpegVideoDecoder destory");
     }
     void clear() override
     {
@@ -246,7 +246,7 @@ public:
             int codec_id = ((int)data[0]) & 0x0F;
             if (((int)(data[0]) >> 4) == 1 && data[1] == 0)
             {
-                emscripten_log(0, "codec = %d", codec_id);
+//                emscripten_log(0, "codec = %d", codec_id);
                 switch (codec_id)
                 {
                 case 7:

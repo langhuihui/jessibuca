@@ -169,7 +169,7 @@ Module.postRun = function () {
             }
         },
         play: function (url) {
-            console.log('Jessibuca play', url)
+            this.opt.debug && console.log('Jessibuca play', url)
             this.getDelay = function (timestamp) {
                 if (!timestamp) return -1
                 this.firstTimestamp = timestamp
@@ -252,7 +252,9 @@ Module.postRun = function () {
                             }
                         }).catch(function (e) {
                             input.return(null);
-                            postMessage({cmd: "printErr", text: e.toString()});
+                            if (e.toString().indexOf('The user aborted a request') === -1) {
+                                postMessage({cmd: "printErr", text: e.toString()});
+                            }
                         })
                     }
                     fetchNext();
@@ -300,9 +302,13 @@ Module.postRun = function () {
                                 break
                         }
                     }
+                    this.ws.onerror = evt => {
+                        postMessage({cmd: "printErr", text: evt.toString()});
+                    }
                 }
                 this._close = function () {
                     this.ws.close()
+                    this.ws = null;
                 }
             }
             this.setVideoSize = function (w, h) {
@@ -342,7 +348,6 @@ Module.postRun = function () {
         },
         close: function () {
             if (this._close) {
-                console.log("jessibuca closed");
                 this._close();
                 clearInterval(this.stopId);
                 this.stopId = null;
