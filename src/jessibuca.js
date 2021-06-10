@@ -5,6 +5,7 @@ import initDecodeWorker from './worker/decodeWorker';
 import initCore from './core/index';
 import {DEFAULT_OPTIONS, EVEMTS, POST_MESSAGE} from "./constant";
 import {$domToggle, $hideBtns, $initBtns, checkFull} from "./utils";
+
 class Jessibuca {
     constructor(options) {
         this._opt = Object.assign(DEFAULT_OPTIONS, options);
@@ -17,6 +18,8 @@ class Jessibuca {
             return;
         }
         delete this._opt.container;
+
+        this._opt.debug && console.log('options', this._opt);
         // core
         initCore(this);
         // video

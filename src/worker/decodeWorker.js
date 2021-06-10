@@ -43,9 +43,9 @@ export default (jessibuca) => {
                         jessibuca._bitmaprenderer.transferFromImageBitmap(msg.buffer);
                     }
                 }
-                // jessibuca._trigger(EVEMTS.timeUpdate, msg.compositionTime);
-                // jessibuca.onTimeUpdate(msg.compositionTime);
-                jessibuca._updateStats({buf: msg.delay});
+                jessibuca._trigger(EVEMTS.timeUpdate, msg.ts);
+                jessibuca.onTimeUpdate(msg.ts);
+                jessibuca._updateStats({buf: msg.delay, ts: msg.ts});
                 jessibuca._checkHeart();
                 break;
             case CMD_TYPE.playAudio:

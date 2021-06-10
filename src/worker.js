@@ -17,19 +17,19 @@ var supportedWasm = (() => {
 // const wasm = 'ff_wasm.js'
 // importScripts(wasm);
 
-function arrayBufferCopy(src, dst, dstByteOffset, numBytes) {
-    var i;
-    var dst32Offset = dstByteOffset / 4;
-    var tail = (numBytes % 4);
-    var src32 = new Uint32Array(src.buffer, 0, (numBytes - tail) / 4);
-    var dst32 = new Uint32Array(dst.buffer);
-    for (i = 0; i < src32.length; i++) {
-        dst32[dst32Offset + i] = src32[i];
-    }
-    for (i = numBytes - tail; i < numBytes; i++) {
-        dst[dstByteOffset + i] = src[i];
-    }
-}
+// function arrayBufferCopy(src, dst, dstByteOffset, numBytes) {
+//     var i;
+//     var dst32Offset = dstByteOffset / 4;
+//     var tail = (numBytes % 4);
+//     var src32 = new Uint32Array(src.buffer, 0, (numBytes - tail) / 4);
+//     var dst32 = new Uint32Array(dst.buffer);
+//     for (i = 0; i < src32.length; i++) {
+//         dst32[dst32Offset + i] = src32[i];
+//     }
+//     for (i = numBytes - tail; i < numBytes; i++) {
+//         dst[dstByteOffset + i] = src[i];
+//     }
+// }
 
 function dispatchData(input) {
     let need = input.next()
@@ -160,7 +160,7 @@ Module.postRun = function () {
                 var payload = yield length
                 switch (type) {
                     case 8:
-                        buffer.push({ts, payload, decoder: audioDecoder, type: 0})
+                        this.opt.hasAudio && buffer.push({ts, payload, decoder: audioDecoder, type: 0})
                         break
                     case 9:
                         buffer.push({ts, payload, decoder: videoDecoder, type: payload[0] >> 4})
@@ -185,12 +185,14 @@ Module.postRun = function () {
                     var data = buffer[0]
                     if (this.getDelay(data.ts) === -1) {
                         buffer.shift()
+                        this.ts = data.ts;
                         data.decoder.decode(data.payload)
                     } else {
                         while (buffer.length) {
                             data = buffer[0]
                             if (this.getDelay(data.ts) > this.videoBuffer) {
                                 buffer.shift()
+                                this.ts = data.ts;
                                 data.decoder.decode(data.payload)
                             } else {
                                 break
@@ -204,14 +206,17 @@ Module.postRun = function () {
                         data = buffer.shift()
                         if (data.type == 1) {
                             this.dropping = false
+                            this.ts = data.ts;
                             data.decoder.decode(data.payload)
                         } else if (data.type == 0) {
+                            this.ts = data.ts;
                             data.decoder.decode(data.payload)
                         }
                     } else {
                         var data = buffer[0]
                         if (this.getDelay(data.ts) === -1) {
                             buffer.shift()
+                            this.ts = data.ts;
                             data.decoder.decode(data.payload)
                         } else if (this.delay > this.videoBuffer + 1000) {
                             this.dropping = true
@@ -220,6 +225,7 @@ Module.postRun = function () {
                                 data = buffer[0]
                                 if (this.getDelay(data.ts) > this.videoBuffer) {
                                     buffer.shift()
+                                    this.ts = data.ts;
                                     data.decoder.decode(data.payload)
                                 } else {
                                     break
@@ -285,7 +291,7 @@ Module.postRun = function () {
                         var dv = new DataView(evt.data)
                         switch (dv.getUint8(0)) {
                             case 1:
-                                buffer.push({
+                                this.opt.hasAudio && buffer.push({
                                     ts: dv.getUint32(1, false),
                                     payload: new Uint8Array(evt.data, 5),
                                     decoder: audioDecoder,
@@ -326,6 +332,7 @@ Module.postRun = function () {
                             cmd: "render",
                             compositionTime: compositionTime,
                             delay: this.delay,
+                            ts: this.ts,
                             buffer: image_bitmap
                         }, [image_bitmap])
                     }
@@ -340,6 +347,7 @@ Module.postRun = function () {
                             cmd: "render",
                             compositionTime: compositionTime,
                             delay: this.delay,
+                            ts: this.ts,
                             output: outputArray
                         }, outputArray.map(x => x.buffer))
                     }
@@ -360,6 +368,7 @@ Module.postRun = function () {
                 this.firstTimestamp = 0;
                 this.startTimestamp = 0;
                 this.delay = 0;
+                this.ts = 0;
                 this.flvMode = false;
                 buffer = [];
                 delete this.playAudioPlanar;

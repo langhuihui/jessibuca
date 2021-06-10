@@ -120,6 +120,7 @@ export default {
                 text: "",
                 // background: "bg.jpg",
                 loadingText: "加载中",
+                hasAudio:false,
                 debug: true,
                 showBandwidth: this.showBandwidth, // 显示网速
                 operateBtns: {
@@ -204,9 +205,9 @@ export default {
         console.log('start');
       })
 
-      this.jessibuca.on("stats", function (stats) {
-        console.log('stats', JSON.stringify(stats));
-      });
+      // this.jessibuca.on("stats", function (stats) {
+      //   console.log('stats', JSON.stringify(stats));
+      // });
 
       this.jessibuca.on("performance", function (performance) {
         var show = "卡顿";
@@ -229,6 +230,7 @@ export default {
         console.log('kBps', kBps);
       });
 
+      // 显示时间戳 PTS
       this.jessibuca.on('videoFrame', function () {
 
       })
@@ -239,7 +241,7 @@ export default {
       });
 
 
-      console.log(this.jessibuca);
+      // console.log(this.jessibuca);
     },
     play() {
       // this.jessibuca.onPlay = () => (this.playing = true);

@@ -9,6 +9,7 @@ export const DEFAULT_OPTIONS = {
     showBandwidth: false,
     keepScreenOn: false,
     isNotMute: false,
+    hasAudio: true,
     operateBtns: {
         fullscreen: false,
         screenshot: false,

@@ -46,7 +46,7 @@ export default (jessibuca) => {
 
     jessibuca._initAudioPlanar = (msg) => {
         const channels = msg.channels
-        const samplerate = msg.samplerate
+        // const samplerate = msg.samplerate
         const context = jessibuca._audioContext;
         if (!context) return false;
         jessibuca._playAudio = function (buffer) {
@@ -80,5 +80,4 @@ export default (jessibuca) => {
             }
         };
     }
-
 }
