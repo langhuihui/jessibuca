@@ -263,7 +263,6 @@ class Jessibuca {
         this._decoderWorker.terminate()
         this._removeEventListener();
         this._initCheckVariable();
-        this._clearCheckLoading();
         this._off();
         this._removeContainerChild();
     }

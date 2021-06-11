@@ -1,21 +1,18 @@
 import {now} from "../utils";
+import {j} from "../../demo/.vitepress/dist/assets/app.56ccf89d";
 
 export default (jessibuca) => {
     jessibuca._resize$2 = () => jessibuca.resize();
 
+    jessibuca._handleVisibilityChange$2 = () => jessibuca._handleVisibilityChange();
     jessibuca._onfullscreenchange$2 = () => jessibuca._onfullscreenchange();
+    jessibuca._handleWakeLock$2 = () => jessibuca._handleWakeLock();
 
     window.addEventListener('resize', jessibuca._resize$2);
     window.addEventListener('fullscreenchange', jessibuca._onfullscreenchange$2);
-
-    jessibuca._handleWakeLock = () => {
-        if (jessibuca._wakeLock !== null && "visible" === document.visibilityState) {
-            jessibuca._enableWakeLock();
-        }
-    }
-
-    document.addEventListener('visibilitychange', jessibuca._handleWakeLock);
-    window.addEventListener('fullscreenchange', jessibuca._handleWakeLock);
+    document.addEventListener('visibilitychange', jessibuca._handleVisibilityChange$2);
+    document.addEventListener('visibilitychange', jessibuca._handleWakeLock$2);
+    window.addEventListener('fullscreenchange', jessibuca._handleWakeLock$2);
 
 
     if (jessibuca._opt.supportDblclickFullscreen) {
@@ -27,8 +24,9 @@ export default (jessibuca) => {
     jessibuca._removeEventListener = () => {
         window.removeEventListener('resize', jessibuca._resize$2);
         window.removeEventListener('fullscreenchange', jessibuca._onfullscreenchange$2);
-        document.removeEventListener('visibilitychange', jessibuca._handleWakeLock);
-        window.removeEventListener('fullscreenchange', jessibuca._handleWakeLock);
+        document.removeEventListener('visibilitychange', jessibuca._handleWakeLock$2);
+        document.removeEventListener('visibilitychange', jessibuca._handleVisibilityChange$2);
+        window.removeEventListener('fullscreenchange', jessibuca._handleWakeLock$2);
     }
 
     jessibuca.$doms.playDom && jessibuca.$doms.playDom.addEventListener('click', (e) => {

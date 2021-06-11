@@ -176,4 +176,26 @@ export default (jessibuca) => {
     jessibuca._onfullscreenchange = () => {
         this.fullscreen = checkFull();
     }
+
+    jessibuca._handleVisibilityChange = () => {
+        console.log(document.visibilityState, jessibuca._isPlayingBeforePageHidden);
+        // show
+        if ("visible" === document.visibilityState) {
+            if (jessibuca._isPlayingBeforePageHidden) {
+                jessibuca._play();
+            }
+        } else {
+            jessibuca._isPlayingBeforePageHidden = jessibuca.playing;
+            // hidden
+            if (jessibuca.playing) {
+                jessibuca._pause();
+            }
+        }
+    }
+
+    jessibuca._handleWakeLock = () => {
+        if (jessibuca._wakeLock !== null && "visible" === document.visibilityState) {
+            jessibuca._enableWakeLock();
+        }
+    }
 }

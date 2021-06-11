@@ -28,12 +28,14 @@ export default (jessibuca) => {
     jessibuca._contextGLRender = null;
     jessibuca._checkLoadingTimeout = null;
     jessibuca._bitmaprenderer = null;
+    jessibuca._isPlayingBeforePageHidden = false;
 
 
     jessibuca._initCheckVariable = () => {
         jessibuca._startBpsTime = '';
         jessibuca._bps = 0;
         jessibuca._clearCheckHeartTimeout();
+        jessibuca._clearCheckLoading();
     }
 
     jessibuca._clearCheckHeartTimeout = () => {
