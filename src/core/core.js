@@ -1,4 +1,4 @@
-import {$domToggle, bpsSize, bufferStatus, checkFull, dataURLToFile, downloadImg, fpsStatus, now} from "../utils";
+import {$domToggle, bufferStatus, checkFull, dataURLToFile, downloadImg, fpsStatus, now} from "../utils";
 import {EVEMTS, POST_MESSAGE} from "../constant";
 
 export default (jessibuca) => {
@@ -27,8 +27,8 @@ export default (jessibuca) => {
             jessibuca.loading = true;
             $domToggle(jessibuca.$doms.bgDom, false);
             jessibuca._checkLoading();
-            jessibuca.playUrl = url;
-        } else if (jessibuca.playUrl) {
+            jessibuca._playUrl = url;
+        } else if (jessibuca._playUrl) {
             // retry
             if (jessibuca.loading) {
                 jessibuca._hideBtns();
@@ -44,10 +44,10 @@ export default (jessibuca) => {
 
         if (needDelay) {
             setTimeout(() => {
-                jessibuca._decoderWorker.postMessage({cmd: POST_MESSAGE.play, url: jessibuca.playUrl})
+                jessibuca._decoderWorker.postMessage({cmd: POST_MESSAGE.play, url: jessibuca._playUrl})
             }, 300);
         } else {
-            jessibuca._decoderWorker.postMessage({cmd: POST_MESSAGE.play, url: jessibuca.playUrl})
+            jessibuca._decoderWorker.postMessage({cmd: POST_MESSAGE.play, url: jessibuca._playUrl})
         }
     }
 
@@ -73,13 +73,15 @@ export default (jessibuca) => {
     }
 
     jessibuca._close$2 = () => {
+        jessibuca._opt.debug && console.log('_close$2-START');
         jessibuca._closeAudio && jessibuca._closeAudio()
         jessibuca._audioPlayBuffers = [];
         jessibuca._audioPlaying = false;
+        jessibuca._decoderWorker.postMessage({cmd: POST_MESSAGE.close})
         delete jessibuca._playAudio;
-        jessibuca._decoderWorker.postMessage({cmd: "close"})
         jessibuca._releaseWakeLock();
         jessibuca._initCheckVariable();
+        jessibuca._opt.debug && console.log('_close$2-END');
     }
 
     jessibuca._releaseWakeLock = () => {

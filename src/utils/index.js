@@ -57,15 +57,7 @@ export function fpsStatus(fps) {
     return result;
 }
 
-export function bufferStatus(buffer, settingBuffer) {
-    let result = BUFFER_STATUS.buffering;
-    if (buffer === 0) {
-        result = BUFFER_STATUS.empty
-    } else if (buffer >= settingBuffer) {
-        result = BUFFER_STATUS.full;
-    }
-    return result;
-}
+
 
 export function setStyle(dom, cssObj) {
     Object.keys(cssObj || {}).forEach(function (key) {
@@ -113,4 +105,14 @@ export function $initBtns($doms) {
     $domToggle($doms.playDom, false);
     $domToggle($doms.playBigDom, false);
     $domToggle($doms.bgDom, false);
+}
+
+export function bufferStatus(buffer, settingBuffer) {
+    let result = BUFFER_STATUS.buffering;
+    if (buffer === 0) {
+        result = BUFFER_STATUS.empty
+    } else if (buffer >= settingBuffer) {
+        result = BUFFER_STATUS.full;
+    }
+    return result;
 }

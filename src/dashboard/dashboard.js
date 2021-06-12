@@ -1,4 +1,4 @@
-import {$domToggle, $hideBtns, dataURLToFile, downloadImg, now, setStyle} from "../utils";
+import {$hideBtns, setStyle} from "../utils";
 import initEventListener from './eventListener';
 
 export default (jessibuca) => {

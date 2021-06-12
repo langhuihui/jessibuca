@@ -1,5 +1,4 @@
 import {now} from "../utils";
-import {j} from "../../demo/.vitepress/dist/assets/app.56ccf89d";
 
 export default (jessibuca) => {
     jessibuca._resize$2 = () => jessibuca.resize();

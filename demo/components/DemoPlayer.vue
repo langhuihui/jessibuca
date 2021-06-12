@@ -120,7 +120,7 @@ export default {
                 text: "",
                 // background: "bg.jpg",
                 loadingText: "加载中",
-                hasAudio:false,
+                // hasAudio:false,
                 debug: true,
                 showBandwidth: this.showBandwidth, // 显示网速
                 operateBtns: {

@@ -246,7 +246,7 @@ Module.postRun = function () {
                 fetch(url, {signal: controller.signal}).then(function (res) {
                     var reader = res.body.getReader();
                     var input = _this.inputFlv()
-                    var dispatch = dispatchData(input)
+                    var dispatch = dispatchData(input);
                     var fetchNext = function () {
                         reader.read().then(({done, value}) => {
                             if (done) {
@@ -258,6 +258,7 @@ Module.postRun = function () {
                             }
                         }).catch(function (e) {
                             input.return(null);
+                            _this.opt.debug && console.error(e);
                             if (e.toString().indexOf('The user aborted a request') === -1) {
                                 postMessage({cmd: "printErr", text: e.toString()});
                             }
@@ -356,6 +357,7 @@ Module.postRun = function () {
         },
         close: function () {
             if (this._close) {
+                this.opt.debug && console.log('worker close');
                 this._close();
                 clearInterval(this.stopId);
                 this.stopId = null;
