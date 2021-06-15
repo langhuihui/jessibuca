@@ -52,4 +52,16 @@ export default (jessibuca) => {
         jessibuca._contextGLRender = createWebGL(_contextGL);
         jessibuca._contextGL = _contextGL;
     }
+
+    jessibuca._destroyContextGL = () => {
+        if (jessibuca._contextGL) {
+            jessibuca._contextGL = null;
+        }
+        if (jessibuca._contextGLRender) {
+            jessibuca._contextGLRender = null;
+        }
+        if (jessibuca._bitmaprenderer) {
+            jessibuca._bitmaprenderer = null;
+        }
+    }
 }

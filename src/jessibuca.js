@@ -260,7 +260,9 @@ class Jessibuca {
      */
     destroy() {
         this._close();
-        this._decoderWorker.terminate()
+        this._destroyAudioContext();
+        this._destroyContextGL();
+        this._decoderWorker.terminate();
         this._removeEventListener();
         this._initCheckVariable();
         this._off();

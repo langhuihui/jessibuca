@@ -3,8 +3,7 @@ import {audioContextUnlock} from "../utils";
 export default (jessibuca) => {
     jessibuca._audioContext = new (window.AudioContext || window.webkitAudioContext)();
     jessibuca._gainNode = jessibuca._audioContext.createGain();
-
-
+    //
     jessibuca._audioEnabled = (flag) => {
         if (flag) {
             audioContextUnlock(jessibuca._audioContext)
@@ -24,26 +23,23 @@ export default (jessibuca) => {
             jessibuca._audioContext.suspend();
         }
     }
-
     // default not mute
     jessibuca._audioEnabled(true);
-
-
+    //
     jessibuca._mute = () => {
         jessibuca._audioEnabled(false);
         jessibuca.quieting = true;
     }
-
-
+    //
     jessibuca._cancelMute = () => {
         jessibuca._audioEnabled(true);
         jessibuca.quieting = false;
     }
-
+    //
     jessibuca._audioResume = () => {
         jessibuca._cancelMute();
     }
-
+    //
     jessibuca._initAudioPlanar = (msg) => {
         const channels = msg.channels
         // const samplerate = msg.samplerate
@@ -79,5 +75,12 @@ export default (jessibuca) => {
                 }
             }
         };
+    }
+
+
+    jessibuca._destroyAudioContext = () => {
+        jessibuca._audioContext.close();
+        jessibuca._audioContext = null;
+        jessibuca._gainNode = null;
     }
 }

@@ -275,7 +275,6 @@ export default (jessibuca) => {
     //
     jessibuca.$doms = doms;
 
-
     jessibuca._removeContainerChild = () => {
         while (jessibuca.$container.firstChild) {
             jessibuca.$container.removeChild(jessibuca.$container.firstChild);
@@ -285,7 +284,6 @@ export default (jessibuca) => {
     initEventListener(jessibuca);
 
     $hideBtns(jessibuca.$doms);
-
 
     // mute
     if (!jessibuca._opt.isNotMute) {
