@@ -180,7 +180,7 @@ export default (jessibuca) => {
     }
 
     jessibuca._handleVisibilityChange = () => {
-        console.log(document.visibilityState, jessibuca._isPlayingBeforePageHidden);
+        jessibuca._opt.debug && console.log(document.visibilityState, jessibuca._isPlayingBeforePageHidden);
         // show
         if ("visible" === document.visibilityState) {
             if (jessibuca._isPlayingBeforePageHidden) {
