@@ -1,4 +1,4 @@
-import {$domToggle, bufferStatus, checkFull, dataURLToFile, downloadImg, fpsStatus, now} from "../utils";
+import {$domToggle, $hideBtns, bufferStatus, checkFull, dataURLToFile, downloadImg, fpsStatus, now} from "../utils";
 import {EVEMTS, POST_MESSAGE} from "../constant";
 
 export default (jessibuca) => {
@@ -31,7 +31,7 @@ export default (jessibuca) => {
         } else if (jessibuca._playUrl) {
             // retry
             if (jessibuca.loading) {
-                jessibuca._hideBtns();
+                $hideBtns(jessibuca.$doms);
                 $domToggle(jessibuca.$doms.fullscreenDom, true);
                 $domToggle(jessibuca.$doms.pauseDom, true);
                 $domToggle(jessibuca.$doms.loadingDom, true);
