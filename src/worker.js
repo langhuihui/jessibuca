@@ -58,10 +58,10 @@ if (!Date.now) Date.now = function () {
     return new Date().getTime();
 };
 Module.print = function (text) {
-    postMessage({cmd: "print", text: text})
+    postMessage({ cmd: "print", text: text })
 }
 Module.printErr = function (text) {
-    postMessage({cmd: "printErr", text: text})
+    postMessage({ cmd: "printErr", text: text })
 }
 Module.postRun = function () {
     var buffer = []
@@ -115,7 +115,7 @@ Module.postRun = function () {
             for (var i = 0; i < channels; i++) {
                 buffersA.push([]);
             }
-            postMessage({cmd: "initAudioPlanar", samplerate: samplerate, channels: channels})
+            postMessage({ cmd: "initAudioPlanar", samplerate: samplerate, channels: channels })
             this.playAudioPlanar = function (data, len) {
                 var outputArray = [];
                 var frameCount = len / 4 / buffersA.length;
@@ -133,7 +133,7 @@ Module.postRun = function () {
                     }
                     outputArray[i] = buffer;
                 }
-                postMessage({cmd: "playAudio", buffer: outputArray}, outputArray.map(x => x.buffer))
+                postMessage({ cmd: "playAudio", buffer: outputArray }, outputArray.map(x => x.buffer))
             }
         },
         inputFlv: function* () {
@@ -160,10 +160,10 @@ Module.postRun = function () {
                 var payload = yield length
                 switch (type) {
                     case 8:
-                        this.opt.hasAudio && buffer.push({ts, payload, decoder: audioDecoder, type: 0})
+                        this.opt.hasAudio && buffer.push({ ts, payload, decoder: audioDecoder, type: 0 })
                         break
                     case 9:
-                        buffer.push({ts, payload, decoder: videoDecoder, type: payload[0] >> 4})
+                        buffer.push({ ts, payload, decoder: videoDecoder, type: payload[0] >> 4 })
                         break
                 }
             }
@@ -237,18 +237,18 @@ Module.postRun = function () {
             }
             this.stopId = setInterval(loop, 10);
             this.speedSamplerId = setInterval(() => {
-                postMessage({cmd: "kBps", kBps: speedSampler.getLastSecondKBps()})
+                postMessage({ cmd: "kBps", kBps: speedSampler.getLastSecondKBps() })
             }, 1000);
             if (url.indexOf("http") == 0) {
                 this.flvMode = true
                 var _this = this;
                 var controller = new AbortController();
-                fetch(url, {signal: controller.signal}).then(function (res) {
+                fetch(url, { signal: controller.signal }).then(function (res) {
                     var reader = res.body.getReader();
                     var input = _this.inputFlv()
                     var dispatch = dispatchData(input);
                     var fetchNext = function () {
-                        reader.read().then(({done, value}) => {
+                        reader.read().then(({ done, value }) => {
                             if (done) {
                                 input.return(null)
                             } else {
@@ -260,13 +260,13 @@ Module.postRun = function () {
                             input.return(null);
                             _this.opt.debug && console.error(e);
                             if (e.toString().indexOf('The user aborted a request') === -1) {
-                                postMessage({cmd: "printErr", text: e.toString()});
+                                postMessage({ cmd: "printErr", text: e.toString() });
                             }
                         })
                     }
                     fetchNext();
                 }).catch((err) => {
-                    postMessage({cmd: "printErr", text: err.message})
+                    postMessage({ cmd: "printErr", text: err.message })
                 })
                 this._close = function () {
                     controller.abort()
@@ -284,7 +284,7 @@ Module.postRun = function () {
                     }
                     this.ws.onerror = (e) => {
                         input.return(null);
-                        postMessage({cmd: "printErr", text: e.toString()});
+                        postMessage({ cmd: "printErr", text: e.toString() });
                     }
                 } else {
                     this.ws.onmessage = evt => {
@@ -310,7 +310,7 @@ Module.postRun = function () {
                         }
                     }
                     this.ws.onerror = evt => {
-                        postMessage({cmd: "printErr", text: evt.toString()});
+                        postMessage({ cmd: "printErr", text: evt.toString() });
                     }
                 }
                 this._close = function () {
@@ -319,7 +319,7 @@ Module.postRun = function () {
                 }
             }
             this.setVideoSize = function (w, h) {
-                postMessage({cmd: "initSize", w: w, h: h})
+                postMessage({ cmd: "initSize", w: w, h: h })
                 var size = w * h
                 var qsize = size >> 2
                 if (!this.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined') {
@@ -381,15 +381,16 @@ Module.postRun = function () {
     }
     var audioDecoder = new Module.AudioDecoder(decoder)
     var videoDecoder = new Module.VideoDecoder(decoder)
-    postMessage({cmd: "init"})
+    postMessage({ cmd: "init" })
     self.onmessage = function (event) {
         var msg = event.data
         switch (msg.cmd) {
             case "init":
                 decoder.opt = JSON.parse(msg.opt)
+                audioDecoder.sample_rate = msg.sampleRate
                 break
             case "getProp":
-                postMessage({cmd: "getProp", value: decoder[msg.prop]})
+                postMessage({ cmd: "getProp", value: decoder[msg.prop] })
                 break
             case "setProp":
                 decoder[msg.prop] = msg.value

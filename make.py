@@ -41,7 +41,7 @@ emcc_args = [
 #     emcc_args.append('--post-js cocosCom.js')
 print ('building...')
 
-emcc_args = ['obj/lib/libavcodec.a','obj/lib/libavutil.a']+emcc_args
+emcc_args = ['obj/lib/libavcodec.a','obj/lib/libavutil.a','obj/lib/libswresample.a']+emcc_args
 
 os.system('emcc Jessibuca.cpp ' +
           (' '.join(emcc_args)) + ' -o '+args['-o']+'.js')

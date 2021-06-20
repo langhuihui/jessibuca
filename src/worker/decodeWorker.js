@@ -1,5 +1,5 @@
-import {CMD_TYPE, EVEMTS, POST_MESSAGE} from "../constant";
-import {bpsSize} from "../utils";
+import { CMD_TYPE, EVEMTS, POST_MESSAGE } from "../constant";
+import { bpsSize } from "../utils";
 
 export default (jessibuca) => {
     const decoderWorker = new Worker(jessibuca._opt.decoder);
@@ -10,7 +10,8 @@ export default (jessibuca) => {
                 jessibuca.setBufferTime(jessibuca._opt.videoBuffer);
                 decoderWorker.postMessage({
                     cmd: POST_MESSAGE.init,
-                    opt: JSON.stringify(jessibuca._opt)
+                    opt: JSON.stringify(jessibuca._opt),
+                    sampleRate: jessibuca._audioContext.sampleRate
                 })
                 if (!jessibuca._hasLoaded) {
                     jessibuca._hasLoaded = true;
@@ -23,7 +24,7 @@ export default (jessibuca) => {
                 jessibuca.$canvasElement.height = msg.h;
                 jessibuca.onInitSize();
                 jessibuca._resize();
-                jessibuca._trigger(EVEMTS.videoInfo, {w: msg.w, h: msg.h});
+                jessibuca._trigger(EVEMTS.videoInfo, { w: msg.w, h: msg.h });
                 jessibuca._trigger(EVEMTS.start);
                 if (jessibuca._supportOffscreen()) {
                     jessibuca._bitmaprenderer = jessibuca.$canvasElement.getContext("bitmaprenderer");
@@ -45,7 +46,7 @@ export default (jessibuca) => {
                 }
                 jessibuca._trigger(EVEMTS.timeUpdate, msg.ts);
                 jessibuca.onTimeUpdate(msg.ts);
-                jessibuca._updateStats({buf: msg.delay, ts: msg.ts});
+                jessibuca._updateStats({ buf: msg.delay, ts: msg.ts });
                 jessibuca._checkHeart();
                 break;
             case CMD_TYPE.playAudio:
@@ -65,11 +66,11 @@ export default (jessibuca) => {
                 break;
             case CMD_TYPE.initAudioPlanar:
                 jessibuca._initAudioPlanar(msg);
-                jessibuca._trigger(EVEMTS.audioInfo, {
-                    numOfChannels: msg.channels, // 声频通道
-                    length: undefined, // 帧数
-                    sampleRate: msg.samplerate // 采样率
-                });
+                // jessibuca._trigger(EVEMTS.audioInfo, {
+                //     numOfChannels: msg.channels, // 声频通道
+                //     length: undefined, // 帧数
+                //     sampleRate: msg.samplerate // 采样率
+                // });
                 break;
             case CMD_TYPE.kBps:
                 if (jessibuca.playing) {

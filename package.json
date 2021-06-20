@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "scripts": {
     "build": "parcel build src/index.js --dist-dir ./demo/public --no-source-maps",
-    "build:wasm": "python make.py --wasm",
+    "build:wasm": "python make.py --wasm && npm run build",
     "build:demo": "vitepress build demo",
     "dev": "vitepress dev demo"
   },
   "devDependencies": {
-    "parcel": "^2.0.0-beta.3.1",
+    "parcel": "^2.0.0-beta.2",
     "vitepress": "^0.14.0"
   },
   "browserslist": [

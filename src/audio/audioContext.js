@@ -1,4 +1,4 @@
-import {audioContextUnlock} from "../utils";
+import { audioContextUnlock } from "../utils";
 
 export default (jessibuca) => {
     jessibuca._audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -41,40 +41,61 @@ export default (jessibuca) => {
     }
     //
     jessibuca._initAudioPlanar = (msg) => {
-        const channels = msg.channels
-        // const samplerate = msg.samplerate
         const context = jessibuca._audioContext;
         if (!context) return false;
-        jessibuca._playAudio = function (buffer) {
-            let _audioPlayBuffers = [buffer];
-            const frameCount = buffer[0].length
-            const scriptNode = context.createScriptProcessor(frameCount, 0, channels);
-            scriptNode.onaudioprocess = function (audioProcessingEvent) {
-                if (_audioPlayBuffers.length) {
-                    const buffer = _audioPlayBuffers.shift()
-                    for (let channel = 0; channel < channels; channel++) {
-                        const nowBuffering = audioProcessingEvent.outputBuffer.getChannelData(channel);
-                        for (let i = 0; i < frameCount; i++) {
-                            nowBuffering[i] = buffer[channel][i]
-                        }
+        let _audioPlayBuffers = [];
+        let lastBuffer
+        const scriptNode = context.createScriptProcessor(1024, 0, 2);
+        scriptNode.onaudioprocess = function (audioProcessingEvent) {
+            if (_audioPlayBuffers.length) {
+                const buffer = _audioPlayBuffers.shift()
+                for (let channel = 0; channel < 2; channel++) {
+                    const b = buffer[channel]
+                    const nowBuffering = audioProcessingEvent.outputBuffer.getChannelData(channel);
+                    for (let i = 0; i < 1024; i++) {
+                        nowBuffering[i] = b[i]
                     }
-                }
-            };
-            scriptNode.connect(jessibuca._gainNode);
-            jessibuca._closeAudio = () => {
-                scriptNode.disconnect(jessibuca._gainNode)
-                jessibuca._gainNode.disconnect(context.destination);
-                delete jessibuca._closeAudio
-                _audioPlayBuffers = [];
-            }
-            jessibuca._gainNode.connect(context.destination);
-            jessibuca._playAudio = (fromBuffer) => {
-                _audioPlayBuffers.push(fromBuffer);
-                if (_audioPlayBuffers.length > 5) {
-                    _audioPlayBuffers.shift();
                 }
             }
         };
+        scriptNode.connect(jessibuca._gainNode);
+        jessibuca._closeAudio = () => {
+            scriptNode.disconnect(jessibuca._gainNode)
+            jessibuca._gainNode.disconnect(context.destination);
+            delete jessibuca._closeAudio
+            _audioPlayBuffers = [];
+        }
+        jessibuca._gainNode.connect(context.destination);
+
+        jessibuca._playAudio = (fromBuffer) => {
+            if (lastBuffer) {
+                let need = 1024 - lastBuffer[0].length
+                if (fromBuffer[0].length >= need) {
+                    _audioPlayBuffers.push(lastBuffer.map((x, i) => x.concat(fromBuffer[i].slice(0, need))));
+                    lastBuffer = null
+                    if (fromBuffer[0].length > need) {
+                        jessibuca._playAudio(fromBuffer.map(x => x.slice(need)))
+                    }
+                } else {
+                    lastBuffer.forEach((x, i) => x.push(...fromBuffer[i]));
+                }
+            } else {
+                let remain = fromBuffer[0].length
+                let start = 0
+                while (remain) {
+                    if (remain >= 1024) {
+                        remain -= 1024
+                        _audioPlayBuffers.push(fromBuffer.map(x => x.slice(start, 1024 + start)));
+                        start += 1024
+                    } else {
+                        remain = 0
+                        lastBuffer = fromBuffer.map(x => x.slice(start))
+                        console.log(lastBuffer)
+                        break
+                    }
+                }
+            }
+        }
     }
 
 
