@@ -44,7 +44,6 @@ export default (jessibuca) => {
         const context = jessibuca._audioContext;
         if (!context) return false;
         let _audioPlayBuffers = [];
-        let lastBuffer
         const scriptNode = context.createScriptProcessor(1024, 0, 2);
         scriptNode.onaudioprocess = function (audioProcessingEvent) {
             if (_audioPlayBuffers.length) {
@@ -66,36 +65,7 @@ export default (jessibuca) => {
             _audioPlayBuffers = [];
         }
         jessibuca._gainNode.connect(context.destination);
-
-        jessibuca._playAudio = (fromBuffer) => {
-            if (lastBuffer) {
-                let need = 1024 - lastBuffer[0].length
-                if (fromBuffer[0].length >= need) {
-                    _audioPlayBuffers.push(lastBuffer.map((x, i) => x.concat(fromBuffer[i].slice(0, need))));
-                    lastBuffer = null
-                    if (fromBuffer[0].length > need) {
-                        jessibuca._playAudio(fromBuffer.map(x => x.slice(need)))
-                    }
-                } else {
-                    lastBuffer.forEach((x, i) => x.push(...fromBuffer[i]));
-                }
-            } else {
-                let remain = fromBuffer[0].length
-                let start = 0
-                while (remain) {
-                    if (remain >= 1024) {
-                        remain -= 1024
-                        _audioPlayBuffers.push(fromBuffer.map(x => x.slice(start, 1024 + start)));
-                        start += 1024
-                    } else {
-                        remain = 0
-                        lastBuffer = fromBuffer.map(x => x.slice(start))
-                        console.log(lastBuffer)
-                        break
-                    }
-                }
-            }
-        }
+        jessibuca._playAudio = (fromBuffer) => _audioPlayBuffers.push(fromBuffer)
     }
 
 

@@ -111,29 +111,42 @@ Module.postRun = function () {
     var decoder = {
         opt: {},
         initAudioPlanar: function (channels, samplerate) {
-            var buffersA = [];
-            for (var i = 0; i < channels; i++) {
-                buffersA.push([]);
-            }
             postMessage({ cmd: "initAudioPlanar", samplerate: samplerate, channels: channels })
+            var buffer = []
+            var outputArray = [];
+            var remain = 0
             this.playAudioPlanar = function (data, len) {
-                var outputArray = [];
-                var frameCount = len / 4 / buffersA.length;
-                for (var i = 0; i < buffersA.length; i++) {
-                    var fp = Module.HEAPU32[(data >> 2) + i] >> 2;
-                    var float32 = Module.HEAPF32.subarray(fp, fp + frameCount);
-                    var buffer = buffersA[i]
-                    if (buffer.length) {
-                        buffer = buffer.pop();
-                        for (var j = 0; j < buffer.length; j++) {
-                            buffer[j] = float32[j];
-                        }
-                    } else {
-                        buffer = Float32Array.from(float32);
-                    }
-                    outputArray[i] = buffer;
+                var frameCount = len;
+                var origin = []
+                var start = 0
+                for (var channel = 0; channel < 2; channel++) {
+                    var fp = Module.HEAPU32[(data >> 2) + channel] >> 2;
+                    origin[channel] = Module.HEAPF32.subarray(fp, fp + frameCount);
                 }
-                postMessage({ cmd: "playAudio", buffer: outputArray }, outputArray.map(x => x.buffer))
+                if (remain) {
+                    len = 1024 - remain
+                    if (frameCount >= len) {
+                        outputArray[0] = Float32Array.of(...buffer[0], ...origin[0].subarray(0, len))
+                        outputArray[1] = Float32Array.of(...buffer[1], ...origin[1].subarray(0, len))
+                        postMessage({ cmd: "playAudio", buffer: outputArray }, outputArray.map(x => x.buffer))
+                        start = len
+                        frameCount -= len
+                    } else {
+                        remain += frameCount
+                        buffer[0] = Float32Array.of(...buffer[0], ...origin[0])
+                        buffer[1] = Float32Array.of(...buffer[1], ...origin[1])
+                        return
+                    }
+                }
+                for (remain = frameCount; remain >= 1024; remain -= 1024) {
+                    outputArray[0] = origin[0].slice(start, start += 1024)
+                    outputArray[1] = origin[1].slice(start - 1024, start)
+                    postMessage({ cmd: "playAudio", buffer: outputArray }, outputArray.map(x => x.buffer))
+                }
+                if (remain) {
+                    buffer[0] = origin[0].slice(start)
+                    buffer[1] = origin[1].slice(start)
+                }
             }
         },
         inputFlv: function* () {

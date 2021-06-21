@@ -124,7 +124,7 @@ public:
 class FFmpegAudioDecoder : public FFmpeg
 {
     SwrContext *au_convert_ctx = nullptr;
-    u8 *out_buffer = nullptr;
+    u8 *out_buffer[2];
     int output_nb_samples;
 
 public:
@@ -191,7 +191,7 @@ public:
         auto bytes_per_sample = av_get_bytes_per_sample(AV_SAMPLE_FMT_FLTP);
         if (dec_ctx->sample_fmt == AV_SAMPLE_FMT_FLTP && sample_rate == dec_ctx->sample_rate && dec_ctx->channel_layout == 2)
         {
-            jsObject.call<void>("playAudioPlanar", int(frame->data), nb_samples *bytes_per_sample <<1);
+            jsObject.call<void>("playAudioPlanar", int(frame->data), nb_samples *bytes_per_sample << 1);
             return;
         }
         if (!au_convert_ctx)
@@ -203,15 +203,17 @@ public:
                                                 0, NULL);
             auto ret = swr_init(au_convert_ctx);
             auto out_buffer_size = av_samples_get_buffer_size(NULL, 2, nb_samples, AV_SAMPLE_FMT_FLTP, 0);
-            out_buffer = (uint8_t *)av_malloc(out_buffer_size);
+            auto buffer = (uint8_t *)av_malloc(out_buffer_size);
+            out_buffer[0] = buffer;
+            out_buffer[1] = buffer + (out_buffer_size / 2);
             emscripten_log(0, "au_convert_ctx init sample_rate:%d->%d,ret:%d", dec_ctx->sample_rate, sample_rate, ret);
         }
         // // 转换
-        auto ret = swr_convert(au_convert_ctx, &out_buffer, nb_samples, (const uint8_t **)frame->data, nb_samples);
+        auto ret = swr_convert(au_convert_ctx, out_buffer, nb_samples, (const uint8_t **)frame->data, nb_samples);
         while (ret > 0)
         {
-            jsObject.call<void>("playAudioPlanar", int(&out_buffer), ret *bytes_per_sample <<1);
-            ret = swr_convert(au_convert_ctx, &out_buffer, nb_samples, (const uint8_t **)frame->data, 0);
+            jsObject.call<void>("playAudioPlanar", int(&out_buffer), ret);
+            ret = swr_convert(au_convert_ctx, out_buffer, nb_samples, (const uint8_t **)frame->data, 0);
         }
     }
 };

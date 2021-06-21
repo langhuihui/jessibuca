@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "parcel build src/index.js --dist-dir ./demo/public --no-source-maps",
-    "build:wasm": "python make.py --wasm && npm run build",
+    "build:wasm": "python make.py --wasm && npm run build:demo",
     "build:demo": "vitepress build demo",
     "dev": "vitepress dev demo"
   },
