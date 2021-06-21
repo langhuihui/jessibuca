@@ -187,7 +187,13 @@ public:
     }
     void _decode() override
     {
-
+        auto nb_samples = frame->nb_samples;
+        auto bytes_per_sample = av_get_bytes_per_sample(AV_SAMPLE_FMT_FLTP);
+        if (dec_ctx->sample_fmt == AV_SAMPLE_FMT_FLTP && sample_rate == dec_ctx->sample_rate && dec_ctx->channel_layout == 2)
+        {
+            jsObject.call<void>("playAudioPlanar", int(frame->data), nb_samples *bytes_per_sample <<1);
+            return;
+        }
         if (!au_convert_ctx)
         {
             // out_buffer = (uint8_t *)av_malloc(av_get_bytes_per_sample(dec_ctx->sample_fmt)*dec_ctx->channels*dec_ctx->frame_size);
@@ -196,17 +202,16 @@ public:
                                                 dec_ctx->channel_layout, dec_ctx->sample_fmt, dec_ctx->sample_rate,
                                                 0, NULL);
             auto ret = swr_init(au_convert_ctx);
-            output_nb_samples = swr_get_out_samples(au_convert_ctx, frame->nb_samples);
-            auto out_buffer_size = av_samples_get_buffer_size(NULL, 2, output_nb_samples, AV_SAMPLE_FMT_FLTP, 1);
+            auto out_buffer_size = av_samples_get_buffer_size(NULL, 2, nb_samples, AV_SAMPLE_FMT_FLTP, 0);
             out_buffer = (uint8_t *)av_malloc(out_buffer_size);
-            emscripten_log(0, "au_convert_ctx init sample_rate:%d->%d,nb_samples:%d->%d ,ret:%d", dec_ctx->sample_rate, sample_rate, frame->nb_samples, output_nb_samples, ret);
+            emscripten_log(0, "au_convert_ctx init sample_rate:%d->%d,ret:%d", dec_ctx->sample_rate, sample_rate, ret);
         }
         // // 转换
-        auto ret = swr_convert(au_convert_ctx, &out_buffer, frame->nb_samples, (const uint8_t **)frame->data, frame->nb_samples);
+        auto ret = swr_convert(au_convert_ctx, &out_buffer, nb_samples, (const uint8_t **)frame->data, nb_samples);
         while (ret > 0)
         {
-            jsObject.call<void>("playAudioPlanar", int(&out_buffer), ret *av_get_bytes_per_sample(AV_SAMPLE_FMT_FLTP) * 2);
-            ret = swr_convert(au_convert_ctx, &out_buffer, frame->nb_samples, (const uint8_t **)frame->data, 0);
+            jsObject.call<void>("playAudioPlanar", int(&out_buffer), ret *bytes_per_sample <<1);
+            ret = swr_convert(au_convert_ctx, &out_buffer, nb_samples, (const uint8_t **)frame->data, 0);
         }
     }
 };
