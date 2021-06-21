@@ -5,6 +5,9 @@ module.exports = {
         repo: "langhuihui/jessibuca",
         docsBranch: "v2",
         sidebar: "auto",
+        nav:[
+            { text: 'API', link: '/api' },
+        ],
         logo: 'logo.png'
     },
     head: [
