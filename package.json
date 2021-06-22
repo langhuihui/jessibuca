@@ -5,7 +5,8 @@
     "build": "parcel build src/index.js --dist-dir ./demo/public --no-source-maps",
     "build:wasm": "python make.py --wasm && npm run build:demo",
     "build:demo": "vitepress build demo",
-    "dev": "vitepress dev demo"
+    "dev": "vitepress dev demo",
+    "dev:watch": "parcel watch src/index.js --dist-dir ./demo/public"
   },
   "devDependencies": {
     "parcel": "^2.0.0-beta.2",
