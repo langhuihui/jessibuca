@@ -387,14 +387,13 @@ jessibuca.on("videoInfo",function(data){console.log('width:',data.w,'height:',da
 ```
 
 ### audioInfo
-当解析出音频信息时回调，3个回调参数
+当解析出音频信息时回调，2个回调参数
 1. numOfChannels：声频通道
-2. length：帧数
-3. sampleRate 采样率
+2. sampleRate 采样率
 
 ```js
 
-jessibuca.on("audioInfo",function(data){console.log('numOfChannels:',data.numOfChannels,'length:',data.length,'sampleRate',data.sampleRate)})
+jessibuca.on("audioInfo",function(data){console.log('numOfChannels:',data.numOfChannels,'sampleRate',data.sampleRate)})
 ```
 
 ### log

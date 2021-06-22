@@ -180,7 +180,7 @@ public:
             }
             if (initialized)
             {
-                jsObject.call<void>("initAudioPlanar", 2, dec_ctx->sample_rate);
+                jsObject.call<void>("initAudioPlanar", 2, sample_rate);
             }
         }
         return 0;

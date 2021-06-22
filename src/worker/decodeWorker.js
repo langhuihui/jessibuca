@@ -66,11 +66,10 @@ export default (jessibuca) => {
                 break;
             case CMD_TYPE.initAudioPlanar:
                 jessibuca._initAudioPlanar(msg);
-                // jessibuca._trigger(EVEMTS.audioInfo, {
-                //     numOfChannels: msg.channels, // 声频通道
-                //     length: undefined, // 帧数
-                //     sampleRate: msg.samplerate // 采样率
-                // });
+                jessibuca._trigger(EVEMTS.audioInfo, {
+                    numOfChannels: msg.channels, // 声频通道
+                    sampleRate: msg.samplerate // 采样率
+                });
                 break;
             case CMD_TYPE.kBps:
                 if (jessibuca.playing) {
