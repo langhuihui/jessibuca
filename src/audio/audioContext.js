@@ -48,7 +48,7 @@ export default (jessibuca) => {
         scriptNode.onaudioprocess = function (audioProcessingEvent) {
             if (_audioPlayBuffers.length) {
                 const buffer = _audioPlayBuffers.shift()
-                for (let channel = 0; channel < 2; channel++) {
+                for (let channel = 0; channel < msg.channels; channel++) {
                     const b = buffer[channel]
                     const nowBuffering = audioProcessingEvent.outputBuffer.getChannelData(channel);
                     for (let i = 0; i < 1024; i++) {

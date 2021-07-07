@@ -126,6 +126,7 @@ class FFmpegAudioDecoder : public FFmpeg
     SwrContext *au_convert_ctx = nullptr;
     u8 *out_buffer[2];
     int output_nb_samples;
+    int n_channel;
 
 public:
     PROP(sample_rate, int)
@@ -138,8 +139,8 @@ public:
     {
         if (au_convert_ctx)
             swr_free(&au_convert_ctx);
-        if (out_buffer)
-            free(out_buffer);
+        if (out_buffer[0])
+            free(out_buffer[0]);
         //        emscripten_log(0, "FFMpegAudioDecoder destory");
     }
     void clear() override
@@ -152,11 +153,7 @@ public:
         u8 audioType = flag >> 4;
         if (initialized)
         {
-            if (audioType == 10)
-            {
-                return FFmpeg::decode(input.substr(2));
-            }
-            return FFmpeg::decode(input.substr(1));
+            return FFmpeg::decode(input.substr(audioType == 10 ? 2 : 1));
         }
         else
         {
@@ -166,13 +163,26 @@ public:
                 if (!input[1])
                 {
                     initCodec(AV_CODEC_ID_AAC, input.substr(2));
+                    n_channel = 2;
                 }
                 break;
             case 7:
                 initCodec(AV_CODEC_ID_PCM_ALAW);
+                dec_ctx->channel_layout = AV_CH_LAYOUT_MONO;
+                dec_ctx->sample_rate = 8000;
+                dec_ctx->channels = 1;
+                avcodec_open2(dec_ctx, codec, NULL);
+                n_channel = 1;
+                initialized = true;
                 break;
             case 8:
                 initCodec(AV_CODEC_ID_PCM_MULAW);
+                dec_ctx->channel_layout = AV_CH_LAYOUT_MONO;
+                dec_ctx->sample_rate = 8000;
+                dec_ctx->channels = 1;
+                avcodec_open2(dec_ctx, codec, NULL);
+                n_channel = 1;
+                initialized = true;
                 break;
             default:
                 emscripten_log(0, "audio type not support:%d", audioType);
@@ -180,7 +190,7 @@ public:
             }
             if (initialized)
             {
-                jsObject.call<void>("initAudioPlanar", 2, sample_rate);
+                jsObject.call<void>("initAudioPlanar", n_channel, sample_rate);
             }
         }
         return 0;
@@ -189,20 +199,20 @@ public:
     {
         auto nb_samples = frame->nb_samples;
         auto bytes_per_sample = av_get_bytes_per_sample(AV_SAMPLE_FMT_FLTP);
-        if (dec_ctx->sample_fmt == AV_SAMPLE_FMT_FLTP && sample_rate == dec_ctx->sample_rate && dec_ctx->channel_layout == 2)
+        if (dec_ctx->sample_fmt == AV_SAMPLE_FMT_FLTP && sample_rate == dec_ctx->sample_rate && dec_ctx->channel_layout == n_channel)
         {
-            jsObject.call<void>("playAudioPlanar", int(frame->data), nb_samples *bytes_per_sample << 1);
+            jsObject.call<void>("playAudioPlanar", int(frame->data), nb_samples *bytes_per_sample *n_channel);
             return;
         }
         if (!au_convert_ctx)
         {
             // out_buffer = (uint8_t *)av_malloc(av_get_bytes_per_sample(dec_ctx->sample_fmt)*dec_ctx->channels*dec_ctx->frame_size);
-            emscripten_log(0, "aac channel_layout:%d,sample_fmt:%d", dec_ctx->channel_layout, dec_ctx->sample_fmt);
-            au_convert_ctx = swr_alloc_set_opts(NULL, AV_CH_LAYOUT_STEREO, AV_SAMPLE_FMT_FLTP, sample_rate,
+            emscripten_log(0, "au_convert_ctx channel_layout:%d,sample_fmt:%d", dec_ctx->channel_layout, dec_ctx->sample_fmt);
+            au_convert_ctx = swr_alloc_set_opts(NULL, n_channel == 2 ? AV_CH_LAYOUT_STEREO : AV_CH_LAYOUT_MONO, AV_SAMPLE_FMT_FLTP, sample_rate,
                                                 dec_ctx->channel_layout, dec_ctx->sample_fmt, dec_ctx->sample_rate,
                                                 0, NULL);
             auto ret = swr_init(au_convert_ctx);
-            auto out_buffer_size = av_samples_get_buffer_size(NULL, 2, nb_samples, AV_SAMPLE_FMT_FLTP, 0);
+            auto out_buffer_size = av_samples_get_buffer_size(NULL, n_channel, nb_samples, AV_SAMPLE_FMT_FLTP, 0);
             auto buffer = (uint8_t *)av_malloc(out_buffer_size);
             out_buffer[0] = buffer;
             out_buffer[1] = buffer + (out_buffer_size / 2);

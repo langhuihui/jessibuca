@@ -127,25 +127,25 @@ Module.postRun = function () {
                     len = 1024 - remain
                     if (frameCount >= len) {
                         outputArray[0] = Float32Array.of(...buffer[0], ...origin[0].subarray(0, len))
-                        outputArray[1] = Float32Array.of(...buffer[1], ...origin[1].subarray(0, len))
+                        if (channels == 2) outputArray[1] = Float32Array.of(...buffer[1], ...origin[1].subarray(0, len))
                         postMessage({ cmd: "playAudio", buffer: outputArray }, outputArray.map(x => x.buffer))
                         start = len
                         frameCount -= len
                     } else {
                         remain += frameCount
                         buffer[0] = Float32Array.of(...buffer[0], ...origin[0])
-                        buffer[1] = Float32Array.of(...buffer[1], ...origin[1])
+                        if (channels == 2) buffer[1] = Float32Array.of(...buffer[1], ...origin[1])
                         return
                     }
                 }
                 for (remain = frameCount; remain >= 1024; remain -= 1024) {
                     outputArray[0] = origin[0].slice(start, start += 1024)
-                    outputArray[1] = origin[1].slice(start - 1024, start)
+                    if (channels == 2) outputArray[1] = origin[1].slice(start - 1024, start)
                     postMessage({ cmd: "playAudio", buffer: outputArray }, outputArray.map(x => x.buffer))
                 }
                 if (remain) {
                     buffer[0] = origin[0].slice(start)
-                    buffer[1] = origin[1].slice(start)
+                    if (channels == 2) buffer[1] = origin[1].slice(start)
                 }
             }
         },
