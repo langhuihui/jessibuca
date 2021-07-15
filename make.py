@@ -21,9 +21,9 @@ sargs = {
     'ERROR_ON_UNDEFINED_SYMBOLS': 0,
     'DISABLE_EXCEPTION_CATCHING': 1,
     # 'ALLOW_MEMORY_GROWTH':1,
-    'ENVIRONMENT':'"worker"',
+    # 'ENVIRONMENT':'"worker"',
     'INVOKE_RUN':0,
-    'USE_PTHREADS':  1
+    'USE_PTHREADS':  0
     # 'DEMANGLE_SUPPORT':1
 }
 emcc_args = [
