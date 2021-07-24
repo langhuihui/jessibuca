@@ -22,7 +22,7 @@ sargs = {
     'DISABLE_EXCEPTION_CATCHING': 1,
     # 'ALLOW_MEMORY_GROWTH':1,
     # 'ENVIRONMENT':'"worker"',
-    'INVOKE_RUN':0,
+    'INVOKE_RUN': 0,
     'USE_PTHREADS':  0
     # 'DEMANGLE_SUPPORT':1
 }
@@ -34,14 +34,15 @@ emcc_args = [
     # '--llvm-lto','1',
     '--bind',
     '-I.', '-Iobj/include',
-    '--post-js','src/post.js'
+    '--post-js', 'src/post.js'
 ]+["-s "+k+"="+str(v) for k, v in sargs.items()]
 
 # if '--cocos' in args:
 #     emcc_args.append('--post-js cocosCom.js')
 print ('building...')
 
-emcc_args = ['obj/lib/libavcodec.a','obj/lib/libavutil.a','obj/lib/libswresample.a']+emcc_args
+emcc_args = ['obj/lib/libavcodec.a', 'obj/lib/libavutil.a',
+             'obj/lib/libswresample.a', 'obj/lib/libavformat.a']+emcc_args
 
 os.system('emcc Jessibuca.cpp ' +
           (' '.join(emcc_args)) + ' -o '+args['-o']+'.js')

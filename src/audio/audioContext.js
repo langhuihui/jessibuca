@@ -44,7 +44,7 @@ export default (jessibuca) => {
         const context = jessibuca._audioContext;
         if (!context) return false;
         let _audioPlayBuffers = [];
-        const scriptNode = context.createScriptProcessor(1024, 0, 2);
+        const scriptNode = context.createScriptProcessor(1024, 0, msg.channels);
         scriptNode.onaudioprocess = function (audioProcessingEvent) {
             if (_audioPlayBuffers.length) {
                 const buffer = _audioPlayBuffers.shift()

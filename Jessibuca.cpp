@@ -39,9 +39,12 @@ extern "C"
 {
 #include <libavcodec/avcodec.h>
 #include <libswresample/swresample.h>
+#include <libavformat/avformat.h>
 }
 //const int SamplingFrequencies[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350, 0, 0, 0};
 //const int AudioObjectTypes[] = {};
+
+#include "mp4.h"
 class FFmpeg
 {
 public:
@@ -50,6 +53,7 @@ public:
     AVCodecContext *dec_ctx = nullptr;
     AVFrame *frame;
     AVPacket *pkt;
+    MP4 *mp4 = nullptr;
     val jsObject;
     bool initialized = false;
     FFmpeg(val &&v) : jsObject(forward<val>(v))
@@ -72,10 +76,11 @@ public:
         initCodec(id);
         dec_ctx->extradata_size = input.length();
         dec_ctx->extradata = (u8 *)input.data();
-        // // dec_ctx->extradata = (u8 *)malloc(dec_ctx->extradata_size);
-        // // memcpy(dec_ctx->extradata, input.c_str(), dec_ctx->extradata_size);
-        avcodec_open2(dec_ctx, codec, NULL);
         initialized = true;
+    }
+    virtual void setMp4(int mp4)
+    {
+        this->mp4 = (MP4 *)mp4;
     }
     virtual ~FFmpeg()
     {
@@ -87,6 +92,10 @@ public:
         pkt->data = (u8 *)(input.data());
         pkt->size = input.length();
         ret = avcodec_send_packet(dec_ctx, pkt);
+        if (mp4 != nullptr)
+        {
+            mp4->write(pkt);
+        }
         while (ret >= 0)
         {
             ret = avcodec_receive_frame(dec_ctx, frame);
@@ -333,6 +342,7 @@ EMSCRIPTEN_BINDINGS(FFmpegAudioDecoder)
         .constructor<val>()
         .PROP(sample_rate)
         .FUNC(clear)
+        .FUNC(setMp4)
         .FUNC(decode);
 }
 #undef FUNC
@@ -344,5 +354,6 @@ EMSCRIPTEN_BINDINGS(FFmpegVideoDecoder)
     class_<FFmpegVideoDecoder>("VideoDecoder")
         .constructor<val>()
         .FUNC(clear)
+        .FUNC(setMp4)
         .FUNC(decode);
 }
