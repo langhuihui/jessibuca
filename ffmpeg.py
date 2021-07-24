@@ -14,11 +14,12 @@ args = [
     'cpu=generic'
     ]
 disables = [
-    'everything','all','avdevice','avformat','postproc','avfilter','programs','asm','parsers','muxers','demuxers','filters',
+    'everything','all','avdevice','postproc','avfilter','programs','asm','parsers','muxers','demuxers','filters',
     'doc','devices','network','bsfs','shared','hwaccels','debug','protocols','indevs','outdevs','runtime-cpudetect','pthreads'
 ]
 enables = [
-    'small','cross-compile','gpl','avcodec','swresample','ffmpeg',
+    'small','cross-compile','gpl','avcodec','swresample','ffmpeg','avformat',
+    'muxer=mp4',
     'parser=h264',
     'parser=hevc',
     'parser=aac',
