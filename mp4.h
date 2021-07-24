@@ -15,14 +15,16 @@ public:
         pOutFmt = output_fmtctx->oformat;
         buf = (u8 *)av_malloc(4096);
         output_fmtctx->pb = avio_alloc_context(buf, 4096, 1, this, NULL, write_packet, NULL);
+        avformat_write_header(output_fmtctx, NULL);
     }
     virtual ~MP4()
     {
         av_write_trailer(output_fmtctx);
+        avio_close(output_fmtctx->pb);
         avformat_free_context(output_fmtctx);
     }
     int write(AVPacket *pkt)
-    {
+    { //av_write_frame
         return av_interleaved_write_frame(output_fmtctx, pkt);
     }
     int getPoint()
