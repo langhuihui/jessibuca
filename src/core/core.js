@@ -99,16 +99,24 @@ export default (jessibuca) => {
     }
 
     jessibuca._resize = () => {
-        const width = jessibuca.$container.clientWidth;
+        let width = jessibuca.$container.clientWidth;
         let height = jessibuca.$container.clientHeight;
         if (jessibuca._showControl()) {
             height -= 38;
         }
-        const resizeWidth = jessibuca.$canvasElement.width;
-        const resizeHeight = jessibuca.$canvasElement.height;
+        let resizeWidth = jessibuca.$canvasElement.width;
+        let resizeHeight = jessibuca.$canvasElement.height;
         const rotate = jessibuca._opt.rotate;
-        const wScale = width / resizeWidth;
-        const hScale = height / resizeHeight;
+        let left = ((width - resizeWidth) / 2)
+        let top = ((height - resizeHeight) / 2)
+        if (rotate === 270 || rotate === 90) {
+            resizeWidth = jessibuca.$canvasElement.height;
+            resizeHeight = jessibuca.$canvasElement.width;
+        }
+        let wScale = width / resizeWidth;
+        let hScale = height / resizeHeight;
+
+
         let scale = wScale > hScale ? hScale : wScale;
         if (!jessibuca._opt.isResize) {
             if (wScale !== hScale) {
@@ -126,9 +134,10 @@ export default (jessibuca) => {
             transform += ' rotate(' + rotate + 'deg)'
         }
 
+
         jessibuca.$canvasElement.style.transform = transform;
-        jessibuca.$canvasElement.style.left = ((width - resizeWidth) / 2) + "px"
-        jessibuca.$canvasElement.style.top = ((height - resizeHeight) / 2) + "px"
+        jessibuca.$canvasElement.style.left = left + "px"
+        jessibuca.$canvasElement.style.top = top + "px"
     }
 
 
