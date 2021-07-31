@@ -54,8 +54,11 @@ public:
     AVFrame *frame;
     AVPacket *pkt;
     MP4 *mp4 = nullptr;
+    AVStream *outStream;
     val jsObject;
     bool initialized = false;
+    u32 timestamp = 0;
+    u32 mp4Ts = 0;
     FFmpeg(val &&v) : jsObject(forward<val>(v))
     {
     }
@@ -78,9 +81,12 @@ public:
         dec_ctx->extradata = (u8 *)input.data();
         initialized = true;
     }
-    virtual void setMp4(int mp4)
+    virtual void setMp4(int p)
     {
-        this->mp4 = (MP4 *)mp4;
+        mp4 = (MP4 *)p;
+        mp4Ts = timestamp;
+        outStream = avformat_new_stream(mp4->output_fmtctx, codec);
+        outStream->id = mp4->output_fmtctx->nb_streams - 1;
     }
     virtual ~FFmpeg()
     {
@@ -94,6 +100,7 @@ public:
         ret = avcodec_send_packet(dec_ctx, pkt);
         if (mp4 != nullptr)
         {
+            pkt->stream_index = outStream->index;
             mp4->write(pkt);
         }
         while (ret >= 0)
@@ -156,12 +163,19 @@ public:
     {
         FFmpeg::clear();
     }
-    int decode(string input) override
+    void setMp4(int p) override
     {
+        FFmpeg::setMp4(p);
+        outStream->time_base = (AVRational){1, dec_ctx->sample_rate};
+    }
+    int decode(u32 ts, string input)
+    {
+        timestamp = ts;
         u8 flag = (u8)input[0];
         u8 audioType = flag >> 4;
         if (initialized)
         {
+            pkt->dts = pkt->pts = (int16_t)(ts-mp4Ts);
             return FFmpeg::decode(input.substr(audioType == 10 ? 2 : 1));
         }
         else
@@ -179,6 +193,7 @@ public:
                 initCodec(AV_CODEC_ID_PCM_ALAW);
                 dec_ctx->channel_layout = AV_CH_LAYOUT_MONO;
                 dec_ctx->sample_rate = 8000;
+
                 dec_ctx->channels = 1;
                 avcodec_open2(dec_ctx, codec, NULL);
                 n_channel = 1;
@@ -199,6 +214,8 @@ public:
             }
             if (initialized)
             {
+                if (outStream)
+                    outStream->time_base = (AVRational){1, dec_ctx->sample_rate};
                 jsObject.call<void>("initAudioPlanar", n_channel, sample_rate);
             }
         }
@@ -245,7 +262,7 @@ public:
     u32 u = 0;
     u32 v = 0;
     int NAL_unit_length = 0;
-    u32 compositionTime = 0;
+    int64_t compositionTime = 0;
 
     FFmpegVideoDecoder(val &&v) : FFmpeg(move(v))
     {
@@ -266,8 +283,14 @@ public:
             y = 0;
         }
     }
-    int decode(string data) override
+    void setMp4(int p) override
     {
+        FFmpeg::setMp4(p);
+        outStream->time_base = (AVRational){1, 90000};
+    }
+    int decode(u32 ts, string data)
+    {
+        timestamp = ts;
         if (!initialized)
         {
             int codec_id = ((int)data[0]) & 0x0F;
@@ -290,7 +313,9 @@ public:
         }
         else
         {
-            compositionTime = (((u32)data[2]) << 16) + (((u32)data[3]) << 8) + (u32)data[4];
+            compositionTime = (((int64_t)data[2]) << 16) + (((int64_t)data[3]) << 8) + (int64_t)data[4];
+            pkt->dts = (int16_t)(ts-mp4Ts);
+            pkt->pts = pkt->dts + compositionTime;
             return FFmpeg::decode(data.substr(5));
         }
         return 0;

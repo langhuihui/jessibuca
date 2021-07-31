@@ -376,5 +376,5 @@ class Jessibuca {
 }
 
 window.Jessibuca = Jessibuca;
-
+console.log("Jessibuca Created!")
 export default Jessibuca;

@@ -14,8 +14,9 @@ public:
         }
         pOutFmt = output_fmtctx->oformat;
         buf = (u8 *)av_malloc(4096);
+       
         output_fmtctx->pb = avio_alloc_context(buf, 4096, 1, this, NULL, write_packet, NULL);
-        avformat_write_header(output_fmtctx, NULL);
+        int ret = avformat_write_header(output_fmtctx, NULL);
     }
     virtual ~MP4()
     {
@@ -36,6 +37,7 @@ int write_packet(void *opaque, unsigned char *buf, int buf_size)
 {
     MP4 *mp4 = (MP4 *)opaque;
     mp4->jsObject.call<void>("write", buf, buf_size);
+    return 0;
 };
 #define FUNC(name) function(#name, &MP4::name)
 // #undef PROP
@@ -46,3 +48,4 @@ EMSCRIPTEN_BINDINGS(MP4)
         .constructor<val>()
         .FUNC(getPoint);
 }
+#undef FUNC

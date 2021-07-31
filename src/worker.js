@@ -65,6 +65,14 @@ Module.printErr = function (text) {
 }
 Module.postRun = function () {
     var buffer = []
+    var _decoder = {
+        decode() {
+            this.decoder.decode(this.ts, this.payload)
+        }
+    }
+    function push(ts, payload, decoder, type = 0) {
+        buffer.push(Object.setPrototypeOf({ ts, payload, decoder, type }, _decoder))
+    }
     var speedSampler = {
         _firstCheckpoint: 0,
         _lastCheckpoint: 0,
@@ -173,10 +181,10 @@ Module.postRun = function () {
                 var payload = yield length
                 switch (type) {
                     case 8:
-                        this.opt.hasAudio && buffer.push({ ts, payload, decoder: audioDecoder, type: 0 })
+                        this.opt.hasAudio && push(ts, payload, audioDecoder)
                         break
                     case 9:
-                        buffer.push({ ts, payload, decoder: videoDecoder, type: payload[0] >> 4 })
+                        push(ts, payload, videoDecoder, payload[0] >> 4)
                         break
                 }
             }
@@ -199,14 +207,14 @@ Module.postRun = function () {
                     if (this.getDelay(data.ts) === -1) {
                         buffer.shift()
                         this.ts = data.ts;
-                        data.decoder.decode(data.payload)
+                        data.decode()
                     } else {
                         while (buffer.length) {
                             data = buffer[0]
                             if (this.getDelay(data.ts) > this.videoBuffer) {
                                 buffer.shift()
                                 this.ts = data.ts;
-                                data.decoder.decode(data.payload)
+                                data.decode()
                             } else {
                                 break
                             }
@@ -220,17 +228,17 @@ Module.postRun = function () {
                         if (data.type == 1) {
                             this.dropping = false
                             this.ts = data.ts;
-                            data.decoder.decode(data.payload)
+                            data.decode()
                         } else if (data.type == 0) {
                             this.ts = data.ts;
-                            data.decoder.decode(data.payload)
+                            data.decode()
                         }
                     } else {
                         var data = buffer[0]
                         if (this.getDelay(data.ts) === -1) {
                             buffer.shift()
                             this.ts = data.ts;
-                            data.decoder.decode(data.payload)
+                            data.decode()
                         } else if (this.delay > this.videoBuffer + 1000) {
                             this.dropping = true
                         } else {
@@ -239,7 +247,7 @@ Module.postRun = function () {
                                 if (this.getDelay(data.ts) > this.videoBuffer) {
                                     buffer.shift()
                                     this.ts = data.ts;
-                                    data.decoder.decode(data.payload)
+                                    data.decode()
                                 } else {
                                     break
                                 }
@@ -305,20 +313,17 @@ Module.postRun = function () {
                         var dv = new DataView(evt.data)
                         switch (dv.getUint8(0)) {
                             case 1:
-                                this.opt.hasAudio && buffer.push({
-                                    ts: dv.getUint32(1, false),
-                                    payload: new Uint8Array(evt.data, 5),
-                                    decoder: audioDecoder,
-                                    type: 0
-                                })
+                                this.opt.hasAudio && push(
+                                    dv.getUint32(1, false),
+                                    new Uint8Array(evt.data, 5),
+                                    audioDecoder)
                                 break
                             case 2:
-                                buffer.push({
-                                    ts: dv.getUint32(1, false),
-                                    payload: new Uint8Array(evt.data, 5),
-                                    decoder: videoDecoder,
-                                    type: dv.getUint8(5) >> 4
-                                })
+                                push(dv.getUint32(1, false),
+                                    new Uint8Array(evt.data, 5),
+                                    videoDecoder,
+                                    dv.getUint8(5) >> 4
+                                )
                                 break
                         }
                     }
@@ -394,6 +399,13 @@ Module.postRun = function () {
     }
     var audioDecoder = new Module.AudioDecoder(decoder)
     var videoDecoder = new Module.VideoDecoder(decoder)
+    var mp4 = new Module.MP4({
+        write(buf, size) {
+            console.log(size)
+        }
+    })
+    audioDecoder.setMp4(mp4.getPoint())
+    videoDecoder.setMp4(mp4.getPoint())
     postMessage({ cmd: "init" })
     self.onmessage = function (event) {
         var msg = event.data
