@@ -26,12 +26,13 @@ options 支持的参数有：
 worker 地址。
 
 
-### vod
+### forceNoOffscreen
 - **类型**：`boolean`
 - **默认值**：false
 - **用法**：
 
-是否设置点播模式，点播模式无视延迟。
+是否不使用离屏模式（提升渲染能力）
+
 
 ### hasAudio
 - **类型**：`boolean`
