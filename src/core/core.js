@@ -187,19 +187,21 @@ export default (jessibuca) => {
     jessibuca._onfullscreenchange = () => {
         this.fullscreen = checkFull();
     }
-
+    //
     jessibuca._handleVisibilityChange = () => {
-        jessibuca._opt.debug && console.log(document.visibilityState, jessibuca._isPlayingBeforePageHidden);
-        // show
-        if ("visible" === document.visibilityState) {
-            if (jessibuca._isPlayingBeforePageHidden) {
-                jessibuca._play();
-            }
-        } else {
-            jessibuca._isPlayingBeforePageHidden = jessibuca.playing;
-            // hidden
-            if (jessibuca.playing) {
-                jessibuca._pause();
+        if (jessibuca._opt.hiddenAutoPause) {
+            jessibuca._opt.debug && console.log(document.visibilityState, jessibuca._isPlayingBeforePageHidden);
+            // show
+            if ("visible" === document.visibilityState) {
+                if (jessibuca._isPlayingBeforePageHidden) {
+                    jessibuca._play();
+                }
+            } else {
+                jessibuca._isPlayingBeforePageHidden = jessibuca.playing;
+                // hidden
+                if (jessibuca.playing) {
+                    jessibuca._pause();
+                }
             }
         }
     }

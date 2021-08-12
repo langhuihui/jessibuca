@@ -20,7 +20,8 @@ export const DEFAULT_OPTIONS = {
     background: '',
     decoder: 'index.js',
     rotate: 0,
-    forceNoOffscreen: false
+    forceNoOffscreen: false,
+    hiddenAutoPause: false
 }
 
 export const CMD_TYPE = {
