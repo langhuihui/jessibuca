@@ -185,7 +185,7 @@ export default (jessibuca) => {
 
     //
     jessibuca._onfullscreenchange = () => {
-        this.fullscreen = checkFull();
+        jessibuca.fullscreen = checkFull();
     }
     //
     jessibuca._handleVisibilityChange = () => {
