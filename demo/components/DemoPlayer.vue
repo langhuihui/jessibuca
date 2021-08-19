@@ -1,6 +1,9 @@
 <template>
   <div class="root">
     <div class="container-shell">
+      <div class="container-shell-title">jessibuca demo player <span class="tag-version" v-if="version">({{
+          version
+        }})</span></div>
       <div id="container" ref="container"></div>
       <div class="input">
         <div>输入URL：</div>
@@ -79,12 +82,15 @@
   </div>
 </template>
 <script>
+import {VERSION} from "./version";
+
 export default {
   name: "DemoPlayer",
   props: {},
   data() {
     return {
       jessibuca: null,
+      version: '',
       wasm: false,
       vc: "ff",
       playing: false,
@@ -102,6 +108,7 @@ export default {
     };
   },
   mounted() {
+    this.version = VERSION === '#VERSION#' ? '' : VERSION;
     this.create();
     window.onerror = (msg) => (this.err = msg);
   },
@@ -334,6 +341,7 @@ export default {
 }
 
 .container-shell {
+  position: relative;
   backdrop-filter: blur(5px);
   background: hsla(0, 0%, 50%, 0.5);
   padding: 30px 4px 10px 4px;
@@ -344,13 +352,15 @@ export default {
   box-shadow: 0 10px 20px;
 }
 
-.container-shell:before {
-  content: "jessibuca demo player";
+.container-shell-title {
   position: absolute;
   color: darkgray;
   top: 4px;
   left: 10px;
   text-shadow: 1px 1px black;
+}
+
+.tag-version {
 }
 
 #container {
