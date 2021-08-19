@@ -44,4 +44,4 @@ worker.js 会引用 demo/public/ff.js （该文件由编译C++文件所得，用
 
 ## 基本原理
 
-<img src="/tech.png">
+<img src="/demo/public/tech.png">
