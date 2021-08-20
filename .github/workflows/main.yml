@@ -54,6 +54,7 @@ jobs:
 
       - name: Deploy
         uses: garygrossgarten/github-action-scp@release
+        if: startsWith(github.repository, 'langhuihui')
         with:
             local: /home/runner/work/jessibuca/jessibuca/demo/.vitepress/dist
             remote: /opt/jessibuca/demo/.vitepress/dist
