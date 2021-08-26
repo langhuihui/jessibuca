@@ -47,7 +47,7 @@ export default (jessibuca) => {
     // screenshots
     jessibuca.$doms.screenshotsDom && jessibuca.$doms.screenshotsDom.addEventListener('click', (e) => {
         e.stopPropagation();
-        const filename = jessibuca._opt.text + '' + now();
+        const filename = (jessibuca._opt.text || '') + '' + now();
         jessibuca._screenshot(filename);
     }, false);
 
