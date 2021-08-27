@@ -163,6 +163,22 @@ class Jessibuca {
     }
 
     /**
+     * 是否正在播放
+     * @returns {*}
+     */
+    isPlaying() {
+        return this.playing
+    }
+
+    /**
+     * 是否静音状态
+     * @returns {*}
+     */
+    isMute() {
+        return this.quieting;
+    }
+
+    /**
      *
      * @param value
      */

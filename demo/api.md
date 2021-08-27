@@ -283,7 +283,6 @@ jessibuca.setRotate(0)
 
 jessibuca.setRotate(90)
 
-
 jessibuca.setRotate(270)
 ```
 
@@ -358,6 +357,26 @@ jessibuca.setFullscreen(false)
 jessibuca.screenshot("test","png",0.5)
 
 ```
+
+
+### isPlaying()
+- **返回值**：`boolean`
+- **用法**：
+  返回是否正在播放中状态。
+```js
+var result = jessibuca.isPlaying()
+console.log(result) // true
+```
+
+### isMute()
+- **返回值**：`boolean`
+- **用法**：
+  返回是否静音。
+```js
+var result = jessibuca.isMute()
+console.log(result) // true
+```
+
 
    
 ### on(event, callback)
