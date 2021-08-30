@@ -20,15 +20,17 @@ options 支持的参数有：
 
 ### decoder
 - **类型**：`string`
-- **默认值**：`worker.js`
+- **默认值**：`index.js`
 - **用法**：
 
-worker 地址。
+worker地址
+
+> 直接引用 index.js 的地址即可。项目会直接引用根目录的index.js，如果修改了index.js文件名称，改为xxx.js，请同步修改decoder参数，引用的是xxx.js文件目录
 
 
 ### forceNoOffscreen
 - **类型**：`boolean`
-- **默认值**：false
+- **默认值**：true
 - **用法**：
 
 是否不使用离屏模式（提升渲染能力）

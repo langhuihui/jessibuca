@@ -315,12 +315,12 @@ Module.postRun = function () {
                 var size = w * h
                 var qsize = size >> 2
                 if (!this.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined') {
-                    var canvas = new OffscreenCanvas(w, h);
-                    var gl = canvas.getContext("webgl");
-                    var render = createWebGL(gl)
+                    this.offscreenCanvas = new OffscreenCanvas(w, h);
+                    this.offscreenCanvasGL = this.offscreenCanvas.getContext("webgl");
+                    var render = createWebGL(this.offscreenCanvasGL)
                     this.draw = function (compositionTime, y, u, v) {
                         render(w, h, Module.HEAPU8.subarray(y, y + size), Module.HEAPU8.subarray(u, u + qsize), Module.HEAPU8.subarray(v, v + (qsize)))
-                        let image_bitmap = canvas.transferToImageBitmap();
+                        let image_bitmap = this.offscreenCanvas.transferToImageBitmap();
                         postMessage({
                             cmd: "render",
                             compositionTime: compositionTime,
@@ -364,6 +364,12 @@ Module.postRun = function () {
                 this.delay = 0;
                 this.ts = 0;
                 this.flvMode = false;
+                if (this.offscreenCanvas) {
+                    this.offscreenCanvas = null;
+                }
+                if (this.offscreenCanvasGL) {
+                    this.offscreenCanvasGL = null;
+                }
                 buffer = [];
                 delete this.playAudioPlanar;
                 delete this.draw;

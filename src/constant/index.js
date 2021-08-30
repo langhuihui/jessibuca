@@ -21,7 +21,7 @@ export const DEFAULT_OPTIONS = {
     decoder: 'index.js',
     rotate: 0,
     text: '',
-    forceNoOffscreen: false,
+    forceNoOffscreen: true,
     hiddenAutoPause: false
 }
 
