@@ -104,7 +104,7 @@ export default {
       volume: 1,
       rotate: 0,
       vod: false,
-      forceNoOffscreen: false,
+      forceNoOffscreen: true,
     };
   },
   mounted() {
