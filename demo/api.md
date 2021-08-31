@@ -342,21 +342,29 @@ jessibuca.setFullscreen(false)
 ```
 
 
-### screenshot(filename, format, quality)
+### screenshot(filename, format, quality,type)
 - **参数**：
     - `{string} filename`  
     - `{string} format`  
     - `{number} quality`
+    - `{string} type` 
 - **用法**：
 
 截图，调用后弹出下载框保存截图
-1. filename: 保存的文件名, 默认 `时间戳`
-2. format : 截图的格式，可选png或jpeg或者webp ,默认 `png`
-3. quality: 可选参数，当格式是jpeg或者webp时，压缩质量，取值0 ~ 1 ,默认 `0.92`
+1. filename: 可选参数, 保存的文件名, 默认 `时间戳`
+2. format : 可选参数, 截图的格式，可选png或jpeg或者webp ,默认 `png`
+3. quality: 可选参数, 当格式是jpeg或者webp时，压缩质量，取值0 ~ 1 ,默认 `0.92`
+4. type: 可选参数, 可选download或者base64或者blob，默认`download`
 
 ```js
 
 jessibuca.screenshot("test","png",0.5)
+
+
+const base64 = jessibuca.screenshot("test","png",0.5,'base64')
+
+
+const fileBlob = jessibuca.screenshot("test",'blob')
 
 ```
 

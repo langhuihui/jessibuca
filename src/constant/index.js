@@ -71,3 +71,10 @@ export const BUFFER_STATUS = {
     buffering: 'buffering',
     full: 'full'
 }
+
+
+export const SCREENSHOT_TYPE = {
+    download: 'download',
+    base64: 'base64',
+    blob: 'blob'
+}

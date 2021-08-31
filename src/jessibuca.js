@@ -376,10 +376,12 @@ class Jessibuca {
      * @param filename
      * @param format
      * @param quality
+     * @param type: download,base64,blob
      */
-    screenshot(filename, format, quality) {
-        this._screenshot(filename, format, quality);
+    screenshot(filename, format, quality, type) {
+        return this._screenshot(filename, format, quality, type);
     }
+
 
     /**
      *

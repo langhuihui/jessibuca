@@ -1,5 +1,5 @@
 import {$domToggle, $hideBtns, bufferStatus, checkFull, dataURLToFile, downloadImg, fpsStatus, now} from "../utils";
-import {EVEMTS, POST_MESSAGE} from "../constant";
+import {EVEMTS, POST_MESSAGE, SCREENSHOT_TYPE} from "../constant";
 
 export default (jessibuca) => {
     //
@@ -52,19 +52,38 @@ export default (jessibuca) => {
     }
 
 
-    jessibuca._screenshot = (filename, format, quality) => {
+    jessibuca._screenshot = (filename, format, quality, type) => {
         filename = filename || now();
+        type = type || SCREENSHOT_TYPE.download;
         const formatType = {
             png: 'image/png',
             jpeg: 'image/jpeg',
             webp: 'image/webp'
         };
         let encoderOptions = 0.92;
+        if (!formatType[format] && SCREENSHOT_TYPE[format]) {
+            type = format;
+            format = 'png';
+            quality = undefined
+        }
+
+        if (typeof quality === "string") {
+            type = quality;
+            quality = undefined;
+        }
+
         if (typeof quality !== 'undefined') {
             encoderOptions = Number(quality);
         }
         const dataURL = jessibuca.$canvasElement.toDataURL(formatType[format] || formatType.png, encoderOptions);
-        downloadImg(dataURLToFile(dataURL), filename);
+        const file = dataURLToFile(dataURL)
+        if (type === SCREENSHOT_TYPE.base64) {
+            return dataURL;
+        } else if (type === SCREENSHOT_TYPE.blob) {
+            return file;
+        } else if (type === SCREENSHOT_TYPE.download) {
+            downloadImg(file, filename);
+        }
     }
 
     jessibuca._close = () => {
