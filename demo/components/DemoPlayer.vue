@@ -10,7 +10,7 @@
         <input
             autocomplete="on"
             ref="playUrl"
-            value="ws://localhost:8080/jessica/live/rtc"
+            value="ws://localhost:8080/jessica/live/rtc?audioOnly=0"
         />
         <button v-if="!playing" @click="play">播放</button>
         <button v-else @click="pause">停止</button>
@@ -260,6 +260,24 @@ export default {
 
       if (this.$refs.playUrl.value) {
         if (this.jessibuca.hasLoaded()) {
+          let url = this.$refs.playUrl.value;
+          let raw = url.split('?');
+          if(raw.length >= 2){
+            let url2 = '?' + raw[1];
+            let urlParams = new URLSearchParams(url2);
+            let res = urlParams.get('audioOnly');
+            if(res != null && res == 1){
+              //the target stream only contains audio
+              this.jessibuca.setAudioOnly(true);
+            }else{
+              //the target stream contains video
+              this.jessibuca.setAudioOnly(false);
+            }
+          }else {
+            console.log('[DemoPlayer.vue] unable to extract params, raw-->' + raw);
+            this.jessibuca.setAudioOnly(false);
+          }
+
           this.jessibuca.play(this.$refs.playUrl.value);
         } else {
           this.jessibuca.on("load", () => {

@@ -70,6 +70,16 @@ export default (jessibuca) => {
                     numOfChannels: msg.channels, // 声频通道
                     sampleRate: msg.samplerate // 采样率
                 });
+                if(jessibuca._opt.audioOnly){
+
+                    if (jessibuca.loading) {
+                        jessibuca.loading = false;
+                        jessibuca.playing = true;
+                        jessibuca._clearCheckLoading();
+                    }
+                    jessibuca._trigger(EVEMTS.start);
+                    jessibuca._trigger(EVEMTS.play);
+                }
                 break;
             case CMD_TYPE.kBps:
                 if (jessibuca.playing) {

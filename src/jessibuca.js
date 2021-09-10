@@ -158,6 +158,10 @@ class Jessibuca {
         }
     }
 
+    setAudioOnly(value){
+        this._opt.audioOnly = value;
+    }
+
     get recording() {
         return this._recording;
     }

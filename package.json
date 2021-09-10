@@ -1,6 +1,6 @@
 {
   "name": "jessibuca",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "build": "parcel build src/index.js --dist-dir ./demo/public --no-source-maps",
     "build:wasm": "python make.py --wasm && npm run build && npm run build:demo",
