@@ -264,7 +264,7 @@ Module.postRun = function () {
                     controller.abort()
                 }
             } else {
-                this.flvMode = url.indexOf(".flv") != -1
+                this.flvMode = url.indexOf(".flv") != -1 || this.opt.isFlv;
                 this.ws = new WebSocket(url)
                 this.ws.binaryType = "arraybuffer"
                 if (this.flvMode) {
