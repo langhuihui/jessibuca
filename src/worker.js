@@ -306,8 +306,10 @@ Module.postRun = function () {
                     }
                 }
                 this._close = function () {
-                    this.ws.close()
-                    this.ws = null;
+                    if (this.ws) {
+                        this.ws.close && this.ws.close();
+                        this.ws = null;
+                    }
                 }
             }
             this.setVideoSize = function (w, h) {
