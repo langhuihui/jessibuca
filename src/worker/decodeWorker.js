@@ -7,6 +7,7 @@ export default (jessibuca) => {
         const msg = event.data;
         switch (msg.cmd) {
             case CMD_TYPE.init:
+                console.log('[decodeWorker]CMD_TYPE.init');
                 jessibuca.setBufferTime(jessibuca._opt.videoBuffer);
                 decoderWorker.postMessage({
                     cmd: POST_MESSAGE.init,
@@ -20,6 +21,7 @@ export default (jessibuca) => {
                 }
                 break;
             case CMD_TYPE.initSize:
+                console.log('[decodeWorker]CMD_TYPE.initSize, start playing');
                 jessibuca.$canvasElement.width = msg.w;
                 jessibuca.$canvasElement.height = msg.h;
                 jessibuca.onInitSize();
@@ -32,6 +34,7 @@ export default (jessibuca) => {
                 }
                 break;
             case CMD_TYPE.render:
+                console.log('[decodeWorker]CMD_TYPE.render');
                 if (jessibuca.loading) {
                     jessibuca.loading = false;
                     jessibuca.playing = true;
@@ -50,6 +53,7 @@ export default (jessibuca) => {
                 jessibuca._checkHeart();
                 break;
             case CMD_TYPE.playAudio:
+                console.log('[decodeWorker]CMD_TYPE.playAudio');
                 if (jessibuca.playing && !jessibuca.quieting) {
                     jessibuca._playAudio(msg.buffer)
                 }
@@ -65,13 +69,14 @@ export default (jessibuca) => {
                 jessibuca._trigger(EVEMTS.error, msg.text);
                 break;
             case CMD_TYPE.initAudioPlanar:
+                console.log('[decodeWorker]CMD_TYPE.initAudioPlanar, trigger audio info');
                 jessibuca._initAudioPlanar(msg);
                 jessibuca._trigger(EVEMTS.audioInfo, {
                     numOfChannels: msg.channels, // 声频通道
                     sampleRate: msg.samplerate // 采样率
                 });
                 if(jessibuca._opt.audioOnly){
-
+                    console.log('[decodeWorker]CMD_TYPE.initAudioPlanar, audio only mode, start playing');
                     if (jessibuca.loading) {
                         jessibuca.loading = false;
                         jessibuca.playing = true;
@@ -80,6 +85,7 @@ export default (jessibuca) => {
                     jessibuca._trigger(EVEMTS.start);
                     jessibuca._trigger(EVEMTS.play);
                 }
+
                 break;
             case CMD_TYPE.kBps:
                 if (jessibuca.playing) {

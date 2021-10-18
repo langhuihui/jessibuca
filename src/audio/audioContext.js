@@ -1,4 +1,4 @@
-import { audioContextUnlock } from "../utils";
+import {audioContextUnlock} from "../utils";
 
 export default (jessibuca) => {
     jessibuca._audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -48,6 +48,9 @@ export default (jessibuca) => {
         scriptNode.onaudioprocess = function (audioProcessingEvent) {
             if (_audioPlayBuffers.length) {
                 const buffer = _audioPlayBuffers.shift()
+                console.log("绘制波纹", buffer)
+                //绘制波纹
+                //WaveViews.draw(buffer);
                 for (let channel = 0; channel < msg.channels; channel++) {
                     const b = buffer[channel]
                     const nowBuffering = audioProcessingEvent.outputBuffer.getChannelData(channel);
@@ -74,4 +77,46 @@ export default (jessibuca) => {
         jessibuca._audioContext = null;
         jessibuca._gainNode = null;
     }
+
+    let WaveViews = {};
+
+     //绘制画布
+    let cvs = document.getElementById("cvs");
+    console.log("WaveViews caverns", cvs)
+    if(typeof(cvs) == 'undefined' || cvs == null){
+        console.error('WaveViews not found')
+    }else{
+        let ctx = cvs.getContext('2d');
+        console.log("ctx 2d", ctx)
+        WaveViews.draw = function (audioBuffer) {
+            //console.log(audioBuffer.getChannelData(0))
+            let lth;
+            let arr;
+            try {
+                lth = audioBuffer.getChannelData(0).length;
+                arr = audioBuffer.getChannelData(0);
+            } catch (e) {
+                lth = audioBuffer.getChannelData(1).length;
+                arr = audioBuffer.getChannelData(1);
+            }
+            if (lth == null || arr == null) {
+                return;
+            }
+            ctx.clearRect(0, 0, cvs.width, cvs.height); //清理画布
+            let w = Math.floor(lth / cvs.width / 2);
+            ctx.fillStyle = '#33ee56'
+            for (let i = 0; i < cvs.width; i++) {
+                //中线
+                ctx.fillRect(i, cvs.height / 2, 10, 1);
+                //计算最高值
+                let waveHeight = (arr[i * w] * cvs.height) > cvs.height ? cvs.height : (arr[i * w] * cvs.height);
+                //双向波纹
+                //ctx.fillRect(i, (cvs.height - arr[i * w] * cvs.height) , 1, waveHeight*8);
+                ctx.fillRect(i, (cvs.height - arr[i * w] * cvs.height) / 2, 1, waveHeight * 8);
+            }
+            ctx.save();
+        }
+    }
+
+
 }

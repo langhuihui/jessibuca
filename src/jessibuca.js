@@ -6,7 +6,7 @@ import initCore from './core/index';
 import {DEFAULT_OPTIONS, EVEMTS, POST_MESSAGE} from "./constant";
 import {$domToggle, $hideBtns, $initBtns, checkFull} from "./utils";
 
-class Jessibuca {
+    class Jessibuca {
     constructor(options) {
         this._opt = Object.assign(DEFAULT_OPTIONS, options);
         this.$container = options.container;
@@ -158,28 +158,12 @@ class Jessibuca {
         }
     }
 
-    setAudioOnly(value){
-        this._opt.audioOnly = value;
-    }
-
     get recording() {
         return this._recording;
     }
 
-    /**
-     * 是否正在播放
-     * @returns {*}
-     */
-    isPlaying() {
-        return this.playing
-    }
-
-    /**
-     * 是否静音状态
-     * @returns {*}
-     */
-    isMute() {
-        return this.quieting;
+    setAudioOnly(value){
+        this._opt.audioOnly = value;
     }
 
     /**
@@ -380,12 +364,10 @@ class Jessibuca {
      * @param filename
      * @param format
      * @param quality
-     * @param type: download,base64,blob
      */
-    screenshot(filename, format, quality, type) {
-        return this._screenshot(filename, format, quality, type);
+    screenshot(filename, format, quality) {
+        this._screenshot(filename, format, quality);
     }
-
 
     /**
      *

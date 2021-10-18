@@ -20,6 +20,8 @@ export default (jessibuca) => {
     }
 
     jessibuca._trigger = (events, ...others) => {
+
+        console.log('[jessibuca] trigger-->' + events.toString());
         // Execute callbacks
         function _callEach(list, args) {
             if (list) {
