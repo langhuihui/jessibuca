@@ -4,7 +4,7 @@ import initDashboard from './dashboard/dashboard';
 import initDecodeWorker from './worker/decodeWorker';
 import initCore from './core/index';
 import {DEFAULT_OPTIONS, EVEMTS, POST_MESSAGE} from "./constant";
-import {$domToggle, $hideBtns, $initBtns, checkFull} from "./utils";
+import {$domToggle, $hideBtns, $initBtns, checkFull, supportWCS} from "./utils";
 
 class Jessibuca {
     constructor(options) {
@@ -17,6 +17,12 @@ class Jessibuca {
             throw new Error('Jessibuca need container option');
             return;
         }
+
+        //
+        if (this._opt.useWCS) {
+            this._opt.useWCS = supportWCS();
+        }
+
         delete this._opt.container;
 
         this._opt.debug && console.log('options', this._opt);
@@ -382,6 +388,12 @@ class Jessibuca {
         return this._screenshot(filename, format, quality, type);
     }
 
+    /**
+     * 使用 webcodecs
+     */
+    useWCS() {
+        this._opt.useWCS = supportWCS()
+    }
 
     /**
      *

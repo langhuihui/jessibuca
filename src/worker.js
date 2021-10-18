@@ -54,6 +54,23 @@ function dispatchData(input) {
     }
 }
 
+function formatVideoDecoderConfigure(avcC) {
+    let codecArray = avcC.subarray(1, 4);
+    let codecString = "avc1.";
+    for (let j = 0; j < 3; j++) {
+        let h = codecArray[j].toString(16);
+        if (h.length < 2) {
+            h = "0" + h
+        }
+        codecString += h
+    }
+
+    return {
+        codec: codecString,
+        description: avcC
+    }
+}
+
 if (!Date.now) Date.now = function () {
     return new Date().getTime();
 };
@@ -108,6 +125,69 @@ Module.postRun = function () {
             }
         }
     }
+
+    var wcsVideoDecoder = {
+        hasInit: false,
+        isEmitInfo: false,
+        decoder: new VideoDecoder({
+            output: function (videoFrame) {
+                // decoder.opt.debug && console.log('frame:', videoFrame);
+                if (!wcsVideoDecoder.isEmitInfo) {
+                    postMessage({cmd: "initSize", w: videoFrame.codedWidth, h: videoFrame.codedHeight})
+                    wcsVideoDecoder.isEmitInfo = true;
+                    this.offscreenCanvas = new OffscreenCanvas(videoFrame.codedWidth, videoFrame.codedHeight);
+                    this.offscreenCanvasCtx = this.offscreenCanvas.getContext("2d");
+                }
+
+                this.offscreenCanvasCtx.drawImage(videoFrame, 0, 0, videoFrame.codedWidth, videoFrame.codedHeight);
+
+                let image_bitmap = this.offscreenCanvas.transferToImageBitmap();
+                postMessage({
+                    cmd: "render",
+                    compositionTime: 0,
+                    delay: this.delay,
+                    ts: this.ts,
+                    buffer: image_bitmap
+                }, [image_bitmap])
+
+                setTimeout(function () {
+                    if (videoFrame.close) {
+                        videoFrame.close()
+                    } else {
+                        videoFrame.destroy()
+                    }
+                }, 100)
+
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        }),
+
+        decode: function (payload, ts) {
+            const isIframe = payload[0] >> 4 === 1;
+            if (!wcsVideoDecoder.hasInit) {
+                if (isIframe && payload[1] === 0) {
+                    const config = formatVideoDecoderConfigure(payload.slice(5));
+                    wcsVideoDecoder.decoder.configure(config);
+                    wcsVideoDecoder.hasInit = true;
+                }
+            } else {
+                const chunk = new EncodedVideoChunk({
+                    data: payload.slice(5),
+                    timestamp: ts,
+                    type: isIframe ? 'key' : 'delta'
+                })
+                wcsVideoDecoder.decoder.decode(chunk);
+            }
+        },
+        reset() {
+            wcsVideoDecoder.hasInit = false;
+            wcsVideoDecoder.isEmitInfo = false;
+        }
+    }
+
+
     var decoder = {
         opt: {},
         initAudioPlanar: function (channels, samplerate) {
@@ -176,7 +256,11 @@ Module.postRun = function () {
                         this.opt.hasAudio && buffer.push({ts, payload, decoder: audioDecoder, type: 0})
                         break
                     case 9:
-                        buffer.push({ts, payload, decoder: videoDecoder, type: payload[0] >> 4})
+                        if (this.opt.useWCS) {
+                            wcsVideoDecoder.decode(payload, ts);
+                        } else {
+                            buffer.push({ts, payload, decoder: videoDecoder, type: payload[0] >> 4})
+                        }
                         break
                 }
             }
@@ -292,12 +376,17 @@ Module.postRun = function () {
                                 })
                                 break
                             case 2:
-                                buffer.push({
-                                    ts: dv.getUint32(1, false),
-                                    payload: new Uint8Array(evt.data, 5),
-                                    decoder: videoDecoder,
-                                    type: dv.getUint8(5) >> 4
-                                })
+                                if (this.opt.useWCS) {
+                                    wcsVideoDecoder.decode(new Uint8Array(evt.data, 5), dv.getUint32(1, false));
+                                } else {
+                                    buffer.push({
+                                        ts: dv.getUint32(1, false),
+                                        payload: new Uint8Array(evt.data, 5),
+                                        decoder: videoDecoder,
+                                        type: dv.getUint8(5) >> 4
+                                    })
+                                }
+
                                 break
                         }
                     }
@@ -361,6 +450,7 @@ Module.postRun = function () {
                 this.ws = null;
                 audioDecoder.clear();
                 videoDecoder.clear();
+                wcsVideoDecoder.reset();
                 this.firstTimestamp = 0;
                 this.startTimestamp = 0;
                 this.delay = 0;

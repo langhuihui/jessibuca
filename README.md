@@ -4,6 +4,7 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 
 ## 功能
 - 支持解码H.264视频(Baseline, Main, High Profile全支持，支持解码B帧视频)
+- 支持WebCodecs硬件解码(支持H.264)
 - 支持解码H.265视频（flv id == 12）
 - 支持解码AAC音频(LC,HE,HEv2 Profile全支持)
 - 支持解码PCMA音频以及PCMU音频格式

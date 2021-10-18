@@ -10,7 +10,7 @@
         <input
             autocomplete="on"
             ref="playUrl"
-            value="ws://localhost:8080/jessica/live/rtc"
+            value="http://flv.bdplay.nodemedia.cn/live/bbb.flv"
         />
         <button v-if="!playing" @click="play">播放</button>
         <button v-else @click="pause">停止</button>
@@ -74,6 +74,15 @@
             v-model="forceNoOffscreen"
             @change="restartPlay"
         /><span>禁用离屏渲染</span>
+        <template v-if="supportWCS &&!forceNoOffscreen ">
+          <input
+              type="checkbox"
+              ref="offscreen"
+              v-model="useWCS"
+              @change="restartPlay"
+          /><span>开启webcodecs硬解码</span>
+        </template>
+
         <input type="checkbox" ref="resize" @change="changeResize"/><span
       >禁止画面拉伸</span
       >
@@ -105,6 +114,8 @@ export default {
       rotate: 0,
       vod: false,
       forceNoOffscreen: true,
+      useWCS: false,
+      supportWCS: "VideoEncoder" in window
     };
   },
   mounted() {
@@ -139,6 +150,7 @@ export default {
                 vod: this.vod,
                 forceNoOffscreen: this.forceNoOffscreen,
                 isNotMute: false,
+                useWCS: this.useWCS
               },
               options
           )

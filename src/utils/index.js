@@ -116,3 +116,8 @@ export function bufferStatus(buffer, settingBuffer) {
     }
     return result;
 }
+
+// 是否支持 webcodecs
+export function supportWCS(){
+    return "VideoEncoder" in window;
+}

@@ -23,7 +23,8 @@ export const DEFAULT_OPTIONS = {
     rotate: 0,
     text: '',
     forceNoOffscreen: true,
-    hiddenAutoPause: false
+    hiddenAutoPause: false,
+    useWCS:false
 }
 
 export const CMD_TYPE = {
