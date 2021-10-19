@@ -92,7 +92,7 @@ export default (jessibuca) => {
     }
 
     jessibuca._close$2 = () => {
-        jessibuca._opt.debug && console.log('_close$2-START');
+        // jessibuca._opt.debug && console.log('_close$2-START');
         jessibuca._closeAudio && jessibuca._closeAudio()
         jessibuca._audioPlayBuffers = [];
         jessibuca._audioPlaying = false;
@@ -100,7 +100,7 @@ export default (jessibuca) => {
         delete jessibuca._playAudio;
         jessibuca._releaseWakeLock();
         jessibuca._initCheckVariable();
-        jessibuca._opt.debug && console.log('_close$2-END');
+        // jessibuca._opt.debug && console.log('_close$2-END');
     }
 
     jessibuca._releaseWakeLock = () => {
@@ -229,5 +229,14 @@ export default (jessibuca) => {
         if (jessibuca._wakeLock !== null && "visible" === document.visibilityState) {
             jessibuca._enableWakeLock();
         }
+    }
+
+
+    jessibuca._reset = () => {
+        jessibuca.recording = false;
+        jessibuca.playing = false;
+        jessibuca.loading = false;
+        jessibuca._clearCheckLoading();
+        jessibuca._close();
     }
 }
