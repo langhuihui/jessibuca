@@ -292,12 +292,14 @@ Module.postRun = function () {
                                 })
                                 break
                             case 2:
-                                buffer.push({
-                                    ts: dv.getUint32(1, false),
-                                    payload: new Uint8Array(evt.data, 5),
-                                    decoder: videoDecoder,
-                                    type: dv.getUint8(5) >> 4
-                                })
+                                if (dv.byteLength > 5) {
+                                    buffer.push({
+                                        ts: dv.getUint32(1, false),
+                                        payload: new Uint8Array(evt.data, 5),
+                                        decoder: videoDecoder,
+                                        type: dv.getUint8(5) >> 4
+                                    })
+                                }
                                 break
                         }
                     }
