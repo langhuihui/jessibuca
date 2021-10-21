@@ -45,6 +45,8 @@ class Jessibuca {
             }
             $domToggle(this.$doms.minScreenDom, false);
             $domToggle(this.$doms.fullscreenDom, true);
+            // 重新适配下窗口。
+            this.resize();
         }
 
         if (this._fullscreen !== value) {
