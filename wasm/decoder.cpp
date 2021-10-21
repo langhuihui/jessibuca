@@ -6,23 +6,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-// #include <functional>
-// #include <map>
-// #include <queue>
 #include <emscripten.h>
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
-// #include <time.h>
-// #include <regex>
 using namespace std;
 using namespace emscripten;
-// #include "slice.h"
 typedef unsigned char u8;
-// typedef signed char i8;
-// typedef unsigned short u16;
-// typedef signed short i16;
 typedef unsigned int u32;
-// typedef signed int i32;
 #define PROP(name, type)                        \
     type name;                                  \
     val get##name() const                       \
@@ -32,7 +22,6 @@ typedef unsigned int u32;
     void set##name(val value)                   \
     {                                           \
         name = value.as<type>();                \
-        emscripten_log(0, #name " = %d", name); \
     }
 
 extern "C"
@@ -40,8 +29,6 @@ extern "C"
 #include <libavcodec/avcodec.h>
 #include <libswresample/swresample.h>
 }
-//const int SamplingFrequencies[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350, 0, 0, 0};
-//const int AudioObjectTypes[] = {};
 class FFmpeg
 {
 public:
@@ -81,7 +68,7 @@ public:
     {
         clear();
     }
-    virtual int decode(string input)
+    virtual int decode(string input,u32 timestamp)
     {
         int ret = 0;
         pkt->data = (u8 *)(input.data());
@@ -92,11 +79,11 @@ public:
             ret = avcodec_receive_frame(dec_ctx, frame);
             if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
                 return 0;
-            _decode();
+            _decode(timestamp);
         }
         return 0;
     }
-    virtual void _decode(){};
+    virtual void _decode(u32 timestamp){};
     virtual void clear()
     {
         if (parser)
@@ -147,13 +134,13 @@ public:
     {
         FFmpeg::clear();
     }
-    int decode(string input) override
+    int decode(string input,u32 timestamp) override
     {
         u8 flag = (u8)input[0];
         u8 audioType = flag >> 4;
         if (initialized)
         {
-            return FFmpeg::decode(input.substr(audioType == 10 ? 2 : 1));
+            return FFmpeg::decode(input.substr(audioType == 10 ? 2 : 1),timestamp);
         }
         else
         {
@@ -185,7 +172,7 @@ public:
                 initialized = true;
                 break;
             default:
-                emscripten_log(0, "audio type not support:%d", audioType);
+//                emscripten_log(0, "audio type not support:%d", audioType);
                 break;
             }
             if (initialized)
@@ -195,7 +182,7 @@ public:
         }
         return 0;
     }
-    void _decode() override
+    void _decode(u32 timestamp) override
     {
         auto nb_samples = frame->nb_samples;
         auto bytes_per_sample = av_get_bytes_per_sample(AV_SAMPLE_FMT_FLTP);
@@ -206,8 +193,6 @@ public:
         }
         if (!au_convert_ctx)
         {
-            // out_buffer = (uint8_t *)av_malloc(av_get_bytes_per_sample(dec_ctx->sample_fmt)*dec_ctx->channels*dec_ctx->frame_size);
-            emscripten_log(0, "au_convert_ctx channel_layout:%d,sample_fmt:%d", dec_ctx->channel_layout, dec_ctx->sample_fmt);
             au_convert_ctx = swr_alloc_set_opts(NULL, n_channel == 2 ? AV_CH_LAYOUT_STEREO : AV_CH_LAYOUT_MONO, AV_SAMPLE_FMT_FLTP, sample_rate,
                                                 dec_ctx->channel_layout, dec_ctx->sample_fmt, dec_ctx->sample_rate,
                                                 0, NULL);
@@ -216,13 +201,12 @@ public:
             auto buffer = (uint8_t *)av_malloc(out_buffer_size);
             out_buffer[0] = buffer;
             out_buffer[1] = buffer + (out_buffer_size / 2);
-            emscripten_log(0, "au_convert_ctx init sample_rate:%d->%d,ret:%d", dec_ctx->sample_rate, sample_rate, ret);
         }
         // // 转换
         auto ret = swr_convert(au_convert_ctx, out_buffer, nb_samples, (const uint8_t **)frame->data, nb_samples);
         while (ret > 0)
         {
-            jsObject.call<void>("playAudioPlanar", int(&out_buffer), ret);
+            jsObject.call<void>("playAudioPlanar", int(&out_buffer), ret,timestamp);
             ret = swr_convert(au_convert_ctx, out_buffer, nb_samples, (const uint8_t **)frame->data, 0);
         }
     }
@@ -235,8 +219,6 @@ public:
     u32 y = 0;
     u32 u = 0;
     u32 v = 0;
-    int NAL_unit_length = 0;
-    u32 compositionTime = 0;
 
     FFmpegVideoDecoder(val &&v) : FFmpeg(move(v))
     {
@@ -257,7 +239,7 @@ public:
             y = 0;
         }
     }
-    int decode(string data) override
+    int decode(string data,u32 timestamp) override
     {
         if (!initialized)
         {
@@ -281,12 +263,11 @@ public:
         }
         else
         {
-            compositionTime = (((u32)data[2]) << 16) + (((u32)data[3]) << 8) + (u32)data[4];
-            return FFmpeg::decode(data.substr(5));
+            return FFmpeg::decode(data.substr(5),timestamp);
         }
         return 0;
     }
-    void _decode() override
+    void _decode(u32 timestamp) override
     {
         if (videoWidth != frame->width || videoHeight != frame->height)
         {
@@ -320,7 +301,7 @@ public:
             memcpy((u8 *)dst, (const u8 *)(frame->data[2] + i * frame->linesize[2]), halfw);
             dst += halfw;
         }
-        jsObject.call<void>("draw", compositionTime, y, u, v);
+        jsObject.call<void>("draw",timestamp, y, u, v);
     }
 };
 

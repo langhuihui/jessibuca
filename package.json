@@ -1,19 +1,57 @@
 {
-  "name": "jessibuca",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "parcel build src/index.js --dist-dir ./demo/public --no-source-maps",
-    "build:wasm": "python make.py --wasm && npm run build && npm run build:demo",
-    "build:demo": "vitepress build demo",
-    "dev": "vitepress dev demo",
-    "dev:watch": "parcel watch src/index.js --dist-dir ./demo/public"
-  },
-  "devDependencies": {
-    "parcel": "2.0.0-beta.2",
-    "vitepress": "0.16.1"
-  },
-  "browserslist": [
-    "last 3 chrome versions",
-    "last 3 safari versions"
-  ]
+    "name": "jessibuca",
+    "version": "1.0.0",
+    "scripts": {
+        "build": "parcel build src/index.js --dist-dir ./demo/public --no-source-maps",
+        "build:wasm": "python wasm/make.py --wasm && npm run build && npm run build:demo",
+        "build:demo": "vitepress build demo",
+        "dev": "vitepress dev demo",
+        "dev:watch": "parcel watch src/index.js --dist-dir ./demo/public"
+    },
+    "dependencies": {
+        "screenfull": "5.1.0"
+    },
+    "devDependencies": {
+        "vitepress": "0.16.1",
+        "typescript": "4.4.4",
+        "@rollup/plugin-json": "4.1.0",
+        "@rollup/plugin-typescript": "8.3.0",
+        "@babel/core": "^7.12.16",
+        "@babel/plugin-external-helpers": "^7.12.13",
+        "@babel/plugin-transform-runtime": "^7.12.15",
+        "@babel/preset-env": "^7.12.16",
+        "@babel/runtime": "^7.12.13",
+        "autoprefixer": "^10.2.4",
+        "babel-eslint": "^10.1.0",
+        "cross-env": "^7.0.3",
+        "cssnano": "^4.1.10",
+        "eslint": "^7.20.0",
+        "eslint-config-airbnb-base": "^14.2.1",
+        "eslint-config-prettier": "^7.2.0",
+        "eslint-plugin-import": "^2.22.1",
+        "node-sass": "^5.0.0",
+        "rollup": "^2.39.0",
+        "postcss": "^8.1.6",
+        "postcss-base64": "0.7.1",
+        "rollup-plugin-babel": "^4.4.0",
+        "rollup-plugin-babel-minify": "^10.0.0",
+        "rollup-plugin-commonjs": "^10.1.0",
+        "rollup-plugin-eslint": "^7.0.0",
+        "rollup-plugin-node-resolve": "^5.2.0",
+        "rollup-plugin-postcss": "^4.0.0",
+        "rollup-plugin-replace": "^2.2.0",
+        "rollup-plugin-string": "^3.0.0",
+        "rollup-plugin-terser": "^7.0.2",
+        "rollup-plugin-uglify": "^6.0.4",
+        "rollup-plugin-worker-inline": "^1.0.6",
+        "rollup-copy-plugin": "0.1.0",
+        "servor": "^4.0.2"
+    },
+    "peerDependencies": {
+        "postcss": "^8.1.6"
+    },
+    "browserslist": [
+        "last 3 chrome versions",
+        "last 3 safari versions"
+    ]
 }
