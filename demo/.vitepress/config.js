@@ -7,6 +7,7 @@ module.exports = {
         sidebar: "auto",
         nav:[
             { text: 'API', link: '/api' },
+            { text: 'DEMO', link: '/demo' },
         ],
         logo: 'logo.png'
     },

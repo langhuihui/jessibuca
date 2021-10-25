@@ -3,6 +3,7 @@ export const DEFAULT_OPTIONS = {
     vod: false,
     isResize: true,
     isFullSize: false,
+    isFlv:false,
     debug: false,
     timeout: 30,
     supportDblclickFullscreen: false,
