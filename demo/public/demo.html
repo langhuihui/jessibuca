@@ -115,8 +115,13 @@
 
 
     var showOperateBtns = true; // 是否显示按钮
+    // 目前webcodecs 是在worker 里面实现的，所以必须使用offsetscreen 才行，后续版本会优化实现。
+    // -----------------------------------------
     var forceNoOffscreen = false; //
     var useWCS = true;
+    // -----------------------------------------
+
+
     var jessibuca = null;
 
     function create() {
