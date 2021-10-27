@@ -1,5 +1,5 @@
-import { CMD_TYPE, EVEMTS, POST_MESSAGE } from "../constant";
-import { bpsSize } from "../utils";
+import {CMD_TYPE, EVEMTS, POST_MESSAGE} from "../constant";
+import {bpsSize} from "../utils";
 
 export default (jessibuca) => {
     const decoderWorker = new Worker(jessibuca._opt.decoder);
@@ -8,7 +8,8 @@ export default (jessibuca) => {
         const msg = event.data;
         switch (msg.cmd) {
             case CMD_TYPE.init:
-                // console.log('[decodeWorker]CMD_TYPE.init');
+                console.log('[decodeWorker]CMD_TYPE.init');
+                jessibuca._opt.debug && console.log('_init');
                 jessibuca.setBufferTime(jessibuca._opt.videoBuffer);
                 decoderWorker.postMessage({
                     cmd: POST_MESSAGE.init,
@@ -22,12 +23,13 @@ export default (jessibuca) => {
                 }
                 break;
             case CMD_TYPE.initSize:
-                // console.log('[decodeWorker]CMD_TYPE.initSize, start playing');
+                console.log('[decodeWorker]CMD_TYPE.initSize, start playing');
+                jessibuca._opt.debug && console.log('_initSize');
                 jessibuca.$canvasElement.width = msg.w;
                 jessibuca.$canvasElement.height = msg.h;
                 jessibuca.onInitSize();
                 jessibuca._resize();
-                jessibuca._trigger(EVEMTS.videoInfo, { w: msg.w, h: msg.h });
+                jessibuca._trigger(EVEMTS.videoInfo, {w: msg.w, h: msg.h});
                 jessibuca._trigger(EVEMTS.start);
                 if (jessibuca._supportOffscreen()) {
                     jessibuca._bitmaprenderer = jessibuca.$canvasElement.getContext("bitmaprenderer");
@@ -50,7 +52,7 @@ export default (jessibuca) => {
                 }
                 jessibuca._trigger(EVEMTS.timeUpdate, msg.ts);
                 jessibuca.onTimeUpdate(msg.ts);
-                jessibuca._updateStats({ buf: msg.delay, ts: msg.ts });
+                jessibuca._updateStats({buf: msg.delay, ts: msg.ts});
                 jessibuca._checkHeart();
                 break;
             case CMD_TYPE.playAudio:
@@ -68,6 +70,10 @@ export default (jessibuca) => {
                 jessibuca._trigger(EVEMTS.log, msg.text);
                 jessibuca.onError(msg.text);
                 jessibuca._trigger(EVEMTS.error, msg.text);
+                // 跨域报错，就直接返回错误。
+                if (msg.text === 'Failed to fetch') {
+                    jessibuca._reset();
+                }
                 break;
             case CMD_TYPE.initAudioPlanar:
                 // console.log('[decodeWorker]CMD_TYPE.initAudioPlanar, trigger audio info');

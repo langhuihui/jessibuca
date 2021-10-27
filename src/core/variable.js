@@ -35,8 +35,8 @@ export default (jessibuca) => {
         jessibuca._startBpsTime = '';
         jessibuca._bps = 0;
         jessibuca._clearCheckHeartTimeout();
-        jessibuca._clearCheckLoading();
     }
+
 
     jessibuca._clearCheckHeartTimeout = () => {
         if (jessibuca._checkHeartTimeout) {
@@ -48,9 +48,7 @@ export default (jessibuca) => {
     jessibuca._startCheckHeartTimeout = () => {
         jessibuca._checkHeartTimeout = setTimeout(function () {
             jessibuca._trigger(EVEMTS.timeout);
-            jessibuca.recording = false;
-            jessibuca.playing = false;
-            jessibuca._close();
+            jessibuca._reset();
         }, jessibuca._opt.timeout * 1000);
     }
 

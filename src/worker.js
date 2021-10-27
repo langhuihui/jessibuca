@@ -115,7 +115,7 @@ Module.postRun = function () {
             var buffer = []
             var outputArray = [];
             var remain = 0
-            this.playAudioPlanar = function (data, len) {
+            this.playAudioPlanar = (data, len) => {
                 var frameCount = len;
                 var origin = []
                 var start = 0
@@ -183,11 +183,11 @@ Module.postRun = function () {
         },
         play: function (url) {
             this.opt.debug && console.log('Jessibuca play', url)
-            this.getDelay = function (timestamp) {
+            this.getDelay = (timestamp) => {
                 if (!timestamp) return -1
                 this.firstTimestamp = timestamp
                 this.startTimestamp = Date.now()
-                this.getDelay = function (timestamp) {
+                this.getDelay = (timestamp) => {
                     this.delay = (Date.now() - this.startTimestamp) - (timestamp - this.firstTimestamp)
                     return this.delay
                 }
@@ -235,11 +235,11 @@ Module.postRun = function () {
                 this.flvMode = true
                 var _this = this;
                 var controller = new AbortController();
-                fetch(url, {signal: controller.signal}).then(function (res) {
+                fetch(url, {signal: controller.signal}).then((res) => {
                     var reader = res.body.getReader();
                     var input = _this.inputFlv()
                     var dispatch = dispatchData(input);
-                    var fetchNext = function () {
+                    var fetchNext = () => {
                         reader.read().then(({done, value}) => {
                             if (done) {
                                 input.return(null)
@@ -248,7 +248,7 @@ Module.postRun = function () {
                                 dispatch(value)
                                 fetchNext()
                             }
-                        }).catch(function (e) {
+                        }).catch((e) => {
                             input.return(null);
                             _this.opt.debug && console.error(e);
                             if (e.toString().indexOf('The user aborted a request') === -1) {
@@ -258,13 +258,13 @@ Module.postRun = function () {
                     }
                     fetchNext();
                 }).catch((err) => {
-                    postMessage({cmd: "printErr", text: err.message})
+                    postMessage({cmd: "printErr", text: err.toString()})
                 })
-                this._close = function () {
+                this._close = () => {
                     controller.abort()
                 }
             } else {
-                this.flvMode = url.indexOf(".flv") != -1
+                this.flvMode = url.indexOf(".flv") != -1 || this.opt.isFlv;
                 this.ws = new WebSocket(url)
                 this.ws.binaryType = "arraybuffer"
                 if (this.flvMode) {
@@ -292,12 +292,14 @@ Module.postRun = function () {
                                 })
                                 break
                             case 2:
-                                buffer.push({
-                                    ts: dv.getUint32(1, false),
-                                    payload: new Uint8Array(evt.data, 5),
-                                    decoder: videoDecoder,
-                                    type: dv.getUint8(5) >> 4
-                                })
+                                if (dv.byteLength > 5) {
+                                    buffer.push({
+                                        ts: dv.getUint32(1, false),
+                                        payload: new Uint8Array(evt.data, 5),
+                                        decoder: videoDecoder,
+                                        type: dv.getUint8(5) >> 4
+                                    })
+                                }
                                 break
                         }
                     }
@@ -305,12 +307,14 @@ Module.postRun = function () {
                         postMessage({cmd: "printErr", text: evt.toString()});
                     }
                 }
-                this._close = function () {
-                    this.ws.close()
-                    this.ws = null;
+                this._close = () => {
+                    if (this.ws) {
+                        this.ws.close && this.ws.close();
+                        this.ws = null;
+                    }
                 }
             }
-            this.setVideoSize = function (w, h) {
+            this.setVideoSize = (w, h) => {
                 postMessage({cmd: "initSize", w: w, h: h})
                 var size = w * h
                 var qsize = size >> 2
@@ -318,7 +322,7 @@ Module.postRun = function () {
                     this.offscreenCanvas = new OffscreenCanvas(w, h);
                     this.offscreenCanvasGL = this.offscreenCanvas.getContext("webgl");
                     var render = createWebGL(this.offscreenCanvasGL)
-                    this.draw = function (compositionTime, y, u, v) {
+                    this.draw = (compositionTime, y, u, v) => {
                         render(w, h, Module.HEAPU8.subarray(y, y + size), Module.HEAPU8.subarray(u, u + qsize), Module.HEAPU8.subarray(v, v + (qsize)))
                         let image_bitmap = this.offscreenCanvas.transferToImageBitmap();
                         postMessage({
@@ -330,7 +334,7 @@ Module.postRun = function () {
                         }, [image_bitmap])
                     }
                 } else {
-                    this.draw = function (compositionTime, y, u, v) {
+                    this.draw = (compositionTime, y, u, v) => {
                         var yuv = [Module.HEAPU8.subarray(y, y + size), Module.HEAPU8.subarray(u, u + qsize), Module.HEAPU8.subarray(v, v + (qsize))];
                         var outputArray = yuv.map(buffer => Uint8Array.from(buffer))
                         // arrayBufferCopy(HEAPU8.subarray(y, y + size), this.sharedBuffer, 0, size)
