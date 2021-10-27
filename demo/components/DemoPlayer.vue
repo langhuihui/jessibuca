@@ -10,7 +10,7 @@
         <input
             autocomplete="on"
             ref="playUrl"
-            value="ws://localhost:8080/jessica/live/rtc?audioOnly=0"
+            value="ws://114.255.88.234:1985/myapp/dev7.flv?audioOnly=1"
         />
         <button v-if="!playing" @click="play">播放</button>
         <button v-else @click="pause">停止</button>
@@ -109,7 +109,7 @@ export default {
   },
   mounted() {
     this.version = VERSION === '#VERSION#' ? '' : VERSION;
-    this.create();
+    window.onload = () => this.create();
     window.onerror = (msg) => (this.err = msg);
   },
   unmounted() {
@@ -128,7 +128,7 @@ export default {
                 // background: "bg.jpg",
                 loadingText: "加载中",
                 // hasAudio:false,
-                debug: true,
+                debug: false,
                 showBandwidth: this.showBandwidth, // 显示网速
                 operateBtns: {
                   fullscreen: this.showOperateBtns,

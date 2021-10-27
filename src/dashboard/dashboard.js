@@ -54,6 +54,8 @@ export default (jessibuca) => {
     const recordDom = document.createElement('div');
     const recordingDom = document.createElement('div');
     const bgDom = document.createElement('div');
+    const audioCvsDom = document.createElement('canvas')
+    audioCvsDom.id = "cvs"
 
 
     loadingTextDom.innerText = jessibuca._opt.loadingText || '';
@@ -157,7 +159,18 @@ export default (jessibuca) => {
         backgroundSize: '100%',
         cursor: 'pointer',
     };
-
+    const audioCanvasStyle = {
+        position: "absolute",
+        display: "flex",
+        zIndex: "1",
+        marginLeft: 0,
+        width: "100%",
+        height: "18vh",
+        bottom:"0",
+        background: "rgba(0, 0, 0, 0.2)",
+        // -webkit-mask: -webkit-linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5));
+    }
+    setStyle(audioCvsDom,audioCanvasStyle);
     setStyle(bgDom, bgStyle);
     setStyle(btnWrap, wrapStyle);
     setStyle(loadingDom, loadingStyle);
@@ -272,6 +285,7 @@ export default (jessibuca) => {
         doms.playBigDom = playBigDom;
     }
     jessibuca.$container.appendChild(fragment);
+    jessibuca.$container.appendChild(audioCvsDom)
     //
     jessibuca.$doms = doms;
 
