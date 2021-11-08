@@ -1,3 +1,10 @@
+
+export const PLAYER_PLAY_PROTOCOL = {
+    websocket: 0,
+    fetch: 1
+}
+
+
 // default player options
 export const DEFAULT_PLAYER_OPTIONS = {
     videoBuffer: 0.5,
@@ -18,13 +25,15 @@ export const DEFAULT_PLAYER_OPTIONS = {
         play: false,
         audio: false
     },
+    hasControl: false,
     loadingText: '',
     background: '',
     decoder: 'decoder.js',
     rotate: 0,
     text: '',
     forceNoOffscreen: true,
-    hiddenAutoPause: false
+    hiddenAutoPause: false,
+    protocol: PLAYER_PLAY_PROTOCOL.fetch
 }
 
 
@@ -53,6 +62,8 @@ export const WORKER_SEND_TYPE = {
     close: 'close'
 }
 
+
+
 //
 export const EVEMTS = {
     fullscreen: 'fullscreen',
@@ -79,7 +90,16 @@ export const EVEMTS = {
     videoFrame: 'videoFrame',
     start: 'start',
     metadata: 'metadata',
-    resize: 'resize'
+    resize: 'resize',
+    streamRate: 'streamRate'
+}
+
+
+export const WEBSOCKET_STATUS = {
+    notConnect: 'notConnect',
+    open: 'open',
+    close: 'close',
+    error: 'error'
 }
 
 export const BUFFER_STATUS = {
@@ -93,4 +113,15 @@ export const SCREENSHOT_TYPE = {
     download: 'download',
     base64: 'base64',
     blob: 'blob'
+}
+
+
+export const VIDEO_ENC_TYPE = {
+    7: 'H264', // 对应jessibuca的 7
+    12: 'H265' // 对应jessibuca的 12
+}
+
+export const VIDEO_ENC_TYPE_OBJ = {
+    h264: 'H264',
+    H265: 'H265'
 }

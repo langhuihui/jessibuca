@@ -1,3 +1,7 @@
+import Player from './player';
+import Events from "./utils/events";
+
+
 class Jessibuca {
     constructor(options) {
         let _opt = options;
@@ -12,11 +16,17 @@ class Jessibuca {
 
         delete _opt.container;
 
-        this.player = this._createPlayer($container, _opt);
+        this._opt = _opt;
+        this.$container = $container;
+        this.player = null;
+        this.href = null;
+        this.events = new Events(this);
     }
 
     _createPlayer($container, option) {
+        const player = new Player($container, option);
 
+        return player;
     }
 
 
@@ -60,8 +70,26 @@ class Jessibuca {
 
     }
 
-    play() {
+    play(url) {
+        return new Promise((resolve, reject) => {
 
+            if (!url) {
+                reject();
+            }
+            if (this.player) {
+                this.player.destroy();
+                this.player = null;
+            }
+
+
+
+            const options = {
+                ...this._opt,
+
+            }
+
+            this.player = this._createPlayer()
+        })
     }
 
     resize() {

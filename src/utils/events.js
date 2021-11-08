@@ -1,7 +1,6 @@
 export default class Events {
-    constructor(master, domain) {
+    constructor(master) {
         this.destroys = [];
-        this.domain = domain;
         this.proxy = this.proxy.bind(this);
         this.master = master;
     }
@@ -17,7 +16,7 @@ export default class Events {
     }
 
     destroy() {
-        this.master.debug.log(`${this.domain} Events`, 'destroy');
+        this.master.debug.log(`Events`, 'destroy');
         this.destroys.forEach(event => event());
     }
 }

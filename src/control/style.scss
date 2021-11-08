@@ -1,0 +1,382 @@
+@keyframes rotation {
+    from {
+        -webkit-transform: rotate(0deg);
+    }
+    to {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+
+.jessibuca-container {
+
+
+    .jessibuca-inner {
+
+    }
+
+    .jessibuca-hide {
+
+    }
+
+    .jessibuca-show {
+
+    }
+
+
+    .jessibuca-icon {
+        cursor: pointer;
+        width: 16px;
+        height: 16px;
+    }
+
+    .jessibuca-player {
+
+        // poster
+        .jessibuca-poster {
+            position: absolute;
+            z-index: 10;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            height: 100%;
+            width: 100%;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: contain;
+            pointer-events: none;
+        }
+
+        // loading
+        .jessibuca-loading {
+            //display: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            z-index: 20;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .jessibuca-controls {
+            background-color: #161616;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            position: absolute;
+            z-index: 40;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 40px;
+            padding-left: 30px;
+            padding-right: 13px;
+            font-size: 14px;
+            color: #fff;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease-in-out;
+            user-select: none;
+
+            .jessibuca-controls-item {
+                position: relative;
+                display: flex;
+                justify-content: center;
+                padding: 0 17px;
+
+                &:hover .icon-title-tips {
+                    visibility: visible;
+                    opacity: 1;
+                }
+            }
+
+            .jessibuca-microphone-close {
+                display: none;
+            }
+
+            .jessibuca-icon-mute {
+                display: none;
+            }
+
+            .jessibuca-ptz-active {
+                display: none;
+            }
+
+            .jessibuca-fullscreen-exit {
+                display: none;
+            }
+
+            .jessibuca-record-stop {
+                display: none;
+            }
+
+            .jessibuca-icon-audio, .jessibuca-icon-mute {
+                z-index: 1;
+            }
+
+
+            .jessibuca-controls-bottom {
+                display: flex;
+                justify-content: space-between;
+                height: 100%;
+
+                .jessibuca-controls-left {
+                    display: flex;
+                    align-items: center;
+                }
+
+                .jessibuca-controls-right {
+                    display: flex;
+                    align-items: center;
+                }
+            }
+        }
+
+        &.jessibuca-controls-show {
+            .jessibuca-controls {
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+
+        &.jessibuca-hide-cursor {
+            * {
+                cursor: none !important;
+            }
+        }
+    }
+
+    &.jessibuca-fullscreen-web {
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 100% !important;
+        height: 100% !important;
+        background: #000;
+    }
+
+
+    .jessibuca-icon-loading {
+        width: 50px;
+        height: 50px;
+        background: url("../assets/loading.png") no-repeat center;
+        background-size: 100% 100%;
+        animation: rotation 1s linear infinite;
+    }
+
+    .jessibuca-icon-screenshot {
+        background: url("../assets/screenshot.png") no-repeat center;
+        background-size: 100% 100%;
+
+        &:hover {
+            background: url("../assets/screenshot-hover.png") no-repeat center;
+            background-size: 100% 100%;
+        }
+    }
+
+    .jessibuca-icon-record {
+        background: url("../assets/record.png") no-repeat center;
+        background-size: 100% 100%;
+
+        &:hover {
+            background: url("../assets/record-hover.png") no-repeat center;
+            background-size: 100% 100%;
+        }
+    }
+
+    .jessibuca-icon-recordStop {
+        background: url("../assets/record-stop.png") no-repeat center;
+        background-size: 100% 100%;
+
+        &:hover {
+            background: url("../assets/record-stop-hover.png") no-repeat center;
+            background-size: 100% 100%;
+        }
+    }
+
+    .jessibuca-icon-fullscreen {
+        background: url("../assets/fullscreen.png") no-repeat center;
+        background-size: 100% 100%;
+
+        &:hover {
+            background: url("../assets/fullscreen-hover.png") no-repeat center;
+            background-size: 100% 100%;
+        }
+    }
+
+    .jessibuca-icon-fullscreenExit {
+        background: url("../assets/exit-fullscreen.png") no-repeat center;
+        background-size: 100% 100%;
+
+        &:hover {
+            background: url("../assets/exit-fullscreen-hover.png") no-repeat center;
+            background-size: 100% 100%;
+        }
+    }
+
+    .jessibuca-icon-audio {
+        background: url("../assets/audio.png") no-repeat center;
+        background-size: 100% 100%;
+
+        &:hover {
+            background: url("../assets/audio-hover.png") no-repeat center;
+            background-size: 100% 100%;
+        }
+    }
+
+    .jessibuca-icon-mute {
+        background: url("../assets/mute.png") no-repeat center;
+        background-size: 100% 100%;
+
+        &:hover {
+            background: url("../assets/mute-hover.png") no-repeat center;
+            background-size: 100% 100%;
+        }
+    }
+
+
+    .jessibuca-icon-text {
+        font-size: 14px;
+        width: 30px;
+    }
+
+    .jessibuca-quality-menu-list {
+        position: absolute;
+        left: 50%;
+        bottom: 100%;
+        visibility: hidden;
+        opacity: 0;
+        transform: translateX(-50%);
+        transition: visibility 300ms, opacity 300ms;
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: 4px;
+
+
+        &.jessibuca-quality-menu-shown {
+            visibility: visible;
+            opacity: 1;
+        }
+    }
+
+    .icon-title-tips {
+        pointer-events: none;
+        position: absolute;
+        left: 50%;
+        bottom: 100%;
+        visibility: hidden;
+        opacity: 0;
+        transform: translateX(-50%);
+        transition: visibility 300ms ease 0s, opacity 300ms ease 0s;
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: 4px;
+    }
+
+    .icon-title {
+        display: inline-block;
+        padding: 5px 10px;
+        font-size: 12px;
+        white-space: nowrap;
+        color: rgb(255, 255, 255);
+    }
+
+
+    .jessibuca-quality-menu {
+        padding: 8px 0;
+    }
+
+    .jessibuca-quality-menu-item {
+        display: block;
+        height: 25px;
+        margin: 0;;
+        padding: 0 10px;
+        cursor: pointer;
+        font-size: 14px;
+        text-align: center;
+        width: 50px;
+        color: rgba(255, 255, 255, 0.5);
+        transition: color 300ms, background-color 300ms;
+
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.2)
+        }
+
+        &:focus {
+            outline: none;
+        }
+
+        &.jessibuca-quality-menu-item-active {
+            color: #2298FC;
+            //background-color: rgba(255, 255, 255, 0.2)
+        }
+    }
+
+    .jessibuca-volume-panel-wrap {
+        position: absolute;
+        left: 50%;
+        bottom: 100%;
+        visibility: hidden;
+        opacity: 0;
+        transform: translateX(-50%) translateY(30%);
+        transition: visibility 300ms, opacity 300ms;
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: 4px;
+        height: 120px;
+        width: 50px;
+        overflow: hidden;
+
+        &.jessibuca-volume-panel-wrap-show {
+            visibility: visible;
+            opacity: 1;
+        }
+    }
+
+    .jessibuca-volume-panel {
+        cursor: pointer;
+        position: absolute;
+        top: 15px;
+        height: 60px;
+        width: 50px;
+        overflow: hidden;
+    }
+
+    .jessibuca-volume-panel-handle {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 12px;
+        height: 12px;
+        border-radius: 12px;
+        margin-left: -6px;
+        background: #fff;
+
+        &::before {
+            bottom: -54px;
+            background: #fff;
+        }
+
+        &::after {
+            bottom: 6px;
+            background: rgba(255, 255, 255, .2);
+        }
+
+        &::before, &::after {
+            content: '';
+            position: absolute;
+            display: block;
+            left: 50%;
+            width: 3px;
+            margin-left: -1px;
+            height: 60px
+        }
+    }
+}

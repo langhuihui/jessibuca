@@ -1,20 +1,20 @@
 export default class Debug {
-    constructor(master, domain) {
+    constructor(master) {
         this.log = (name, ...args) => {
             if (master._opt.debug) {
-                console.log(`Jessibuca[${domain}]: [${name}]`, ...args);
+                console.log(`Jessibuca: [${name}]`, ...args);
             }
         };
 
         this.warn = (name, ...args) => {
             if (master._opt.debug) {
-                console.warn(`Jessibuca[${domain}]: [${name}]`, ...args);
+                console.warn(`Jessibuca: [${name}]`, ...args);
             }
         };
 
         this.error = (name, ...args) => {
             if (master._opt.debug) {
-                console.error(`Jessibuca[${domain}]: [${name}]`, ...args);
+                console.error(`Jessibuca: [${name}]`, ...args);
             }
         };
     }
