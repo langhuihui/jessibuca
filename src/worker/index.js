@@ -1,4 +1,4 @@
-import {EVEMTS, MEDIA_TYPE, WORKER_CMD_TYPE, WORKER_SEND_TYPE} from "../constant";
+import {EVENTS, MEDIA_TYPE, WORKER_CMD_TYPE, WORKER_SEND_TYPE} from "../constant";
 
 export default class DecoderWorker {
     constructor(player) {
@@ -90,90 +90,35 @@ export default class DecoderWorker {
         })
     }
 
-    //
     decodeVideo(arrayBuffer, ts, isIFrame) {
-        if (this.playType === PLAY_TYPE.player) {
-            this._decodeVideo(arrayBuffer, ts, isIFrame)
-        } else if (this.playType === PLAY_TYPE.playbackTF) {
-            this._decodeVideoNoDelay(arrayBuffer, ts)
-        } else if (this.playType === PLAY_TYPE.playbackCloud) {
-            this._decodeCloneVideoNoDelay(arrayBuffer, ts)
-        }
-    }
-
-
-    _decodeVideo(arrayBuffer, ts, isIFrame) {
         const options = {
             type: MEDIA_TYPE.video,
             ts: Math.max(ts, 0),
             isIFrame
         }
-        // this.player.debug.log('decoderWorker', `decodeVideo ts：${ts},timestamp:${Date.now()}`);
-        this.decoderWorker.postMessage({
-            cmd: WORKER_SEND_TYPE.decode,
-            buffer: arrayBuffer,
-            options
-        }, [arrayBuffer.buffer])
-    }
 
-    _decodeVideoNoDelay(arrayBuffer, ts) {
-        // this.player.debug.log('decoderWorker', `decodeVideoNoDelay timestamp:${Date.now()}`);
-        this.decoderWorker.postMessage({
-            cmd: WORKER_SEND_TYPE.videoDecode,
-            buffer: arrayBuffer,
-            ts: Math.max(ts, 0)
-        }, [arrayBuffer.buffer])
-    }
+        if (this.player._opt.useWCS && this.player._opt.forceNoOffscreen) {
 
-    _decodeCloneVideoNoDelay(arrayBuffer, ts) {
-        const cloneArrayBuffer = Uint8Array.from(arrayBuffer);
-        this.decoderWorker.postMessage({
-            cmd: WORKER_SEND_TYPE.videoDecode,
-            buffer: cloneArrayBuffer,
-            ts: Math.max(ts, 0)
-        }, [cloneArrayBuffer.buffer])
-    }
-
-    decodeAudio(arrayBuffer, ts) {
-        if (this.playType === PLAY_TYPE.player) {
-            this._decodeAudio(arrayBuffer, ts)
-        } else if (this.playType === PLAY_TYPE.playbackTF) {
-            this._decodeAudioNoDelay(arrayBuffer, ts)
-        } else if (this.playType === PLAY_TYPE.playbackCloud) {
-            this._decodeCloneAudioNoDelay(arrayBuffer, ts)
+        } else {
+            this.decoderWorker.postMessage({
+                cmd: WORKER_SEND_TYPE.decode,
+                buffer: arrayBuffer,
+                options
+            }, [arrayBuffer.buffer])
         }
     }
 
     //
-    _decodeAudio(arrayBuffer, ts) {
+    decodeAudio(arrayBuffer, ts) {
         const options = {
             type: MEDIA_TYPE.audio,
             ts: Math.max(ts, 0)
         }
-        // this.player.debug.log('decoderWorker', `decodeAudio ts：${ts},timestamp:${Date.now()}`);
         this.decoderWorker.postMessage({
             cmd: WORKER_SEND_TYPE.decode,
             buffer: arrayBuffer,
             options
         }, [arrayBuffer.buffer])
-    }
-
-    _decodeAudioNoDelay(arrayBuffer, ts) {
-        // this.player.debug.log('decoderWorker', `decodeAudioNoDelay timestamp:${Date.now()}`);
-        this.decoderWorker.postMessage({
-            cmd: WORKER_SEND_TYPE.audioDecode,
-            buffer: arrayBuffer,
-            ts: Math.max(ts, 0)
-        }, [arrayBuffer.buffer])
-    }
-
-    _decodeCloneAudioNoDelay(arrayBuffer, ts) {
-        const cloneArrayBuffer = Uint8Array.from(arrayBuffer);
-        this.decoderWorker.postMessage({
-            cmd: WORKER_SEND_TYPE.audioDecode,
-            buffer: cloneArrayBuffer,
-            ts: Math.max(ts, 0)
-        }, [cloneArrayBuffer.buffer])
     }
 
 

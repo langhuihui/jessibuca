@@ -1,20 +1,20 @@
-import {EVEMTS} from "../constant";
+import {EVENTS} from "../constant";
 
 export default (player) => {
 
 //
-    player.on(EVEMTS.load, () => {
+    player.on(EVENTS.load, () => {
         player.debug.log('player', 'has loaded');
         player._hasLoaded = true;
     })
 
     //
-    player.on(EVEMTS.play, () => {
+    player.on(EVENTS.play, () => {
         player.loading = false;
     })
 
     //
-    player.on(EVEMTS.fullscreen, (value) => {
+    player.on(EVENTS.fullscreen, (value) => {
         if (value) {
             try {
                 screenfull.request(player.$container).then(() => {
@@ -44,7 +44,7 @@ export default (player) => {
         }
     })
 
-    player.on(EVEMTS.webFullscreen, (value) => {
+    player.on(EVENTS.webFullscreen, (value) => {
         if (value) {
             player.$container.classList.add('webmediaplayer-fullscreen-web')
             const {clientHeight: bodyHeight, clientWidth: bodyWidth} = document.body;
@@ -64,15 +64,15 @@ export default (player) => {
     })
 
     //
-    player.on(EVEMTS.resize, () => {
+    player.on(EVENTS.resize, () => {
         player.video.resize();
     })
 
 
     if (player._opt.debug) {
-        Object.keys(EVEMTS).forEach((key) => {
-            player.on(EVEMTS[key], (value) => {
-                player.debug.log('player events', EVEMTS[key], value);
+        Object.keys(EVENTS).forEach((key) => {
+            player.on(EVENTS[key], (value) => {
+                player.debug.log('player events', EVENTS[key], value);
             })
         })
     }

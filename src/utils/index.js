@@ -7,6 +7,8 @@ export function supportOffscreen($canvas) {
 }
 
 
+
+
 export function createContextGL($canvas) {
     let gl = null;
 
@@ -253,30 +255,6 @@ export function throttle(callback, delay) {
 
 export function isDef(v) {
     return v !== undefined && v !== null;
-}
-
-//
-export function dispatchData(input) {
-    let need = input.next()
-    let buffer = null
-    return (value) => {
-        var data = new Uint8Array(value)
-        if (buffer) {
-            var combine = new Uint8Array(buffer.length + data.length)
-            combine.set(buffer)
-            combine.set(data, buffer.length)
-            data = combine
-            buffer = null
-        }
-        while (data.length >= need.value) {
-            var remain = data.slice(need.value)
-            need = input.next(data.slice(0, need.value))
-            data = remain
-        }
-        if (data.length > 0) {
-            buffer = data
-        }
-    }
 }
 
 export function formatVideoDecoderConfigure(avcC) {

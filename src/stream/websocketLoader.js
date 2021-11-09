@@ -1,5 +1,5 @@
 import Emitter from "../utils/emitter";
-import {EVEMTS, WEBSOCKET_STATUS} from "../constant";
+import {EVENTS, WEBSOCKET_STATUS} from "../constant";
 import {calculationRate} from "../utils";
 
 export default class WebsocketLoader extends Emitter {
@@ -12,16 +12,55 @@ export default class WebsocketLoader extends Emitter {
         this.wsUrl = null;
         //
         this.streamRate = calculationRate(rate => {
-            player.emit(EVEMTS.streamRate, rate);
+            player.emit(EVENTS.streamRate, rate);
         });
     }
 
     _createWebSocket() {
+        const player = this.player;
+        const {
+            debug,
+            events: {proxy},
+            demux,
+        } = player;
 
+        this.socket = new WebSocket(this.wsUrl);
+        this.socket.binaryType = 'arraybuffer';
+        proxy(this.socket, 'open', () => {
+            debug.log('websocketLoader', 'socket open -> send login');
+            this.socketStatus = WEBSOCKET_STATUS.open;
+        });
+
+        proxy(this.socket, 'message', event => {
+            const message = new Uint8Array(event.data);
+            this.streamRate(message.byteLength);
+            this._handleMessage(message);
+        });
+
+
+        proxy(this.socket, 'close', () => {
+            player.emit(EVENTS.streamEnd);
+            this.socketStatus = WEBSOCKET_STATUS.close;
+        });
+
+        proxy(this.socket, 'error', error => {
+            player.emit(EVENTS.streamError, error);
+            this.socketStatus = WEBSOCKET_STATUS.error;
+            demux.close();
+            debug.log('websocketLoader', `socket error:`, error);
+        });
     }
 
-    _handleMessage() {
+    //
+    _handleMessage(message) {
+        const {demux} = this.player;
+        demux.dispatch(message);
+    }
 
+
+    fetchStream(url) {
+        this.wsUrl = url;
+        this._createWebSocket();
     }
 
 
