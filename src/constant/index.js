@@ -45,6 +45,7 @@ export const DEFAULT_PLAYER_OPTIONS = {
     demuxType: DEMUX_TYPE.flv, //
     useWCS: false, //
     useEMS: false, //
+    useOffscreen: false //
 }
 
 

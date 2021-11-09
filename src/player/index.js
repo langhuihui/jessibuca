@@ -3,7 +3,7 @@ import Debug from "../utils/debug";
 import Events from "../utils/events";
 import property from './property';
 import events from './events';
-import {supportOffscreen, supportWCS} from "../utils";
+import {supportOffscreen, supportOffscreenV2, supportWCS} from "../utils";
 import Video from "../video";
 import Stream from "../stream";
 import Recorder from "../recorder";
@@ -22,8 +22,13 @@ export default class Player extends Emitter {
             this._opt.useWCS = supportWCS();
         }
 
-        if(!this._opt.forceNoOffscreen){
-            this._opt.forceNoOffscreen = supportOffscreen();
+        if (!this._opt.forceNoOffscreen) {
+            if (!supportOffscreenV2()) {
+                this._opt.forceNoOffscreen = true;
+                this._opt.useOffscreen = false;
+            } else {
+                this._opt.useOffscreen = true;
+            }
         }
 
 

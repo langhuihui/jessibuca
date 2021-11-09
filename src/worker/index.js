@@ -97,7 +97,8 @@ export default class DecoderWorker {
             isIFrame
         }
 
-        if (this.player._opt.useWCS && this.player._opt.forceNoOffscreen) {
+        // 如果没有使用
+        if (this.player._opt.useWCS && !this.player._opt.useOffscreen) {
 
         } else {
             this.decoderWorker.postMessage({

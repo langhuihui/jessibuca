@@ -7,6 +7,9 @@ export function supportOffscreen($canvas) {
 }
 
 
+export function supportOffscreenV2() {
+    return typeof OffscreenCanvas !== "undefined";
+}
 
 
 export function createContextGL($canvas) {
