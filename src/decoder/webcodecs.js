@@ -1,13 +1,16 @@
 import {formatVideoDecoderConfigure, noop} from "../utils";
+import Emitter from "../utils/emitter";
+import {EVENTS} from "../constant";
 
 
-export default class WebcodecsDecoder {
-    constructor({initInfoCallback, videoFrameCallback}) {
+export default class WebcodecsDecoder extends Emitter {
+    constructor(player) {
+        super();
+        this.player = player;
         this.hasInit = false;
         this.isInitInfo = false;
         this.decoder = null;
-        this.initInfoCallback = initInfoCallback || noop;
-        this.videoFrameCallback = videoFrameCallback || noop;
+        this.initDecoder();
     }
 
     initDecoder() {
@@ -23,14 +26,17 @@ export default class WebcodecsDecoder {
     }
 
     handleDecode(videoFrame) {
-        if (!this.isEmitInfo) {
-            this.initInfoCallback({
+        if (!this.isInitInfo) {
+            this.player.video.updateVideoInfo({
                 width: videoFrame.codedWidth,
                 height: videoFrame.codedHeight
             })
-            this.isEmitInfo = true;
+            this.player.video.initCanvasViewSize();
+            this.isInitInfo = true;
         }
-        this.videoFrameCallback(videoFrame);
+        this.player.video.render({
+            videoFrame
+        })
         //
         setTimeout(function () {
             if (videoFrame.close) {
@@ -45,10 +51,13 @@ export default class WebcodecsDecoder {
 
     }
 
-    decode(payload, ts) {
-        const isIframe = payload[0] >> 4 === 1;
+    decodeVideo(payload, ts, isIframe) {
         if (!this.hasInit) {
             if (isIframe && payload[1] === 0) {
+                const videoCodec = (payload[0] & 0x0F);
+                this.player.emit(EVENTS.videoInfo, {
+                    encTypeCode: videoCodec
+                })
                 const config = formatVideoDecoderConfigure(payload.slice(5));
                 this.decoder.configure(config);
                 this.hasInit = true;
@@ -63,7 +72,9 @@ export default class WebcodecsDecoder {
         }
     }
 
+
     destroy() {
+        this.decoder.close();
         this.decoder = null;
 
     }

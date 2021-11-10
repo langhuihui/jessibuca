@@ -58,7 +58,9 @@ export const WORKER_CMD_TYPE = {
     printErr: 'printErr',
     initAudio: 'initAudio',
     kBps: 'kBps',
-    decode: 'decode'
+    decode: 'decode',
+    audioCode: 'audioCode',
+    videoCode: 'videoCode'
 }
 
 export const MEDIA_TYPE = {
@@ -110,7 +112,8 @@ export const EVENTS = {
     streamRate: 'streamRate',
     streamEnd: 'streamEnd',
     streamError: 'streamError',
-    volumechange: 'volumechange'
+    volumechange: 'volumechange',
+    frameStart: 'frameStart'
 }
 
 export const EVENTS_ERROR = {
@@ -142,11 +145,19 @@ export const SCREENSHOT_TYPE = {
 
 
 export const VIDEO_ENC_TYPE = {
-    7: 'H264', // 对应jessibuca的 7
-    12: 'H265' // 对应jessibuca的 12
+    7: 'H264', //
+    12: 'H265' //
+}
+
+export const AUDIO_ENC_TYPE = {
+    10: 'AAC',
+    7: 'ALAW',
+    8: 'MULAW'
 }
 
 export const VIDEO_ENC_TYPE_OBJ = {
     h264: 'H264',
     H265: 'H265'
 }
+
+export const CONTROL_HEIGHT = 40

@@ -1,7 +1,7 @@
 import Emitter from "../utils/emitter";
 import {createContextGL, dataURLToFile, downloadImg, now, supportOffscreen} from "../utils";
 import createWebGL from "../utils/webgl";
-import {SCREENSHOT_TYPE} from "../constant";
+import {CONTROL_HEIGHT, EVENTS, SCREENSHOT_TYPE, VIDEO_ENC_TYPE} from "../constant";
 
 
 export default class CanvasVideoLoader extends Emitter {
@@ -26,6 +26,21 @@ export default class CanvasVideoLoader extends Emitter {
         }
     }
 
+    updateVideoInfo(data) {
+        if (data.encTypeCode) {
+            this.videoInfo.encTypeCode = data.encTypeCode;
+            this.videoInfo.encType = VIDEO_ENC_TYPE[data.encTypeCode];
+        }
+
+        if (data.width) {
+            this.videoInfo.width = data.width;
+        }
+
+        if (data.height) {
+            this.videoInfo.height = data.height;
+        }
+    }
+
     _initContextGl() {
         this.contextGl = createContextGL(this.$videoElement);
         const webgl = createWebGL(this.contextGl);
@@ -33,20 +48,35 @@ export default class CanvasVideoLoader extends Emitter {
         this.contextGlDestroy = webgl.destroy
     }
 
-    _initCanvasViewSize() {
+    initCanvasViewSize() {
         this.$videoElement.width = this.videoInfo.width;
         this.$videoElement.height = this.videoInfo.height;
+
+        if (!this.player._opt.useWCS) {
+            this._initContextGl();
+        }
+
         this.resize();
     }
 
     _supportOffscreen() {
-        return supportOffscreen(this.$videoElement) && !this.player._opt.forceNoOffscreen;
+        return supportOffscreen(this.$videoElement) && this.player._opt.useOffscreen;
     }
 
     //
     bindOffscreen() {
         if (this._supportOffscreen()) {
             this.bitmaprenderer = this.$videoElement.getContext('bitmaprenderer');
+        }
+    }
+
+    render(msg) {
+        if (this._supportOffscreen()) {
+            this.bitmaprenderer && this.bitmaprenderer.transferFromImageBitmap(msg.buffer);
+        } else if (this.player._opt.useWCS) {
+            this.$videoElement.drawImage(msg.videoFrame, 0, 0, this.$videoElement.width, this.$videoElement.height);
+        } else {
+            this.contextGlRender(this.$videoElement.width, this.$videoElement.height, msg.output[0], msg.output[1], msg.output[2]);
         }
     }
 
@@ -83,6 +113,34 @@ export default class CanvasVideoLoader extends Emitter {
         } else if (type === SCREENSHOT_TYPE.download) {
             downloadImg(file, filename);
         }
+    }
+
+    resize() {
+        this.player.debug.log('canvasVideo', 'resize');
+        const width = this.player.width;
+        let height = this.player.height;
+        if (this.player._opt.hasControl) {
+            height -= CONTROL_HEIGHT;
+        }
+        const resizeWidth = this.$videoElement.width;
+        const resizeHeight = this.$videoElement.height;
+        const wScale = width / resizeWidth;
+        const hScale = height / resizeHeight;
+        let scale = wScale > hScale ? hScale : wScale;
+        //
+        if (!this.player._opt.isResize) {
+            if (wScale !== hScale) {
+                scale = wScale + ',' + hScale;
+            }
+        }
+        //
+        if (this.player._opt.isFullResize) {
+            scale = wScale > hScale ? wScale : hScale;
+        }
+        let transform = "scale(" + scale + ")";
+        this.$videoElement.style.transform = transform;
+        this.$videoElement.style.left = ((width - resizeWidth) / 2) + "px"
+        this.$videoElement.style.top = ((height - resizeHeight) / 2) + "px"
     }
 
 

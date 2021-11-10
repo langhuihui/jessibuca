@@ -14,66 +14,50 @@ export default class DecoderWorker {
             switch (msg.cmd) {
                 case WORKER_CMD_TYPE.init:
                     debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.init);
-                    this.player.emit(EVEMTS.load);
-                    this.player.emit(EVEMTS.decoderWorkerInit);
+                    this.player.emit(EVENTS.load);
                     this._initWork();
+                    break;
+                case WORKER_CMD_TYPE.videoCode:
+                    this.player.video.updateVideoInfo({
+                        encTypeCode: msg.code
+                    })
+                    break;
+                case WORKER_CMD_TYPE.audioCode:
+                    this.player.audio.updateAudioInfo({
+                        encTypeCode: msg.code
+                    })
                     break;
                 case WORKER_CMD_TYPE.initVideo:
                     debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.initVideo, `width:${msg.w},height:${msg.h}`);
-                    if (this.playType === PLAY_TYPE.player) {
-                        this.player.video.bindOffscreen();
-                        this.player.emit(EVEMTS.start);
-                    } else if (this.playType === PLAY_TYPE.playbackTF) {
-                        this.player.video.initVideoDelay();
-                    } else if (this.playType === PLAY_TYPE.playbackCloud) {
-                        this.player.video.initVideo();
-                    }
+                    this.player.video.updateVideoInfo({
+                        width: msg.w,
+                        height: msg.h
+                    })
+                    this.player.video.initCanvasViewSize();
+                    this.player.video.bindOffscreen();
                     break;
                 case WORKER_CMD_TYPE.initAudio:
-                    debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.initAudio, `channels:${msg.channels},samplerate:${msg.samplerate}`);
-                    if (this.playType === PLAY_TYPE.player) {
-                        this.player.audio.initScriptNode(msg);
-                    } else if (this.playType === PLAY_TYPE.playbackTF) {
-                        this.player.audio.initScriptNodeDelay(msg);
-                    } else if (this.playType === PLAY_TYPE.playbackCloud) {
-                        this.player.audio.initScriptNode(msg);
-                    }
+                    debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.initAudio, `channels:${msg.channels},sampleRate:${msg.sampleRate}`);
+                    this.player.audio.updateAudioInfo(msg);
+                    this.player.audio.initScriptNode(msg);
                     break;
                 case WORKER_CMD_TYPE.render:
                     // debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.render, `msg ts:${msg.ts}`);
                     if (this.player.loading) {
-                        this.player.emit(EVEMTS.frameStart);
+                        this.player.emit(EVENTS.frameStart);
                         this.player.loading = false;
                     }
                     if (!this.player.playing) {
                         this.player.playing = true;
                     }
-                    if (this.playType === PLAY_TYPE.player) {
-                        this.player.video.render(msg);
-                    } else if (this.playType === PLAY_TYPE.playbackTF) {
-                        this.player.video.pushData(msg);
-                    } else if (this.playType === PLAY_TYPE.playbackCloud) {
-                        this.player.video.pushData(msg);
-                    }
+                    this.player.video.render(msg);
                     break;
 
                 case WORKER_CMD_TYPE.playAudio:
                     // debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.playAudio, `msg ts:${msg.ts}`);
-                    if (this.playType === PLAY_TYPE.player) {
-                        // 只有在 playing 的时候。
-                        if (this.player.playing) {
-                            this.player.audio.play(msg.buffer, msg.ts);
-                        }
-                    } else if (this.playType === PLAY_TYPE.playbackTF) {
-                        // 只有在 playing 的时候。
-                        if (this.player.playing) {
-                            this.player.audio.play(msg.buffer, msg.ts);
-                        }
-                    } else if (this.playType === PLAY_TYPE.playbackCloud) {
-                        //
-                        if (this.player.playing) {
-                            this.player.audio.play(msg.buffer, msg.ts);
-                        }
+                    // 只有在 playing 的时候。
+                    if (this.player.playing) {
+                        this.player.audio.play(msg.buffer, msg.ts);
                     }
                     break;
                 default:
@@ -97,16 +81,11 @@ export default class DecoderWorker {
             isIFrame
         }
 
-        // 如果没有使用
-        if (this.player._opt.useWCS && !this.player._opt.useOffscreen) {
-
-        } else {
-            this.decoderWorker.postMessage({
-                cmd: WORKER_SEND_TYPE.decode,
-                buffer: arrayBuffer,
-                options
-            }, [arrayBuffer.buffer])
-        }
+        this.decoderWorker.postMessage({
+            cmd: WORKER_SEND_TYPE.decode,
+            buffer: arrayBuffer,
+            options
+        }, [arrayBuffer.buffer])
     }
 
     //

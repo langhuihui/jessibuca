@@ -19,7 +19,7 @@ export default class FlvLoader {
         const tmp32 = new Uint32Array(tmp)
 
         const player = this.player;
-        const {decoderWorker} = player;
+        const {decoderWorker, webcodecsDecoder} = player;
 
         while (true) {
             tmp8[3] = 0
@@ -47,7 +47,11 @@ export default class FlvLoader {
                 case FLV_MEDIA_TYPE.video:
                     if (player._opt.hasVideo) {
                         const isIframe = payload[0] >> 4 === 1;
-                        decoderWorker.decodeVideo(payload, ts, isIframe);
+                        if (player._opt.useWCS) {
+                            webcodecsDecoder.decodeVideo(payload, ts, isIframe);
+                        } else {
+                            decoderWorker.decodeVideo(payload, ts, isIframe);
+                        }
                     }
                     break
             }

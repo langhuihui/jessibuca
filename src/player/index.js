@@ -3,13 +3,15 @@ import Debug from "../utils/debug";
 import Events from "../utils/events";
 import property from './property';
 import events from './events';
-import {supportOffscreen, supportOffscreenV2, supportWCS} from "../utils";
+import {supportOffscreenV2, supportWCS} from "../utils";
 import Video from "../video";
 import Stream from "../stream";
 import Recorder from "../recorder";
 import DecoderWorker from "../worker";
 import Emitter from "../utils/emitter";
 import Demux from "../demux";
+import WebcodecsDecoder from "../decoder/webcodecs";
+import Control from "../control";
 
 export default class Player extends Emitter {
     constructor(container, options) {
@@ -32,6 +34,8 @@ export default class Player extends Emitter {
         }
 
 
+        this._opt.hasControl = this._hasControl();
+
         property(this);
         events(this);
         this._loading = true;
@@ -46,6 +50,15 @@ export default class Player extends Emitter {
         this.demux = new Demux(this);
         this.decoderWorker = new DecoderWorker(this);
 
+        if (this._opt.useWCS) {
+            this.webcodecsDecoder = new WebcodecsDecoder(this)
+        }
+
+        //
+        if (this._opt.hasControl) {
+            this.control = new Control(this);
+        }
+
         this.debug.log('options', this._opt);
     }
 
@@ -54,6 +67,23 @@ export default class Player extends Emitter {
         return new Promise((resolve, reject) => {
 
         })
+    }
+
+    _hasControl() {
+        let result = false;
+
+        let hasBtnShow = false;
+        Object.keys(this._opt.operateBtns).forEach((key) => {
+            if (this._opt.operateBtns[key]) {
+                hasBtnShow = true;
+            }
+        });
+
+        if (this._opt.showBandwidth || this._opt.text || hasBtnShow) {
+            result = true;
+        }
+
+        return result;
     }
 
 
@@ -83,6 +113,11 @@ export default class Player extends Emitter {
         if (this.recorder) {
             this.recorder.destroy();
             this.recorder = null;
+        }
+
+        if (this.control) {
+            this.control.destroy();
+            this.control = null;
         }
 
         // 其他没法解耦的，通过 destroy 方式

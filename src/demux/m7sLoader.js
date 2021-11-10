@@ -1,4 +1,3 @@
-import CommonLoader from "./commonLoader";
 import {MEDIA_TYPE} from "../constant";
 
 export default class M7sLoader {
@@ -28,7 +27,6 @@ export default class M7sLoader {
                     }
                 }
                 break;
-
         }
     }
 
