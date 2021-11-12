@@ -6,6 +6,7 @@ export default class FetchLoader extends Emitter {
     constructor(player) {
         super();
         this.player = player;
+        this.playing = false;
 
         this.abortController = new AbortController();
 
@@ -20,6 +21,7 @@ export default class FetchLoader extends Emitter {
         const {demux} = this.player;
         fetch(url, {signal: this.abortController.signal}).then((res) => {
             const reader = res.body.getReader();
+            this.emit(EVENTS.streamSuccess);
             const fetchNext = () => {
                 reader.read().then(({done, value}) => {
                         if (done) {

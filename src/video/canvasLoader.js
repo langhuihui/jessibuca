@@ -14,6 +14,8 @@ export default class CanvasVideoLoader extends Emitter {
         $canvasElement.style.top = 0;
         $canvasElement.style.left = 0;
         this.$videoElement = $canvasElement;
+        player.$container.appendChild(this.$videoElement);
+
         this.contextGl = null;
         this.contextGlRender = null;
         this.contextGlDestroy = null;
@@ -26,6 +28,7 @@ export default class CanvasVideoLoader extends Emitter {
         }
     }
 
+    //
     updateVideoInfo(data) {
         if (data.encTypeCode) {
             this.videoInfo.encTypeCode = data.encTypeCode;
@@ -112,6 +115,15 @@ export default class CanvasVideoLoader extends Emitter {
             return file;
         } else if (type === SCREENSHOT_TYPE.download) {
             downloadImg(file, filename);
+        }
+    }
+
+    //
+    clearView() {
+        if (this.contextGl) {
+            this.contextGl.clear(this.contextGl.COLOR_BUFFER_BIT);
+        } else if (this.player._opt.useWCS) {
+
         }
     }
 

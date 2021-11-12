@@ -15,7 +15,7 @@ export const DEFAULT_PLAYER_OPTIONS = {
     videoBuffer: 0.5,
     vod: false,
     isResize: true,
-    isFullSize: false,
+    isFullResize: false,
     isFlv: false,
     debug: false,
     timeout: 30,
@@ -86,6 +86,7 @@ export const WORKER_SEND_TYPE = {
 export const EVENTS = {
     fullscreen: 'fullscreen',
     webFullscreen: 'webFullscreen',
+    decoderWorkerInit: 'decoderWorkerInit',
     play: 'play',
     playing: 'playing',
     pause: 'pause',
@@ -111,13 +112,35 @@ export const EVENTS = {
     resize: 'resize',
     streamRate: 'streamRate',
     streamEnd: 'streamEnd',
+    streamSuccess:'streamSuccess',
+    streamMessage: 'streamMessage',
     streamError: 'streamError',
     volumechange: 'volumechange',
     frameStart: 'frameStart'
 }
 
+
+export const JESSIBUCA_EVENTS = {
+    load: EVENTS.load,
+    timeUpdate: EVENTS.timeUpdate,
+    videoInfo: EVENTS.videoInfo,
+    audioInfo: EVENTS.audioInfo,
+    error: EVENTS.error,
+    kBps: EVENTS.kBps,
+    log: EVENTS.log,
+    start: EVENTS.frameStart,
+    timeout: EVENTS.timeout,
+    fullscreen: EVENTS.fullscreen,
+    play: EVENTS.play,
+    pause: EVENTS.pause,
+    mute: EVENTS.mute,
+    stats: EVENTS.stats,
+    performance: EVENTS.performance
+}
+
 export const EVENTS_ERROR = {
     fetchError: "fetchError",
+    websocketError: 'websocketError',
     websocketCloseSuccess: 'websocketCloseSuccess',
     websocketClosedByError: 'websocketClosedByError',
 }
@@ -161,3 +184,9 @@ export const VIDEO_ENC_TYPE_OBJ = {
 }
 
 export const CONTROL_HEIGHT = 40
+
+export const SCALE_MODE_TYPE = {
+    full: 0, //  视频画面完全填充canvas区域,画面会被拉伸
+    auto: 1, // 视频画面做等比缩放后,高或宽对齐canvas区域,画面不被拉伸,但有黑边
+    fullAuto: 2 // 视频画面做等比缩放后,完全填充canvas区域,画面不被拉伸,没有黑边,但画面显示不全
+}

@@ -37,7 +37,7 @@ export default class WebcodecsDecoder extends Emitter {
         this.player.video.render({
             videoFrame
         })
-        //
+        // release resource
         setTimeout(function () {
             if (videoFrame.close) {
                 videoFrame.close()

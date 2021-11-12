@@ -1,5 +1,5 @@
 import Emitter from "../utils/emitter";
-import {EVENTS, WEBSOCKET_STATUS} from "../constant";
+import {EVENTS, EVENTS_ERROR, WEBSOCKET_STATUS} from "../constant";
 import {calculationRate} from "../utils";
 
 export default class WebsocketLoader extends Emitter {
@@ -27,7 +27,8 @@ export default class WebsocketLoader extends Emitter {
         this.socket = new WebSocket(this.wsUrl);
         this.socket.binaryType = 'arraybuffer';
         proxy(this.socket, 'open', () => {
-            debug.log('websocketLoader', 'socket open -> send login');
+            this.emit(EVENTS.streamSuccess);
+            debug.log('websocketLoader', 'socket open');
             this.socketStatus = WEBSOCKET_STATUS.open;
         });
 
@@ -39,12 +40,14 @@ export default class WebsocketLoader extends Emitter {
 
 
         proxy(this.socket, 'close', () => {
-            player.emit(EVENTS.streamEnd);
+            debug.log('websocketLoader', 'socket close');
+            this.emit(EVENTS.streamEnd);
             this.socketStatus = WEBSOCKET_STATUS.close;
         });
 
         proxy(this.socket, 'error', error => {
-            player.emit(EVENTS.streamError, error);
+            debug.log('websocketLoader', 'socket error');
+            this.emit(EVENTS_ERROR.websocketError, error);
             this.socketStatus = WEBSOCKET_STATUS.error;
             demux.close();
             debug.log('websocketLoader', `socket error:`, error);

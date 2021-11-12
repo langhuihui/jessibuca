@@ -276,3 +276,7 @@ export function formatVideoDecoderConfigure(avcC) {
         description: avcC
     }
 }
+
+export function isFullScreen() {
+    return document.isFullScreen || document.mozIsFullScreen || document.webkitIsFullScreen;
+}

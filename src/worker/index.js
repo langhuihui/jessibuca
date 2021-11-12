@@ -15,6 +15,7 @@ export default class DecoderWorker {
                 case WORKER_CMD_TYPE.init:
                     debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.init);
                     this.player.emit(EVENTS.load);
+                    this.player.emit(EVENTS.decoderWorkerInit);
                     this._initWork();
                     break;
                 case WORKER_CMD_TYPE.videoCode:
@@ -100,7 +101,6 @@ export default class DecoderWorker {
             options
         }, [arrayBuffer.buffer])
     }
-
 
     destroy() {
         this.player.debug.log(`decoderWorker`, 'destroy');

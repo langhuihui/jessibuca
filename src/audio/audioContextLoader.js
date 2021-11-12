@@ -32,9 +32,12 @@ export default class AudioContextLoader extends Emitter {
         this.audioBufferSourceNode = source;
         //
         this.mediaStreamAudioDestinationNode = this.audioContext.createMediaStreamDestination();
-        this._audioEnabled(true);
+        this.audioEnabled(true);
         // default setting 0
         this.gainNode.gain.value = 0;
+
+        this.playing = false;
+
 
         this.audioInfo = {
             encType: '',
@@ -43,7 +46,6 @@ export default class AudioContextLoader extends Emitter {
             sampleRate: ''
         }
     }
-
 
     updateAudioInfo(data) {
         if (data.encTypeCode) {
@@ -60,8 +62,13 @@ export default class AudioContextLoader extends Emitter {
         }
     }
 
+    //
+    get isPlaying() {
+        return this.playing;
+    }
+
     get isMute() {
-        return this.gainNode.gain.value === 0;
+        return this.gainNode.gain.value === 0 && this.isStateSuspended();
     }
 
     get volume() {
@@ -80,10 +87,11 @@ export default class AudioContextLoader extends Emitter {
         const channels = this.audioInfo.channels;
 
         const scriptNode = this.audioContext.createScriptProcessor(1024, 0, channels);
-
+        this.playing = true;
         scriptNode.onaudioprocess = (audioProcessingEvent) => {
             const outputBuffer = audioProcessingEvent.outputBuffer;
-            if (this.bufferList.length) {
+
+            if (this.bufferList.length && this.playing) {
                 const buffer = this.bufferList.shift();
                 for (let channel = 0; channel < channels; channel++) {
                     const b = buffer[channel]
@@ -102,13 +110,13 @@ export default class AudioContextLoader extends Emitter {
         this.hasInitScriptNode = true;
     }
 
-
     mute(flag) {
-        this.setVolume(flag ? 0 : 0.5);
-
-        // 如果是静音状态，直接清空buffer
         if (flag) {
+            this.setVolume(0);
+            this.audioEnabled(false);
             this.clear();
+        } else {
+            this.audioEnabled(true);
         }
     }
 
@@ -117,6 +125,8 @@ export default class AudioContextLoader extends Emitter {
         if (isNaN(volume)) {
             return;
         }
+
+        this.audioEnabled(true);
         volume = clamp(volume, 0, 1);
         this.gainNode.gain.value = volume;
         this.gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
@@ -125,16 +135,15 @@ export default class AudioContextLoader extends Emitter {
 
     closeAudio() {
         if (this.hasInitScriptNode) {
-            // this.audioBufferSourceNode && this.audioBufferSourceNode.disconnect(this.scriptNode);
             this.scriptNode && this.scriptNode.disconnect(this.gainNode);
             this.gainNode && this.gainNode.disconnect(this.audioContext.destination);
             this.gainNode && this.gainNode.disconnect(this.mediaStreamAudioDestinationNode);
         }
-        this.bufferList = [];
+        this.clear();
     }
 
     // 是否播放。。。
-    _audioEnabled(flag) {
+    audioEnabled(flag) {
         if (flag) {
             if (this.audioContext.state === 'suspended') {
                 // resume
@@ -148,11 +157,28 @@ export default class AudioContextLoader extends Emitter {
         }
     }
 
+    isStateRunning() {
+        return this.audioContext.state === 'running';
+    }
+
+    isStateSuspended() {
+        return this.audioContext.state === 'suspended';
+    }
+
     clear() {
         // 全部清空。
         while (this.bufferList.length) {
             this.bufferList.shift();
         }
+    }
+
+    pause() {
+        this.playing = false;
+        this.clear();
+    }
+
+    resume() {
+        this.playing = true;
     }
 
 

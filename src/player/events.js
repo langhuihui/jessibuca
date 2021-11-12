@@ -1,4 +1,5 @@
 import {EVENTS} from "../constant";
+import screenfull from "screenfull";
 
 export default (player) => {
 
@@ -18,9 +19,7 @@ export default (player) => {
         if (value) {
             try {
                 screenfull.request(player.$container).then(() => {
-                    if (player.$borderSelect) {
-                        player.$borderSelect.style.display = 'none';
-                    }
+
                 }).catch((e) => {
                     player.webFullscreen = true;
                 });
