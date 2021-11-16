@@ -11,6 +11,7 @@ export const DEFAULT_OPTIONS = {
     keepScreenOn: false,
     isNotMute: false,
     hasAudio: true,
+    hasVideo:true,
     operateBtns: {
         fullscreen: false,
         screenshot: false,

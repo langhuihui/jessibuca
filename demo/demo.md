@@ -16,6 +16,10 @@ https://github.com/bosscheng/jessibuca-webcodecs-demo
 
 https://github.com/bosscheng/jessibuca-vue-demo
 
+## Uni-app run in hBuilderX
+
+https://github.com/bosscheng/jessibuca-umi-app-hBuilderX-demo
+
 ## Uni-app
 
 https://github.com/bosscheng/jessibuca-uni-app-demo
