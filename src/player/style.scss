@@ -1,4 +1,6 @@
 .jessibuca-container {
+    position: relative;
+
     &.jessibuca-fullscreen-web {
         position: fixed;
         z-index: 9999;

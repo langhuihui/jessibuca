@@ -15,7 +15,21 @@ export default class Control {
     }
 
     autoSize() {
-
+        const player = this.player;
+        player.$container.style.padding = '0 0';
+        const playerWidth = player.width;
+        const playerHeight = player.height;
+        const playerRatio = playerWidth / playerHeight;
+        const canvasWidth = player.audio.$videoElement.width;
+        const canvasHeight = player.audio.$videoElement.height;
+        const canvasRatio = canvasWidth / canvasHeight;
+        if (playerRatio > canvasRatio) {
+            const padding = (playerWidth - playerHeight * canvasRatio) / 2;
+            player.$container.style.padding = `0 ${padding}px`;
+        } else {
+            const padding = (playerHeight - playerWidth / canvasRatio) / 2;
+            player.$container.style.padding = `${padding}px 0`;
+        }
     }
 
     destroy() {

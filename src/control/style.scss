@@ -30,126 +30,123 @@
         height: 16px;
     }
 
-    .jessibuca-player {
+    // poster
+    .jessibuca-poster {
+        position: absolute;
+        z-index: 10;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        height: 100%;
+        width: 100%;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: contain;
+        pointer-events: none;
+    }
 
-        // poster
-        .jessibuca-poster {
-            position: absolute;
-            z-index: 10;
-            left: 0;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            height: 100%;
-            width: 100%;
-            background-position: center center;
-            background-repeat: no-repeat;
-            background-size: contain;
-            pointer-events: none;
-        }
+    // loading
+    .jessibuca-loading {
+        //display: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        z-index: 20;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
 
-        // loading
-        .jessibuca-loading {
-            //display: none;
+    .jessibuca-controls {
+        background-color: #161616;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        position: absolute;
+        z-index: 40;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 38px;
+        padding-left: 30px;
+        padding-right: 13px;
+        font-size: 14px;
+        color: #fff;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s ease-in-out;
+        user-select: none;
+
+        .jessibuca-controls-item {
+            position: relative;
             display: flex;
             justify-content: center;
-            align-items: center;
-            position: absolute;
-            z-index: 20;
-            left: 0;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
+            padding: 0 8px;
 
-        .jessibuca-controls {
-            background-color: #161616;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            position: absolute;
-            z-index: 40;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            height: 40px;
-            padding-left: 30px;
-            padding-right: 13px;
-            font-size: 14px;
-            color: #fff;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.2s ease-in-out;
-            user-select: none;
-
-            .jessibuca-controls-item {
-                position: relative;
-                display: flex;
-                justify-content: center;
-                padding: 0 17px;
-
-                &:hover .icon-title-tips {
-                    visibility: visible;
-                    opacity: 1;
-                }
-            }
-
-            .jessibuca-microphone-close {
-                display: none;
-            }
-
-            .jessibuca-icon-mute {
-                display: none;
-            }
-
-            .jessibuca-ptz-active {
-                display: none;
-            }
-
-            .jessibuca-fullscreen-exit {
-                display: none;
-            }
-
-            .jessibuca-record-stop {
-                display: none;
-            }
-
-            .jessibuca-icon-audio, .jessibuca-icon-mute {
-                z-index: 1;
-            }
-
-
-            .jessibuca-controls-bottom {
-                display: flex;
-                justify-content: space-between;
-                height: 100%;
-
-                .jessibuca-controls-left {
-                    display: flex;
-                    align-items: center;
-                }
-
-                .jessibuca-controls-right {
-                    display: flex;
-                    align-items: center;
-                }
-            }
-        }
-
-        &.jessibuca-controls-show {
-            .jessibuca-controls {
-                opacity: 1;
+            &:hover .icon-title-tips {
                 visibility: visible;
+                opacity: 1;
             }
         }
 
-        &.jessibuca-hide-cursor {
-            * {
-                cursor: none !important;
+        .jessibuca-microphone-close {
+            display: none;
+        }
+
+        .jessibuca-icon-mute {
+            display: none;
+        }
+
+        .jessibuca-ptz-active {
+            display: none;
+        }
+
+        .jessibuca-fullscreen-exit {
+            display: none;
+        }
+
+        .jessibuca-record-stop {
+            display: none;
+        }
+
+        .jessibuca-icon-audio, .jessibuca-icon-mute {
+            z-index: 1;
+        }
+
+
+        .jessibuca-controls-bottom {
+            display: flex;
+            justify-content: space-between;
+            height: 100%;
+
+            .jessibuca-controls-left {
+                display: flex;
+                align-items: center;
             }
+
+            .jessibuca-controls-right {
+                display: flex;
+                align-items: center;
+            }
+        }
+    }
+
+    &.jessibuca-controls-show {
+        .jessibuca-controls {
+            opacity: 1;
+            visibility: visible;
+        }
+    }
+
+    &.jessibuca-hide-cursor {
+        * {
+            cursor: none !important;
         }
     }
 

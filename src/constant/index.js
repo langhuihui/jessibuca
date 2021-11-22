@@ -183,7 +183,7 @@ export const VIDEO_ENC_TYPE_OBJ = {
     H265: 'H265'
 }
 
-export const CONTROL_HEIGHT = 40
+export const CONTROL_HEIGHT = 38
 
 export const SCALE_MODE_TYPE = {
     full: 0, //  视频画面完全填充canvas区域,画面会被拉伸

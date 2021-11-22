@@ -35,4 +35,119 @@ export default (player, control) => {
             </div>
         `
     )
+
+    Object.defineProperty(control, '$poster', {
+        value: player.$container.querySelector('.jessibuca-poster'),
+    });
+
+    Object.defineProperty(control, '$loading', {
+        value: player.$container.querySelector('.jessibuca-loading'),
+    });
+
+    Object.defineProperty(control, '$controls', {
+        value: player.$container.querySelector('.jessibuca-controls'),
+    });
+
+    Object.defineProperty(control, '$fullscreen', {
+        value: player.$container.querySelector('.jessibuca-fullscreen'),
+    });
+
+    Object.defineProperty(control, '$fullscreen', {
+        value: player.$container.querySelector('.jessibuca-fullscreen'),
+    });
+
+    Object.defineProperty(control, '$qualityText', {
+        value: player.$container.querySelector('.jessibuca-icon-text'),
+    });
+
+    Object.defineProperty(control, '$qualityMenu', {
+        value: player.$container.querySelector('.jessibuca-quality-menu'),
+    });
+
+    Object.defineProperty(control, '$qualityMenuList', {
+        value: player.$container.querySelector('.jessibuca-quality-menu-list'),
+    });
+
+    Object.defineProperty(control, '$qualityMenuItems', {
+        value: player.$container.querySelectorAll('.jessibuca-quality-menu-item'),
+    });
+
+
+    Object.defineProperty(control, '$volume', {
+        value: player.$container.querySelector('.jessibuca-volume'),
+    });
+
+    Object.defineProperty(control, '$volumePanelWrap', {
+        value: player.$container.querySelector('.jessibuca-volume-panel-wrap'),
+    });
+
+    Object.defineProperty(control, '$volumePanel', {
+        value: player.$container.querySelector('.jessibuca-volume-panel'),
+    });
+
+    Object.defineProperty(control, '$volumeHandle', {
+        value: player.$container.querySelector('.jessibuca-volume-panel-handle'),
+    });
+
+    Object.defineProperty(control, '$volumeOn', {
+        value: player.$container.querySelector('.jessibuca-icon-audio'),
+    });
+
+    Object.defineProperty(control, '$volumeOff', {
+        value: player.$container.querySelector('.jessibuca-icon-mute'),
+    });
+
+    Object.defineProperty(control, '$ptz', {
+        value: player.$container.querySelector('.jessibuca-ptz'),
+    });
+
+    Object.defineProperty(control, '$ptzActive', {
+        value: player.$container.querySelector('.jessibuca-ptz-active'),
+    });
+
+    Object.defineProperty(control, '$ptzControl', {
+        value: player.$container.querySelector('.jessibuca-ptz-controls'),
+    });
+
+    Object.defineProperty(control, '$ptzBgActive', {
+        value: player.$container.querySelector('.jessibuca-ptz-bg-active'),
+    });
+
+    Object.defineProperty(control, '$ptzControlCircular', {
+        value: player.$container.querySelector('.jessibuca-ptz-control'),
+    });
+
+    Object.defineProperty(control, '$ptzArrows', {
+        value: player.$container.querySelectorAll('.jessibuca-ptz-arrow'),
+    });
+
+    Object.defineProperty(control, '$microphoneOpen', {
+        value: player.$container.querySelector('.jessibuca-microphone-open'),
+    });
+
+    Object.defineProperty(control, '$microphoneClose', {
+        value: player.$container.querySelector('.jessibuca-microphone-close'),
+    });
+
+    Object.defineProperty(control, '$fullscreen', {
+        value: player.$container.querySelector('.jessibuca-fullscreen'),
+    });
+
+    Object.defineProperty(control, '$fullscreenExit', {
+        value: player.$container.querySelector('.jessibuca-fullscreen-exit'),
+    });
+
+    Object.defineProperty(control, '$record', {
+        value: player.$container.querySelector('.jessibuca-record'),
+    });
+    Object.defineProperty(control, '$recordStop', {
+        value: player.$container.querySelector('.jessibuca-record-stop'),
+    });
+
+    Object.defineProperty(control, '$screenshot', {
+        value: player.$container.querySelector('.jessibuca-screenshot'),
+    });
+
+
+
 }
