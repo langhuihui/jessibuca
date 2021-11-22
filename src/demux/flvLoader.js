@@ -3,9 +3,9 @@ import {FLV_MEDIA_TYPE} from "../constant";
 export default class FlvLoader {
     constructor(player) {
         this.player = player;
-
         const input = this._inputFlv();
         this.flvDemux = this.dispatchFlvData(input);
+        player.debug.log('FlvDemux', 'init')
     }
 
     dispatch(data) {

@@ -1,4 +1,5 @@
 import Emitter from "../utils/emitter";
+import {CONTROL_HEIGHT} from "../constant";
 
 export default class VideoLoader extends Emitter {
     constructor(player) {

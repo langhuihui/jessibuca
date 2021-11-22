@@ -18,6 +18,8 @@ class Jessibuca extends Emitter {
             return;
         }
 
+        $container.classList.add('jessibuca-container');
+
         delete _opt.container;
 
         this._opt = _opt;
@@ -25,23 +27,21 @@ class Jessibuca extends Emitter {
         this.href = null;
         this.events = new Events(this);
         this.player = new Player($container, _opt);
+        this._bindEvents();
+    }
+
+    _bindEvents() {
+        // 对外的事件
+        Object.keys(JESSIBUCA_EVENTS).forEach((key) => {
+            this.player.on(EVENTS[key], (value) => {
+                this.emit(key, value)
+            })
+        })
     }
 
     /**
-     *
-     * @param option
-     * @returns {Player}
-     * @private
-     */
-    _createPlayer(option) {
-        const player = new Player(this.$container, option);
-        return player;
-    }
-
-
-    /**
-     *
-     * @param value
+     * 是否开启控制台调试打印
+     * @param value {Boolean}
      */
     setDebug(value) {
         this.player.updateOption({
@@ -65,10 +65,10 @@ class Jessibuca extends Emitter {
 
     /**
      *
+     * @param value {number}
      */
     setVolume(value) {
         this.player.audio.setValue(value);
-
     }
 
     /**
@@ -79,15 +79,19 @@ class Jessibuca extends Emitter {
 
     }
 
-    setTimeout(value) {
+    /**
+     * 设置超时时长, 单位秒 在连接成功之前和播放中途,如果超过设定时长无数据返回,则回调timeout事件
+     * @param value {number}
+     */
+    setTimeout(time) {
         this.player.updateOption({
-            timeout: Number(value)
+            timeout: Number(time)
         })
     }
 
     /**
      *
-     * @param type: 0,1,2
+     * @param type {number}: 0,1,2
      */
     setScaleMode(type) {
         type = Number(type);
@@ -121,86 +125,74 @@ class Jessibuca extends Emitter {
         this.player.pause();
     }
 
+    /**
+     *
+     */
     close() {
         this.player.close();
     }
 
-    destroy() {
-        this.player.destroy();
-    }
 
+    /**
+     *
+     */
     clearView() {
         this.player.video.clearView()
     }
 
-    //
+    /**
+     *
+     * @param url {string}
+     * @returns {Promise<unknown>}
+     */
     play(url) {
         return new Promise((resolve, reject) => {
-
             if (!url && !this._opt.url) {
                 reject();
+                return;
             }
 
-
-            if (this._opt.url) {
-
-            } else {
-
-            }
-
-
-            //
-            if (this.player) {
-                this.player.destroy();
-                this.player = null;
-                // 解除绑定事件
-                this.off();
-            }
-
-            this._opt.url = url;
-
-            //
-            const isHttp = url.indexOf("http") === 0;
-            //
-            const protocol = isHttp ? PLAYER_PLAY_PROTOCOL.fetch : PLAYER_PLAY_PROTOCOL.websocket
-            //
-            const demuxType = (isHttp || url.indexOf(".flv") !== -1 || this._opt.isFlv) ? DEMUX_TYPE.flv : DEMUX_TYPE.m7s;
-
-            const options = {
-                ...this._opt,
-                protocol,
-                demuxType,
-                url
-            }
-
-            this.player = this._createPlayer(options);
-
-            // 对外的事件
-            Object.keys(JESSIBUCA_EVENTS).forEach((key) => {
-                this.player.on(EVENTS[key], (value) => {
-                    this.emit(key, value)
-                })
-            })
-
-
-            if (this.player.hasLoaded()) {
-                this.player.play().then(() => {
+            if (url) {
+                // url 相等的时候。
+                if (this._opt.url && (url === this._opt.url)) {
                     resolve();
-                }).catch(() => {
-                    this.player.destroy();
-                    this.player = null;
-                    reject();
-                })
-            } else {
-                this.player.once(EVENTS.load, () => {
-                    this.player.play().then(() => {
-                        resolve();
-                    }).catch(() => {
-                        this.player.destroy();
-                        this.player = null;
-                        reject();
+                    return;
+                } else {
+                    this._opt.url = url;
+                    //  新的url
+                    const isHttp = url.indexOf("http") === 0;
+                    //
+                    const protocol = isHttp ? PLAYER_PLAY_PROTOCOL.fetch : PLAYER_PLAY_PROTOCOL.websocket
+                    //
+                    const demuxType = (isHttp || url.indexOf(".flv") !== -1 || this._opt.isFlv) ? DEMUX_TYPE.flv : DEMUX_TYPE.m7s;
+
+                    this.player.updateOption({
+                        protocol,
+                        demuxType
                     })
-                })
+
+                    if (this.hasLoaded()) {
+                        this.player.play(url).then(() => {
+                            resolve();
+                        }).catch(() => {
+                            this.player.close();
+                            reject();
+                        })
+                    } else {
+                        this.player.once(EVENTS.load, () => {
+                            this.player.play(url).then(() => {
+                                resolve();
+                            }).catch(() => {
+                                this.player.close();
+                                reject();
+                            })
+                        })
+                    }
+                }
+            } else {
+                //  url 不存在的时候
+                //  就是从 play-> pause -> play
+                this.player.resume();
             }
         })
     }
@@ -209,6 +201,10 @@ class Jessibuca extends Emitter {
         this.player.video.resize();
     }
 
+    /**
+     *
+     * @param time {number}
+     */
     setBufferTime(time) {
         time = Number(time)
         if (this.player) {
@@ -218,6 +214,10 @@ class Jessibuca extends Emitter {
         }
     }
 
+    /**
+     *
+     * @param deg {number}
+     */
     setRotate(deg) {
         deg = parseInt(deg, 10)
         const list = [0, 90, 270];
@@ -244,6 +244,10 @@ class Jessibuca extends Emitter {
         this._opt.useWCS = supportWCS();
     }
 
+    /**
+     *
+     * @param flag {Boolean}
+     */
     setFullscreen(flag) {
         const fullscreen = !!flag;
         if (this.player.fullscreen !== fullscreen) {
@@ -253,15 +257,19 @@ class Jessibuca extends Emitter {
 
     /**
      *
-     * @param filename
-     * @param format
-     * @param quality
-     * @param type download,base64,blob
+     * @param filename {string}
+     * @param format {string}
+     * @param quality {number}
+     * @param type {string} download,base64,blob
      */
     screenshot(filename, format, quality, type) {
         return this.player.video.screenshot(filename, format, quality, type)
     }
 
+    /**
+     *
+     * @returns {Boolean}
+     */
     isPlaying() {
         return this.player.playing;
     }
@@ -273,4 +281,17 @@ class Jessibuca extends Emitter {
     isMute() {
         return this.player.audio.isMute();
     }
+
+    /**
+     *
+     */
+    destroy() {
+        this.player.destroy();
+        this.player = null;
+    }
 }
+
+
+window.Jessibuca = Jessibuca;
+
+export default Jessibuca;

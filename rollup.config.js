@@ -1,5 +1,4 @@
 import babel from 'rollup-plugin-babel'; // 大家都理解，方便使用 javascript 的新特性,es新特性的解析
-import typescript from '@rollup/plugin-typescript'; // ts
 import commonjs from 'rollup-plugin-commonjs'; // 插件将CommonJS模块转换为 ES2015 提供给 Rollup 处理
 import postcss from 'rollup-plugin-postcss'; // 提取样式文件（sass 或者 less 等）添加浏览器前缀 以及压缩
 import autoprefixer from 'autoprefixer'; // 添加前缀
@@ -53,20 +52,24 @@ const baseConfig = {
             },
         },
         copy({
-            'src/decoder/decoder.wasm': isProd ? 'dist/decoder.wasm' : 'demo/public/decoder.wasm'
+            targets: [
+                {
+                    src: "src/decoder/decoder.wasm",
+                    dest: isProd ? 'dist/decoder.wasm' : 'demo/public/decoder.wasm'
+                }
+            ]
         })
     ],
 };
 
 export default [
     {
-        input: 'src/jessibuca.ts',
+        input: 'src/jessibuca.js',
         output: {
             name: 'jessibuca',
             file: isProd ? 'dist/jessibuca.js' : 'demo/public/jessibuca.js',
         },
         plugins: [
-            typescript(),
             postcss({
                 plugins: [
                     base64({

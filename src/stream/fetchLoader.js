@@ -14,6 +14,7 @@ export default class FetchLoader extends Emitter {
         this.streamRate = calculationRate(rate => {
             player.emit(EVENTS.streamRate, rate);
         });
+        player.debug.log('FetchStream', 'init');
     }
 
 
@@ -28,12 +29,14 @@ export default class FetchLoader extends Emitter {
                             demux.close();
                         } else {
                             this.streamRate(value.byteLength);
+                            this.playing = true;
                             demux.dispatch(value);
                             fetchNext();
                         }
                     }
                 ).catch((e) => {
                     demux.close();
+                    this.playing = false;
                     // 这边会报用户 aborted a request 错误。
                     this.emit(EVENTS_ERROR.fetchError, e);
                 })

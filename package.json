@@ -2,11 +2,11 @@
     "name": "jessibuca",
     "version": "1.0.0",
     "scripts": {
-        "build": "parcel build src/index.js --dist-dir ./demo/public --no-source-maps",
+        "build": "npx cross-env NODE_ENV=production rollup -c",
         "build:wasm": "python wasm/make.py --wasm && npm run build && npm run build:demo",
         "build:demo": "vitepress build demo",
         "dev": "vitepress dev demo",
-        "dev:watch": "parcel watch src/index.js --dist-dir ./demo/public"
+        "dev:watch": "npx cross-env NODE_ENV=development rollup -c -m -w"
     },
     "dependencies": {
         "screenfull": "5.1.0"
@@ -15,7 +15,6 @@
         "vitepress": "0.16.1",
         "typescript": "4.4.4",
         "@rollup/plugin-json": "4.1.0",
-        "@rollup/plugin-typescript": "8.3.0",
         "@babel/core": "^7.12.16",
         "@babel/plugin-external-helpers": "^7.12.13",
         "@babel/plugin-transform-runtime": "^7.12.15",

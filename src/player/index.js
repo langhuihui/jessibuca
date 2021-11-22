@@ -5,13 +5,15 @@ import property from './property';
 import events from './events';
 import {isFullScreen, supportOffscreenV2, supportWCS} from "../utils";
 import Video from "../video";
+import Audio from "../audio";
 import Stream from "../stream";
 import Recorder from "../recorder";
-import DecoderWorker from "../worker";
+import DecoderWorker from "../worker/index";
 import Emitter from "../utils/emitter";
 import Demux from "../demux";
 import WebcodecsDecoder from "../decoder/webcodecs";
 import Control from "../control";
+import './style.scss'
 
 export default class Player extends Emitter {
     constructor(container, options) {
@@ -140,47 +142,89 @@ export default class Player extends Emitter {
         this._opt = Object.assign({}, this._opt, options)
     }
 
-
-    play() {
+    //
+    init() {
         return new Promise((resolve, reject) => {
-            this.stream.fetchStream(this._opt.url);
+            if (!this.stream) {
+                this.stream = new Stream(this);
+            }
 
-            this.stream.once(EVENTS_ERROR.fetchError, (error) => {
-                reject(error)
-            })
+            if (!this.demux) {
+                this.demux = new Demux(this);
+            }
 
-            this.stream.once(EVENTS.streamSuccess, () => {
-                resolve();
+            if (!this.decoderWorker) {
+                this.decoderWorker = new DecoderWorker(this);
+
+                this.once(EVENTS.decoderWorkerInit, () => {
+                    resolve()
+                })
+            } else {
+                resolve()
+            }
+
+        })
+    }
+
+
+    play(url) {
+        return new Promise((resolve, reject) => {
+
+            this.init().then(() => {
+                this.stream.fetchStream(url);
+                //
+                this.stream.once(EVENTS_ERROR.fetchError, (error) => {
+                    reject(error)
+                })
+                //
+                this.stream.once(EVENTS.streamSuccess, () => {
+                    resolve();
+                })
+            }).catch((e) => {
+                reject(e)
             })
         })
+    }
+
+    //
+    close() {
+        //
+        if (this.stream) {
+            this.stream.destroy();
+            this.stream = null;
+        }
+
+        if (this.demux) {
+            this.demux.destroy();
+            this.demux = null;
+        }
+
+        //
+        if (this.decoderWorker) {
+            this.decoderWorker.destroy();
+            this.decoderWorker = null;
+        }
+
+        if (this.webcodecsDecoder) {
+            this.webcodecsDecoder.destroy();
+            this.webcodecsDecoder = null;
+        }
     }
 
     pause() {
         return new Promise((resolve, reject) => {
-            if (this.decoderWorker) {
-                this.decoderWorker.destroy();
-                this.decoderWorker = null;
-            }
-
-            if (this.stream) {
-                this.stream.destroy();
-                this.stream = null;
-            }
-
-            if (this.webcodecsDecoder) {
-                this.webcodecsDecoder.destroy();
-                this.webcodecsDecoder = null;
-            }
-
+            this.close();
             //
             this.playing = false;
             this.audio.pause();
-            //
-            this.once(EVENTS.decoderWorkerInit, () => {
-                resolve();
-            })
         })
     }
+
+    // 恢复播放
+    resume() {
+
+    }
+
 
     _hasControl() {
         let result = false;
@@ -198,7 +242,6 @@ export default class Player extends Emitter {
 
         return result;
     }
-
 
     destroy() {
         if (this.events) {

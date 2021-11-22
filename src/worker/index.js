@@ -65,6 +65,7 @@ export default class DecoderWorker {
                     player[msg.cmd] && player[msg.cmd](msg);
             }
         }
+        player.debug.log('decoderWorker', 'init')
     }
 
     _initWork() {
@@ -81,7 +82,7 @@ export default class DecoderWorker {
             ts: Math.max(ts, 0),
             isIFrame
         }
-
+        // this.player.debug.log('decoderWorker', 'decodeVideo');
         this.decoderWorker.postMessage({
             cmd: WORKER_SEND_TYPE.decode,
             buffer: arrayBuffer,
@@ -95,6 +96,8 @@ export default class DecoderWorker {
             type: MEDIA_TYPE.audio,
             ts: Math.max(ts, 0)
         }
+        // this.player.debug.log('decoderWorker', 'decodeAudio');
+
         this.decoderWorker.postMessage({
             cmd: WORKER_SEND_TYPE.decode,
             buffer: arrayBuffer,

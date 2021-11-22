@@ -3,6 +3,7 @@ import {MEDIA_TYPE} from "../constant";
 export default class M7sLoader {
     constructor(player) {
         this.player = player;
+        player.debug.log('M7sDemux', 'init')
     }
 
     dispatch(data) {

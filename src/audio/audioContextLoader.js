@@ -32,6 +32,7 @@ export default class AudioContextLoader extends Emitter {
         this.audioBufferSourceNode = source;
         //
         this.mediaStreamAudioDestinationNode = this.audioContext.createMediaStreamDestination();
+        //
         this.audioEnabled(true);
         // default setting 0
         this.gainNode.gain.value = 0;
@@ -45,6 +46,7 @@ export default class AudioContextLoader extends Emitter {
             channels: '',
             sampleRate: ''
         }
+        this.player.debug.log('AudioContext', 'init');
     }
 
     updateAudioInfo(data) {
@@ -125,7 +127,6 @@ export default class AudioContextLoader extends Emitter {
         if (isNaN(volume)) {
             return;
         }
-
         this.audioEnabled(true);
         volume = clamp(volume, 0, 1);
         this.gainNode.gain.value = volume;
@@ -170,6 +171,10 @@ export default class AudioContextLoader extends Emitter {
         while (this.bufferList.length) {
             this.bufferList.shift();
         }
+    }
+
+    play(buffer, ts) {
+        this.bufferList.push(buffer);
     }
 
     pause() {

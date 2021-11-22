@@ -80,7 +80,7 @@ Module.postRun = function () {
             return !this.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined';
         },
         initAudioPlanar: function (channels, samplerate) {
-            decoder.opt.debug && console.log('Jessibuca[worker] initAudio', `sampleRate:${samplerate},channels:${channels}`);
+            decoder.opt.debug && console.log('Jessibuca: [worker] initAudio', `sampleRate:${samplerate},channels:${channels}`);
             postMessage({cmd: WORKER_CMD_TYPE.initAudio, sampleRate: samplerate, channels: channels})
             var buffer = []
             var outputArray = [];
@@ -142,7 +142,7 @@ Module.postRun = function () {
             postMessage({cmd: WORKER_CMD_TYPE.audioCode, code})
         },
         setVideoSize: function (w, h) {
-            decoder.opt.debug && console.log('Jessibuca[worker] setVideoSize', `w:${w},h:${h}`);
+            decoder.opt.debug && console.log('Jessibuca: [worker] setVideoSize', `w:${w},h:${h}`);
             postMessage({cmd: WORKER_CMD_TYPE.initVideo, w: w, h: h})
             var size = w * h
             var qsize = size >> 2
@@ -185,7 +185,7 @@ Module.postRun = function () {
             return -1
         },
         init: function () {
-            decoder.opt.debug && console.log('Jessibuca[worker] init');
+            decoder.opt.debug && console.log('Jessibuca: [worker] init');
             const _doDecode = (data) => {
                 if (decoder.opt.useWCS && decoder.useOffscreen() && data.type === MEDIA_TYPE.video) {
                     wcsVideoDecoder.decode(data.payload, data.ts)
@@ -232,7 +232,7 @@ Module.postRun = function () {
             this.stopId = setInterval(loop, 10);
         },
         close: function () {
-            this.opt.debug && console.log('Jessibuca[worker]: close');
+            this.opt.debug && console.log('Jessibuca: [worker]: close');
             clearInterval(this.stopId);
             this.stopId = null;
             audioDecoder.clear();
@@ -273,7 +273,7 @@ Module.postRun = function () {
     }
     var audioDecoder = new Module.AudioDecoder(decoder)
     var videoDecoder = new Module.VideoDecoder(decoder)
-    postMessage({cmd: "init"})
+    postMessage({cmd: WORKER_SEND_TYPE.init})
     self.onmessage = function (event) {
         var msg = event.data
         switch (msg.cmd) {

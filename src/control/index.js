@@ -2,6 +2,7 @@ import template from "./template";
 import observer from './observer';
 import property from './property';
 import events from './events';
+import './style.scss'
 
 export default class Control {
     constructor(player) {
@@ -13,7 +14,7 @@ export default class Control {
         this.player.debug.log('Control', 'init');
     }
 
-    autoSize(){
+    autoSize() {
 
     }
 

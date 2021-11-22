@@ -26,6 +26,8 @@ export default class CanvasVideoLoader extends Emitter {
             encType: '',
             encTypeCode: ''
         }
+        this.player.debug.log('CanvasVideo', 'init');
+
     }
 
     //
@@ -154,7 +156,6 @@ export default class CanvasVideoLoader extends Emitter {
         this.$videoElement.style.left = ((width - resizeWidth) / 2) + "px"
         this.$videoElement.style.top = ((height - resizeHeight) / 2) + "px"
     }
-
 
     destroy() {
         if (this.contextGl) {
