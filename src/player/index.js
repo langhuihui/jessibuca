@@ -147,7 +147,10 @@ export default class Player extends Emitter {
         this._opt = Object.assign({}, this._opt, options)
     }
 
-    //
+    /**
+     *
+     * @returns {Promise<unknown>}
+     */
     init() {
         return new Promise((resolve, reject) => {
             if (!this.stream) {
@@ -172,6 +175,11 @@ export default class Player extends Emitter {
     }
 
 
+    /**
+     *
+     * @param url
+     * @returns {Promise<unknown>}
+     */
     play(url) {
 
         return new Promise((resolve, reject) => {
@@ -210,7 +218,9 @@ export default class Player extends Emitter {
         })
     }
 
-    //
+    /**
+     *
+     */
     close() {
         //
         if (this.stream) {
@@ -235,6 +245,10 @@ export default class Player extends Emitter {
         }
     }
 
+    /**
+     *
+     * @returns {Promise<unknown>}
+     */
     pause() {
         return new Promise((resolve, reject) => {
             this.close();
@@ -246,15 +260,25 @@ export default class Player extends Emitter {
         })
     }
 
+    /**
+     *
+     * @param flag
+     */
     mute(flag) {
         this.audio.mute(flag)
     }
 
-    //
+    /**
+     *
+     */
     resize() {
         this.video.resize();
     }
 
+    /**
+     *
+     * @param fileName
+     */
     startRecord(fileName) {
         if (this.recording) {
             return;
@@ -264,6 +288,9 @@ export default class Player extends Emitter {
         this.recording = true;
     }
 
+    /**
+     *
+     */
     stopRecordAndSave() {
         if (this.recording) {
             this.recording = false;
@@ -286,6 +313,9 @@ export default class Player extends Emitter {
 
         return result;
     }
+
+
+
 
     destroy() {
         if (this.events) {
