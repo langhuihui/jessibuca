@@ -104,7 +104,7 @@ export default (player, control) => {
     })
 
 
-    player.on(EVENTS.streamRate, (rate) => {
+    player.on(EVENTS.kBps, (rate) => {
         const bps = bpsSize(rate);
         control.$speed.innerHTML = bps;
     })

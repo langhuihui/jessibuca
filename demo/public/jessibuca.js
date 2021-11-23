@@ -114,7 +114,6 @@
       start: 'start',
       metadata: 'metadata',
       resize: 'resize',
-      streamRate: 'streamRate',
       streamEnd: 'streamEnd',
       streamSuccess: 'streamSuccess',
       streamMessage: 'streamMessage',
@@ -858,6 +857,11 @@
 
         if (data.height) {
           this.videoInfo.height = data.height;
+        } // video 基本信息
+
+
+        if (this.videoInfo.encTypeCode && this.videoInfo.height && this.videoInfo.width) {
+          this.player.emit(EVENTS.videoInfo, this.videoInfo);
         }
       }
 
@@ -1070,6 +1074,11 @@
 
         if (data.sampleRate) {
           this.audioInfo.sampleRate = data.sampleRate;
+        } // audio 基本信息
+
+
+        if (this.audioInfo.sampleRate && this.audioInfo.channels && this.audioInfo.encTypeCode) {
+          this.player.emit(EVENTS.audioInfo, this.audioInfo);
         }
       } //
 
@@ -1238,7 +1247,7 @@
         this.abortController = new AbortController(); //
 
         this.streamRate = calculationRate(rate => {
-          player.emit(EVENTS.streamRate, (rate / 1024).toFixed(2));
+          player.emit(EVENTS.kBps, (rate / 1024).toFixed(2));
         });
         player.debug.log('FetchStream', 'init');
       }
@@ -1298,7 +1307,7 @@
         this.wsUrl = null; //
 
         this.streamRate = calculationRate(rate => {
-          player.emit(EVENTS.streamRate, (rate / 1024).toFixed(2));
+          player.emit(EVENTS.kBps, (rate / 1024).toFixed(2));
         });
       }
 
@@ -1359,6 +1368,7 @@
         }
 
         this.socketStatus = WEBSOCKET_STATUS.notConnect;
+        this.streamRate = null;
         this.off();
         this.player.debug.log('websocketLoader', 'destroy');
       }
@@ -7709,7 +7719,7 @@
             case WORKER_CMD_TYPE.render:
               // debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.render, `msg ts:${msg.ts}`);
               if (this.player.loading) {
-                this.player.emit(EVENTS.frameStart);
+                this.player.emit(EVENTS.start);
                 this.player.loading = false;
               }
 
@@ -7718,6 +7728,7 @@
               }
 
               this.player.video.render(msg);
+              this.player.emit(EVENTS.timeUpdate, msg.ts);
               break;
 
             case WORKER_CMD_TYPE.playAudio:
@@ -8225,7 +8236,7 @@
           control.$speed.innerHTML = bpsSize('');
         }
       });
-      player.on(EVENTS.streamRate, rate => {
+      player.on(EVENTS.kBps, rate => {
         const bps = bpsSize(rate);
         control.$speed.innerHTML = bps;
       });

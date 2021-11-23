@@ -11,7 +11,7 @@ export default class FetchLoader extends Emitter {
         this.abortController = new AbortController();
         //
         this.streamRate = calculationRate(rate => {
-            player.emit(EVENTS.streamRate, (rate / 1024).toFixed(2));
+            player.emit(EVENTS.kBps, (rate / 1024).toFixed(2));
         });
         player.debug.log('FetchStream', 'init');
     }

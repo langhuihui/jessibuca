@@ -45,13 +45,14 @@ export default class DecoderWorker {
                 case WORKER_CMD_TYPE.render:
                     // debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.render, `msg ts:${msg.ts}`);
                     if (this.player.loading) {
-                        this.player.emit(EVENTS.frameStart);
+                        this.player.emit(EVENTS.start);
                         this.player.loading = false;
                     }
                     if (!this.player.playing) {
                         this.player.playing = true;
                     }
                     this.player.video.render(msg);
+                    this.player.emit(EVENTS.timeUpdate, msg.ts)
                     break;
 
                 case WORKER_CMD_TYPE.playAudio:

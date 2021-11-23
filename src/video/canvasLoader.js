@@ -44,6 +44,11 @@ export default class CanvasVideoLoader extends Emitter {
         if (data.height) {
             this.videoInfo.height = data.height;
         }
+
+        // video 基本信息
+        if (this.videoInfo.encTypeCode && this.videoInfo.height && this.videoInfo.width) {
+            this.player.emit(EVENTS.videoInfo, this.videoInfo);
+        }
     }
 
     _initContextGl() {

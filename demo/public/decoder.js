@@ -6511,7 +6511,8 @@
 	        let image_bitmap = this.offscreenCanvas.transferToImageBitmap();
 	        postMessage({
 	          cmd: WORKER_CMD_TYPE.render,
-	          buffer: image_bitmap
+	          buffer: image_bitmap,
+	          ts: 0
 	        }, [image_bitmap]);
 	        setTimeout(function () {
 	          if (videoFrame.close) {

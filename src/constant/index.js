@@ -111,7 +111,6 @@ export const EVENTS = {
     start: 'start',
     metadata: 'metadata',
     resize: 'resize',
-    streamRate: 'streamRate',
     streamEnd: 'streamEnd',
     streamSuccess: 'streamSuccess',
     streamMessage: 'streamMessage',
