@@ -8552,7 +8552,11 @@
 
       updateOption(options) {
         this._opt = Object.assign({}, this._opt, options);
-      } //
+      }
+      /**
+       *
+       * @returns {Promise<unknown>}
+       */
 
 
       init() {
@@ -8575,6 +8579,12 @@
           }
         });
       }
+      /**
+       *
+       * @param url
+       * @returns {Promise<unknown>}
+       */
+
 
       play(url) {
         return new Promise((resolve, reject) => {
@@ -8611,7 +8621,10 @@
             reject(e);
           });
         });
-      } //
+      }
+      /**
+       *
+       */
 
 
       close() {
@@ -8637,6 +8650,11 @@
           this.webcodecsDecoder = null;
         }
       }
+      /**
+       *
+       * @returns {Promise<unknown>}
+       */
+
 
       pause() {
         return new Promise((resolve, reject) => {
@@ -8648,15 +8666,28 @@
           }, 0);
         });
       }
+      /**
+       *
+       * @param flag
+       */
+
 
       mute(flag) {
         this.audio.mute(flag);
-      } //
+      }
+      /**
+       *
+       */
 
 
       resize() {
         this.video.resize();
       }
+      /**
+       *
+       * @param fileName
+       */
+
 
       startRecord(fileName) {
         if (this.recording) {
@@ -8666,6 +8697,10 @@
         this.recorder.setFileName(fileName);
         this.recording = true;
       }
+      /**
+       *
+       */
+
 
       stopRecordAndSave() {
         if (this.recording) {
