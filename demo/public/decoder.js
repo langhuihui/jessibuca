@@ -6512,6 +6512,7 @@
 	        postMessage({
 	          cmd: WORKER_CMD_TYPE.render,
 	          buffer: image_bitmap,
+	          delay: decoder$1.delay,
 	          ts: 0
 	        }, [image_bitmap]);
 	        setTimeout(function () {
@@ -6664,6 +6665,7 @@
 	          postMessage({
 	            cmd: WORKER_CMD_TYPE.render,
 	            buffer: image_bitmap,
+	            delay: this.delay,
 	            ts
 	          }, [image_bitmap]);
 	        };
@@ -6674,6 +6676,7 @@
 	          postMessage({
 	            cmd: WORKER_CMD_TYPE.render,
 	            output: outputArray,
+	            delay: this.delay,
 	            ts
 	          }, outputArray.map(x => x.buffer));
 	        };

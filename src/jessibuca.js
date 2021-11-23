@@ -164,7 +164,9 @@ class Jessibuca extends Emitter {
                             this.player.play(this._opt.url).then(() => {
                                 resolve();
                             }).catch(() => {
-                                reject();
+                                this.player.pause().then(() => {
+                                    reject();
+                                })
                             })
                         }
                     } else {
@@ -186,7 +188,9 @@ class Jessibuca extends Emitter {
                 this.player.play(this._opt.url).then(() => {
                     resolve();
                 }).catch(() => {
-                    reject();
+                    this.player.pause().then(() => {
+                        reject();
+                    })
                 })
             }
         })
@@ -211,16 +215,18 @@ class Jessibuca extends Emitter {
                 this.player.play(url).then(() => {
                     resolve();
                 }).catch(() => {
-                    this.player.close();
-                    reject();
+                    this.player.pause().then(() => {
+                        reject();
+                    })
                 })
             } else {
                 this.player.once(EVENTS.load, () => {
                     this.player.play(url).then(() => {
                         resolve();
                     }).catch(() => {
-                        this.player.close();
-                        reject();
+                        this.player.pause().then(() => {
+                            reject();
+                        })
                     })
                 })
             }

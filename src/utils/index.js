@@ -292,3 +292,15 @@ export function bpsSize(value) {
     size = size.toFixed(2);
     return size + 'KB/S';
 }
+
+
+export function fpsStatus(fps) {
+    let result = 0;
+    if (fps >= 24) {
+        result = 2;
+    } else if (fps >= 15) {
+        result = 1;
+    }
+
+    return result;
+}

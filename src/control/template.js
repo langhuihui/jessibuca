@@ -10,31 +10,37 @@ export default (player, control) => {
         'beforeend',
         `
             ${options.background ? `<div class="jessibuca-poster" style="background-image: url(${options.background})"></div>` : ''}
-            <div class="jessibuca-loading">${icons.loading}</div>
-            <div class="jessibuca-controls">
-                <div class="jessibuca-controls-bottom">
-                    <div class="jessibuca-controls-left">
-                        ${options.showBandwidth ? `<div class="jessibuca-controls-item jessibuca-speed"></div>` : ''}
-                    </div>
-                    <div class="jessibuca-controls-right">
-                         ${operateBtns.audio ? `
-                             <div class="jessibuca-controls-item jessibuca-volume">
-                                 ${icons.audio}
-                                 ${icons.mute}
-                                 <div class="jessibuca-volume-panel-wrap">
-                                      <div class="jessibuca-volume-panel">
-                                             <div class="jessibuca-volume-panel-handle"></div>
-                                      </div>
+            <div class="jessibuca-loading">
+                ${icons.loading}
+                ${options.loadingText ? `<div class="jessibuca-loading-text">${options.loadingText}</div>` : ''}
+            </div>
+            ${options.hasControl ? `
+                <div class="jessibuca-controls">
+                    <div class="jessibuca-controls-bottom">
+                        <div class="jessibuca-controls-left">
+                            ${options.showBandwidth ? `<div class="jessibuca-controls-item jessibuca-speed"></div>` : ''}
+                        </div>
+                        <div class="jessibuca-controls-right">
+                             ${operateBtns.audio ? `
+                                 <div class="jessibuca-controls-item jessibuca-volume">
+                                     ${icons.audio}
+                                     ${icons.mute}
+                                     <div class="jessibuca-volume-panel-wrap">
+                                          <div class="jessibuca-volume-panel">
+                                                 <div class="jessibuca-volume-panel-handle"></div>
+                                          </div>
+                                     </div>
                                  </div>
-                             </div>
-                         `:''}
-                         ${operateBtns.play ? `<div class="jessibuca-controls-item jessibuca-play">${icons.play}</div><div class="jessibuca-controls-item jessibuca-pause">${icons.pause}</div>` : ''}
-                         ${operateBtns.screenshot ? `<div class="jessibuca-controls-item jessibuca-screenshot">${icons.screenshot}</div>` : ''}
-                         ${operateBtns.recorder ? ` <div class="jessibuca-controls-item jessibuca-record">${icons.record}</div><div class="jessibuca-controls-item jessibuca-record-stop">${icons.recordStop}</div>` : ''}
-                         ${operateBtns.fullscreen ? `<div class="jessibuca-controls-item jessibuca-fullscreen">${icons.fullscreen}</div><div class="jessibuca-controls-item jessibuca-fullscreen-exit">${icons.fullscreenExit}</div>` : ''}
+                             ` : ''}
+                             ${operateBtns.play ? `<div class="jessibuca-controls-item jessibuca-play">${icons.play}</div><div class="jessibuca-controls-item jessibuca-pause">${icons.pause}</div>` : ''}
+                             ${operateBtns.screenshot ? `<div class="jessibuca-controls-item jessibuca-screenshot">${icons.screenshot}</div>` : ''}
+                             ${operateBtns.recorder ? ` <div class="jessibuca-controls-item jessibuca-record">${icons.record}</div><div class="jessibuca-controls-item jessibuca-record-stop">${icons.recordStop}</div>` : ''}
+                             ${operateBtns.fullscreen ? `<div class="jessibuca-controls-item jessibuca-fullscreen">${icons.fullscreen}</div><div class="jessibuca-controls-item jessibuca-fullscreen-exit">${icons.fullscreenExit}</div>` : ''}
+                        </div>
                     </div>
                 </div>
-            </div>
+            ` : ''}
+
         `
     )
 

@@ -47,14 +47,17 @@ export default class DecoderWorker {
                     if (this.player.loading) {
                         this.player.emit(EVENTS.start);
                         this.player.loading = false;
+                        this.player.clearCheckLoadingTimeout();
                     }
                     if (!this.player.playing) {
                         this.player.playing = true;
                     }
                     this.player.video.render(msg);
                     this.player.emit(EVENTS.timeUpdate, msg.ts)
+                    // 健康检查
+                    this.player.updateStats({ts: msg.ts, buf: msg.delay})
+                    this.player.checkHeart();
                     break;
-
                 case WORKER_CMD_TYPE.playAudio:
                     // debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.playAudio, `msg ts:${msg.ts}`);
                     // 只有在 playing 的时候。

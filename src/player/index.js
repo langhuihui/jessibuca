@@ -3,7 +3,7 @@ import Debug from "../utils/debug";
 import Events from "../utils/events";
 import property from './property';
 import events from './events';
-import {isFullScreen, supportOffscreenV2, supportWCS} from "../utils";
+import {fpsStatus, isFullScreen, now, supportOffscreenV2, supportWCS} from "../utils";
 import Video from "../video";
 import Audio from "../audio";
 import Stream from "../stream";
@@ -14,6 +14,7 @@ import Demux from "../demux";
 import WebcodecsDecoder from "../decoder/webcodecs";
 import Control from "../control";
 import './style.scss'
+import observer from "./observer";
 
 export default class Player extends Emitter {
     constructor(container, options) {
@@ -40,9 +41,29 @@ export default class Player extends Emitter {
 
         property(this);
         events(this);
+        observer(this);
+        //
         this._loading = false;
         this._playing = false;
         this._hasLoaded = false;
+
+        //
+        this._checkHeartTimeout = null;
+        this._checkLoadingTimeout = null;
+
+        //
+        this._startBpsTime = null;
+        this._isPlayingBeforePageHidden = false;
+        this._stats = {
+            buf: 0, // 当前缓冲区时长，单位毫秒,
+            fps: 0, // 当前视频帧率
+            abps: '', // 当前音频码率，单位bit
+            vbps: '', // 当前视频码率，单位bit
+            ts: '' // 当前视频帧pts，单位毫秒
+        }
+
+        this._wakeLock = null;
+
 
         this.debug = new Debug(this);
         this.events = new Events(this);
@@ -60,9 +81,7 @@ export default class Player extends Emitter {
         }
 
         //
-        if (this._opt.hasControl) {
-            this.control = new Control(this);
-        }
+        this.control = new Control(this);
 
         this.debug.log('options', this._opt);
     }
@@ -92,6 +111,7 @@ export default class Player extends Emitter {
     set playing(value) {
 
         if (value) {
+            // 将loading 设置为 false
             this.loading = false;
         }
 
@@ -118,7 +138,7 @@ export default class Player extends Emitter {
     set loading(value) {
         if (this.loading !== value) {
             this._loading = value;
-            this.emit(EVENTS.loading);
+            this.emit(EVENTS.loading, this._loading);
         }
     }
 
@@ -193,23 +213,24 @@ export default class Player extends Emitter {
                 url = this._opt.url;
             }
             this._opt.url = url;
+
+            this.clearCheckHeartTimeout();
             this.init().then(() => {
                 this.stream.fetchStream(url);
+                //
+                this.checkLoadingTimeout();
                 // fetch error
                 this.stream.once(EVENTS_ERROR.fetchError, (error) => {
-                    this.playing = false;
                     reject(error)
                 })
 
                 // ws
                 this.stream.once(EVENTS_ERROR.websocketError, (error) => {
-                    this.playing = false;
                     reject(error)
                 })
 
                 // success
                 this.stream.once(EVENTS.streamSuccess, () => {
-                    this.playing = true;
                     resolve();
                 })
             }).catch((e) => {
@@ -252,7 +273,10 @@ export default class Player extends Emitter {
     pause() {
         return new Promise((resolve, reject) => {
             this.close();
+            this.clearCheckHeartTimeout();
+            this.clearCheckLoadingTimeout();
             this.playing = false;
+            // 声音要清除掉。。。。
             this.audio.pause();
             setTimeout(() => {
                 resolve();
@@ -314,7 +338,94 @@ export default class Player extends Emitter {
         return result;
     }
 
+    checkHeart() {
+        this.clearCheckHeartTimeout();
+        this.checkHeartTimeout();
+    }
 
+    // 心跳检查，如果渲染间隔暂停了多少时间之后，就会抛出异常
+    checkHeartTimeout() {
+        this._checkHeartTimeout = setTimeout(() => {
+            this.pause().then(() => {
+                this.emit(EVENTS.timeout, 'heart timeout');
+            });
+        }, this._opt.timeout * 1000)
+    }
+
+    //
+    clearCheckHeartTimeout() {
+        if (this._checkHeartTimeout) {
+            clearTimeout(this._checkHeartTimeout);
+            this._checkHeartTimeout = null;
+        }
+    }
+
+    // loading 等待时间
+    checkLoadingTimeout() {
+        this._checkLoadingTimeout = setTimeout(() => {
+            this.pause().then(() => {
+                this.emit(EVENTS.timeout, 'loading timeout');
+            });
+        }, this._opt.timeout * 1000)
+    }
+
+    clearCheckLoadingTimeout() {
+        if (this._checkLoadingTimeout) {
+            clearTimeout(this._checkLoadingTimeout);
+            this._checkLoadingTimeout = null;
+        }
+    }
+
+    //
+    updateStats(options) {
+        options = options || {};
+
+        if (!this._startBpsTime) {
+            this._startBpsTime = now();
+        }
+
+        const _nowTime = now();
+        const timestamp = _nowTime - this._startBpsTime;
+
+        if (timestamp < 1 * 1000) {
+            this._stats.fps += 1;
+            return;
+        }
+        this._stats.ts = options.ts;
+        this._stats.buf = options.buf;
+        this.emit(EVENTS.stats, this._stats);
+        this.emit(EVENTS.performance, fpsStatus(this._stats.fps));
+        this._stats.fps = 0;
+        this._startBpsTime = _nowTime;
+    }
+
+    resetStats() {
+        this._startBpsTime = null;
+        this._stats = {
+            buf: 0, //ms
+            fps: 0,
+            abps: '',
+            vbps: '',
+            ts: ''
+        }
+    }
+
+    enableWakeLock() {
+        if (this._opt.keepScreenOn) {
+            if ("wakeLock" in navigator) {
+                navigator.wakeLock.request("screen").then((lock) => {
+                    this._wakeLock = lock;
+                })
+            }
+        }
+    }
+
+    releaseWakeLock() {
+        if (this._wakeLock) {
+            this._wakeLock.release();
+            this._wakeLock = null;
+        }
+    }
 
 
     destroy() {
@@ -354,6 +465,10 @@ export default class Player extends Emitter {
         this._playing = false;
         this._hasLoaded = false;
 
+        this.clearCheckHeartTimeout();
+        this.clearCheckLoadingTimeout();
+
+        this.releaseWakeLock();
 
         // 其他没法解耦的，通过 destroy 方式
         this.emit('destroy');

@@ -99,14 +99,14 @@ export default (player, control) => {
 
         // 不在播放
         if (!flag) {
-            control.$speed.innerHTML = bpsSize('');
+            control.$speed && (control.$speed.innerHTML = bpsSize(''));
         }
     })
 
 
     player.on(EVENTS.kBps, (rate) => {
         const bps = bpsSize(rate);
-        control.$speed.innerHTML = bps;
+        control.$speed && (control.$speed.innerHTML = bps);
     })
 
 

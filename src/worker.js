@@ -34,6 +34,7 @@ Module.postRun = function () {
                 postMessage({
                     cmd: WORKER_CMD_TYPE.render,
                     buffer: image_bitmap,
+                    delay: decoder.delay,
                     ts: 0
                 }, [image_bitmap])
 
@@ -157,6 +158,7 @@ Module.postRun = function () {
                     postMessage({
                         cmd: WORKER_CMD_TYPE.render,
                         buffer: image_bitmap,
+                        delay: this.delay,
                         ts
                     }, [image_bitmap])
                 }
@@ -167,6 +169,7 @@ Module.postRun = function () {
                     postMessage({
                         cmd: WORKER_CMD_TYPE.render,
                         output: outputArray,
+                        delay: this.delay,
                         ts
                     }, outputArray.map(x => x.buffer))
                 }
