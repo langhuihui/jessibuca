@@ -9,14 +9,12 @@ export default class FetchLoader extends Emitter {
         this.playing = false;
 
         this.abortController = new AbortController();
-
         //
         this.streamRate = calculationRate(rate => {
-            player.emit(EVENTS.streamRate, rate);
+            player.emit(EVENTS.streamRate, (rate / 1024).toFixed(2));
         });
         player.debug.log('FetchStream', 'init');
     }
-
 
     fetchStream(url) {
         const {demux} = this.player;
@@ -29,14 +27,12 @@ export default class FetchLoader extends Emitter {
                             demux.close();
                         } else {
                             this.streamRate(value.byteLength);
-                            this.playing = true;
                             demux.dispatch(value);
                             fetchNext();
                         }
                     }
                 ).catch((e) => {
                     demux.close();
-                    this.playing = false;
                     // 这边会报用户 aborted a request 错误。
                     this.emit(EVENTS_ERROR.fetchError, e);
                 })

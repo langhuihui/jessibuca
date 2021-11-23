@@ -1,5 +1,5 @@
 import {EVENTS} from "../constant";
-import {getStyle, setStyle} from "../utils";
+import {bpsSize, getStyle, setStyle} from "../utils";
 import screenfull from "screenfull";
 
 export default (player, control) => {
@@ -88,6 +88,25 @@ export default (player, control) => {
     //
     player.on(EVENTS.recordingTimestamp, (timestamp) => {
         // console.log(timestamp);
+    })
+
+    player.on(EVENTS.playing, (flag) => {
+        setStyle(control.$play, 'display', flag ? 'none' : 'flex');
+        setStyle(control.$pause, 'display', flag ? 'flex' : 'none');
+        setStyle(control.$screenshot, 'display', flag ? 'flex' : 'none');
+        setStyle(control.$record, 'display', flag ? 'flex' : 'none');
+        setStyle(control.$fullscreen, 'display', flag ? 'flex' : 'none');
+
+        // 不在播放
+        if (!flag) {
+            control.$speed.innerHTML = bpsSize('');
+        }
+    })
+
+
+    player.on(EVENTS.streamRate, (rate) => {
+        const bps = bpsSize(rate);
+        control.$speed.innerHTML = bps;
     })
 
 

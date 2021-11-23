@@ -40,7 +40,8 @@ export default class Player extends Emitter {
 
         property(this);
         events(this);
-        this._loading = true;
+        this._loading = false;
+        this._playing = false;
         this._hasLoaded = false;
 
         this.debug = new Debug(this);
@@ -49,6 +50,7 @@ export default class Player extends Emitter {
         this.audio = new Audio(this);
         this.recorder = new Recorder(this);
         this.decoderWorker = new DecoderWorker(this);
+
 
         this.stream = null;
         this.demux = null;
@@ -88,23 +90,36 @@ export default class Player extends Emitter {
 
     //
     set playing(value) {
+
+        if (value) {
+            this.loading = false;
+        }
+
         if (this.playing !== value) {
+            this._playing = value;
             this.emit(EVENTS.playing, value);
             this.emit(EVENTS.volumechange, this.volume);
         }
+
     }
 
     get playing() {
-        return this.stream.playing;
+        return this._playing;
     }
 
     get volume() {
         return this.audio.volume;
     }
 
+    set volume(value) {
+        this.audio.setVolume(value);
+    }
+
     set loading(value) {
-        this._loading = value;
-        this.emit(EVENTS.loading);
+        if (this.loading !== value) {
+            this._loading = value;
+            this.emit(EVENTS.loading);
+        }
     }
 
     get loading() {
@@ -121,16 +136,6 @@ export default class Player extends Emitter {
 
     get recording() {
         return this.recorder.recording;
-    }
-
-    startRecord(fileName) {
-        this.recorder.setFileName(fileName);
-        //
-        this.recording = true;
-    }
-
-    stopRecordAndSave() {
-        this.recording = false;
     }
 
 
@@ -168,16 +173,35 @@ export default class Player extends Emitter {
 
 
     play(url) {
-        return new Promise((resolve, reject) => {
 
+        return new Promise((resolve, reject) => {
+            if (!url && !this._opt.url) {
+                return reject();
+            }
+
+            this.loading = true;
+            this.playing = false;
+            if (!url) {
+                url = this._opt.url;
+            }
+            this._opt.url = url;
             this.init().then(() => {
                 this.stream.fetchStream(url);
-                //
+                // fetch error
                 this.stream.once(EVENTS_ERROR.fetchError, (error) => {
+                    this.playing = false;
                     reject(error)
                 })
-                //
+
+                // ws
+                this.stream.once(EVENTS_ERROR.websocketError, (error) => {
+                    this.playing = false;
+                    reject(error)
+                })
+
+                // success
                 this.stream.once(EVENTS.streamSuccess, () => {
+                    this.playing = true;
                     resolve();
                 })
             }).catch((e) => {
@@ -214,17 +238,37 @@ export default class Player extends Emitter {
     pause() {
         return new Promise((resolve, reject) => {
             this.close();
-            //
             this.playing = false;
             this.audio.pause();
+            setTimeout(() => {
+                resolve();
+            }, 0)
         })
     }
 
-    // 恢复播放
-    resume() {
-
+    mute(flag) {
+        this.audio.mute(flag)
     }
 
+    //
+    resize() {
+        this.video.resize();
+    }
+
+    startRecord(fileName) {
+        if (this.recording) {
+            return;
+        }
+
+        this.recorder.setFileName(fileName);
+        this.recording = true;
+    }
+
+    stopRecordAndSave() {
+        if (this.recording) {
+            this.recording = false;
+        }
+    }
 
     _hasControl() {
         let result = false;
@@ -275,6 +319,11 @@ export default class Player extends Emitter {
             this.control.destroy();
             this.control = null;
         }
+
+        this._loading = false;
+        this._playing = false;
+        this._hasLoaded = false;
+
 
         // 其他没法解耦的，通过 destroy 方式
         this.emit('destroy');

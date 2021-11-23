@@ -3,33 +3,35 @@ import icons from './icons';
 export default (player, control) => {
     player.$container.classList.add('jessibuca-controls-show');
     const options = player._opt;
+    const operateBtns = options.operateBtns;
 
 
     player.$container.insertAdjacentHTML(
         'beforeend',
         `
-            ${options.poster ? `<div class="jessibuca-poster" style="background-image: url(${options.poster})"></div>` : ''}
+            ${options.background ? `<div class="jessibuca-poster" style="background-image: url(${options.background})"></div>` : ''}
             <div class="jessibuca-loading">${icons.loading}</div>
             <div class="jessibuca-controls">
                 <div class="jessibuca-controls-bottom">
                     <div class="jessibuca-controls-left">
-                        <div class="jessibuca-controls-item"></div>
+                        ${options.showBandwidth ? `<div class="jessibuca-controls-item jessibuca-speed"></div>` : ''}
                     </div>
                     <div class="jessibuca-controls-right">
-                         <div class="jessibuca-controls-item jessibuca-volume">
-                         ${icons.audio}
-                         ${icons.mute}
-                         <div class="jessibuca-volume-panel-wrap">
-                              <div class="jessibuca-volume-panel">
-                                     <div class="jessibuca-volume-panel-handle"></div>
-                              </div>
-                         </div>
-                         </div>
-                         <div class="jessibuca-controls-item jessibuca-screenshot">${icons.screenshot}</div>
-                         <div class="jessibuca-controls-item jessibuca-record">${icons.record}</div>
-                         <div class="jessibuca-controls-item jessibuca-record-stop">${icons.recordStop}</div>
-                         <div class="jessibuca-controls-item jessibuca-fullscreen">${icons.fullscreen}</div>
-                         <div class="jessibuca-controls-item jessibuca-fullscreen-exit">${icons.fullscreenExit}</div>
+                         ${operateBtns.audio ? `
+                             <div class="jessibuca-controls-item jessibuca-volume">
+                                 ${icons.audio}
+                                 ${icons.mute}
+                                 <div class="jessibuca-volume-panel-wrap">
+                                      <div class="jessibuca-volume-panel">
+                                             <div class="jessibuca-volume-panel-handle"></div>
+                                      </div>
+                                 </div>
+                             </div>
+                         `:''}
+                         ${operateBtns.play ? `<div class="jessibuca-controls-item jessibuca-play">${icons.play}</div><div class="jessibuca-controls-item jessibuca-pause">${icons.pause}</div>` : ''}
+                         ${operateBtns.screenshot ? `<div class="jessibuca-controls-item jessibuca-screenshot">${icons.screenshot}</div>` : ''}
+                         ${operateBtns.recorder ? ` <div class="jessibuca-controls-item jessibuca-record">${icons.record}</div><div class="jessibuca-controls-item jessibuca-record-stop">${icons.recordStop}</div>` : ''}
+                         ${operateBtns.fullscreen ? `<div class="jessibuca-controls-item jessibuca-fullscreen">${icons.fullscreen}</div><div class="jessibuca-controls-item jessibuca-fullscreen-exit">${icons.fullscreenExit}</div>` : ''}
                     </div>
                 </div>
             </div>
@@ -44,6 +46,14 @@ export default (player, control) => {
         value: player.$container.querySelector('.jessibuca-loading'),
     });
 
+    Object.defineProperty(control, '$play', {
+        value: player.$container.querySelector('.jessibuca-play'),
+    });
+
+    Object.defineProperty(control, '$pause', {
+        value: player.$container.querySelector('.jessibuca-pause'),
+    });
+
     Object.defineProperty(control, '$controls', {
         value: player.$container.querySelector('.jessibuca-controls'),
     });
@@ -54,22 +64,6 @@ export default (player, control) => {
 
     Object.defineProperty(control, '$fullscreen', {
         value: player.$container.querySelector('.jessibuca-fullscreen'),
-    });
-
-    Object.defineProperty(control, '$qualityText', {
-        value: player.$container.querySelector('.jessibuca-icon-text'),
-    });
-
-    Object.defineProperty(control, '$qualityMenu', {
-        value: player.$container.querySelector('.jessibuca-quality-menu'),
-    });
-
-    Object.defineProperty(control, '$qualityMenuList', {
-        value: player.$container.querySelector('.jessibuca-quality-menu-list'),
-    });
-
-    Object.defineProperty(control, '$qualityMenuItems', {
-        value: player.$container.querySelectorAll('.jessibuca-quality-menu-item'),
     });
 
 
@@ -97,37 +91,6 @@ export default (player, control) => {
         value: player.$container.querySelector('.jessibuca-icon-mute'),
     });
 
-    Object.defineProperty(control, '$ptz', {
-        value: player.$container.querySelector('.jessibuca-ptz'),
-    });
-
-    Object.defineProperty(control, '$ptzActive', {
-        value: player.$container.querySelector('.jessibuca-ptz-active'),
-    });
-
-    Object.defineProperty(control, '$ptzControl', {
-        value: player.$container.querySelector('.jessibuca-ptz-controls'),
-    });
-
-    Object.defineProperty(control, '$ptzBgActive', {
-        value: player.$container.querySelector('.jessibuca-ptz-bg-active'),
-    });
-
-    Object.defineProperty(control, '$ptzControlCircular', {
-        value: player.$container.querySelector('.jessibuca-ptz-control'),
-    });
-
-    Object.defineProperty(control, '$ptzArrows', {
-        value: player.$container.querySelectorAll('.jessibuca-ptz-arrow'),
-    });
-
-    Object.defineProperty(control, '$microphoneOpen', {
-        value: player.$container.querySelector('.jessibuca-microphone-open'),
-    });
-
-    Object.defineProperty(control, '$microphoneClose', {
-        value: player.$container.querySelector('.jessibuca-microphone-close'),
-    });
 
     Object.defineProperty(control, '$fullscreen', {
         value: player.$container.querySelector('.jessibuca-fullscreen'),
@@ -148,6 +111,7 @@ export default (player, control) => {
         value: player.$container.querySelector('.jessibuca-screenshot'),
     });
 
-
-
+    Object.defineProperty(control, '$speed', {
+        value: player.$container.querySelector('.jessibuca-speed'),
+    });
 }

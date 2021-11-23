@@ -14,7 +14,7 @@ const iconsMap = {
 export default Object.keys(iconsMap).reduce((icons, key) => {
     icons[key] = `
     <i class="jessibuca-icon jessibuca-icon-${key}"></i>
-    <span class="icon-title-tips"><span class="icon-title">${iconsMap[key]}</span></span>
+    ${iconsMap[key] ? `<span class="icon-title-tips"><span class="icon-title">${iconsMap[key]}</span></span>` : ''}
 `;
     return icons;
 }, {});

@@ -38,8 +38,9 @@ export default class Control {
             this.player.$container.removeChild(this.$poster);
         }
         this.player.$container.removeChild(this.$loading);
-        this.player.$container.removeChild(this.$ptzControl);
-        this.player.$container.removeChild(this.$controls);
+        if (this.$controls) {
+            this.player.$container.removeChild(this.$controls);
+        }
         this.player = null;
     }
 }

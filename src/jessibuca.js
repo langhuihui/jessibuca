@@ -53,14 +53,14 @@ class Jessibuca extends Emitter {
      *
      */
     mute() {
-        this.player.audio.mute(true);
+        this.player.mute(true);
     }
 
     /**
      *
      */
     cancelMute() {
-        this.player.audio.mute(false);
+        this.player.mute(false);
     }
 
     /**
@@ -68,7 +68,7 @@ class Jessibuca extends Emitter {
      * @param value {number}
      */
     setVolume(value) {
-        this.player.audio.setValue(value);
+        this.player.volume = value;
     }
 
     /**
@@ -76,7 +76,6 @@ class Jessibuca extends Emitter {
      */
     audioResume() {
         this.player.audio.audioEnabled(true);
-
     }
 
     /**
@@ -115,14 +114,14 @@ class Jessibuca extends Emitter {
         }
 
         this.player.updateOption(options);
-        this.player.video.resize();
+        this.resize();
     }
 
     /**
      *
      */
     pause() {
-        this.player.pause();
+        return this.player.pause();
     }
 
     /**
@@ -154,51 +153,85 @@ class Jessibuca extends Emitter {
 
             if (url) {
                 // url 相等的时候。
-                if (this._opt.url && (url === this._opt.url)) {
-                    resolve();
-                    return;
-                } else {
-                    this._opt.url = url;
-                    //  新的url
-                    const isHttp = url.indexOf("http") === 0;
-                    //
-                    const protocol = isHttp ? PLAYER_PLAY_PROTOCOL.fetch : PLAYER_PLAY_PROTOCOL.websocket
-                    //
-                    const demuxType = (isHttp || url.indexOf(".flv") !== -1 || this._opt.isFlv) ? DEMUX_TYPE.flv : DEMUX_TYPE.m7s;
-
-                    this.player.updateOption({
-                        protocol,
-                        demuxType
-                    })
-
-                    if (this.hasLoaded()) {
-                        this.player.play(url).then(() => {
+                if (this._opt.url) {
+                    // 存在相同的 url
+                    if (url === this._opt.url) {
+                        // 正在播放
+                        if (this.player.playing) {
                             resolve();
-                        }).catch(() => {
-                            this.player.close();
-                            reject();
-                        })
-                    } else {
-                        this.player.once(EVENTS.load, () => {
-                            this.player.play(url).then(() => {
+                        } else {
+                            // pause ->  play
+                            this.player.play(this._opt.url).then(() => {
                                 resolve();
                             }).catch(() => {
-                                this.player.close();
                                 reject();
                             })
+                        }
+                    } else {
+                        // url 发生改变了
+                        this.player.pause().then(() => {
+                            // 清除 画面
+                            this.clearView();
+                            return this._play(url);
+                        }).catch(() => {
+                            reject();
                         })
                     }
+                } else {
+                    return this._play(url);
                 }
             } else {
                 //  url 不存在的时候
                 //  就是从 play-> pause -> play
-                this.player.resume();
+                this.player.play(this._opt.url).then(() => {
+                    resolve();
+                }).catch(() => {
+                    reject();
+                })
             }
         })
     }
 
+    _play(url) {
+        return new Promise((resolve, reject) => {
+            this._opt.url = url;
+            //  新的url
+            const isHttp = url.indexOf("http") === 0;
+            //
+            const protocol = isHttp ? PLAYER_PLAY_PROTOCOL.fetch : PLAYER_PLAY_PROTOCOL.websocket
+            //
+            const demuxType = (isHttp || url.indexOf(".flv") !== -1 || this._opt.isFlv) ? DEMUX_TYPE.flv : DEMUX_TYPE.m7s;
+
+            this.player.updateOption({
+                protocol,
+                demuxType
+            })
+
+            if (this.hasLoaded()) {
+                this.player.play(url).then(() => {
+                    resolve();
+                }).catch(() => {
+                    this.player.close();
+                    reject();
+                })
+            } else {
+                this.player.once(EVENTS.load, () => {
+                    this.player.play(url).then(() => {
+                        resolve();
+                    }).catch(() => {
+                        this.player.close();
+                        reject();
+                    })
+                })
+            }
+        })
+    }
+
+    /**
+     *
+     */
     resize() {
-        this.player.video.resize();
+        this.player.resize();
     }
 
     /**
@@ -230,16 +263,26 @@ class Jessibuca extends Emitter {
         this.resize();
     }
 
+    /**
+     *
+     * @returns {boolean}
+     */
     hasLoaded() {
         return this.player.loaded;
     }
 
+    /**
+     *
+     */
     setKeepScreenOn() {
         this.player.updateOption({
             keepScreenOn: true
         })
     }
 
+    /**
+     *
+     */
     useWCS() {
         this._opt.useWCS = supportWCS();
     }
@@ -264,6 +307,28 @@ class Jessibuca extends Emitter {
      */
     screenshot(filename, format, quality, type) {
         return this.player.video.screenshot(filename, format, quality, type)
+    }
+
+    /**
+     *
+     * @param fileName {string}
+     * @returns {Promise<unknown>}
+     */
+    startRecord(fileName) {
+        return new Promise((resolve, reject) => {
+            if (this.player.playing) {
+                this.player.startRecord(fileName)
+                resolve();
+            } else {
+                reject();
+            }
+        })
+    }
+
+    stopRecordAndSave() {
+        if (this.player.recording) {
+            this.player.stopRecordAndSave();
+        }
     }
 
     /**

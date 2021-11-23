@@ -48,8 +48,8 @@
 
     // loading
     .jessibuca-loading {
-        //display: none;
-        display: flex;
+        display: none;
+        //display: flex;
         justify-content: center;
         align-items: center;
         position: absolute;
@@ -74,7 +74,7 @@
         right: 0;
         bottom: 0;
         height: 38px;
-        padding-left: 30px;
+        padding-left: 13px;
         padding-right: 13px;
         font-size: 14px;
         color: #fff;
@@ -99,17 +99,35 @@
             display: none;
         }
 
-        .jessibuca-icon-mute {
+        .jessibuca-icon-audio {
             display: none;
         }
 
-        .jessibuca-ptz-active {
+        .jessibuca-play {
+            display: none;
+        }
+
+        .jessibuca-pause {
             display: none;
         }
 
         .jessibuca-fullscreen-exit {
             display: none;
         }
+
+        .jessibuca-screenshot {
+            display: none;
+        }
+
+        .jessibuca-record {
+            display: none;
+        }
+
+        .jessibuca-fullscreen {
+            display: none;
+        }
+
+
 
         .jessibuca-record-stop {
             display: none;
@@ -181,6 +199,27 @@
         }
     }
 
+    .jessibuca-icon-play {
+        background: url("../assets/play.png") no-repeat center;
+        background-size: 100% 100%;
+
+        &:hover {
+            background: url("../assets/play-hover.png") no-repeat center;
+            background-size: 100% 100%;
+        }
+    }
+
+    .jessibuca-icon-pause {
+        background: url("../assets/pause.png") no-repeat center;
+        background-size: 100% 100%;
+
+        &:hover {
+            background: url("../assets/pause-hover.png") no-repeat center;
+            background-size: 100% 100%;
+        }
+    }
+
+
     .jessibuca-icon-record {
         background: url("../assets/record.png") no-repeat center;
         background-size: 100% 100%;
@@ -245,6 +284,11 @@
     .jessibuca-icon-text {
         font-size: 14px;
         width: 30px;
+    }
+
+    .jessibuca-speed {
+        font-size: 14px;
+        color: #fff;
     }
 
     .jessibuca-quality-menu-list {
@@ -323,7 +367,7 @@
         bottom: 100%;
         visibility: hidden;
         opacity: 0;
-        transform: translateX(-50%) translateY(30%);
+        transform: translateX(-50%) translateY(22%);
         transition: visibility 300ms, opacity 300ms;
         background-color: rgba(0, 0, 0, 0.5);
         border-radius: 4px;
@@ -340,7 +384,7 @@
     .jessibuca-volume-panel {
         cursor: pointer;
         position: absolute;
-        top: 15px;
+        top: 21px;
         height: 60px;
         width: 50px;
         overflow: hidden;
@@ -348,7 +392,7 @@
 
     .jessibuca-volume-panel-handle {
         position: absolute;
-        top: 0;
+        top: 48px;
         left: 50%;
         width: 12px;
         height: 12px;

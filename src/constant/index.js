@@ -38,7 +38,7 @@ export const DEFAULT_PLAYER_OPTIONS = {
     decoder: 'decoder.js',
     url: '',//
     rotate: 0,
-    text: '',
+    // text: '',
     forceNoOffscreen: true, // 默认是不采用
     hiddenAutoPause: false,
     protocol: PLAYER_PLAY_PROTOCOL.fetch,
@@ -105,6 +105,7 @@ export const EVENTS = {
     record: 'record',
     recording: 'recording',
     recordingTimestamp: 'recordingTimestamp',
+    recordCreateError: 'recordCreateError',
     buffer: 'buffer',
     videoFrame: 'videoFrame',
     start: 'start',
@@ -112,11 +113,12 @@ export const EVENTS = {
     resize: 'resize',
     streamRate: 'streamRate',
     streamEnd: 'streamEnd',
-    streamSuccess:'streamSuccess',
+    streamSuccess: 'streamSuccess',
     streamMessage: 'streamMessage',
     streamError: 'streamError',
     volumechange: 'volumechange',
-    frameStart: 'frameStart'
+    frameStart: 'frameStart',
+    destroy: 'destroy'
 }
 
 
@@ -190,3 +192,9 @@ export const SCALE_MODE_TYPE = {
     auto: 1, // 视频画面做等比缩放后,高或宽对齐canvas区域,画面不被拉伸,但有黑边
     fullAuto: 2 // 视频画面做等比缩放后,完全填充canvas区域,画面不被拉伸,没有黑边,但画面显示不全
 }
+
+
+export const FILE_SUFFIX = {
+    mp4: 'mp4',
+    webm: 'webm'
+};

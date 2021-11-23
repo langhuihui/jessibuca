@@ -6,6 +6,9 @@ export default class Events {
     }
 
     proxy(target, name, callback, option = {}) {
+        if (!target) {
+            return;
+        }
         if (Array.isArray(name)) {
             return name.map(item => this.proxy(target, item, callback, option));
         }

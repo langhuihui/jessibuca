@@ -9,7 +9,8 @@
         "dev:watch": "npx cross-env NODE_ENV=development rollup -c -m -w"
     },
     "dependencies": {
-        "screenfull": "5.1.0"
+        "screenfull": "5.1.0",
+        "recordrtc": "5.6.2"
     },
     "devDependencies": {
         "vitepress": "0.16.1",

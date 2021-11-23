@@ -110,6 +110,9 @@ export function clamp(num, a, b) {
 }
 
 export function setStyle(element, key, value) {
+    if (!element) {
+        return
+    }
     if (typeof key === 'object') {
         Object.keys(key).forEach(item => {
             setStyle(element, item, key[item]);
@@ -279,4 +282,13 @@ export function formatVideoDecoderConfigure(avcC) {
 
 export function isFullScreen() {
     return document.isFullScreen || document.mozIsFullScreen || document.webkitIsFullScreen;
+}
+
+export function bpsSize(value) {
+    if (null == value || value === '') {
+        return "0 KB/S";
+    }
+    let size = parseFloat(value);
+    size = size.toFixed(2);
+    return size + 'KB/S';
 }
