@@ -38,10 +38,6 @@ export default class Player extends Emitter {
 
 
         this._opt.hasControl = this._hasControl();
-
-        property(this);
-        events(this);
-        observer(this);
         //
         this._loading = false;
         this._playing = false;
@@ -82,6 +78,11 @@ export default class Player extends Emitter {
 
         //
         this.control = new Control(this);
+
+
+        property(this);
+        events(this);
+        observer(this);
 
         this.debug.log('options', this._opt);
     }

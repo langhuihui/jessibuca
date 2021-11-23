@@ -2341,10 +2341,7 @@
           }
         }
 
-        this._opt.hasControl = this._hasControl();
-        property$1(this);
-        events$1(this);
-        observer(this); //
+        this._opt.hasControl = this._hasControl(); //
 
         this._loading = false;
         this._playing = false;
@@ -2383,6 +2380,9 @@
 
 
         this.control = new Control(this);
+        property$1(this);
+        events$1(this);
+        observer(this);
         this.debug.log('options', this._opt);
       }
 
