@@ -1,5 +1,5 @@
 import Emitter from "../utils/emitter";
-import {createContextGL, dataURLToFile, downloadImg, now, supportOffscreen} from "../utils";
+import {createContextGL, createEmptyImageBitmap, dataURLToFile, downloadImg, now, supportOffscreen} from "../utils";
 import createWebGL from "../utils/webgl";
 import {CANVAS_RENDER_TYPE, CONTROL_HEIGHT, EVENTS, SCREENSHOT_TYPE, VIDEO_ENC_TYPE} from "../constant";
 
@@ -15,6 +15,7 @@ export default class CanvasVideoLoader extends Emitter {
         this.$videoElement = $canvasElement;
         player.$container.appendChild(this.$videoElement);
 
+        this.context2D = null;
         this.contextGl = null;
         this.contextGlRender = null;
         this.contextGlDestroy = null;
@@ -57,6 +58,10 @@ export default class CanvasVideoLoader extends Emitter {
         this.contextGlDestroy = webgl.destroy
     }
 
+    _initContext2D() {
+        this.context2D = this.$videoElement.getContext('2d');
+    }
+
     initCanvasViewSize() {
         this.$videoElement.width = this.videoInfo.width;
         this.$videoElement.height = this.videoInfo.height;
@@ -67,6 +72,7 @@ export default class CanvasVideoLoader extends Emitter {
     _initCanvasRender() {
         if (this.player._opt.useWCS) {
             this.renderType = CANVAS_RENDER_TYPE.webcodecs;
+            this._initContext2D();
         } else if (this._supportOffscreen()) {
             this.renderType = CANVAS_RENDER_TYPE.offscreen;
             this._bindOffscreen();
@@ -95,7 +101,7 @@ export default class CanvasVideoLoader extends Emitter {
                 this.contextGlRender(this.$videoElement.width, this.$videoElement.height, msg.output[0], msg.output[1], msg.output[2]);
                 break;
             case CANVAS_RENDER_TYPE.webcodecs:
-                this.$videoElement.drawImage(msg.videoFrame, 0, 0, this.$videoElement.width, this.$videoElement.height);
+                this.context2D.drawImage(msg.videoFrame, 0, 0, this.$videoElement.width, this.$videoElement.height);
                 break;
         }
     }
@@ -139,49 +145,71 @@ export default class CanvasVideoLoader extends Emitter {
     clearView() {
         switch (this.renderType) {
             case CANVAS_RENDER_TYPE.offscreen:
-
+                createEmptyImageBitmap(this.$videoElement.width, this.$videoElement.height).then((imageBitMap) => {
+                    this.bitmaprenderer.transferFromImageBitmap(imageBitMap);
+                })
                 break;
             case CANVAS_RENDER_TYPE.webgl:
                 this.contextGl.clear(this.contextGl.COLOR_BUFFER_BIT);
                 break;
             case CANVAS_RENDER_TYPE.webcodecs:
-                this.$videoElement.clearRect(0, 0, this.$videoElement.width, this.$videoElement.height)
+                this.context2D.clearRect(0, 0, this.$videoElement.width, this.$videoElement.height)
                 break;
         }
     }
 
     resize() {
         this.player.debug.log('canvasVideo', 'resize');
+        const option = this.player._opt;
         const width = this.player.width;
         let height = this.player.height;
-        if (this.player._opt.hasControl) {
+        if (option.hasControl) {
             height -= CONTROL_HEIGHT;
         }
-        const resizeWidth = this.$videoElement.width;
-        const resizeHeight = this.$videoElement.height;
+        let resizeWidth = this.$videoElement.width;
+        let resizeHeight = this.$videoElement.height;
+        const rotate = option.rotate;
+        let left = ((width - resizeWidth) / 2)
+        let top = ((height - resizeHeight) / 2)
+        if (rotate === 270 || rotate === 90) {
+            resizeWidth = this.$videoElement.height;
+            resizeHeight = this.$videoElement.width;
+        }
+
         const wScale = width / resizeWidth;
         const hScale = height / resizeHeight;
+
         let scale = wScale > hScale ? hScale : wScale;
         //
-        if (!this.player._opt.isResize) {
+        if (!option.isResize) {
             if (wScale !== hScale) {
                 scale = wScale + ',' + hScale;
             }
         }
         //
-        if (this.player._opt.isFullResize) {
+        if (option.isFullResize) {
             scale = wScale > hScale ? wScale : hScale;
         }
         let transform = "scale(" + scale + ")";
+
+        if (rotate) {
+            transform += ' rotate(' + rotate + 'deg)'
+        }
+
         this.$videoElement.style.transform = transform;
-        this.$videoElement.style.left = ((width - resizeWidth) / 2) + "px"
-        this.$videoElement.style.top = ((height - resizeHeight) / 2) + "px"
+        this.$videoElement.style.left = left + "px"
+        this.$videoElement.style.top = top + "px"
     }
 
     destroy() {
         if (this.contextGl) {
             this.contextGl = null;
         }
+
+        if (this.context2D) {
+            this.context2D = null;
+        }
+
         if (this.contextGlRender) {
             this.contextGlDestroy && this.contextGlDestroy();
             this.contextGlDestroy = null;

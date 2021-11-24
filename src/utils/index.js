@@ -124,6 +124,10 @@ export function setStyle(element, key, value) {
 
 
 export function getStyle(element, key, numberType = true) {
+    if (!element) {
+        return 0
+    }
+
     const value = getComputedStyle(element, null).getPropertyValue(key);
     return numberType ? parseFloat(value) : value;
 }
@@ -303,4 +307,11 @@ export function fpsStatus(fps) {
     }
 
     return result;
+}
+
+export function createEmptyImageBitmap(width, height) {
+    const $canvasElement = document.createElement("canvas");
+    $canvasElement.width = width;
+    $canvasElement.height = height;
+    return createImageBitmap($canvasElement, 0, 0, width, height);
 }

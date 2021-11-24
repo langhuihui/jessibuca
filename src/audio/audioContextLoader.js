@@ -87,14 +87,15 @@ export default class AudioContextLoader extends Emitter {
 
 
     initScriptNode() {
+        this.playing = true;
+
         if (this.hasInitScriptNode) {
             return;
         }
-
         const channels = this.audioInfo.channels;
 
         const scriptNode = this.audioContext.createScriptProcessor(1024, 0, channels);
-        this.playing = true;
+
         scriptNode.onaudioprocess = (audioProcessingEvent) => {
             const outputBuffer = audioProcessingEvent.outputBuffer;
 
@@ -123,7 +124,6 @@ export default class AudioContextLoader extends Emitter {
             if (!this.isMute) {
                 this.player.emit(EVENTS.mute, flag);
             }
-
             this.setVolume(0);
             this.audioEnabled(false);
             this.clear();
@@ -131,6 +131,7 @@ export default class AudioContextLoader extends Emitter {
             if (this.isMute) {
                 this.player.emit(EVENTS.mute, flag);
             }
+            this.setVolume(0.5);
             this.audioEnabled(true);
         }
     }
@@ -145,7 +146,6 @@ export default class AudioContextLoader extends Emitter {
         this.gainNode.gain.value = volume;
         this.gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
         this.player.emit(EVENTS.volumechange, this.player.volume);
-
     }
 
     closeAudio() {

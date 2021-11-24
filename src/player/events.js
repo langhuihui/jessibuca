@@ -1,4 +1,4 @@
-import {EVENTS} from "../constant";
+import {EVENTS, EVENTS_ERROR} from "../constant";
 import screenfull from "screenfull";
 
 export default (player) => {
@@ -72,6 +72,12 @@ export default (player) => {
         Object.keys(EVENTS).forEach((key) => {
             player.on(EVENTS[key], (value) => {
                 player.debug.log('player events', EVENTS[key], value);
+            })
+        })
+
+        Object.keys(EVENTS_ERROR).forEach((key) => {
+            player.on(EVENTS_ERROR[key], (value) => {
+                player.debug.log('player event error', EVENTS_ERROR[key], value);
             })
         })
     }

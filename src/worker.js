@@ -23,6 +23,7 @@ Module.postRun = function () {
         decoder: new VideoDecoder({
             output: function (videoFrame) {
                 if (!wcsVideoDecoder.isEmitInfo) {
+                    decoder.opt.debug && console.log('Jessibuca: [worker] Webcodecs Video Decoder initSize');
                     postMessage({cmd: "initSize", w: videoFrame.codedWidth, h: videoFrame.codedHeight})
                     wcsVideoDecoder.isEmitInfo = true;
                     this.offscreenCanvas = new OffscreenCanvas(videoFrame.codedWidth, videoFrame.codedHeight);

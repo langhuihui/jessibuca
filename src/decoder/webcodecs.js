@@ -11,6 +11,7 @@ export default class WebcodecsDecoder extends Emitter {
         this.isInitInfo = false;
         this.decoder = null;
         this.initDecoder();
+        player.debug.log('Webcodecs', 'init')
     }
 
     initDecoder() {
@@ -36,10 +37,11 @@ export default class WebcodecsDecoder extends Emitter {
         }
 
         this.player.handleRender();
-
         this.player.video.render({
             videoFrame
         })
+        this.player.updateStats({ts: 0, buf: 0})
+
         // release resource
         setTimeout(function () {
             if (videoFrame.close) {
@@ -79,6 +81,9 @@ export default class WebcodecsDecoder extends Emitter {
     destroy() {
         this.decoder.close();
         this.decoder = null;
-
+        this.hasInit = false;
+        this.isInitInfo = false;
+        this.player.debug.log('Webcodecs', 'destroy')
+        this.player = null;
     }
 }

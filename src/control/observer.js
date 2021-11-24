@@ -49,12 +49,14 @@ export default (player, control) => {
             setStyle(control.$volumeOff, 'display', 'flex');
             setStyle(control.$volumeHandle, 'top', `${48}px`);
         } else {
-            const panelHeight = getStyle(control.$volumePanel, 'height') || 60;
-            const handleHeight = getStyle(control.$volumeHandle, 'height');
-            const top = panelHeight - (panelHeight - handleHeight) * percentage - handleHeight;
-            setStyle(control.$volumeHandle, 'top', `${top}px`);
-            setStyle(control.$volumeOn, 'display', 'flex');
-            setStyle(control.$volumeOff, 'display', 'none');
+            if (control.$volumeHandle && control.$volumePanel) {
+                const panelHeight = getStyle(control.$volumePanel, 'height') || 60;
+                const handleHeight = getStyle(control.$volumeHandle, 'height');
+                const top = panelHeight - (panelHeight - handleHeight) * percentage - handleHeight;
+                setStyle(control.$volumeHandle, 'top', `${top}px`);
+                setStyle(control.$volumeOn, 'display', 'flex');
+                setStyle(control.$volumeOff, 'display', 'none');
+            }
         }
     }
 

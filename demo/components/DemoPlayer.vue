@@ -4,6 +4,29 @@
             <div class="container-shell-title">jessibuca demo player <span class="tag-version" v-if="version">({{
                     version
                 }})</span></div>
+            <div class="option">
+                <span>缓冲(秒):</span>
+                <input
+                    style="width: 50px"
+                    type="number"
+                    ref="buffer"
+                    value="0.2"
+                    @change="changeBuffer"
+                />
+                <input
+                    type="checkbox"
+                    v-model="useWCS"
+                    ref="vod"
+                    @change="restartPlay"
+                /><span>webcodecs</span>
+                <input
+                    type="checkbox"
+                    ref="offscreen"
+                    v-model="useOffscreen"
+                    @change="restartPlay"
+                /><span>离屏渲染</span>
+                <input type="checkbox" ref="resize" @change="changeResize"/><span>禁止画面拉伸</span>
+            </div>
             <div id="container" ref="container"></div>
             <div class="input">
                 <div>输入URL：</div>
@@ -53,30 +76,9 @@
                     <span v-if="performance">性能：{{ performance }}</span>
                 </div>
             </div>
-            <div class="option">
-                <span>缓冲(秒):</span>
-                <input
-                    style="width: 50px"
-                    type="number"
-                    ref="buffer"
-                    value="0.2"
-                    @change="changeBuffer"
-                />
-                <input
-                    type="checkbox"
-                    v-model="useWcs"
-                    ref="vod"
-                    @change="restartPlay"
-                /><span>webcodecs</span>
-                <input
-                    type="checkbox"
-                    ref="offscreen"
-                    v-model="forceNoOffscreen"
-                    @change="restartPlay"
-                /><span>禁用离屏渲染</span>
-                <input type="checkbox" ref="resize" @change="changeResize"/><span
-            >禁止画面拉伸</span
-            >
+            <div class="input" v-if="loaded">
+                <button @click="clearView">清屏</button>
+
             </div>
         </div>
     </div>
@@ -103,8 +105,8 @@ export default {
             performance: "",
             volume: 1,
             rotate: 0,
-            useWcs: false,
-            forceNoOffscreen: true,
+            useWCS: true,
+            useOffscreen: true,
         };
     },
     mounted() {
@@ -124,7 +126,7 @@ export default {
                         container: this.$refs.container,
                         videoBuffer: Number(this.$refs.buffer.value), // 缓存时长
                         isResize: false,
-                        useWcs: this.useWcs,
+                        useWCS: this.useWCS,
                         text: "",
                         // background: "bg.jpg",
                         loadingText: "加载中",
@@ -138,7 +140,7 @@ export default {
                             audio: this.showOperateBtns,
                         },
                         vod: this.vod,
-                        forceNoOffscreen: this.forceNoOffscreen,
+                        forceNoOffscreen: !this.useOffscreen,
                         isNotMute: false,
                     },
                     options
@@ -286,6 +288,10 @@ export default {
 
         fullscreen() {
             this.jessibuca.setFullscreen(true);
+        },
+
+        clearView() {
+            this.jessibuca.clearView();
         },
 
         screenShot() {

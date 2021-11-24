@@ -84,6 +84,11 @@ export default class Player extends Emitter {
         events(this);
         observer(this);
 
+        if (this._opt.isNotMute) {
+            this.mute(true);
+        }
+
+        this.enableWakeLock();
 
         this.debug.log('options', this._opt);
     }
@@ -155,23 +160,17 @@ export default class Player extends Emitter {
     }
 
     set recording(value) {
-        if (value) {
-            this.recorder.startRecord();
-        } else {
-            this.recorder.stopRecordAndSave();
+        if (this.playing) {
+            if (value) {
+                this.recorder.startRecord();
+            } else {
+                this.recorder.stopRecordAndSave();
+            }
         }
     }
 
     get recording() {
         return this.recorder.recording;
-    }
-
-    init() {
-        if (this._opt.isNotMute) {
-            this.mute(true);
-        }
-
-        this.enableWakeLock();
     }
 
 
@@ -195,6 +194,12 @@ export default class Player extends Emitter {
 
             if (!this.demux) {
                 this.demux = new Demux(this);
+            }
+
+            if (this._opt.useWCS) {
+                if (!this.webcodecsDecoder) {
+                    this.webcodecsDecoder = new WebcodecsDecoder(this)
+                }
             }
 
             if (!this.decoderWorker) {
@@ -292,6 +297,8 @@ export default class Player extends Emitter {
             this.clearCheckHeartTimeout();
             this.clearCheckLoadingTimeout();
             this.playing = false;
+            this.loading = false;
+            this.recording = false;
             // 声音要清除掉。。。。
             this.audio.pause();
             setTimeout(() => {
