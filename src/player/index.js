@@ -84,6 +84,7 @@ export default class Player extends Emitter {
         events(this);
         observer(this);
 
+
         this.debug.log('options', this._opt);
     }
 
@@ -157,6 +158,14 @@ export default class Player extends Emitter {
 
     get recording() {
         return this.recorder.recording;
+    }
+
+    init() {
+        if (this._opt.isNotMute) {
+            this.mute(true);
+        }
+
+        this.enableWakeLock();
     }
 
 

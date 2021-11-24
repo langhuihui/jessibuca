@@ -7,6 +7,13 @@ export default (player) => {
     } = player;
 
 
+    if (_opt.supportDblclickFullscreen) {
+        proxy(player.$videoElement, 'dblclick', () => {
+            player.fullscreen = !player.fullscreen;
+        })
+    }
+
+
     //
     proxy(document, 'visibilitychange', () => {
         if (_opt.hiddenAutoPause) {

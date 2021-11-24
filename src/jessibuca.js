@@ -119,6 +119,7 @@ class Jessibuca extends Emitter {
 
     /**
      *
+     * @returns {Promise<commander.ParseOptionsResult.unknown>}
      */
     pause() {
         return this.player.pause();
@@ -246,11 +247,10 @@ class Jessibuca extends Emitter {
      */
     setBufferTime(time) {
         time = Number(time)
-        if (this.player) {
 
-        } else {
-            this._opt.videoBuffer = time
-        }
+        this.player.updateOption({
+            videoBuffer: time
+        })
     }
 
     /**
