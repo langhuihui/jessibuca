@@ -1,8 +1,7 @@
 import Emitter from "../utils/emitter";
 import {createContextGL, dataURLToFile, downloadImg, now, supportOffscreen} from "../utils";
 import createWebGL from "../utils/webgl";
-import {CONTROL_HEIGHT, EVENTS, SCREENSHOT_TYPE, VIDEO_ENC_TYPE} from "../constant";
-
+import {CANVAS_RENDER_TYPE, CONTROL_HEIGHT, EVENTS, SCREENSHOT_TYPE, VIDEO_ENC_TYPE} from "../constant";
 
 export default class CanvasVideoLoader extends Emitter {
 
@@ -20,20 +19,20 @@ export default class CanvasVideoLoader extends Emitter {
         this.contextGlRender = null;
         this.contextGlDestroy = null;
         this.bitmaprenderer = null;
+        this.renderType = null;
         this.videoInfo = {
             width: '',
             height: '',
             encType: '',
-            encTypeCode: ''
         }
+        //
+        this._initCanvasRender();
         this.player.debug.log('CanvasVideo', 'init');
-
     }
 
     //
     updateVideoInfo(data) {
         if (data.encTypeCode) {
-            this.videoInfo.encTypeCode = data.encTypeCode;
             this.videoInfo.encType = VIDEO_ENC_TYPE[data.encTypeCode];
         }
 
@@ -61,12 +60,20 @@ export default class CanvasVideoLoader extends Emitter {
     initCanvasViewSize() {
         this.$videoElement.width = this.videoInfo.width;
         this.$videoElement.height = this.videoInfo.height;
+        this.resize();
+    }
 
-        if (!this.player._opt.useWCS) {
+    // 渲染类型
+    _initCanvasRender() {
+        if (this.player._opt.useWCS) {
+            this.renderType = CANVAS_RENDER_TYPE.webcodecs;
+        } else if (this._supportOffscreen()) {
+            this.renderType = CANVAS_RENDER_TYPE.offscreen;
+            this._bindOffscreen();
+        } else {
+            this.renderType = CANVAS_RENDER_TYPE.webgl;
             this._initContextGl();
         }
-
-        this.resize();
     }
 
     _supportOffscreen() {
@@ -74,19 +81,22 @@ export default class CanvasVideoLoader extends Emitter {
     }
 
     //
-    bindOffscreen() {
-        if (this._supportOffscreen()) {
-            this.bitmaprenderer = this.$videoElement.getContext('bitmaprenderer');
-        }
+    _bindOffscreen() {
+        this.bitmaprenderer = this.$videoElement.getContext('bitmaprenderer');
     }
 
+    //
     render(msg) {
-        if (this._supportOffscreen()) {
-            this.bitmaprenderer && this.bitmaprenderer.transferFromImageBitmap(msg.buffer);
-        } else if (this.player._opt.useWCS) {
-            this.$videoElement.drawImage(msg.videoFrame, 0, 0, this.$videoElement.width, this.$videoElement.height);
-        } else {
-            this.contextGlRender(this.$videoElement.width, this.$videoElement.height, msg.output[0], msg.output[1], msg.output[2]);
+        switch (this.renderType) {
+            case CANVAS_RENDER_TYPE.offscreen:
+                this.bitmaprenderer.transferFromImageBitmap(msg.buffer);
+                break;
+            case CANVAS_RENDER_TYPE.webgl:
+                this.contextGlRender(this.$videoElement.width, this.$videoElement.height, msg.output[0], msg.output[1], msg.output[2]);
+                break;
+            case CANVAS_RENDER_TYPE.webcodecs:
+                this.$videoElement.drawImage(msg.videoFrame, 0, 0, this.$videoElement.width, this.$videoElement.height);
+                break;
         }
     }
 
@@ -127,10 +137,16 @@ export default class CanvasVideoLoader extends Emitter {
 
     //
     clearView() {
-        if (this.contextGl) {
-            this.contextGl.clear(this.contextGl.COLOR_BUFFER_BIT);
-        } else if (this.player._opt.useWCS) {
+        switch (this.renderType) {
+            case CANVAS_RENDER_TYPE.offscreen:
 
+                break;
+            case CANVAS_RENDER_TYPE.webgl:
+                this.contextGl.clear(this.contextGl.COLOR_BUFFER_BIT);
+                break;
+            case CANVAS_RENDER_TYPE.webcodecs:
+                this.$videoElement.clearRect(0, 0, this.$videoElement.width, this.$videoElement.height)
+                break;
         }
     }
 
@@ -168,11 +184,14 @@ export default class CanvasVideoLoader extends Emitter {
         }
         if (this.contextGlRender) {
             this.contextGlDestroy && this.contextGlDestroy();
+            this.contextGlDestroy = null;
             this.contextGlRender = null;
         }
         if (this.bitmaprenderer) {
             this.bitmaprenderer = null;
         }
+
+        this.renderType = null;
 
         this.videoInfo = {
             width: '',

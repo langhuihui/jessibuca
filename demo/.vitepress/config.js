@@ -11,6 +11,6 @@ module.exports = {
         logo: 'logo.png'
     },
     head: [
-        ['script', {src: '/index.js'}]
+        ['script', {src: '/jessibuca.js'}]
     ]
 }

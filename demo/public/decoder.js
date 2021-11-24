@@ -6263,7 +6263,7 @@
 	    return (Module["dynCall_jiji"] = Module["asm"]["X"]).apply(null, arguments);
 	  };
 
-	  Module["_ff_h264_cabac_tables"] = 83717;
+	  Module["_ff_h264_cabac_tables"] = 83749;
 
 	  var calledRun;
 
@@ -6440,6 +6440,10 @@
 	  videoDecode: 'videoDecode',
 	  close: 'close'
 	}; //
+	const ENCODED_VIDEO_TYPE = {
+	  key: 'key',
+	  delta: 'delta'
+	};
 
 	(() => {
 	  try {
@@ -6540,7 +6544,7 @@
 	        const chunk = new EncodedVideoChunk({
 	          data: payload.slice(5),
 	          timestamp: ts,
-	          type: isIframe ? 'key' : 'delta'
+	          type: isIframe ? ENCODED_VIDEO_TYPE.key : ENCODED_VIDEO_TYPE.delta
 	        });
 	        wcsVideoDecoder.decoder.decode(chunk);
 	      }
@@ -6560,7 +6564,6 @@
 	      return !this.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined';
 	    },
 	    initAudioPlanar: function (channels, samplerate) {
-	      decoder$1.opt.debug && console.log('Jessibuca: [worker] initAudio', `sampleRate:${samplerate},channels:${channels}`);
 	      postMessage({
 	        cmd: WORKER_CMD_TYPE.initAudio,
 	        sampleRate: samplerate,
@@ -6645,7 +6648,6 @@
 	      });
 	    },
 	    setVideoSize: function (w, h) {
-	      decoder$1.opt.debug && console.log('Jessibuca: [worker] setVideoSize', `w:${w},h:${h}`);
 	      postMessage({
 	        cmd: WORKER_CMD_TYPE.initVideo,
 	        w: w,

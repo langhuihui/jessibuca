@@ -1,6 +1,6 @@
 import {formatVideoDecoderConfigure, noop} from "../utils";
 import Emitter from "../utils/emitter";
-import {EVENTS} from "../constant";
+import {ENCODED_VIDEO_TYPE, EVENTS} from "../constant";
 
 
 export default class WebcodecsDecoder extends Emitter {
@@ -34,6 +34,9 @@ export default class WebcodecsDecoder extends Emitter {
             this.player.video.initCanvasViewSize();
             this.isInitInfo = true;
         }
+
+        this.player.handleRender();
+
         this.player.video.render({
             videoFrame
         })
@@ -48,14 +51,14 @@ export default class WebcodecsDecoder extends Emitter {
     }
 
     handleError(error) {
-
+        this.player.debug.log('Webcodecs', 'VideoDecoder handleError', error)
     }
 
     decodeVideo(payload, ts, isIframe) {
         if (!this.hasInit) {
             if (isIframe && payload[1] === 0) {
                 const videoCodec = (payload[0] & 0x0F);
-                this.player.emit(EVENTS.videoInfo, {
+                this.player.video.updateVideoInfo({
                     encTypeCode: videoCodec
                 })
                 const config = formatVideoDecoderConfigure(payload.slice(5));
@@ -66,7 +69,7 @@ export default class WebcodecsDecoder extends Emitter {
             const chunk = new EncodedVideoChunk({
                 data: payload.slice(5),
                 timestamp: ts,
-                type: isIframe ? 'key' : 'delta'
+                type: isIframe ? ENCODED_VIDEO_TYPE.key : ENCODED_VIDEO_TYPE.delta
             })
             this.decoder.decode(chunk);
         }

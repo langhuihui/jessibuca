@@ -144,9 +144,9 @@ public:
         }
         else
         {
+            jsObject.call<void>("setAudioCodec", audioType);
             switch (audioType)
             {
-            jsObject.call<void>("setAudioCodec", audioType);
             case 10:
                 if (!input[1])
                 {

@@ -42,7 +42,6 @@ export default class AudioContextLoader extends Emitter {
 
         this.audioInfo = {
             encType: '',
-            encTypeCode: '',
             channels: '',
             sampleRate: ''
         }
@@ -51,7 +50,6 @@ export default class AudioContextLoader extends Emitter {
 
     updateAudioInfo(data) {
         if (data.encTypeCode) {
-            this.audioInfo.encTypeCode = data.encTypeCode;
             this.audioInfo.encType = AUDIO_ENC_TYPE[data.encTypeCode];
         }
 
@@ -65,6 +63,7 @@ export default class AudioContextLoader extends Emitter {
 
         // audio 基本信息
         if (this.audioInfo.sampleRate && this.audioInfo.channels && this.audioInfo.encTypeCode) {
+
             this.player.emit(EVENTS.audioInfo, this.audioInfo);
         }
     }
@@ -75,7 +74,7 @@ export default class AudioContextLoader extends Emitter {
     }
 
     get isMute() {
-        return this.gainNode.gain.value === 0 && this.isStateSuspended();
+        return this.gainNode.gain.value === 0 || this.isStateSuspended();
     }
 
     get volume() {
@@ -85,6 +84,7 @@ export default class AudioContextLoader extends Emitter {
     get bufferSize() {
         return this.bufferList.length;
     }
+
 
     initScriptNode() {
         if (this.hasInitScriptNode) {
@@ -119,10 +119,18 @@ export default class AudioContextLoader extends Emitter {
 
     mute(flag) {
         if (flag) {
+
+            if (!this.isMute) {
+                this.player.emit(EVENTS.mute, flag);
+            }
+
             this.setVolume(0);
             this.audioEnabled(false);
             this.clear();
         } else {
+            if (this.isMute) {
+                this.player.emit(EVENTS.mute, flag);
+            }
             this.audioEnabled(true);
         }
     }
@@ -137,6 +145,7 @@ export default class AudioContextLoader extends Emitter {
         this.gainNode.gain.value = volume;
         this.gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
         this.player.emit(EVENTS.volumechange, this.player.volume);
+
     }
 
     closeAudio() {

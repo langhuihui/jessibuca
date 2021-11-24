@@ -1,6 +1,6 @@
 import Module from './decoder/decoder'
 import createWebGL from './utils/webgl';
-import {WORKER_CMD_TYPE, MEDIA_TYPE, WORKER_SEND_TYPE} from "./constant";
+import {WORKER_CMD_TYPE, MEDIA_TYPE, WORKER_SEND_TYPE, ENCODED_VIDEO_TYPE} from "./constant";
 import {formatVideoDecoderConfigure} from "./utils";
 
 if (!Date.now) Date.now = function () {
@@ -64,7 +64,7 @@ Module.postRun = function () {
                 const chunk = new EncodedVideoChunk({
                     data: payload.slice(5),
                     timestamp: ts,
-                    type: isIframe ? 'key' : 'delta'
+                    type: isIframe ? ENCODED_VIDEO_TYPE.key : ENCODED_VIDEO_TYPE.delta
                 })
                 wcsVideoDecoder.decoder.decode(chunk);
             }
@@ -82,7 +82,6 @@ Module.postRun = function () {
             return !this.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined';
         },
         initAudioPlanar: function (channels, samplerate) {
-            decoder.opt.debug && console.log('Jessibuca: [worker] initAudio', `sampleRate:${samplerate},channels:${channels}`);
             postMessage({cmd: WORKER_CMD_TYPE.initAudio, sampleRate: samplerate, channels: channels})
             var buffer = []
             var outputArray = [];
@@ -144,7 +143,6 @@ Module.postRun = function () {
             postMessage({cmd: WORKER_CMD_TYPE.audioCode, code})
         },
         setVideoSize: function (w, h) {
-            decoder.opt.debug && console.log('Jessibuca: [worker] setVideoSize', `w:${w},h:${h}`);
             postMessage({cmd: WORKER_CMD_TYPE.initVideo, w: w, h: h})
             var size = w * h
             var qsize = size >> 2

@@ -121,6 +121,12 @@ export default class Player extends Emitter {
             this._playing = value;
             this.emit(EVENTS.playing, value);
             this.emit(EVENTS.volumechange, this.volume);
+
+            if (value) {
+                this.emit(EVENTS.play);
+            } else {
+                this.emit(EVENTS.pause);
+            }
         }
 
     }
@@ -385,6 +391,19 @@ export default class Player extends Emitter {
             this._checkLoadingTimeout = null;
         }
     }
+
+    handleRender() {
+        if (this.loading) {
+            this.emit(EVENTS.start);
+            this.loading = false;
+            this.clearCheckLoadingTimeout();
+        }
+        if (!this.playing) {
+            this.playing = true;
+        }
+        this.checkHeart();
+    }
+
 
     //
     updateStats(options) {

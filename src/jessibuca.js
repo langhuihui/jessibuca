@@ -350,7 +350,7 @@ class Jessibuca extends Emitter {
      * @returns {Boolean}
      */
     isMute() {
-        return this.player.audio.isMute();
+        return this.player.audio.isMute;
     }
 
     /**

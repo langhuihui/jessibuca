@@ -19,11 +19,13 @@ export default class DecoderWorker {
                     this._initWork();
                     break;
                 case WORKER_CMD_TYPE.videoCode:
+                    debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.videoCode, msg.code);
                     this.player.video.updateVideoInfo({
                         encTypeCode: msg.code
                     })
                     break;
                 case WORKER_CMD_TYPE.audioCode:
+                    debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.audioCode, msg.code);
                     this.player.audio.updateAudioInfo({
                         encTypeCode: msg.code
                     })
@@ -35,7 +37,6 @@ export default class DecoderWorker {
                         height: msg.h
                     })
                     this.player.video.initCanvasViewSize();
-                    this.player.video.bindOffscreen();
                     break;
                 case WORKER_CMD_TYPE.initAudio:
                     debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.initAudio, `channels:${msg.channels},sampleRate:${msg.sampleRate}`);
@@ -44,19 +45,10 @@ export default class DecoderWorker {
                     break;
                 case WORKER_CMD_TYPE.render:
                     // debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.render, `msg ts:${msg.ts}`);
-                    if (this.player.loading) {
-                        this.player.emit(EVENTS.start);
-                        this.player.loading = false;
-                        this.player.clearCheckLoadingTimeout();
-                    }
-                    if (!this.player.playing) {
-                        this.player.playing = true;
-                    }
+                    this.player.handleRender();
                     this.player.video.render(msg);
                     this.player.emit(EVENTS.timeUpdate, msg.ts)
-                    // 健康检查
                     this.player.updateStats({ts: msg.ts, buf: msg.delay})
-                    this.player.checkHeart();
                     break;
                 case WORKER_CMD_TYPE.playAudio:
                     // debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.playAudio, `msg ts:${msg.ts}`);

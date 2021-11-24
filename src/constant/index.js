@@ -197,3 +197,15 @@ export const FILE_SUFFIX = {
     mp4: 'mp4',
     webm: 'webm'
 };
+
+
+export const CANVAS_RENDER_TYPE = {
+    webcodecs: 'webcodecs',
+    webgl: 'webgl',
+    offscreen: 'offscreen'
+}
+
+export const ENCODED_VIDEO_TYPE = {
+    key: 'key',
+    delta: 'delta'
+}
