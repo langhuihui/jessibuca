@@ -48,7 +48,7 @@ class MP4 {
 
         constants.FTYP = new Uint8Array([
             0x69, 0x73, 0x6F, 0x6D,  // major_brand: isom
-            0x0,  0x0,  0x0,  0x1,   // minor_version: 0x01
+            0x0, 0x0, 0x0, 0x1,   // minor_version: 0x01
             0x69, 0x73, 0x6F, 0x6D,  // isom
             0x61, 0x76, 0x63, 0x31   // avc1
         ]);
@@ -132,7 +132,7 @@ class MP4 {
         result = new Uint8Array(size);
         result[0] = (size >>> 24) & 0xFF;  // size
         result[1] = (size >>> 16) & 0xFF;
-        result[2] = (size >>>  8) & 0xFF;
+        result[2] = (size >>> 8) & 0xFF;
         result[3] = (size) & 0xFF;
 
         result.set(type, 4);  // type
@@ -173,11 +173,11 @@ class MP4 {
             0x00, 0x00, 0x00, 0x00,  // modification_time
             (timescale >>> 24) & 0xFF,  // timescale: 4 bytes
             (timescale >>> 16) & 0xFF,
-            (timescale >>>  8) & 0xFF,
+            (timescale >>> 8) & 0xFF,
             (timescale) & 0xFF,
             (duration >>> 24) & 0xFF,   // duration: 4 bytes
             (duration >>> 16) & 0xFF,
-            (duration >>>  8) & 0xFF,
+            (duration >>> 8) & 0xFF,
             (duration) & 0xFF,
             0x00, 0x01, 0x00, 0x00,  // Preferred rate: 1.0
             0x01, 0x00, 0x00, 0x00,  // PreferredVolume(1.0, 2bytes) + reserved(2bytes)
@@ -218,12 +218,12 @@ class MP4 {
             0x00, 0x00, 0x00, 0x00,  // modification_time
             (trackId >>> 24) & 0xFF,  // track_ID: 4 bytes
             (trackId >>> 16) & 0xFF,
-            (trackId >>>  8) & 0xFF,
+            (trackId >>> 8) & 0xFF,
             (trackId) & 0xFF,
             0x00, 0x00, 0x00, 0x00,  // reserved: 4 bytes
             (duration >>> 24) & 0xFF, // duration: 4 bytes
             (duration >>> 16) & 0xFF,
-            (duration >>>  8) & 0xFF,
+            (duration >>> 8) & 0xFF,
             (duration) & 0xFF,
             0x00, 0x00, 0x00, 0x00,  // reserved: 2 * 4 bytes
             0x00, 0x00, 0x00, 0x00,
@@ -262,11 +262,11 @@ class MP4 {
             0x00, 0x00, 0x00, 0x00,  // modification_time
             (timescale >>> 24) & 0xFF,  // timescale: 4 bytes
             (timescale >>> 16) & 0xFF,
-            (timescale >>>  8) & 0xFF,
+            (timescale >>> 8) & 0xFF,
             (timescale) & 0xFF,
             (duration >>> 24) & 0xFF,   // duration: 4 bytes
             (duration >>> 16) & 0xFF,
-            (duration >>>  8) & 0xFF,
+            (duration >>> 8) & 0xFF,
             (duration) & 0xFF,
             0x55, 0xC4,             // language: und (undetermined)
             0x00, 0x00              // pre_defined = 0
@@ -311,8 +311,8 @@ class MP4 {
             MP4.box(MP4.types.stsc, MP4.constants.STSC),  // Sample-To-Chunk
             MP4.box(MP4.types.stsz, MP4.constants.STSZ),  // Sample size
             MP4.box(MP4.types.stco, MP4.constants.STCO)   // Chunk offset
-        ); 
-        return result; 
+        );
+        return result;
     }
 
     // Sample description box
@@ -444,7 +444,7 @@ class MP4 {
             0x00, 0x00, 0x00, 0x00,  // version(0) + flags
             (trackId >>> 24) & 0xFF, // track_ID
             (trackId >>> 16) & 0xFF,
-            (trackId >>>  8) & 0xFF,
+            (trackId >>> 8) & 0xFF,
             (trackId) & 0xFF,
             0x00, 0x00, 0x00, 0x01,  // default_sample_description_index
             0x00, 0x00, 0x00, 0x00,  // default_sample_duration
@@ -464,7 +464,7 @@ class MP4 {
             0x00, 0x00, 0x00, 0x00,
             (sequenceNumber >>> 24) & 0xFF,  // sequence_number: int32
             (sequenceNumber >>> 16) & 0xFF,
-            (sequenceNumber >>>  8) & 0xFF,
+            (sequenceNumber >>> 8) & 0xFF,
             (sequenceNumber) & 0xFF
         ]);
         return MP4.box(MP4.types.mfhd, data);
@@ -479,7 +479,7 @@ class MP4 {
             0x00, 0x00, 0x00, 0x00,  // version(0) & flags
             (trackId >>> 24) & 0xFF, // track_ID
             (trackId >>> 16) & 0xFF,
-            (trackId >>>  8) & 0xFF,
+            (trackId >>> 8) & 0xFF,
             (trackId) & 0xFF
         ]));
         // Track Fragment Decode Time
@@ -487,7 +487,7 @@ class MP4 {
             0x00, 0x00, 0x00, 0x00,  // version(0) & flags
             (baseMediaDecodeTime >>> 24) & 0xFF,  // baseMediaDecodeTime: int32
             (baseMediaDecodeTime >>> 16) & 0xFF,
-            (baseMediaDecodeTime >>>  8) & 0xFF,
+            (baseMediaDecodeTime >>> 8) & 0xFF,
             (baseMediaDecodeTime) & 0xFF
         ]));
         let sdtp = MP4.sdtp(track);
@@ -505,9 +505,9 @@ class MP4 {
         for (let i = 0; i < sampleCount; i++) {
             let flags = samples[i].flags;
             data[i + 4] = (flags.isLeading << 6)    // is_leading: 2 (bit)
-                        | (flags.dependsOn << 4)    // sample_depends_on
-                        | (flags.isDependedOn << 2) // sample_is_depended_on
-                        | (flags.hasRedundancy);    // sample_has_redundancy
+                | (flags.dependsOn << 4)    // sample_depends_on
+                | (flags.isDependedOn << 2) // sample_is_depended_on
+                | (flags.hasRedundancy);    // sample_has_redundancy
         }
         return MP4.box(MP4.types.sdtp, data);
     }
@@ -524,11 +524,11 @@ class MP4 {
             0x00, 0x00, 0x0F, 0x01,      // version(0) & flags
             (sampleCount >>> 24) & 0xFF, // sample_count
             (sampleCount >>> 16) & 0xFF,
-            (sampleCount >>>  8) & 0xFF,
+            (sampleCount >>> 8) & 0xFF,
             (sampleCount) & 0xFF,
             (offset >>> 24) & 0xFF,      // data_offset
             (offset >>> 16) & 0xFF,
-            (offset >>>  8) & 0xFF,
+            (offset >>> 8) & 0xFF,
             (offset) & 0xFF
         ], 0);
 
@@ -540,18 +540,18 @@ class MP4 {
             data.set([
                 (duration >>> 24) & 0xFF,  // sample_duration
                 (duration >>> 16) & 0xFF,
-                (duration >>>  8) & 0xFF,
+                (duration >>> 8) & 0xFF,
                 (duration) & 0xFF,
                 (size >>> 24) & 0xFF,      // sample_size
                 (size >>> 16) & 0xFF,
-                (size >>>  8) & 0xFF,
+                (size >>> 8) & 0xFF,
                 (size) & 0xFF,
                 (flags.isLeading << 2) | flags.dependsOn,  // sample_flags
                 (flags.isDependedOn << 6) | (flags.hasRedundancy << 4) | flags.isNonSync,
                 0x00, 0x00,                // sample_degradation_priority
                 (cts >>> 24) & 0xFF,       // sample_composition_time_offset
                 (cts >>> 16) & 0xFF,
-                (cts >>>  8) & 0xFF,
+                (cts >>> 8) & 0xFF,
                 (cts) & 0xFF
             ], 12 + 16 * i);
         }

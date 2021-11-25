@@ -1,6 +1,7 @@
 import Emitter from "../utils/emitter";
 import {EVENTS, MEDIA_SOURCE_STATE, MP4_CODECS} from "../constant";
 import {formatVideoDecoderConfigure} from "../utils";
+import MP4 from "../remux/mp4-generator";
 
 export default class MseDecoder extends Emitter {
     constructor(player) {
@@ -11,6 +12,8 @@ export default class MseDecoder extends Emitter {
         this.sourceBuffer = null;
         this.hasInit = false;
         this.isInitInfo = false;
+        this.cacheTrack = {};
+        this.timeInit = false;
 
         player.video.$videoElement.src = window.URL.createObjectURL(this.mediaSource);
 
@@ -62,9 +65,26 @@ export default class MseDecoder extends Emitter {
                     encTypeCode: videoCodec
                 })
                 this.hasInit = true;
+                //
+                const metaData = {
+                    id: 1,
+                    type: 'video',
+                    timescale: 1000,
+                    duration: 0,
+                    avcc: payload.slice(5),
+                    codecWidth: 0,
+                    codecHeight: 0,
+                    codec: 512
+                }
+                const metaBox = MP4.generateInitSegment(metaData);
+                this.isAvc = true;
+                this.appendBuffer(metaBox.buffer);
+                this.cacheTrack = null;
+                this.timeInit = false;
             }
         } else {
             // 真正的开始解码
+
 
         }
 
