@@ -222,7 +222,6 @@ export default class Player extends Emitter {
      * @returns {Promise<unknown>}
      */
     play(url) {
-
         return new Promise((resolve, reject) => {
             if (!url && !this._opt.url) {
                 return reject();
@@ -264,36 +263,38 @@ export default class Player extends Emitter {
      *
      */
     close() {
-        //
-        if (this.stream) {
-            this.stream.destroy();
-            this.stream = null;
-        }
-
-        if (this.demux) {
-            this.demux.destroy();
-            this.demux = null;
-        }
-
-        //
-        if (this.decoderWorker) {
-            this.decoderWorker.destroy();
-            this.decoderWorker = null;
-        }
-
-        if (this.webcodecsDecoder) {
-            this.webcodecsDecoder.destroy();
-            this.webcodecsDecoder = null;
-        }
+        return new Promise((resolve, reject) => {
+            this._close().then(() => {
+                this.video.clearView();
+                resolve()
+            })
+        })
     }
 
-    /**
-     *
-     * @returns {Promise<unknown>}
-     */
-    pause() {
+    _close() {
         return new Promise((resolve, reject) => {
-            this.close();
+            //
+            if (this.stream) {
+                this.stream.destroy();
+                this.stream = null;
+            }
+
+            if (this.demux) {
+                this.demux.destroy();
+                this.demux = null;
+            }
+
+            //
+            if (this.decoderWorker) {
+                this.decoderWorker.destroy();
+                this.decoderWorker = null;
+            }
+
+            if (this.webcodecsDecoder) {
+                this.webcodecsDecoder.destroy();
+                this.webcodecsDecoder = null;
+            }
+
             this.clearCheckHeartTimeout();
             this.clearCheckLoadingTimeout();
             this.playing = false;
@@ -302,9 +303,22 @@ export default class Player extends Emitter {
             // 声音要清除掉。。。。
             this.audio.pause();
             setTimeout(() => {
-                resolve();
+                resolve()
             }, 0)
         })
+    }
+
+    /**
+     *
+     * @param flag {boolean} 是否清除画面
+     * @returns {Promise<unknown>}
+     */
+    pause(flag) {
+        if (flag) {
+            return this.close();
+        } else {
+            return this._close();
+        }
     }
 
     /**

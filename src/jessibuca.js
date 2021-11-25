@@ -129,7 +129,7 @@ class Jessibuca extends Emitter {
      *
      */
     close() {
-        this.player.close();
+        return this.player.close();
     }
 
 
@@ -197,6 +197,12 @@ class Jessibuca extends Emitter {
         })
     }
 
+    /**
+     *
+     * @param url {string}
+     * @returns {Promise<unknown>}
+     * @private
+     */
     _play(url) {
         return new Promise((resolve, reject) => {
             this._opt.url = url;

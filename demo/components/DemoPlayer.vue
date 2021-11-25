@@ -77,8 +77,7 @@
                 </div>
             </div>
             <div class="input" v-if="loaded">
-                <button @click="clearView">清屏</button>
-
+                <button v-if="!playing" @click="clearView">清屏</button>
             </div>
         </div>
     </div>

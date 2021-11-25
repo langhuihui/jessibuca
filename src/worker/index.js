@@ -86,8 +86,17 @@ export default class DecoderWorker {
         }, [arrayBuffer.buffer])
     }
 
-    //
     decodeAudio(arrayBuffer, ts) {
+        if (this.player._opt.useWCS) {
+            this._decodeAudioNoDelay(arrayBuffer, ts);
+        } else {
+            this._decodeAudio(arrayBuffer, ts);
+        }
+    }
+
+
+    //
+    _decodeAudio(arrayBuffer, ts) {
         const options = {
             type: MEDIA_TYPE.audio,
             ts: Math.max(ts, 0)
@@ -98,6 +107,15 @@ export default class DecoderWorker {
             cmd: WORKER_SEND_TYPE.decode,
             buffer: arrayBuffer,
             options
+        }, [arrayBuffer.buffer])
+    }
+
+
+    _decodeAudioNoDelay(arrayBuffer, ts) {
+        this.decoderWorker.postMessage({
+            cmd: WORKER_SEND_TYPE.audioDecode,
+            buffer: arrayBuffer,
+            ts: Math.max(ts, 0)
         }, [arrayBuffer.buffer])
     }
 
