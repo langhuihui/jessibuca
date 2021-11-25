@@ -1,4 +1,14 @@
-import {$domToggle, $hideBtns, bufferStatus, checkFull, dataURLToFile, downloadImg, fpsStatus, now} from "../utils";
+import {
+    $domToggle,
+    $hideBtns,
+    bufferStatus,
+    checkFull,
+    createEmptyImageBitmap,
+    dataURLToFile,
+    downloadImg,
+    fpsStatus,
+    now
+} from "../utils";
 import {EVEMTS, POST_MESSAGE, SCREENSHOT_TYPE} from "../constant";
 
 export default (jessibuca) => {
@@ -114,6 +124,10 @@ export default (jessibuca) => {
     jessibuca._clearView = () => {
         if (jessibuca._contextGL) {
             jessibuca._contextGL.clear(jessibuca._contextGL.COLOR_BUFFER_BIT);
+        } else if (jessibuca._bitmaprenderer) {
+            createEmptyImageBitmap(jessibuca.$canvasElement.width, jessibuca.$canvasElement.height).then((imageBitMap) => {
+                jessibuca._bitmaprenderer.transferFromImageBitmap(imageBitMap);
+            })
         }
     }
 
