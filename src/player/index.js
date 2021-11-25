@@ -22,6 +22,7 @@ export default class Player extends Emitter {
         super()
         this.$container = container;
         this._opt = Object.assign({}, DEFAULT_PLAYER_OPTIONS, options)
+        this.debug = new Debug(this);
 
 
         if (this._opt.useWCS) {
@@ -31,6 +32,21 @@ export default class Player extends Emitter {
         if (this._opt.useMSE) {
             this._opt.useMSE = supportMSE();
         }
+
+        // 如果使用mse则强制不允许 webcodecs
+        if (this._opt.useMSE) {
+            if (this._opt.useWCS) {
+                this.debug.log('Player', 'useWCS set true->false')
+            }
+
+            if (!this._opt.forceNoOffscreen) {
+                this.debug.log('Player', 'forceNoOffscreen set false->true')
+            }
+
+            this._opt.useWCS = false;
+            this._opt.forceNoOffscreen = true;
+        }
+
 
         if (!this._opt.forceNoOffscreen) {
             if (!supportOffscreenV2()) {
@@ -65,7 +81,8 @@ export default class Player extends Emitter {
 
         this._wakeLock = null;
 
-        this.debug = new Debug(this);
+        property(this);
+
         this.events = new Events(this);
         this.video = new Video(this);
         this.audio = new Audio(this);
@@ -75,6 +92,7 @@ export default class Player extends Emitter {
 
         this.stream = null;
         this.demux = null;
+
 
         if (this._opt.useWCS) {
             this.webcodecsDecoder = new WebcodecsDecoder(this)
@@ -88,7 +106,6 @@ export default class Player extends Emitter {
         this.control = new Control(this);
 
 
-        property(this);
         events(this);
         observer(this);
 
@@ -102,8 +119,12 @@ export default class Player extends Emitter {
             this.debug.log('Player', 'use WCS')
         }
 
-        if (this._opt.useEMS) {
+        if (this._opt.useMSE) {
             this.debug.log('Player', 'use MSE')
+        }
+
+        if (this._opt.useOffscreen) {
+            this.debug.log('Player', 'use offscreen')
         }
 
         this.debug.log('Player options', this._opt);
@@ -218,6 +239,12 @@ export default class Player extends Emitter {
                 }
             }
 
+            if (this._opt.useMSE) {
+                if (!this.mseDecoder) {
+                    this.mseDecoder = new MseDecoder(this);
+                }
+            }
+
             if (!this.decoderWorker) {
                 this.decoderWorker = new DecoderWorker(this);
 
@@ -253,6 +280,10 @@ export default class Player extends Emitter {
             this.clearCheckHeartTimeout();
             this.init().then(() => {
                 this.stream.fetchStream(url);
+
+                if (this._opt.useMSE) {
+                    this.video.play();
+                }
                 //
                 this.checkLoadingTimeout();
                 // fetch error
@@ -310,6 +341,12 @@ export default class Player extends Emitter {
                 this.webcodecsDecoder.destroy();
                 this.webcodecsDecoder = null;
             }
+
+            if (this.mseDecoder) {
+                this.mseDecoder.destroy();
+                this.mseDecoder = null;
+            }
+
 
             this.clearCheckHeartTimeout();
             this.clearCheckLoadingTimeout();

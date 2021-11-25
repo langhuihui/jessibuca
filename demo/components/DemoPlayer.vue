@@ -15,6 +15,12 @@
                 />
                 <input
                     type="checkbox"
+                    v-model="useMSE"
+                    ref="vod"
+                    @change="restartPlay"
+                /><span>MediaSource</span>
+                <input
+                    type="checkbox"
                     v-model="useWCS"
                     ref="vod"
                     @change="restartPlay"
@@ -104,8 +110,9 @@ export default {
             performance: "",
             volume: 1,
             rotate: 0,
-            useWCS: true,
-            useOffscreen: true,
+            useWCS: false,
+            useMSE: true,
+            useOffscreen: false,
         };
     },
     mounted() {
@@ -126,6 +133,7 @@ export default {
                         videoBuffer: Number(this.$refs.buffer.value), // 缓存时长
                         isResize: false,
                         useWCS: this.useWCS,
+                        useMSE:this.useMSE,
                         text: "",
                         // background: "bg.jpg",
                         loadingText: "加载中",

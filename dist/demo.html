@@ -113,7 +113,8 @@
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
 
-    var showOperateBtns = false; // 是否显示按钮
+
+    var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var jessibuca = null;
 
@@ -123,16 +124,14 @@
             videoBuffer: 0.2, // 缓存时长
             isResize: false,
             text: "",
-            loadingText: "",
-            useMSE:true,
+            loadingText: "加载中",
             debug: true,
             showBandwidth: showOperateBtns, // 显示网速
             operateBtns: {
                 fullscreen: showOperateBtns,
                 screenshot: showOperateBtns,
                 play: showOperateBtns,
-                audio: false,
-                recorder:false
+                audio: showOperateBtns,
             },
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
