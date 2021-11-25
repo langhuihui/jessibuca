@@ -19,7 +19,7 @@ export default class FlvLoader {
         const tmp32 = new Uint32Array(tmp)
 
         const player = this.player;
-        const {decoderWorker, webcodecsDecoder} = player;
+        const {decoderWorker, webcodecsDecoder, mseDecoder} = player;
 
         while (true) {
             tmp8[3] = 0
@@ -41,7 +41,11 @@ export default class FlvLoader {
             switch (type) {
                 case FLV_MEDIA_TYPE.audio:
                     if (player._opt.hasAudio) {
-                        decoderWorker.decodeAudio(payload, ts);
+                        if (player._opt.useMSE) {
+                            mseDecoder.decodeAudio(payload, ts);
+                        } else {
+                            decoderWorker.decodeAudio(payload, ts);
+                        }
                     }
                     break
                 case FLV_MEDIA_TYPE.video:
@@ -49,6 +53,8 @@ export default class FlvLoader {
                         const isIframe = payload[0] >> 4 === 1;
                         if (player._opt.useWCS) {
                             webcodecsDecoder.decodeVideo(payload, ts, isIframe);
+                        } else if (player._opt.useMSE) {
+                            mseDecoder.decodeVideo(payload, ts, isIframe);
                         } else {
                             decoderWorker.decodeVideo(payload, ts, isIframe);
                         }

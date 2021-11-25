@@ -315,3 +315,8 @@ export function createEmptyImageBitmap(width, height) {
     $canvasElement.height = height;
     return createImageBitmap($canvasElement, 0, 0, width, height);
 }
+
+
+export function supportMSE() {
+    return window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="avc1.64002A"')
+}

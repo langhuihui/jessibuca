@@ -3,7 +3,7 @@ import Debug from "../utils/debug";
 import Events from "../utils/events";
 import property from './property';
 import events from './events';
-import {fpsStatus, isFullScreen, now, supportOffscreenV2, supportWCS} from "../utils";
+import {fpsStatus, isFullScreen, now, supportMSE, supportOffscreenV2, supportWCS} from "../utils";
 import Video from "../video";
 import Audio from "../audio";
 import Stream from "../stream";
@@ -15,6 +15,7 @@ import WebcodecsDecoder from "../decoder/webcodecs";
 import Control from "../control";
 import './style.scss'
 import observer from "./observer";
+import MseDecoder from "../decoder/mse";
 
 export default class Player extends Emitter {
     constructor(container, options) {
@@ -25,6 +26,10 @@ export default class Player extends Emitter {
 
         if (this._opt.useWCS) {
             this._opt.useWCS = supportWCS();
+        }
+
+        if (this._opt.useMSE) {
+            this._opt.useMSE = supportMSE();
         }
 
         if (!this._opt.forceNoOffscreen) {
@@ -60,7 +65,6 @@ export default class Player extends Emitter {
 
         this._wakeLock = null;
 
-
         this.debug = new Debug(this);
         this.events = new Events(this);
         this.video = new Video(this);
@@ -74,6 +78,10 @@ export default class Player extends Emitter {
 
         if (this._opt.useWCS) {
             this.webcodecsDecoder = new WebcodecsDecoder(this)
+        }
+
+        if (this._opt.useMSE) {
+            this.mseDecoder = new MseDecoder(this);
         }
 
         //
@@ -90,7 +98,15 @@ export default class Player extends Emitter {
 
         this.enableWakeLock();
 
-        this.debug.log('options', this._opt);
+        if (this._opt.useWCS) {
+            this.debug.log('Player', 'use WCS')
+        }
+
+        if (this._opt.useEMS) {
+            this.debug.log('Player', 'use MSE')
+        }
+
+        this.debug.log('Player options', this._opt);
     }
 
 

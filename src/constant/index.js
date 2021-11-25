@@ -44,7 +44,7 @@ export const DEFAULT_PLAYER_OPTIONS = {
     protocol: PLAYER_PLAY_PROTOCOL.fetch,
     demuxType: DEMUX_TYPE.flv, //
     useWCS: false, //
-    useEMS: false, //
+    useMSE: false, //
     useOffscreen: false //
 }
 
@@ -117,7 +117,11 @@ export const EVENTS = {
     streamError: 'streamError',
     volumechange: 'volumechange',
     frameStart: 'frameStart',
-    destroy: 'destroy'
+    destroy: 'destroy',
+    mseSourceOpen: 'mseSourceOpen',
+    mseSourceClose: 'mseSourceClose',
+    mseSourceBufferError:'mseSourceBufferError',
+    mseSourceBufferBusy:'mseSourceBufferBusy'
 }
 
 
@@ -208,4 +212,17 @@ export const CANVAS_RENDER_TYPE = {
 export const ENCODED_VIDEO_TYPE = {
     key: 'key',
     delta: 'delta'
+}
+
+
+export const MP4_CODECS = {
+    avc: 'video/mp4; codecs="avc1.64002A"',
+    hev: 'video/mp4; codecs="hev1.1.6.L123.b0"',
+}
+
+
+export const MEDIA_SOURCE_STATE = {
+    ended: 'ended',
+    open: 'open',
+    closed: 'closed'
 }
