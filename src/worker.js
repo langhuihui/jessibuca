@@ -57,6 +57,8 @@ Module.postRun = function () {
             const isIframe = payload[0] >> 4 === 1;
             if (!wcsVideoDecoder.hasInit) {
                 if (isIframe && payload[1] === 0) {
+                    const videoCodec = (payload[0] & 0x0F);
+                    decoder.setVideoCodec(videoCodec);
                     const config = formatVideoDecoderConfigure(payload.slice(5));
                     wcsVideoDecoder.decoder.configure(config);
                     wcsVideoDecoder.hasInit = true;
