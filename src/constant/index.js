@@ -120,8 +120,8 @@ export const EVENTS = {
     destroy: 'destroy',
     mseSourceOpen: 'mseSourceOpen',
     mseSourceClose: 'mseSourceClose',
-    mseSourceBufferError:'mseSourceBufferError',
-    mseSourceBufferBusy:'mseSourceBufferBusy'
+    mseSourceBufferError: 'mseSourceBufferError',
+    mseSourceBufferBusy: 'mseSourceBufferBusy'
 }
 
 
@@ -217,6 +217,7 @@ export const ENCODED_VIDEO_TYPE = {
 
 export const MP4_CODECS = {
     avc: 'video/mp4; codecs="avc1.64002A"',
+    // avc: 'video/mp4; codecs="avc1.64001f"',
     hev: 'video/mp4; codecs="hev1.1.6.L123.b0"',
 }
 

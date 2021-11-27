@@ -281,9 +281,6 @@ export default class Player extends Emitter {
             this.init().then(() => {
                 this.stream.fetchStream(url);
 
-                if (this._opt.useMSE) {
-                    this.video.play();
-                }
                 //
                 this.checkLoadingTimeout();
                 // fetch error
@@ -299,6 +296,10 @@ export default class Player extends Emitter {
                 // success
                 this.stream.once(EVENTS.streamSuccess, () => {
                     resolve();
+                    //
+                    if (this._opt.useMSE) {
+                        this.video.play();
+                    }
                 })
             }).catch((e) => {
                 reject(e)

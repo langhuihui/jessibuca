@@ -19,7 +19,15 @@ export default class VideoLoader extends Emitter {
             encType: '',
         }
         this.resize();
+
+        const {proxy} = this.player.events;
+
+        proxy(this.$videoElement, 'canplay', () => {
+            this.player.debug.log('Video', 'canplay');
+        })
+
         this.player.debug.log('Video', 'init');
+
     }
 
     updateVideoInfo(data) {
@@ -41,7 +49,13 @@ export default class VideoLoader extends Emitter {
         }
     }
 
+    initCanvasViewSize() {
+
+    }
+
     play() {
+        // this.$videoElement.autoplay = true;
+        this.$videoElement.controls = true;
         this.$videoElement.play();
     }
 

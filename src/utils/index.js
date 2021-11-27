@@ -1,3 +1,5 @@
+import {MP4_CODECS} from "../constant";
+
 export function noop() {
 }
 
@@ -318,5 +320,5 @@ export function createEmptyImageBitmap(width, height) {
 
 
 export function supportMSE() {
-    return window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="avc1.64002A"')
+    return window.MediaSource && window.MediaSource.isTypeSupported(MP4_CODECS.avc);
 }

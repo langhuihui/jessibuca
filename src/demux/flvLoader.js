@@ -9,6 +9,7 @@ export default class FlvLoader {
     }
 
     dispatch(data) {
+        // this.player.debug.log('FlvDemux', 'dispatch');
         this.flvDemux(data);
     }
 
@@ -52,10 +53,13 @@ export default class FlvLoader {
                     if (player._opt.hasVideo) {
                         const isIframe = payload[0] >> 4 === 1;
                         if (player._opt.useWCS) {
+                            // this.player.debug.log('FlvDemux', 'decodeVideo useWCS')
                             webcodecsDecoder.decodeVideo(payload, ts, isIframe);
                         } else if (player._opt.useMSE) {
+                            // this.player.debug.log('FlvDemux', 'decodeVideo useMSE')
                             mseDecoder.decodeVideo(payload, ts, isIframe);
                         } else {
+                            // this.player.debug.log('FlvDemux', 'decodeVideo')
                             decoderWorker.decodeVideo(payload, ts, isIframe);
                         }
                     }
@@ -92,6 +96,6 @@ export default class FlvLoader {
     }
 
     destroy() {
-
+        this.player.debug.log('FlvDemux', 'destroy')
     }
 }
