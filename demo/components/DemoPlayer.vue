@@ -10,7 +10,7 @@
         <input
             autocomplete="on"
             ref="playUrl"
-            value="ws://localhost:8080/jessica/live/rtc"
+            value="ws://59.47.233.134:8081/jessica/live/rtc"
         />
         <button v-if="!playing" @click="play">播放</button>
         <button v-else @click="pause">停止</button>

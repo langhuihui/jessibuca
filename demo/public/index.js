@@ -2562,7 +2562,7 @@ _demoPublicFfDefault.default.postRun = function () {
 
 },{"../demo/public/ff":"5pFL4","./utils/webgl":"7Fbr1","@parcel/transformer-js/lib/esmodule-helpers.js":"2yIXH"}],"5pFL4":[function(require,module,exports) {
 var process = require("process");
-var __dirname = "/Users/wancheng/Documents/GitHub/jessibuca-v2/demo/public";
+var __dirname = "/Users/chengwan/Documents/GitHub/Monibuca/jessibuca/demo/public";
 var Buffer = require("buffer").Buffer;
 var Module = typeof Module !== "undefined" ? Module : {};
 var moduleOverrides = {};
