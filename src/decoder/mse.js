@@ -94,7 +94,7 @@ export default class MseDecoder extends Emitter {
                     type: 'video',
                     timescale: 1000,
                     duration: 0,
-                    codec: avcConfig.codec,
+                    // codec: avcConfig.codec,
                     avcc: data,
                     codecWidth: avcConfig.codecWidth,
                     codecHeight: avcConfig.codecHeight,
@@ -152,8 +152,9 @@ export default class MseDecoder extends Emitter {
                 this.cacheTrack = {};
             }
 
-            // this.cacheTrack.id = 1;
-            this.cacheTrack.sequenceNumber = ++this.sequenceNumber;
+            this.cacheTrack.id = 1;
+            // this.cacheTrack.sequenceNumber = ++this.sequenceNumber;
+            this.cacheTrack.sn = ++this.sequenceNumber;
             this.cacheTrack.size = bytes;
             this.cacheTrack.dts = dts;
             this.cacheTrack.cts = cts;
@@ -199,8 +200,9 @@ export default class MseDecoder extends Emitter {
         } = this.player;
 
         if (this.sourceBuffer === null && this.codec) {
-            // const codecs = MP4_CODECS.avc;
-            this.sourceBuffer = this.mediaSource.addSourceBuffer(this.codec);
+            const codecs = MP4_CODECS.avc;
+            // const codecs = this.codec;
+            this.sourceBuffer = this.mediaSource.addSourceBuffer(codecs);
             proxy(this.sourceBuffer, 'error', (error) => {
                 this.player.emit(EVENTS.mseSourceBufferError, error);
             })

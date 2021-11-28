@@ -54,9 +54,9 @@ export default class VideoLoader extends Emitter {
     }
 
     play() {
-        // this.$videoElement.autoplay = true;
+        this.$videoElement.autoplay = true;
         this.$videoElement.controls = true;
-        this.$videoElement.play();
+        // this.$videoElement.play();
     }
 
     clearView() {
