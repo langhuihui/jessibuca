@@ -121,7 +121,9 @@ export const EVENTS = {
     mseSourceOpen: 'mseSourceOpen',
     mseSourceClose: 'mseSourceClose',
     mseSourceBufferError: 'mseSourceBufferError',
-    mseSourceBufferBusy: 'mseSourceBufferBusy'
+    mseSourceBufferBusy: 'mseSourceBufferBusy',
+    videoWaiting: 'videoWaiting',
+    videoTimeUpdate: 'videoTimeUpdate'
 }
 
 

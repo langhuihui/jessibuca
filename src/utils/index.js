@@ -322,3 +322,8 @@ export function createEmptyImageBitmap(width, height) {
 export function supportMSE() {
     return window.MediaSource && window.MediaSource.isTypeSupported(MP4_CODECS.avc);
 }
+
+
+export function formatMp4VideoCodec(codec) {
+    return `video/mp4; codecs="${codec}"`
+}

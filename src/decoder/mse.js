@@ -1,6 +1,8 @@
 import Emitter from "../utils/emitter";
 import {EVENTS, MEDIA_SOURCE_STATE, MP4_CODECS} from "../constant";
 import MP4 from "../remux/mp4-generator";
+import {formatMp4VideoCodec, readSPS} from "../utils";
+import {parseAVCDecoderConfigurationRecord} from "../utils/h264";
 
 export default class MseDecoder extends Emitter {
     constructor(player) {
@@ -15,6 +17,7 @@ export default class MseDecoder extends Emitter {
         this.timeInit = false;
         this.sequenceNumber = 0;
         this.mediaSourceOpen = false;
+        this.codec = null;
 
         player.video.$videoElement.src = window.URL.createObjectURL(this.mediaSource);
         const {
@@ -34,13 +37,12 @@ export default class MseDecoder extends Emitter {
 
 
         proxy(player.video.$videoElement, 'waiting', () => {
-
+            this.player.emit(EVENTS.videoWaiting);
         })
 
         proxy(player.video.$videoElement, 'timeupdate', () => {
-
+            this.player.emit(EVENTS.videoTimeUpdate);
         })
-
 
         player.debug.log('MediaSource', 'init')
     }
@@ -70,9 +72,11 @@ export default class MseDecoder extends Emitter {
         this.mediaSource.duration = duration
     }
 
+    //
     decodeVideo(payload, ts, isIframe) {
         const player = this.player;
         if (!this.hasInit) {
+            //
             if (isIframe && payload[1] === 0) {
                 const videoCodec = (payload[0] & 0x0F);
                 player.video.updateVideoInfo({
@@ -80,18 +84,20 @@ export default class MseDecoder extends Emitter {
                 })
                 this.hasInit = true;
                 player.debug.log('MediaSource', 'decodeVideo hasInit set true');
-                let data = payload.slice(5)
-
+                let data = payload.slice(5);
+                const avcConfig = parseAVCDecoderConfigurationRecord(data);
+                console.log(avcConfig);
+                this.codec = formatMp4VideoCodec(avcConfig.codec);
                 // 这一步肯定是成功的。
                 const metaData = {
                     id: 1,
                     type: 'video',
                     timescale: 1000,
                     duration: 0,
+                    codec: avcConfig.codec,
                     avcc: data,
-                    codecWidth: 960,
-                    codecHeight: 540,
-                    codec: 512
+                    codecWidth: avcConfig.codecWidth,
+                    codecHeight: avcConfig.codecHeight,
                 }
                 // ftyp
                 const metaBox = MP4.generateInitSegment(metaData);
@@ -107,10 +113,9 @@ export default class MseDecoder extends Emitter {
             let bytes = arrayBuffer.byteLength;
             let cts = 0;
             let dts = ts;
-            let flags = isIframe;
 
             const $video = player.video.$videoElement;
-            player.debug.log('MediaSource', 'decodeVideo', `$video.buffered.length:${$video.buffered.length}, bytes:${bytes},cts:${cts},dts:${ts},flag:${isIframe}`);
+            player.debug.log('MediaSource', 'decodeVideo', `$video.buffered.length:${$video.buffered.length},bytes:${bytes},cts:${cts},dts:${ts},flag:${isIframe}`);
 
             if ($video.buffered.length > 1) {
                 this.removeBuffer($video.buffered.start(0), $video.buffered.end(0));
@@ -128,9 +133,9 @@ export default class MseDecoder extends Emitter {
                 mdatbox[1] = mdatBytes >>> 16 & 255;
                 mdatbox[2] = mdatBytes >>> 8 & 255;
                 mdatbox[3] = mdatBytes & 255;
-                // mdat
                 mdatbox.set(MP4.types.mdat, 4);
                 mdatbox.set(this.cacheTrack.data, 8);
+
                 this.cacheTrack.duration = dts - this.cacheTrack.dts;
                 // moof
                 let moofbox = MP4.moof(this.cacheTrack, this.cacheTrack.dts);
@@ -147,19 +152,20 @@ export default class MseDecoder extends Emitter {
                 this.cacheTrack = {};
             }
 
-            this.cacheTrack.id = 1;
-            this.cacheTrack.sn = ++this.sequenceNumber;
+            // this.cacheTrack.id = 1;
+            this.cacheTrack.sequenceNumber = ++this.sequenceNumber;
             this.cacheTrack.size = bytes;
             this.cacheTrack.dts = dts;
             this.cacheTrack.cts = cts;
-            // this.cacheTrack.isKeyframe = flags;
+            this.cacheTrack.isKeyframe = isIframe;
             this.cacheTrack.data = arrayBuffer;
+            //
             this.cacheTrack.flags = {
                 isLeading: 0,
-                dependsOn: flags ? 2 : 1,
-                isDependedOn: flags ? 1 : 0,
+                dependsOn: isIframe ? 2 : 1,
+                isDependedOn: isIframe ? 1 : 0,
                 hasRedundancy: 0,
-                isNonSync: flags ? 0 : 1
+                isNonSync: isIframe ? 0 : 1
             }
 
             //
@@ -191,9 +197,10 @@ export default class MseDecoder extends Emitter {
             debug,
             events: {proxy},
         } = this.player;
-        if (this.sourceBuffer === null) {
-            const codecs = this.isAvc ? MP4_CODECS.avc : MP4_CODECS.hev;
-            this.sourceBuffer = this.mediaSource.addSourceBuffer(codecs);
+
+        if (this.sourceBuffer === null && this.codec) {
+            // const codecs = MP4_CODECS.avc;
+            this.sourceBuffer = this.mediaSource.addSourceBuffer(this.codec);
             proxy(this.sourceBuffer, 'error', (error) => {
                 this.player.emit(EVENTS.mseSourceBufferError, error);
             })
@@ -267,5 +274,6 @@ export default class MseDecoder extends Emitter {
         this.sequenceNumber = 0;
         this.cacheTrack = null;
         this.timeInit = false;
+        this.codec = null;
     }
 }

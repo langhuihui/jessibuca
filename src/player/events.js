@@ -69,8 +69,13 @@ export default (player) => {
 
 
     if (player._opt.debug) {
+        const ignoreList = [EVENTS.timeUpdate];
         Object.keys(EVENTS).forEach((key) => {
             player.on(EVENTS[key], (value) => {
+                if (ignoreList.includes(key)) {
+                    return;
+                }
+
                 player.debug.log('player events', EVENTS[key], value);
             })
         })

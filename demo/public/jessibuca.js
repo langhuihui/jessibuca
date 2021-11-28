@@ -128,7 +128,9 @@
       mseSourceOpen: 'mseSourceOpen',
       mseSourceClose: 'mseSourceClose',
       mseSourceBufferError: 'mseSourceBufferError',
-      mseSourceBufferBusy: 'mseSourceBufferBusy'
+      mseSourceBufferBusy: 'mseSourceBufferBusy',
+      videoWaiting: 'videoWaiting',
+      videoTimeUpdate: 'videoTimeUpdate'
     };
     const JESSIBUCA_EVENTS = {
       load: EVENTS.load,
@@ -532,8 +534,13 @@
       });
 
       if (player._opt.debug) {
+        const ignoreList = [EVENTS.timeUpdate];
         Object.keys(EVENTS).forEach(key => {
           player.on(EVENTS[key], value => {
+            if (ignoreList.includes(key)) {
+              return;
+            }
+
             player.debug.log('player events', EVENTS[key], value);
           });
         });
@@ -722,6 +729,9 @@
     }
     function supportMSE() {
       return window.MediaSource && window.MediaSource.isTypeSupported(MP4_CODECS.avc);
+    }
+    function formatMp4VideoCodec(codec) {
+      return `video/mp4; codecs="${codec}"`;
     }
 
     class Emitter {
@@ -3032,6 +3042,583 @@
 
     MP4.init();
 
+    /*
+     * Copyright (C) 2016 Bilibili. All Rights Reserved.
+     *
+     * @author zheng qian <xqq@xqq.im>
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *     http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    // Exponential-Golomb buffer decoder
+    class ExpGolomb {
+      constructor(uint8array) {
+        this.TAG = 'ExpGolomb';
+        this._buffer = uint8array;
+        this._buffer_index = 0;
+        this._total_bytes = uint8array.byteLength;
+        this._total_bits = uint8array.byteLength * 8;
+        this._current_word = 0;
+        this._current_word_bits_left = 0;
+      }
+
+      destroy() {
+        this._buffer = null;
+      }
+
+      _fillCurrentWord() {
+        let buffer_bytes_left = this._total_bytes - this._buffer_index;
+
+        let bytes_read = Math.min(4, buffer_bytes_left);
+        let word = new Uint8Array(4);
+        word.set(this._buffer.subarray(this._buffer_index, this._buffer_index + bytes_read));
+        this._current_word = new DataView(word.buffer).getUint32(0, false);
+        this._buffer_index += bytes_read;
+        this._current_word_bits_left = bytes_read * 8;
+      }
+
+      readBits(bits) {
+
+        if (bits <= this._current_word_bits_left) {
+          let result = this._current_word >>> 32 - bits;
+          this._current_word <<= bits;
+          this._current_word_bits_left -= bits;
+          return result;
+        }
+
+        let result = this._current_word_bits_left ? this._current_word : 0;
+        result = result >>> 32 - this._current_word_bits_left;
+        let bits_need_left = bits - this._current_word_bits_left;
+
+        this._fillCurrentWord();
+
+        let bits_read_next = Math.min(bits_need_left, this._current_word_bits_left);
+        let result2 = this._current_word >>> 32 - bits_read_next;
+        this._current_word <<= bits_read_next;
+        this._current_word_bits_left -= bits_read_next;
+        result = result << bits_read_next | result2;
+        return result;
+      }
+
+      readBool() {
+        return this.readBits(1) === 1;
+      }
+
+      readByte() {
+        return this.readBits(8);
+      }
+
+      _skipLeadingZero() {
+        let zero_count;
+
+        for (zero_count = 0; zero_count < this._current_word_bits_left; zero_count++) {
+          if (0 !== (this._current_word & 0x80000000 >>> zero_count)) {
+            this._current_word <<= zero_count;
+            this._current_word_bits_left -= zero_count;
+            return zero_count;
+          }
+        }
+
+        this._fillCurrentWord();
+
+        return zero_count + this._skipLeadingZero();
+      }
+
+      readUEG() {
+        // unsigned exponential golomb
+        let leading_zeros = this._skipLeadingZero();
+
+        return this.readBits(leading_zeros + 1) - 1;
+      }
+
+      readSEG() {
+        // signed exponential golomb
+        let value = this.readUEG();
+
+        if (value & 0x01) {
+          return value + 1 >>> 1;
+        } else {
+          return -1 * (value >>> 1);
+        }
+      }
+
+    }
+
+    /*
+     * Copyright (C) 2016 Bilibili. All Rights Reserved.
+     *
+     * @author zheng qian <xqq@xqq.im>
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *     http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+
+    class SPSParser {
+      static _ebsp2rbsp(uint8array) {
+        let src = uint8array;
+        let src_length = src.byteLength;
+        let dst = new Uint8Array(src_length);
+        let dst_idx = 0;
+
+        for (let i = 0; i < src_length; i++) {
+          if (i >= 2) {
+            // Unescape: Skip 0x03 after 00 00
+            if (src[i] === 0x03 && src[i - 1] === 0x00 && src[i - 2] === 0x00) {
+              continue;
+            }
+          }
+
+          dst[dst_idx] = src[i];
+          dst_idx++;
+        }
+
+        return new Uint8Array(dst.buffer, 0, dst_idx);
+      } // 解析 SPS
+      // https://zhuanlan.zhihu.com/p/27896239
+
+
+      static parseSPS(uint8array) {
+        let rbsp = SPSParser._ebsp2rbsp(uint8array);
+
+        let gb = new ExpGolomb(rbsp);
+        gb.readByte(); // 标识当前H.264码流的profile。
+        // 我们知道，H.264中定义了三种常用的档次profile： 基准档次：baseline profile;主要档次：main profile; 扩展档次：extended profile;
+
+        let profile_idc = gb.readByte(); // profile_idc
+
+        gb.readByte(); // constraint_set_flags[5] + reserved_zero[3]
+        // 标识当前码流的Level。编码的Level定义了某种条件下的最大视频分辨率、最大视频帧率等参数，码流所遵从的level由level_idc指定。
+
+        let level_idc = gb.readByte(); // level_idc
+        // 表示当前的序列参数集的id。通过该id值，图像参数集pps可以引用其代表的sps中的参数。
+
+        gb.readUEG(); // seq_parameter_set_id
+
+        let profile_string = SPSParser.getProfileString(profile_idc);
+        let level_string = SPSParser.getLevelString(level_idc);
+        let chroma_format_idc = 1;
+        let chroma_format = 420;
+        let chroma_format_table = [0, 420, 422, 444];
+        let bit_depth = 8; //
+
+        if (profile_idc === 100 || profile_idc === 110 || profile_idc === 122 || profile_idc === 244 || profile_idc === 44 || profile_idc === 83 || profile_idc === 86 || profile_idc === 118 || profile_idc === 128 || profile_idc === 138 || profile_idc === 144) {
+          //
+          chroma_format_idc = gb.readUEG();
+
+          if (chroma_format_idc === 3) {
+            gb.readBits(1); // separate_colour_plane_flag
+          }
+
+          if (chroma_format_idc <= 3) {
+            chroma_format = chroma_format_table[chroma_format_idc];
+          }
+
+          bit_depth = gb.readUEG() + 8; // bit_depth_luma_minus8
+
+          gb.readUEG(); // bit_depth_chroma_minus8
+
+          gb.readBits(1); // qpprime_y_zero_transform_bypass_flag
+
+          if (gb.readBool()) {
+            // seq_scaling_matrix_present_flag
+            let scaling_list_count = chroma_format_idc !== 3 ? 8 : 12;
+
+            for (let i = 0; i < scaling_list_count; i++) {
+              if (gb.readBool()) {
+                // seq_scaling_list_present_flag
+                if (i < 6) {
+                  SPSParser._skipScalingList(gb, 16);
+                } else {
+                  SPSParser._skipScalingList(gb, 64);
+                }
+              }
+            }
+          }
+        } // 用于计算MaxFrameNum的值。计算公式为MaxFrameNum = 2^(log2_max_frame_num_minus4 +
+
+
+        gb.readUEG(); // log2_max_frame_num_minus4
+        // 表示解码picture order count(POC)的方法。POC是另一种计量图像序号的方式，与frame_num有着不同的计算方法。该语法元素的取值为0、1或2。
+
+        let pic_order_cnt_type = gb.readUEG();
+
+        if (pic_order_cnt_type === 0) {
+          gb.readUEG(); // log2_max_pic_order_cnt_lsb_minus_4
+        } else if (pic_order_cnt_type === 1) {
+          gb.readBits(1); // delta_pic_order_always_zero_flag
+
+          gb.readSEG(); // offset_for_non_ref_pic
+
+          gb.readSEG(); // offset_for_top_to_bottom_field
+
+          let num_ref_frames_in_pic_order_cnt_cycle = gb.readUEG();
+
+          for (let i = 0; i < num_ref_frames_in_pic_order_cnt_cycle; i++) {
+            gb.readSEG(); // offset_for_ref_frame
+          }
+        } // 用于表示参考帧的最大数目。
+
+
+        let ref_frames = gb.readUEG(); // max_num_ref_frames
+        // 标识位，说明frame_num中是否允许不连续的值。
+
+        gb.readBits(1); // gaps_in_frame_num_value_allowed_flag
+        // 用于计算图像的宽度。单位为宏块个数，因此图像的实际宽度为:
+
+        let pic_width_in_mbs_minus1 = gb.readUEG(); // 使用PicHeightInMapUnits来度量视频中一帧图像的高度。
+        // PicHeightInMapUnits并非图像明确的以像素或宏块为单位的高度，而需要考虑该宏块是帧编码或场编码。PicHeightInMapUnits的计算方式为：
+
+        let pic_height_in_map_units_minus1 = gb.readUEG(); // 标识位，说明宏块的编码方式。当该标识位为0时，宏块可能为帧编码或场编码；
+        // 该标识位为1时，所有宏块都采用帧编码。根据该标识位取值不同，PicHeightInMapUnits的含义也不同，
+        // 为0时表示一场数据按宏块计算的高度，为1时表示一帧数据按宏块计算的高度。
+
+        let frame_mbs_only_flag = gb.readBits(1);
+
+        if (frame_mbs_only_flag === 0) {
+          // 标识位，说明是否采用了宏块级的帧场自适应编码。当该标识位为0时，不存在帧编码和场编码之间的切换；当标识位为1时，宏块可能在帧编码和场编码模式之间进行选择。
+          gb.readBits(1); // mb_adaptive_frame_field_flag
+        } // 标识位，用于B_Skip、B_Direct模式运动矢量的推导计算。
+
+
+        gb.readBits(1); // direct_8x8_inference_flag
+
+        let frame_crop_left_offset = 0;
+        let frame_crop_right_offset = 0;
+        let frame_crop_top_offset = 0;
+        let frame_crop_bottom_offset = 0;
+        let frame_cropping_flag = gb.readBool();
+
+        if (frame_cropping_flag) {
+          frame_crop_left_offset = gb.readUEG();
+          frame_crop_right_offset = gb.readUEG();
+          frame_crop_top_offset = gb.readUEG();
+          frame_crop_bottom_offset = gb.readUEG();
+        }
+
+        let sar_width = 1,
+            sar_height = 1;
+        let fps = 0,
+            fps_fixed = true,
+            fps_num = 0,
+            fps_den = 0; // 标识位，说明SPS中是否存在VUI信息。
+
+        let vui_parameters_present_flag = gb.readBool();
+
+        if (vui_parameters_present_flag) {
+          if (gb.readBool()) {
+            // aspect_ratio_info_present_flag
+            let aspect_ratio_idc = gb.readByte();
+            let sar_w_table = [1, 12, 10, 16, 40, 24, 20, 32, 80, 18, 15, 64, 160, 4, 3, 2];
+            let sar_h_table = [1, 11, 11, 11, 33, 11, 11, 11, 33, 11, 11, 33, 99, 3, 2, 1];
+
+            if (aspect_ratio_idc > 0 && aspect_ratio_idc < 16) {
+              sar_width = sar_w_table[aspect_ratio_idc - 1];
+              sar_height = sar_h_table[aspect_ratio_idc - 1];
+            } else if (aspect_ratio_idc === 255) {
+              sar_width = gb.readByte() << 8 | gb.readByte();
+              sar_height = gb.readByte() << 8 | gb.readByte();
+            }
+          }
+
+          if (gb.readBool()) {
+            // overscan_info_present_flag
+            gb.readBool(); // overscan_appropriate_flag
+          }
+
+          if (gb.readBool()) {
+            // video_signal_type_present_flag
+            gb.readBits(4); // video_format & video_full_range_flag
+
+            if (gb.readBool()) {
+              // colour_description_present_flag
+              gb.readBits(24); // colour_primaries & transfer_characteristics & matrix_coefficients
+            }
+          }
+
+          if (gb.readBool()) {
+            // chroma_loc_info_present_flag
+            gb.readUEG(); // chroma_sample_loc_type_top_field
+
+            gb.readUEG(); // chroma_sample_loc_type_bottom_field
+          }
+
+          if (gb.readBool()) {
+            // timing_info_present_flag
+            let num_units_in_tick = gb.readBits(32);
+            let time_scale = gb.readBits(32);
+            fps_fixed = gb.readBool(); // fixed_frame_rate_flag
+
+            fps_num = time_scale;
+            fps_den = num_units_in_tick * 2;
+            fps = fps_num / fps_den;
+          }
+        }
+
+        let sarScale = 1;
+
+        if (sar_width !== 1 || sar_height !== 1) {
+          sarScale = sar_width / sar_height;
+        }
+
+        let crop_unit_x = 0,
+            crop_unit_y = 0;
+
+        if (chroma_format_idc === 0) {
+          crop_unit_x = 1;
+          crop_unit_y = 2 - frame_mbs_only_flag;
+        } else {
+          let sub_wc = chroma_format_idc === 3 ? 1 : 2;
+          let sub_hc = chroma_format_idc === 1 ? 2 : 1;
+          crop_unit_x = sub_wc;
+          crop_unit_y = sub_hc * (2 - frame_mbs_only_flag);
+        }
+
+        let codec_width = (pic_width_in_mbs_minus1 + 1) * 16;
+        let codec_height = (2 - frame_mbs_only_flag) * ((pic_height_in_map_units_minus1 + 1) * 16);
+        codec_width -= (frame_crop_left_offset + frame_crop_right_offset) * crop_unit_x;
+        codec_height -= (frame_crop_top_offset + frame_crop_bottom_offset) * crop_unit_y;
+        let present_width = Math.ceil(codec_width * sarScale);
+        gb.destroy();
+        gb = null; // 解析出来的SPS 内容。
+
+        return {
+          profile_string: profile_string,
+          // baseline, high, high10, ...
+          level_string: level_string,
+          // 3, 3.1, 4, 4.1, 5, 5.1, ...
+          bit_depth: bit_depth,
+          // 8bit, 10bit, ...
+          ref_frames: ref_frames,
+          chroma_format: chroma_format,
+          // 4:2:0, 4:2:2, ...
+          chroma_format_string: SPSParser.getChromaFormatString(chroma_format),
+          frame_rate: {
+            fixed: fps_fixed,
+            fps: fps,
+            fps_den: fps_den,
+            fps_num: fps_num
+          },
+          sar_ratio: {
+            width: sar_width,
+            height: sar_height
+          },
+          codec_size: {
+            width: codec_width,
+            height: codec_height
+          },
+          present_size: {
+            width: present_width,
+            height: codec_height
+          }
+        };
+      }
+
+      static _skipScalingList(gb, count) {
+        let last_scale = 8,
+            next_scale = 8;
+        let delta_scale = 0;
+
+        for (let i = 0; i < count; i++) {
+          if (next_scale !== 0) {
+            delta_scale = gb.readSEG();
+            next_scale = (last_scale + delta_scale + 256) % 256;
+          }
+
+          last_scale = next_scale === 0 ? last_scale : next_scale;
+        }
+      } // profile_idc = 66 → baseline profile;
+      // profile_idc = 77 → main profile;
+      // profile_idc = 88 → extended profile;
+      // 在新版的标准中，还包括了High、High 10、High 4:2:2、High 4:4:4、High 10 Intra、High
+      // 4:2:2 Intra、High 4:4:4 Intra、CAVLC 4:4:4 Intra
+
+
+      static getProfileString(profile_idc) {
+        switch (profile_idc) {
+          case 66:
+            return 'Baseline';
+
+          case 77:
+            return 'Main';
+
+          case 88:
+            return 'Extended';
+
+          case 100:
+            return 'High';
+
+          case 110:
+            return 'High10';
+
+          case 122:
+            return 'High422';
+
+          case 244:
+            return 'High444';
+
+          default:
+            return 'Unknown';
+        }
+      }
+
+      static getLevelString(level_idc) {
+        return (level_idc / 10).toFixed(1);
+      }
+
+      static getChromaFormatString(chroma) {
+        switch (chroma) {
+          case 420:
+            return '4:2:0';
+
+          case 422:
+            return '4:2:2';
+
+          case 444:
+            return '4:4:4';
+
+          default:
+            return 'Unknown';
+        }
+      }
+
+    }
+
+    function parseAVCDecoderConfigurationRecord(arrayBuffer) {
+      const meta = {};
+      const v = new DataView(arrayBuffer.buffer);
+      let version = v.getUint8(0); // configurationVersion
+
+      let avcProfile = v.getUint8(1); // avcProfileIndication
+
+      v.getUint8(2); // profile_compatibil
+
+      v.getUint8(3); // AVCLevelIndication
+
+      if (version !== 1 || avcProfile === 0) {
+        // this._onError(DemuxErrors.FORMAT_ERROR, 'Flv: Invalid AVCDecoderConfigurationRecord');
+        return;
+      }
+
+      const _naluLengthSize = (v.getUint8(4) & 3) + 1; // lengthSizeMinusOne
+
+
+      if (_naluLengthSize !== 3 && _naluLengthSize !== 4) {
+        // holy shit!!!
+        // this._onError(DemuxErrors.FORMAT_ERROR, `Flv: Strange NaluLengthSizeMinusOne: ${_naluLengthSize - 1}`);
+        return;
+      }
+
+      let spsCount = v.getUint8(5) & 31; // numOfSequenceParameterSets
+
+      if (spsCount === 0) {
+        // this._onError(DemuxErrors.FORMAT_ERROR, 'Flv: Invalid AVCDecoderConfigurationRecord: No SPS');
+        return;
+      }
+
+      let offset = 6;
+
+      for (let i = 0; i < spsCount; i++) {
+        let len = v.getUint16(offset, false); // sequenceParameterSetLength
+
+        offset += 2;
+
+        if (len === 0) {
+          continue;
+        } // Notice: Nalu without startcode header (00 00 00 01)
+
+
+        let sps = new Uint8Array(arrayBuffer.buffer, offset, len);
+        offset += len; // flv.js作者选择了自己来解析这个数据结构，也是迫不得已，因为JS环境下没有ffmpeg，解析这个结构主要是为了提取 sps和pps。虽然理论上sps允许有多个，但其实一般就一个。
+        // packetTtype 为 1 表示 NALU，NALU= network abstract layer unit，这是H.264的概念，网络抽象层数据单元，其实简单理解就是一帧视频数据。
+        // pps的信息没什么用，所以作者只实现了sps的分析器，说明作者下了很大功夫去学习264的标准，其中的Golomb解码还是挺复杂的，能解对不容易，我在PC和手机平台都是用ffmpeg去解析的。
+        // SPS里面包括了视频分辨率，帧率，profile level等视频重要信息。
+
+        let config = SPSParser.parseSPS(sps);
+
+        if (i !== 0) {
+          // ignore other sps's config
+          continue;
+        }
+
+        meta.codecWidth = config.codec_size.width;
+        meta.codecHeight = config.codec_size.height;
+        meta.presentWidth = config.present_size.width;
+        meta.presentHeight = config.present_size.height;
+        meta.profile = config.profile_string;
+        meta.level = config.level_string;
+        meta.bitDepth = config.bit_depth;
+        meta.chromaFormat = config.chroma_format;
+        meta.sarRatio = config.sar_ratio; // meta.frameRate = config.frame_rate;
+        // if (config.frame_rate.fixed === false ||
+        //     config.frame_rate.fps_num === 0 ||
+        //     config.frame_rate.fps_den === 0) {
+        //     meta.frameRate = {};
+        // }
+        // let fps_den = meta.frameRate.fps_den;
+        // let fps_num = meta.frameRate.fps_num;
+        // meta.refSampleDuration = meta.timescale * (fps_den / fps_num);
+
+        let codecArray = sps.subarray(1, 4);
+        let codecString = 'avc1.';
+
+        for (let j = 0; j < 3; j++) {
+          let h = codecArray[j].toString(16);
+
+          if (h.length < 2) {
+            h = '0' + h;
+          }
+
+          codecString += h;
+        } // codec
+
+
+        meta.codec = codecString;
+      }
+
+      let ppsCount = v.getUint8(offset); // numOfPictureParameterSets
+
+      if (ppsCount === 0) {
+        // this._onError(DemuxErrors.FORMAT_ERROR, 'Flv: Invalid AVCDecoderConfigurationRecord: No PPS');
+        return;
+      }
+
+      offset++;
+
+      for (let i = 0; i < ppsCount; i++) {
+        let len = v.getUint16(offset, false); // pictureParameterSetLength
+
+        offset += 2;
+
+        if (len === 0) {
+          continue;
+        } // pps is useless for extracting video information
+
+
+        offset += len;
+      } // meta.avcc = arrayBuffer;
+
+
+      return meta;
+    }
+
     class MseDecoder extends Emitter {
       constructor(player) {
         super();
@@ -3045,6 +3632,7 @@
         this.timeInit = false;
         this.sequenceNumber = 0;
         this.mediaSourceOpen = false;
+        this.codec = null;
         player.video.$videoElement.src = window.URL.createObjectURL(this.mediaSource);
         const {
           debug,
@@ -3059,8 +3647,12 @@
         proxy(this.mediaSource, 'sourceclose', () => {
           this.player.emit(EVENTS.mseSourceClose);
         });
-        proxy(player.video.$videoElement, 'waiting', () => {});
-        proxy(player.video.$videoElement, 'timeupdate', () => {});
+        proxy(player.video.$videoElement, 'waiting', () => {
+          this.player.emit(EVENTS.videoWaiting);
+        });
+        proxy(player.video.$videoElement, 'timeupdate', () => {
+          this.player.emit(EVENTS.videoTimeUpdate);
+        });
         player.debug.log('MediaSource', 'init');
       }
 
@@ -3086,12 +3678,14 @@
 
       set duration(duration) {
         this.mediaSource.duration = duration;
-      }
+      } //
+
 
       decodeVideo(payload, ts, isIframe) {
         const player = this.player;
 
         if (!this.hasInit) {
+          //
           if (isIframe && payload[1] === 0) {
             const videoCodec = payload[0] & 0x0F;
             player.video.updateVideoInfo({
@@ -3099,17 +3693,20 @@
             });
             this.hasInit = true;
             player.debug.log('MediaSource', 'decodeVideo hasInit set true');
-            let data = payload.slice(5); // 这一步肯定是成功的。
+            let data = payload.slice(5);
+            const avcConfig = parseAVCDecoderConfigurationRecord(data);
+            console.log(avcConfig);
+            this.codec = formatMp4VideoCodec(avcConfig.codec); // 这一步肯定是成功的。
 
             const metaData = {
               id: 1,
               type: 'video',
               timescale: 1000,
               duration: 0,
+              codec: avcConfig.codec,
               avcc: data,
-              codecWidth: 960,
-              codecHeight: 540,
-              codec: 512
+              codecWidth: avcConfig.codecWidth,
+              codecHeight: avcConfig.codecHeight
             }; // ftyp
 
             const metaBox = MP4.generateInitSegment(metaData);
@@ -3125,9 +3722,8 @@
           let bytes = arrayBuffer.byteLength;
           let cts = 0;
           let dts = ts;
-          let flags = isIframe;
           const $video = player.video.$videoElement;
-          player.debug.log('MediaSource', 'decodeVideo', `$video.buffered.length:${$video.buffered.length}, bytes:${bytes},cts:${cts},dts:${ts},flag:${isIframe}`);
+          player.debug.log('MediaSource', 'decodeVideo', `$video.buffered.length:${$video.buffered.length},bytes:${bytes},cts:${cts},dts:${ts},flag:${isIframe}`);
 
           if ($video.buffered.length > 1) {
             this.removeBuffer($video.buffered.start(0), $video.buffered.end(0));
@@ -3146,8 +3742,7 @@
             mdatbox[0] = mdatBytes >>> 24 & 255;
             mdatbox[1] = mdatBytes >>> 16 & 255;
             mdatbox[2] = mdatBytes >>> 8 & 255;
-            mdatbox[3] = mdatBytes & 255; // mdat
-
+            mdatbox[3] = mdatBytes & 255;
             mdatbox.set(MP4.types.mdat, 4);
             mdatbox.set(this.cacheTrack.data, 8);
             this.cacheTrack.duration = dts - this.cacheTrack.dts; // moof
@@ -3164,21 +3759,22 @@
             player.debug.log('MediaSource', 'timeInit set false , cacheTrack = {}');
             this.timeInit = false;
             this.cacheTrack = {};
-          }
+          } // this.cacheTrack.id = 1;
 
-          this.cacheTrack.id = 1;
-          this.cacheTrack.sn = ++this.sequenceNumber;
+
+          this.cacheTrack.sequenceNumber = ++this.sequenceNumber;
           this.cacheTrack.size = bytes;
           this.cacheTrack.dts = dts;
-          this.cacheTrack.cts = cts; // this.cacheTrack.isKeyframe = flags;
+          this.cacheTrack.cts = cts;
+          this.cacheTrack.isKeyframe = isIframe;
+          this.cacheTrack.data = arrayBuffer; //
 
-          this.cacheTrack.data = arrayBuffer;
           this.cacheTrack.flags = {
             isLeading: 0,
-            dependsOn: flags ? 2 : 1,
-            isDependedOn: flags ? 1 : 0,
+            dependsOn: isIframe ? 2 : 1,
+            isDependedOn: isIframe ? 1 : 0,
             hasRedundancy: 0,
-            isNonSync: flags ? 0 : 1
+            isNonSync: isIframe ? 0 : 1
           }; //
 
           if (!this.timeInit && $video.buffered.length === 1) {
@@ -3209,9 +3805,9 @@
           }
         } = this.player;
 
-        if (this.sourceBuffer === null) {
-          const codecs = this.isAvc ? MP4_CODECS.avc : MP4_CODECS.hev;
-          this.sourceBuffer = this.mediaSource.addSourceBuffer(codecs);
+        if (this.sourceBuffer === null && this.codec) {
+          // const codecs = MP4_CODECS.avc;
+          this.sourceBuffer = this.mediaSource.addSourceBuffer(this.codec);
           proxy(this.sourceBuffer, 'error', error => {
             this.player.emit(EVENTS.mseSourceBufferError, error);
           });
@@ -3284,6 +3880,7 @@
         this.sequenceNumber = 0;
         this.cacheTrack = null;
         this.timeInit = false;
+        this.codec = null;
       }
 
     }
