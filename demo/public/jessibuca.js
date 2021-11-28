@@ -3722,7 +3722,7 @@
           let cts = 0;
           let dts = ts;
           const $video = player.video.$videoElement;
-          player.debug.log('MediaSource', 'decodeVideo', `$video.buffered.length:${$video.buffered.length},bytes:${bytes},cts:${cts},dts:${ts},flag:${isIframe}`);
+          player.debug.log('MediaSource', 'decodeVideo', `$video.buffered.length:${$video.buffered.length}, this.sourceBuffer.buffered:${this.sourceBuffer.buffered.length},bytes:${bytes},cts:${cts},dts:${ts},flag:${isIframe}`);
 
           if ($video.buffered.length > 1) {
             this.removeBuffer($video.buffered.start(0), $video.buffered.end(0));
