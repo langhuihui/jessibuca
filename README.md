@@ -22,7 +22,7 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 执行yarn dev 或者 npm run dev
 
 ## API
-[API](/api.md)
+[API](/demo/api.md)
 
 ## 源码目录结构
 
