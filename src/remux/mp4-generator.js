@@ -1,36 +1,42 @@
-/*
- * Copyright (C) 2016 Bilibili. All Rights Reserved.
- *
- * This file is derived from dailymotion's hls.js library (hls.js/src/remux/mp4-generator.js)
- * @author zheng qian <xqq@xqq.im>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-//  MP4 boxes generator for ISO BMFF (ISO Base Media File Format, defined in ISO/IEC 14496-12)
 class MP4 {
 
     static init() {
         MP4.types = {
-            avc1: [], avcC: [], btrt: [], dinf: [],
-            dref: [], esds: [], ftyp: [], hdlr: [],
-            mdat: [], mdhd: [], mdia: [], mfhd: [],
-            minf: [], moof: [], moov: [], mp4a: [],
-            mvex: [], mvhd: [], sdtp: [], stbl: [],
-            stco: [], stsc: [], stsd: [], stsz: [],
-            stts: [], tfdt: [], tfhd: [], traf: [],
-            trak: [], trun: [], trex: [], tkhd: [],
-            vmhd: [], smhd: [], '.mp3': []
+            avc1: [],
+            avcC: [],
+            hvc1: [],
+            btrt: [],
+            dinf: [],
+            dref: [],
+            esds: [],
+            ftyp: [],
+            hdlr: [],
+            mdat: [],
+            mdhd: [],
+            mdia: [],
+            mfhd: [],
+            minf: [],
+            moof: [],
+            moov: [],
+            mp4a: [],
+            mvex: [],
+            mvhd: [],
+            sdtp: [],
+            stbl: [],
+            stco: [],
+            stsc: [],
+            stsd: [],
+            stsz: [],
+            stts: [],
+            tfdt: [],
+            tfhd: [],
+            traf: [],
+            trak: [],
+            trun: [],
+            trex: [],
+            tkhd: [],
+            vmhd: [],
+            smhd: []
         };
 
         for (let name in MP4.types) {
@@ -318,13 +324,14 @@ class MP4 {
     // Sample description box
     static stsd(meta) {
         if (meta.type === 'audio') {
-            if (meta.codec === 'mp3') {
-                return MP4.box(MP4.types.stsd, MP4.constants.STSD_PREFIX, MP4.mp3(meta));
-            }
             // else: aac -> mp4a
             return MP4.box(MP4.types.stsd, MP4.constants.STSD_PREFIX, MP4.mp4a(meta));
         } else {
-            return MP4.box(MP4.types.stsd, MP4.constants.STSD_PREFIX, MP4.avc1(meta));
+            if (meta.videoType === 'avc') {
+                return MP4.box(MP4.types.stsd, MP4.constants.STSD_PREFIX, MP4.avc1(meta));
+            } else {
+                MP4.box(MP4.types.stsd, MP4.constants.STSD_PREFIX, MP4.hvc1(meta))
+            }
         }
     }
 
@@ -430,6 +437,16 @@ class MP4 {
             0xFF, 0xFF               // pre_defined = -1
         ]);
         return MP4.box(MP4.types.avc1, data, MP4.box(MP4.types.avcC, avcc));
+    }
+
+
+    static hvc1(meta) {
+        let avcc = meta.avcc;
+        let codecWidth = meta.codecWidth;
+        let codecHeight = meta.codecHeight;
+        let data = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, codecWidth >>> 8 & 255, codecWidth & 255, codecHeight >>> 8 & 255, codecHeight & 255, 0, 72, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 255, 255]);
+        return MP4.box(MP4.types.hvc1, data, MP4.box(MP4.types.hvcC, avcc))
+
     }
 
     // Movie Extends box

@@ -26,6 +26,15 @@ export default class VideoLoader extends Emitter {
             this.player.debug.log('Video', 'canplay');
         })
 
+
+        proxy(this.$videoElement, 'waiting', () => {
+            this.player.emit(EVENTS.videoWaiting);
+        })
+
+        proxy(this.$videoElement, 'timeupdate', () => {
+            this.player.emit(EVENTS.videoTimeUpdate);
+        })
+
         this.player.debug.log('Video', 'init');
 
     }
@@ -54,9 +63,8 @@ export default class VideoLoader extends Emitter {
     }
 
     play() {
-        this.$videoElement.autoplay = true;
-        this.$videoElement.controls = true;
-        // this.$videoElement.play();
+        // this.$videoElement.autoplay = true;
+        this.$videoElement.play();
     }
 
     clearView() {
