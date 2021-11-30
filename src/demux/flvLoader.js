@@ -43,11 +43,7 @@ export default class FlvLoader {
             switch (type) {
                 case FLV_MEDIA_TYPE.audio:
                     if (player._opt.hasAudio) {
-                        if (player._opt.useMSE) {
-                            mseDecoder.decodeAudio(payload, ts);
-                        } else {
-                            decoderWorker.decodeAudio(payload, ts);
-                        }
+                        decoderWorker.decodeAudio(payload, ts);
                     }
                     break
                 case FLV_MEDIA_TYPE.video:

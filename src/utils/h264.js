@@ -1,4 +1,4 @@
-import SPSParser from './sps-parser.js';
+import SPSParser from './h264-sps-parser.js';
 
 //
 export function parseAVCDecoderConfigurationRecord(arrayBuffer) {
@@ -109,6 +109,8 @@ export function parseAVCDecoderConfigurationRecord(arrayBuffer) {
         // pps is useless for extracting video information
         offset += len;
     }
+
+    meta.videoType = 'avc';
 
     // meta.avcc = arrayBuffer;
     return meta;

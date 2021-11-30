@@ -15,7 +15,7 @@ import WebcodecsDecoder from "../decoder/webcodecs";
 import Control from "../control";
 import './style.scss'
 import observer from "./observer";
-import MseDecoder from "../decoder/mse";
+import MseDecoder from "../decoder/mediaSource";
 
 export default class Player extends Emitter {
     constructor(container, options) {
@@ -437,7 +437,7 @@ export default class Player extends Emitter {
     // 心跳检查，如果渲染间隔暂停了多少时间之后，就会抛出异常
     checkHeartTimeout() {
         this._checkHeartTimeout = setTimeout(() => {
-            this.pause().then(() => {
+            this.pause(false).then(() => {
                 this.emit(EVENTS.timeout, 'heart timeout');
             });
         }, this._opt.timeout * 1000)
@@ -454,7 +454,7 @@ export default class Player extends Emitter {
     // loading 等待时间
     checkLoadingTimeout() {
         this._checkLoadingTimeout = setTimeout(() => {
-            this.pause().then(() => {
+            this.pause(false).then(() => {
                 this.emit(EVENTS.timeout, 'loading timeout');
             });
         }, this._opt.timeout * 1000)

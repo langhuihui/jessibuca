@@ -1,8 +1,8 @@
 import Emitter from "../utils/emitter";
-import {EVENTS, MEDIA_SOURCE_STATE, MP4_CODECS} from "../constant";
-import MP4 from "../remux/mp4-generator2";
-import {formatMp4VideoCodec, readSPS} from "../utils";
+import {EVENTS, FRAG_DURATION, MEDIA_SOURCE_STATE, MP4_CODECS, VIDEO_ENC_CODE} from "../constant";
+import MP4 from "../remux/mp4-generator";
 import {parseAVCDecoderConfigurationRecord} from "../utils/h264";
+import {parseHEVCDecoderConfigurationRecord} from "../utils/h256";
 
 export default class MseDecoder extends Emitter {
     constructor(player) {
@@ -80,7 +80,7 @@ export default class MseDecoder extends Emitter {
                 this._doDecode();
                 this.decodeInterval = setInterval(() => {
                     this._doDecode();
-                }, 40)
+                }, FRAG_DURATION)
             }
         }
     }
@@ -100,25 +100,30 @@ export default class MseDecoder extends Emitter {
         player.video.updateVideoInfo({
             encTypeCode: videoCodec
         })
-
-        player.debug.log('MediaSource', 'decodeVideo hasInit set true');
+        // player.debug.log('MediaSource', 'decodeVideo hasInit set true');
         let data = payload.slice(5);
-        const avcConfig = parseAVCDecoderConfigurationRecord(data);
-        console.log(avcConfig);
+        let config = {};
+
+        if (videoCodec === VIDEO_ENC_CODE.h264) {
+            config = parseAVCDecoderConfigurationRecord(data)
+        } else if (videoCodec === VIDEO_ENC_CODE.h265) {
+            config = parseHEVCDecoderConfigurationRecord(data);
+        }
+        // console.log(avcConfig);
         const metaData = {
             id: 1,
             type: 'video',
             timescale: 1000,
             duration: 0,
             avcc: data,
-            codecWidth: avcConfig.codecWidth,
-            codecHeight: avcConfig.codecHeight,
-            videoType: 'avc'
+            codecWidth: config.codecWidth,
+            codecHeight: config.codecHeight,
+            videoType: config.videoType
         }
-        console.log('metaData', metaData);
+        // console.log('metaData', metaData);
         // ftyp
         const metaBox = MP4.generateInitSegment(metaData);
-        console.log('metaBox', metaBox);
+        // console.log('metaBox', metaBox);
         this.isAvc = true;
         this.appendBuffer(metaBox.buffer);
         this.sequenceNumber = 0;
@@ -130,19 +135,18 @@ export default class MseDecoder extends Emitter {
     _decodeVideo(payload, ts, isIframe) {
         const player = this.player;
         let arrayBuffer = payload.slice(5);
-        // 真正的开始解码
         let bytes = arrayBuffer.byteLength;
         let cts = 0;
         let dts = ts;
 
         const $video = player.video.$videoElement;
-        player.debug.log('MediaSource', 'decodeVideo', `$video.buffered.length:${$video.buffered.length},bytes:${bytes},cts:${cts},dts:${ts},flag:${isIframe}`);
+        // player.debug.log('MediaSource', 'decodeVideo', `$video.buffered.length:${$video.buffered.length},bytes:${bytes},cts:${cts},dts:${ts},flag:${isIframe}`);
 
         if ($video.buffered.length > 1) {
             this.removeBuffer($video.buffered.start(0), $video.buffered.end(0));
             this.timeInit = false;
         }
-        player.debug.log('MediaSource', `cacheTrack.dts:${this.cacheTrack && this.cacheTrack.dts}`);
+        // player.debug.log('MediaSource', `cacheTrack.dts:${this.cacheTrack && this.cacheTrack.dts}`);
         if ($video.drop && dts - this.cacheTrack.dts > 1000) {
             $video.drop = false;
             this.cacheTrack = {};
@@ -166,7 +170,7 @@ export default class MseDecoder extends Emitter {
             // appendBuffer
             this.appendBuffer(result.buffer)
             player.handleRender();
-            player.debug.log('MediaSource', 'add render data');
+            // player.debug.log('MediaSource', 'add render data');
         } else {
             player.debug.log('MediaSource', 'timeInit set false , cacheTrack = {}');
             this.timeInit = false;
@@ -226,8 +230,9 @@ export default class MseDecoder extends Emitter {
         }
 
         if (this.sourceBuffer.updating === false && this.isStateOpen) {
-            this.player.debug.log('MediaSource', 'appendBuffer')
+            // this.player.debug.log('MediaSource', 'appendBuffer')
             this.sourceBuffer.appendBuffer(buffer);
+            0
             return;
         }
 

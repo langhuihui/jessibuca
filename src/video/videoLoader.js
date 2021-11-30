@@ -26,13 +26,12 @@ export default class VideoLoader extends Emitter {
             this.player.debug.log('Video', 'canplay');
         })
 
-
         proxy(this.$videoElement, 'waiting', () => {
             this.player.emit(EVENTS.videoWaiting);
         })
 
-        proxy(this.$videoElement, 'timeupdate', () => {
-            this.player.emit(EVENTS.videoTimeUpdate);
+        proxy(this.$videoElement, 'timeupdate', (event) => {
+            this.player.emit(EVENTS.videoTimeUpdate, event.timeStamp);
         })
 
         this.player.debug.log('Video', 'init');

@@ -162,6 +162,7 @@ class Jessibuca extends Emitter {
                             resolve();
                         } else {
                             // pause ->  play
+                            this.clearView();
                             this.player.play(this._opt.url).then(() => {
                                 resolve();
                             }).catch(() => {
@@ -185,7 +186,7 @@ class Jessibuca extends Emitter {
                 }
             } else {
                 //  url 不存在的时候
-                //  就是从 play-> pause -> play
+                //  就是从 play -> pause -> play
                 this.player.play(this._opt.url).then(() => {
                     resolve();
                 }).catch(() => {

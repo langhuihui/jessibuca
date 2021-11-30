@@ -175,9 +175,15 @@ export const SCREENSHOT_TYPE = {
 
 
 export const VIDEO_ENC_TYPE = {
-    7: 'H264', //
-    12: 'H265' //
+    7: 'H264(AVC)', //
+    12: 'H265(HEVC)' //
 }
+
+export const VIDEO_ENC_CODE = {
+    h264: 7,
+    h265: 12
+}
+
 
 export const AUDIO_ENC_TYPE = {
     10: 'AAC',
@@ -185,9 +191,10 @@ export const AUDIO_ENC_TYPE = {
     8: 'MULAW'
 }
 
-export const VIDEO_ENC_TYPE_OBJ = {
-    h264: 'H264',
-    H265: 'H265'
+export const H265_NAL_TYPE = {
+    vps: 32,
+    sps: 33,
+    pps: 34
 }
 
 export const CONTROL_HEIGHT = 38
@@ -219,7 +226,6 @@ export const ENCODED_VIDEO_TYPE = {
 
 export const MP4_CODECS = {
     avc: 'video/mp4; codecs="avc1.64002A"',
-    // avc: 'video/mp4; codecs="avc1.64001f"',
     hev: 'video/mp4; codecs="hev1.1.6.L123.b0"',
 }
 
@@ -229,3 +235,7 @@ export const MEDIA_SOURCE_STATE = {
     open: 'open',
     closed: 'closed'
 }
+
+
+// frag duration
+export const FRAG_DURATION = Math.ceil(1000 / 25)

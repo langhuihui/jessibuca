@@ -163,15 +163,24 @@
       blob: 'blob'
     };
     const VIDEO_ENC_TYPE = {
-      7: 'H264',
+      7: 'H264(AVC)',
       //
-      12: 'H265' //
+      12: 'H265(HEVC)' //
 
+    };
+    const VIDEO_ENC_CODE = {
+      h264: 7,
+      h265: 12
     };
     const AUDIO_ENC_TYPE = {
       10: 'AAC',
       7: 'ALAW',
       8: 'MULAW'
+    };
+    const H265_NAL_TYPE = {
+      vps: 32,
+      sps: 33,
+      pps: 34
     };
     const CONTROL_HEIGHT = 38;
     const SCALE_MODE_TYPE = {
@@ -197,14 +206,15 @@
     };
     const MP4_CODECS = {
       avc: 'video/mp4; codecs="avc1.64002A"',
-      // avc: 'video/mp4; codecs="avc1.64001f"',
       hev: 'video/mp4; codecs="hev1.1.6.L123.b0"'
     };
     const MEDIA_SOURCE_STATE = {
       ended: 'ended',
       open: 'open',
       closed: 'closed'
-    };
+    }; // frag duration
+
+    const FRAG_DURATION = Math.ceil(1000 / 25);
 
     class Debug {
       constructor(master) {
@@ -1148,8 +1158,8 @@
         proxy(this.$videoElement, 'waiting', () => {
           this.player.emit(EVENTS.videoWaiting);
         });
-        proxy(this.$videoElement, 'timeupdate', () => {
-          this.player.emit(EVENTS.videoTimeUpdate);
+        proxy(this.$videoElement, 'timeupdate', event => {
+          this.player.emit(EVENTS.videoTimeUpdate, event.timeStamp);
         });
         this.player.debug.log('Video', 'init');
       }
@@ -8002,8 +8012,8 @@
           type: MEDIA_TYPE.video,
           ts: Math.max(ts, 0),
           isIFrame
-        }; // this.player.debug.log('decoderWorker', 'decodeVideo');
-
+        };
+        this.player.debug.log('decoderWorker', 'decodeVideo');
         this.decoderWorker.postMessage({
           cmd: WORKER_SEND_TYPE.decode,
           buffer: arrayBuffer,
@@ -8103,11 +8113,7 @@
           switch (type) {
             case FLV_MEDIA_TYPE.audio:
               if (player._opt.hasAudio) {
-                if (player._opt.useMSE) {
-                  mseDecoder.decodeAudio(payload, ts);
-                } else {
-                  decoderWorker.decodeAudio(payload, ts);
-                }
+                decoderWorker.decodeAudio(payload, ts);
               }
 
               break;
@@ -8176,9 +8182,11 @@
       dispatch(data) {
         const player = this.player;
         const {
-          decoderWorker
+          decoderWorker,
+          webcodecsDecoder,
+          mseDecoder
         } = player;
-        const dv = new DataView(data);
+        const dv = new DataView(data.buffer);
         const type = dv.getUint8(0);
         const ts = dv.getUint32(1, false);
 
@@ -8196,7 +8204,17 @@
               if (dv.byteLength > 5) {
                 const payload = new Uint8Array(data, 5);
                 const isIframe = dv.getUint8(5) >> 4 === 1;
-                decoderWorker.decodeVideo(payload, ts, isIframe);
+
+                if (player._opt.useWCS) {
+                  // this.player.debug.log('FlvDemux', 'decodeVideo useWCS')
+                  webcodecsDecoder.decodeVideo(payload, ts, isIframe);
+                } else if (player._opt.useMSE) {
+                  // this.player.debug.log('FlvDemux', 'decodeVideo useMSE')
+                  mseDecoder.decodeVideo(payload, ts, isIframe);
+                } else {
+                  // this.player.debug.log('FlvDemux', 'decodeVideo')
+                  decoderWorker.decodeVideo(payload, ts, isIframe);
+                }
               }
             }
 
@@ -8763,6 +8781,97 @@
     });
 
     class MP4 {
+      static initOld() {
+        MP4.types = {
+          avc1: [],
+          avcC: [],
+          hvc1: [],
+          hvcC: [],
+          btrt: [],
+          dinf: [],
+          dref: [],
+          esds: [],
+          ftyp: [],
+          hdlr: [],
+          mdat: [],
+          mdhd: [],
+          mdia: [],
+          mfhd: [],
+          minf: [],
+          moof: [],
+          moov: [],
+          mp4a: [],
+          mvex: [],
+          mvhd: [],
+          sdtp: [],
+          stbl: [],
+          stco: [],
+          stsc: [],
+          stsd: [],
+          stsz: [],
+          stts: [],
+          tfdt: [],
+          tfhd: [],
+          traf: [],
+          trak: [],
+          trun: [],
+          trex: [],
+          tkhd: [],
+          vmhd: [],
+          smhd: []
+        };
+
+        for (const name in MP4.types) {
+          if (MP4.types.hasOwnProperty(name)) {
+            MP4.types[name] = [name.charCodeAt(0), name.charCodeAt(1), name.charCodeAt(2), name.charCodeAt(3)];
+          }
+        }
+
+        const constants = MP4.constants = {};
+        constants.FTYP = new Uint8Array([105, 115, 111, 109, // major_brand: isom
+        0, 0, 0, 1, // minor_version: 0x01
+        105, 115, 111, 109, // isom
+        97, 118, 99, 49 // avc1
+        ]);
+        constants.STSD_PREFIX = new Uint8Array([0, 0, 0, 0, // version(0) + flags
+        0, 0, 0, 1 // entry_count
+        ]);
+        constants.STTS = new Uint8Array([0, 0, 0, 0, // version(0) + flags
+        0, 0, 0, 0 // entry_count
+        ]);
+        constants.STSC = constants.STCO = constants.STTS;
+        constants.STSZ = new Uint8Array([0, 0, 0, 0, // version(0) + flags
+        0, 0, 0, 0, // sample_size
+        0, 0, 0, 0 // sample_count
+        ]);
+        constants.HDLR_VIDEO = new Uint8Array([0, 0, 0, 0, // version(0) + flags
+        0, 0, 0, 0, // pre_defined
+        118, 105, 100, 101, // handler_type: 'vide'
+        0, 0, 0, 0, // reserved: 3 * 4 bytes
+        0, 0, 0, 0, 0, 0, 0, 0, 86, 105, 100, 101, 111, 72, 97, 110, 100, 108, 101, 114, 0 // name: VideoHandler
+        ]);
+        constants.HDLR_AUDIO = new Uint8Array([0, 0, 0, 0, // version(0) + flags
+        0, 0, 0, 0, // pre_defined
+        115, 111, 117, 110, // handler_type: 'soun'
+        0, 0, 0, 0, // reserved: 3 * 4 bytes
+        0, 0, 0, 0, 0, 0, 0, 0, 83, 111, 117, 110, 100, 72, 97, 110, 100, 108, 101, 114, 0 // name: SoundHandler
+        ]);
+        constants.DREF = new Uint8Array([0, 0, 0, 0, // version(0) + flags
+        0, 0, 0, 1, // entry_count
+        0, 0, 0, 12, // entry_size
+        117, 114, 108, 32, // type 'url '
+        0, 0, 0, 1 // version(0) + flags
+        ]);
+        constants.SMHD = new Uint8Array([0, 0, 0, 0, // version(0) + flags
+        0, 0, 0, 0 // balance(2) + reserved(2)
+        ]); //
+
+        constants.VMHD = new Uint8Array([0, 0, 0, 1, // version(0) + flags
+        0, 0, // graphicsmode: 2 bytes
+        0, 0, 0, 0, // opcolor: 3 * 2 bytes
+        0, 0]);
+      }
+
       static init() {
         MP4.types = {
           avc1: [],
@@ -8803,175 +8912,365 @@
           smhd: []
         };
 
-        for (const e in MP4.types) {
-          if (MP4.types.hasOwnProperty(e)) {
-            MP4.types[e] = [e.charCodeAt(0), e.charCodeAt(1), e.charCodeAt(2), e.charCodeAt(3)];
+        for (let name in MP4.types) {
+          if (MP4.types.hasOwnProperty(name)) {
+            MP4.types[name] = [name.charCodeAt(0), name.charCodeAt(1), name.charCodeAt(2), name.charCodeAt(3)];
           }
         }
 
-        const A = MP4.constants = {};
-        A.FTYP = new Uint8Array([105, 115, 111, 109, 0, 0, 0, 1, 105, 115, 111, 109, 97, 118, 99, 49]), A.STSD_PREFIX = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 1]), A.STTS = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0]), A.STSC = A.STCO = A.STTS, A.STSZ = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), A.HDLR_VIDEO = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 118, 105, 100, 101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 86, 105, 100, 101, 111, 72, 97, 110, 100, 108, 101, 114, 0]), A.HDLR_AUDIO = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 115, 111, 117, 110, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 83, 111, 117, 110, 100, 72, 97, 110, 100, 108, 101, 114, 0]), A.DREF = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 12, 117, 114, 108, 32, 0, 0, 0, 1]), A.SMHD = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0]), A.VMHD = new Uint8Array([0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]);
-      }
+        let constants = MP4.constants = {};
+        constants.FTYP = new Uint8Array([0x69, 0x73, 0x6F, 0x6D, // major_brand: isom
+        0x0, 0x0, 0x0, 0x1, // minor_version: 0x01
+        0x69, 0x73, 0x6F, 0x6D, // isom
+        0x61, 0x76, 0x63, 0x31 // avc1
+        ]);
+        constants.STSD_PREFIX = new Uint8Array([0x00, 0x00, 0x00, 0x00, // version(0) + flags
+        0x00, 0x00, 0x00, 0x01 // entry_count
+        ]);
+        constants.STTS = new Uint8Array([0x00, 0x00, 0x00, 0x00, // version(0) + flags
+        0x00, 0x00, 0x00, 0x00 // entry_count
+        ]);
+        constants.STSC = constants.STCO = constants.STTS;
+        constants.STSZ = new Uint8Array([0x00, 0x00, 0x00, 0x00, // version(0) + flags
+        0x00, 0x00, 0x00, 0x00, // sample_size
+        0x00, 0x00, 0x00, 0x00 // sample_count
+        ]);
+        constants.HDLR_VIDEO = new Uint8Array([0x00, 0x00, 0x00, 0x00, // version(0) + flags
+        0x00, 0x00, 0x00, 0x00, // pre_defined
+        0x76, 0x69, 0x64, 0x65, // handler_type: 'vide'
+        0x00, 0x00, 0x00, 0x00, // reserved: 3 * 4 bytes
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x56, 0x69, 0x64, 0x65, 0x6F, 0x48, 0x61, 0x6E, 0x64, 0x6C, 0x65, 0x72, 0x00 // name: VideoHandler
+        ]);
+        constants.HDLR_AUDIO = new Uint8Array([0x00, 0x00, 0x00, 0x00, // version(0) + flags
+        0x00, 0x00, 0x00, 0x00, // pre_defined
+        0x73, 0x6F, 0x75, 0x6E, // handler_type: 'soun'
+        0x00, 0x00, 0x00, 0x00, // reserved: 3 * 4 bytes
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x53, 0x6F, 0x75, 0x6E, 0x64, 0x48, 0x61, 0x6E, 0x64, 0x6C, 0x65, 0x72, 0x00 // name: SoundHandler
+        ]);
+        constants.DREF = new Uint8Array([0x00, 0x00, 0x00, 0x00, // version(0) + flags
+        0x00, 0x00, 0x00, 0x01, // entry_count
+        0x00, 0x00, 0x00, 0x0C, // entry_size
+        0x75, 0x72, 0x6C, 0x20, // type 'url '
+        0x00, 0x00, 0x00, 0x01 // version(0) + flags
+        ]); // Sound media header
 
-      static box(A) {
-        let e = 8,
-            t = null,
-            r = Array.prototype.slice.call(arguments, 1),
-            i = r.length;
+        constants.SMHD = new Uint8Array([0x00, 0x00, 0x00, 0x00, // version(0) + flags
+        0x00, 0x00, 0x00, 0x00 // balance(2) + reserved(2)
+        ]); // video media header
 
-        for (let h = 0; h < i; h++) {
-          e += r[h].byteLength;
+        constants.VMHD = new Uint8Array([0x00, 0x00, 0x00, 0x01, // version(0) + flags
+        0x00, 0x00, // graphicsmode: 2 bytes
+        0x00, 0x00, 0x00, 0x00, // opcolor: 3 * 2 bytes
+        0x00, 0x00]);
+      } // Generate a box
+
+
+      static box(type) {
+        let size = 8;
+        let result = null;
+        let datas = Array.prototype.slice.call(arguments, 1);
+        let arrayCount = datas.length;
+
+        for (let i = 0; i < arrayCount; i++) {
+          size += datas[i].byteLength;
         }
 
-        t = new Uint8Array(e), t[0] = e >>> 24 & 255, t[1] = e >>> 16 & 255, t[2] = e >>> 8 & 255, t[3] = e & 255, t.set(A, 4);
-        let o = 8;
+        result = new Uint8Array(size);
+        result[0] = size >>> 24 & 0xFF; // size
 
-        for (let h = 0; h < i; h++) {
-          t.set(r[h], o), o += r[h].byteLength;
+        result[1] = size >>> 16 & 0xFF;
+        result[2] = size >>> 8 & 0xFF;
+        result[3] = size & 0xFF;
+        result.set(type, 4); // type
+
+        let offset = 8;
+
+        for (let i = 0; i < arrayCount; i++) {
+          // data body
+          result.set(datas[i], offset);
+          offset += datas[i].byteLength;
         }
 
-        return t;
+        return result;
+      } // emit ftyp & moov
+
+
+      static generateInitSegment(meta) {
+        let ftyp = MP4.box(MP4.types.ftyp, MP4.constants.FTYP);
+        let moov = MP4.moov(meta);
+        let result = new Uint8Array(ftyp.byteLength + moov.byteLength);
+        result.set(ftyp, 0);
+        result.set(moov, ftyp.byteLength);
+        return result;
+      } // Movie metadata box
+
+
+      static moov(meta) {
+        let mvhd = MP4.mvhd(meta.timescale, meta.duration);
+        let trak = MP4.trak(meta);
+        let mvex = MP4.mvex(meta);
+        return MP4.box(MP4.types.moov, mvhd, trak, mvex);
+      } // Movie header box
+
+
+      static mvhd(timescale, duration) {
+        return MP4.box(MP4.types.mvhd, new Uint8Array([0x00, 0x00, 0x00, 0x00, // version(0) + flags
+        0x00, 0x00, 0x00, 0x00, // creation_time
+        0x00, 0x00, 0x00, 0x00, // modification_time
+        timescale >>> 24 & 0xFF, // timescale: 4 bytes
+        timescale >>> 16 & 0xFF, timescale >>> 8 & 0xFF, timescale & 0xFF, duration >>> 24 & 0xFF, // duration: 4 bytes
+        duration >>> 16 & 0xFF, duration >>> 8 & 0xFF, duration & 0xFF, 0x00, 0x01, 0x00, 0x00, // Preferred rate: 1.0
+        0x01, 0x00, 0x00, 0x00, // PreferredVolume(1.0, 2bytes) + reserved(2bytes)
+        0x00, 0x00, 0x00, 0x00, // reserved: 4 + 4 bytes
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, // ----begin composition matrix----
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, // ----end composition matrix----
+        0x00, 0x00, 0x00, 0x00, // ----begin pre_defined 6 * 4 bytes----
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ----end pre_defined 6 * 4 bytes----
+        0xFF, 0xFF, 0xFF, 0xFF // next_track_ID
+        ]));
+      } // Track box
+
+
+      static trak(meta) {
+        return MP4.box(MP4.types.trak, MP4.tkhd(meta), MP4.mdia(meta));
+      } // Track header box
+
+
+      static tkhd(meta) {
+        let trackId = meta.id,
+            duration = meta.duration;
+        let width = meta.presentWidth,
+            height = meta.presentHeight;
+        return MP4.box(MP4.types.tkhd, new Uint8Array([0x00, 0x00, 0x00, 0x07, // version(0) + flags
+        0x00, 0x00, 0x00, 0x00, // creation_time
+        0x00, 0x00, 0x00, 0x00, // modification_time
+        trackId >>> 24 & 0xFF, // track_ID: 4 bytes
+        trackId >>> 16 & 0xFF, trackId >>> 8 & 0xFF, trackId & 0xFF, 0x00, 0x00, 0x00, 0x00, // reserved: 4 bytes
+        duration >>> 24 & 0xFF, // duration: 4 bytes
+        duration >>> 16 & 0xFF, duration >>> 8 & 0xFF, duration & 0xFF, 0x00, 0x00, 0x00, 0x00, // reserved: 2 * 4 bytes
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // layer(2bytes) + alternate_group(2bytes)
+        0x00, 0x00, 0x00, 0x00, // volume(2bytes) + reserved(2bytes)
+        0x00, 0x01, 0x00, 0x00, // ----begin composition matrix----
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, // ----end composition matrix----
+        width >>> 8 & 0xFF, // width and height
+        width & 0xFF, 0x00, 0x00, height >>> 8 & 0xFF, height & 0xFF, 0x00, 0x00]));
       }
 
-      static generateInitSegment(A) {
-        let e = MP4.box(MP4.types.ftyp, MP4.constants.FTYP),
-            t = MP4.moov(A),
-            r = new Uint8Array(e.byteLength + t.byteLength);
-        return r.set(e, 0), r.set(t, e.byteLength), r;
-      }
+      static mdia(meta) {
+        return MP4.box(MP4.types.mdia, MP4.mdhd(meta), MP4.hdlr(meta), MP4.minf(meta));
+      } // Media header box
 
-      static moov(A) {
-        let e = MP4.mvhd(A.timescale, A.duration),
-            t = MP4.trak(A),
-            r = MP4.mvex(A);
-        return MP4.box(MP4.types.moov, e, t, r);
-      }
 
-      static mvhd(A, e) {
-        return MP4.box(MP4.types.mvhd, new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, A >>> 24 & 255, A >>> 16 & 255, A >>> 8 & 255, A & 255, e >>> 24 & 255, e >>> 16 & 255, e >>> 8 & 255, e & 255, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255]));
-      }
+      static mdhd(meta) {
+        let timescale = meta.timescale;
+        let duration = meta.duration;
+        return MP4.box(MP4.types.mdhd, new Uint8Array([0x00, 0x00, 0x00, 0x00, // version(0) + flags
+        0x00, 0x00, 0x00, 0x00, // creation_time
+        0x00, 0x00, 0x00, 0x00, // modification_time
+        timescale >>> 24 & 0xFF, // timescale: 4 bytes
+        timescale >>> 16 & 0xFF, timescale >>> 8 & 0xFF, timescale & 0xFF, duration >>> 24 & 0xFF, // duration: 4 bytes
+        duration >>> 16 & 0xFF, duration >>> 8 & 0xFF, duration & 0xFF, 0x55, 0xC4, // language: und (undetermined)
+        0x00, 0x00 // pre_defined = 0
+        ]));
+      } // Media handler reference box
 
-      static trak(A) {
-        return MP4.box(MP4.types.trak, MP4.tkhd(A), MP4.mdia(A));
-      }
 
-      static tkhd(A) {
-        let e = A.id,
-            t = A.duration,
-            r = A.codecWidth,
-            i = A.codecHeight;
-        return MP4.box(MP4.types.tkhd, new Uint8Array([0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, e >>> 24 & 255, e >>> 16 & 255, e >>> 8 & 255, e & 255, 0, 0, 0, 0, t >>> 24 & 255, t >>> 16 & 255, t >>> 8 & 255, t & 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, r >>> 8 & 255, r & 255, 0, 0, i >>> 8 & 255, i & 255, 0, 0]));
-      }
+      static hdlr(meta) {
+        let data = null;
 
-      static mdia(A) {
-        return MP4.box(MP4.types.mdia, MP4.mdhd(A), MP4.hdlr(A), MP4.minf(A));
-      }
+        if (meta.type === 'audio') {
+          data = MP4.constants.HDLR_AUDIO;
+        } else {
+          data = MP4.constants.HDLR_VIDEO;
+        }
 
-      static mdhd(A) {
-        let e = A.timescale,
-            t = A.duration;
-        return MP4.box(MP4.types.mdhd, new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, e >>> 24 & 255, e >>> 16 & 255, e >>> 8 & 255, e & 255, t >>> 24 & 255, t >>> 16 & 255, t >>> 8 & 255, t & 255, 85, 196, 0, 0]));
-      }
+        return MP4.box(MP4.types.hdlr, data);
+      } // Media infomation box
 
-      static hdlr(A) {
-        let e = null;
-        return A.type === "audio" ? e = MP4.constants.HDLR_AUDIO : e = MP4.constants.HDLR_VIDEO, MP4.box(MP4.types.hdlr, e);
-      }
 
-      static minf(A) {
-        let e = null;
-        return A.type === "audio" ? e = MP4.box(MP4.types.smhd, MP4.constants.SMHD) : e = MP4.box(MP4.types.vmhd, MP4.constants.VMHD), MP4.box(MP4.types.minf, e, MP4.dinf(), MP4.stbl(A));
-      }
+      static minf(meta) {
+        let xmhd = null;
+
+        if (meta.type === 'audio') {
+          xmhd = MP4.box(MP4.types.smhd, MP4.constants.SMHD);
+        } else {
+          xmhd = MP4.box(MP4.types.vmhd, MP4.constants.VMHD);
+        }
+
+        return MP4.box(MP4.types.minf, xmhd, MP4.dinf(), MP4.stbl(meta));
+      } // Data infomation box
+
 
       static dinf() {
-        return MP4.box(MP4.types.dinf, MP4.box(MP4.types.dref, MP4.constants.DREF));
+        let result = MP4.box(MP4.types.dinf, MP4.box(MP4.types.dref, MP4.constants.DREF));
+        return result;
+      } // Sample table box
+
+
+      static stbl(meta) {
+        let result = MP4.box(MP4.types.stbl, // type: stbl
+        MP4.stsd(meta), // Sample Description Table
+        MP4.box(MP4.types.stts, MP4.constants.STTS), // Time-To-Sample
+        MP4.box(MP4.types.stsc, MP4.constants.STSC), // Sample-To-Chunk
+        MP4.box(MP4.types.stsz, MP4.constants.STSZ), // Sample size
+        MP4.box(MP4.types.stco, MP4.constants.STCO) // Chunk offset
+        );
+        return result;
       }
 
-      static stbl(A) {
-        return MP4.box(MP4.types.stbl, MP4.stsd(A), MP4.box(MP4.types.stts, MP4.constants.STTS), MP4.box(MP4.types.stsc, MP4.constants.STSC), MP4.box(MP4.types.stsz, MP4.constants.STSZ), MP4.box(MP4.types.stco, MP4.constants.STCO));
+      static stsdOld(meta) {
+        return meta.type === "audio" ? MP4.box(MP4.types.stsd, MP4.constants.STSD_PREFIX, MP4.mp4a(meta)) : meta.videoType === 'avc' ? MP4.box(MP4.types.stsd, MP4.constants.STSD_PREFIX, MP4.avc1(meta)) : MP4.box(MP4.types.stsd, MP4.constants.STSD_PREFIX, MP4.hvc1(meta));
+      } // Sample description box
+
+
+      static stsd(meta) {
+        if (meta.type === 'audio') {
+          // else: aac -> mp4a
+          return MP4.box(MP4.types.stsd, MP4.constants.STSD_PREFIX, MP4.mp4a(meta));
+        } else {
+          if (meta.videoType === 'avc') {
+            //
+            return MP4.box(MP4.types.stsd, MP4.constants.STSD_PREFIX, MP4.avc1(meta));
+          } else {
+            //
+            return MP4.box(MP4.types.stsd, MP4.constants.STSD_PREFIX, MP4.hvc1(meta));
+          }
+        }
       }
 
-      static stsd(A) {
-        return A.type === "audio" ? MP4.box(MP4.types.stsd, MP4.constants.STSD_PREFIX, MP4.mp4a(A)) : A.videoType === 'avc' ? MP4.box(MP4.types.stsd, MP4.constants.STSD_PREFIX, MP4.avc1(A)) : MP4.box(MP4.types.stsd, MP4.constants.STSD_PREFIX, MP4.hvc1(A));
+      static mp4a(meta) {
+        let channelCount = meta.channelCount;
+        let sampleRate = meta.audioSampleRate;
+        let data = new Uint8Array([0x00, 0x00, 0x00, 0x00, // reserved(4)
+        0x00, 0x00, 0x00, 0x01, // reserved(2) + data_reference_index(2)
+        0x00, 0x00, 0x00, 0x00, // reserved: 2 * 4 bytes
+        0x00, 0x00, 0x00, 0x00, 0x00, channelCount, // channelCount(2)
+        0x00, 0x10, // sampleSize(2)
+        0x00, 0x00, 0x00, 0x00, // reserved(4)
+        sampleRate >>> 8 & 0xFF, // Audio sample rate
+        sampleRate & 0xFF, 0x00, 0x00]);
+        return MP4.box(MP4.types.mp4a, data, MP4.esds(meta));
       }
 
-      static mp4a(A) {
-        let e = A.channelCount,
-            t = A.audioSampleRate,
-            r = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, e, 0, 16, 0, 0, 0, 0, t >>> 8 & 255, t & 255, 0, 0]);
-        return MP4.box(MP4.types.mp4a, r, MP4.esds(A));
+      static esds(meta) {
+        let config = meta.config || [];
+        let configSize = config.length;
+        let data = new Uint8Array([0x00, 0x00, 0x00, 0x00, // version 0 + flags
+        0x03, // descriptor_type
+        0x17 + configSize, // length3
+        0x00, 0x01, // es_id
+        0x00, // stream_priority
+        0x04, // descriptor_type
+        0x0F + configSize, // length
+        0x40, // codec: mpeg4_audio
+        0x15, // stream_type: Audio
+        0x00, 0x00, 0x00, // buffer_size
+        0x00, 0x00, 0x00, 0x00, // maxBitrate
+        0x00, 0x00, 0x00, 0x00, // avgBitrate
+        0x05 // descriptor_type
+        ].concat([configSize]).concat(config).concat([0x06, 0x01, 0x02 // GASpecificConfig
+        ]));
+        return MP4.box(MP4.types.esds, data);
       }
 
-      static esds(A) {
-        let e = A.config || [],
-            t = e.length,
-            r = new Uint8Array([0, 0, 0, 0, 3, 23 + t, 0, 1, 0, 4, 15 + t, 64, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5].concat([t]).concat(e).concat([6, 1, 2]));
-        return MP4.box(MP4.types.esds, r);
+      static avc1(meta) {
+        let avcc = meta.avcc;
+        const width = meta.codecWidth;
+        const height = meta.codecHeight;
+        let data = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, width >>> 8 & 255, width & 255, height >>> 8 & 255, height & 255, 0, 72, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 255, 255]);
+        return MP4.box(MP4.types.avc1, data, MP4.box(MP4.types.avcC, avcc));
       }
 
-      static avc1(A) {
-        let e = A.avcc,
-            t = A.codecWidth;
-        const r = A.codecHeight;
-        let i = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, t >>> 8 & 255, t & 255, r >>> 8 & 255, r & 255, 0, 72, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 255, 255]);
-        return MP4.box(MP4.types.avc1, i, MP4.box(MP4.types.avcC, e));
+      static hvc1(meta) {
+        let avcc = meta.avcc;
+        const width = meta.codecWidth;
+        const height = meta.codecHeight;
+        let data = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, width >>> 8 & 255, width & 255, height >>> 8 & 255, height & 255, 0, 72, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 255, 255]);
+        return MP4.box(MP4.types.hvc1, data, MP4.box(MP4.types.hvcC, avcc));
+      } // Movie Extends box
+
+
+      static mvex(meta) {
+        return MP4.box(MP4.types.mvex, MP4.trex(meta));
+      } // Track Extends box
+
+
+      static trex(meta) {
+        let trackId = meta.id;
+        let data = new Uint8Array([0x00, 0x00, 0x00, 0x00, // version(0) + flags
+        trackId >>> 24 & 0xFF, // track_ID
+        trackId >>> 16 & 0xFF, trackId >>> 8 & 0xFF, trackId & 0xFF, 0x00, 0x00, 0x00, 0x01, // default_sample_description_index
+        0x00, 0x00, 0x00, 0x00, // default_sample_duration
+        0x00, 0x00, 0x00, 0x00, // default_sample_size
+        0x00, 0x01, 0x00, 0x01 // default_sample_flags
+        ]);
+        return MP4.box(MP4.types.trex, data);
+      } // Movie fragment box
+
+
+      static moof(track, baseMediaDecodeTime) {
+        return MP4.box(MP4.types.moof, MP4.mfhd(track.sequenceNumber), MP4.traf(track, baseMediaDecodeTime));
       }
 
-      static hvc1(A) {
-        let e = A.avcc,
-            t = A.codecWidth;
-        const r = A.codecHeight;
-        let i = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, t >>> 8 & 255, t & 255, r >>> 8 & 255, r & 255, 0, 72, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 255, 255]);
-        return MP4.box(MP4.types.hvc1, i, MP4.box(MP4.types.hvcC, e));
-      }
+      static mfhd(sequenceNumber) {
+        let data = new Uint8Array([0x00, 0x00, 0x00, 0x00, sequenceNumber >>> 24 & 0xFF, // sequence_number: int32
+        sequenceNumber >>> 16 & 0xFF, sequenceNumber >>> 8 & 0xFF, sequenceNumber & 0xFF]);
+        return MP4.box(MP4.types.mfhd, data);
+      } // Track fragment box
 
-      static mvex(A) {
-        return MP4.box(MP4.types.mvex, MP4.trex(A));
-      }
 
-      static trex(A) {
-        let e = A.id,
-            t = new Uint8Array([0, 0, 0, 0, e >>> 24 & 255, e >>> 16 & 255, e >>> 8 & 255, e & 255, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1]);
-        return MP4.box(MP4.types.trex, t);
-      }
+      static traf(track, baseMediaDecodeTime) {
+        let trackId = track.id; // Track fragment header box
 
-      static moof(A, e) {
-        return MP4.box(MP4.types.moof, MP4.mfhd(A.sequenceNumber), MP4.traf(A, e));
-      }
+        let tfhd = MP4.box(MP4.types.tfhd, new Uint8Array([0x00, 0x00, 0x00, 0x00, // version(0) & flags
+        trackId >>> 24 & 0xFF, // track_ID
+        trackId >>> 16 & 0xFF, trackId >>> 8 & 0xFF, trackId & 0xFF])); // Track Fragment Decode Time
 
-      static mfhd(A) {
-        let e = new Uint8Array([0, 0, 0, 0, A >>> 24 & 255, A >>> 16 & 255, A >>> 8 & 255, A & 255]);
-        return MP4.box(MP4.types.mfhd, e);
-      }
+        let tfdt = MP4.box(MP4.types.tfdt, new Uint8Array([0x00, 0x00, 0x00, 0x00, // version(0) & flags
+        baseMediaDecodeTime >>> 24 & 0xFF, // baseMediaDecodeTime: int32
+        baseMediaDecodeTime >>> 16 & 0xFF, baseMediaDecodeTime >>> 8 & 0xFF, baseMediaDecodeTime & 0xFF]));
+        let sdtp = MP4.sdtp(track);
+        let trun = MP4.trun(track, sdtp.byteLength + 16 + 16 + 8 + 16 + 8 + 8);
+        return MP4.box(MP4.types.traf, tfhd, tfdt, trun, sdtp);
+      } // Sample Dependency Type box
 
-      static traf(A, e) {
-        let t = A.id,
-            r = MP4.box(MP4.types.tfhd, new Uint8Array([0, 0, 0, 0, t >>> 24 & 255, t >>> 16 & 255, t >>> 8 & 255, t & 255])),
-            i = MP4.box(MP4.types.tfdt, new Uint8Array([0, 0, 0, 0, e >>> 24 & 255, e >>> 16 & 255, e >>> 8 & 255, e & 255])),
-            o = MP4.sdtp(A),
-            h = MP4.trun(A, o.byteLength + 16 + 16 + 8 + 16 + 8 + 8);
-        return MP4.box(MP4.types.traf, r, i, h, o);
-      }
 
-      static sdtp(A) {
+      static sdtpOld(A) {
         let e = new Uint8Array(4 + 1),
             t = A.flags;
         return e[4] = t.isLeading << 6 | t.dependsOn << 4 | t.isDependedOn << 2 | t.hasRedundancy, MP4.box(MP4.types.sdtp, e);
       }
 
-      static trun(A, e) {
-        let t = 12 + 16,
-            r = new Uint8Array(t);
-        e += 8 + t, r.set([0, 0, 15, 1, 0, 0, 0, 1, e >>> 24 & 255, e >>> 16 & 255, e >>> 8 & 255, e & 255], 0);
-        let i = A.duration,
-            o = A.size,
-            h = A.flags,
-            u = A.cts;
-        return r.set([i >>> 24 & 255, i >>> 16 & 255, i >>> 8 & 255, i & 255, o >>> 24 & 255, o >>> 16 & 255, o >>> 8 & 255, o & 255, h.isLeading << 2 | h.dependsOn, h.isDependedOn << 6 | h.hasRedundancy << 4 | h.isNonSync, 0, 0, u >>> 24 & 255, u >>> 16 & 255, u >>> 8 & 255, u & 255], 12), MP4.box(MP4.types.trun, r);
+      static sdtp(track) {
+        let data = new Uint8Array(4 + 1);
+        let flags = track.flags;
+        data[4] = flags.isLeading << 6 | flags.dependsOn << 4 | flags.isDependedOn << 2 | flags.hasRedundancy;
+        return MP4.box(MP4.types.sdtp, data);
       }
 
-      static mdat(A) {
-        return MP4.box(MP4.types.mdat, A);
+      static trun(track, offset) {
+        let dataSize = 12 + 16;
+        let data = new Uint8Array(dataSize);
+        offset += 8 + dataSize;
+        data.set([0x00, 0x00, 0x0F, 0x01, // version(0) & flags
+        0x00, 0x00, 0x00, 0x01, // sample_count
+        offset >>> 24 & 0xFF, // data_offset
+        offset >>> 16 & 0xFF, offset >>> 8 & 0xFF, offset & 0xFF], 0);
+        let duration = track.duration;
+        let size = track.size;
+        let flags = track.flags;
+        let cts = track.cts;
+        data.set([duration >>> 24 & 0xFF, // sample_duration
+        duration >>> 16 & 0xFF, duration >>> 8 & 0xFF, duration & 0xFF, size >>> 24 & 0xFF, // sample_size
+        size >>> 16 & 0xFF, size >>> 8 & 0xFF, size & 0xFF, flags.isLeading << 2 | flags.dependsOn, // sample_flags
+        flags.isDependedOn << 6 | flags.hasRedundancy << 4 | flags.isNonSync, 0x00, 0x00, // sample_degradation_priority
+        cts >>> 24 & 0xFF, // sample_composition_time_offset
+        cts >>> 16 & 0xFF, cts >>> 8 & 0xFF, cts & 0xFF], 12);
+        return MP4.box(MP4.types.trun, data);
+      }
+
+      static mdat(data) {
+        return MP4.box(MP4.types.mdat, data);
       }
 
     }
@@ -9107,7 +9406,7 @@
      * limitations under the License.
      */
 
-    class SPSParser {
+    class SPSParser$1 {
       static _ebsp2rbsp(uint8array) {
         let src = uint8array;
         let src_length = src.byteLength;
@@ -9132,7 +9431,7 @@
 
 
       static parseSPS(uint8array) {
-        let rbsp = SPSParser._ebsp2rbsp(uint8array);
+        let rbsp = SPSParser$1._ebsp2rbsp(uint8array);
 
         let gb = new ExpGolomb(rbsp);
         gb.readByte(); // 标识当前H.264码流的profile。
@@ -9148,8 +9447,8 @@
 
         gb.readUEG(); // seq_parameter_set_id
 
-        let profile_string = SPSParser.getProfileString(profile_idc);
-        let level_string = SPSParser.getLevelString(level_idc);
+        let profile_string = SPSParser$1.getProfileString(profile_idc);
+        let level_string = SPSParser$1.getLevelString(level_idc);
         let chroma_format_idc = 1;
         let chroma_format = 420;
         let chroma_format_table = [0, 420, 422, 444];
@@ -9181,9 +9480,9 @@
               if (gb.readBool()) {
                 // seq_scaling_list_present_flag
                 if (i < 6) {
-                  SPSParser._skipScalingList(gb, 16);
+                  SPSParser$1._skipScalingList(gb, 16);
                 } else {
-                  SPSParser._skipScalingList(gb, 64);
+                  SPSParser$1._skipScalingList(gb, 64);
                 }
               }
             }
@@ -9345,7 +9644,7 @@
           ref_frames: ref_frames,
           chroma_format: chroma_format,
           // 4:2:0, 4:2:2, ...
-          chroma_format_string: SPSParser.getChromaFormatString(chroma_format),
+          chroma_format_string: SPSParser$1.getChromaFormatString(chroma_format),
           frame_rate: {
             fixed: fps_fixed,
             fps: fps,
@@ -9487,7 +9786,7 @@
         // pps的信息没什么用，所以作者只实现了sps的分析器，说明作者下了很大功夫去学习264的标准，其中的Golomb解码还是挺复杂的，能解对不容易，我在PC和手机平台都是用ffmpeg去解析的。
         // SPS里面包括了视频分辨率，帧率，profile level等视频重要信息。
 
-        let config = SPSParser.parseSPS(sps);
+        let config = SPSParser$1.parseSPS(sps);
 
         if (i !== 0) {
           // ignore other sps's config
@@ -9549,9 +9848,72 @@
 
 
         offset += len;
-      } // meta.avcc = arrayBuffer;
+      }
 
+      meta.videoType = 'avc'; // meta.avcc = arrayBuffer;
 
+      return meta;
+    }
+
+    class SPSParser {
+      static parseSPS(uint8array) {}
+
+    }
+
+    function parseHEVCDecoderConfigurationRecord(arrayBuffer) {
+      const meta = {};
+      meta.videoType = 'hevc';
+      let offset = 28 - 5; //
+
+      const vpsTag = arrayBuffer[offset];
+
+      if (vpsTag !== H265_NAL_TYPE.vps) {
+        return meta;
+      }
+
+      offset += 2;
+      offset += 1;
+      const vpsLength = arrayBuffer[offset + 1] | arrayBuffer[offset] << 8;
+      offset += 2;
+      const vpsData = arrayBuffer.slice(offset, offset + vpsLength);
+      console.log(Uint8Array.from(vpsData));
+      offset += vpsLength;
+      const spsTag = arrayBuffer[offset];
+
+      if (spsTag !== H265_NAL_TYPE.sps) {
+        return meta;
+      }
+
+      offset += 2;
+      offset += 1;
+      const spsLength = arrayBuffer[offset + 1] | arrayBuffer[offset] << 8;
+      offset += 2;
+      const spsData = arrayBuffer.slice(offset, offset + spsLength);
+      console.log(Uint8Array.from(spsData));
+      offset += spsLength;
+      const ppsTag = arrayBuffer[offset];
+
+      if (ppsTag !== H265_NAL_TYPE.pps) {
+        return meta;
+      }
+
+      offset += 2;
+      offset += 1;
+      const ppsLength = arrayBuffer[offset + 1] | arrayBuffer[offset] << 8;
+      offset += 2;
+      const ppsData = arrayBuffer.slice(offset, offset + ppsLength);
+      console.log(Uint8Array.from(ppsData));
+      let sps = Uint8Array.from(spsData);
+      let config = SPSParser.parseSPS(sps);
+      meta.codecWidth = config.codec_size.width;
+      meta.codecHeight = config.codec_size.height;
+      meta.presentWidth = config.present_size.width;
+      meta.presentHeight = config.present_size.height;
+      meta.profile = config.profile_string;
+      meta.level = config.level_string;
+      meta.bitDepth = config.bit_depth;
+      meta.chromaFormat = config.chroma_format;
+      meta.sarRatio = config.sar_ratio;
       return meta;
     }
 
@@ -9631,7 +9993,7 @@
 
             this.decodeInterval = setInterval(() => {
               this._doDecode();
-            }, 40);
+            }, FRAG_DURATION);
           }
         }
       }
@@ -9649,25 +10011,32 @@
         const videoCodec = payload[0] & 0x0F;
         player.video.updateVideoInfo({
           encTypeCode: videoCodec
-        });
-        player.debug.log('MediaSource', 'decodeVideo hasInit set true');
+        }); // player.debug.log('MediaSource', 'decodeVideo hasInit set true');
+
         let data = payload.slice(5);
-        const avcConfig = parseAVCDecoderConfigurationRecord(data);
-        console.log(avcConfig);
+        let config = {};
+
+        if (videoCodec === VIDEO_ENC_CODE.h264) {
+          config = parseAVCDecoderConfigurationRecord(data);
+        } else if (videoCodec === VIDEO_ENC_CODE.h265) {
+          config = parseHEVCDecoderConfigurationRecord(data);
+        } // console.log(avcConfig);
+
+
         const metaData = {
           id: 1,
           type: 'video',
           timescale: 1000,
           duration: 0,
           avcc: data,
-          codecWidth: avcConfig.codecWidth,
-          codecHeight: avcConfig.codecHeight,
-          videoType: 'avc'
-        };
-        console.log('metaData', metaData); // ftyp
+          codecWidth: config.codecWidth,
+          codecHeight: config.codecHeight,
+          videoType: config.videoType
+        }; // console.log('metaData', metaData);
+        // ftyp
 
-        const metaBox = MP4.generateInitSegment(metaData);
-        console.log('metaBox', metaBox);
+        const metaBox = MP4.generateInitSegment(metaData); // console.log('metaBox', metaBox);
+
         this.isAvc = true;
         this.appendBuffer(metaBox.buffer);
         this.sequenceNumber = 0;
@@ -9678,20 +10047,17 @@
 
       _decodeVideo(payload, ts, isIframe) {
         const player = this.player;
-        let arrayBuffer = payload.slice(5); // 真正的开始解码
-
+        let arrayBuffer = payload.slice(5);
         let bytes = arrayBuffer.byteLength;
         let cts = 0;
         let dts = ts;
-        const $video = player.video.$videoElement;
-        player.debug.log('MediaSource', 'decodeVideo', `$video.buffered.length:${$video.buffered.length},bytes:${bytes},cts:${cts},dts:${ts},flag:${isIframe}`);
+        const $video = player.video.$videoElement; // player.debug.log('MediaSource', 'decodeVideo', `$video.buffered.length:${$video.buffered.length},bytes:${bytes},cts:${cts},dts:${ts},flag:${isIframe}`);
 
         if ($video.buffered.length > 1) {
           this.removeBuffer($video.buffered.start(0), $video.buffered.end(0));
           this.timeInit = false;
-        }
+        } // player.debug.log('MediaSource', `cacheTrack.dts:${this.cacheTrack && this.cacheTrack.dts}`);
 
-        player.debug.log('MediaSource', `cacheTrack.dts:${this.cacheTrack && this.cacheTrack.dts}`);
 
         if ($video.drop && dts - this.cacheTrack.dts > 1000) {
           $video.drop = false;
@@ -9714,8 +10080,7 @@
           result.set(mdatbox, moofbox.byteLength); // appendBuffer
 
           this.appendBuffer(result.buffer);
-          player.handleRender();
-          player.debug.log('MediaSource', 'add render data');
+          player.handleRender(); // player.debug.log('MediaSource', 'add render data');
         } else {
           player.debug.log('MediaSource', 'timeInit set false , cacheTrack = {}');
           this.timeInit = false;
@@ -9773,7 +10138,7 @@
         }
 
         if (this.sourceBuffer.updating === false && this.isStateOpen) {
-          this.player.debug.log('MediaSource', 'appendBuffer');
+          // this.player.debug.log('MediaSource', 'appendBuffer')
           this.sourceBuffer.appendBuffer(buffer);
           return;
         }
@@ -10262,7 +10627,7 @@
 
       checkHeartTimeout() {
         this._checkHeartTimeout = setTimeout(() => {
-          this.pause().then(() => {
+          this.pause(false).then(() => {
             this.emit(EVENTS.timeout, 'heart timeout');
           });
         }, this._opt.timeout * 1000);
@@ -10279,7 +10644,7 @@
 
       checkLoadingTimeout() {
         this._checkLoadingTimeout = setTimeout(() => {
-          this.pause().then(() => {
+          this.pause(false).then(() => {
             this.emit(EVENTS.timeout, 'loading timeout');
           });
         }, this._opt.timeout * 1000);
@@ -10582,6 +10947,7 @@
                   resolve();
                 } else {
                   // pause ->  play
+                  this.clearView();
                   this.player.play(this._opt.url).then(() => {
                     resolve();
                   }).catch(() => {
@@ -10605,7 +10971,7 @@
             }
           } else {
             //  url 不存在的时候
-            //  就是从 play-> pause -> play
+            //  就是从 play -> pause -> play
             this.player.play(this._opt.url).then(() => {
               resolve();
             }).catch(() => {

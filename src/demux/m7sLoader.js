@@ -8,8 +8,8 @@ export default class M7sLoader {
 
     dispatch(data) {
         const player = this.player;
-        const {decoderWorker} = player;
-        const dv = new DataView(data)
+        const {decoderWorker, webcodecsDecoder, mseDecoder} = player;
+        const dv = new DataView(data.buffer)
         const type = dv.getUint8(0);
         const ts = dv.getUint32(1, false);
         switch (type) {
@@ -24,7 +24,16 @@ export default class M7sLoader {
                     if (dv.byteLength > 5) {
                         const payload = new Uint8Array(data, 5);
                         const isIframe = dv.getUint8(5) >> 4 === 1;
-                        decoderWorker.decodeVideo(payload, ts, isIframe)
+                        if (player._opt.useWCS) {
+                            // this.player.debug.log('FlvDemux', 'decodeVideo useWCS')
+                            webcodecsDecoder.decodeVideo(payload, ts, isIframe);
+                        } else if (player._opt.useMSE) {
+                            // this.player.debug.log('FlvDemux', 'decodeVideo useMSE')
+                            mseDecoder.decodeVideo(payload, ts, isIframe);
+                        } else {
+                            // this.player.debug.log('FlvDemux', 'decodeVideo')
+                            decoderWorker.decodeVideo(payload, ts, isIframe);
+                        }
                     }
                 }
                 break;
