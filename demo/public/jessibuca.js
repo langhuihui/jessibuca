@@ -15,7 +15,7 @@
     }; // default player options
 
     const DEFAULT_PLAYER_OPTIONS = {
-      videoBuffer: 0.5,
+      videoBuffer: 1,
       vod: false,
       isResize: true,
       isFullResize: false,
@@ -1582,10 +1582,9 @@
           this.socketStatus = WEBSOCKET_STATUS.open;
         });
         proxy(this.socket, 'message', event => {
-          const message = new Uint8Array(event.data);
-          this.streamRate(message.byteLength);
+          this.streamRate(event.data.byteLength);
 
-          this._handleMessage(message);
+          this._handleMessage(event.data);
         });
         proxy(this.socket, 'close', () => {
           debug.log('websocketLoader', 'socket close');
@@ -8186,7 +8185,7 @@
           webcodecsDecoder,
           mseDecoder
         } = player;
-        const dv = new DataView(data.buffer);
+        const dv = new DataView(data);
         const type = dv.getUint8(0);
         const ts = dv.getUint32(1, false);
 

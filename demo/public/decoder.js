@@ -6707,9 +6707,12 @@
 	      decoder$1.opt.debug && console.log('Jessibuca: [worker] init');
 
 	      const _doDecode = data => {
+	        this.opt.debug && console.log('Jessibuca: [worker]: _doDecode');
+
 	        if (decoder$1.opt.useWCS && decoder$1.useOffscreen() && data.type === MEDIA_TYPE.video) {
 	          wcsVideoDecoder.decode(data.payload, data.ts);
 	        } else {
+	          this.opt.debug && console.log('Jessibuca: [worker]: _doDecode  wasm');
 	          data.decoder.decode(data.payload, data.ts);
 	        }
 	      };

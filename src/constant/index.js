@@ -12,7 +12,7 @@ export const DEMUX_TYPE = {
 
 // default player options
 export const DEFAULT_PLAYER_OPTIONS = {
-    videoBuffer: 0.5,
+    videoBuffer: 1,
     vod: false,
     isResize: true,
     isFullResize: false,
