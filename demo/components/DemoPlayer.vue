@@ -39,7 +39,7 @@
                 <input
                     autocomplete="on"
                     ref="playUrl"
-                    value="http://42.193.7.166:9020/hdl/34020000001320000001/34020000001320000001.flv"
+                    value="ws://219.138.126.226:18298/jessica/sub/34020000001320000102"
                 />
                 <button v-if="!playing" @click="play">播放</button>
                 <button v-else @click="pause">停止</button>
@@ -133,12 +133,12 @@ export default {
                         videoBuffer: Number(this.$refs.buffer.value), // 缓存时长
                         isResize: false,
                         useWCS: this.useWCS,
-                        useMSE:this.useMSE,
+                        useMSE: this.useMSE,
                         text: "",
                         // background: "bg.jpg",
                         loadingText: "加载中",
                         // hasAudio:false,
-                        debug: true,
+                        debug: false,
                         showBandwidth: this.showBandwidth, // 显示网速
                         operateBtns: {
                             fullscreen: this.showOperateBtns,
@@ -192,11 +192,11 @@ export default {
             this.jessibuca.on("bps", function (bps) {
                 // console.log('bps', bps);
             });
-            let _ts = 0;
-            this.jessibuca.on("timeUpdate", function (ts) {
-                // console.log('timeUpdate,old,new,timestamp', _ts, ts, ts - _ts);
-                _ts = ts;
-            });
+            // let _ts = 0;
+            // this.jessibuca.on("timeUpdate", function (ts) {
+            //     console.log('timeUpdate,old,new,timestamp', _ts, ts, ts - _ts);
+            //     _ts = ts;
+            // });
 
             this.jessibuca.on("videoInfo", function (info) {
                 console.log("videoInfo", info);
@@ -213,10 +213,6 @@ export default {
             this.jessibuca.on('start', function () {
                 console.log('start');
             })
-
-            // this.jessibuca.on("stats", function (stats) {
-            //   console.log('stats', JSON.stringify(stats));
-            // });
 
             this.jessibuca.on("performance", function (performance) {
                 var show = "卡顿";
@@ -241,6 +237,7 @@ export default {
 
             // 显示时间戳 PTS
             this.jessibuca.on('videoFrame', function () {
+                console.log('videoFrame', kBps);
 
             })
 
@@ -249,16 +246,18 @@ export default {
 
             });
 
-
-            // console.log(this.jessibuca);
-        },
-        play() {
-            // this.jessibuca.onPlay = () => (this.playing = true);
             this.jessibuca.on("play", () => {
                 this.playing = true;
                 this.loaded = true;
                 this.quieting = this.jessibuca.isMute();
             });
+
+
+            // console.log(this.jessibuca);
+        },
+        play() {
+            // this.jessibuca.onPlay = () => (this.playing = true);
+
 
             if (this.$refs.playUrl.value) {
                 this.jessibuca.play(this.$refs.playUrl.value);

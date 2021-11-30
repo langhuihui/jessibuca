@@ -14,6 +14,7 @@ export default (player, control) => {
                 ${icons.loading}
                 ${options.loadingText ? `<div class="jessibuca-loading-text">${options.loadingText}</div>` : ''}
             </div>
+            ${options.hasControl && operateBtns.play ? `<div class="jessibuca-play-big"></div>` : ''}
             ${options.hasControl ? `
                 <div class="jessibuca-controls">
                     <div class="jessibuca-controls-bottom">
@@ -54,6 +55,10 @@ export default (player, control) => {
 
     Object.defineProperty(control, '$play', {
         value: player.$container.querySelector('.jessibuca-play'),
+    });
+
+    Object.defineProperty(control, '$playBig', {
+        value: player.$container.querySelector('.jessibuca-play-big'),
     });
 
     Object.defineProperty(control, '$pause', {

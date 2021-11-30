@@ -78,7 +78,7 @@ export default class DecoderWorker {
             ts: Math.max(ts, 0),
             isIFrame
         }
-        this.player.debug.log('decoderWorker', 'decodeVideo', options);
+        // this.player.debug.log('decoderWorker', 'decodeVideo', options);
         this.decoderWorker.postMessage({
             cmd: WORKER_SEND_TYPE.decode,
             buffer: arrayBuffer,
@@ -101,7 +101,7 @@ export default class DecoderWorker {
             type: MEDIA_TYPE.audio,
             ts: Math.max(ts, 0)
         }
-        this.player.debug.log('decoderWorker', 'decodeAudio',options);
+        // this.player.debug.log('decoderWorker', 'decodeAudio',options);
 
         this.decoderWorker.postMessage({
             cmd: WORKER_SEND_TYPE.decode,

@@ -64,8 +64,13 @@ export default (player, control) => {
         setVolumeHandle(player.volume);
     });
 
-    player.on(EVENTS.loading, () => {
-        setStyle(control.$loading, 'display', player.loading ? 'flex' : 'none');
+    player.on(EVENTS.loading, (flag) => {
+        setStyle(control.$loading, 'display', flag ? 'flex' : 'none');
+        setStyle(control.$poster, 'display', 'none')
+
+        if (flag) {
+            setStyle(control.$playBig, 'display', 'none');
+        }
     })
 
     try {
@@ -94,6 +99,7 @@ export default (player, control) => {
 
     player.on(EVENTS.playing, (flag) => {
         setStyle(control.$play, 'display', flag ? 'none' : 'flex');
+        setStyle(control.$playBig, 'display', flag ? 'none' : 'block');
         setStyle(control.$pause, 'display', flag ? 'flex' : 'none');
         setStyle(control.$screenshot, 'display', flag ? 'flex' : 'none');
         setStyle(control.$record, 'display', flag ? 'flex' : 'none');

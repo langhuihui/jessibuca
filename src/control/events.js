@@ -42,6 +42,11 @@ export default (player, control) => {
         player.play();
     })
 
+    // 监听 play 方法
+    proxy(control.$playBig, 'click', (e) => {
+        player.play();
+    })
+
     proxy(control.$volume, 'mouseover', () => {
         control.$volumePanelWrap.classList.add('jessibuca-volume-panel-wrap-show');
     })

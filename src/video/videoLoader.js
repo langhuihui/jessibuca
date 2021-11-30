@@ -39,31 +39,6 @@ export default class VideoLoader extends CommonLoader {
 
     }
 
-    updateVideoInfo(data) {
-        if (data.encTypeCode) {
-            this.videoInfo.encType = VIDEO_ENC_TYPE[data.encTypeCode];
-        }
-
-        if (data.width) {
-            this.videoInfo.width = data.width;
-        }
-
-        if (data.height) {
-            this.videoInfo.height = data.height;
-        }
-
-        // video 基本信息
-        if (this.videoInfo.encTypeCode && this.videoInfo.height && this.videoInfo.width) {
-            this.player.emit(EVENTS.videoInfo, this.videoInfo);
-        }
-    }
-
-    initCanvasViewSize() {
-        this.$videoElement.width = this.videoInfo.width;
-        this.$videoElement.height = this.videoInfo.height;
-        this.resize();
-    }
-
     play() {
         // this.$videoElement.autoplay = true;
         this.$videoElement.play();

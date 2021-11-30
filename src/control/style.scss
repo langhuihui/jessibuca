@@ -46,6 +46,23 @@
         pointer-events: none;
     }
 
+    .jessibuca-play-big {
+        position: absolute;
+        display: none;
+        height: 100%;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        background-image: url("../assets/play.png");
+        background-repeat: no-repeat;
+        background-position: center;
+        cursor: pointer;
+        background-size: 48px 48px;
+
+        &:hover {
+            background-image: url("../assets/play-hover.png");
+        }
+    }
+
     // loading
     .jessibuca-loading {
         display: none;

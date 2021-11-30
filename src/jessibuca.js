@@ -33,7 +33,7 @@ class Jessibuca extends Emitter {
     _bindEvents() {
         // 对外的事件
         Object.keys(JESSIBUCA_EVENTS).forEach((key) => {
-            this.player.on(EVENTS[key], (value) => {
+            this.player.on(JESSIBUCA_EVENTS[key], (value) => {
                 this.emit(key, value)
             })
         })

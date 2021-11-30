@@ -1,9 +1,22 @@
-import {EVENTS, EVENTS_ERROR} from "../constant";
+import {EVENTS, EVENTS_ERROR, JESSIBUCA_EVENTS} from "../constant";
 import screenfull from "screenfull";
+import {setStyle} from "../utils";
 
 export default (player) => {
 
-//
+
+    try {
+        const screenfullChange = () => {
+            player.emit(JESSIBUCA_EVENTS.fullscreen,player.fullscreen)
+        };
+        screenfull.on('change', screenfullChange);
+        player.events.destroys.push(() => {
+            screenfull.off('change', screenfullChange);
+        });
+    } catch (error) {
+        //
+    }
+    //
     player.on(EVENTS.load, () => {
         player.debug.log('player', 'has loaded');
         player._hasLoaded = true;
@@ -30,9 +43,6 @@ export default (player) => {
         } else {
             try {
                 screenfull.exit().then(() => {
-                    if (player.$borderSelect) {
-                        player.$borderSelect.style.display = 'block';
-                    }
                 }).catch(() => {
                     player.webFullscreen = false;
 

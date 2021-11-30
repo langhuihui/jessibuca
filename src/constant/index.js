@@ -84,7 +84,7 @@ export const WORKER_SEND_TYPE = {
 
 //
 export const EVENTS = {
-    fullscreen: 'fullscreen',
+    fullscreen: 'fullscreen$2',
     webFullscreen: 'webFullscreen',
     decoderWorkerInit: 'decoderWorkerInit',
     play: 'play',
@@ -137,7 +137,7 @@ export const JESSIBUCA_EVENTS = {
     log: EVENTS.log,
     start: EVENTS.frameStart,
     timeout: EVENTS.timeout,
-    fullscreen: EVENTS.fullscreen,
+    fullscreen: 'fullscreen',
     play: EVENTS.play,
     pause: EVENTS.pause,
     mute: EVENTS.mute,

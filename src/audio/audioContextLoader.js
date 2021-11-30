@@ -62,8 +62,7 @@ export default class AudioContextLoader extends Emitter {
         }
 
         // audio 基本信息
-        if (this.audioInfo.sampleRate && this.audioInfo.channels && this.audioInfo.encTypeCode) {
-
+        if (this.audioInfo.sampleRate && this.audioInfo.channels && this.audioInfo.encType) {
             this.player.emit(EVENTS.audioInfo, this.audioInfo);
         }
     }
