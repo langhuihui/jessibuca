@@ -2,8 +2,9 @@ import Emitter from "../utils/emitter";
 import {createContextGL, createEmptyImageBitmap, dataURLToFile, downloadImg, now, supportOffscreen} from "../utils";
 import createWebGL from "../utils/webgl";
 import {CANVAS_RENDER_TYPE, CONTROL_HEIGHT, EVENTS, SCREENSHOT_TYPE, VIDEO_ENC_TYPE} from "../constant";
+import CommonLoader from "./commonLoader";
 
-export default class CanvasVideoLoader extends Emitter {
+export default class CanvasVideoLoader extends CommonLoader {
 
     constructor(player) {
         super()

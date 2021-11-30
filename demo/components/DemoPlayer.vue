@@ -39,7 +39,7 @@
                 <input
                     autocomplete="on"
                     ref="playUrl"
-                    value="http://flv.bdplay.nodemedia.cn/live/bbb.flv"
+                    value="http://42.193.7.166:9020/hdl/34020000001320000001/34020000001320000001.flv"
                 />
                 <button v-if="!playing" @click="play">播放</button>
                 <button v-else @click="pause">停止</button>
@@ -111,7 +111,7 @@ export default {
             volume: 1,
             rotate: 0,
             useWCS: false,
-            useMSE: true,
+            useMSE: false,
             useOffscreen: false,
         };
     },

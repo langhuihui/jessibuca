@@ -192,11 +192,11 @@ Module.postRun = function () {
         init: function () {
             decoder.opt.debug && console.log('Jessibuca: [worker] init');
             const _doDecode = (data) => {
-                this.opt.debug && console.log('Jessibuca: [worker]: _doDecode');
+                // this.opt.debug && console.log('Jessibuca: [worker]: _doDecode');
                 if (decoder.opt.useWCS && decoder.useOffscreen() && data.type === MEDIA_TYPE.video) {
                     wcsVideoDecoder.decode(data.payload, data.ts)
                 } else {
-                    this.opt.debug && console.log('Jessibuca: [worker]: _doDecode  wasm');
+                    // this.opt.debug && console.log('Jessibuca: [worker]: _doDecode  wasm');
                     data.decoder.decode(data.payload, data.ts)
                 }
             }

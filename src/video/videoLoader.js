@@ -1,8 +1,9 @@
 import Emitter from "../utils/emitter";
 import {CONTROL_HEIGHT, EVENTS, SCREENSHOT_TYPE, VIDEO_ENC_TYPE} from "../constant";
 import {dataURLToFile, downloadImg, now} from "../utils";
+import CommonLoader from "./commonLoader";
 
-export default class VideoLoader extends Emitter {
+export default class VideoLoader extends CommonLoader {
     constructor(player) {
         super();
         this.player = player;
@@ -58,7 +59,9 @@ export default class VideoLoader extends Emitter {
     }
 
     initCanvasViewSize() {
-
+        this.$videoElement.width = this.videoInfo.width;
+        this.$videoElement.height = this.videoInfo.height;
+        this.resize();
     }
 
     play() {
@@ -109,11 +112,6 @@ export default class VideoLoader extends Emitter {
         }
     }
 
-
-    resize() {
-        this.$videoElement.width = this.player.width;
-        this.$videoElement.height = this.player._opt.hasControl ? this.player.height - CONTROL_HEIGHT : this.player.height;
-    }
 
     destroy() {
         this.player.$container.removeChild(this.$videoElement);

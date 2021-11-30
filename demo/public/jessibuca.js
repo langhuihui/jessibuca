@@ -890,7 +890,61 @@
       };
     });
 
-    class CanvasVideoLoader extends Emitter {
+    class CommonLoader extends Emitter {
+      constructor() {
+        super();
+      }
+
+      resize() {
+        this.player.debug.log('canvasVideo', 'resize');
+        const option = this.player._opt;
+        const width = this.player.width;
+        let height = this.player.height;
+
+        if (option.hasControl) {
+          height -= CONTROL_HEIGHT;
+        }
+
+        let resizeWidth = this.$videoElement.width;
+        let resizeHeight = this.$videoElement.height;
+        const rotate = option.rotate;
+        let left = (width - resizeWidth) / 2;
+        let top = (height - resizeHeight) / 2;
+
+        if (rotate === 270 || rotate === 90) {
+          resizeWidth = this.$videoElement.height;
+          resizeHeight = this.$videoElement.width;
+        }
+
+        const wScale = width / resizeWidth;
+        const hScale = height / resizeHeight;
+        let scale = wScale > hScale ? hScale : wScale; //
+
+        if (!option.isResize) {
+          if (wScale !== hScale) {
+            scale = wScale + ',' + hScale;
+          }
+        } //
+
+
+        if (option.isFullResize) {
+          scale = wScale > hScale ? wScale : hScale;
+        }
+
+        let transform = "scale(" + scale + ")";
+
+        if (rotate) {
+          transform += ' rotate(' + rotate + 'deg)';
+        }
+
+        this.$videoElement.style.transform = transform;
+        this.$videoElement.style.left = left + "px";
+        this.$videoElement.style.top = top + "px";
+      }
+
+    }
+
+    class CanvasVideoLoader extends CommonLoader {
       constructor(player) {
         super();
         this.player = player;
@@ -1132,7 +1186,7 @@
 
     }
 
-    class VideoLoader extends Emitter {
+    class VideoLoader extends CommonLoader {
       constructor(player) {
         super();
         this.player = player;
@@ -1183,7 +1237,11 @@
         }
       }
 
-      initCanvasViewSize() {}
+      initCanvasViewSize() {
+        this.$videoElement.width = this.videoInfo.width;
+        this.$videoElement.height = this.videoInfo.height;
+        this.resize();
+      }
 
       play() {
         // this.$videoElement.autoplay = true;
@@ -1233,11 +1291,6 @@
         } else if (type === SCREENSHOT_TYPE.download) {
           downloadImg(file, filename);
         }
-      }
-
-      resize() {
-        this.$videoElement.width = this.player.width;
-        this.$videoElement.height = this.player._opt.hasControl ? this.player.height - CONTROL_HEIGHT : this.player.height;
       }
 
       destroy() {
@@ -8012,7 +8065,7 @@
           ts: Math.max(ts, 0),
           isIFrame
         };
-        this.player.debug.log('decoderWorker', 'decodeVideo');
+        this.player.debug.log('decoderWorker', 'decodeVideo', options);
         this.decoderWorker.postMessage({
           cmd: WORKER_SEND_TYPE.decode,
           buffer: arrayBuffer,
@@ -8033,8 +8086,8 @@
         const options = {
           type: MEDIA_TYPE.audio,
           ts: Math.max(ts, 0)
-        }; // this.player.debug.log('decoderWorker', 'decodeAudio');
-
+        };
+        this.player.debug.log('decoderWorker', 'decodeAudio', options);
         this.decoderWorker.postMessage({
           cmd: WORKER_SEND_TYPE.decode,
           buffer: arrayBuffer,
