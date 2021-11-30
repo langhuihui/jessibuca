@@ -1,5 +1,5 @@
 if (typeof importScripts === "undefined") {
-    require("./jessibuca")
+    require("./jessibuca.js")
 } else {
     require('./worker.js')
 }

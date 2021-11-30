@@ -1,5 +1,4 @@
 import {FLV_MEDIA_TYPE} from "../constant";
-import {parseSPS} from "../utils";
 
 export default class FlvLoader {
     constructor(player) {

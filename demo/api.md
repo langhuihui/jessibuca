@@ -13,19 +13,19 @@ options 支持的参数有：
 > 若为 string ，则底层调用的是 document.getElementById('id')
 
 ### videoBuffer
-- **类型**：`number` 
+- **类型**：`number`
 - **默认值**：`0`
 - **用法**：
 设置最大缓冲时长，单位毫秒，播放器会自动消除延迟。
 
 ### decoder
 - **类型**：`string`
-- **默认值**：`index.js`
+- **默认值**：`decoder.js`
 - **用法**：
 
 worker地址
 
-> 直接引用 index.js 的地址即可。项目会直接引用根目录的index.js，如果修改了index.js文件名称，改为xxx.js，请同步修改decoder参数，引用的是xxx.js文件目录
+> 默认引用的是根目录下面的decoder.js文件 ，decoder.js 与 decoder.wasm文件必须是放在同一个目录下面。
 
 
 ### forceNoOffscreen
@@ -51,7 +51,7 @@ worker地址
 - **默认值**：true
 - **用法**：
 
-是否有音频，如果设置`false`，则不对音频数据解码，提升性能。 
+是否有音频，如果设置`false`，则不对音频数据解码，提升性能。
 
 
 ### rotate
@@ -60,7 +60,7 @@ worker地址
 - **用法**：
 
 设置旋转角度，只支持，0(默认) ，180，270 三个值。
-  
+
 ### isResize
 - **类型**：`boolean`
 - **默认值**：`true`
@@ -186,7 +186,7 @@ https://developers.google.com/web/updates/2017/09/autoplay-policy-changes
 
 ### setTimeout(time)
 - **参数**：
-   - `{number} time`  
+   - `{number} time`
 - **用法**：
 
 设置超时时长, 单位秒
@@ -196,14 +196,14 @@ https://developers.google.com/web/updates/2017/09/autoplay-policy-changes
 jessibuca.setTimeout(10)
 
 jessibuca.on('timeout',function(){
-    // 
+    //
 });
 ```
 
 ### setScaleMode(mode)
 - **参数**：
-   - `{number} mode`  
-   
+   - `{number} mode`
+
 - **用法**：
 
 1. `0` 视频画面完全填充canvas区域,画面会被拉伸  等同于参数 `isResize` 为false
@@ -252,14 +252,14 @@ jessibuca.clearView()
 
 ### play([url])
 - **参数**：
-   - `{string} url`  
-   
+   - `{string} url`
+
 - **用法**：
 播放视频
 ```js
 
 jessibuca.play('url')
-// 
+//
 jessibuca.play()
 ```
 
@@ -269,8 +269,8 @@ jessibuca.play()
 
 ### setBufferTime(time)
 - **参数**：
-   - `{number} time`  
-   
+   - `{number} time`
+
 - **用法**：
 设置最大缓冲时长，单位秒，播放器会自动消除延迟。
 
@@ -283,7 +283,7 @@ jessibuca.setBufferTime(0.2)
 
 ### setRotate(deg)
 - **参数**：
-   - `{number} deg`  
+   - `{number} deg`
 - **用法**：
 设置旋转角度，只支持，0(默认) ，180，270 三个值。
 
@@ -301,8 +301,8 @@ jessibuca.setRotate(270)
 
 ### setVolume(volume)
 - **参数**：
-   - `{number} volume`  
-   
+   - `{number} volume`
+
 - **用法**：
 
 1. 设置音量大小，取值0 — 1
@@ -339,8 +339,8 @@ jessibuca.setKeepScreenOn()
 ```
 ### setFullscreen(flag)
 - **参数**：
-   - `{boolean} flag`  
-   
+   - `{boolean} flag`
+
 - **用法**：
 全屏(取消全屏)播放视频
 ```js
@@ -353,10 +353,10 @@ jessibuca.setFullscreen(false)
 
 ### screenshot(filename, format, quality,type)
 - **参数**：
-    - `{string} filename`  
-    - `{string} format`  
+    - `{string} filename`
+    - `{string} format`
     - `{number} quality`
-    - `{string} type` 
+    - `{string} type`
 - **用法**：
 
 截图，调用后弹出下载框保存截图
@@ -397,11 +397,11 @@ console.log(result) // true
 ```
 
 
-   
+
 ### on(event, callback)
 - **参数**：
-    - `{string} event`  
-    - `{function} callback`  
+    - `{string} event`
+    - `{function} callback`
 - **用法**：
 监听方法
 
@@ -409,7 +409,7 @@ console.log(result) // true
 
 jessibuca.on("load",function(){console.log('load')})
 ```
- 
+
 ## 事件
 
 ### load

@@ -136,7 +136,7 @@ export default {
                         useMSE: this.useMSE,
                         text: "",
                         // background: "bg.jpg",
-                        loadingText: "加载中",
+                        loadingText: "疯狂加载中...",
                         // hasAudio:false,
                         debug: false,
                         showBandwidth: this.showBandwidth, // 显示网速
