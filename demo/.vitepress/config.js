@@ -8,6 +8,8 @@ module.exports = {
         nav:[
             { text: 'API', link: '/api' },
             { text: 'DEMO', link: '/demo' },
+            { text: '3.X', link: 'https://j.m7s.live/' },
+
         ],
         logo: 'logo.png'
     },
