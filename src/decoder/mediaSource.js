@@ -232,7 +232,6 @@ export default class MseDecoder extends Emitter {
         if (this.sourceBuffer.updating === false && this.isStateOpen) {
             // this.player.debug.log('MediaSource', 'appendBuffer')
             this.sourceBuffer.appendBuffer(buffer);
-            0
             return;
         }
 
