@@ -39,7 +39,7 @@
                 <input
                     autocomplete="on"
                     ref="playUrl"
-                    value="ws://219.138.126.226:18298/jessica/sub/34020000001320000102"
+                    value=""
                 />
                 <button v-if="!playing" @click="play">播放</button>
                 <button v-else @click="pause">停止</button>
