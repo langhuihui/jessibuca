@@ -1,6 +1,6 @@
 import Emitter from "../utils/emitter";
 import {EVENTS, FRAG_DURATION, MEDIA_SOURCE_STATE, MP4_CODECS, VIDEO_ENC_CODE} from "../constant";
-import MP4 from "../remux/mp4-generator";
+import MP4 from "../remux/fmp4-generator";
 import {parseAVCDecoderConfigurationRecord} from "../utils/h264";
 import {parseHEVCDecoderConfigurationRecord} from "../utils/h256";
 

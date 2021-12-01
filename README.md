@@ -18,11 +18,10 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 支持解码8kHz PCM_ALAW, PCM_MULAW的G.711音频
 - 支持填充，等比，等比缩放 3中视频缩放模式
 - 支持音量调节
-- 支持自动分析是否支持并采用MSE进行播放(硬件解码，在除iOS平台以外的大部分浏览器支持)
 - 支持WebWorker多核解码，提升多画面播放性能。
 - 支持WebCodecs硬件解码API
 - 支持MediaSourceExtensions 硬件解码
-- 支持MediaSourceExtensions 硬件解码后渲染到canvas
+- 支持视频录制(WebM、MP4格式)
 
 
 ## 本地测试
@@ -31,12 +30,12 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 执行yarn dev 或者 npm run dev
 
 ## API
-[API](/api.md)
+[API](/demo/api.md)
 
 ## 源码目录结构
 
-- obj 存放emscripten编译好的ffmpeg解码库的字节码库
-- demo/public 存放编译输出的js和wasm文件
+- wasm/obj 存放emscripten编译好的ffmpeg解码库的字节码库
+- dist 存放编译输出的js和wasm文件
 - src 存放js源码
 
 ## 打包js
@@ -44,8 +43,12 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 执行yarn build 或者 npm run build
 
 ## 引用关系
-src/index.js 引用了jessibuca.js和worker.js 目的是将两个js打包到一起，实际执行中会根据当前是否为主线程来判断是否加载worker线程（把自己加载到webworker中）
-worker.js 会引用 demo/public/ff.js （该文件由编译C++文件所得，用于加载wasm）
+
+- jessibuca.js 是业务js代码
+- decoder.js 是worker进程跑的负责音视频解码的js代码
+- decoder.wasm 是decoder.js的胶水代码
+
+
 
 ## 编译C++代码
 

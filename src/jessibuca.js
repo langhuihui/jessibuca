@@ -325,12 +325,13 @@ class Jessibuca extends Emitter {
     /**
      *
      * @param fileName {string}
+     * @param fileType {string}
      * @returns {Promise<unknown>}
      */
-    startRecord(fileName) {
+    startRecord(fileName, fileType) {
         return new Promise((resolve, reject) => {
             if (this.player.playing) {
-                this.player.startRecord(fileName)
+                this.player.startRecord(fileName, fileType)
                 resolve();
             } else {
                 reject();

@@ -7,14 +7,20 @@ export default class RecordRTCLoader extends Emitter {
     constructor(player) {
         super();
         this.player = player;
+        this.fileName = '';
+        this.fileType = FILE_SUFFIX.webm;
         this.isRecording = false;
         this.recordingTimestamp = 0;
         this.recordingInterval = null;
         player.debug.log('Recorder', 'init');
     }
 
-    setFileName(fileName) {
+    setFileName(fileName, fileType) {
         this.fileName = fileName;
+
+        if (FILE_SUFFIX.mp4 === fileType || FILE_SUFFIX.webm === fileType) {
+            this.fileType = fileType;
+        }
     }
 
     get recording() {
@@ -63,7 +69,7 @@ export default class RecordRTCLoader extends Emitter {
         }
         this.recorder.stopRecording(() => {
             this.player.debug.log('Recorder', 'stop recording');
-            downloadRecord(this.recorder.getBlob(), this.fileName, FILE_SUFFIX.mp4);
+            downloadRecord(this.recorder.getBlob(), this.fileName, this.fileType);
             this._reset();
             this.emit(EVENTS.recording, false);
         })

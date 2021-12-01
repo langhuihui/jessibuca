@@ -393,13 +393,14 @@ export default class Player extends Emitter {
     /**
      *
      * @param fileName
+     * @param fileType
      */
-    startRecord(fileName) {
+    startRecord(fileName, fileType) {
         if (this.recording) {
             return;
         }
 
-        this.recorder.setFileName(fileName);
+        this.recorder.setFileName(fileName, fileType);
         this.recording = true;
     }
 

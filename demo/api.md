@@ -219,6 +219,8 @@ jessibuca.setScaleMode(2)
 ```
 
 ### pause()
+- **返回**：
+    - `{Promise}`
 - **用法**：
 暂停播放
 ```js
@@ -254,6 +256,8 @@ jessibuca.clearView()
 - **参数**：
    - `{string} url`
 
+- **返回**：
+  - `{Promise}`
 - **用法**：
 播放视频
 ```js

@@ -84,6 +84,15 @@
             </div>
             <div class="input" v-if="loaded">
                 <button v-if="!playing" @click="clearView">清屏</button>
+                <template v-if="playing">
+                    <select v-model="recordType">
+                        <option value="webm">webm</option>
+                        <option value="mp4">mp4</option>
+                    </select>
+                    <button v-if="!recording" @click="startRecord">录制</button>
+                    <button v-if="!recording" @click="stopAndSaveRecord">暂停录制</button>
+                </template>
+
             </div>
         </div>
     </div>
@@ -113,6 +122,8 @@ export default {
             useWCS: false,
             useMSE: false,
             useOffscreen: false,
+            recording: false,
+            recordType: 'webm'
         };
     },
     mounted() {
@@ -252,6 +263,10 @@ export default {
                 this.quieting = this.jessibuca.isMute();
             });
 
+            this.jessibuca.on('recordingTimestamp', (ts) => {
+                console.log('recordingTimestamp', ts);
+            })
+
 
             // console.log(this.jessibuca);
         },
@@ -299,6 +314,16 @@ export default {
         clearView() {
             this.jessibuca.clearView();
         },
+
+        startRecord() {
+            const time = new Date().getTime();
+            this.jessibuca.startRecord(time, this.recordType);
+        },
+
+        stopAndSaveRecord() {
+            this.jessibuca.stopRecordAndSave();
+        },
+
 
         screenShot() {
             this.jessibuca.screenshot();
