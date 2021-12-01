@@ -332,7 +332,9 @@ export default {
 
         restartPlay() {
             this.destroy();
-            this.play();
+            setTimeout(() => {
+                this.play();
+            }, 100)
         },
 
         changeBuffer() {

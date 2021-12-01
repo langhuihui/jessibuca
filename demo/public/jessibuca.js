@@ -10169,9 +10169,9 @@
           if (this.sourceBuffer) {
             this.sourceBuffer.abort();
           }
-
-          this.endOfStream();
         }
+
+        this.endOfStream();
       }
 
       dropSourceBuffer(flag) {
@@ -10253,7 +10253,7 @@
 
           this._opt.useWCS = false;
           this._opt.forceNoOffscreen = true;
-        }
+        } else if (this._opt.useWCS) ;
 
         if (!this._opt.forceNoOffscreen) {
           if (!supportOffscreenV2()) {
@@ -10737,6 +10737,10 @@
       }
 
       destroy() {
+        this._loading = false;
+        this._playing = false;
+        this._hasLoaded = false;
+
         if (this.events) {
           this.events.destroy();
           this.events = null;
@@ -10772,11 +10776,19 @@
           this.control = null;
         }
 
-        this._loading = false;
-        this._playing = false;
-        this._hasLoaded = false;
+        if (this.webcodecsDecoder) {
+          this.webcodecsDecoder.destroy();
+          this.webcodecsDecoder = null;
+        }
+
+        if (this.mseDecoder) {
+          this.mseDecoder.destroy();
+          this.mseDecoder = null;
+        }
+
         this.clearCheckHeartTimeout();
-        this.clearCheckLoadingTimeout();
+        this.clearCheckLoadingTimeout(); //
+
         this.releaseWakeLock(); // 其他没法解耦的，通过 destroy 方式
 
         this.emit('destroy'); // 接触所有绑定事件

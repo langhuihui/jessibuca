@@ -253,8 +253,8 @@ export default class MseDecoder extends Emitter {
             if (this.sourceBuffer) {
                 this.sourceBuffer.abort();
             }
-            this.endOfStream();
         }
+        this.endOfStream();
     }
 
     dropSourceBuffer(flag) {

@@ -45,6 +45,8 @@ export default class Player extends Emitter {
 
             this._opt.useWCS = false;
             this._opt.forceNoOffscreen = true;
+        } else if (this._opt.useWCS) {
+
         }
 
 
@@ -534,6 +536,10 @@ export default class Player extends Emitter {
 
 
     destroy() {
+        this._loading = false;
+        this._playing = false;
+        this._hasLoaded = false;
+
         if (this.events) {
             this.events.destroy();
             this.events = null;
@@ -566,13 +572,20 @@ export default class Player extends Emitter {
             this.control = null;
         }
 
-        this._loading = false;
-        this._playing = false;
-        this._hasLoaded = false;
+        if (this.webcodecsDecoder) {
+            this.webcodecsDecoder.destroy();
+            this.webcodecsDecoder = null;
+        }
+
+        if (this.mseDecoder) {
+            this.mseDecoder.destroy();
+            this.mseDecoder = null;
+        }
+
 
         this.clearCheckHeartTimeout();
         this.clearCheckLoadingTimeout();
-
+        //
         this.releaseWakeLock();
 
         // 其他没法解耦的，通过 destroy 方式
