@@ -295,13 +295,6 @@ class Jessibuca extends Emitter {
 
     /**
      *
-     */
-    useWCS() {
-        this._opt.useWCS = supportWCS();
-    }
-
-    /**
-     *
      * @param flag {Boolean}
      */
     setFullscreen(flag) {
@@ -359,6 +352,14 @@ class Jessibuca extends Emitter {
      */
     isMute() {
         return this.player.audio.isMute;
+    }
+
+    /**
+     * 是否在录制视频
+     * @returns {*}
+     */
+    isRecording() {
+        return this.player.recorder.recording;
     }
 
     /**

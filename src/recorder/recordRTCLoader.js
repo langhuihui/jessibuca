@@ -78,7 +78,11 @@ export default class RecordRTCLoader extends Emitter {
     _reset() {
         this.isRecording = false;
         this.recordingTimestamp = 0;
-        this.recorder = null;
+
+        if (this.recorder) {
+            this.recorder.destroy();
+            this.recorder = null;
+        }
         this.fileName = null;
         if (this.recordingInterval) {
             clearInterval(this.recordingInterval);

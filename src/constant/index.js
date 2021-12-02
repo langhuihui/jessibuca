@@ -12,8 +12,7 @@ export const DEMUX_TYPE = {
 
 // default player options
 export const DEFAULT_PLAYER_OPTIONS = {
-    videoBuffer: 1,
-    vod: false,
+    videoBuffer: 1, //second
     isResize: true,
     isFullResize: false,
     isFlv: false,
@@ -30,7 +29,7 @@ export const DEFAULT_PLAYER_OPTIONS = {
         screenshot: false,
         play: false,
         audio: false,
-        recorder: false
+        record: false
     },
     hasControl: false,
     loadingText: '',

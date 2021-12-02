@@ -114,7 +114,13 @@ worker地址
 
 ### operateBtns
 - **类型**：`object`
-- **默认值**：`{fullscreen:false,screenshot: false,play: false,audio: false}`
+- **默认值**：`{
+            fullscreen:false,
+            screenshot: false,
+            play: false,
+            audio: false,
+            record:false
+            }`
 - **用法**：
 配置操作按钮
 其中
@@ -123,6 +129,7 @@ worker地址
 2. screenshot 是否显示截图按钮
 3. play 是否显示播放暂停按钮
 4. audio 是否显示声音按钮
+5. record 是否显示录制按钮
 
 ### keepScreenOn
 - **类型**：`boolean`
@@ -224,9 +231,19 @@ jessibuca.setScaleMode(2)
 - **用法**：
 暂停播放
 ```js
-jessibuca.pause()
+jessibuca.pause().then(()=>{
+    console.log('pause success')
 
-jessibuca.play()
+    jessibuca.play().then(()=>{
+
+    }).catch((e)=>{
+
+    })
+
+}).catch((e)=>{
+    console.log('pause error',e);
+})
+
 ```
 可以在pause 之后，再调用 `play()`方法就继续播放之前的流。
 
@@ -262,7 +279,11 @@ jessibuca.clearView()
 播放视频
 ```js
 
-jessibuca.play('url')
+jessibuca.play('url').then(()=>{
+    console.log('play success')
+}).catch((e)=>{
+    console.log('play error',e)
+})
 //
 jessibuca.play()
 ```
@@ -381,6 +402,31 @@ const fileBlob = jessibuca.screenshot("test",'blob')
 
 ```
 
+### startRecord(fileName,fileType)
+- **参数**：
+    - `{string} filename`
+    - `{string} fileType`
+
+- **用法**：
+  开始录制。
+1. fileName: 可选，默认时间戳
+2. fileType: 可选，默认webm，支持webm 和mp4 格式
+
+
+```js
+jessibuca.startRecord('xxx','webm')
+```
+
+
+### stopRecordAndSave()
+
+- **用法**：
+  暂停录制并下载。
+```js
+jessibuca.stopRecordAndSave()
+```
+
+
 
 ### isPlaying()
 - **返回值**：`boolean`
@@ -401,6 +447,14 @@ console.log(result) // true
 ```
 
 
+### isRecording()
+- **返回值**：`boolean`
+- **用法**：
+  返回是否正在录制。
+```js
+var result = jessibuca.isRecording()
+console.log(result) // true
+```
 
 ### on(event, callback)
 - **参数**：
