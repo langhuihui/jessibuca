@@ -100,7 +100,6 @@ export default class MseDecoder extends Emitter {
         player.video.updateVideoInfo({
             encTypeCode: videoCodec
         })
-        // player.debug.log('MediaSource', 'decodeVideo hasInit set true');
         let data = payload.slice(5);
         let config = {};
 
@@ -109,7 +108,6 @@ export default class MseDecoder extends Emitter {
         } else if (videoCodec === VIDEO_ENC_CODE.h265) {
             config = parseHEVCDecoderConfigurationRecord(data);
         }
-        // console.log(avcConfig);
         const metaData = {
             id: 1, // video tag data
             type: 'video',
@@ -120,10 +118,8 @@ export default class MseDecoder extends Emitter {
             codecHeight: config.codecHeight,
             videoType: config.videoType
         }
-        // console.log('metaData', metaData);
         // ftyp
         const metaBox = MP4.generateInitSegment(metaData);
-        // console.log('metaBox', metaBox);
         this.isAvc = true;
         this.appendBuffer(metaBox.buffer);
         this.sequenceNumber = 0;
@@ -140,13 +136,11 @@ export default class MseDecoder extends Emitter {
         let dts = ts;
 
         const $video = player.video.$videoElement;
-        // player.debug.log('MediaSource', 'decodeVideo', `$video.buffered.length:${$video.buffered.length},bytes:${bytes},cts:${cts},dts:${ts},flag:${isIframe}`);
 
         if ($video.buffered.length > 1) {
             this.removeBuffer($video.buffered.start(0), $video.buffered.end(0));
             this.timeInit = false;
         }
-        // player.debug.log('MediaSource', `cacheTrack.dts:${this.cacheTrack && this.cacheTrack.dts}`);
         if ($video.drop && dts - this.cacheTrack.dts > 1000) {
             $video.drop = false;
             this.cacheTrack = {};
@@ -170,7 +164,6 @@ export default class MseDecoder extends Emitter {
             // appendBuffer
             this.appendBuffer(result.buffer)
             player.handleRender();
-            // player.debug.log('MediaSource', 'add render data');
         } else {
             player.debug.log('MediaSource', 'timeInit set false , cacheTrack = {}');
             this.timeInit = false;
@@ -230,7 +223,6 @@ export default class MseDecoder extends Emitter {
         }
 
         if (this.sourceBuffer.updating === false && this.isStateOpen) {
-            // this.player.debug.log('MediaSource', 'appendBuffer')
             this.sourceBuffer.appendBuffer(buffer);
             return;
         }

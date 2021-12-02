@@ -9934,8 +9934,7 @@
         const videoCodec = payload[0] & 0x0F;
         player.video.updateVideoInfo({
           encTypeCode: videoCodec
-        }); // player.debug.log('MediaSource', 'decodeVideo hasInit set true');
-
+        });
         let data = payload.slice(5);
         let config = {};
 
@@ -9943,8 +9942,7 @@
           config = parseAVCDecoderConfigurationRecord(data);
         } else if (videoCodec === VIDEO_ENC_CODE.h265) {
           config = parseHEVCDecoderConfigurationRecord(data);
-        } // console.log(avcConfig);
-
+        }
 
         const metaData = {
           id: 1,
@@ -9956,11 +9954,9 @@
           codecWidth: config.codecWidth,
           codecHeight: config.codecHeight,
           videoType: config.videoType
-        }; // console.log('metaData', metaData);
-        // ftyp
+        }; // ftyp
 
-        const metaBox = MP4.generateInitSegment(metaData); // console.log('metaBox', metaBox);
-
+        const metaBox = MP4.generateInitSegment(metaData);
         this.isAvc = true;
         this.appendBuffer(metaBox.buffer);
         this.sequenceNumber = 0;
@@ -9975,13 +9971,12 @@
         let bytes = arrayBuffer.byteLength;
         let cts = 0;
         let dts = ts;
-        const $video = player.video.$videoElement; // player.debug.log('MediaSource', 'decodeVideo', `$video.buffered.length:${$video.buffered.length},bytes:${bytes},cts:${cts},dts:${ts},flag:${isIframe}`);
+        const $video = player.video.$videoElement;
 
         if ($video.buffered.length > 1) {
           this.removeBuffer($video.buffered.start(0), $video.buffered.end(0));
           this.timeInit = false;
-        } // player.debug.log('MediaSource', `cacheTrack.dts:${this.cacheTrack && this.cacheTrack.dts}`);
-
+        }
 
         if ($video.drop && dts - this.cacheTrack.dts > 1000) {
           $video.drop = false;
@@ -10004,7 +9999,7 @@
           result.set(mdatbox, moofbox.byteLength); // appendBuffer
 
           this.appendBuffer(result.buffer);
-          player.handleRender(); // player.debug.log('MediaSource', 'add render data');
+          player.handleRender();
         } else {
           player.debug.log('MediaSource', 'timeInit set false , cacheTrack = {}');
           this.timeInit = false;
@@ -10062,7 +10057,6 @@
         }
 
         if (this.sourceBuffer.updating === false && this.isStateOpen) {
-          // this.player.debug.log('MediaSource', 'appendBuffer')
           this.sourceBuffer.appendBuffer(buffer);
           return;
         }
