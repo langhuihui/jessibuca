@@ -134,12 +134,15 @@ class MP4 {
     }
 
     // Generate a box
+    // Type是box的类型
+    // box的参数除了第一个为类型，其他参数都需要是二进制的arraybuffer类型。
     static box(type) {
         // box前8位为预留位，这8位中前4位为数据size，
         // 当size值为0时，表示该box为文件的最后一个box（仅存在于mdat box中），
         // 当size值为1时，表示该box的size为large size（8位）
         let size = 8;
         let result = null;
+        // 方法中的第三行表示获取参数中除去第一个参数的其他参数
         let datas = Array.prototype.slice.call(arguments, 1);
         let arrayCount = datas.length;
 
@@ -166,8 +169,10 @@ class MP4 {
 
     // emit ftyp & moov
     static generateInitSegment(meta, trakList, mdatBytes) {
-
+        // Ftypbox 是一个由四个字符组成的码字，用来表示编码类型、兼容协议或者媒体文件的用途。
+        // 在普通MP4文件中，ftyp box有且仅有一个，在文件的开始位置。
         let ftyp = MP4.box(MP4.types.ftyp, MP4.constants.FTYP);
+        //
         let free = MP4.box(MP4.types.free);
         // allocate mdatbox init fps = 25
         let offset = 8;
@@ -215,7 +220,10 @@ class MP4 {
                 }
             }
         }
+        // Moov box中存放着媒体信息，上面提到的stbl里存放帧信息，属于媒体信息，也在moov box里。Moov box 用来描述媒体数据。
+        // Moov box 主要包含 mvhd、trak、mvex三种子box。
         let moov = MP4.moov(meta, trakList);
+        //
         let result = new Uint8Array(ftyp.byteLength + moov.byteLength + mdatbox.byteLength + free.byteLength);
         result.set(ftyp, 0);
         result.set(free, ftyp.byteLength);
@@ -225,10 +233,12 @@ class MP4 {
     }
 
     // Movie metadata box
+    // Moov box 主要包含 mvhd、trak、mvex三种子box。
     static moov(meta, trakList) {
         let timescale = meta.timescale;
         let duration = meta.duration;
         let trakLen = trakList.length;
+        // Mvhd box定义了整个文件的特性
         let mvhd = MP4.mvhd(timescale, duration);
         let trakArrayBuffer = new Uint8Array();
         for (let i = 0; i < trakLen; i++) {
@@ -244,7 +254,9 @@ class MP4 {
     }
 
     // Movie header box
+    // 这里写mp4时需要传入的参数为Time scale 和 Duration，其他的使用默认值即可。
     static mvhd(timescale, duration) {
+        //
         return MP4.box(MP4.types.mvhd, new Uint8Array([
             0x00, 0x00, 0x00, 0x00,  // version(0) + flags
             0xCE, 0xBA, 0xFD, 0xA8,  // creation_time
@@ -281,11 +293,17 @@ class MP4 {
     }
 
     // Track box
+    // 一个Track box定义了movie中的一个track。一部movie可以包含一个或多个tracks，它们之间相互独立，各自有各自的时间和空间信息。每个track box 都有与之关联的mdat box。
+    // 包含媒体数据引用和描述
+    // 包含modifier track
+    // 写mp4时仅用到第一个目的，所以这里只介绍媒体数据的引用和描述。
+    // 一个trak box一般主要包含了tkhd box、 edts box 、mdia box
     static trak(trak) {
         return MP4.box(MP4.types.trak, MP4.tkhd(trak), MP4.mdia(trak));
     }
 
     // Track header box
+    // 用来描述trak box的header 信息，定义了一个trak的时间、空间、音量信息。
     static tkhd(trak) {
         let trackId = trak.id, duration = trak.duration;
         let width = trak.presentWidth, height = trak.presentHeight;
@@ -361,6 +379,8 @@ class MP4 {
         return MP4.box(MP4.types.edts, MP4.elst(meta, i));
     }
 
+    // 该box为edst box的唯一子box，不是所有的MP4文件都有edst box，这个box是使其对应的trak box的时间戳产生偏移。
+    // 暂时未发现需要该偏移量的地方，编码时也未对该box进行编码。
     static elst(meta, i) {
         let videoList = [], videoDelayDuration = 0;
         for (let j = 0; j < i; j++) {
@@ -391,6 +411,7 @@ class MP4 {
     }
 
     // Media Box
+    // 该box定义了trak box的类型和sample的信息。
     static mdia(trak) {
         return MP4.box(MP4.types.mdia, MP4.mdhd(trak), MP4.hdlr(trak), MP4.minf(trak));
     }
@@ -446,6 +467,8 @@ class MP4 {
     }
 
     // Sample table box
+    // 在普通mp4中，在获取数据之前，需要解析每个帧数据所在位置，每个帧数据都存放在mdat中，而这些帧的信息全部存放在stbl box 中，
+    // 所以，若要mp4文件能够正常播放，需要在写mp4文件时，将所有的帧数据信息写入 stbl box中。
     static stbl(trak) {
         let sampleList = trak.samples;
         let sampleToChunk = [
@@ -854,6 +877,10 @@ class MP4 {
         return MP4.box(MP4.types.trun, data);
     }
 
+    // Mdat box 中包含了MP4文件的媒体数据，在文件中的位置可以在moov的前面，也可以在moov的后面，
+    // 因我们这里用到MP4文件格式用来写mp4文件，需要计算每一帧媒体数据在文件中的偏移量，为了方便计算，mdat放置moov前面。
+    // Mdat box数据格式单一，无子box。主要分为box header 和box body，box header中存放box size 和box type（mdat），box body中存放所有媒体数据，媒体数据以sample为数据单元。
+    // 这里使用时，视频数据中，每一个sample是一个视频帧，存放sample时，需要根据帧数据类型进行拼帧处理后存放。
     static mdat(data) {
         return MP4.box(MP4.types.mdat, data);
     }
