@@ -29,7 +29,7 @@ export default class MP4RecorderLoader extends Emitter {
             codec: null,
             sequenceNumber: 0,
             samples: [],
-            refSampleDuration: 0,
+            refSampleDuration: 25,// 默认video的fps为25帧，低于25的默认补帧到25
             length: 0,
             avcc: new Uint8Array(),
             addSampleNum: 1,
@@ -67,16 +67,46 @@ export default class MP4RecorderLoader extends Emitter {
     }
 
     startRecord() {
-
-
         this.recordingInterval = window.setInterval(() => {
             this.recordingTimestamp += 1;
             this.player.emit(EVENTS.recordingTimestamp, this.recordingTimestamp);
         }, 1000);
     }
 
-    stopRecordAndSave() {
+    //
+    handleAddDecoderConfigurationRecord() {
+        // 需要update avcc ,sps,pps 数据。
+        // this.realTrack.avcc =
+    }
 
+    //
+    handleAddTrack() {
+        let DRFlag = new Uint8Array();
+        const isKeyFrameUnit = false;
+        const sampleItem = {
+            dts: 0,
+            pts: 0,
+            cts: 0,
+            // units: [],
+            // size: 0,
+            data:'',
+            isKeyframe: false,
+            duration: 0,
+            originalDts: 0,
+            flags: {
+                isLeading: 0,
+                dependsOn: isKeyFrameUnit ? 2 : 1,
+                isDependedOn: isKeyFrameUnit ? 1 : 0,
+                hasRedundancy: 0,
+                isNonSync: isKeyFrameUnit ? 0 : 1
+            }
+        }
+        this.realTrack.sequenceNumber++;
+        this.realTrack.samples.push(sampleItem)
+        this.metaDataPrame.duration += this.realTrack.refSampleDuration;
+    }
+
+    stopRecordAndSave() {
         if (!this.isRecording) {
             return;
         }

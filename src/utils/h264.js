@@ -62,18 +62,18 @@ export function parseAVCDecoderConfigurationRecord(arrayBuffer) {
         meta.bitDepth = config.bit_depth;
         meta.chromaFormat = config.chroma_format;
         meta.sarRatio = config.sar_ratio;
-        // meta.frameRate = config.frame_rate;
+        meta.frameRate = config.frame_rate;
 
-        // if (config.frame_rate.fixed === false ||
-        //     config.frame_rate.fps_num === 0 ||
-        //     config.frame_rate.fps_den === 0) {
-        //     meta.frameRate = {};
-        // }
+        if (config.frame_rate.fixed === false ||
+            config.frame_rate.fps_num === 0 ||
+            config.frame_rate.fps_den === 0) {
+            meta.frameRate = {};
+        }
 
-        // let fps_den = meta.frameRate.fps_den;
-        // let fps_num = meta.frameRate.fps_num;
+        let fps_den = meta.frameRate.fps_den;
+        let fps_num = meta.frameRate.fps_num;
 
-        // meta.refSampleDuration = meta.timescale * (fps_den / fps_num);
+        meta.refSampleDuration = meta.timescale * (fps_den / fps_num);
 
         let codecArray = sps.subarray(1, 4);
 
@@ -105,6 +105,7 @@ export function parseAVCDecoderConfigurationRecord(arrayBuffer) {
         if (len === 0) {
             continue;
         }
+        let pps = new Uint8Array(arrayBuffer.buffer, offset, len);
 
         // pps is useless for extracting video information
         offset += len;
