@@ -414,6 +414,18 @@
         overflow: hidden;
     }
 
+    .jessibuca-volume-panel-text{
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 50px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        color: #fff;
+        font-size: 12px;
+    }
+
     .jessibuca-volume-panel-handle {
         position: absolute;
         top: 48px;

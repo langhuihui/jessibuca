@@ -1,12 +1,8 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('recordrtc')) :
-    typeof define === 'function' && define.amd ? define(['recordrtc'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.jessibuca = factory(global.RecordRTC));
-})(this, (function (RecordRTC) { 'use strict';
-
-    function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-    var RecordRTC__default = /*#__PURE__*/_interopDefaultLegacy(RecordRTC);
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+    typeof define === 'function' && define.amd ? define(factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.jessibuca = factory());
+})(this, (function () { 'use strict';
 
     // 播放协议
     const PLAYER_PLAY_PROTOCOL = {
@@ -289,6 +285,8 @@
         });
       });
     });
+
+    var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
     function createCommonjsModule(fn, module) {
     	return module = { exports: {} }, fn(module, module.exports), module.exports;
@@ -1636,6 +1634,6175 @@
 
     }
 
+    var RecordRTC_1 = createCommonjsModule(function (module) {
+
+    // Last time updated: 2021-03-09 3:20:22 AM UTC
+
+    // ________________
+    // RecordRTC v5.6.2
+
+    // Open-Sourced: https://github.com/muaz-khan/RecordRTC
+
+    // --------------------------------------------------
+    // Muaz Khan     - www.MuazKhan.com
+    // MIT License   - www.WebRTC-Experiment.com/licence
+    // --------------------------------------------------
+
+    // ____________
+    // RecordRTC.js
+
+    /**
+     * {@link https://github.com/muaz-khan/RecordRTC|RecordRTC} is a WebRTC JavaScript library for audio/video as well as screen activity recording. It supports Chrome, Firefox, Opera, Android, and Microsoft Edge. Platforms: Linux, Mac and Windows. 
+     * @summary Record audio, video or screen inside the browser.
+     * @license {@link https://github.com/muaz-khan/RecordRTC/blob/master/LICENSE|MIT}
+     * @author {@link https://MuazKhan.com|Muaz Khan}
+     * @typedef RecordRTC
+     * @class
+     * @example
+     * var recorder = RecordRTC(mediaStream or [arrayOfMediaStream], {
+     *     type: 'video', // audio or video or gif or canvas
+     *     recorderType: MediaStreamRecorder || CanvasRecorder || StereoAudioRecorder || Etc
+     * });
+     * recorder.startRecording();
+     * @see For further information:
+     * @see {@link https://github.com/muaz-khan/RecordRTC|RecordRTC Source Code}
+     * @param {MediaStream} mediaStream - Single media-stream object, array of media-streams, html-canvas-element, etc.
+     * @param {object} config - {type:"video", recorderType: MediaStreamRecorder, disableLogs: true, numberOfAudioChannels: 1, bufferSize: 0, sampleRate: 0, desiredSampRate: 16000, video: HTMLVideoElement, etc.}
+     */
+
+    function RecordRTC(mediaStream, config) {
+        if (!mediaStream) {
+            throw 'First parameter is required.';
+        }
+
+        config = config || {
+            type: 'video'
+        };
+
+        config = new RecordRTCConfiguration(mediaStream, config);
+
+        // a reference to user's recordRTC object
+        var self = this;
+
+        function startRecording(config2) {
+            if (!config.disableLogs) {
+                console.log('RecordRTC version: ', self.version);
+            }
+
+            if (!!config2) {
+                // allow users to set options using startRecording method
+                // config2 is similar to main "config" object (second parameter over RecordRTC constructor)
+                config = new RecordRTCConfiguration(mediaStream, config2);
+            }
+
+            if (!config.disableLogs) {
+                console.log('started recording ' + config.type + ' stream.');
+            }
+
+            if (mediaRecorder) {
+                mediaRecorder.clearRecordedData();
+                mediaRecorder.record();
+
+                setState('recording');
+
+                if (self.recordingDuration) {
+                    handleRecordingDuration();
+                }
+                return self;
+            }
+
+            initRecorder(function() {
+                if (self.recordingDuration) {
+                    handleRecordingDuration();
+                }
+            });
+
+            return self;
+        }
+
+        function initRecorder(initCallback) {
+            if (initCallback) {
+                config.initCallback = function() {
+                    initCallback();
+                    initCallback = config.initCallback = null; // recorder.initRecorder should be call-backed once.
+                };
+            }
+
+            var Recorder = new GetRecorderType(mediaStream, config);
+
+            mediaRecorder = new Recorder(mediaStream, config);
+            mediaRecorder.record();
+
+            setState('recording');
+
+            if (!config.disableLogs) {
+                console.log('Initialized recorderType:', mediaRecorder.constructor.name, 'for output-type:', config.type);
+            }
+        }
+
+        function stopRecording(callback) {
+            callback = callback || function() {};
+
+            if (!mediaRecorder) {
+                warningLog();
+                return;
+            }
+
+            if (self.state === 'paused') {
+                self.resumeRecording();
+
+                setTimeout(function() {
+                    stopRecording(callback);
+                }, 1);
+                return;
+            }
+
+            if (self.state !== 'recording' && !config.disableLogs) {
+                console.warn('Recording state should be: "recording", however current state is: ', self.state);
+            }
+
+            if (!config.disableLogs) {
+                console.log('Stopped recording ' + config.type + ' stream.');
+            }
+
+            if (config.type !== 'gif') {
+                mediaRecorder.stop(_callback);
+            } else {
+                mediaRecorder.stop();
+                _callback();
+            }
+
+            setState('stopped');
+
+            function _callback(__blob) {
+                if (!mediaRecorder) {
+                    if (typeof callback.call === 'function') {
+                        callback.call(self, '');
+                    } else {
+                        callback('');
+                    }
+                    return;
+                }
+
+                Object.keys(mediaRecorder).forEach(function(key) {
+                    if (typeof mediaRecorder[key] === 'function') {
+                        return;
+                    }
+
+                    self[key] = mediaRecorder[key];
+                });
+
+                var blob = mediaRecorder.blob;
+
+                if (!blob) {
+                    if (__blob) {
+                        mediaRecorder.blob = blob = __blob;
+                    } else {
+                        throw 'Recording failed.';
+                    }
+                }
+
+                if (blob && !config.disableLogs) {
+                    console.log(blob.type, '->', bytesToSize(blob.size));
+                }
+
+                if (callback) {
+                    var url;
+
+                    try {
+                        url = URL.createObjectURL(blob);
+                    } catch (e) {}
+
+                    if (typeof callback.call === 'function') {
+                        callback.call(self, url);
+                    } else {
+                        callback(url);
+                    }
+                }
+
+                if (!config.autoWriteToDisk) {
+                    return;
+                }
+
+                getDataURL(function(dataURL) {
+                    var parameter = {};
+                    parameter[config.type + 'Blob'] = dataURL;
+                    DiskStorage.Store(parameter);
+                });
+            }
+        }
+
+        function pauseRecording() {
+            if (!mediaRecorder) {
+                warningLog();
+                return;
+            }
+
+            if (self.state !== 'recording') {
+                if (!config.disableLogs) {
+                    console.warn('Unable to pause the recording. Recording state: ', self.state);
+                }
+                return;
+            }
+
+            setState('paused');
+
+            mediaRecorder.pause();
+
+            if (!config.disableLogs) {
+                console.log('Paused recording.');
+            }
+        }
+
+        function resumeRecording() {
+            if (!mediaRecorder) {
+                warningLog();
+                return;
+            }
+
+            if (self.state !== 'paused') {
+                if (!config.disableLogs) {
+                    console.warn('Unable to resume the recording. Recording state: ', self.state);
+                }
+                return;
+            }
+
+            setState('recording');
+
+            // not all libs have this method yet
+            mediaRecorder.resume();
+
+            if (!config.disableLogs) {
+                console.log('Resumed recording.');
+            }
+        }
+
+        function readFile(_blob) {
+            postMessage(new FileReaderSync().readAsDataURL(_blob));
+        }
+
+        function getDataURL(callback, _mediaRecorder) {
+            if (!callback) {
+                throw 'Pass a callback function over getDataURL.';
+            }
+
+            var blob = _mediaRecorder ? _mediaRecorder.blob : (mediaRecorder || {}).blob;
+
+            if (!blob) {
+                if (!config.disableLogs) {
+                    console.warn('Blob encoder did not finish its job yet.');
+                }
+
+                setTimeout(function() {
+                    getDataURL(callback, _mediaRecorder);
+                }, 1000);
+                return;
+            }
+
+            if (typeof Worker !== 'undefined' && !navigator.mozGetUserMedia) {
+                var webWorker = processInWebWorker(readFile);
+
+                webWorker.onmessage = function(event) {
+                    callback(event.data);
+                };
+
+                webWorker.postMessage(blob);
+            } else {
+                var reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onload = function(event) {
+                    callback(event.target.result);
+                };
+            }
+
+            function processInWebWorker(_function) {
+                try {
+                    var blob = URL.createObjectURL(new Blob([_function.toString(),
+                        'this.onmessage =  function (eee) {' + _function.name + '(eee.data);}'
+                    ], {
+                        type: 'application/javascript'
+                    }));
+
+                    var worker = new Worker(blob);
+                    URL.revokeObjectURL(blob);
+                    return worker;
+                } catch (e) {}
+            }
+        }
+
+        function handleRecordingDuration(counter) {
+            counter = counter || 0;
+
+            if (self.state === 'paused') {
+                setTimeout(function() {
+                    handleRecordingDuration(counter);
+                }, 1000);
+                return;
+            }
+
+            if (self.state === 'stopped') {
+                return;
+            }
+
+            if (counter >= self.recordingDuration) {
+                stopRecording(self.onRecordingStopped);
+                return;
+            }
+
+            counter += 1000; // 1-second
+
+            setTimeout(function() {
+                handleRecordingDuration(counter);
+            }, 1000);
+        }
+
+        function setState(state) {
+            if (!self) {
+                return;
+            }
+
+            self.state = state;
+
+            if (typeof self.onStateChanged.call === 'function') {
+                self.onStateChanged.call(self, state);
+            } else {
+                self.onStateChanged(state);
+            }
+        }
+
+        var WARNING = 'It seems that recorder is destroyed or "startRecording" is not invoked for ' + config.type + ' recorder.';
+
+        function warningLog() {
+            if (config.disableLogs === true) {
+                return;
+            }
+
+            console.warn(WARNING);
+        }
+
+        var mediaRecorder;
+
+        var returnObject = {
+            /**
+             * This method starts the recording.
+             * @method
+             * @memberof RecordRTC
+             * @instance
+             * @example
+             * var recorder = RecordRTC(mediaStream, {
+             *     type: 'video'
+             * });
+             * recorder.startRecording();
+             */
+            startRecording: startRecording,
+
+            /**
+             * This method stops the recording. It is strongly recommended to get "blob" or "URI" inside the callback to make sure all recorders finished their job.
+             * @param {function} callback - Callback to get the recorded blob.
+             * @method
+             * @memberof RecordRTC
+             * @instance
+             * @example
+             * recorder.stopRecording(function() {
+             *     // use either "this" or "recorder" object; both are identical
+             *     video.src = this.toURL();
+             *     var blob = this.getBlob();
+             * });
+             */
+            stopRecording: stopRecording,
+
+            /**
+             * This method pauses the recording. You can resume recording using "resumeRecording" method.
+             * @method
+             * @memberof RecordRTC
+             * @instance
+             * @todo Firefox is unable to pause the recording. Fix it.
+             * @example
+             * recorder.pauseRecording();  // pause the recording
+             * recorder.resumeRecording(); // resume again
+             */
+            pauseRecording: pauseRecording,
+
+            /**
+             * This method resumes the recording.
+             * @method
+             * @memberof RecordRTC
+             * @instance
+             * @example
+             * recorder.pauseRecording();  // first of all, pause the recording
+             * recorder.resumeRecording(); // now resume it
+             */
+            resumeRecording: resumeRecording,
+
+            /**
+             * This method initializes the recording.
+             * @method
+             * @memberof RecordRTC
+             * @instance
+             * @todo This method should be deprecated.
+             * @example
+             * recorder.initRecorder();
+             */
+            initRecorder: initRecorder,
+
+            /**
+             * Ask RecordRTC to auto-stop the recording after 5 minutes.
+             * @method
+             * @memberof RecordRTC
+             * @instance
+             * @example
+             * var fiveMinutes = 5 * 1000 * 60;
+             * recorder.setRecordingDuration(fiveMinutes, function() {
+             *    var blob = this.getBlob();
+             *    video.src = this.toURL();
+             * });
+             * 
+             * // or otherwise
+             * recorder.setRecordingDuration(fiveMinutes).onRecordingStopped(function() {
+             *    var blob = this.getBlob();
+             *    video.src = this.toURL();
+             * });
+             */
+            setRecordingDuration: function(recordingDuration, callback) {
+                if (typeof recordingDuration === 'undefined') {
+                    throw 'recordingDuration is required.';
+                }
+
+                if (typeof recordingDuration !== 'number') {
+                    throw 'recordingDuration must be a number.';
+                }
+
+                self.recordingDuration = recordingDuration;
+                self.onRecordingStopped = callback || function() {};
+
+                return {
+                    onRecordingStopped: function(callback) {
+                        self.onRecordingStopped = callback;
+                    }
+                };
+            },
+
+            /**
+             * This method can be used to clear/reset all the recorded data.
+             * @method
+             * @memberof RecordRTC
+             * @instance
+             * @todo Figure out the difference between "reset" and "clearRecordedData" methods.
+             * @example
+             * recorder.clearRecordedData();
+             */
+            clearRecordedData: function() {
+                if (!mediaRecorder) {
+                    warningLog();
+                    return;
+                }
+
+                mediaRecorder.clearRecordedData();
+
+                if (!config.disableLogs) {
+                    console.log('Cleared old recorded data.');
+                }
+            },
+
+            /**
+             * Get the recorded blob. Use this method inside the "stopRecording" callback.
+             * @method
+             * @memberof RecordRTC
+             * @instance
+             * @example
+             * recorder.stopRecording(function() {
+             *     var blob = this.getBlob();
+             *
+             *     var file = new File([blob], 'filename.webm', {
+             *         type: 'video/webm'
+             *     });
+             *
+             *     var formData = new FormData();
+             *     formData.append('file', file); // upload "File" object rather than a "Blob"
+             *     uploadToServer(formData);
+             * });
+             * @returns {Blob} Returns recorded data as "Blob" object.
+             */
+            getBlob: function() {
+                if (!mediaRecorder) {
+                    warningLog();
+                    return;
+                }
+
+                return mediaRecorder.blob;
+            },
+
+            /**
+             * Get data-URI instead of Blob.
+             * @param {function} callback - Callback to get the Data-URI.
+             * @method
+             * @memberof RecordRTC
+             * @instance
+             * @example
+             * recorder.stopRecording(function() {
+             *     recorder.getDataURL(function(dataURI) {
+             *         video.src = dataURI;
+             *     });
+             * });
+             */
+            getDataURL: getDataURL,
+
+            /**
+             * Get virtual/temporary URL. Usage of this URL is limited to current tab.
+             * @method
+             * @memberof RecordRTC
+             * @instance
+             * @example
+             * recorder.stopRecording(function() {
+             *     video.src = this.toURL();
+             * });
+             * @returns {String} Returns a virtual/temporary URL for the recorded "Blob".
+             */
+            toURL: function() {
+                if (!mediaRecorder) {
+                    warningLog();
+                    return;
+                }
+
+                return URL.createObjectURL(mediaRecorder.blob);
+            },
+
+            /**
+             * Get internal recording object (i.e. internal module) e.g. MutliStreamRecorder, MediaStreamRecorder, StereoAudioRecorder or WhammyRecorder etc.
+             * @method
+             * @memberof RecordRTC
+             * @instance
+             * @example
+             * var internalRecorder = recorder.getInternalRecorder();
+             * if(internalRecorder instanceof MultiStreamRecorder) {
+             *     internalRecorder.addStreams([newAudioStream]);
+             *     internalRecorder.resetVideoStreams([screenStream]);
+             * }
+             * @returns {Object} Returns internal recording object.
+             */
+            getInternalRecorder: function() {
+                return mediaRecorder;
+            },
+
+            /**
+             * Invoke save-as dialog to save the recorded blob into your disk.
+             * @param {string} fileName - Set your own file name.
+             * @method
+             * @memberof RecordRTC
+             * @instance
+             * @example
+             * recorder.stopRecording(function() {
+             *     this.save('file-name');
+             *
+             *     // or manually:
+             *     invokeSaveAsDialog(this.getBlob(), 'filename.webm');
+             * });
+             */
+            save: function(fileName) {
+                if (!mediaRecorder) {
+                    warningLog();
+                    return;
+                }
+
+                invokeSaveAsDialog(mediaRecorder.blob, fileName);
+            },
+
+            /**
+             * This method gets a blob from indexed-DB storage.
+             * @param {function} callback - Callback to get the recorded blob.
+             * @method
+             * @memberof RecordRTC
+             * @instance
+             * @example
+             * recorder.getFromDisk(function(dataURL) {
+             *     video.src = dataURL;
+             * });
+             */
+            getFromDisk: function(callback) {
+                if (!mediaRecorder) {
+                    warningLog();
+                    return;
+                }
+
+                RecordRTC.getFromDisk(config.type, callback);
+            },
+
+            /**
+             * This method appends an array of webp images to the recorded video-blob. It takes an "array" object.
+             * @type {Array.<Array>}
+             * @param {Array} arrayOfWebPImages - Array of webp images.
+             * @method
+             * @memberof RecordRTC
+             * @instance
+             * @todo This method should be deprecated.
+             * @example
+             * var arrayOfWebPImages = [];
+             * arrayOfWebPImages.push({
+             *     duration: index,
+             *     image: 'data:image/webp;base64,...'
+             * });
+             * recorder.setAdvertisementArray(arrayOfWebPImages);
+             */
+            setAdvertisementArray: function(arrayOfWebPImages) {
+                config.advertisement = [];
+
+                var length = arrayOfWebPImages.length;
+                for (var i = 0; i < length; i++) {
+                    config.advertisement.push({
+                        duration: i,
+                        image: arrayOfWebPImages[i]
+                    });
+                }
+            },
+
+            /**
+             * It is equivalent to <code class="str">"recorder.getBlob()"</code> method. Usage of "getBlob" is recommended, though.
+             * @property {Blob} blob - Recorded Blob can be accessed using this property.
+             * @memberof RecordRTC
+             * @instance
+             * @readonly
+             * @example
+             * recorder.stopRecording(function() {
+             *     var blob = this.blob;
+             *
+             *     // below one is recommended
+             *     var blob = this.getBlob();
+             * });
+             */
+            blob: null,
+
+            /**
+             * This works only with {recorderType:StereoAudioRecorder}. Use this property on "stopRecording" to verify the encoder's sample-rates.
+             * @property {number} bufferSize - Buffer-size used to encode the WAV container
+             * @memberof RecordRTC
+             * @instance
+             * @readonly
+             * @example
+             * recorder.stopRecording(function() {
+             *     alert('Recorder used this buffer-size: ' + this.bufferSize);
+             * });
+             */
+            bufferSize: 0,
+
+            /**
+             * This works only with {recorderType:StereoAudioRecorder}. Use this property on "stopRecording" to verify the encoder's sample-rates.
+             * @property {number} sampleRate - Sample-rates used to encode the WAV container
+             * @memberof RecordRTC
+             * @instance
+             * @readonly
+             * @example
+             * recorder.stopRecording(function() {
+             *     alert('Recorder used these sample-rates: ' + this.sampleRate);
+             * });
+             */
+            sampleRate: 0,
+
+            /**
+             * {recorderType:StereoAudioRecorder} returns ArrayBuffer object.
+             * @property {ArrayBuffer} buffer - Audio ArrayBuffer, supported only in Chrome.
+             * @memberof RecordRTC
+             * @instance
+             * @readonly
+             * @example
+             * recorder.stopRecording(function() {
+             *     var arrayBuffer = this.buffer;
+             *     alert(arrayBuffer.byteLength);
+             * });
+             */
+            buffer: null,
+
+            /**
+             * This method resets the recorder. So that you can reuse single recorder instance many times.
+             * @method
+             * @memberof RecordRTC
+             * @instance
+             * @example
+             * recorder.reset();
+             * recorder.startRecording();
+             */
+            reset: function() {
+                if (self.state === 'recording' && !config.disableLogs) {
+                    console.warn('Stop an active recorder.');
+                }
+
+                if (mediaRecorder && typeof mediaRecorder.clearRecordedData === 'function') {
+                    mediaRecorder.clearRecordedData();
+                }
+                mediaRecorder = null;
+                setState('inactive');
+                self.blob = null;
+            },
+
+            /**
+             * This method is called whenever recorder's state changes. Use this as an "event".
+             * @property {String} state - A recorder's state can be: recording, paused, stopped or inactive.
+             * @method
+             * @memberof RecordRTC
+             * @instance
+             * @example
+             * recorder.onStateChanged = function(state) {
+             *     console.log('Recorder state: ', state);
+             * };
+             */
+            onStateChanged: function(state) {
+                if (!config.disableLogs) {
+                    console.log('Recorder state changed:', state);
+                }
+            },
+
+            /**
+             * A recorder can have inactive, recording, paused or stopped states.
+             * @property {String} state - A recorder's state can be: recording, paused, stopped or inactive.
+             * @memberof RecordRTC
+             * @static
+             * @readonly
+             * @example
+             * // this looper function will keep you updated about the recorder's states.
+             * (function looper() {
+             *     document.querySelector('h1').innerHTML = 'Recorder\'s state is: ' + recorder.state;
+             *     if(recorder.state === 'stopped') return; // ignore+stop
+             *     setTimeout(looper, 1000); // update after every 3-seconds
+             * })();
+             * recorder.startRecording();
+             */
+            state: 'inactive',
+
+            /**
+             * Get recorder's readonly state.
+             * @method
+             * @memberof RecordRTC
+             * @example
+             * var state = recorder.getState();
+             * @returns {String} Returns recording state.
+             */
+            getState: function() {
+                return self.state;
+            },
+
+            /**
+             * Destroy RecordRTC instance. Clear all recorders and objects.
+             * @method
+             * @memberof RecordRTC
+             * @example
+             * recorder.destroy();
+             */
+            destroy: function() {
+                var disableLogsCache = config.disableLogs;
+
+                config = {
+                    disableLogs: true
+                };
+                self.reset();
+                setState('destroyed');
+                returnObject = self = null;
+
+                if (Storage.AudioContextConstructor) {
+                    Storage.AudioContextConstructor.close();
+                    Storage.AudioContextConstructor = null;
+                }
+
+                config.disableLogs = disableLogsCache;
+
+                if (!config.disableLogs) {
+                    console.log('RecordRTC is destroyed.');
+                }
+            },
+
+            /**
+             * RecordRTC version number
+             * @property {String} version - Release version number.
+             * @memberof RecordRTC
+             * @static
+             * @readonly
+             * @example
+             * alert(recorder.version);
+             */
+            version: '5.6.2'
+        };
+
+        if (!this) {
+            self = returnObject;
+            return returnObject;
+        }
+
+        // if someone wants to use RecordRTC with the "new" keyword.
+        for (var prop in returnObject) {
+            this[prop] = returnObject[prop];
+        }
+
+        self = this;
+
+        return returnObject;
+    }
+
+    RecordRTC.version = '5.6.2';
+
+    {
+        module.exports = RecordRTC;
+    }
+
+    RecordRTC.getFromDisk = function(type, callback) {
+        if (!callback) {
+            throw 'callback is mandatory.';
+        }
+
+        console.log('Getting recorded ' + (type === 'all' ? 'blobs' : type + ' blob ') + ' from disk!');
+        DiskStorage.Fetch(function(dataURL, _type) {
+            if (type !== 'all' && _type === type + 'Blob' && callback) {
+                callback(dataURL);
+            }
+
+            if (type === 'all' && callback) {
+                callback(dataURL, _type.replace('Blob', ''));
+            }
+        });
+    };
+
+    /**
+     * This method can be used to store recorded blobs into IndexedDB storage.
+     * @param {object} options - {audio: Blob, video: Blob, gif: Blob}
+     * @method
+     * @memberof RecordRTC
+     * @example
+     * RecordRTC.writeToDisk({
+     *     audio: audioBlob,
+     *     video: videoBlob,
+     *     gif  : gifBlob
+     * });
+     */
+    RecordRTC.writeToDisk = function(options) {
+        console.log('Writing recorded blob(s) to disk!');
+        options = options || {};
+        if (options.audio && options.video && options.gif) {
+            options.audio.getDataURL(function(audioDataURL) {
+                options.video.getDataURL(function(videoDataURL) {
+                    options.gif.getDataURL(function(gifDataURL) {
+                        DiskStorage.Store({
+                            audioBlob: audioDataURL,
+                            videoBlob: videoDataURL,
+                            gifBlob: gifDataURL
+                        });
+                    });
+                });
+            });
+        } else if (options.audio && options.video) {
+            options.audio.getDataURL(function(audioDataURL) {
+                options.video.getDataURL(function(videoDataURL) {
+                    DiskStorage.Store({
+                        audioBlob: audioDataURL,
+                        videoBlob: videoDataURL
+                    });
+                });
+            });
+        } else if (options.audio && options.gif) {
+            options.audio.getDataURL(function(audioDataURL) {
+                options.gif.getDataURL(function(gifDataURL) {
+                    DiskStorage.Store({
+                        audioBlob: audioDataURL,
+                        gifBlob: gifDataURL
+                    });
+                });
+            });
+        } else if (options.video && options.gif) {
+            options.video.getDataURL(function(videoDataURL) {
+                options.gif.getDataURL(function(gifDataURL) {
+                    DiskStorage.Store({
+                        videoBlob: videoDataURL,
+                        gifBlob: gifDataURL
+                    });
+                });
+            });
+        } else if (options.audio) {
+            options.audio.getDataURL(function(audioDataURL) {
+                DiskStorage.Store({
+                    audioBlob: audioDataURL
+                });
+            });
+        } else if (options.video) {
+            options.video.getDataURL(function(videoDataURL) {
+                DiskStorage.Store({
+                    videoBlob: videoDataURL
+                });
+            });
+        } else if (options.gif) {
+            options.gif.getDataURL(function(gifDataURL) {
+                DiskStorage.Store({
+                    gifBlob: gifDataURL
+                });
+            });
+        }
+    };
+
+    // __________________________
+    // RecordRTC-Configuration.js
+
+    /**
+     * {@link RecordRTCConfiguration} is an inner/private helper for {@link RecordRTC}.
+     * @summary It configures the 2nd parameter passed over {@link RecordRTC} and returns a valid "config" object.
+     * @license {@link https://github.com/muaz-khan/RecordRTC/blob/master/LICENSE|MIT}
+     * @author {@link https://MuazKhan.com|Muaz Khan}
+     * @typedef RecordRTCConfiguration
+     * @class
+     * @example
+     * var options = RecordRTCConfiguration(mediaStream, options);
+     * @see {@link https://github.com/muaz-khan/RecordRTC|RecordRTC Source Code}
+     * @param {MediaStream} mediaStream - MediaStream object fetched using getUserMedia API or generated using captureStreamUntilEnded or WebAudio API.
+     * @param {object} config - {type:"video", disableLogs: true, numberOfAudioChannels: 1, bufferSize: 0, sampleRate: 0, video: HTMLVideoElement, getNativeBlob:true, etc.}
+     */
+
+    function RecordRTCConfiguration(mediaStream, config) {
+        if (!config.recorderType && !config.type) {
+            if (!!config.audio && !!config.video) {
+                config.type = 'video';
+            } else if (!!config.audio && !config.video) {
+                config.type = 'audio';
+            }
+        }
+
+        if (config.recorderType && !config.type) {
+            if (config.recorderType === WhammyRecorder || config.recorderType === CanvasRecorder || (typeof WebAssemblyRecorder !== 'undefined' && config.recorderType === WebAssemblyRecorder)) {
+                config.type = 'video';
+            } else if (config.recorderType === GifRecorder) {
+                config.type = 'gif';
+            } else if (config.recorderType === StereoAudioRecorder) {
+                config.type = 'audio';
+            } else if (config.recorderType === MediaStreamRecorder) {
+                if (getTracks(mediaStream, 'audio').length && getTracks(mediaStream, 'video').length) {
+                    config.type = 'video';
+                } else if (!getTracks(mediaStream, 'audio').length && getTracks(mediaStream, 'video').length) {
+                    config.type = 'video';
+                } else if (getTracks(mediaStream, 'audio').length && !getTracks(mediaStream, 'video').length) {
+                    config.type = 'audio';
+                } else ;
+            }
+        }
+
+        if (typeof MediaStreamRecorder !== 'undefined' && typeof MediaRecorder !== 'undefined' && 'requestData' in MediaRecorder.prototype) {
+            if (!config.mimeType) {
+                config.mimeType = 'video/webm';
+            }
+
+            if (!config.type) {
+                config.type = config.mimeType.split('/')[0];
+            }
+
+            if (!config.bitsPerSecond) ;
+        }
+
+        // consider default type=audio
+        if (!config.type) {
+            if (config.mimeType) {
+                config.type = config.mimeType.split('/')[0];
+            }
+            if (!config.type) {
+                config.type = 'audio';
+            }
+        }
+
+        return config;
+    }
+
+    // __________________
+    // GetRecorderType.js
+
+    /**
+     * {@link GetRecorderType} is an inner/private helper for {@link RecordRTC}.
+     * @summary It returns best recorder-type available for your browser.
+     * @license {@link https://github.com/muaz-khan/RecordRTC/blob/master/LICENSE|MIT}
+     * @author {@link https://MuazKhan.com|Muaz Khan}
+     * @typedef GetRecorderType
+     * @class
+     * @example
+     * var RecorderType = GetRecorderType(options);
+     * var recorder = new RecorderType(options);
+     * @see {@link https://github.com/muaz-khan/RecordRTC|RecordRTC Source Code}
+     * @param {MediaStream} mediaStream - MediaStream object fetched using getUserMedia API or generated using captureStreamUntilEnded or WebAudio API.
+     * @param {object} config - {type:"video", disableLogs: true, numberOfAudioChannels: 1, bufferSize: 0, sampleRate: 0, video: HTMLVideoElement, etc.}
+     */
+
+    function GetRecorderType(mediaStream, config) {
+        var recorder;
+
+        // StereoAudioRecorder can work with all three: Edge, Firefox and Chrome
+        // todo: detect if it is Edge, then auto use: StereoAudioRecorder
+        if (isChrome || isEdge || isOpera) {
+            // Media Stream Recording API has not been implemented in chrome yet;
+            // That's why using WebAudio API to record stereo audio in WAV format
+            recorder = StereoAudioRecorder;
+        }
+
+        if (typeof MediaRecorder !== 'undefined' && 'requestData' in MediaRecorder.prototype && !isChrome) {
+            recorder = MediaStreamRecorder;
+        }
+
+        // video recorder (in WebM format)
+        if (config.type === 'video' && (isChrome || isOpera)) {
+            recorder = WhammyRecorder;
+
+            if (typeof WebAssemblyRecorder !== 'undefined' && typeof ReadableStream !== 'undefined') {
+                recorder = WebAssemblyRecorder;
+            }
+        }
+
+        // video recorder (in Gif format)
+        if (config.type === 'gif') {
+            recorder = GifRecorder;
+        }
+
+        // html2canvas recording!
+        if (config.type === 'canvas') {
+            recorder = CanvasRecorder;
+        }
+
+        if (isMediaRecorderCompatible() && recorder !== CanvasRecorder && recorder !== GifRecorder && typeof MediaRecorder !== 'undefined' && 'requestData' in MediaRecorder.prototype) {
+            if (getTracks(mediaStream, 'video').length || getTracks(mediaStream, 'audio').length) {
+                // audio-only recording
+                if (config.type === 'audio') {
+                    if (typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported('audio/webm')) {
+                        recorder = MediaStreamRecorder;
+                    }
+                    // else recorder = StereoAudioRecorder;
+                } else {
+                    // video or screen tracks
+                    if (typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported('video/webm')) {
+                        recorder = MediaStreamRecorder;
+                    }
+                }
+            }
+        }
+
+        if (mediaStream instanceof Array && mediaStream.length) {
+            recorder = MultiStreamRecorder;
+        }
+
+        if (config.recorderType) {
+            recorder = config.recorderType;
+        }
+
+        if (!config.disableLogs && !!recorder && !!recorder.name) {
+            console.log('Using recorderType:', recorder.name || recorder.constructor.name);
+        }
+
+        if (!recorder && isSafari) {
+            recorder = MediaStreamRecorder;
+        }
+
+        return recorder;
+    }
+
+    // _____________
+    // MRecordRTC.js
+
+    /**
+     * MRecordRTC runs on top of {@link RecordRTC} to bring multiple recordings in a single place, by providing simple API.
+     * @summary MRecordRTC stands for "Multiple-RecordRTC".
+     * @license {@link https://github.com/muaz-khan/RecordRTC/blob/master/LICENSE|MIT}
+     * @author {@link https://MuazKhan.com|Muaz Khan}
+     * @typedef MRecordRTC
+     * @class
+     * @example
+     * var recorder = new MRecordRTC();
+     * recorder.addStream(MediaStream);
+     * recorder.mediaType = {
+     *     audio: true, // or StereoAudioRecorder or MediaStreamRecorder
+     *     video: true, // or WhammyRecorder or MediaStreamRecorder or WebAssemblyRecorder or CanvasRecorder
+     *     gif: true    // or GifRecorder
+     * };
+     * // mimeType is optional and should be set only in advance cases.
+     * recorder.mimeType = {
+     *     audio: 'audio/wav',
+     *     video: 'video/webm',
+     *     gif:   'image/gif'
+     * };
+     * recorder.startRecording();
+     * @see For further information:
+     * @see {@link https://github.com/muaz-khan/RecordRTC/tree/master/MRecordRTC|MRecordRTC Source Code}
+     * @param {MediaStream} mediaStream - MediaStream object fetched using getUserMedia API or generated using captureStreamUntilEnded or WebAudio API.
+     * @requires {@link RecordRTC}
+     */
+
+    function MRecordRTC(mediaStream) {
+
+        /**
+         * This method attaches MediaStream object to {@link MRecordRTC}.
+         * @param {MediaStream} mediaStream - A MediaStream object, either fetched using getUserMedia API, or generated using captureStreamUntilEnded or WebAudio API.
+         * @method
+         * @memberof MRecordRTC
+         * @example
+         * recorder.addStream(MediaStream);
+         */
+        this.addStream = function(_mediaStream) {
+            if (_mediaStream) {
+                mediaStream = _mediaStream;
+            }
+        };
+
+        /**
+         * This property can be used to set the recording type e.g. audio, or video, or gif, or canvas.
+         * @property {object} mediaType - {audio: true, video: true, gif: true}
+         * @memberof MRecordRTC
+         * @example
+         * var recorder = new MRecordRTC();
+         * recorder.mediaType = {
+         *     audio: true, // TRUE or StereoAudioRecorder or MediaStreamRecorder
+         *     video: true, // TRUE or WhammyRecorder or MediaStreamRecorder or WebAssemblyRecorder or CanvasRecorder
+         *     gif  : true  // TRUE or GifRecorder
+         * };
+         */
+        this.mediaType = {
+            audio: true,
+            video: true
+        };
+
+        /**
+         * This method starts recording.
+         * @method
+         * @memberof MRecordRTC
+         * @example
+         * recorder.startRecording();
+         */
+        this.startRecording = function() {
+            var mediaType = this.mediaType;
+            var recorderType;
+            var mimeType = this.mimeType || {
+                audio: null,
+                video: null,
+                gif: null
+            };
+
+            if (typeof mediaType.audio !== 'function' && isMediaRecorderCompatible() && !getTracks(mediaStream, 'audio').length) {
+                mediaType.audio = false;
+            }
+
+            if (typeof mediaType.video !== 'function' && isMediaRecorderCompatible() && !getTracks(mediaStream, 'video').length) {
+                mediaType.video = false;
+            }
+
+            if (typeof mediaType.gif !== 'function' && isMediaRecorderCompatible() && !getTracks(mediaStream, 'video').length) {
+                mediaType.gif = false;
+            }
+
+            if (!mediaType.audio && !mediaType.video && !mediaType.gif) {
+                throw 'MediaStream must have either audio or video tracks.';
+            }
+
+            if (!!mediaType.audio) {
+                recorderType = null;
+                if (typeof mediaType.audio === 'function') {
+                    recorderType = mediaType.audio;
+                }
+
+                this.audioRecorder = new RecordRTC(mediaStream, {
+                    type: 'audio',
+                    bufferSize: this.bufferSize,
+                    sampleRate: this.sampleRate,
+                    numberOfAudioChannels: this.numberOfAudioChannels || 2,
+                    disableLogs: this.disableLogs,
+                    recorderType: recorderType,
+                    mimeType: mimeType.audio,
+                    timeSlice: this.timeSlice,
+                    onTimeStamp: this.onTimeStamp
+                });
+
+                if (!mediaType.video) {
+                    this.audioRecorder.startRecording();
+                }
+            }
+
+            if (!!mediaType.video) {
+                recorderType = null;
+                if (typeof mediaType.video === 'function') {
+                    recorderType = mediaType.video;
+                }
+
+                var newStream = mediaStream;
+
+                if (isMediaRecorderCompatible() && !!mediaType.audio && typeof mediaType.audio === 'function') {
+                    var videoTrack = getTracks(mediaStream, 'video')[0];
+
+                    if (isFirefox) {
+                        newStream = new MediaStream();
+                        newStream.addTrack(videoTrack);
+
+                        if (recorderType && recorderType === WhammyRecorder) {
+                            // Firefox does NOT supports webp-encoding yet
+                            // But Firefox do supports WebAssemblyRecorder
+                            recorderType = MediaStreamRecorder;
+                        }
+                    } else {
+                        newStream = new MediaStream();
+                        newStream.addTrack(videoTrack);
+                    }
+                }
+
+                this.videoRecorder = new RecordRTC(newStream, {
+                    type: 'video',
+                    video: this.video,
+                    canvas: this.canvas,
+                    frameInterval: this.frameInterval || 10,
+                    disableLogs: this.disableLogs,
+                    recorderType: recorderType,
+                    mimeType: mimeType.video,
+                    timeSlice: this.timeSlice,
+                    onTimeStamp: this.onTimeStamp,
+                    workerPath: this.workerPath,
+                    webAssemblyPath: this.webAssemblyPath,
+                    frameRate: this.frameRate, // used by WebAssemblyRecorder; values: usually 30; accepts any.
+                    bitrate: this.bitrate // used by WebAssemblyRecorder; values: 0 to 1000+
+                });
+
+                if (!mediaType.audio) {
+                    this.videoRecorder.startRecording();
+                }
+            }
+
+            if (!!mediaType.audio && !!mediaType.video) {
+                var self = this;
+
+                var isSingleRecorder = isMediaRecorderCompatible() === true;
+
+                if (mediaType.audio instanceof StereoAudioRecorder && !!mediaType.video) {
+                    isSingleRecorder = false;
+                } else if (mediaType.audio !== true && mediaType.video !== true && mediaType.audio !== mediaType.video) {
+                    isSingleRecorder = false;
+                }
+
+                if (isSingleRecorder === true) {
+                    self.audioRecorder = null;
+                    self.videoRecorder.startRecording();
+                } else {
+                    self.videoRecorder.initRecorder(function() {
+                        self.audioRecorder.initRecorder(function() {
+                            // Both recorders are ready to record things accurately
+                            self.videoRecorder.startRecording();
+                            self.audioRecorder.startRecording();
+                        });
+                    });
+                }
+            }
+
+            if (!!mediaType.gif) {
+                recorderType = null;
+                if (typeof mediaType.gif === 'function') {
+                    recorderType = mediaType.gif;
+                }
+                this.gifRecorder = new RecordRTC(mediaStream, {
+                    type: 'gif',
+                    frameRate: this.frameRate || 200,
+                    quality: this.quality || 10,
+                    disableLogs: this.disableLogs,
+                    recorderType: recorderType,
+                    mimeType: mimeType.gif
+                });
+                this.gifRecorder.startRecording();
+            }
+        };
+
+        /**
+         * This method stops recording.
+         * @param {function} callback - Callback function is invoked when all encoders finished their jobs.
+         * @method
+         * @memberof MRecordRTC
+         * @example
+         * recorder.stopRecording(function(recording){
+         *     var audioBlob = recording.audio;
+         *     var videoBlob = recording.video;
+         *     var gifBlob   = recording.gif;
+         * });
+         */
+        this.stopRecording = function(callback) {
+            callback = callback || function() {};
+
+            if (this.audioRecorder) {
+                this.audioRecorder.stopRecording(function(blobURL) {
+                    callback(blobURL, 'audio');
+                });
+            }
+
+            if (this.videoRecorder) {
+                this.videoRecorder.stopRecording(function(blobURL) {
+                    callback(blobURL, 'video');
+                });
+            }
+
+            if (this.gifRecorder) {
+                this.gifRecorder.stopRecording(function(blobURL) {
+                    callback(blobURL, 'gif');
+                });
+            }
+        };
+
+        /**
+         * This method pauses recording.
+         * @method
+         * @memberof MRecordRTC
+         * @example
+         * recorder.pauseRecording();
+         */
+        this.pauseRecording = function() {
+            if (this.audioRecorder) {
+                this.audioRecorder.pauseRecording();
+            }
+
+            if (this.videoRecorder) {
+                this.videoRecorder.pauseRecording();
+            }
+
+            if (this.gifRecorder) {
+                this.gifRecorder.pauseRecording();
+            }
+        };
+
+        /**
+         * This method resumes recording.
+         * @method
+         * @memberof MRecordRTC
+         * @example
+         * recorder.resumeRecording();
+         */
+        this.resumeRecording = function() {
+            if (this.audioRecorder) {
+                this.audioRecorder.resumeRecording();
+            }
+
+            if (this.videoRecorder) {
+                this.videoRecorder.resumeRecording();
+            }
+
+            if (this.gifRecorder) {
+                this.gifRecorder.resumeRecording();
+            }
+        };
+
+        /**
+         * This method can be used to manually get all recorded blobs.
+         * @param {function} callback - All recorded blobs are passed back to the "callback" function.
+         * @method
+         * @memberof MRecordRTC
+         * @example
+         * recorder.getBlob(function(recording){
+         *     var audioBlob = recording.audio;
+         *     var videoBlob = recording.video;
+         *     var gifBlob   = recording.gif;
+         * });
+         * // or
+         * var audioBlob = recorder.getBlob().audio;
+         * var videoBlob = recorder.getBlob().video;
+         */
+        this.getBlob = function(callback) {
+            var output = {};
+
+            if (this.audioRecorder) {
+                output.audio = this.audioRecorder.getBlob();
+            }
+
+            if (this.videoRecorder) {
+                output.video = this.videoRecorder.getBlob();
+            }
+
+            if (this.gifRecorder) {
+                output.gif = this.gifRecorder.getBlob();
+            }
+
+            if (callback) {
+                callback(output);
+            }
+
+            return output;
+        };
+
+        /**
+         * Destroy all recorder instances.
+         * @method
+         * @memberof MRecordRTC
+         * @example
+         * recorder.destroy();
+         */
+        this.destroy = function() {
+            if (this.audioRecorder) {
+                this.audioRecorder.destroy();
+                this.audioRecorder = null;
+            }
+
+            if (this.videoRecorder) {
+                this.videoRecorder.destroy();
+                this.videoRecorder = null;
+            }
+
+            if (this.gifRecorder) {
+                this.gifRecorder.destroy();
+                this.gifRecorder = null;
+            }
+        };
+
+        /**
+         * This method can be used to manually get all recorded blobs' DataURLs.
+         * @param {function} callback - All recorded blobs' DataURLs are passed back to the "callback" function.
+         * @method
+         * @memberof MRecordRTC
+         * @example
+         * recorder.getDataURL(function(recording){
+         *     var audioDataURL = recording.audio;
+         *     var videoDataURL = recording.video;
+         *     var gifDataURL   = recording.gif;
+         * });
+         */
+        this.getDataURL = function(callback) {
+            this.getBlob(function(blob) {
+                if (blob.audio && blob.video) {
+                    getDataURL(blob.audio, function(_audioDataURL) {
+                        getDataURL(blob.video, function(_videoDataURL) {
+                            callback({
+                                audio: _audioDataURL,
+                                video: _videoDataURL
+                            });
+                        });
+                    });
+                } else if (blob.audio) {
+                    getDataURL(blob.audio, function(_audioDataURL) {
+                        callback({
+                            audio: _audioDataURL
+                        });
+                    });
+                } else if (blob.video) {
+                    getDataURL(blob.video, function(_videoDataURL) {
+                        callback({
+                            video: _videoDataURL
+                        });
+                    });
+                }
+            });
+
+            function getDataURL(blob, callback00) {
+                if (typeof Worker !== 'undefined') {
+                    var webWorker = processInWebWorker(function readFile(_blob) {
+                        postMessage(new FileReaderSync().readAsDataURL(_blob));
+                    });
+
+                    webWorker.onmessage = function(event) {
+                        callback00(event.data);
+                    };
+
+                    webWorker.postMessage(blob);
+                } else {
+                    var reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onload = function(event) {
+                        callback00(event.target.result);
+                    };
+                }
+            }
+
+            function processInWebWorker(_function) {
+                var blob = URL.createObjectURL(new Blob([_function.toString(),
+                    'this.onmessage =  function (eee) {' + _function.name + '(eee.data);}'
+                ], {
+                    type: 'application/javascript'
+                }));
+
+                var worker = new Worker(blob);
+                var url;
+                if (typeof URL !== 'undefined') {
+                    url = URL;
+                } else if (typeof webkitURL !== 'undefined') {
+                    url = webkitURL;
+                } else {
+                    throw 'Neither URL nor webkitURL detected.';
+                }
+                url.revokeObjectURL(blob);
+                return worker;
+            }
+        };
+
+        /**
+         * This method can be used to ask {@link MRecordRTC} to write all recorded blobs into IndexedDB storage.
+         * @method
+         * @memberof MRecordRTC
+         * @example
+         * recorder.writeToDisk();
+         */
+        this.writeToDisk = function() {
+            RecordRTC.writeToDisk({
+                audio: this.audioRecorder,
+                video: this.videoRecorder,
+                gif: this.gifRecorder
+            });
+        };
+
+        /**
+         * This method can be used to invoke a save-as dialog for all recorded blobs.
+         * @param {object} args - {audio: 'audio-name', video: 'video-name', gif: 'gif-name'}
+         * @method
+         * @memberof MRecordRTC
+         * @example
+         * recorder.save({
+         *     audio: 'audio-file-name',
+         *     video: 'video-file-name',
+         *     gif  : 'gif-file-name'
+         * });
+         */
+        this.save = function(args) {
+            args = args || {
+                audio: true,
+                video: true,
+                gif: true
+            };
+
+            if (!!args.audio && this.audioRecorder) {
+                this.audioRecorder.save(typeof args.audio === 'string' ? args.audio : '');
+            }
+
+            if (!!args.video && this.videoRecorder) {
+                this.videoRecorder.save(typeof args.video === 'string' ? args.video : '');
+            }
+            if (!!args.gif && this.gifRecorder) {
+                this.gifRecorder.save(typeof args.gif === 'string' ? args.gif : '');
+            }
+        };
+    }
+
+    /**
+     * This method can be used to get all recorded blobs from IndexedDB storage.
+     * @param {string} type - 'all' or 'audio' or 'video' or 'gif'
+     * @param {function} callback - Callback function to get all stored blobs.
+     * @method
+     * @memberof MRecordRTC
+     * @example
+     * MRecordRTC.getFromDisk('all', function(dataURL, type){
+     *     if(type === 'audio') { }
+     *     if(type === 'video') { }
+     *     if(type === 'gif')   { }
+     * });
+     */
+    MRecordRTC.getFromDisk = RecordRTC.getFromDisk;
+
+    /**
+     * This method can be used to store recorded blobs into IndexedDB storage.
+     * @param {object} options - {audio: Blob, video: Blob, gif: Blob}
+     * @method
+     * @memberof MRecordRTC
+     * @example
+     * MRecordRTC.writeToDisk({
+     *     audio: audioBlob,
+     *     video: videoBlob,
+     *     gif  : gifBlob
+     * });
+     */
+    MRecordRTC.writeToDisk = RecordRTC.writeToDisk;
+
+    if (typeof RecordRTC !== 'undefined') {
+        RecordRTC.MRecordRTC = MRecordRTC;
+    }
+
+    var browserFakeUserAgent = 'Fake/5.0 (FakeOS) AppleWebKit/123 (KHTML, like Gecko) Fake/12.3.4567.89 Fake/123.45';
+
+    (function(that) {
+        if (!that) {
+            return;
+        }
+
+        if (typeof window !== 'undefined') {
+            return;
+        }
+
+        if (typeof commonjsGlobal === 'undefined') {
+            return;
+        }
+
+        commonjsGlobal.navigator = {
+            userAgent: browserFakeUserAgent,
+            getUserMedia: function() {}
+        };
+
+        if (!commonjsGlobal.console) {
+            commonjsGlobal.console = {};
+        }
+
+        if (typeof commonjsGlobal.console.log === 'undefined' || typeof commonjsGlobal.console.error === 'undefined') {
+            commonjsGlobal.console.error = commonjsGlobal.console.log = commonjsGlobal.console.log || function() {
+                console.log(arguments);
+            };
+        }
+
+        if (typeof document === 'undefined') {
+            /*global document:true */
+            that.document = {
+                documentElement: {
+                    appendChild: function() {
+                        return '';
+                    }
+                }
+            };
+
+            document.createElement = document.captureStream = document.mozCaptureStream = function() {
+                var obj = {
+                    getContext: function() {
+                        return obj;
+                    },
+                    play: function() {},
+                    pause: function() {},
+                    drawImage: function() {},
+                    toDataURL: function() {
+                        return '';
+                    },
+                    style: {}
+                };
+                return obj;
+            };
+
+            that.HTMLVideoElement = function() {};
+        }
+
+        if (typeof location === 'undefined') {
+            /*global location:true */
+            that.location = {
+                protocol: 'file:',
+                href: '',
+                hash: ''
+            };
+        }
+
+        if (typeof screen === 'undefined') {
+            /*global screen:true */
+            that.screen = {
+                width: 0,
+                height: 0
+            };
+        }
+
+        if (typeof URL === 'undefined') {
+            /*global screen:true */
+            that.URL = {
+                createObjectURL: function() {
+                    return '';
+                },
+                revokeObjectURL: function() {
+                    return '';
+                }
+            };
+        }
+
+        /*global window:true */
+        that.window = commonjsGlobal;
+    })(typeof commonjsGlobal !== 'undefined' ? commonjsGlobal : null);
+
+    // _____________________________
+    // Cross-Browser-Declarations.js
+
+    // animation-frame used in WebM recording
+
+    /*jshint -W079 */
+    var requestAnimationFrame = window.requestAnimationFrame;
+    if (typeof requestAnimationFrame === 'undefined') {
+        if (typeof webkitRequestAnimationFrame !== 'undefined') {
+            /*global requestAnimationFrame:true */
+            requestAnimationFrame = webkitRequestAnimationFrame;
+        } else if (typeof mozRequestAnimationFrame !== 'undefined') {
+            /*global requestAnimationFrame:true */
+            requestAnimationFrame = mozRequestAnimationFrame;
+        } else if (typeof msRequestAnimationFrame !== 'undefined') {
+            /*global requestAnimationFrame:true */
+            requestAnimationFrame = msRequestAnimationFrame;
+        } else if (typeof requestAnimationFrame === 'undefined') {
+            // via: https://gist.github.com/paulirish/1579671
+            var lastTime = 0;
+
+            /*global requestAnimationFrame:true */
+            requestAnimationFrame = function(callback, element) {
+                var currTime = new Date().getTime();
+                var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+                var id = setTimeout(function() {
+                    callback(currTime + timeToCall);
+                }, timeToCall);
+                lastTime = currTime + timeToCall;
+                return id;
+            };
+        }
+    }
+
+    /*jshint -W079 */
+    var cancelAnimationFrame = window.cancelAnimationFrame;
+    if (typeof cancelAnimationFrame === 'undefined') {
+        if (typeof webkitCancelAnimationFrame !== 'undefined') {
+            /*global cancelAnimationFrame:true */
+            cancelAnimationFrame = webkitCancelAnimationFrame;
+        } else if (typeof mozCancelAnimationFrame !== 'undefined') {
+            /*global cancelAnimationFrame:true */
+            cancelAnimationFrame = mozCancelAnimationFrame;
+        } else if (typeof msCancelAnimationFrame !== 'undefined') {
+            /*global cancelAnimationFrame:true */
+            cancelAnimationFrame = msCancelAnimationFrame;
+        } else if (typeof cancelAnimationFrame === 'undefined') {
+            /*global cancelAnimationFrame:true */
+            cancelAnimationFrame = function(id) {
+                clearTimeout(id);
+            };
+        }
+    }
+
+    // WebAudio API representer
+    var AudioContext = window.AudioContext;
+
+    if (typeof AudioContext === 'undefined') {
+        if (typeof webkitAudioContext !== 'undefined') {
+            /*global AudioContext:true */
+            AudioContext = webkitAudioContext;
+        }
+
+        if (typeof mozAudioContext !== 'undefined') {
+            /*global AudioContext:true */
+            AudioContext = mozAudioContext;
+        }
+    }
+
+    /*jshint -W079 */
+    var URL = window.URL;
+
+    if (typeof URL === 'undefined' && typeof webkitURL !== 'undefined') {
+        /*global URL:true */
+        URL = webkitURL;
+    }
+
+    if (typeof navigator !== 'undefined' && typeof navigator.getUserMedia === 'undefined') { // maybe window.navigator?
+        if (typeof navigator.webkitGetUserMedia !== 'undefined') {
+            navigator.getUserMedia = navigator.webkitGetUserMedia;
+        }
+
+        if (typeof navigator.mozGetUserMedia !== 'undefined') {
+            navigator.getUserMedia = navigator.mozGetUserMedia;
+        }
+    }
+
+    var isEdge = navigator.userAgent.indexOf('Edge') !== -1 && (!!navigator.msSaveBlob || !!navigator.msSaveOrOpenBlob);
+    var isOpera = !!window.opera || navigator.userAgent.indexOf('OPR/') !== -1;
+    var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1 && ('netscape' in window) && / rv:/.test(navigator.userAgent);
+    var isChrome = (!isOpera && !isEdge && !!navigator.webkitGetUserMedia) || isElectron() || navigator.userAgent.toLowerCase().indexOf('chrome/') !== -1;
+
+    var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+    if (isSafari && !isChrome && navigator.userAgent.indexOf('CriOS') !== -1) {
+        isSafari = false;
+        isChrome = true;
+    }
+
+    var MediaStream = window.MediaStream;
+
+    if (typeof MediaStream === 'undefined' && typeof webkitMediaStream !== 'undefined') {
+        MediaStream = webkitMediaStream;
+    }
+
+    /*global MediaStream:true */
+    if (typeof MediaStream !== 'undefined') {
+        // override "stop" method for all browsers
+        if (typeof MediaStream.prototype.stop === 'undefined') {
+            MediaStream.prototype.stop = function() {
+                this.getTracks().forEach(function(track) {
+                    track.stop();
+                });
+            };
+        }
+    }
+
+    // below function via: http://goo.gl/B3ae8c
+    /**
+     * Return human-readable file size.
+     * @param {number} bytes - Pass bytes and get formatted string.
+     * @returns {string} - formatted string
+     * @example
+     * bytesToSize(1024*1024*5) === '5 GB'
+     * @see {@link https://github.com/muaz-khan/RecordRTC|RecordRTC Source Code}
+     */
+    function bytesToSize(bytes) {
+        var k = 1000;
+        var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        if (bytes === 0) {
+            return '0 Bytes';
+        }
+        var i = parseInt(Math.floor(Math.log(bytes) / Math.log(k)), 10);
+        return (bytes / Math.pow(k, i)).toPrecision(3) + ' ' + sizes[i];
+    }
+
+    /**
+     * @param {Blob} file - File or Blob object. This parameter is required.
+     * @param {string} fileName - Optional file name e.g. "Recorded-Video.webm"
+     * @example
+     * invokeSaveAsDialog(blob or file, [optional] fileName);
+     * @see {@link https://github.com/muaz-khan/RecordRTC|RecordRTC Source Code}
+     */
+    function invokeSaveAsDialog(file, fileName) {
+        if (!file) {
+            throw 'Blob object is required.';
+        }
+
+        if (!file.type) {
+            try {
+                file.type = 'video/webm';
+            } catch (e) {}
+        }
+
+        var fileExtension = (file.type || 'video/webm').split('/')[1];
+        if (fileExtension.indexOf(';') !== -1) {
+            // extended mimetype, e.g. 'video/webm;codecs=vp8,opus'
+            fileExtension = fileExtension.split(';')[0];
+        }
+        if (fileName && fileName.indexOf('.') !== -1) {
+            var splitted = fileName.split('.');
+            fileName = splitted[0];
+            fileExtension = splitted[1];
+        }
+
+        var fileFullName = (fileName || (Math.round(Math.random() * 9999999999) + 888888888)) + '.' + fileExtension;
+
+        if (typeof navigator.msSaveOrOpenBlob !== 'undefined') {
+            return navigator.msSaveOrOpenBlob(file, fileFullName);
+        } else if (typeof navigator.msSaveBlob !== 'undefined') {
+            return navigator.msSaveBlob(file, fileFullName);
+        }
+
+        var hyperlink = document.createElement('a');
+        hyperlink.href = URL.createObjectURL(file);
+        hyperlink.download = fileFullName;
+
+        hyperlink.style = 'display:none;opacity:0;color:transparent;';
+        (document.body || document.documentElement).appendChild(hyperlink);
+
+        if (typeof hyperlink.click === 'function') {
+            hyperlink.click();
+        } else {
+            hyperlink.target = '_blank';
+            hyperlink.dispatchEvent(new MouseEvent('click', {
+                view: window,
+                bubbles: true,
+                cancelable: true
+            }));
+        }
+
+        URL.revokeObjectURL(hyperlink.href);
+    }
+
+    /**
+     * from: https://github.com/cheton/is-electron/blob/master/index.js
+     **/
+    function isElectron() {
+        // Renderer process
+        if (typeof window !== 'undefined' && typeof window.process === 'object' && window.process.type === 'renderer') {
+            return true;
+        }
+
+        // Main process
+        if (typeof process !== 'undefined' && typeof process.versions === 'object' && !!process.versions.electron) {
+            return true;
+        }
+
+        // Detect the user agent when the `nodeIntegration` option is set to true
+        if (typeof navigator === 'object' && typeof navigator.userAgent === 'string' && navigator.userAgent.indexOf('Electron') >= 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function getTracks(stream, kind) {
+        if (!stream || !stream.getTracks) {
+            return [];
+        }
+
+        return stream.getTracks().filter(function(t) {
+            return t.kind === (kind || 'audio');
+        });
+    }
+
+    function setSrcObject(stream, element) {
+        if ('srcObject' in element) {
+            element.srcObject = stream;
+        } else if ('mozSrcObject' in element) {
+            element.mozSrcObject = stream;
+        } else {
+            element.srcObject = stream;
+        }
+    }
+
+    /**
+     * @param {Blob} file - File or Blob object.
+     * @param {function} callback - Callback function.
+     * @example
+     * getSeekableBlob(blob or file, callback);
+     * @see {@link https://github.com/muaz-khan/RecordRTC|RecordRTC Source Code}
+     */
+    function getSeekableBlob(inputBlob, callback) {
+        // EBML.js copyrights goes to: https://github.com/legokichi/ts-ebml
+        if (typeof EBML === 'undefined') {
+            throw new Error('Please link: https://www.webrtc-experiment.com/EBML.js');
+        }
+
+        var reader = new EBML.Reader();
+        var decoder = new EBML.Decoder();
+        var tools = EBML.tools;
+
+        var fileReader = new FileReader();
+        fileReader.onload = function(e) {
+            var ebmlElms = decoder.decode(this.result);
+            ebmlElms.forEach(function(element) {
+                reader.read(element);
+            });
+            reader.stop();
+            var refinedMetadataBuf = tools.makeMetadataSeekable(reader.metadatas, reader.duration, reader.cues);
+            var body = this.result.slice(reader.metadataSize);
+            var newBlob = new Blob([refinedMetadataBuf, body], {
+                type: 'video/webm'
+            });
+
+            callback(newBlob);
+        };
+        fileReader.readAsArrayBuffer(inputBlob);
+    }
+
+    if (typeof RecordRTC !== 'undefined') {
+        RecordRTC.invokeSaveAsDialog = invokeSaveAsDialog;
+        RecordRTC.getTracks = getTracks;
+        RecordRTC.getSeekableBlob = getSeekableBlob;
+        RecordRTC.bytesToSize = bytesToSize;
+        RecordRTC.isElectron = isElectron;
+    }
+
+    // __________ (used to handle stuff like http://goo.gl/xmE5eg) issue #129
+    // Storage.js
+
+    /**
+     * Storage is a standalone object used by {@link RecordRTC} to store reusable objects e.g. "new AudioContext".
+     * @license {@link https://github.com/muaz-khan/RecordRTC/blob/master/LICENSE|MIT}
+     * @author {@link https://MuazKhan.com|Muaz Khan}
+     * @example
+     * Storage.AudioContext === webkitAudioContext
+     * @property {webkitAudioContext} AudioContext - Keeps a reference to AudioContext object.
+     * @see {@link https://github.com/muaz-khan/RecordRTC|RecordRTC Source Code}
+     */
+
+    var Storage = {};
+
+    if (typeof AudioContext !== 'undefined') {
+        Storage.AudioContext = AudioContext;
+    } else if (typeof webkitAudioContext !== 'undefined') {
+        Storage.AudioContext = webkitAudioContext;
+    }
+
+    if (typeof RecordRTC !== 'undefined') {
+        RecordRTC.Storage = Storage;
+    }
+
+    function isMediaRecorderCompatible() {
+        if (isFirefox || isSafari || isEdge) {
+            return true;
+        }
+        var nAgt = navigator.userAgent;
+        var fullVersion = '' + parseFloat(navigator.appVersion);
+        var majorVersion = parseInt(navigator.appVersion, 10);
+        var verOffset, ix;
+
+        if (isChrome || isOpera) {
+            verOffset = nAgt.indexOf('Chrome');
+            fullVersion = nAgt.substring(verOffset + 7);
+        }
+
+        // trim the fullVersion string at semicolon/space if present
+        if ((ix = fullVersion.indexOf(';')) !== -1) {
+            fullVersion = fullVersion.substring(0, ix);
+        }
+
+        if ((ix = fullVersion.indexOf(' ')) !== -1) {
+            fullVersion = fullVersion.substring(0, ix);
+        }
+
+        majorVersion = parseInt('' + fullVersion, 10);
+
+        if (isNaN(majorVersion)) {
+            fullVersion = '' + parseFloat(navigator.appVersion);
+            majorVersion = parseInt(navigator.appVersion, 10);
+        }
+
+        return majorVersion >= 49;
+    }
+
+    // ______________________
+    // MediaStreamRecorder.js
+
+    /**
+     * MediaStreamRecorder is an abstraction layer for {@link https://w3c.github.io/mediacapture-record/MediaRecorder.html|MediaRecorder API}. It is used by {@link RecordRTC} to record MediaStream(s) in both Chrome and Firefox.
+     * @summary Runs top over {@link https://w3c.github.io/mediacapture-record/MediaRecorder.html|MediaRecorder API}.
+     * @license {@link https://github.com/muaz-khan/RecordRTC/blob/master/LICENSE|MIT}
+     * @author {@link https://github.com/muaz-khan|Muaz Khan}
+     * @typedef MediaStreamRecorder
+     * @class
+     * @example
+     * var config = {
+     *     mimeType: 'video/webm', // vp8, vp9, h264, mkv, opus/vorbis
+     *     audioBitsPerSecond : 256 * 8 * 1024,
+     *     videoBitsPerSecond : 256 * 8 * 1024,
+     *     bitsPerSecond: 256 * 8 * 1024,  // if this is provided, skip above two
+     *     checkForInactiveTracks: true,
+     *     timeSlice: 1000, // concatenate intervals based blobs
+     *     ondataavailable: function() {} // get intervals based blobs
+     * }
+     * var recorder = new MediaStreamRecorder(mediaStream, config);
+     * recorder.record();
+     * recorder.stop(function(blob) {
+     *     video.src = URL.createObjectURL(blob);
+     *
+     *     // or
+     *     var blob = recorder.blob;
+     * });
+     * @see {@link https://github.com/muaz-khan/RecordRTC|RecordRTC Source Code}
+     * @param {MediaStream} mediaStream - MediaStream object fetched using getUserMedia API or generated using captureStreamUntilEnded or WebAudio API.
+     * @param {object} config - {disableLogs:true, initCallback: function, mimeType: "video/webm", timeSlice: 1000}
+     * @throws Will throw an error if first argument "MediaStream" is missing. Also throws error if "MediaRecorder API" are not supported by the browser.
+     */
+
+    function MediaStreamRecorder(mediaStream, config) {
+        var self = this;
+
+        if (typeof mediaStream === 'undefined') {
+            throw 'First argument "MediaStream" is required.';
+        }
+
+        if (typeof MediaRecorder === 'undefined') {
+            throw 'Your browser does not support the Media Recorder API. Please try other modules e.g. WhammyRecorder or StereoAudioRecorder.';
+        }
+
+        config = config || {
+            // bitsPerSecond: 256 * 8 * 1024,
+            mimeType: 'video/webm'
+        };
+
+        if (config.type === 'audio') {
+            if (getTracks(mediaStream, 'video').length && getTracks(mediaStream, 'audio').length) {
+                var stream;
+                if (!!navigator.mozGetUserMedia) {
+                    stream = new MediaStream();
+                    stream.addTrack(getTracks(mediaStream, 'audio')[0]);
+                } else {
+                    // webkitMediaStream
+                    stream = new MediaStream(getTracks(mediaStream, 'audio'));
+                }
+                mediaStream = stream;
+            }
+
+            if (!config.mimeType || config.mimeType.toString().toLowerCase().indexOf('audio') === -1) {
+                config.mimeType = isChrome ? 'audio/webm' : 'audio/ogg';
+            }
+
+            if (config.mimeType && config.mimeType.toString().toLowerCase() !== 'audio/ogg' && !!navigator.mozGetUserMedia) {
+                // forcing better codecs on Firefox (via #166)
+                config.mimeType = 'audio/ogg';
+            }
+        }
+
+        var arrayOfBlobs = [];
+
+        /**
+         * This method returns array of blobs. Use only with "timeSlice". Its useful to preview recording anytime, without using the "stop" method.
+         * @method
+         * @memberof MediaStreamRecorder
+         * @example
+         * var arrayOfBlobs = recorder.getArrayOfBlobs();
+         * @returns {Array} Returns array of recorded blobs.
+         */
+        this.getArrayOfBlobs = function() {
+            return arrayOfBlobs;
+        };
+
+        /**
+         * This method records MediaStream.
+         * @method
+         * @memberof MediaStreamRecorder
+         * @example
+         * recorder.record();
+         */
+        this.record = function() {
+            // set defaults
+            self.blob = null;
+            self.clearRecordedData();
+            self.timestamps = [];
+            allStates = [];
+            arrayOfBlobs = [];
+
+            var recorderHints = config;
+
+            if (!config.disableLogs) {
+                console.log('Passing following config over MediaRecorder API.', recorderHints);
+            }
+
+            if (mediaRecorder) {
+                // mandatory to make sure Firefox doesn't fails to record streams 3-4 times without reloading the page.
+                mediaRecorder = null;
+            }
+
+            if (isChrome && !isMediaRecorderCompatible()) {
+                // to support video-only recording on stable
+                recorderHints = 'video/vp8';
+            }
+
+            if (typeof MediaRecorder.isTypeSupported === 'function' && recorderHints.mimeType) {
+                if (!MediaRecorder.isTypeSupported(recorderHints.mimeType)) {
+                    if (!config.disableLogs) {
+                        console.warn('MediaRecorder API seems unable to record mimeType:', recorderHints.mimeType);
+                    }
+
+                    recorderHints.mimeType = config.type === 'audio' ? 'audio/webm' : 'video/webm';
+                }
+            }
+
+            // using MediaRecorder API here
+            try {
+                mediaRecorder = new MediaRecorder(mediaStream, recorderHints);
+
+                // reset
+                config.mimeType = recorderHints.mimeType;
+            } catch (e) {
+                // chrome-based fallback
+                mediaRecorder = new MediaRecorder(mediaStream);
+            }
+
+            // old hack?
+            if (recorderHints.mimeType && !MediaRecorder.isTypeSupported && 'canRecordMimeType' in mediaRecorder && mediaRecorder.canRecordMimeType(recorderHints.mimeType) === false) {
+                if (!config.disableLogs) {
+                    console.warn('MediaRecorder API seems unable to record mimeType:', recorderHints.mimeType);
+                }
+            }
+
+            // Dispatching OnDataAvailable Handler
+            mediaRecorder.ondataavailable = function(e) {
+                if (e.data) {
+                    allStates.push('ondataavailable: ' + bytesToSize(e.data.size));
+                }
+
+                if (typeof config.timeSlice === 'number') {
+                    if (e.data && e.data.size) {
+                        arrayOfBlobs.push(e.data);
+                        updateTimeStamp();
+
+                        if (typeof config.ondataavailable === 'function') {
+                            // intervals based blobs
+                            var blob = config.getNativeBlob ? e.data : new Blob([e.data], {
+                                type: getMimeType(recorderHints)
+                            });
+                            config.ondataavailable(blob);
+                        }
+                    }
+                    return;
+                }
+
+                if (!e.data || !e.data.size || e.data.size < 100 || self.blob) {
+                    // make sure that stopRecording always getting fired
+                    // even if there is invalid data
+                    if (self.recordingCallback) {
+                        self.recordingCallback(new Blob([], {
+                            type: getMimeType(recorderHints)
+                        }));
+                        self.recordingCallback = null;
+                    }
+                    return;
+                }
+
+                self.blob = config.getNativeBlob ? e.data : new Blob([e.data], {
+                    type: getMimeType(recorderHints)
+                });
+
+                if (self.recordingCallback) {
+                    self.recordingCallback(self.blob);
+                    self.recordingCallback = null;
+                }
+            };
+
+            mediaRecorder.onstart = function() {
+                allStates.push('started');
+            };
+
+            mediaRecorder.onpause = function() {
+                allStates.push('paused');
+            };
+
+            mediaRecorder.onresume = function() {
+                allStates.push('resumed');
+            };
+
+            mediaRecorder.onstop = function() {
+                allStates.push('stopped');
+            };
+
+            mediaRecorder.onerror = function(error) {
+                if (!error) {
+                    return;
+                }
+
+                if (!error.name) {
+                    error.name = 'UnknownError';
+                }
+
+                allStates.push('error: ' + error);
+
+                if (!config.disableLogs) {
+                    // via: https://w3c.github.io/mediacapture-record/MediaRecorder.html#exception-summary
+                    if (error.name.toString().toLowerCase().indexOf('invalidstate') !== -1) {
+                        console.error('The MediaRecorder is not in a state in which the proposed operation is allowed to be executed.', error);
+                    } else if (error.name.toString().toLowerCase().indexOf('notsupported') !== -1) {
+                        console.error('MIME type (', recorderHints.mimeType, ') is not supported.', error);
+                    } else if (error.name.toString().toLowerCase().indexOf('security') !== -1) {
+                        console.error('MediaRecorder security error', error);
+                    }
+
+                    // older code below
+                    else if (error.name === 'OutOfMemory') {
+                        console.error('The UA has exhaused the available memory. User agents SHOULD provide as much additional information as possible in the message attribute.', error);
+                    } else if (error.name === 'IllegalStreamModification') {
+                        console.error('A modification to the stream has occurred that makes it impossible to continue recording. An example would be the addition of a Track while recording is occurring. User agents SHOULD provide as much additional information as possible in the message attribute.', error);
+                    } else if (error.name === 'OtherRecordingError') {
+                        console.error('Used for an fatal error other than those listed above. User agents SHOULD provide as much additional information as possible in the message attribute.', error);
+                    } else if (error.name === 'GenericError') {
+                        console.error('The UA cannot provide the codec or recording option that has been requested.', error);
+                    } else {
+                        console.error('MediaRecorder Error', error);
+                    }
+                }
+
+                (function(looper) {
+                    if (!self.manuallyStopped && mediaRecorder && mediaRecorder.state === 'inactive') {
+                        delete config.timeslice;
+
+                        // 10 minutes, enough?
+                        mediaRecorder.start(10 * 60 * 1000);
+                        return;
+                    }
+
+                    setTimeout(looper, 1000);
+                })();
+
+                if (mediaRecorder.state !== 'inactive' && mediaRecorder.state !== 'stopped') {
+                    mediaRecorder.stop();
+                }
+            };
+
+            if (typeof config.timeSlice === 'number') {
+                updateTimeStamp();
+                mediaRecorder.start(config.timeSlice);
+            } else {
+                // default is 60 minutes; enough?
+                // use config => {timeSlice: 1000} otherwise
+
+                mediaRecorder.start(3.6e+6);
+            }
+
+            if (config.initCallback) {
+                config.initCallback(); // old code
+            }
+        };
+
+        /**
+         * @property {Array} timestamps - Array of time stamps
+         * @memberof MediaStreamRecorder
+         * @example
+         * console.log(recorder.timestamps);
+         */
+        this.timestamps = [];
+
+        function updateTimeStamp() {
+            self.timestamps.push(new Date().getTime());
+
+            if (typeof config.onTimeStamp === 'function') {
+                config.onTimeStamp(self.timestamps[self.timestamps.length - 1], self.timestamps);
+            }
+        }
+
+        function getMimeType(secondObject) {
+            if (mediaRecorder && mediaRecorder.mimeType) {
+                return mediaRecorder.mimeType;
+            }
+
+            return secondObject.mimeType || 'video/webm';
+        }
+
+        /**
+         * This method stops recording MediaStream.
+         * @param {function} callback - Callback function, that is used to pass recorded blob back to the callee.
+         * @method
+         * @memberof MediaStreamRecorder
+         * @example
+         * recorder.stop(function(blob) {
+         *     video.src = URL.createObjectURL(blob);
+         * });
+         */
+        this.stop = function(callback) {
+            callback = callback || function() {};
+
+            self.manuallyStopped = true; // used inside the mediaRecorder.onerror
+
+            if (!mediaRecorder) {
+                return;
+            }
+
+            this.recordingCallback = callback;
+
+            if (mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+            }
+
+            if (typeof config.timeSlice === 'number') {
+                setTimeout(function() {
+                    self.blob = new Blob(arrayOfBlobs, {
+                        type: getMimeType(config)
+                    });
+
+                    self.recordingCallback(self.blob);
+                }, 100);
+            }
+        };
+
+        /**
+         * This method pauses the recording process.
+         * @method
+         * @memberof MediaStreamRecorder
+         * @example
+         * recorder.pause();
+         */
+        this.pause = function() {
+            if (!mediaRecorder) {
+                return;
+            }
+
+            if (mediaRecorder.state === 'recording') {
+                mediaRecorder.pause();
+            }
+        };
+
+        /**
+         * This method resumes the recording process.
+         * @method
+         * @memberof MediaStreamRecorder
+         * @example
+         * recorder.resume();
+         */
+        this.resume = function() {
+            if (!mediaRecorder) {
+                return;
+            }
+
+            if (mediaRecorder.state === 'paused') {
+                mediaRecorder.resume();
+            }
+        };
+
+        /**
+         * This method resets currently recorded data.
+         * @method
+         * @memberof MediaStreamRecorder
+         * @example
+         * recorder.clearRecordedData();
+         */
+        this.clearRecordedData = function() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                self.stop(clearRecordedDataCB);
+            }
+
+            clearRecordedDataCB();
+        };
+
+        function clearRecordedDataCB() {
+            arrayOfBlobs = [];
+            mediaRecorder = null;
+            self.timestamps = [];
+        }
+
+        // Reference to "MediaRecorder" object
+        var mediaRecorder;
+
+        /**
+         * Access to native MediaRecorder API
+         * @method
+         * @memberof MediaStreamRecorder
+         * @instance
+         * @example
+         * var internal = recorder.getInternalRecorder();
+         * internal.ondataavailable = function() {}; // override
+         * internal.stream, internal.onpause, internal.onstop, etc.
+         * @returns {Object} Returns internal recording object.
+         */
+        this.getInternalRecorder = function() {
+            return mediaRecorder;
+        };
+
+        function isMediaStreamActive() {
+            if ('active' in mediaStream) {
+                if (!mediaStream.active) {
+                    return false;
+                }
+            } else if ('ended' in mediaStream) { // old hack
+                if (mediaStream.ended) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * @property {Blob} blob - Recorded data as "Blob" object.
+         * @memberof MediaStreamRecorder
+         * @example
+         * recorder.stop(function() {
+         *     var blob = recorder.blob;
+         * });
+         */
+        this.blob = null;
+
+
+        /**
+         * Get MediaRecorder readonly state.
+         * @method
+         * @memberof MediaStreamRecorder
+         * @example
+         * var state = recorder.getState();
+         * @returns {String} Returns recording state.
+         */
+        this.getState = function() {
+            if (!mediaRecorder) {
+                return 'inactive';
+            }
+
+            return mediaRecorder.state || 'inactive';
+        };
+
+        // list of all recording states
+        var allStates = [];
+
+        /**
+         * Get MediaRecorder all recording states.
+         * @method
+         * @memberof MediaStreamRecorder
+         * @example
+         * var state = recorder.getAllStates();
+         * @returns {Array} Returns all recording states
+         */
+        this.getAllStates = function() {
+            return allStates;
+        };
+
+        // if any Track within the MediaStream is muted or not enabled at any time, 
+        // the browser will only record black frames 
+        // or silence since that is the content produced by the Track
+        // so we need to stopRecording as soon as any single track ends.
+        if (typeof config.checkForInactiveTracks === 'undefined') {
+            config.checkForInactiveTracks = false; // disable to minimize CPU usage
+        }
+
+        var self = this;
+
+        // this method checks if media stream is stopped
+        // or if any track is ended.
+        (function looper() {
+            if (!mediaRecorder || config.checkForInactiveTracks === false) {
+                return;
+            }
+
+            if (isMediaStreamActive() === false) {
+                if (!config.disableLogs) {
+                    console.log('MediaStream seems stopped.');
+                }
+                self.stop();
+                return;
+            }
+
+            setTimeout(looper, 1000); // check every second
+        })();
+
+        // for debugging
+        this.name = 'MediaStreamRecorder';
+        this.toString = function() {
+            return this.name;
+        };
+    }
+
+    if (typeof RecordRTC !== 'undefined') {
+        RecordRTC.MediaStreamRecorder = MediaStreamRecorder;
+    }
+
+    // source code from: http://typedarray.org/wp-content/projects/WebAudioRecorder/script.js
+    // https://github.com/mattdiamond/Recorderjs#license-mit
+    // ______________________
+    // StereoAudioRecorder.js
+
+    /**
+     * StereoAudioRecorder is a standalone class used by {@link RecordRTC} to bring "stereo" audio-recording in chrome.
+     * @summary JavaScript standalone object for stereo audio recording.
+     * @license {@link https://github.com/muaz-khan/RecordRTC/blob/master/LICENSE|MIT}
+     * @author {@link https://MuazKhan.com|Muaz Khan}
+     * @typedef StereoAudioRecorder
+     * @class
+     * @example
+     * var recorder = new StereoAudioRecorder(MediaStream, {
+     *     sampleRate: 44100,
+     *     bufferSize: 4096
+     * });
+     * recorder.record();
+     * recorder.stop(function(blob) {
+     *     video.src = URL.createObjectURL(blob);
+     * });
+     * @see {@link https://github.com/muaz-khan/RecordRTC|RecordRTC Source Code}
+     * @param {MediaStream} mediaStream - MediaStream object fetched using getUserMedia API or generated using captureStreamUntilEnded or WebAudio API.
+     * @param {object} config - {sampleRate: 44100, bufferSize: 4096, numberOfAudioChannels: 1, etc.}
+     */
+
+    function StereoAudioRecorder(mediaStream, config) {
+        if (!getTracks(mediaStream, 'audio').length) {
+            throw 'Your stream has no audio tracks.';
+        }
+
+        config = config || {};
+
+        var self = this;
+
+        // variables
+        var leftchannel = [];
+        var rightchannel = [];
+        var recording = false;
+        var recordingLength = 0;
+        var jsAudioNode;
+
+        var numberOfAudioChannels = 2;
+
+        /**
+         * Set sample rates such as 8K or 16K. Reference: http://stackoverflow.com/a/28977136/552182
+         * @property {number} desiredSampRate - Desired Bits per sample * 1000
+         * @memberof StereoAudioRecorder
+         * @instance
+         * @example
+         * var recorder = StereoAudioRecorder(mediaStream, {
+         *   desiredSampRate: 16 * 1000 // bits-per-sample * 1000
+         * });
+         */
+        var desiredSampRate = config.desiredSampRate;
+
+        // backward compatibility
+        if (config.leftChannel === true) {
+            numberOfAudioChannels = 1;
+        }
+
+        if (config.numberOfAudioChannels === 1) {
+            numberOfAudioChannels = 1;
+        }
+
+        if (!numberOfAudioChannels || numberOfAudioChannels < 1) {
+            numberOfAudioChannels = 2;
+        }
+
+        if (!config.disableLogs) {
+            console.log('StereoAudioRecorder is set to record number of channels: ' + numberOfAudioChannels);
+        }
+
+        // if any Track within the MediaStream is muted or not enabled at any time, 
+        // the browser will only record black frames 
+        // or silence since that is the content produced by the Track
+        // so we need to stopRecording as soon as any single track ends.
+        if (typeof config.checkForInactiveTracks === 'undefined') {
+            config.checkForInactiveTracks = true;
+        }
+
+        function isMediaStreamActive() {
+            if (config.checkForInactiveTracks === false) {
+                // always return "true"
+                return true;
+            }
+
+            if ('active' in mediaStream) {
+                if (!mediaStream.active) {
+                    return false;
+                }
+            } else if ('ended' in mediaStream) { // old hack
+                if (mediaStream.ended) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * This method records MediaStream.
+         * @method
+         * @memberof StereoAudioRecorder
+         * @example
+         * recorder.record();
+         */
+        this.record = function() {
+            if (isMediaStreamActive() === false) {
+                throw 'Please make sure MediaStream is active.';
+            }
+
+            resetVariables();
+
+            isAudioProcessStarted = isPaused = false;
+            recording = true;
+
+            if (typeof config.timeSlice !== 'undefined') {
+                looper();
+            }
+        };
+
+        function mergeLeftRightBuffers(config, callback) {
+            function mergeAudioBuffers(config, cb) {
+                var numberOfAudioChannels = config.numberOfAudioChannels;
+
+                // todo: "slice(0)" --- is it causes loop? Should be removed?
+                var leftBuffers = config.leftBuffers.slice(0);
+                var rightBuffers = config.rightBuffers.slice(0);
+                var sampleRate = config.sampleRate;
+                var internalInterleavedLength = config.internalInterleavedLength;
+                var desiredSampRate = config.desiredSampRate;
+
+                if (numberOfAudioChannels === 2) {
+                    leftBuffers = mergeBuffers(leftBuffers, internalInterleavedLength);
+                    rightBuffers = mergeBuffers(rightBuffers, internalInterleavedLength);
+
+                    if (desiredSampRate) {
+                        leftBuffers = interpolateArray(leftBuffers, desiredSampRate, sampleRate);
+                        rightBuffers = interpolateArray(rightBuffers, desiredSampRate, sampleRate);
+                    }
+                }
+
+                if (numberOfAudioChannels === 1) {
+                    leftBuffers = mergeBuffers(leftBuffers, internalInterleavedLength);
+
+                    if (desiredSampRate) {
+                        leftBuffers = interpolateArray(leftBuffers, desiredSampRate, sampleRate);
+                    }
+                }
+
+                // set sample rate as desired sample rate
+                if (desiredSampRate) {
+                    sampleRate = desiredSampRate;
+                }
+
+                // for changing the sampling rate, reference:
+                // http://stackoverflow.com/a/28977136/552182
+                function interpolateArray(data, newSampleRate, oldSampleRate) {
+                    var fitCount = Math.round(data.length * (newSampleRate / oldSampleRate));
+                    var newData = [];
+                    var springFactor = Number((data.length - 1) / (fitCount - 1));
+                    newData[0] = data[0];
+                    for (var i = 1; i < fitCount - 1; i++) {
+                        var tmp = i * springFactor;
+                        var before = Number(Math.floor(tmp)).toFixed();
+                        var after = Number(Math.ceil(tmp)).toFixed();
+                        var atPoint = tmp - before;
+                        newData[i] = linearInterpolate(data[before], data[after], atPoint);
+                    }
+                    newData[fitCount - 1] = data[data.length - 1];
+                    return newData;
+                }
+
+                function linearInterpolate(before, after, atPoint) {
+                    return before + (after - before) * atPoint;
+                }
+
+                function mergeBuffers(channelBuffer, rLength) {
+                    var result = new Float64Array(rLength);
+                    var offset = 0;
+                    var lng = channelBuffer.length;
+
+                    for (var i = 0; i < lng; i++) {
+                        var buffer = channelBuffer[i];
+                        result.set(buffer, offset);
+                        offset += buffer.length;
+                    }
+
+                    return result;
+                }
+
+                function interleave(leftChannel, rightChannel) {
+                    var length = leftChannel.length + rightChannel.length;
+
+                    var result = new Float64Array(length);
+
+                    var inputIndex = 0;
+
+                    for (var index = 0; index < length;) {
+                        result[index++] = leftChannel[inputIndex];
+                        result[index++] = rightChannel[inputIndex];
+                        inputIndex++;
+                    }
+                    return result;
+                }
+
+                function writeUTFBytes(view, offset, string) {
+                    var lng = string.length;
+                    for (var i = 0; i < lng; i++) {
+                        view.setUint8(offset + i, string.charCodeAt(i));
+                    }
+                }
+
+                // interleave both channels together
+                var interleaved;
+
+                if (numberOfAudioChannels === 2) {
+                    interleaved = interleave(leftBuffers, rightBuffers);
+                }
+
+                if (numberOfAudioChannels === 1) {
+                    interleaved = leftBuffers;
+                }
+
+                var interleavedLength = interleaved.length;
+
+                // create wav file
+                var resultingBufferLength = 44 + interleavedLength * 2;
+
+                var buffer = new ArrayBuffer(resultingBufferLength);
+
+                var view = new DataView(buffer);
+
+                // RIFF chunk descriptor/identifier 
+                writeUTFBytes(view, 0, 'RIFF');
+
+                // RIFF chunk length
+                // changed "44" to "36" via #401
+                view.setUint32(4, 36 + interleavedLength * 2, true);
+
+                // RIFF type 
+                writeUTFBytes(view, 8, 'WAVE');
+
+                // format chunk identifier 
+                // FMT sub-chunk
+                writeUTFBytes(view, 12, 'fmt ');
+
+                // format chunk length 
+                view.setUint32(16, 16, true);
+
+                // sample format (raw)
+                view.setUint16(20, 1, true);
+
+                // stereo (2 channels)
+                view.setUint16(22, numberOfAudioChannels, true);
+
+                // sample rate 
+                view.setUint32(24, sampleRate, true);
+
+                // byte rate (sample rate * block align)
+                view.setUint32(28, sampleRate * numberOfAudioChannels * 2, true);
+
+                // block align (channel count * bytes per sample) 
+                view.setUint16(32, numberOfAudioChannels * 2, true);
+
+                // bits per sample 
+                view.setUint16(34, 16, true);
+
+                // data sub-chunk
+                // data chunk identifier 
+                writeUTFBytes(view, 36, 'data');
+
+                // data chunk length 
+                view.setUint32(40, interleavedLength * 2, true);
+
+                // write the PCM samples
+                var lng = interleavedLength;
+                var index = 44;
+                var volume = 1;
+                for (var i = 0; i < lng; i++) {
+                    view.setInt16(index, interleaved[i] * (0x7FFF * volume), true);
+                    index += 2;
+                }
+
+                if (cb) {
+                    return cb({
+                        buffer: buffer,
+                        view: view
+                    });
+                }
+
+                postMessage({
+                    buffer: buffer,
+                    view: view
+                });
+            }
+
+            if (config.noWorker) {
+                mergeAudioBuffers(config, function(data) {
+                    callback(data.buffer, data.view);
+                });
+                return;
+            }
+
+
+            var webWorker = processInWebWorker(mergeAudioBuffers);
+
+            webWorker.onmessage = function(event) {
+                callback(event.data.buffer, event.data.view);
+
+                // release memory
+                URL.revokeObjectURL(webWorker.workerURL);
+
+                // kill webworker (or Chrome will kill your page after ~25 calls)
+                webWorker.terminate();
+            };
+
+            webWorker.postMessage(config);
+        }
+
+        function processInWebWorker(_function) {
+            var workerURL = URL.createObjectURL(new Blob([_function.toString(),
+                ';this.onmessage =  function (eee) {' + _function.name + '(eee.data);}'
+            ], {
+                type: 'application/javascript'
+            }));
+
+            var worker = new Worker(workerURL);
+            worker.workerURL = workerURL;
+            return worker;
+        }
+
+        /**
+         * This method stops recording MediaStream.
+         * @param {function} callback - Callback function, that is used to pass recorded blob back to the callee.
+         * @method
+         * @memberof StereoAudioRecorder
+         * @example
+         * recorder.stop(function(blob) {
+         *     video.src = URL.createObjectURL(blob);
+         * });
+         */
+        this.stop = function(callback) {
+            callback = callback || function() {};
+
+            // stop recording
+            recording = false;
+
+            mergeLeftRightBuffers({
+                desiredSampRate: desiredSampRate,
+                sampleRate: sampleRate,
+                numberOfAudioChannels: numberOfAudioChannels,
+                internalInterleavedLength: recordingLength,
+                leftBuffers: leftchannel,
+                rightBuffers: numberOfAudioChannels === 1 ? [] : rightchannel,
+                noWorker: config.noWorker
+            }, function(buffer, view) {
+                /**
+                 * @property {Blob} blob - The recorded blob object.
+                 * @memberof StereoAudioRecorder
+                 * @example
+                 * recorder.stop(function(){
+                 *     var blob = recorder.blob;
+                 * });
+                 */
+                self.blob = new Blob([view], {
+                    type: 'audio/wav'
+                });
+
+                /**
+                 * @property {ArrayBuffer} buffer - The recorded buffer object.
+                 * @memberof StereoAudioRecorder
+                 * @example
+                 * recorder.stop(function(){
+                 *     var buffer = recorder.buffer;
+                 * });
+                 */
+                self.buffer = new ArrayBuffer(view.buffer.byteLength);
+
+                /**
+                 * @property {DataView} view - The recorded data-view object.
+                 * @memberof StereoAudioRecorder
+                 * @example
+                 * recorder.stop(function(){
+                 *     var view = recorder.view;
+                 * });
+                 */
+                self.view = view;
+
+                self.sampleRate = desiredSampRate || sampleRate;
+                self.bufferSize = bufferSize;
+
+                // recorded audio length
+                self.length = recordingLength;
+
+                isAudioProcessStarted = false;
+
+                if (callback) {
+                    callback(self.blob);
+                }
+            });
+        };
+
+        if (typeof RecordRTC.Storage === 'undefined') {
+            RecordRTC.Storage = {
+                AudioContextConstructor: null,
+                AudioContext: window.AudioContext || window.webkitAudioContext
+            };
+        }
+
+        if (!RecordRTC.Storage.AudioContextConstructor || RecordRTC.Storage.AudioContextConstructor.state === 'closed') {
+            RecordRTC.Storage.AudioContextConstructor = new RecordRTC.Storage.AudioContext();
+        }
+
+        var context = RecordRTC.Storage.AudioContextConstructor;
+
+        // creates an audio node from the microphone incoming stream
+        var audioInput = context.createMediaStreamSource(mediaStream);
+
+        var legalBufferValues = [0, 256, 512, 1024, 2048, 4096, 8192, 16384];
+
+        /**
+         * From the spec: This value controls how frequently the audioprocess event is
+         * dispatched and how many sample-frames need to be processed each call.
+         * Lower values for buffer size will result in a lower (better) latency.
+         * Higher values will be necessary to avoid audio breakup and glitches
+         * The size of the buffer (in sample-frames) which needs to
+         * be processed each time onprocessaudio is called.
+         * Legal values are (256, 512, 1024, 2048, 4096, 8192, 16384).
+         * @property {number} bufferSize - Buffer-size for how frequently the audioprocess event is dispatched.
+         * @memberof StereoAudioRecorder
+         * @example
+         * recorder = new StereoAudioRecorder(mediaStream, {
+         *     bufferSize: 4096
+         * });
+         */
+
+        // "0" means, let chrome decide the most accurate buffer-size for current platform.
+        var bufferSize = typeof config.bufferSize === 'undefined' ? 4096 : config.bufferSize;
+
+        if (legalBufferValues.indexOf(bufferSize) === -1) {
+            if (!config.disableLogs) {
+                console.log('Legal values for buffer-size are ' + JSON.stringify(legalBufferValues, null, '\t'));
+            }
+        }
+
+        if (context.createJavaScriptNode) {
+            jsAudioNode = context.createJavaScriptNode(bufferSize, numberOfAudioChannels, numberOfAudioChannels);
+        } else if (context.createScriptProcessor) {
+            jsAudioNode = context.createScriptProcessor(bufferSize, numberOfAudioChannels, numberOfAudioChannels);
+        } else {
+            throw 'WebAudio API has no support on this browser.';
+        }
+
+        // connect the stream to the script processor
+        audioInput.connect(jsAudioNode);
+
+        if (!config.bufferSize) {
+            bufferSize = jsAudioNode.bufferSize; // device buffer-size
+        }
+
+        /**
+         * The sample rate (in sample-frames per second) at which the
+         * AudioContext handles audio. It is assumed that all AudioNodes
+         * in the context run at this rate. In making this assumption,
+         * sample-rate converters or "varispeed" processors are not supported
+         * in real-time processing.
+         * The sampleRate parameter describes the sample-rate of the
+         * linear PCM audio data in the buffer in sample-frames per second.
+         * An implementation must support sample-rates in at least
+         * the range 22050 to 96000.
+         * @property {number} sampleRate - Buffer-size for how frequently the audioprocess event is dispatched.
+         * @memberof StereoAudioRecorder
+         * @example
+         * recorder = new StereoAudioRecorder(mediaStream, {
+         *     sampleRate: 44100
+         * });
+         */
+        var sampleRate = typeof config.sampleRate !== 'undefined' ? config.sampleRate : context.sampleRate || 44100;
+
+        if (sampleRate < 22050 || sampleRate > 96000) {
+            // Ref: http://stackoverflow.com/a/26303918/552182
+            if (!config.disableLogs) {
+                console.log('sample-rate must be under range 22050 and 96000.');
+            }
+        }
+
+        if (!config.disableLogs) {
+            if (config.desiredSampRate) {
+                console.log('Desired sample-rate: ' + config.desiredSampRate);
+            }
+        }
+
+        var isPaused = false;
+        /**
+         * This method pauses the recording process.
+         * @method
+         * @memberof StereoAudioRecorder
+         * @example
+         * recorder.pause();
+         */
+        this.pause = function() {
+            isPaused = true;
+        };
+
+        /**
+         * This method resumes the recording process.
+         * @method
+         * @memberof StereoAudioRecorder
+         * @example
+         * recorder.resume();
+         */
+        this.resume = function() {
+            if (isMediaStreamActive() === false) {
+                throw 'Please make sure MediaStream is active.';
+            }
+
+            if (!recording) {
+                if (!config.disableLogs) {
+                    console.log('Seems recording has been restarted.');
+                }
+                this.record();
+                return;
+            }
+
+            isPaused = false;
+        };
+
+        /**
+         * This method resets currently recorded data.
+         * @method
+         * @memberof StereoAudioRecorder
+         * @example
+         * recorder.clearRecordedData();
+         */
+        this.clearRecordedData = function() {
+            config.checkForInactiveTracks = false;
+
+            if (recording) {
+                this.stop(clearRecordedDataCB);
+            }
+
+            clearRecordedDataCB();
+        };
+
+        function resetVariables() {
+            leftchannel = [];
+            rightchannel = [];
+            recordingLength = 0;
+            isAudioProcessStarted = false;
+            recording = false;
+            isPaused = false;
+            context = null;
+
+            self.leftchannel = leftchannel;
+            self.rightchannel = rightchannel;
+            self.numberOfAudioChannels = numberOfAudioChannels;
+            self.desiredSampRate = desiredSampRate;
+            self.sampleRate = sampleRate;
+            self.recordingLength = recordingLength;
+
+            intervalsBasedBuffers = {
+                left: [],
+                right: [],
+                recordingLength: 0
+            };
+        }
+
+        function clearRecordedDataCB() {
+            if (jsAudioNode) {
+                jsAudioNode.onaudioprocess = null;
+                jsAudioNode.disconnect();
+                jsAudioNode = null;
+            }
+
+            if (audioInput) {
+                audioInput.disconnect();
+                audioInput = null;
+            }
+
+            resetVariables();
+        }
+
+        // for debugging
+        this.name = 'StereoAudioRecorder';
+        this.toString = function() {
+            return this.name;
+        };
+
+        var isAudioProcessStarted = false;
+
+        function onAudioProcessDataAvailable(e) {
+            if (isPaused) {
+                return;
+            }
+
+            if (isMediaStreamActive() === false) {
+                if (!config.disableLogs) {
+                    console.log('MediaStream seems stopped.');
+                }
+                jsAudioNode.disconnect();
+                recording = false;
+            }
+
+            if (!recording) {
+                if (audioInput) {
+                    audioInput.disconnect();
+                    audioInput = null;
+                }
+                return;
+            }
+
+            /**
+             * This method is called on "onaudioprocess" event's first invocation.
+             * @method {function} onAudioProcessStarted
+             * @memberof StereoAudioRecorder
+             * @example
+             * recorder.onAudioProcessStarted: function() { };
+             */
+            if (!isAudioProcessStarted) {
+                isAudioProcessStarted = true;
+                if (config.onAudioProcessStarted) {
+                    config.onAudioProcessStarted();
+                }
+
+                if (config.initCallback) {
+                    config.initCallback();
+                }
+            }
+
+            var left = e.inputBuffer.getChannelData(0);
+
+            // we clone the samples
+            var chLeft = new Float32Array(left);
+            leftchannel.push(chLeft);
+
+            if (numberOfAudioChannels === 2) {
+                var right = e.inputBuffer.getChannelData(1);
+                var chRight = new Float32Array(right);
+                rightchannel.push(chRight);
+            }
+
+            recordingLength += bufferSize;
+
+            // export raw PCM
+            self.recordingLength = recordingLength;
+
+            if (typeof config.timeSlice !== 'undefined') {
+                intervalsBasedBuffers.recordingLength += bufferSize;
+                intervalsBasedBuffers.left.push(chLeft);
+
+                if (numberOfAudioChannels === 2) {
+                    intervalsBasedBuffers.right.push(chRight);
+                }
+            }
+        }
+
+        jsAudioNode.onaudioprocess = onAudioProcessDataAvailable;
+
+        // to prevent self audio to be connected with speakers
+        if (context.createMediaStreamDestination) {
+            jsAudioNode.connect(context.createMediaStreamDestination());
+        } else {
+            jsAudioNode.connect(context.destination);
+        }
+
+        // export raw PCM
+        this.leftchannel = leftchannel;
+        this.rightchannel = rightchannel;
+        this.numberOfAudioChannels = numberOfAudioChannels;
+        this.desiredSampRate = desiredSampRate;
+        this.sampleRate = sampleRate;
+        self.recordingLength = recordingLength;
+
+        // helper for intervals based blobs
+        var intervalsBasedBuffers = {
+            left: [],
+            right: [],
+            recordingLength: 0
+        };
+
+        // this looper is used to support intervals based blobs (via timeSlice+ondataavailable)
+        function looper() {
+            if (!recording || typeof config.ondataavailable !== 'function' || typeof config.timeSlice === 'undefined') {
+                return;
+            }
+
+            if (intervalsBasedBuffers.left.length) {
+                mergeLeftRightBuffers({
+                    desiredSampRate: desiredSampRate,
+                    sampleRate: sampleRate,
+                    numberOfAudioChannels: numberOfAudioChannels,
+                    internalInterleavedLength: intervalsBasedBuffers.recordingLength,
+                    leftBuffers: intervalsBasedBuffers.left,
+                    rightBuffers: numberOfAudioChannels === 1 ? [] : intervalsBasedBuffers.right
+                }, function(buffer, view) {
+                    var blob = new Blob([view], {
+                        type: 'audio/wav'
+                    });
+                    config.ondataavailable(blob);
+
+                    setTimeout(looper, config.timeSlice);
+                });
+
+                intervalsBasedBuffers = {
+                    left: [],
+                    right: [],
+                    recordingLength: 0
+                };
+            } else {
+                setTimeout(looper, config.timeSlice);
+            }
+        }
+    }
+
+    if (typeof RecordRTC !== 'undefined') {
+        RecordRTC.StereoAudioRecorder = StereoAudioRecorder;
+    }
+
+    // _________________
+    // CanvasRecorder.js
+
+    /**
+     * CanvasRecorder is a standalone class used by {@link RecordRTC} to bring HTML5-Canvas recording into video WebM. It uses HTML2Canvas library and runs top over {@link Whammy}.
+     * @summary HTML2Canvas recording into video WebM.
+     * @license {@link https://github.com/muaz-khan/RecordRTC/blob/master/LICENSE|MIT}
+     * @author {@link https://MuazKhan.com|Muaz Khan}
+     * @typedef CanvasRecorder
+     * @class
+     * @example
+     * var recorder = new CanvasRecorder(htmlElement, { disableLogs: true, useWhammyRecorder: true });
+     * recorder.record();
+     * recorder.stop(function(blob) {
+     *     video.src = URL.createObjectURL(blob);
+     * });
+     * @see {@link https://github.com/muaz-khan/RecordRTC|RecordRTC Source Code}
+     * @param {HTMLElement} htmlElement - querySelector/getElementById/getElementsByTagName[0]/etc.
+     * @param {object} config - {disableLogs:true, initCallback: function}
+     */
+
+    function CanvasRecorder(htmlElement, config) {
+        if (typeof html2canvas === 'undefined') {
+            throw 'Please link: https://www.webrtc-experiment.com/screenshot.js';
+        }
+
+        config = config || {};
+        if (!config.frameInterval) {
+            config.frameInterval = 10;
+        }
+
+        // via DetectRTC.js
+        var isCanvasSupportsStreamCapturing = false;
+        ['captureStream', 'mozCaptureStream', 'webkitCaptureStream'].forEach(function(item) {
+            if (item in document.createElement('canvas')) {
+                isCanvasSupportsStreamCapturing = true;
+            }
+        });
+
+        var _isChrome = (!!window.webkitRTCPeerConnection || !!window.webkitGetUserMedia) && !!window.chrome;
+
+        var chromeVersion = 50;
+        var matchArray = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
+        if (_isChrome && matchArray && matchArray[2]) {
+            chromeVersion = parseInt(matchArray[2], 10);
+        }
+
+        if (_isChrome && chromeVersion < 52) {
+            isCanvasSupportsStreamCapturing = false;
+        }
+
+        if (config.useWhammyRecorder) {
+            isCanvasSupportsStreamCapturing = false;
+        }
+
+        var globalCanvas, mediaStreamRecorder;
+
+        if (isCanvasSupportsStreamCapturing) {
+            if (!config.disableLogs) {
+                console.log('Your browser supports both MediRecorder API and canvas.captureStream!');
+            }
+
+            if (htmlElement instanceof HTMLCanvasElement) {
+                globalCanvas = htmlElement;
+            } else if (htmlElement instanceof CanvasRenderingContext2D) {
+                globalCanvas = htmlElement.canvas;
+            } else {
+                throw 'Please pass either HTMLCanvasElement or CanvasRenderingContext2D.';
+            }
+        } else if (!!navigator.mozGetUserMedia) {
+            if (!config.disableLogs) {
+                console.error('Canvas recording is NOT supported in Firefox.');
+            }
+        }
+
+        var isRecording;
+
+        /**
+         * This method records Canvas.
+         * @method
+         * @memberof CanvasRecorder
+         * @example
+         * recorder.record();
+         */
+        this.record = function() {
+            isRecording = true;
+
+            if (isCanvasSupportsStreamCapturing && !config.useWhammyRecorder) {
+                // CanvasCaptureMediaStream
+                var canvasMediaStream;
+                if ('captureStream' in globalCanvas) {
+                    canvasMediaStream = globalCanvas.captureStream(25); // 25 FPS
+                } else if ('mozCaptureStream' in globalCanvas) {
+                    canvasMediaStream = globalCanvas.mozCaptureStream(25);
+                } else if ('webkitCaptureStream' in globalCanvas) {
+                    canvasMediaStream = globalCanvas.webkitCaptureStream(25);
+                }
+
+                try {
+                    var mdStream = new MediaStream();
+                    mdStream.addTrack(getTracks(canvasMediaStream, 'video')[0]);
+                    canvasMediaStream = mdStream;
+                } catch (e) {}
+
+                if (!canvasMediaStream) {
+                    throw 'captureStream API are NOT available.';
+                }
+
+                // Note: Jan 18, 2016 status is that, 
+                // Firefox MediaRecorder API can't record CanvasCaptureMediaStream object.
+                mediaStreamRecorder = new MediaStreamRecorder(canvasMediaStream, {
+                    mimeType: config.mimeType || 'video/webm'
+                });
+                mediaStreamRecorder.record();
+            } else {
+                whammy.frames = [];
+                lastTime = new Date().getTime();
+                drawCanvasFrame();
+            }
+
+            if (config.initCallback) {
+                config.initCallback();
+            }
+        };
+
+        this.getWebPImages = function(callback) {
+            if (htmlElement.nodeName.toLowerCase() !== 'canvas') {
+                callback();
+                return;
+            }
+
+            var framesLength = whammy.frames.length;
+            whammy.frames.forEach(function(frame, idx) {
+                var framesRemaining = framesLength - idx;
+                if (!config.disableLogs) {
+                    console.log(framesRemaining + '/' + framesLength + ' frames remaining');
+                }
+
+                if (config.onEncodingCallback) {
+                    config.onEncodingCallback(framesRemaining, framesLength);
+                }
+
+                var webp = frame.image.toDataURL('image/webp', 1);
+                whammy.frames[idx].image = webp;
+            });
+
+            if (!config.disableLogs) {
+                console.log('Generating WebM');
+            }
+
+            callback();
+        };
+
+        /**
+         * This method stops recording Canvas.
+         * @param {function} callback - Callback function, that is used to pass recorded blob back to the callee.
+         * @method
+         * @memberof CanvasRecorder
+         * @example
+         * recorder.stop(function(blob) {
+         *     video.src = URL.createObjectURL(blob);
+         * });
+         */
+        this.stop = function(callback) {
+            isRecording = false;
+
+            var that = this;
+
+            if (isCanvasSupportsStreamCapturing && mediaStreamRecorder) {
+                mediaStreamRecorder.stop(callback);
+                return;
+            }
+
+            this.getWebPImages(function() {
+                /**
+                 * @property {Blob} blob - Recorded frames in video/webm blob.
+                 * @memberof CanvasRecorder
+                 * @example
+                 * recorder.stop(function() {
+                 *     var blob = recorder.blob;
+                 * });
+                 */
+                whammy.compile(function(blob) {
+                    if (!config.disableLogs) {
+                        console.log('Recording finished!');
+                    }
+
+                    that.blob = blob;
+
+                    if (that.blob.forEach) {
+                        that.blob = new Blob([], {
+                            type: 'video/webm'
+                        });
+                    }
+
+                    if (callback) {
+                        callback(that.blob);
+                    }
+
+                    whammy.frames = [];
+                });
+            });
+        };
+
+        var isPausedRecording = false;
+
+        /**
+         * This method pauses the recording process.
+         * @method
+         * @memberof CanvasRecorder
+         * @example
+         * recorder.pause();
+         */
+        this.pause = function() {
+            isPausedRecording = true;
+
+            if (mediaStreamRecorder instanceof MediaStreamRecorder) {
+                mediaStreamRecorder.pause();
+                return;
+            }
+        };
+
+        /**
+         * This method resumes the recording process.
+         * @method
+         * @memberof CanvasRecorder
+         * @example
+         * recorder.resume();
+         */
+        this.resume = function() {
+            isPausedRecording = false;
+
+            if (mediaStreamRecorder instanceof MediaStreamRecorder) {
+                mediaStreamRecorder.resume();
+                return;
+            }
+
+            if (!isRecording) {
+                this.record();
+            }
+        };
+
+        /**
+         * This method resets currently recorded data.
+         * @method
+         * @memberof CanvasRecorder
+         * @example
+         * recorder.clearRecordedData();
+         */
+        this.clearRecordedData = function() {
+            if (isRecording) {
+                this.stop(clearRecordedDataCB);
+            }
+            clearRecordedDataCB();
+        };
+
+        function clearRecordedDataCB() {
+            whammy.frames = [];
+            isRecording = false;
+            isPausedRecording = false;
+        }
+
+        // for debugging
+        this.name = 'CanvasRecorder';
+        this.toString = function() {
+            return this.name;
+        };
+
+        function cloneCanvas() {
+            //create a new canvas
+            var newCanvas = document.createElement('canvas');
+            var context = newCanvas.getContext('2d');
+
+            //set dimensions
+            newCanvas.width = htmlElement.width;
+            newCanvas.height = htmlElement.height;
+
+            //apply the old canvas to the new one
+            context.drawImage(htmlElement, 0, 0);
+
+            //return the new canvas
+            return newCanvas;
+        }
+
+        function drawCanvasFrame() {
+            if (isPausedRecording) {
+                lastTime = new Date().getTime();
+                return setTimeout(drawCanvasFrame, 500);
+            }
+
+            if (htmlElement.nodeName.toLowerCase() === 'canvas') {
+                var duration = new Date().getTime() - lastTime;
+                // via #206, by Jack i.e. @Seymourr
+                lastTime = new Date().getTime();
+
+                whammy.frames.push({
+                    image: cloneCanvas(),
+                    duration: duration
+                });
+
+                if (isRecording) {
+                    setTimeout(drawCanvasFrame, config.frameInterval);
+                }
+                return;
+            }
+
+            html2canvas(htmlElement, {
+                grabMouse: typeof config.showMousePointer === 'undefined' || config.showMousePointer,
+                onrendered: function(canvas) {
+                    var duration = new Date().getTime() - lastTime;
+                    if (!duration) {
+                        return setTimeout(drawCanvasFrame, config.frameInterval);
+                    }
+
+                    // via #206, by Jack i.e. @Seymourr
+                    lastTime = new Date().getTime();
+
+                    whammy.frames.push({
+                        image: canvas.toDataURL('image/webp', 1),
+                        duration: duration
+                    });
+
+                    if (isRecording) {
+                        setTimeout(drawCanvasFrame, config.frameInterval);
+                    }
+                }
+            });
+        }
+
+        var lastTime = new Date().getTime();
+
+        var whammy = new Whammy.Video(100);
+    }
+
+    if (typeof RecordRTC !== 'undefined') {
+        RecordRTC.CanvasRecorder = CanvasRecorder;
+    }
+
+    // _________________
+    // WhammyRecorder.js
+
+    /**
+     * WhammyRecorder is a standalone class used by {@link RecordRTC} to bring video recording in Chrome. It runs top over {@link Whammy}.
+     * @summary Video recording feature in Chrome.
+     * @license {@link https://github.com/muaz-khan/RecordRTC/blob/master/LICENSE|MIT}
+     * @author {@link https://MuazKhan.com|Muaz Khan}
+     * @typedef WhammyRecorder
+     * @class
+     * @example
+     * var recorder = new WhammyRecorder(mediaStream);
+     * recorder.record();
+     * recorder.stop(function(blob) {
+     *     video.src = URL.createObjectURL(blob);
+     * });
+     * @see {@link https://github.com/muaz-khan/RecordRTC|RecordRTC Source Code}
+     * @param {MediaStream} mediaStream - MediaStream object fetched using getUserMedia API or generated using captureStreamUntilEnded or WebAudio API.
+     * @param {object} config - {disableLogs: true, initCallback: function, video: HTMLVideoElement, etc.}
+     */
+
+    function WhammyRecorder(mediaStream, config) {
+
+        config = config || {};
+
+        if (!config.frameInterval) {
+            config.frameInterval = 10;
+        }
+
+        if (!config.disableLogs) {
+            console.log('Using frames-interval:', config.frameInterval);
+        }
+
+        /**
+         * This method records video.
+         * @method
+         * @memberof WhammyRecorder
+         * @example
+         * recorder.record();
+         */
+        this.record = function() {
+            if (!config.width) {
+                config.width = 320;
+            }
+
+            if (!config.height) {
+                config.height = 240;
+            }
+
+            if (!config.video) {
+                config.video = {
+                    width: config.width,
+                    height: config.height
+                };
+            }
+
+            if (!config.canvas) {
+                config.canvas = {
+                    width: config.width,
+                    height: config.height
+                };
+            }
+
+            canvas.width = config.canvas.width || 320;
+            canvas.height = config.canvas.height || 240;
+
+            context = canvas.getContext('2d');
+
+            // setting defaults
+            if (config.video && config.video instanceof HTMLVideoElement) {
+                video = config.video.cloneNode();
+
+                if (config.initCallback) {
+                    config.initCallback();
+                }
+            } else {
+                video = document.createElement('video');
+
+                setSrcObject(mediaStream, video);
+
+                video.onloadedmetadata = function() { // "onloadedmetadata" may NOT work in FF?
+                    if (config.initCallback) {
+                        config.initCallback();
+                    }
+                };
+
+                video.width = config.video.width;
+                video.height = config.video.height;
+            }
+
+            video.muted = true;
+            video.play();
+
+            lastTime = new Date().getTime();
+            whammy = new Whammy.Video();
+
+            if (!config.disableLogs) {
+                console.log('canvas resolutions', canvas.width, '*', canvas.height);
+                console.log('video width/height', video.width || canvas.width, '*', video.height || canvas.height);
+            }
+
+            drawFrames(config.frameInterval);
+        };
+
+        /**
+         * Draw and push frames to Whammy
+         * @param {integer} frameInterval - set minimum interval (in milliseconds) between each time we push a frame to Whammy
+         */
+        function drawFrames(frameInterval) {
+            frameInterval = typeof frameInterval !== 'undefined' ? frameInterval : 10;
+
+            var duration = new Date().getTime() - lastTime;
+            if (!duration) {
+                return setTimeout(drawFrames, frameInterval, frameInterval);
+            }
+
+            if (isPausedRecording) {
+                lastTime = new Date().getTime();
+                return setTimeout(drawFrames, 100);
+            }
+
+            // via #206, by Jack i.e. @Seymourr
+            lastTime = new Date().getTime();
+
+            if (video.paused) {
+                // via: https://github.com/muaz-khan/WebRTC-Experiment/pull/316
+                // Tweak for Android Chrome
+                video.play();
+            }
+
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            whammy.frames.push({
+                duration: duration,
+                image: canvas.toDataURL('image/webp')
+            });
+
+            if (!isStopDrawing) {
+                setTimeout(drawFrames, frameInterval, frameInterval);
+            }
+        }
+
+        function asyncLoop(o) {
+            var i = -1,
+                length = o.length;
+
+            (function loop() {
+                i++;
+                if (i === length) {
+                    o.callback();
+                    return;
+                }
+
+                // "setTimeout" added by Jim McLeod
+                setTimeout(function() {
+                    o.functionToLoop(loop, i);
+                }, 1);
+            })();
+        }
+
+
+        /**
+         * remove black frames from the beginning to the specified frame
+         * @param {Array} _frames - array of frames to be checked
+         * @param {number} _framesToCheck - number of frame until check will be executed (-1 - will drop all frames until frame not matched will be found)
+         * @param {number} _pixTolerance - 0 - very strict (only black pixel color) ; 1 - all
+         * @param {number} _frameTolerance - 0 - very strict (only black frame color) ; 1 - all
+         * @returns {Array} - array of frames
+         */
+        // pull#293 by @volodalexey
+        function dropBlackFrames(_frames, _framesToCheck, _pixTolerance, _frameTolerance, callback) {
+            var localCanvas = document.createElement('canvas');
+            localCanvas.width = canvas.width;
+            localCanvas.height = canvas.height;
+            var context2d = localCanvas.getContext('2d');
+            var resultFrames = [];
+
+            var checkUntilNotBlack = _framesToCheck === -1;
+            var endCheckFrame = (_framesToCheck && _framesToCheck > 0 && _framesToCheck <= _frames.length) ?
+                _framesToCheck : _frames.length;
+            var sampleColor = {
+                r: 0,
+                g: 0,
+                b: 0
+            };
+            var maxColorDifference = Math.sqrt(
+                Math.pow(255, 2) +
+                Math.pow(255, 2) +
+                Math.pow(255, 2)
+            );
+            var pixTolerance = _pixTolerance && _pixTolerance >= 0 && _pixTolerance <= 1 ? _pixTolerance : 0;
+            var frameTolerance = _frameTolerance && _frameTolerance >= 0 && _frameTolerance <= 1 ? _frameTolerance : 0;
+            var doNotCheckNext = false;
+
+            asyncLoop({
+                length: endCheckFrame,
+                functionToLoop: function(loop, f) {
+                    var matchPixCount, endPixCheck, maxPixCount;
+
+                    var finishImage = function() {
+                        if (!doNotCheckNext && maxPixCount - matchPixCount <= maxPixCount * frameTolerance) ; else {
+                            // console.log('frame is passed : ' + f);
+                            if (checkUntilNotBlack) {
+                                doNotCheckNext = true;
+                            }
+                            resultFrames.push(_frames[f]);
+                        }
+                        loop();
+                    };
+
+                    if (!doNotCheckNext) {
+                        var image = new Image();
+                        image.onload = function() {
+                            context2d.drawImage(image, 0, 0, canvas.width, canvas.height);
+                            var imageData = context2d.getImageData(0, 0, canvas.width, canvas.height);
+                            matchPixCount = 0;
+                            endPixCheck = imageData.data.length;
+                            maxPixCount = imageData.data.length / 4;
+
+                            for (var pix = 0; pix < endPixCheck; pix += 4) {
+                                var currentColor = {
+                                    r: imageData.data[pix],
+                                    g: imageData.data[pix + 1],
+                                    b: imageData.data[pix + 2]
+                                };
+                                var colorDifference = Math.sqrt(
+                                    Math.pow(currentColor.r - sampleColor.r, 2) +
+                                    Math.pow(currentColor.g - sampleColor.g, 2) +
+                                    Math.pow(currentColor.b - sampleColor.b, 2)
+                                );
+                                // difference in color it is difference in color vectors (r1,g1,b1) <=> (r2,g2,b2)
+                                if (colorDifference <= maxColorDifference * pixTolerance) {
+                                    matchPixCount++;
+                                }
+                            }
+                            finishImage();
+                        };
+                        image.src = _frames[f].image;
+                    } else {
+                        finishImage();
+                    }
+                },
+                callback: function() {
+                    resultFrames = resultFrames.concat(_frames.slice(endCheckFrame));
+
+                    if (resultFrames.length <= 0) {
+                        // at least one last frame should be available for next manipulation
+                        // if total duration of all frames will be < 1000 than ffmpeg doesn't work well...
+                        resultFrames.push(_frames[_frames.length - 1]);
+                    }
+                    callback(resultFrames);
+                }
+            });
+        }
+
+        var isStopDrawing = false;
+
+        /**
+         * This method stops recording video.
+         * @param {function} callback - Callback function, that is used to pass recorded blob back to the callee.
+         * @method
+         * @memberof WhammyRecorder
+         * @example
+         * recorder.stop(function(blob) {
+         *     video.src = URL.createObjectURL(blob);
+         * });
+         */
+        this.stop = function(callback) {
+            callback = callback || function() {};
+
+            isStopDrawing = true;
+
+            var _this = this;
+            // analyse of all frames takes some time!
+            setTimeout(function() {
+                // e.g. dropBlackFrames(frames, 10, 1, 1) - will cut all 10 frames
+                // e.g. dropBlackFrames(frames, 10, 0.5, 0.5) - will analyse 10 frames
+                // e.g. dropBlackFrames(frames, 10) === dropBlackFrames(frames, 10, 0, 0) - will analyse 10 frames with strict black color
+                dropBlackFrames(whammy.frames, -1, null, null, function(frames) {
+                    whammy.frames = frames;
+
+                    // to display advertisement images!
+                    if (config.advertisement && config.advertisement.length) {
+                        whammy.frames = config.advertisement.concat(whammy.frames);
+                    }
+
+                    /**
+                     * @property {Blob} blob - Recorded frames in video/webm blob.
+                     * @memberof WhammyRecorder
+                     * @example
+                     * recorder.stop(function() {
+                     *     var blob = recorder.blob;
+                     * });
+                     */
+                    whammy.compile(function(blob) {
+                        _this.blob = blob;
+
+                        if (_this.blob.forEach) {
+                            _this.blob = new Blob([], {
+                                type: 'video/webm'
+                            });
+                        }
+
+                        if (callback) {
+                            callback(_this.blob);
+                        }
+                    });
+                });
+            }, 10);
+        };
+
+        var isPausedRecording = false;
+
+        /**
+         * This method pauses the recording process.
+         * @method
+         * @memberof WhammyRecorder
+         * @example
+         * recorder.pause();
+         */
+        this.pause = function() {
+            isPausedRecording = true;
+        };
+
+        /**
+         * This method resumes the recording process.
+         * @method
+         * @memberof WhammyRecorder
+         * @example
+         * recorder.resume();
+         */
+        this.resume = function() {
+            isPausedRecording = false;
+
+            if (isStopDrawing) {
+                this.record();
+            }
+        };
+
+        /**
+         * This method resets currently recorded data.
+         * @method
+         * @memberof WhammyRecorder
+         * @example
+         * recorder.clearRecordedData();
+         */
+        this.clearRecordedData = function() {
+            if (!isStopDrawing) {
+                this.stop(clearRecordedDataCB);
+            }
+            clearRecordedDataCB();
+        };
+
+        function clearRecordedDataCB() {
+            whammy.frames = [];
+            isStopDrawing = true;
+            isPausedRecording = false;
+        }
+
+        // for debugging
+        this.name = 'WhammyRecorder';
+        this.toString = function() {
+            return this.name;
+        };
+
+        var canvas = document.createElement('canvas');
+        var context = canvas.getContext('2d');
+
+        var video;
+        var lastTime;
+        var whammy;
+    }
+
+    if (typeof RecordRTC !== 'undefined') {
+        RecordRTC.WhammyRecorder = WhammyRecorder;
+    }
+
+    // https://github.com/antimatter15/whammy/blob/master/LICENSE
+    // _________
+    // Whammy.js
+
+    // todo: Firefox now supports webp for webm containers!
+    // their MediaRecorder implementation works well!
+    // should we provide an option to record via Whammy.js or MediaRecorder API is a better solution?
+
+    /**
+     * Whammy is a standalone class used by {@link RecordRTC} to bring video recording in Chrome. It is written by {@link https://github.com/antimatter15|antimatter15}
+     * @summary A real time javascript webm encoder based on a canvas hack.
+     * @license {@link https://github.com/muaz-khan/RecordRTC/blob/master/LICENSE|MIT}
+     * @author {@link https://MuazKhan.com|Muaz Khan}
+     * @typedef Whammy
+     * @class
+     * @example
+     * var recorder = new Whammy().Video(15);
+     * recorder.add(context || canvas || dataURL);
+     * var output = recorder.compile();
+     * @see {@link https://github.com/muaz-khan/RecordRTC|RecordRTC Source Code}
+     */
+
+    var Whammy = (function() {
+        // a more abstract-ish API
+
+        function WhammyVideo(duration) {
+            this.frames = [];
+            this.duration = duration || 1;
+            this.quality = 0.8;
+        }
+
+        /**
+         * Pass Canvas or Context or image/webp(string) to {@link Whammy} encoder.
+         * @method
+         * @memberof Whammy
+         * @example
+         * recorder = new Whammy().Video(0.8, 100);
+         * recorder.add(canvas || context || 'image/webp');
+         * @param {string} frame - Canvas || Context || image/webp
+         * @param {number} duration - Stick a duration (in milliseconds)
+         */
+        WhammyVideo.prototype.add = function(frame, duration) {
+            if ('canvas' in frame) { //CanvasRenderingContext2D
+                frame = frame.canvas;
+            }
+
+            if ('toDataURL' in frame) {
+                frame = frame.toDataURL('image/webp', this.quality);
+            }
+
+            if (!(/^data:image\/webp;base64,/ig).test(frame)) {
+                throw 'Input must be formatted properly as a base64 encoded DataURI of type image/webp';
+            }
+            this.frames.push({
+                image: frame,
+                duration: duration || this.duration
+            });
+        };
+
+        function processInWebWorker(_function) {
+            var blob = URL.createObjectURL(new Blob([_function.toString(),
+                'this.onmessage =  function (eee) {' + _function.name + '(eee.data);}'
+            ], {
+                type: 'application/javascript'
+            }));
+
+            var worker = new Worker(blob);
+            URL.revokeObjectURL(blob);
+            return worker;
+        }
+
+        function whammyInWebWorker(frames) {
+            function ArrayToWebM(frames) {
+                var info = checkFrames(frames);
+                if (!info) {
+                    return [];
+                }
+
+                var clusterMaxDuration = 30000;
+
+                var EBML = [{
+                    'id': 0x1a45dfa3, // EBML
+                    'data': [{
+                        'data': 1,
+                        'id': 0x4286 // EBMLVersion
+                    }, {
+                        'data': 1,
+                        'id': 0x42f7 // EBMLReadVersion
+                    }, {
+                        'data': 4,
+                        'id': 0x42f2 // EBMLMaxIDLength
+                    }, {
+                        'data': 8,
+                        'id': 0x42f3 // EBMLMaxSizeLength
+                    }, {
+                        'data': 'webm',
+                        'id': 0x4282 // DocType
+                    }, {
+                        'data': 2,
+                        'id': 0x4287 // DocTypeVersion
+                    }, {
+                        'data': 2,
+                        'id': 0x4285 // DocTypeReadVersion
+                    }]
+                }, {
+                    'id': 0x18538067, // Segment
+                    'data': [{
+                        'id': 0x1549a966, // Info
+                        'data': [{
+                            'data': 1e6, //do things in millisecs (num of nanosecs for duration scale)
+                            'id': 0x2ad7b1 // TimecodeScale
+                        }, {
+                            'data': 'whammy',
+                            'id': 0x4d80 // MuxingApp
+                        }, {
+                            'data': 'whammy',
+                            'id': 0x5741 // WritingApp
+                        }, {
+                            'data': doubleToString(info.duration),
+                            'id': 0x4489 // Duration
+                        }]
+                    }, {
+                        'id': 0x1654ae6b, // Tracks
+                        'data': [{
+                            'id': 0xae, // TrackEntry
+                            'data': [{
+                                'data': 1,
+                                'id': 0xd7 // TrackNumber
+                            }, {
+                                'data': 1,
+                                'id': 0x73c5 // TrackUID
+                            }, {
+                                'data': 0,
+                                'id': 0x9c // FlagLacing
+                            }, {
+                                'data': 'und',
+                                'id': 0x22b59c // Language
+                            }, {
+                                'data': 'V_VP8',
+                                'id': 0x86 // CodecID
+                            }, {
+                                'data': 'VP8',
+                                'id': 0x258688 // CodecName
+                            }, {
+                                'data': 1,
+                                'id': 0x83 // TrackType
+                            }, {
+                                'id': 0xe0, // Video
+                                'data': [{
+                                    'data': info.width,
+                                    'id': 0xb0 // PixelWidth
+                                }, {
+                                    'data': info.height,
+                                    'id': 0xba // PixelHeight
+                                }]
+                            }]
+                        }]
+                    }]
+                }];
+
+                //Generate clusters (max duration)
+                var frameNumber = 0;
+                var clusterTimecode = 0;
+                while (frameNumber < frames.length) {
+
+                    var clusterFrames = [];
+                    var clusterDuration = 0;
+                    do {
+                        clusterFrames.push(frames[frameNumber]);
+                        clusterDuration += frames[frameNumber].duration;
+                        frameNumber++;
+                    } while (frameNumber < frames.length && clusterDuration < clusterMaxDuration);
+
+                    var clusterCounter = 0;
+                    var cluster = {
+                        'id': 0x1f43b675, // Cluster
+                        'data': getClusterData(clusterTimecode, clusterCounter, clusterFrames)
+                    }; //Add cluster to segment
+                    EBML[1].data.push(cluster);
+                    clusterTimecode += clusterDuration;
+                }
+
+                return generateEBML(EBML);
+            }
+
+            function getClusterData(clusterTimecode, clusterCounter, clusterFrames) {
+                return [{
+                    'data': clusterTimecode,
+                    'id': 0xe7 // Timecode
+                }].concat(clusterFrames.map(function(webp) {
+                    var block = makeSimpleBlock({
+                        discardable: 0,
+                        frame: webp.data.slice(4),
+                        invisible: 0,
+                        keyframe: 1,
+                        lacing: 0,
+                        trackNum: 1,
+                        timecode: Math.round(clusterCounter)
+                    });
+                    clusterCounter += webp.duration;
+                    return {
+                        data: block,
+                        id: 0xa3
+                    };
+                }));
+            }
+
+            // sums the lengths of all the frames and gets the duration
+
+            function checkFrames(frames) {
+                if (!frames[0]) {
+                    postMessage({
+                        error: 'Something went wrong. Maybe WebP format is not supported in the current browser.'
+                    });
+                    return;
+                }
+
+                var width = frames[0].width,
+                    height = frames[0].height,
+                    duration = frames[0].duration;
+
+                for (var i = 1; i < frames.length; i++) {
+                    duration += frames[i].duration;
+                }
+                return {
+                    duration: duration,
+                    width: width,
+                    height: height
+                };
+            }
+
+            function numToBuffer(num) {
+                var parts = [];
+                while (num > 0) {
+                    parts.push(num & 0xff);
+                    num = num >> 8;
+                }
+                return new Uint8Array(parts.reverse());
+            }
+
+            function strToBuffer(str) {
+                return new Uint8Array(str.split('').map(function(e) {
+                    return e.charCodeAt(0);
+                }));
+            }
+
+            function bitsToBuffer(bits) {
+                var data = [];
+                var pad = (bits.length % 8) ? (new Array(1 + 8 - (bits.length % 8))).join('0') : '';
+                bits = pad + bits;
+                for (var i = 0; i < bits.length; i += 8) {
+                    data.push(parseInt(bits.substr(i, 8), 2));
+                }
+                return new Uint8Array(data);
+            }
+
+            function generateEBML(json) {
+                var ebml = [];
+                for (var i = 0; i < json.length; i++) {
+                    var data = json[i].data;
+
+                    if (typeof data === 'object') {
+                        data = generateEBML(data);
+                    }
+
+                    if (typeof data === 'number') {
+                        data = bitsToBuffer(data.toString(2));
+                    }
+
+                    if (typeof data === 'string') {
+                        data = strToBuffer(data);
+                    }
+
+                    var len = data.size || data.byteLength || data.length;
+                    var zeroes = Math.ceil(Math.ceil(Math.log(len) / Math.log(2)) / 8);
+                    var sizeToString = len.toString(2);
+                    var padded = (new Array((zeroes * 7 + 7 + 1) - sizeToString.length)).join('0') + sizeToString;
+                    var size = (new Array(zeroes)).join('0') + '1' + padded;
+
+                    ebml.push(numToBuffer(json[i].id));
+                    ebml.push(bitsToBuffer(size));
+                    ebml.push(data);
+                }
+
+                return new Blob(ebml, {
+                    type: 'video/webm'
+                });
+            }
+
+            function makeSimpleBlock(data) {
+                var flags = 0;
+
+                if (data.keyframe) {
+                    flags |= 128;
+                }
+
+                if (data.invisible) {
+                    flags |= 8;
+                }
+
+                if (data.lacing) {
+                    flags |= (data.lacing << 1);
+                }
+
+                if (data.discardable) {
+                    flags |= 1;
+                }
+
+                if (data.trackNum > 127) {
+                    throw 'TrackNumber > 127 not supported';
+                }
+
+                var out = [data.trackNum | 0x80, data.timecode >> 8, data.timecode & 0xff, flags].map(function(e) {
+                    return String.fromCharCode(e);
+                }).join('') + data.frame;
+
+                return out;
+            }
+
+            function parseWebP(riff) {
+                var VP8 = riff.RIFF[0].WEBP[0];
+
+                var frameStart = VP8.indexOf('\x9d\x01\x2a'); // A VP8 keyframe starts with the 0x9d012a header
+                for (var i = 0, c = []; i < 4; i++) {
+                    c[i] = VP8.charCodeAt(frameStart + 3 + i);
+                }
+
+                var width, height, tmp;
+
+                //the code below is literally copied verbatim from the bitstream spec
+                tmp = (c[1] << 8) | c[0];
+                width = tmp & 0x3FFF;
+                tmp = (c[3] << 8) | c[2];
+                height = tmp & 0x3FFF;
+                return {
+                    width: width,
+                    height: height,
+                    data: VP8,
+                    riff: riff
+                };
+            }
+
+            function getStrLength(string, offset) {
+                return parseInt(string.substr(offset + 4, 4).split('').map(function(i) {
+                    var unpadded = i.charCodeAt(0).toString(2);
+                    return (new Array(8 - unpadded.length + 1)).join('0') + unpadded;
+                }).join(''), 2);
+            }
+
+            function parseRIFF(string) {
+                var offset = 0;
+                var chunks = {};
+
+                while (offset < string.length) {
+                    var id = string.substr(offset, 4);
+                    var len = getStrLength(string, offset);
+                    var data = string.substr(offset + 4 + 4, len);
+                    offset += 4 + 4 + len;
+                    chunks[id] = chunks[id] || [];
+
+                    if (id === 'RIFF' || id === 'LIST') {
+                        chunks[id].push(parseRIFF(data));
+                    } else {
+                        chunks[id].push(data);
+                    }
+                }
+                return chunks;
+            }
+
+            function doubleToString(num) {
+                return [].slice.call(
+                    new Uint8Array((new Float64Array([num])).buffer), 0).map(function(e) {
+                    return String.fromCharCode(e);
+                }).reverse().join('');
+            }
+
+            var webm = new ArrayToWebM(frames.map(function(frame) {
+                var webp = parseWebP(parseRIFF(atob(frame.image.slice(23))));
+                webp.duration = frame.duration;
+                return webp;
+            }));
+
+            postMessage(webm);
+        }
+
+        /**
+         * Encodes frames in WebM container. It uses WebWorkinvoke to invoke 'ArrayToWebM' method.
+         * @param {function} callback - Callback function, that is used to pass recorded blob back to the callee.
+         * @method
+         * @memberof Whammy
+         * @example
+         * recorder = new Whammy().Video(0.8, 100);
+         * recorder.compile(function(blob) {
+         *    // blob.size - blob.type
+         * });
+         */
+        WhammyVideo.prototype.compile = function(callback) {
+            var webWorker = processInWebWorker(whammyInWebWorker);
+
+            webWorker.onmessage = function(event) {
+                if (event.data.error) {
+                    console.error(event.data.error);
+                    return;
+                }
+                callback(event.data);
+            };
+
+            webWorker.postMessage(this.frames);
+        };
+
+        return {
+            /**
+             * A more abstract-ish API.
+             * @method
+             * @memberof Whammy
+             * @example
+             * recorder = new Whammy().Video(0.8, 100);
+             * @param {?number} speed - 0.8
+             * @param {?number} quality - 100
+             */
+            Video: WhammyVideo
+        };
+    })();
+
+    if (typeof RecordRTC !== 'undefined') {
+        RecordRTC.Whammy = Whammy;
+    }
+
+    // ______________ (indexed-db)
+    // DiskStorage.js
+
+    /**
+     * DiskStorage is a standalone object used by {@link RecordRTC} to store recorded blobs in IndexedDB storage.
+     * @summary Writing blobs into IndexedDB.
+     * @license {@link https://github.com/muaz-khan/RecordRTC/blob/master/LICENSE|MIT}
+     * @author {@link https://MuazKhan.com|Muaz Khan}
+     * @example
+     * DiskStorage.Store({
+     *     audioBlob: yourAudioBlob,
+     *     videoBlob: yourVideoBlob,
+     *     gifBlob  : yourGifBlob
+     * });
+     * DiskStorage.Fetch(function(dataURL, type) {
+     *     if(type === 'audioBlob') { }
+     *     if(type === 'videoBlob') { }
+     *     if(type === 'gifBlob')   { }
+     * });
+     * // DiskStorage.dataStoreName = 'recordRTC';
+     * // DiskStorage.onError = function(error) { };
+     * @property {function} init - This method must be called once to initialize IndexedDB ObjectStore. Though, it is auto-used internally.
+     * @property {function} Fetch - This method fetches stored blobs from IndexedDB.
+     * @property {function} Store - This method stores blobs in IndexedDB.
+     * @property {function} onError - This function is invoked for any known/unknown error.
+     * @property {string} dataStoreName - Name of the ObjectStore created in IndexedDB storage.
+     * @see {@link https://github.com/muaz-khan/RecordRTC|RecordRTC Source Code}
+     */
+
+
+    var DiskStorage = {
+        /**
+         * This method must be called once to initialize IndexedDB ObjectStore. Though, it is auto-used internally.
+         * @method
+         * @memberof DiskStorage
+         * @internal
+         * @example
+         * DiskStorage.init();
+         */
+        init: function() {
+            var self = this;
+
+            if (typeof indexedDB === 'undefined' || typeof indexedDB.open === 'undefined') {
+                console.error('IndexedDB API are not available in this browser.');
+                return;
+            }
+
+            var dbVersion = 1;
+            var dbName = this.dbName || location.href.replace(/\/|:|#|%|\.|\[|\]/g, ''),
+                db;
+            var request = indexedDB.open(dbName, dbVersion);
+
+            function createObjectStore(dataBase) {
+                dataBase.createObjectStore(self.dataStoreName);
+            }
+
+            function putInDB() {
+                var transaction = db.transaction([self.dataStoreName], 'readwrite');
+
+                if (self.videoBlob) {
+                    transaction.objectStore(self.dataStoreName).put(self.videoBlob, 'videoBlob');
+                }
+
+                if (self.gifBlob) {
+                    transaction.objectStore(self.dataStoreName).put(self.gifBlob, 'gifBlob');
+                }
+
+                if (self.audioBlob) {
+                    transaction.objectStore(self.dataStoreName).put(self.audioBlob, 'audioBlob');
+                }
+
+                function getFromStore(portionName) {
+                    transaction.objectStore(self.dataStoreName).get(portionName).onsuccess = function(event) {
+                        if (self.callback) {
+                            self.callback(event.target.result, portionName);
+                        }
+                    };
+                }
+
+                getFromStore('audioBlob');
+                getFromStore('videoBlob');
+                getFromStore('gifBlob');
+            }
+
+            request.onerror = self.onError;
+
+            request.onsuccess = function() {
+                db = request.result;
+                db.onerror = self.onError;
+
+                if (db.setVersion) {
+                    if (db.version !== dbVersion) {
+                        var setVersion = db.setVersion(dbVersion);
+                        setVersion.onsuccess = function() {
+                            createObjectStore(db);
+                            putInDB();
+                        };
+                    } else {
+                        putInDB();
+                    }
+                } else {
+                    putInDB();
+                }
+            };
+            request.onupgradeneeded = function(event) {
+                createObjectStore(event.target.result);
+            };
+        },
+        /**
+         * This method fetches stored blobs from IndexedDB.
+         * @method
+         * @memberof DiskStorage
+         * @internal
+         * @example
+         * DiskStorage.Fetch(function(dataURL, type) {
+         *     if(type === 'audioBlob') { }
+         *     if(type === 'videoBlob') { }
+         *     if(type === 'gifBlob')   { }
+         * });
+         */
+        Fetch: function(callback) {
+            this.callback = callback;
+            this.init();
+
+            return this;
+        },
+        /**
+         * This method stores blobs in IndexedDB.
+         * @method
+         * @memberof DiskStorage
+         * @internal
+         * @example
+         * DiskStorage.Store({
+         *     audioBlob: yourAudioBlob,
+         *     videoBlob: yourVideoBlob,
+         *     gifBlob  : yourGifBlob
+         * });
+         */
+        Store: function(config) {
+            this.audioBlob = config.audioBlob;
+            this.videoBlob = config.videoBlob;
+            this.gifBlob = config.gifBlob;
+
+            this.init();
+
+            return this;
+        },
+        /**
+         * This function is invoked for any known/unknown error.
+         * @method
+         * @memberof DiskStorage
+         * @internal
+         * @example
+         * DiskStorage.onError = function(error){
+         *     alerot( JSON.stringify(error) );
+         * };
+         */
+        onError: function(error) {
+            console.error(JSON.stringify(error, null, '\t'));
+        },
+
+        /**
+         * @property {string} dataStoreName - Name of the ObjectStore created in IndexedDB storage.
+         * @memberof DiskStorage
+         * @internal
+         * @example
+         * DiskStorage.dataStoreName = 'recordRTC';
+         */
+        dataStoreName: 'recordRTC',
+        dbName: null
+    };
+
+    if (typeof RecordRTC !== 'undefined') {
+        RecordRTC.DiskStorage = DiskStorage;
+    }
+
+    // ______________
+    // GifRecorder.js
+
+    /**
+     * GifRecorder is standalone calss used by {@link RecordRTC} to record video or canvas into animated gif.
+     * @license {@link https://github.com/muaz-khan/RecordRTC/blob/master/LICENSE|MIT}
+     * @author {@link https://MuazKhan.com|Muaz Khan}
+     * @typedef GifRecorder
+     * @class
+     * @example
+     * var recorder = new GifRecorder(mediaStream || canvas || context, { onGifPreview: function, onGifRecordingStarted: function, width: 1280, height: 720, frameRate: 200, quality: 10 });
+     * recorder.record();
+     * recorder.stop(function(blob) {
+     *     img.src = URL.createObjectURL(blob);
+     * });
+     * @see {@link https://github.com/muaz-khan/RecordRTC|RecordRTC Source Code}
+     * @param {MediaStream} mediaStream - MediaStream object or HTMLCanvasElement or CanvasRenderingContext2D.
+     * @param {object} config - {disableLogs:true, initCallback: function, width: 320, height: 240, frameRate: 200, quality: 10}
+     */
+
+    function GifRecorder(mediaStream, config) {
+        if (typeof GIFEncoder === 'undefined') {
+            var script = document.createElement('script');
+            script.src = 'https://www.webrtc-experiment.com/gif-recorder.js';
+            (document.body || document.documentElement).appendChild(script);
+        }
+
+        config = config || {};
+
+        var isHTMLObject = mediaStream instanceof CanvasRenderingContext2D || mediaStream instanceof HTMLCanvasElement;
+
+        /**
+         * This method records MediaStream.
+         * @method
+         * @memberof GifRecorder
+         * @example
+         * recorder.record();
+         */
+        this.record = function() {
+            if (typeof GIFEncoder === 'undefined') {
+                setTimeout(self.record, 1000);
+                return;
+            }
+
+            if (!isLoadedMetaData) {
+                setTimeout(self.record, 1000);
+                return;
+            }
+
+            if (!isHTMLObject) {
+                if (!config.width) {
+                    config.width = video.offsetWidth || 320;
+                }
+
+                if (!config.height) {
+                    config.height = video.offsetHeight || 240;
+                }
+
+                if (!config.video) {
+                    config.video = {
+                        width: config.width,
+                        height: config.height
+                    };
+                }
+
+                if (!config.canvas) {
+                    config.canvas = {
+                        width: config.width,
+                        height: config.height
+                    };
+                }
+
+                canvas.width = config.canvas.width || 320;
+                canvas.height = config.canvas.height || 240;
+
+                video.width = config.video.width || 320;
+                video.height = config.video.height || 240;
+            }
+
+            // external library to record as GIF images
+            gifEncoder = new GIFEncoder();
+
+            // void setRepeat(int iter) 
+            // Sets the number of times the set of GIF frames should be played. 
+            // Default is 1; 0 means play indefinitely.
+            gifEncoder.setRepeat(0);
+
+            // void setFrameRate(Number fps) 
+            // Sets frame rate in frames per second. 
+            // Equivalent to setDelay(1000/fps).
+            // Using "setDelay" instead of "setFrameRate"
+            gifEncoder.setDelay(config.frameRate || 200);
+
+            // void setQuality(int quality) 
+            // Sets quality of color quantization (conversion of images to the 
+            // maximum 256 colors allowed by the GIF specification). 
+            // Lower values (minimum = 1) produce better colors, 
+            // but slow processing significantly. 10 is the default, 
+            // and produces good color mapping at reasonable speeds. 
+            // Values greater than 20 do not yield significant improvements in speed.
+            gifEncoder.setQuality(config.quality || 10);
+
+            // Boolean start() 
+            // This writes the GIF Header and returns false if it fails.
+            gifEncoder.start();
+
+            if (typeof config.onGifRecordingStarted === 'function') {
+                config.onGifRecordingStarted();
+            }
+
+            function drawVideoFrame(time) {
+                if (self.clearedRecordedData === true) {
+                    return;
+                }
+
+                if (isPausedRecording) {
+                    return setTimeout(function() {
+                        drawVideoFrame(time);
+                    }, 100);
+                }
+
+                lastAnimationFrame = requestAnimationFrame(drawVideoFrame);
+
+                if (typeof lastFrameTime === undefined) {
+                    lastFrameTime = time;
+                }
+
+                // ~10 fps
+                if (time - lastFrameTime < 90) {
+                    return;
+                }
+
+                if (!isHTMLObject && video.paused) {
+                    // via: https://github.com/muaz-khan/WebRTC-Experiment/pull/316
+                    // Tweak for Android Chrome
+                    video.play();
+                }
+
+                if (!isHTMLObject) {
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                }
+
+                if (config.onGifPreview) {
+                    config.onGifPreview(canvas.toDataURL('image/png'));
+                }
+
+                gifEncoder.addFrame(context);
+                lastFrameTime = time;
+            }
+
+            lastAnimationFrame = requestAnimationFrame(drawVideoFrame);
+
+            if (config.initCallback) {
+                config.initCallback();
+            }
+        };
+
+        /**
+         * This method stops recording MediaStream.
+         * @param {function} callback - Callback function, that is used to pass recorded blob back to the callee.
+         * @method
+         * @memberof GifRecorder
+         * @example
+         * recorder.stop(function(blob) {
+         *     img.src = URL.createObjectURL(blob);
+         * });
+         */
+        this.stop = function(callback) {
+            callback = callback || function() {};
+
+            if (lastAnimationFrame) {
+                cancelAnimationFrame(lastAnimationFrame);
+            }
+
+            /**
+             * @property {Blob} blob - The recorded blob object.
+             * @memberof GifRecorder
+             * @example
+             * recorder.stop(function(){
+             *     var blob = recorder.blob;
+             * });
+             */
+            this.blob = new Blob([new Uint8Array(gifEncoder.stream().bin)], {
+                type: 'image/gif'
+            });
+
+            callback(this.blob);
+
+            // bug: find a way to clear old recorded blobs
+            gifEncoder.stream().bin = [];
+        };
+
+        var isPausedRecording = false;
+
+        /**
+         * This method pauses the recording process.
+         * @method
+         * @memberof GifRecorder
+         * @example
+         * recorder.pause();
+         */
+        this.pause = function() {
+            isPausedRecording = true;
+        };
+
+        /**
+         * This method resumes the recording process.
+         * @method
+         * @memberof GifRecorder
+         * @example
+         * recorder.resume();
+         */
+        this.resume = function() {
+            isPausedRecording = false;
+        };
+
+        /**
+         * This method resets currently recorded data.
+         * @method
+         * @memberof GifRecorder
+         * @example
+         * recorder.clearRecordedData();
+         */
+        this.clearRecordedData = function() {
+            self.clearedRecordedData = true;
+            clearRecordedDataCB();
+        };
+
+        function clearRecordedDataCB() {
+            if (gifEncoder) {
+                gifEncoder.stream().bin = [];
+            }
+        }
+
+        // for debugging
+        this.name = 'GifRecorder';
+        this.toString = function() {
+            return this.name;
+        };
+
+        var canvas = document.createElement('canvas');
+        var context = canvas.getContext('2d');
+
+        if (isHTMLObject) {
+            if (mediaStream instanceof CanvasRenderingContext2D) {
+                context = mediaStream;
+                canvas = context.canvas;
+            } else if (mediaStream instanceof HTMLCanvasElement) {
+                context = mediaStream.getContext('2d');
+                canvas = mediaStream;
+            }
+        }
+
+        var isLoadedMetaData = true;
+
+        if (!isHTMLObject) {
+            var video = document.createElement('video');
+            video.muted = true;
+            video.autoplay = true;
+            video.playsInline = true;
+
+            isLoadedMetaData = false;
+            video.onloadedmetadata = function() {
+                isLoadedMetaData = true;
+            };
+
+            setSrcObject(mediaStream, video);
+
+            video.play();
+        }
+
+        var lastAnimationFrame = null;
+        var lastFrameTime;
+
+        var gifEncoder;
+
+        var self = this;
+    }
+
+    if (typeof RecordRTC !== 'undefined') {
+        RecordRTC.GifRecorder = GifRecorder;
+    }
+
+    // Last time updated: 2019-06-21 4:09:42 AM UTC
+
+    // ________________________
+    // MultiStreamsMixer v1.2.2
+
+    // Open-Sourced: https://github.com/muaz-khan/MultiStreamsMixer
+
+    // --------------------------------------------------
+    // Muaz Khan     - www.MuazKhan.com
+    // MIT License   - www.WebRTC-Experiment.com/licence
+    // --------------------------------------------------
+
+    function MultiStreamsMixer(arrayOfMediaStreams, elementClass) {
+
+        var browserFakeUserAgent = 'Fake/5.0 (FakeOS) AppleWebKit/123 (KHTML, like Gecko) Fake/12.3.4567.89 Fake/123.45';
+
+        (function(that) {
+            if (typeof RecordRTC !== 'undefined') {
+                return;
+            }
+
+            if (!that) {
+                return;
+            }
+
+            if (typeof window !== 'undefined') {
+                return;
+            }
+
+            if (typeof commonjsGlobal === 'undefined') {
+                return;
+            }
+
+            commonjsGlobal.navigator = {
+                userAgent: browserFakeUserAgent,
+                getUserMedia: function() {}
+            };
+
+            if (!commonjsGlobal.console) {
+                commonjsGlobal.console = {};
+            }
+
+            if (typeof commonjsGlobal.console.log === 'undefined' || typeof commonjsGlobal.console.error === 'undefined') {
+                commonjsGlobal.console.error = commonjsGlobal.console.log = commonjsGlobal.console.log || function() {
+                    console.log(arguments);
+                };
+            }
+
+            if (typeof document === 'undefined') {
+                /*global document:true */
+                that.document = {
+                    documentElement: {
+                        appendChild: function() {
+                            return '';
+                        }
+                    }
+                };
+
+                document.createElement = document.captureStream = document.mozCaptureStream = function() {
+                    var obj = {
+                        getContext: function() {
+                            return obj;
+                        },
+                        play: function() {},
+                        pause: function() {},
+                        drawImage: function() {},
+                        toDataURL: function() {
+                            return '';
+                        },
+                        style: {}
+                    };
+                    return obj;
+                };
+
+                that.HTMLVideoElement = function() {};
+            }
+
+            if (typeof location === 'undefined') {
+                /*global location:true */
+                that.location = {
+                    protocol: 'file:',
+                    href: '',
+                    hash: ''
+                };
+            }
+
+            if (typeof screen === 'undefined') {
+                /*global screen:true */
+                that.screen = {
+                    width: 0,
+                    height: 0
+                };
+            }
+
+            if (typeof URL === 'undefined') {
+                /*global screen:true */
+                that.URL = {
+                    createObjectURL: function() {
+                        return '';
+                    },
+                    revokeObjectURL: function() {
+                        return '';
+                    }
+                };
+            }
+
+            /*global window:true */
+            that.window = commonjsGlobal;
+        })(typeof commonjsGlobal !== 'undefined' ? commonjsGlobal : null);
+
+        // requires: chrome://flags/#enable-experimental-web-platform-features
+
+        elementClass = elementClass || 'multi-streams-mixer';
+
+        var videos = [];
+        var isStopDrawingFrames = false;
+
+        var canvas = document.createElement('canvas');
+        var context = canvas.getContext('2d');
+        canvas.style.opacity = 0;
+        canvas.style.position = 'absolute';
+        canvas.style.zIndex = -1;
+        canvas.style.top = '-1000em';
+        canvas.style.left = '-1000em';
+        canvas.className = elementClass;
+        (document.body || document.documentElement).appendChild(canvas);
+
+        this.disableLogs = false;
+        this.frameInterval = 10;
+
+        this.width = 360;
+        this.height = 240;
+
+        // use gain node to prevent echo
+        this.useGainNode = true;
+
+        var self = this;
+
+        // _____________________________
+        // Cross-Browser-Declarations.js
+
+        // WebAudio API representer
+        var AudioContext = window.AudioContext;
+
+        if (typeof AudioContext === 'undefined') {
+            if (typeof webkitAudioContext !== 'undefined') {
+                /*global AudioContext:true */
+                AudioContext = webkitAudioContext;
+            }
+
+            if (typeof mozAudioContext !== 'undefined') {
+                /*global AudioContext:true */
+                AudioContext = mozAudioContext;
+            }
+        }
+
+        /*jshint -W079 */
+        var URL = window.URL;
+
+        if (typeof URL === 'undefined' && typeof webkitURL !== 'undefined') {
+            /*global URL:true */
+            URL = webkitURL;
+        }
+
+        if (typeof navigator !== 'undefined' && typeof navigator.getUserMedia === 'undefined') { // maybe window.navigator?
+            if (typeof navigator.webkitGetUserMedia !== 'undefined') {
+                navigator.getUserMedia = navigator.webkitGetUserMedia;
+            }
+
+            if (typeof navigator.mozGetUserMedia !== 'undefined') {
+                navigator.getUserMedia = navigator.mozGetUserMedia;
+            }
+        }
+
+        var MediaStream = window.MediaStream;
+
+        if (typeof MediaStream === 'undefined' && typeof webkitMediaStream !== 'undefined') {
+            MediaStream = webkitMediaStream;
+        }
+
+        /*global MediaStream:true */
+        if (typeof MediaStream !== 'undefined') {
+            // override "stop" method for all browsers
+            if (typeof MediaStream.prototype.stop === 'undefined') {
+                MediaStream.prototype.stop = function() {
+                    this.getTracks().forEach(function(track) {
+                        track.stop();
+                    });
+                };
+            }
+        }
+
+        var Storage = {};
+
+        if (typeof AudioContext !== 'undefined') {
+            Storage.AudioContext = AudioContext;
+        } else if (typeof webkitAudioContext !== 'undefined') {
+            Storage.AudioContext = webkitAudioContext;
+        }
+
+        function setSrcObject(stream, element) {
+            if ('srcObject' in element) {
+                element.srcObject = stream;
+            } else if ('mozSrcObject' in element) {
+                element.mozSrcObject = stream;
+            } else {
+                element.srcObject = stream;
+            }
+        }
+
+        this.startDrawingFrames = function() {
+            drawVideosToCanvas();
+        };
+
+        function drawVideosToCanvas() {
+            if (isStopDrawingFrames) {
+                return;
+            }
+
+            var videosLength = videos.length;
+
+            var fullcanvas = false;
+            var remaining = [];
+            videos.forEach(function(video) {
+                if (!video.stream) {
+                    video.stream = {};
+                }
+
+                if (video.stream.fullcanvas) {
+                    fullcanvas = video;
+                } else {
+                    // todo: video.stream.active or video.stream.live to fix blank frames issues?
+                    remaining.push(video);
+                }
+            });
+
+            if (fullcanvas) {
+                canvas.width = fullcanvas.stream.width;
+                canvas.height = fullcanvas.stream.height;
+            } else if (remaining.length) {
+                canvas.width = videosLength > 1 ? remaining[0].width * 2 : remaining[0].width;
+
+                var height = 1;
+                if (videosLength === 3 || videosLength === 4) {
+                    height = 2;
+                }
+                if (videosLength === 5 || videosLength === 6) {
+                    height = 3;
+                }
+                if (videosLength === 7 || videosLength === 8) {
+                    height = 4;
+                }
+                if (videosLength === 9 || videosLength === 10) {
+                    height = 5;
+                }
+                canvas.height = remaining[0].height * height;
+            } else {
+                canvas.width = self.width || 360;
+                canvas.height = self.height || 240;
+            }
+
+            if (fullcanvas && fullcanvas instanceof HTMLVideoElement) {
+                drawImage(fullcanvas);
+            }
+
+            remaining.forEach(function(video, idx) {
+                drawImage(video, idx);
+            });
+
+            setTimeout(drawVideosToCanvas, self.frameInterval);
+        }
+
+        function drawImage(video, idx) {
+            if (isStopDrawingFrames) {
+                return;
+            }
+
+            var x = 0;
+            var y = 0;
+            var width = video.width;
+            var height = video.height;
+
+            if (idx === 1) {
+                x = video.width;
+            }
+
+            if (idx === 2) {
+                y = video.height;
+            }
+
+            if (idx === 3) {
+                x = video.width;
+                y = video.height;
+            }
+
+            if (idx === 4) {
+                y = video.height * 2;
+            }
+
+            if (idx === 5) {
+                x = video.width;
+                y = video.height * 2;
+            }
+
+            if (idx === 6) {
+                y = video.height * 3;
+            }
+
+            if (idx === 7) {
+                x = video.width;
+                y = video.height * 3;
+            }
+
+            if (typeof video.stream.left !== 'undefined') {
+                x = video.stream.left;
+            }
+
+            if (typeof video.stream.top !== 'undefined') {
+                y = video.stream.top;
+            }
+
+            if (typeof video.stream.width !== 'undefined') {
+                width = video.stream.width;
+            }
+
+            if (typeof video.stream.height !== 'undefined') {
+                height = video.stream.height;
+            }
+
+            context.drawImage(video, x, y, width, height);
+
+            if (typeof video.stream.onRender === 'function') {
+                video.stream.onRender(context, x, y, width, height, idx);
+            }
+        }
+
+        function getMixedStream() {
+            isStopDrawingFrames = false;
+            var mixedVideoStream = getMixedVideoStream();
+
+            var mixedAudioStream = getMixedAudioStream();
+            if (mixedAudioStream) {
+                mixedAudioStream.getTracks().filter(function(t) {
+                    return t.kind === 'audio';
+                }).forEach(function(track) {
+                    mixedVideoStream.addTrack(track);
+                });
+            }
+            arrayOfMediaStreams.forEach(function(stream) {
+                if (stream.fullcanvas) ;
+            });
+
+            // mixedVideoStream.prototype.appendStreams = appendStreams;
+            // mixedVideoStream.prototype.resetVideoStreams = resetVideoStreams;
+            // mixedVideoStream.prototype.clearRecordedData = clearRecordedData;
+
+            return mixedVideoStream;
+        }
+
+        function getMixedVideoStream() {
+            resetVideoStreams();
+
+            var capturedStream;
+
+            if ('captureStream' in canvas) {
+                capturedStream = canvas.captureStream();
+            } else if ('mozCaptureStream' in canvas) {
+                capturedStream = canvas.mozCaptureStream();
+            } else if (!self.disableLogs) {
+                console.error('Upgrade to latest Chrome or otherwise enable this flag: chrome://flags/#enable-experimental-web-platform-features');
+            }
+
+            var videoStream = new MediaStream();
+
+            capturedStream.getTracks().filter(function(t) {
+                return t.kind === 'video';
+            }).forEach(function(track) {
+                videoStream.addTrack(track);
+            });
+
+            canvas.stream = videoStream;
+
+            return videoStream;
+        }
+
+        function getMixedAudioStream() {
+            // via: @pehrsons
+            if (!Storage.AudioContextConstructor) {
+                Storage.AudioContextConstructor = new Storage.AudioContext();
+            }
+
+            self.audioContext = Storage.AudioContextConstructor;
+
+            self.audioSources = [];
+
+            if (self.useGainNode === true) {
+                self.gainNode = self.audioContext.createGain();
+                self.gainNode.connect(self.audioContext.destination);
+                self.gainNode.gain.value = 0; // don't hear self
+            }
+
+            var audioTracksLength = 0;
+            arrayOfMediaStreams.forEach(function(stream) {
+                if (!stream.getTracks().filter(function(t) {
+                        return t.kind === 'audio';
+                    }).length) {
+                    return;
+                }
+
+                audioTracksLength++;
+
+                var audioSource = self.audioContext.createMediaStreamSource(stream);
+
+                if (self.useGainNode === true) {
+                    audioSource.connect(self.gainNode);
+                }
+
+                self.audioSources.push(audioSource);
+            });
+
+            if (!audioTracksLength) {
+                // because "self.audioContext" is not initialized
+                // that's why we've to ignore rest of the code
+                return;
+            }
+
+            self.audioDestination = self.audioContext.createMediaStreamDestination();
+            self.audioSources.forEach(function(audioSource) {
+                audioSource.connect(self.audioDestination);
+            });
+            return self.audioDestination.stream;
+        }
+
+        function getVideo(stream) {
+            var video = document.createElement('video');
+
+            setSrcObject(stream, video);
+
+            video.className = elementClass;
+
+            video.muted = true;
+            video.volume = 0;
+
+            video.width = stream.width || self.width || 360;
+            video.height = stream.height || self.height || 240;
+
+            video.play();
+
+            return video;
+        }
+
+        this.appendStreams = function(streams) {
+            if (!streams) {
+                throw 'First parameter is required.';
+            }
+
+            if (!(streams instanceof Array)) {
+                streams = [streams];
+            }
+
+            streams.forEach(function(stream) {
+                var newStream = new MediaStream();
+
+                if (stream.getTracks().filter(function(t) {
+                        return t.kind === 'video';
+                    }).length) {
+                    var video = getVideo(stream);
+                    video.stream = stream;
+                    videos.push(video);
+
+                    newStream.addTrack(stream.getTracks().filter(function(t) {
+                        return t.kind === 'video';
+                    })[0]);
+                }
+
+                if (stream.getTracks().filter(function(t) {
+                        return t.kind === 'audio';
+                    }).length) {
+                    var audioSource = self.audioContext.createMediaStreamSource(stream);
+                    self.audioDestination = self.audioContext.createMediaStreamDestination();
+                    audioSource.connect(self.audioDestination);
+
+                    newStream.addTrack(self.audioDestination.stream.getTracks().filter(function(t) {
+                        return t.kind === 'audio';
+                    })[0]);
+                }
+
+                arrayOfMediaStreams.push(newStream);
+            });
+        };
+
+        this.releaseStreams = function() {
+            videos = [];
+            isStopDrawingFrames = true;
+
+            if (self.gainNode) {
+                self.gainNode.disconnect();
+                self.gainNode = null;
+            }
+
+            if (self.audioSources.length) {
+                self.audioSources.forEach(function(source) {
+                    source.disconnect();
+                });
+                self.audioSources = [];
+            }
+
+            if (self.audioDestination) {
+                self.audioDestination.disconnect();
+                self.audioDestination = null;
+            }
+
+            if (self.audioContext) {
+                self.audioContext.close();
+            }
+
+            self.audioContext = null;
+
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (canvas.stream) {
+                canvas.stream.stop();
+                canvas.stream = null;
+            }
+        };
+
+        this.resetVideoStreams = function(streams) {
+            if (streams && !(streams instanceof Array)) {
+                streams = [streams];
+            }
+
+            resetVideoStreams(streams);
+        };
+
+        function resetVideoStreams(streams) {
+            videos = [];
+            streams = streams || arrayOfMediaStreams;
+
+            // via: @adrian-ber
+            streams.forEach(function(stream) {
+                if (!stream.getTracks().filter(function(t) {
+                        return t.kind === 'video';
+                    }).length) {
+                    return;
+                }
+
+                var video = getVideo(stream);
+                video.stream = stream;
+                videos.push(video);
+            });
+        }
+
+        // for debugging
+        this.name = 'MultiStreamsMixer';
+        this.toString = function() {
+            return this.name;
+        };
+
+        this.getMixedStream = getMixedStream;
+
+    }
+
+    if (typeof RecordRTC === 'undefined') {
+        {
+            module.exports = MultiStreamsMixer;
+        }
+    }
+
+    // ______________________
+    // MultiStreamRecorder.js
+
+    /*
+     * Video conference recording, using captureStream API along with WebAudio and Canvas2D API.
+     */
+
+    /**
+     * MultiStreamRecorder can record multiple videos in single container.
+     * @summary Multi-videos recorder.
+     * @license {@link https://github.com/muaz-khan/RecordRTC/blob/master/LICENSE|MIT}
+     * @author {@link https://MuazKhan.com|Muaz Khan}
+     * @typedef MultiStreamRecorder
+     * @class
+     * @example
+     * var options = {
+     *     mimeType: 'video/webm'
+     * }
+     * var recorder = new MultiStreamRecorder(ArrayOfMediaStreams, options);
+     * recorder.record();
+     * recorder.stop(function(blob) {
+     *     video.src = URL.createObjectURL(blob);
+     *
+     *     // or
+     *     var blob = recorder.blob;
+     * });
+     * @see {@link https://github.com/muaz-khan/RecordRTC|RecordRTC Source Code}
+     * @param {MediaStreams} mediaStreams - Array of MediaStreams.
+     * @param {object} config - {disableLogs:true, frameInterval: 1, mimeType: "video/webm"}
+     */
+
+    function MultiStreamRecorder(arrayOfMediaStreams, options) {
+        arrayOfMediaStreams = arrayOfMediaStreams || [];
+        var self = this;
+
+        var mixer;
+        var mediaRecorder;
+
+        options = options || {
+            elementClass: 'multi-streams-mixer',
+            mimeType: 'video/webm',
+            video: {
+                width: 360,
+                height: 240
+            }
+        };
+
+        if (!options.frameInterval) {
+            options.frameInterval = 10;
+        }
+
+        if (!options.video) {
+            options.video = {};
+        }
+
+        if (!options.video.width) {
+            options.video.width = 360;
+        }
+
+        if (!options.video.height) {
+            options.video.height = 240;
+        }
+
+        /**
+         * This method records all MediaStreams.
+         * @method
+         * @memberof MultiStreamRecorder
+         * @example
+         * recorder.record();
+         */
+        this.record = function() {
+            // github/muaz-khan/MultiStreamsMixer
+            mixer = new MultiStreamsMixer(arrayOfMediaStreams, options.elementClass || 'multi-streams-mixer');
+
+            if (getAllVideoTracks().length) {
+                mixer.frameInterval = options.frameInterval || 10;
+                mixer.width = options.video.width || 360;
+                mixer.height = options.video.height || 240;
+                mixer.startDrawingFrames();
+            }
+
+            if (options.previewStream && typeof options.previewStream === 'function') {
+                options.previewStream(mixer.getMixedStream());
+            }
+
+            // record using MediaRecorder API
+            mediaRecorder = new MediaStreamRecorder(mixer.getMixedStream(), options);
+            mediaRecorder.record();
+        };
+
+        function getAllVideoTracks() {
+            var tracks = [];
+            arrayOfMediaStreams.forEach(function(stream) {
+                getTracks(stream, 'video').forEach(function(track) {
+                    tracks.push(track);
+                });
+            });
+            return tracks;
+        }
+
+        /**
+         * This method stops recording MediaStream.
+         * @param {function} callback - Callback function, that is used to pass recorded blob back to the callee.
+         * @method
+         * @memberof MultiStreamRecorder
+         * @example
+         * recorder.stop(function(blob) {
+         *     video.src = URL.createObjectURL(blob);
+         * });
+         */
+        this.stop = function(callback) {
+            if (!mediaRecorder) {
+                return;
+            }
+
+            mediaRecorder.stop(function(blob) {
+                self.blob = blob;
+
+                callback(blob);
+
+                self.clearRecordedData();
+            });
+        };
+
+        /**
+         * This method pauses the recording process.
+         * @method
+         * @memberof MultiStreamRecorder
+         * @example
+         * recorder.pause();
+         */
+        this.pause = function() {
+            if (mediaRecorder) {
+                mediaRecorder.pause();
+            }
+        };
+
+        /**
+         * This method resumes the recording process.
+         * @method
+         * @memberof MultiStreamRecorder
+         * @example
+         * recorder.resume();
+         */
+        this.resume = function() {
+            if (mediaRecorder) {
+                mediaRecorder.resume();
+            }
+        };
+
+        /**
+         * This method resets currently recorded data.
+         * @method
+         * @memberof MultiStreamRecorder
+         * @example
+         * recorder.clearRecordedData();
+         */
+        this.clearRecordedData = function() {
+            if (mediaRecorder) {
+                mediaRecorder.clearRecordedData();
+                mediaRecorder = null;
+            }
+
+            if (mixer) {
+                mixer.releaseStreams();
+                mixer = null;
+            }
+        };
+
+        /**
+         * Add extra media-streams to existing recordings.
+         * @method
+         * @memberof MultiStreamRecorder
+         * @param {MediaStreams} mediaStreams - Array of MediaStreams
+         * @example
+         * recorder.addStreams([newAudioStream, newVideoStream]);
+         */
+        this.addStreams = function(streams) {
+            if (!streams) {
+                throw 'First parameter is required.';
+            }
+
+            if (!(streams instanceof Array)) {
+                streams = [streams];
+            }
+
+            arrayOfMediaStreams.concat(streams);
+
+            if (!mediaRecorder || !mixer) {
+                return;
+            }
+
+            mixer.appendStreams(streams);
+
+            if (options.previewStream && typeof options.previewStream === 'function') {
+                options.previewStream(mixer.getMixedStream());
+            }
+        };
+
+        /**
+         * Reset videos during live recording. Replace old videos e.g. replace cameras with full-screen.
+         * @method
+         * @memberof MultiStreamRecorder
+         * @param {MediaStreams} mediaStreams - Array of MediaStreams
+         * @example
+         * recorder.resetVideoStreams([newVideo1, newVideo2]);
+         */
+        this.resetVideoStreams = function(streams) {
+            if (!mixer) {
+                return;
+            }
+
+            if (streams && !(streams instanceof Array)) {
+                streams = [streams];
+            }
+
+            mixer.resetVideoStreams(streams);
+        };
+
+        /**
+         * Returns MultiStreamsMixer
+         * @method
+         * @memberof MultiStreamRecorder
+         * @example
+         * let mixer = recorder.getMixer();
+         * mixer.appendStreams([newStream]);
+         */
+        this.getMixer = function() {
+            return mixer;
+        };
+
+        // for debugging
+        this.name = 'MultiStreamRecorder';
+        this.toString = function() {
+            return this.name;
+        };
+    }
+
+    if (typeof RecordRTC !== 'undefined') {
+        RecordRTC.MultiStreamRecorder = MultiStreamRecorder;
+    }
+
+    // _____________________
+    // RecordRTC.promises.js
+
+    /**
+     * RecordRTCPromisesHandler adds promises support in {@link RecordRTC}. Try a {@link https://github.com/muaz-khan/RecordRTC/blob/master/simple-demos/RecordRTCPromisesHandler.html|demo here}
+     * @summary Promises for {@link RecordRTC}
+     * @license {@link https://github.com/muaz-khan/RecordRTC/blob/master/LICENSE|MIT}
+     * @author {@link https://MuazKhan.com|Muaz Khan}
+     * @typedef RecordRTCPromisesHandler
+     * @class
+     * @example
+     * var recorder = new RecordRTCPromisesHandler(mediaStream, options);
+     * recorder.startRecording()
+     *         .then(successCB)
+     *         .catch(errorCB);
+     * // Note: You can access all RecordRTC API using "recorder.recordRTC" e.g. 
+     * recorder.recordRTC.onStateChanged = function(state) {};
+     * recorder.recordRTC.setRecordingDuration(5000);
+     * @see {@link https://github.com/muaz-khan/RecordRTC|RecordRTC Source Code}
+     * @param {MediaStream} mediaStream - Single media-stream object, array of media-streams, html-canvas-element, etc.
+     * @param {object} config - {type:"video", recorderType: MediaStreamRecorder, disableLogs: true, numberOfAudioChannels: 1, bufferSize: 0, sampleRate: 0, video: HTMLVideoElement, etc.}
+     * @throws Will throw an error if "new" keyword is not used to initiate "RecordRTCPromisesHandler". Also throws error if first argument "MediaStream" is missing.
+     * @requires {@link RecordRTC}
+     */
+
+    function RecordRTCPromisesHandler(mediaStream, options) {
+        if (!this) {
+            throw 'Use "new RecordRTCPromisesHandler()"';
+        }
+
+        if (typeof mediaStream === 'undefined') {
+            throw 'First argument "MediaStream" is required.';
+        }
+
+        var self = this;
+
+        /**
+         * @property {Blob} blob - Access/reach the native {@link RecordRTC} object.
+         * @memberof RecordRTCPromisesHandler
+         * @example
+         * let internal = recorder.recordRTC.getInternalRecorder();
+         * alert(internal instanceof MediaStreamRecorder);
+         * recorder.recordRTC.onStateChanged = function(state) {};
+         */
+        self.recordRTC = new RecordRTC(mediaStream, options);
+
+        /**
+         * This method records MediaStream.
+         * @method
+         * @memberof RecordRTCPromisesHandler
+         * @example
+         * recorder.startRecording()
+         *         .then(successCB)
+         *         .catch(errorCB);
+         */
+        this.startRecording = function() {
+            return new Promise(function(resolve, reject) {
+                try {
+                    self.recordRTC.startRecording();
+                    resolve();
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        };
+
+        /**
+         * This method stops the recording.
+         * @method
+         * @memberof RecordRTCPromisesHandler
+         * @example
+         * recorder.stopRecording().then(function() {
+         *     var blob = recorder.getBlob();
+         * }).catch(errorCB);
+         */
+        this.stopRecording = function() {
+            return new Promise(function(resolve, reject) {
+                try {
+                    self.recordRTC.stopRecording(function(url) {
+                        self.blob = self.recordRTC.getBlob();
+
+                        if (!self.blob || !self.blob.size) {
+                            reject('Empty blob.', self.blob);
+                            return;
+                        }
+
+                        resolve(url);
+                    });
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        };
+
+        /**
+         * This method pauses the recording. You can resume recording using "resumeRecording" method.
+         * @method
+         * @memberof RecordRTCPromisesHandler
+         * @example
+         * recorder.pauseRecording()
+         *         .then(successCB)
+         *         .catch(errorCB);
+         */
+        this.pauseRecording = function() {
+            return new Promise(function(resolve, reject) {
+                try {
+                    self.recordRTC.pauseRecording();
+                    resolve();
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        };
+
+        /**
+         * This method resumes the recording.
+         * @method
+         * @memberof RecordRTCPromisesHandler
+         * @example
+         * recorder.resumeRecording()
+         *         .then(successCB)
+         *         .catch(errorCB);
+         */
+        this.resumeRecording = function() {
+            return new Promise(function(resolve, reject) {
+                try {
+                    self.recordRTC.resumeRecording();
+                    resolve();
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        };
+
+        /**
+         * This method returns data-url for the recorded blob.
+         * @method
+         * @memberof RecordRTCPromisesHandler
+         * @example
+         * recorder.stopRecording().then(function() {
+         *     recorder.getDataURL().then(function(dataURL) {
+         *         window.open(dataURL);
+         *     }).catch(errorCB);;
+         * }).catch(errorCB);
+         */
+        this.getDataURL = function(callback) {
+            return new Promise(function(resolve, reject) {
+                try {
+                    self.recordRTC.getDataURL(function(dataURL) {
+                        resolve(dataURL);
+                    });
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        };
+
+        /**
+         * This method returns the recorded blob.
+         * @method
+         * @memberof RecordRTCPromisesHandler
+         * @example
+         * recorder.stopRecording().then(function() {
+         *     recorder.getBlob().then(function(blob) {})
+         * }).catch(errorCB);
+         */
+        this.getBlob = function() {
+            return new Promise(function(resolve, reject) {
+                try {
+                    resolve(self.recordRTC.getBlob());
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        };
+
+        /**
+         * This method returns the internal recording object.
+         * @method
+         * @memberof RecordRTCPromisesHandler
+         * @example
+         * let internalRecorder = await recorder.getInternalRecorder();
+         * if(internalRecorder instanceof MultiStreamRecorder) {
+         *     internalRecorder.addStreams([newAudioStream]);
+         *     internalRecorder.resetVideoStreams([screenStream]);
+         * }
+         * @returns {Object} 
+         */
+        this.getInternalRecorder = function() {
+            return new Promise(function(resolve, reject) {
+                try {
+                    resolve(self.recordRTC.getInternalRecorder());
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        };
+
+        /**
+         * This method resets the recorder. So that you can reuse single recorder instance many times.
+         * @method
+         * @memberof RecordRTCPromisesHandler
+         * @example
+         * await recorder.reset();
+         * recorder.startRecording(); // record again
+         */
+        this.reset = function() {
+            return new Promise(function(resolve, reject) {
+                try {
+                    resolve(self.recordRTC.reset());
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        };
+
+        /**
+         * Destroy RecordRTC instance. Clear all recorders and objects.
+         * @method
+         * @memberof RecordRTCPromisesHandler
+         * @example
+         * recorder.destroy().then(successCB).catch(errorCB);
+         */
+        this.destroy = function() {
+            return new Promise(function(resolve, reject) {
+                try {
+                    resolve(self.recordRTC.destroy());
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        };
+
+        /**
+         * Get recorder's readonly state.
+         * @method
+         * @memberof RecordRTCPromisesHandler
+         * @example
+         * let state = await recorder.getState();
+         * // or
+         * recorder.getState().then(state => { console.log(state); })
+         * @returns {String} Returns recording state.
+         */
+        this.getState = function() {
+            return new Promise(function(resolve, reject) {
+                try {
+                    resolve(self.recordRTC.getState());
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        };
+
+        /**
+         * @property {Blob} blob - Recorded data as "Blob" object.
+         * @memberof RecordRTCPromisesHandler
+         * @example
+         * await recorder.stopRecording();
+         * let blob = recorder.getBlob(); // or "recorder.recordRTC.blob"
+         * invokeSaveAsDialog(blob);
+         */
+        this.blob = null;
+
+        /**
+         * RecordRTC version number
+         * @property {String} version - Release version number.
+         * @memberof RecordRTCPromisesHandler
+         * @static
+         * @readonly
+         * @example
+         * alert(recorder.version);
+         */
+        this.version = '5.6.2';
+    }
+
+    if (typeof RecordRTC !== 'undefined') {
+        RecordRTC.RecordRTCPromisesHandler = RecordRTCPromisesHandler;
+    }
+
+    // ______________________
+    // WebAssemblyRecorder.js
+
+    /**
+     * WebAssemblyRecorder lets you create webm videos in JavaScript via WebAssembly. The library consumes raw RGBA32 buffers (4 bytes per pixel) and turns them into a webm video with the given framerate and quality. This makes it compatible out-of-the-box with ImageData from a CANVAS. With realtime mode you can also use webm-wasm for streaming webm videos.
+     * @summary Video recording feature in Chrome, Firefox and maybe Edge.
+     * @license {@link https://github.com/muaz-khan/RecordRTC/blob/master/LICENSE|MIT}
+     * @author {@link https://MuazKhan.com|Muaz Khan}
+     * @typedef WebAssemblyRecorder
+     * @class
+     * @example
+     * var recorder = new WebAssemblyRecorder(mediaStream);
+     * recorder.record();
+     * recorder.stop(function(blob) {
+     *     video.src = URL.createObjectURL(blob);
+     * });
+     * @see {@link https://github.com/muaz-khan/RecordRTC|RecordRTC Source Code}
+     * @param {MediaStream} mediaStream - MediaStream object fetched using getUserMedia API or generated using captureStreamUntilEnded or WebAudio API.
+     * @param {object} config - {webAssemblyPath:'webm-wasm.wasm',workerPath: 'webm-worker.js', frameRate: 30, width: 1920, height: 1080, bitrate: 1024, realtime: true}
+     */
+    function WebAssemblyRecorder(stream, config) {
+        // based on: github.com/GoogleChromeLabs/webm-wasm
+
+        if (typeof ReadableStream === 'undefined' || typeof WritableStream === 'undefined') {
+            // because it fixes readable/writable streams issues
+            console.error('Following polyfill is strongly recommended: https://unpkg.com/@mattiasbuelens/web-streams-polyfill/dist/polyfill.min.js');
+        }
+
+        config = config || {};
+
+        config.width = config.width || 640;
+        config.height = config.height || 480;
+        config.frameRate = config.frameRate || 30;
+        config.bitrate = config.bitrate || 1200;
+        config.realtime = config.realtime || true;
+
+        var finished;
+
+        function cameraStream() {
+            return new ReadableStream({
+                start: function(controller) {
+                    var cvs = document.createElement('canvas');
+                    var video = document.createElement('video');
+                    var first = true;
+                    video.srcObject = stream;
+                    video.muted = true;
+                    video.height = config.height;
+                    video.width = config.width;
+                    video.volume = 0;
+                    video.onplaying = function() {
+                        cvs.width = config.width;
+                        cvs.height = config.height;
+                        var ctx = cvs.getContext('2d');
+                        var frameTimeout = 1000 / config.frameRate;
+                        var cameraTimer = setInterval(function f() {
+                            if (finished) {
+                                clearInterval(cameraTimer);
+                                controller.close();
+                            }
+
+                            if (first) {
+                                first = false;
+                                if (config.onVideoProcessStarted) {
+                                    config.onVideoProcessStarted();
+                                }
+                            }
+
+                            ctx.drawImage(video, 0, 0);
+                            if (controller._controlledReadableStream.state !== 'closed') {
+                                try {
+                                    controller.enqueue(
+                                        ctx.getImageData(0, 0, config.width, config.height)
+                                    );
+                                } catch (e) {}
+                            }
+                        }, frameTimeout);
+                    };
+                    video.play();
+                }
+            });
+        }
+
+        var worker;
+
+        function startRecording(stream, buffer) {
+            if (!config.workerPath && !buffer) {
+                finished = false;
+
+                // is it safe to use @latest ?
+
+                fetch(
+                    'https://unpkg.com/webm-wasm@latest/dist/webm-worker.js'
+                ).then(function(r) {
+                    r.arrayBuffer().then(function(buffer) {
+                        startRecording(stream, buffer);
+                    });
+                });
+                return;
+            }
+
+            if (!config.workerPath && buffer instanceof ArrayBuffer) {
+                var blob = new Blob([buffer], {
+                    type: 'text/javascript'
+                });
+                config.workerPath = URL.createObjectURL(blob);
+            }
+
+            if (!config.workerPath) {
+                console.error('workerPath parameter is missing.');
+            }
+
+            worker = new Worker(config.workerPath);
+
+            worker.postMessage(config.webAssemblyPath || 'https://unpkg.com/webm-wasm@latest/dist/webm-wasm.wasm');
+            worker.addEventListener('message', function(event) {
+                if (event.data === 'READY') {
+                    worker.postMessage({
+                        width: config.width,
+                        height: config.height,
+                        bitrate: config.bitrate || 1200,
+                        timebaseDen: config.frameRate || 30,
+                        realtime: config.realtime
+                    });
+
+                    cameraStream().pipeTo(new WritableStream({
+                        write: function(image) {
+                            if (finished) {
+                                console.error('Got image, but recorder is finished!');
+                                return;
+                            }
+
+                            worker.postMessage(image.data.buffer, [image.data.buffer]);
+                        }
+                    }));
+                } else if (!!event.data) {
+                    if (!isPaused) {
+                        arrayOfBuffers.push(event.data);
+                    }
+                }
+            });
+        }
+
+        /**
+         * This method records video.
+         * @method
+         * @memberof WebAssemblyRecorder
+         * @example
+         * recorder.record();
+         */
+        this.record = function() {
+            arrayOfBuffers = [];
+            isPaused = false;
+            this.blob = null;
+            startRecording(stream);
+
+            if (typeof config.initCallback === 'function') {
+                config.initCallback();
+            }
+        };
+
+        var isPaused;
+
+        /**
+         * This method pauses the recording process.
+         * @method
+         * @memberof WebAssemblyRecorder
+         * @example
+         * recorder.pause();
+         */
+        this.pause = function() {
+            isPaused = true;
+        };
+
+        /**
+         * This method resumes the recording process.
+         * @method
+         * @memberof WebAssemblyRecorder
+         * @example
+         * recorder.resume();
+         */
+        this.resume = function() {
+            isPaused = false;
+        };
+
+        function terminate(callback) {
+            if (!worker) {
+                if (callback) {
+                    callback();
+                }
+
+                return;
+            }
+
+            // Wait for null event data to indicate that the encoding is complete
+            worker.addEventListener('message', function(event) {
+                if (event.data === null) {
+                    worker.terminate();
+                    worker = null;
+
+                    if (callback) {
+                        callback();
+                    }
+                }
+            });
+
+            worker.postMessage(null);
+        }
+
+        var arrayOfBuffers = [];
+
+        /**
+         * This method stops recording video.
+         * @param {function} callback - Callback function, that is used to pass recorded blob back to the callee.
+         * @method
+         * @memberof WebAssemblyRecorder
+         * @example
+         * recorder.stop(function(blob) {
+         *     video.src = URL.createObjectURL(blob);
+         * });
+         */
+        this.stop = function(callback) {
+            finished = true;
+
+            var recorder = this;
+
+            terminate(function() {
+                recorder.blob = new Blob(arrayOfBuffers, {
+                    type: 'video/webm'
+                });
+
+                callback(recorder.blob);
+            });
+        };
+
+        // for debugging
+        this.name = 'WebAssemblyRecorder';
+        this.toString = function() {
+            return this.name;
+        };
+
+        /**
+         * This method resets currently recorded data.
+         * @method
+         * @memberof WebAssemblyRecorder
+         * @example
+         * recorder.clearRecordedData();
+         */
+        this.clearRecordedData = function() {
+            arrayOfBuffers = [];
+            isPaused = false;
+            this.blob = null;
+
+            // todo: if recording-ON then STOP it first
+        };
+
+        /**
+         * @property {Blob} blob - The recorded blob object.
+         * @memberof WebAssemblyRecorder
+         * @example
+         * recorder.stop(function(){
+         *     var blob = recorder.blob;
+         * });
+         */
+        this.blob = null;
+    }
+
+    if (typeof RecordRTC !== 'undefined') {
+        RecordRTC.WebAssemblyRecorder = WebAssemblyRecorder;
+    }
+    });
+
     class RecordRTCLoader extends Emitter {
       constructor(player) {
         super();
@@ -1679,7 +7846,7 @@
           const stream = this.player.video.$videoElement.captureStream(25);
           const audioStream = this.player.audio.mediaStreamAudioDestinationNode.stream;
           stream.addTrack(audioStream.getAudioTracks()[0]);
-          this.recorder = RecordRTC__default["default"](stream, options);
+          this.recorder = RecordRTC_1(stream, options);
         } catch (e) {
           debug.error('Recorder', e);
           this.emit(EVENTS.recordCreateError);
@@ -2213,6 +8380,7 @@
                                           <div class="jessibuca-volume-panel">
                                                  <div class="jessibuca-volume-panel-handle"></div>
                                           </div>
+                                          <div class="jessibuca-volume-panel-text"></div>
                                      </div>
                                  </div>
                              ` : ''}
@@ -2255,6 +8423,9 @@
       });
       Object.defineProperty(control, '$volumePanelWrap', {
         value: player.$container.querySelector('.jessibuca-volume-panel-wrap')
+      });
+      Object.defineProperty(control, '$volumePanelText', {
+        value: player.$container.querySelector('.jessibuca-volume-panel-text')
       });
       Object.defineProperty(control, '$volumePanel', {
         value: player.$container.querySelector('.jessibuca-volume-panel')
@@ -2341,6 +8512,8 @@
             setStyle(control.$volumeOff, 'display', 'none');
           }
         }
+
+        control.$volumePanelText && (control.$volumePanelText.innerHTML = parseInt(percentage * 100));
       }
 
       player.on(EVENTS.volumechange, () => {
@@ -2533,7 +8706,7 @@
       }
     }
 
-    var css_248z$1 = "@keyframes rotation{0%{-webkit-transform:rotate(0deg)}to{-webkit-transform:rotate(1turn)}}.jessibuca-container .jessibuca-icon{cursor:pointer;width:16px;height:16px}.jessibuca-container .jessibuca-poster{position:absolute;z-index:10;left:0;top:0;right:0;bottom:0;height:100%;width:100%;background-position:50%;background-repeat:no-repeat;background-size:contain;pointer-events:none}.jessibuca-container .jessibuca-play-big{position:absolute;display:none;height:100%;width:100%;background:rgba(0,0,0,.4);background-image:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACgklEQVRoQ+3ZPYsTQRjA8eeZZCFlWttAwCIkZOaZJt8hlvkeHrlccuAFT6wEG0FQOeQQLCIWih6chQgKgkkKIyqKCVYip54IWmiQkTmyYhFvd3Zn3yDb7szu/7cv7GaDkPEFM94PK0DSZ9DzDAyHw7uI2HRDlVJX5/N5r9FoHCYdr/fvCRiNRmpJ6AEidoUQ15NG+AH8BgD2n9AHANAmohdJQfwAfgGA4xF4bjabnW21Whob62ILoKNfAsAGEd2PU2ATcNSNiDf0/cE5/xAHxDpgEf0NADaJ6HLUiKgAbvcjpdSGlPJZVJCoAUfdSqkLxWLxTLlc/mkbEgtgET1TSnWklLdtIuIEuN23crlcp16vv7cBSQKgu38AwBYRXQyLSArg3hsjRDxNRE+CQhIF/BN9qVAobFYqle+mkLQAdLd+8K0T0U0TRJoAbvc9fVkJId75gaQRoLv1C2STiPTb7rFLWgE6+g0RncwyYEJEtawCvjDGmpzzp5kD6NfxfD7frtVqB17xen2a7oG3ALBm+oMoFQBEPD+dTvtBfpImDXjIGFvjnD/3c7ksG5MU4HDxWeZa0HB3XhKAXcdxOn5vUi9gnIDXSqm2lHLPK8pkfVyAbSLqm4T5HRs1YB8RO0KIid8g03FRAT4rpbpSyh3TINPxUQB2GGM9zvkn05gg420CJovLZT9ISNA5tgB9ItoOGhFmnh/AcZ/X9xhj65zzV2Eiwsz1A1j2B8dHAOgS0W6YnduY6wkYj8d3lFKn/j66Ea84jtOrVqtfbQSE3YYnYDAY5Eql0hYAnNDv6kKIx2F3anO+J8DmzqLY1goQxVE12ebqDJgcrSjGrs5AFEfVZJt/AF0m+jHzUTtnAAAAAElFTkSuQmCC\");background-repeat:no-repeat;background-position:50%;cursor:pointer;background-size:48px 48px}.jessibuca-container .jessibuca-play-big:hover{background-image:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACEElEQVRoQ+2ZXStEQRjH/3/yIXwDdz7J+i7kvdisXCk3SiFJW27kglBcSFFKbqwQSa4krykuKB09Naf2Yndn5jgzc06d53Znd36/mWfeniVyHsw5PwqB0DOonYEoijYBlOpAFwCMkHwLDS/9mwhEDUCfAAyTXA4tYSLwC6CtCegegH6S56FETAR+AHRoACcBTJAUWa+RloBAXwAYIrnt0yBNgZi7qtbHgw8RFwLC/QFglOScawlXAjH3gUqrE1cirgVi7mkAYyS/0xbxJSDcdwAGSa6nKeFTIOZeUyL3aYiEEBDuLwDjJGf+KxFKIOY+BdBL8iipSGiBmHtWbbuftiJZERBuOfgGSK7aSGRJIObeUml1ayKSRQHhlgtkiaTcdltGVgUE+ppkV54FaiS78yrwqlLoOI8Cch2XV548W7WRpTVwA6DP9kGUFYEpAOUkT9LQAvtq1M+0udKkQSgBqSlJWWYxKXj8vRACK+o6bbRIdYI+Ba7U7rKjg7L53JdAhWTZBsy0rWuBXZUuNVMg23auBF7UIl2yBbJt70JAoKV6/WwLk6R9mgKSJlJ1kLTxFmkJyCla8UZd15GJQKvyumyJ8gy8DAEvfZoINPqD41EtUjmUgoaJwAaAnjrKebVI34OSq85NBNqlCAWgE0CV5GEWwI3vQlmCbcSinYFCwPEIFDPgeIC1P1/MgHaIHDf4Aydx2TF7wnKeAAAAAElFTkSuQmCC\")}.jessibuca-container .jessibuca-loading{display:none;flex-direction:column;justify-content:center;align-items:center;position:absolute;z-index:20;left:0;top:0;right:0;bottom:0;width:100%;height:100%;pointer-events:none}.jessibuca-container .jessibuca-loading-text{line-height:20px;font-size:13px;color:#fff;margin-top:10px}.jessibuca-container .jessibuca-controls{background-color:#161616;display:flex;flex-direction:column;justify-content:flex-end;position:absolute;z-index:40;left:0;right:0;bottom:0;height:38px;padding-left:13px;padding-right:13px;font-size:14px;color:#fff;opacity:0;visibility:hidden;transition:all .2s ease-in-out;-webkit-user-select:none;user-select:none}.jessibuca-container .jessibuca-controls .jessibuca-controls-item{position:relative;display:flex;justify-content:center;padding:0 8px}.jessibuca-container .jessibuca-controls .jessibuca-controls-item:hover .icon-title-tips{visibility:visible;opacity:1}.jessibuca-container .jessibuca-controls .jessibuca-fullscreen,.jessibuca-container .jessibuca-controls .jessibuca-fullscreen-exit,.jessibuca-container .jessibuca-controls .jessibuca-icon-audio,.jessibuca-container .jessibuca-controls .jessibuca-microphone-close,.jessibuca-container .jessibuca-controls .jessibuca-pause,.jessibuca-container .jessibuca-controls .jessibuca-play,.jessibuca-container .jessibuca-controls .jessibuca-record,.jessibuca-container .jessibuca-controls .jessibuca-record-stop,.jessibuca-container .jessibuca-controls .jessibuca-screenshot{display:none}.jessibuca-container .jessibuca-controls .jessibuca-icon-audio,.jessibuca-container .jessibuca-controls .jessibuca-icon-mute{z-index:1}.jessibuca-container .jessibuca-controls .jessibuca-controls-bottom{display:flex;justify-content:space-between;height:100%}.jessibuca-container .jessibuca-controls .jessibuca-controls-bottom .jessibuca-controls-left,.jessibuca-container .jessibuca-controls .jessibuca-controls-bottom .jessibuca-controls-right{display:flex;align-items:center}.jessibuca-container.jessibuca-controls-show .jessibuca-controls{opacity:1;visibility:visible}.jessibuca-container.jessibuca-hide-cursor *{cursor:none!important}.jessibuca-container.jessibuca-fullscreen-web{position:fixed;z-index:9999;left:0;top:0;right:0;bottom:0;width:100%!important;height:100%!important;background:#000}.jessibuca-container .jessibuca-icon-loading{width:50px;height:50px;background:url(\"data:image/png;base64,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\") no-repeat 50%;background-size:100% 100%;animation:rotation 1s linear infinite}.jessibuca-container .jessibuca-icon-screenshot{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAE5UlEQVRoQ+1YW2sdVRT+1s7JxbsoVkEUrIIX0ouz15zYNA+N1RdtQfCltlUfvLbqL/BCwZ8grbHtizQqPojgBSr0JkiMmT2nxgapqBURtPVCq7HxJCeZJVPmxDlzZubMmXOSEsnAvOy917fXt9e39tp7E5b4R0vcfywTuNgRbBgBx3HuJqLVzPzmYjprjHkcwAlmLqXNm4XAISLaSESPaq2HF4OE67rbRGRYRA7btn1fbgLGmKsA/Azg0gBkGzO/vZAkHMd5hIiqc5wHcCMz/5k0Z2oExsfHV1QqldPAf8lORNu11m8tBAljzFYAYWxRSl1vWdZvuQj4RsYYF4AVBlgIOVVlE55HRIxt23ZuCfmGjuOsJ6LPoiAistW27XfaEYmIbOYhPc9bXywWR1oiEJDYQkR1zrYjEjGyqfqbKd8a7kJVtLgQ+30i8pht2wfyRKIdmJkJBPkQTbILfudJ7CTZNBvVpggEcgpvc/ML38zESbLJsxBNE/A9biX0rdjGyTQXgbxyapdsarb0PMlXtWnGoXbKpm0Essqp3bJpK4E0OXmed3+hUBDP8w5FI91M0rdcyLLILElOCbaZilSWeXMncRx4klTCY1spfG3dhZJWx3GcDUR0EEB3ZMw0ET2gtT6SZWWzjmlrBIJCl0hAKfWgZVmHszqXZVxbCSxpCS2JJA6umIhe8ZKKVLPbaBJ+S9toqVRa53nedgAbAKwIwH4FcAzAa0R0l4i8F7PPz189k6RFRA+LyNcAXojDV0oNW5b1eW4Cxpg9AHZkSaaa6hhzb065uDSCH2LmRB8Sk9gY4293g43Qo/1pV80m8yQMfZSZ781cB1zXHRKRZ2IMpgD8A+DamL4ZItqitX4/jbQx5iEA7wLoihn3V/ACckWMJN/QWj9b1x5tGBsbW6uUOh5pPy0iL3Z2dn6ilJqanp5ep5TaJSLhF4NppdRNaU8gPmapVLrO87yfIoXuWyJ6uVKp+HmFjo6OQSJ6FcBtYT+UUmstyxqvkWuUgDFmP4AnQu2/e563qlgs+u9DNZ8xZhRAX7VRRPbath0XuXk7Y8xeAE+FgL6fnJzsHRwcLIfBR0ZGLunq6poAsDLUvp+Zw7b1r9PGmJMAbg8Z7WDmoThZuK67WkS+DD18fcPMdzSQUBR/EzN/nIC/SUQ+DPXV4dclsTHmHAD/SfHCNzc3t7Kvr++HJKeMMacA3BL0nyuXyzcPDAxMxo0fHR29slAo/Ajg6qD/fE9Pzw29vb1/x42fmJi4vFwu+5G/LOg/y8zXNJLQ2dAES5JANMQ7mfn1jBI6ycx3NiMhItqstf4oAX+ziHwQ6qvDj5NQNIn/ALCKmX+JSeIvABRD7fuY+ekGBPYBeDI05tTMzExvf3+/vz2Hk91/ET8RSeI6/DoCpVJpjed5fmKGvzMAXpqdnT3oed5Ud3d3v4jsAqBr9Ei0Rmv9VRqBBPzvROQVETnq2xJRdRu9tRF+bCVOKWT+Kvl/TSIFk6SW/LAjKfjV5K8rZABi8dOOEv7FI7Z8x6zwEWbemLbyMfJr5qiSiJ96oclymBOR3bZtP9+M89WxxpjdAHY2sN3DzM8ljWl4I3Nd9x7/OE1ENcdpETnmH3e11n41zv0l4J8RkU+J6AAz+xtF4teQQG7PFslwmcAiLfSyhC72Qv9/I/Avns2OT7QJskoAAAAASUVORK5CYII=\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-screenshot:hover{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAED0lEQVRoQ+2ZycsdRRTFf2ejqHFAMQqiYBTUoElUHLNx3GgCgpuYRF2o0UT9CxwQ/BMkMSbZSKLiQgQHUDCJgjiAxiEiESdEcJbEedgcKaj3UV+/6q7u/jovPPkK3qbr1ql76p5bt6qemPKmKfefeQKHOoLFCNg+H1gi6fFJOmv7VmCvpD1N87Yh8ApwNXCzpB2TIGF7DRDm2inpmt4EbB8LfAMcGUHWSHryYJKwfRMwmuMP4BRJv9TN2RgB2wuB72BWsq+V9MTBIGF7NZBiGzhJ0o+9CIRBtt8FLqgADC6nRDbpVO9Iuqi3hCKB5cDrGZDVkp4aIhIV2aSQyyW9MScCkcQqIOfsnCORkc3I31b5VtyFRmg1IQ7dt0ja3icSQ2C2JhAjUU2ykd+dE7tBNp2i2olAJJFuc+nCt564QTadF6IzgUhiVGiqyinKaQjZpJP2ItBXTkPJZhACXeU0pGwGI9BWTkPLZlACBTldG4o5EA6E1dY66edcyNrs8Q36zg1vVaTazNs7iXPgDVJJzYs7VRvHRzaDEohyugJ4CTi84sg/wHWSdnVxsGQ7aQLXS9pZcqpL/6AEplpCU5HE8YpJ9YrXUKQ6baN1+HPaRm1fBqwFQnKGK2ZoPwCvAo8Ai4FnMpPMHMwapHUj8DFwbw3+Dklv9iZgexOwvktSRduxU2VDlErwmyXV+lCbxLbDdndlCT3TX3vV7JgnKfRuSVflfMkSsL0ZuDMz4E/gL+CETN+/wCpJzzaRtn0D8DRwWMbu1/gCcnSm7zFJd1W/jxGwvQx4r2IYnlbuA14GAomQFw8B6YtBKFSnNj2BxEJ3IvB1pdB9CjwQ8yqYhcg/DJxZ8WOZpA/SbzkC24DbEqOfgPMkBRKzmu23gEuSj1sk5SI3Y2J7C3BHMuZz4FxJf6fgto8APgIWJd+3SUrHjr9O294HnJUMWi8pSGqs2V4CvJ88fH0i6eyChKr4KyS9WIO/Ang+6RvDz0XgABCeFEdtkaQv65yy/QVweuwPY0+T9FuNQ8cAXwHHxf7wdHiypN9r7BfEl8GjYv9+SceXJLQ/mSDYTh2Baog3SHq0pYT2STqno4RWSnqhBn8l8FzSN4bfJol/jkn8bXUS228DFyfft0paVyCwFbg9sQkSDEkctueZZju8iO+tJPEYfo7A0piYKd73wP3xnB+20cvjNnphxdmlkj4sEMjhfwY8COyOY0fb6Bkl/K6FLKxS+M1KpDhJY8mvrG5doRwlf66QZfGbjhLh4pEt35kV3iUp/IvTunU8qtTil/7gaHOY2yjpntaez9b5RmBDYewmSXfX2RRvZLYvbThOh+NuqMa9Ww1+yLnXgO2SwkZR24oEens2oYHzBCa00PMSOtQL/f+NwH+Hg8hAnbrYgQAAAABJRU5ErkJggg==\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-play{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACgklEQVRoQ+3ZPYsTQRjA8eeZZCFlWttAwCIkZOaZJt8hlvkeHrlccuAFT6wEG0FQOeQQLCIWih6chQgKgkkKIyqKCVYip54IWmiQkTmyYhFvd3Zn3yDb7szu/7cv7GaDkPEFM94PK0DSZ9DzDAyHw7uI2HRDlVJX5/N5r9FoHCYdr/fvCRiNRmpJ6AEidoUQ15NG+AH8BgD2n9AHANAmohdJQfwAfgGA4xF4bjabnW21Whob62ILoKNfAsAGEd2PU2ATcNSNiDf0/cE5/xAHxDpgEf0NADaJ6HLUiKgAbvcjpdSGlPJZVJCoAUfdSqkLxWLxTLlc/mkbEgtgET1TSnWklLdtIuIEuN23crlcp16vv7cBSQKgu38AwBYRXQyLSArg3hsjRDxNRE+CQhIF/BN9qVAobFYqle+mkLQAdLd+8K0T0U0TRJoAbvc9fVkJId75gaQRoLv1C2STiPTb7rFLWgE6+g0RncwyYEJEtawCvjDGmpzzp5kD6NfxfD7frtVqB17xen2a7oG3ALBm+oMoFQBEPD+dTvtBfpImDXjIGFvjnD/3c7ksG5MU4HDxWeZa0HB3XhKAXcdxOn5vUi9gnIDXSqm2lHLPK8pkfVyAbSLqm4T5HRs1YB8RO0KIid8g03FRAT4rpbpSyh3TINPxUQB2GGM9zvkn05gg420CJovLZT9ISNA5tgB9ItoOGhFmnh/AcZ/X9xhj65zzV2Eiwsz1A1j2B8dHAOgS0W6YnduY6wkYj8d3lFKn/j66Ea84jtOrVqtfbQSE3YYnYDAY5Eql0hYAnNDv6kKIx2F3anO+J8DmzqLY1goQxVE12ebqDJgcrSjGrs5AFEfVZJt/AF0m+jHzUTtnAAAAAElFTkSuQmCC\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-play:hover{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACEElEQVRoQ+2ZXStEQRjH/3/yIXwDdz7J+i7kvdisXCk3SiFJW27kglBcSFFKbqwQSa4krykuKB09Naf2Yndn5jgzc06d53Znd36/mWfeniVyHsw5PwqB0DOonYEoijYBlOpAFwCMkHwLDS/9mwhEDUCfAAyTXA4tYSLwC6CtCegegH6S56FETAR+AHRoACcBTJAUWa+RloBAXwAYIrnt0yBNgZi7qtbHgw8RFwLC/QFglOScawlXAjH3gUqrE1cirgVi7mkAYyS/0xbxJSDcdwAGSa6nKeFTIOZeUyL3aYiEEBDuLwDjJGf+KxFKIOY+BdBL8iipSGiBmHtWbbuftiJZERBuOfgGSK7aSGRJIObeUml1ayKSRQHhlgtkiaTcdltGVgUE+ppkV54FaiS78yrwqlLoOI8Cch2XV548W7WRpTVwA6DP9kGUFYEpAOUkT9LQAvtq1M+0udKkQSgBqSlJWWYxKXj8vRACK+o6bbRIdYI+Ba7U7rKjg7L53JdAhWTZBsy0rWuBXZUuNVMg23auBF7UIl2yBbJt70JAoKV6/WwLk6R9mgKSJlJ1kLTxFmkJyCla8UZd15GJQKvyumyJ8gy8DAEvfZoINPqD41EtUjmUgoaJwAaAnjrKebVI34OSq85NBNqlCAWgE0CV5GEWwI3vQlmCbcSinYFCwPEIFDPgeIC1P1/MgHaIHDf4Aydx2TF7wnKeAAAAAElFTkSuQmCC\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-pause{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABA0lEQVRoQ+1YwQqCUBAcfWXXsLr2AXWTPXno8yVB8AP6Aa3oHI+kCDqYaawJljSe133uzO44bx0M/HEG/v1gAd9mkAyQgY4I/F8LJUlyrQFtD2AtIkcNoFEU+Z7n7QD4DfFHEVlocrVmgAUAIAOl3mILPcDgEFcUhyrUKMGUUcroc3NQRimj9XJBGaWMvvPydKN0o6/9QTdKN6rZANxj6EbpRulGuZnjYqs8BbyR8Ub2Izeys+u6yyAIDpo/ehzHM2NMDsA0xFsRmWhyfTIDWSXxCEBmrd2EYXjSHJqm6bQoii2AOYBL5Z0xgFxEVppcrQvQJO0zhgX0iXbdWWSADHRE4AZQ731AhEUeNwAAAABJRU5ErkJggg==\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-pause:hover{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAA7klEQVRoQ+2YSwrCQBBEX6HiVvxsPYDewfN7By/gD9ciQkvERQwJdBSiYs0mEDo96aruombEjy/9+P/jAj7NoBkwA28i8H8tFBFRA9oeWEo6ZgCNiDGwAYpn3TpKmmVytWbABQBmoNRbbqEHGB7iiuJYhRol2DJqGX1uDsuoZdRmLuNZSzGWUcuoZdRHSp/IylNgK2ErYSthK3FHwLcSvpXIjoLt9Jfa6TMwl3TIMBkRE2AH9BriL5KGmVyvWIltJXEfKN6tJJ0ym0bECFgDU+Ba+WZQFCdpkcnVuoBM0i5jXECXaNftZQbMwJsI3AAPN3dAQflHegAAAABJRU5ErkJggg==\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-record{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAC+UlEQVRoQ+1ZS2sTURT+zlDJYE3XSq219QHVuEjnJDT+Bff9Abqw2voAEfGxqygUqWhVFHGl/yMLu9BwByxk5SNI66ML6U7axjhHbmhgWiftncxoOiV3FcI53z3f/e65594zhIQPSnj86BBot4IdBToKRFyBnbeFlFIScVEiuYvIWC6Xe2YK8pcC7SYA4CMzH4mDQBXAqilQBDsLQLfPf9FxnF4i8kwwmypARI+Wl5dvmIBEsUmlUkNE9NaHsVCpVAZGR0d/m+A2JSAid3K53E0TkCg2pVKpz7KseR/GfKVSGYxMAMA0M1+JEpyJb6lUOm5ZVnkrAsVisaunp+esiByr1Wp3R0ZGvmifzZK4XQQWHMc52MgBpdQuAOcAXABwuB400ZTjONdaIjA7O5u2bVsnWU1EujzP+5nP5xdMVjvIJkCBD8x8VCm1G8AYgAkAAxt8Z5j5YmgCSqlTAJ4D2OcD/AXgATNfbYVEAIFPIvKKiE4D6GuCea8xX6gtpJT6DmBvECgRFRzHeROWRAABE4iWCbwHEFhkPM/L5vP5dyaz+23+KwHXdR3P854S0YG1ILSCuthNMfNM2OC1/RYENLY+ygcBnPfht6ZAA6BYLNr6dyqVokKhsGpaNQ2TWJstreXaE2aed133sojcj41AKyvdzCdAgSXLsk4MDw9/a/i4rntbRPxFNZoC/5jAV2be759DKTUJ4FZSFFi0bbs/k8noy2R9dAjEuWU2YgXkQOK3kD6BMsysi2Z9JC2Jdcw/ALzwPO+xvmcl7Rj177JVEbkO4BARjSflFDJJuW1dBxJPoCIiL4noDIB1BS0pW6j+oJmbm+uuVqvjRKQfLr0bZHnIzJf0f6HeAybahrUJqAPruhLlcnnPysqKfpXp11n/Gv62zoHAroS+AafT6QkiGrIsazKbzX7eVIHEt1US39gCkOzWYthkjNE+tuZujDGZQ8XRXn8N4KT5lLFZ6uaYPt+nwyDuvC80YdhvB9uOAu1WoaNAR4GIK/AHvdr+QAexB7EAAAAASUVORK5CYII=\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-record:hover{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACfUlEQVRoQ+2ZSYsUQRCFvycK4nJXXEbHBdwO4kn/gv9CD467ICIutxEFkREdFUU86T/xojcPntyQcT2INw+uISFVkD1Wd2dWlU7nUHlqisiX+fJFZGREi8yHMt8/HYG5VrBToFOg4QnMPxcyM2t4KE2nT0i6EwvylwIjQOCFpE1tEPgGfI0FamC3AFgazP8IrJL0KwZzkAI3gLMxIA1ttgCPA4w3wHpJP2NwBxG4KOlcDEgTGzNbA8wEGP57vA0CU5JONtlczFwz2wY8HUbAzBYCB4CtwCVJb33OIAXmioC70LoyBsxsEXAQOApsLIhelnS6FgEzW+5BBvwA/FS+SPJFa40KBZ5L2mxmS4AJ4IjHxCzwaUnHkgmY2V7gLrAyAPwOXJN0qg6DCgIvgQfAPsDjo2pcKddLciEz+wCs6AO6W9KjVBIVBGIgahN4BvRLMjslPYlZPbT53wR2AbeBtcUmXEFPdh5U06mbd/shBBzbr/Jx4FCAX0+BEsDMFocEYrNmFcE+BD4XsXZL0oyZnQCutkagzkn3m1NBwDe/Q9L74MAuFEqUn5op8I8JvJO0elacTALnc1HAH3Njkvwx+WeYWUegTa/pwaqIgexdyIN4uyRPmqULZRXEvulPwD3gpr+zcrtGQxfzRHYG2AAczuUWiom3kc4D2RN4BdwH9gM9CS0XFyoLGu9UuN974eIFVDiuSzruH5LqgRhtU20q8kBPV8LMlhVVmVdnYwX+SMdAZVeieAF7eeltmElJr4cpkH1bJfvGVvatxdR4bMu+teZuWxtKxWncXn8I7EldtQV7vz79fp9KwZp//9CksB8F206BuVahU6BToOEJ/Ab7+KdABdTt8AAAAABJRU5ErkJggg==\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-recordStop{background:url(\"data:image/png;base64,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\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-recordStop:hover{background:url(\"data:image/png;base64,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\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-fullscreen{background:url(\"data:image/png;base64,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\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-fullscreen:hover{background:url(\"data:image/png;base64,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\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-fullscreenExit{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADd0lEQVRoQ+2Zz2sdVRTHv+fJBDW6anDVXen6wZszYxYBiYgtFGst3VSDunKjpS0GpUlqfjVpsVVs6aaL0or4YxMVFCJZ2ZLdPUP+gq5bQnTxtNAkfTnlhnnlkmQy9yV9780rudt77tzv5/y4v4bQ4Y06XD/2ANodwec/AiJygJnvtdvTWfPnRkBEJAiCN8rl8kMfiPn5+Ve7u7v3rays0Orq6lJfX99/PuN2auMDoAD+BvA2M6/mTWSMOUtE48D6AjHGzN/kjdlNvy+AnWOOmQ/lTSYiEwDOWzsimgrDcCRvzG76GwGw8/zJzO9sN6GInAMwbW1UdSSKoqndCMwb6wNwGsB39Q+p6h/M/C4R2dTa1AoHYBWKyCkA1+pqiWi2Wq0e7e/vf7yRoJAAKcQggMtuJKIoOtoxACnE0/xOi/SXMAxPuhCFjUBdpIjYVWXSEf0TM3/g9BeriDMKdSPEz8z8vrU1xgwT0YXCrEJZy1iSJKOqOub0/8jMA0mSfKKqNwoPkHp7ioiGHIhRIvpHVa93BEBa2JcAfOlALAHo6RgAKzRJkk9V1S6xL7kpV4idOM31taxaIKJHqmpPnMMA9hcOQES2PDJkAT1XAAC+ZebPfWB3auNzmLObVsNRUNUXVHUujuM7OxXnMy4XwOcj29mIyOuq+lapVGrYCelKpkEQ3CyXy4tbzdN0AGPMxr2iYZ+sra3FcRybtgCIiK2BKw2rdgaUSqWoUqlIkQAepFDdAF7cBq5ERI9rtdr1OI7tmE2t6SmUEYFHAEaexYW/1QC2EF+ru5GIvg7D0D2GNJxprQY4o6qv1I/b6SpzOYqiLxpWng5oOQAzXxWRWwA+dkRfYOb1p5hGW6sBJpn5KytSRG4D+KguWFXHoyhy7xdeLC0F2ChSRL4H8OFuINoKYIUbY34gogHH3eeZef1K6tPaDpCm068A3nMEDzHzxY4BUNWSiPxORO6z5aDPPlGICNQ9bYyZIaLjjudzIQoFkKbTbwCO+UI0HcB9J/LdeY0xs0R02IGYYObRrWqiFQCfEZEtSHsfmGZm+4qxbbM/hQD8BeBNa0hEM2EYnmgLgP3lFARBT1dXly4vL//b29tbzQNIU+llAHeJaLFSqRzJes5vegR8xGbZLCwsHKzVav8z8/0sm0ID+MDvAfh4qZk2exFopnd9vv0ELrXBQO7fD10AAAAASUVORK5CYII=\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-fullscreenExit:hover{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAC/ElEQVRoQ+2Zy49NQRCHvx+ReK6IlZ34E7CUiCAR4xEbTLCyQRATYswwb2IQZDYWgojHZpCQECts+ResiQwLj0RClNSkb9Lu3HtPz7mZc8+V6eXt6tP1VVV3VdcVbT7U5vozC9BqD/7/HjCzlZLet9rS9fbP9ICZvQPWSfqRAmFmS4ClMHm+JiR9S1mXVyYFwIBXwEZJv7I2MrPjQH8A6JN0OWtNM/OpAL7HS0mbsjYzswGgN8gNS+rJWtPM/HQAfJ9nkrY22tDMTgMjQaZH0nAzCmatTQE4ClyNPvQU2CbJQ2vKKB2Aa2hmR4DrkbbPgQ5Jv6sJSgkQILqA0dgTkjraBiBAxPHtPz2UtDuGKK0HKkqamd8qg5HS9yXtjebLdYjrHNRqiAeS9gQvnQGGSnML1bvGzOwc0BfN35PUaWYHgRulBwjW9ju+O4JwqM/AWFsABIgLwKkIYgJY1jYAAeJQuGIXVIVcKTKxh8WfBin9J+AVpx/eFWUEqFkyNACKp0rhgWYArkg6kQibSyylmPOklQdibijBX+fSLHFRJkDid+qKmdlaYENOI0zeEcBNSZ9qbVIEQHWuyGOTNZLetgrAz8ClPFpHa1ZL8rf5lFGEB2oBfAxQi4D5DeDmAP7mGJPka0oD4LnDr9imH/xFe8AP4vLIjBclxWXItCOtaIBjwOKo3HaFRyWdnLbmYUHhAJKumdkt4ECk9JCkSitmWixFAwxKOjt5uZvdBvZH2vZLit8XSSBFA/yjpJndAfY1A9FSgOCJu0BnBNErqfIkzfRCywECxCNgR6Rtt6TzmdqHBmyKXG4ZM4sTWc04NzNPWE+AuG3ZlZInSuGBinXMbBzYGVkrE6JUACGcHgPbUyGKAIj7REmZ18y897o5ghiQ5E/bltRChwE/kF7Xj0jyLkbDYWbzgBfA+iA4LmlXqwD8LydvszjAF0lfswBCKC0E3gBeP22p186f8RBKUbaejJmtAr5L+lBPptQAKfCzAClWmkmZWQ/MpHVTvv0X9iFAQGQyevIAAAAASUVORK5CYII=\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-audio{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACrUlEQVRoQ+2ZPYgTURCAZzbBXJnCeL2Cnb87b9MEtPBUrrMQFAtrtT5/ClGs9LBWWz0RtbBUFCF4oJDsbO68wsLA2YqQSmLlvpEHu7IuMdlLcus+yUKKhJfZ+ebnvZl5CJY/aLn+MAP41x7M1QPMfFtr/crzvHfTAs8FoNPp1LTWzwHgqIg0lFLvrQHwfX8BER8DwC6jNCIecF13wwoA3/dvIuKNpLJa60Oe560XGoCZd4rICiKeTCtaeABmPg4AJmRqg6xcaABmvg4At4aFRyEBhoVM4UMoCplHADCfJTEL5YEsIVNID5iQAYCHALCYxeq5b6PMfF5EBAAEESthGK7W6/XPRpFWq7W3VCqtZg2ZcT3g+/6i4zjzIlLSWn/yPO/DIGMNLCWY2Sj/+xGRK0qpZfNDEASnROTFVi0fr8+aA8z8Ld6KEfGt67oLYwMAwEUium8EREn7OgeAjwCwPyo/nrque3YSgAtE9GDaAM1mc65arc4Zuf1+P2w0Gt9jJZl5DQAORt+fENG5wgEw8zUAMB/zbBBRwyqAIAjuiMjlSOlNItpjFUCqWl0josMzgChR/9hGAWBbknjmAdPhDdqa0gfZzAMJKyVP4v8hhJYRcSni+0JEu63ahZj5anyQici6UuqIVQDdbrfS6/UqRulyufyTiH5sF8AlIro37VpoWEHIzGZ2tM+sEZFnSqkzk9RCS0R01wjIsZz+mug53hDRia0AnI4bGgDYISItz/M2jYC8Gpp2u30MEWuO4zha665Sqp0ZYFStX/iWchRAItFGzoHSsrJ2ZFl1mHg6bfVYJeGJv85CC++BpIJZ5kSFC6G0ha0e7mYJqcJ7IOkRay84UhD2XjHFIFZf8iW9YcYoYRi+tO6aNeupOs66iU/icV46zf/MAKZpzXFk/QL+JG1PUPhRiQAAAABJRU5ErkJggg==\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-audio:hover{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACSElEQVRoQ+2Zu4sUQRCHf5+C+gf4yBXMfMYHGvjCzEBQDIzV+HwEohipGKupD0QNDE8UEwUFTe68wEDhTMVUMFJ+0tArzbjs9u3Ojt0wBR0M9MzUV1XdXVWNKhcq1189wP/2YKcesH1d0nPgdVvgnQDY3iTpqaT9kuaAt9UA2D4o6aGkzVHpXcByFQC2r0q60lB2D7BUNIDtjZIeSDoyRNGyAWwfiiET4n6YlAtg+7Kka2PCozyAMSHT5CkLIIbMfUlbMhdmOQCZIVOeB2LI3JN0NNPq6bTZe8D2aUmOY72kN8DnoIXt7eF5FSEzkQdsB+OEsFwr6RPwbpixhqYStoPyqVwAbkaAY5KeTWD5wStZHrD9XdJgK34FhBP9H8kFOAvciQBhn3/RAcBHSTvjfx4DJ6cBOAPcbRvA9gZJYQT5DfwYKGl7UdLu+PwIOFUiwCVJYQRZBuZqA7gh6XxUegXYVhtAmq0uAnt7gLhQm9vorBZx74Hcc6D3QLKH/z2JGyVnlYs4pCfzEe4rsLW2XehicpAtAftqAwiZbhhBfgE/ZwVwDrjddi40KiG0HXpHO+KcJ8CJaXKheeBWBOgqnf6W1BwvgcOrATieFDTrJL0HViJAVwXNgVgPrJH0BfiQDTDKtREiNK7KLSnHASQLLacP1PxcVkWWq8PU3emq2yqJJ0b1Qsv2QKpdZp+orBBqmrfq5m5mSJXtgUZI1XnB0YCo94opCal6L/ka3ghtlIXqrllzT9VJ5k19Ek/y0zbf6QHatOYk3/oDujC8QMWgjf4AAAAASUVORK5CYII=\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-mute{background:url(\"data:image/png;base64,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\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-mute:hover{background:url(\"data:image/png;base64,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\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-text{font-size:14px;width:30px}.jessibuca-container .jessibuca-speed{font-size:14px;color:#fff}.jessibuca-container .jessibuca-quality-menu-list{position:absolute;left:50%;bottom:100%;visibility:hidden;opacity:0;transform:translateX(-50%);transition:visibility .3s,opacity .3s;background-color:rgba(0,0,0,.5);border-radius:4px}.jessibuca-container .jessibuca-quality-menu-list.jessibuca-quality-menu-shown{visibility:visible;opacity:1}.jessibuca-container .icon-title-tips{pointer-events:none;position:absolute;left:50%;bottom:100%;visibility:hidden;opacity:0;transform:translateX(-50%);transition:visibility .3s ease 0s,opacity .3s ease 0s;background-color:rgba(0,0,0,.5);border-radius:4px}.jessibuca-container .icon-title{display:inline-block;padding:5px 10px;font-size:12px;white-space:nowrap;color:#fff}.jessibuca-container .jessibuca-quality-menu{padding:8px 0}.jessibuca-container .jessibuca-quality-menu-item{display:block;height:25px;margin:0;padding:0 10px;cursor:pointer;font-size:14px;text-align:center;width:50px;color:hsla(0,0%,100%,.5);transition:color .3s,background-color .3s}.jessibuca-container .jessibuca-quality-menu-item:hover{background-color:hsla(0,0%,100%,.2)}.jessibuca-container .jessibuca-quality-menu-item:focus{outline:none}.jessibuca-container .jessibuca-quality-menu-item.jessibuca-quality-menu-item-active{color:#2298fc}.jessibuca-container .jessibuca-volume-panel-wrap{position:absolute;left:50%;bottom:100%;visibility:hidden;opacity:0;transform:translateX(-50%) translateY(22%);transition:visibility .3s,opacity .3s;background-color:rgba(0,0,0,.5);border-radius:4px;height:120px;width:50px;overflow:hidden}.jessibuca-container .jessibuca-volume-panel-wrap.jessibuca-volume-panel-wrap-show{visibility:visible;opacity:1}.jessibuca-container .jessibuca-volume-panel{cursor:pointer;position:absolute;top:21px;height:60px;width:50px;overflow:hidden}.jessibuca-container .jessibuca-volume-panel-handle{position:absolute;top:48px;left:50%;width:12px;height:12px;border-radius:12px;margin-left:-6px;background:#fff}.jessibuca-container .jessibuca-volume-panel-handle:before{bottom:-54px;background:#fff}.jessibuca-container .jessibuca-volume-panel-handle:after{bottom:6px;background:hsla(0,0%,100%,.2)}.jessibuca-container .jessibuca-volume-panel-handle:after,.jessibuca-container .jessibuca-volume-panel-handle:before{content:\"\";position:absolute;display:block;left:50%;width:3px;margin-left:-1px;height:60px}\n/*# sourceMappingURL=data:application/json;base64,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bEIsUUFBUyxDQUNULFFBQVMsQ0FDVCxVQUFXLENBQ1gsV0FBWSxDQUNaLGtCQUFtQixDQUNuQixnQkFBaUIsQ0FDakIsZUFBa0IsQ0FDbEIsMkRBQ0UsWUFBYSxDQUNiLGVBQWtCLENBQ3BCLDBEQUNFLFVBQVcsQ0FDWCw2QkFBc0MsQ0FDeEMscUhBQ0UsVUFBVyxDQUNYLGlCQUFrQixDQUNsQixhQUFjLENBQ2QsUUFBUyxDQUNULFNBQVUsQ0FDVixnQkFBaUIsQ0FDakIsV0FBYyIsImZpbGUiOiJzdHlsZS5zY3NzIiwic291cmNlc0NvbnRlbnQiOlsiQGtleWZyYW1lcyByb3RhdGlvbiB7XG4gIGZyb20ge1xuICAgIC13ZWJraXQtdHJhbnNmb3JtOiByb3RhdGUoMGRlZyk7IH1cbiAgdG8ge1xuICAgIC13ZWJraXQtdHJhbnNmb3JtOiByb3RhdGUoMzYwZGVnKTsgfSB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtaWNvbiB7XG4gIGN1cnNvcjogcG9pbnRlcjtcbiAgd2lkdGg6IDE2cHg7XG4gIGhlaWdodDogMTZweDsgfVxuXG4uamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLXBvc3RlciB7XG4gIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgei1pbmRleDogMTA7XG4gIGxlZnQ6IDA7XG4gIHRvcDogMDtcbiAgcmlnaHQ6IDA7XG4gIGJvdHRvbTogMDtcbiAgaGVpZ2h0OiAxMDAlO1xuICB3aWR0aDogMTAwJTtcbiAgYmFja2dyb3VuZC1wb3NpdGlvbjogY2VudGVyIGNlbnRlcjtcbiAgYmFja2dyb3VuZC1yZXBlYXQ6IG5vLXJlcGVhdDtcbiAgYmFja2dyb3VuZC1zaXplOiBjb250YWluO1xuICBwb2ludGVyLWV2ZW50czogbm9uZTsgfVxuXG4uamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLXBsYXktYmlnIHtcbiAgcG9zaXRpb246IGFic29sdXRlO1xuICBkaXNwbGF5OiBub25lO1xuICBoZWlnaHQ6IDEwMCU7XG4gIHdpZHRoOiAxMDAlO1xuICBiYWNrZ3JvdW5kOiByZ2JhKDAsIDAsIDAsIDAuNCk7XG4gIGJhY2tncm91bmQtaW1hZ2U6IHVybChcIi4uL2Fzc2V0cy9wbGF5LnBuZ1wiKTtcbiAgYmFja2dyb3VuZC1yZXBlYXQ6IG5vLXJlcGVhdDtcbiAgYmFja2dyb3VuZC1wb3NpdGlvbjogY2VudGVyO1xuICBjdXJzb3I6IHBvaW50ZXI7XG4gIGJhY2tncm91bmQtc2l6ZTogNDhweCA0OHB4OyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtcGxheS1iaWc6aG92ZXIge1xuICAgIGJhY2tncm91bmQtaW1hZ2U6IHVybChcIi4uL2Fzc2V0cy9wbGF5LWhvdmVyLnBuZ1wiKTsgfVxuXG4uamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWxvYWRpbmcge1xuICBkaXNwbGF5OiBub25lO1xuICBmbGV4LWRpcmVjdGlvbjogY29sdW1uO1xuICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjtcbiAgYWxpZ24taXRlbXM6IGNlbnRlcjtcbiAgcG9zaXRpb246IGFic29sdXRlO1xuICB6LWluZGV4OiAyMDtcbiAgbGVmdDogMDtcbiAgdG9wOiAwO1xuICByaWdodDogMDtcbiAgYm90dG9tOiAwO1xuICB3aWR0aDogMTAwJTtcbiAgaGVpZ2h0OiAxMDAlO1xuICBwb2ludGVyLWV2ZW50czogbm9uZTsgfVxuXG4uamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWxvYWRpbmctdGV4dCB7XG4gIGxpbmUtaGVpZ2h0OiAyMHB4O1xuICBmb250LXNpemU6IDEzcHg7XG4gIGNvbG9yOiAjZmZmO1xuICBtYXJnaW4tdG9wOiAxMHB4OyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtY29udHJvbHMge1xuICBiYWNrZ3JvdW5kLWNvbG9yOiAjMTYxNjE2O1xuICBkaXNwbGF5OiBmbGV4O1xuICBmbGV4LWRpcmVjdGlvbjogY29sdW1uO1xuICBqdXN0aWZ5LWNvbnRlbnQ6IGZsZXgtZW5kO1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIHotaW5kZXg6IDQwO1xuICBsZWZ0OiAwO1xuICByaWdodDogMDtcbiAgYm90dG9tOiAwO1xuICBoZWlnaHQ6IDM4cHg7XG4gIHBhZGRpbmctbGVmdDogMTNweDtcbiAgcGFkZGluZy1yaWdodDogMTNweDtcbiAgZm9udC1zaXplOiAxNHB4O1xuICBjb2xvcjogI2ZmZjtcbiAgb3BhY2l0eTogMDtcbiAgdmlzaWJpbGl0eTogaGlkZGVuO1xuICB0cmFuc2l0aW9uOiBhbGwgMC4ycyBlYXNlLWluLW91dDtcbiAgdXNlci1zZWxlY3Q6IG5vbmU7IH1cbiAgLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1jb250cm9scyAuamVzc2lidWNhLWNvbnRyb2xzLWl0ZW0ge1xuICAgIHBvc2l0aW9uOiByZWxhdGl2ZTtcbiAgICBkaXNwbGF5OiBmbGV4O1xuICAgIGp1c3RpZnktY29udGVudDogY2VudGVyO1xuICAgIHBhZGRpbmc6IDAgOHB4OyB9XG4gICAgLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1jb250cm9scyAuamVzc2lidWNhLWNvbnRyb2xzLWl0ZW06aG92ZXIgLmljb24tdGl0bGUtdGlwcyB7XG4gICAgICB2aXNpYmlsaXR5OiB2aXNpYmxlO1xuICAgICAgb3BhY2l0eTogMTsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWNvbnRyb2xzIC5qZXNzaWJ1Y2EtbWljcm9waG9uZS1jbG9zZSB7XG4gICAgZGlzcGxheTogbm9uZTsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWNvbnRyb2xzIC5qZXNzaWJ1Y2EtaWNvbi1hdWRpbyB7XG4gICAgZGlzcGxheTogbm9uZTsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWNvbnRyb2xzIC5qZXNzaWJ1Y2EtcGxheSB7XG4gICAgZGlzcGxheTogbm9uZTsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWNvbnRyb2xzIC5qZXNzaWJ1Y2EtcGF1c2Uge1xuICAgIGRpc3BsYXk6IG5vbmU7IH1cbiAgLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1jb250cm9scyAuamVzc2lidWNhLWZ1bGxzY3JlZW4tZXhpdCB7XG4gICAgZGlzcGxheTogbm9uZTsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWNvbnRyb2xzIC5qZXNzaWJ1Y2Etc2NyZWVuc2hvdCB7XG4gICAgZGlzcGxheTogbm9uZTsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWNvbnRyb2xzIC5qZXNzaWJ1Y2EtcmVjb3JkIHtcbiAgICBkaXNwbGF5OiBub25lOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtY29udHJvbHMgLmplc3NpYnVjYS1mdWxsc2NyZWVuIHtcbiAgICBkaXNwbGF5OiBub25lOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtY29udHJvbHMgLmplc3NpYnVjYS1yZWNvcmQtc3RvcCB7XG4gICAgZGlzcGxheTogbm9uZTsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWNvbnRyb2xzIC5qZXNzaWJ1Y2EtaWNvbi1hdWRpbywgLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1jb250cm9scyAuamVzc2lidWNhLWljb24tbXV0ZSB7XG4gICAgei1pbmRleDogMTsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWNvbnRyb2xzIC5qZXNzaWJ1Y2EtY29udHJvbHMtYm90dG9tIHtcbiAgICBkaXNwbGF5OiBmbGV4O1xuICAgIGp1c3RpZnktY29udGVudDogc3BhY2UtYmV0d2VlbjtcbiAgICBoZWlnaHQ6IDEwMCU7IH1cbiAgICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWNvbnRyb2xzIC5qZXNzaWJ1Y2EtY29udHJvbHMtYm90dG9tIC5qZXNzaWJ1Y2EtY29udHJvbHMtbGVmdCB7XG4gICAgICBkaXNwbGF5OiBmbGV4O1xuICAgICAgYWxpZ24taXRlbXM6IGNlbnRlcjsgfVxuICAgIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtY29udHJvbHMgLmplc3NpYnVjYS1jb250cm9scy1ib3R0b20gLmplc3NpYnVjYS1jb250cm9scy1yaWdodCB7XG4gICAgICBkaXNwbGF5OiBmbGV4O1xuICAgICAgYWxpZ24taXRlbXM6IGNlbnRlcjsgfVxuXG4uamVzc2lidWNhLWNvbnRhaW5lci5qZXNzaWJ1Y2EtY29udHJvbHMtc2hvdyAuamVzc2lidWNhLWNvbnRyb2xzIHtcbiAgb3BhY2l0eTogMTtcbiAgdmlzaWJpbGl0eTogdmlzaWJsZTsgfVxuXG4uamVzc2lidWNhLWNvbnRhaW5lci5qZXNzaWJ1Y2EtaGlkZS1jdXJzb3IgKiB7XG4gIGN1cnNvcjogbm9uZSAhaW1wb3J0YW50OyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyLmplc3NpYnVjYS1mdWxsc2NyZWVuLXdlYiB7XG4gIHBvc2l0aW9uOiBmaXhlZDtcbiAgei1pbmRleDogOTk5OTtcbiAgbGVmdDogMDtcbiAgdG9wOiAwO1xuICByaWdodDogMDtcbiAgYm90dG9tOiAwO1xuICB3aWR0aDogMTAwJSAhaW1wb3J0YW50O1xuICBoZWlnaHQ6IDEwMCUgIWltcG9ydGFudDtcbiAgYmFja2dyb3VuZDogIzAwMDsgfVxuXG4uamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWljb24tbG9hZGluZyB7XG4gIHdpZHRoOiA1MHB4O1xuICBoZWlnaHQ6IDUwcHg7XG4gIGJhY2tncm91bmQ6IHVybChcIi4uL2Fzc2V0cy9sb2FkaW5nLnBuZ1wiKSBuby1yZXBlYXQgY2VudGVyO1xuICBiYWNrZ3JvdW5kLXNpemU6IDEwMCUgMTAwJTtcbiAgYW5pbWF0aW9uOiByb3RhdGlvbiAxcyBsaW5lYXIgaW5maW5pdGU7IH1cblxuLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1pY29uLXNjcmVlbnNob3Qge1xuICBiYWNrZ3JvdW5kOiB1cmwoXCIuLi9hc3NldHMvc2NyZWVuc2hvdC5wbmdcIikgbm8tcmVwZWF0IGNlbnRlcjtcbiAgYmFja2dyb3VuZC1zaXplOiAxMDAlIDEwMCU7IH1cbiAgLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1pY29uLXNjcmVlbnNob3Q6aG92ZXIge1xuICAgIGJhY2tncm91bmQ6IHVybChcIi4uL2Fzc2V0cy9zY3JlZW5zaG90LWhvdmVyLnBuZ1wiKSBuby1yZXBlYXQgY2VudGVyO1xuICAgIGJhY2tncm91bmQtc2l6ZTogMTAwJSAxMDAlOyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtaWNvbi1wbGF5IHtcbiAgYmFja2dyb3VuZDogdXJsKFwiLi4vYXNzZXRzL3BsYXkucG5nXCIpIG5vLXJlcGVhdCBjZW50ZXI7XG4gIGJhY2tncm91bmQtc2l6ZTogMTAwJSAxMDAlOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtaWNvbi1wbGF5OmhvdmVyIHtcbiAgICBiYWNrZ3JvdW5kOiB1cmwoXCIuLi9hc3NldHMvcGxheS1ob3Zlci5wbmdcIikgbm8tcmVwZWF0IGNlbnRlcjtcbiAgICBiYWNrZ3JvdW5kLXNpemU6IDEwMCUgMTAwJTsgfVxuXG4uamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWljb24tcGF1c2Uge1xuICBiYWNrZ3JvdW5kOiB1cmwoXCIuLi9hc3NldHMvcGF1c2UucG5nXCIpIG5vLXJlcGVhdCBjZW50ZXI7XG4gIGJhY2tncm91bmQtc2l6ZTogMTAwJSAxMDAlOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtaWNvbi1wYXVzZTpob3ZlciB7XG4gICAgYmFja2dyb3VuZDogdXJsKFwiLi4vYXNzZXRzL3BhdXNlLWhvdmVyLnBuZ1wiKSBuby1yZXBlYXQgY2VudGVyO1xuICAgIGJhY2tncm91bmQtc2l6ZTogMTAwJSAxMDAlOyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtaWNvbi1yZWNvcmQge1xuICBiYWNrZ3JvdW5kOiB1cmwoXCIuLi9hc3NldHMvcmVjb3JkLnBuZ1wiKSBuby1yZXBlYXQgY2VudGVyO1xuICBiYWNrZ3JvdW5kLXNpemU6IDEwMCUgMTAwJTsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWljb24tcmVjb3JkOmhvdmVyIHtcbiAgICBiYWNrZ3JvdW5kOiB1cmwoXCIuLi9hc3NldHMvcmVjb3JkLWhvdmVyLnBuZ1wiKSBuby1yZXBlYXQgY2VudGVyO1xuICAgIGJhY2tncm91bmQtc2l6ZTogMTAwJSAxMDAlOyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtaWNvbi1yZWNvcmRTdG9wIHtcbiAgYmFja2dyb3VuZDogdXJsKFwiLi4vYXNzZXRzL3JlY29yZC1zdG9wLnBuZ1wiKSBuby1yZXBlYXQgY2VudGVyO1xuICBiYWNrZ3JvdW5kLXNpemU6IDEwMCUgMTAwJTsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWljb24tcmVjb3JkU3RvcDpob3ZlciB7XG4gICAgYmFja2dyb3VuZDogdXJsKFwiLi4vYXNzZXRzL3JlY29yZC1zdG9wLWhvdmVyLnBuZ1wiKSBuby1yZXBlYXQgY2VudGVyO1xuICAgIGJhY2tncm91bmQtc2l6ZTogMTAwJSAxMDAlOyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtaWNvbi1mdWxsc2NyZWVuIHtcbiAgYmFja2dyb3VuZDogdXJsKFwiLi4vYXNzZXRzL2Z1bGxzY3JlZW4ucG5nXCIpIG5vLXJlcGVhdCBjZW50ZXI7XG4gIGJhY2tncm91bmQtc2l6ZTogMTAwJSAxMDAlOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtaWNvbi1mdWxsc2NyZWVuOmhvdmVyIHtcbiAgICBiYWNrZ3JvdW5kOiB1cmwoXCIuLi9hc3NldHMvZnVsbHNjcmVlbi1ob3Zlci5wbmdcIikgbm8tcmVwZWF0IGNlbnRlcjtcbiAgICBiYWNrZ3JvdW5kLXNpemU6IDEwMCUgMTAwJTsgfVxuXG4uamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWljb24tZnVsbHNjcmVlbkV4aXQge1xuICBiYWNrZ3JvdW5kOiB1cmwoXCIuLi9hc3NldHMvZXhpdC1mdWxsc2NyZWVuLnBuZ1wiKSBuby1yZXBlYXQgY2VudGVyO1xuICBiYWNrZ3JvdW5kLXNpemU6IDEwMCUgMTAwJTsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWljb24tZnVsbHNjcmVlbkV4aXQ6aG92ZXIge1xuICAgIGJhY2tncm91bmQ6IHVybChcIi4uL2Fzc2V0cy9leGl0LWZ1bGxzY3JlZW4taG92ZXIucG5nXCIpIG5vLXJlcGVhdCBjZW50ZXI7XG4gICAgYmFja2dyb3VuZC1zaXplOiAxMDAlIDEwMCU7IH1cblxuLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1pY29uLWF1ZGlvIHtcbiAgYmFja2dyb3VuZDogdXJsKFwiLi4vYXNzZXRzL2F1ZGlvLnBuZ1wiKSBuby1yZXBlYXQgY2VudGVyO1xuICBiYWNrZ3JvdW5kLXNpemU6IDEwMCUgMTAwJTsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWljb24tYXVkaW86aG92ZXIge1xuICAgIGJhY2tncm91bmQ6IHVybChcIi4uL2Fzc2V0cy9hdWRpby1ob3Zlci5wbmdcIikgbm8tcmVwZWF0IGNlbnRlcjtcbiAgICBiYWNrZ3JvdW5kLXNpemU6IDEwMCUgMTAwJTsgfVxuXG4uamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWljb24tbXV0ZSB7XG4gIGJhY2tncm91bmQ6IHVybChcIi4uL2Fzc2V0cy9tdXRlLnBuZ1wiKSBuby1yZXBlYXQgY2VudGVyO1xuICBiYWNrZ3JvdW5kLXNpemU6IDEwMCUgMTAwJTsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWljb24tbXV0ZTpob3ZlciB7XG4gICAgYmFja2dyb3VuZDogdXJsKFwiLi4vYXNzZXRzL211dGUtaG92ZXIucG5nXCIpIG5vLXJlcGVhdCBjZW50ZXI7XG4gICAgYmFja2dyb3VuZC1zaXplOiAxMDAlIDEwMCU7IH1cblxuLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1pY29uLXRleHQge1xuICBmb250LXNpemU6IDE0cHg7XG4gIHdpZHRoOiAzMHB4OyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2Etc3BlZWQge1xuICBmb250LXNpemU6IDE0cHg7XG4gIGNvbG9yOiAjZmZmOyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtcXVhbGl0eS1tZW51LWxpc3Qge1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIGxlZnQ6IDUwJTtcbiAgYm90dG9tOiAxMDAlO1xuICB2aXNpYmlsaXR5OiBoaWRkZW47XG4gIG9wYWNpdHk6IDA7XG4gIHRyYW5zZm9ybTogdHJhbnNsYXRlWCgtNTAlKTtcbiAgdHJhbnNpdGlvbjogdmlzaWJpbGl0eSAzMDBtcywgb3BhY2l0eSAzMDBtcztcbiAgYmFja2dyb3VuZC1jb2xvcjogcmdiYSgwLCAwLCAwLCAwLjUpO1xuICBib3JkZXItcmFkaXVzOiA0cHg7IH1cbiAgLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1xdWFsaXR5LW1lbnUtbGlzdC5qZXNzaWJ1Y2EtcXVhbGl0eS1tZW51LXNob3duIHtcbiAgICB2aXNpYmlsaXR5OiB2aXNpYmxlO1xuICAgIG9wYWNpdHk6IDE7IH1cblxuLmplc3NpYnVjYS1jb250YWluZXIgLmljb24tdGl0bGUtdGlwcyB7XG4gIHBvaW50ZXItZXZlbnRzOiBub25lO1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIGxlZnQ6IDUwJTtcbiAgYm90dG9tOiAxMDAlO1xuICB2aXNpYmlsaXR5OiBoaWRkZW47XG4gIG9wYWNpdHk6IDA7XG4gIHRyYW5zZm9ybTogdHJhbnNsYXRlWCgtNTAlKTtcbiAgdHJhbnNpdGlvbjogdmlzaWJpbGl0eSAzMDBtcyBlYXNlIDBzLCBvcGFjaXR5IDMwMG1zIGVhc2UgMHM7XG4gIGJhY2tncm91bmQtY29sb3I6IHJnYmEoMCwgMCwgMCwgMC41KTtcbiAgYm9yZGVyLXJhZGl1czogNHB4OyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5pY29uLXRpdGxlIHtcbiAgZGlzcGxheTogaW5saW5lLWJsb2NrO1xuICBwYWRkaW5nOiA1cHggMTBweDtcbiAgZm9udC1zaXplOiAxMnB4O1xuICB3aGl0ZS1zcGFjZTogbm93cmFwO1xuICBjb2xvcjogd2hpdGU7IH1cblxuLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1xdWFsaXR5LW1lbnUge1xuICBwYWRkaW5nOiA4cHggMDsgfVxuXG4uamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLXF1YWxpdHktbWVudS1pdGVtIHtcbiAgZGlzcGxheTogYmxvY2s7XG4gIGhlaWdodDogMjVweDtcbiAgbWFyZ2luOiAwO1xuICBwYWRkaW5nOiAwIDEwcHg7XG4gIGN1cnNvcjogcG9pbnRlcjtcbiAgZm9udC1zaXplOiAxNHB4O1xuICB0ZXh0LWFsaWduOiBjZW50ZXI7XG4gIHdpZHRoOiA1MHB4O1xuICBjb2xvcjogcmdiYSgyNTUsIDI1NSwgMjU1LCAwLjUpO1xuICB0cmFuc2l0aW9uOiBjb2xvciAzMDBtcywgYmFja2dyb3VuZC1jb2xvciAzMDBtczsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLXF1YWxpdHktbWVudS1pdGVtOmhvdmVyIHtcbiAgICBiYWNrZ3JvdW5kLWNvbG9yOiByZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMik7IH1cbiAgLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1xdWFsaXR5LW1lbnUtaXRlbTpmb2N1cyB7XG4gICAgb3V0bGluZTogbm9uZTsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLXF1YWxpdHktbWVudS1pdGVtLmplc3NpYnVjYS1xdWFsaXR5LW1lbnUtaXRlbS1hY3RpdmUge1xuICAgIGNvbG9yOiAjMjI5OEZDOyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2Etdm9sdW1lLXBhbmVsLXdyYXAge1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIGxlZnQ6IDUwJTtcbiAgYm90dG9tOiAxMDAlO1xuICB2aXNpYmlsaXR5OiBoaWRkZW47XG4gIG9wYWNpdHk6IDA7XG4gIHRyYW5zZm9ybTogdHJhbnNsYXRlWCgtNTAlKSB0cmFuc2xhdGVZKDIyJSk7XG4gIHRyYW5zaXRpb246IHZpc2liaWxpdHkgMzAwbXMsIG9wYWNpdHkgMzAwbXM7XG4gIGJhY2tncm91bmQtY29sb3I6IHJnYmEoMCwgMCwgMCwgMC41KTtcbiAgYm9yZGVyLXJhZGl1czogNHB4O1xuICBoZWlnaHQ6IDEyMHB4O1xuICB3aWR0aDogNTBweDtcbiAgb3ZlcmZsb3c6IGhpZGRlbjsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLXZvbHVtZS1wYW5lbC13cmFwLmplc3NpYnVjYS12b2x1bWUtcGFuZWwtd3JhcC1zaG93IHtcbiAgICB2aXNpYmlsaXR5OiB2aXNpYmxlO1xuICAgIG9wYWNpdHk6IDE7IH1cblxuLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS12b2x1bWUtcGFuZWwge1xuICBjdXJzb3I6IHBvaW50ZXI7XG4gIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgdG9wOiAyMXB4O1xuICBoZWlnaHQ6IDYwcHg7XG4gIHdpZHRoOiA1MHB4O1xuICBvdmVyZmxvdzogaGlkZGVuOyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2Etdm9sdW1lLXBhbmVsLWhhbmRsZSB7XG4gIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgdG9wOiA0OHB4O1xuICBsZWZ0OiA1MCU7XG4gIHdpZHRoOiAxMnB4O1xuICBoZWlnaHQ6IDEycHg7XG4gIGJvcmRlci1yYWRpdXM6IDEycHg7XG4gIG1hcmdpbi1sZWZ0OiAtNnB4O1xuICBiYWNrZ3JvdW5kOiAjZmZmOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2Etdm9sdW1lLXBhbmVsLWhhbmRsZTo6YmVmb3JlIHtcbiAgICBib3R0b206IC01NHB4O1xuICAgIGJhY2tncm91bmQ6ICNmZmY7IH1cbiAgLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS12b2x1bWUtcGFuZWwtaGFuZGxlOjphZnRlciB7XG4gICAgYm90dG9tOiA2cHg7XG4gICAgYmFja2dyb3VuZDogcmdiYSgyNTUsIDI1NSwgMjU1LCAwLjIpOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2Etdm9sdW1lLXBhbmVsLWhhbmRsZTo6YmVmb3JlLCAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLXZvbHVtZS1wYW5lbC1oYW5kbGU6OmFmdGVyIHtcbiAgICBjb250ZW50OiAnJztcbiAgICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gICAgZGlzcGxheTogYmxvY2s7XG4gICAgbGVmdDogNTAlO1xuICAgIHdpZHRoOiAzcHg7XG4gICAgbWFyZ2luLWxlZnQ6IC0xcHg7XG4gICAgaGVpZ2h0OiA2MHB4OyB9XG4iXX0= */";
+    var css_248z$1 = "@keyframes rotation{0%{-webkit-transform:rotate(0deg)}to{-webkit-transform:rotate(1turn)}}.jessibuca-container .jessibuca-icon{cursor:pointer;width:16px;height:16px}.jessibuca-container .jessibuca-poster{position:absolute;z-index:10;left:0;top:0;right:0;bottom:0;height:100%;width:100%;background-position:50%;background-repeat:no-repeat;background-size:contain;pointer-events:none}.jessibuca-container .jessibuca-play-big{position:absolute;display:none;height:100%;width:100%;background:rgba(0,0,0,.4);background-image:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACgklEQVRoQ+3ZPYsTQRjA8eeZZCFlWttAwCIkZOaZJt8hlvkeHrlccuAFT6wEG0FQOeQQLCIWih6chQgKgkkKIyqKCVYip54IWmiQkTmyYhFvd3Zn3yDb7szu/7cv7GaDkPEFM94PK0DSZ9DzDAyHw7uI2HRDlVJX5/N5r9FoHCYdr/fvCRiNRmpJ6AEidoUQ15NG+AH8BgD2n9AHANAmohdJQfwAfgGA4xF4bjabnW21Whob62ILoKNfAsAGEd2PU2ATcNSNiDf0/cE5/xAHxDpgEf0NADaJ6HLUiKgAbvcjpdSGlPJZVJCoAUfdSqkLxWLxTLlc/mkbEgtgET1TSnWklLdtIuIEuN23crlcp16vv7cBSQKgu38AwBYRXQyLSArg3hsjRDxNRE+CQhIF/BN9qVAobFYqle+mkLQAdLd+8K0T0U0TRJoAbvc9fVkJId75gaQRoLv1C2STiPTb7rFLWgE6+g0RncwyYEJEtawCvjDGmpzzp5kD6NfxfD7frtVqB17xen2a7oG3ALBm+oMoFQBEPD+dTvtBfpImDXjIGFvjnD/3c7ksG5MU4HDxWeZa0HB3XhKAXcdxOn5vUi9gnIDXSqm2lHLPK8pkfVyAbSLqm4T5HRs1YB8RO0KIid8g03FRAT4rpbpSyh3TINPxUQB2GGM9zvkn05gg420CJovLZT9ISNA5tgB9ItoOGhFmnh/AcZ/X9xhj65zzV2Eiwsz1A1j2B8dHAOgS0W6YnduY6wkYj8d3lFKn/j66Ea84jtOrVqtfbQSE3YYnYDAY5Eql0hYAnNDv6kKIx2F3anO+J8DmzqLY1goQxVE12ebqDJgcrSjGrs5AFEfVZJt/AF0m+jHzUTtnAAAAAElFTkSuQmCC\");background-repeat:no-repeat;background-position:50%;cursor:pointer;background-size:48px 48px}.jessibuca-container .jessibuca-play-big:hover{background-image:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACEElEQVRoQ+2ZXStEQRjH/3/yIXwDdz7J+i7kvdisXCk3SiFJW27kglBcSFFKbqwQSa4krykuKB09Naf2Yndn5jgzc06d53Znd36/mWfeniVyHsw5PwqB0DOonYEoijYBlOpAFwCMkHwLDS/9mwhEDUCfAAyTXA4tYSLwC6CtCegegH6S56FETAR+AHRoACcBTJAUWa+RloBAXwAYIrnt0yBNgZi7qtbHgw8RFwLC/QFglOScawlXAjH3gUqrE1cirgVi7mkAYyS/0xbxJSDcdwAGSa6nKeFTIOZeUyL3aYiEEBDuLwDjJGf+KxFKIOY+BdBL8iipSGiBmHtWbbuftiJZERBuOfgGSK7aSGRJIObeUml1ayKSRQHhlgtkiaTcdltGVgUE+ppkV54FaiS78yrwqlLoOI8Cch2XV548W7WRpTVwA6DP9kGUFYEpAOUkT9LQAvtq1M+0udKkQSgBqSlJWWYxKXj8vRACK+o6bbRIdYI+Ba7U7rKjg7L53JdAhWTZBsy0rWuBXZUuNVMg23auBF7UIl2yBbJt70JAoKV6/WwLk6R9mgKSJlJ1kLTxFmkJyCla8UZd15GJQKvyumyJ8gy8DAEvfZoINPqD41EtUjmUgoaJwAaAnjrKebVI34OSq85NBNqlCAWgE0CV5GEWwI3vQlmCbcSinYFCwPEIFDPgeIC1P1/MgHaIHDf4Aydx2TF7wnKeAAAAAElFTkSuQmCC\")}.jessibuca-container .jessibuca-loading{display:none;flex-direction:column;justify-content:center;align-items:center;position:absolute;z-index:20;left:0;top:0;right:0;bottom:0;width:100%;height:100%;pointer-events:none}.jessibuca-container .jessibuca-loading-text{line-height:20px;font-size:13px;color:#fff;margin-top:10px}.jessibuca-container .jessibuca-controls{background-color:#161616;display:flex;flex-direction:column;justify-content:flex-end;position:absolute;z-index:40;left:0;right:0;bottom:0;height:38px;padding-left:13px;padding-right:13px;font-size:14px;color:#fff;opacity:0;visibility:hidden;transition:all .2s ease-in-out;-webkit-user-select:none;user-select:none}.jessibuca-container .jessibuca-controls .jessibuca-controls-item{position:relative;display:flex;justify-content:center;padding:0 8px}.jessibuca-container .jessibuca-controls .jessibuca-controls-item:hover .icon-title-tips{visibility:visible;opacity:1}.jessibuca-container .jessibuca-controls .jessibuca-fullscreen,.jessibuca-container .jessibuca-controls .jessibuca-fullscreen-exit,.jessibuca-container .jessibuca-controls .jessibuca-icon-audio,.jessibuca-container .jessibuca-controls .jessibuca-microphone-close,.jessibuca-container .jessibuca-controls .jessibuca-pause,.jessibuca-container .jessibuca-controls .jessibuca-play,.jessibuca-container .jessibuca-controls .jessibuca-record,.jessibuca-container .jessibuca-controls .jessibuca-record-stop,.jessibuca-container .jessibuca-controls .jessibuca-screenshot{display:none}.jessibuca-container .jessibuca-controls .jessibuca-icon-audio,.jessibuca-container .jessibuca-controls .jessibuca-icon-mute{z-index:1}.jessibuca-container .jessibuca-controls .jessibuca-controls-bottom{display:flex;justify-content:space-between;height:100%}.jessibuca-container .jessibuca-controls .jessibuca-controls-bottom .jessibuca-controls-left,.jessibuca-container .jessibuca-controls .jessibuca-controls-bottom .jessibuca-controls-right{display:flex;align-items:center}.jessibuca-container.jessibuca-controls-show .jessibuca-controls{opacity:1;visibility:visible}.jessibuca-container.jessibuca-hide-cursor *{cursor:none!important}.jessibuca-container.jessibuca-fullscreen-web{position:fixed;z-index:9999;left:0;top:0;right:0;bottom:0;width:100%!important;height:100%!important;background:#000}.jessibuca-container .jessibuca-icon-loading{width:50px;height:50px;background:url(\"data:image/png;base64,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\") no-repeat 50%;background-size:100% 100%;animation:rotation 1s linear infinite}.jessibuca-container .jessibuca-icon-screenshot{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAE5UlEQVRoQ+1YW2sdVRT+1s7JxbsoVkEUrIIX0ouz15zYNA+N1RdtQfCltlUfvLbqL/BCwZ8grbHtizQqPojgBSr0JkiMmT2nxgapqBURtPVCq7HxJCeZJVPmxDlzZubMmXOSEsnAvOy917fXt9e39tp7E5b4R0vcfywTuNgRbBgBx3HuJqLVzPzmYjprjHkcwAlmLqXNm4XAISLaSESPaq2HF4OE67rbRGRYRA7btn1fbgLGmKsA/Azg0gBkGzO/vZAkHMd5hIiqc5wHcCMz/5k0Z2oExsfHV1QqldPAf8lORNu11m8tBAljzFYAYWxRSl1vWdZvuQj4RsYYF4AVBlgIOVVlE55HRIxt23ZuCfmGjuOsJ6LPoiAistW27XfaEYmIbOYhPc9bXywWR1oiEJDYQkR1zrYjEjGyqfqbKd8a7kJVtLgQ+30i8pht2wfyRKIdmJkJBPkQTbILfudJ7CTZNBvVpggEcgpvc/ML38zESbLJsxBNE/A9biX0rdjGyTQXgbxyapdsarb0PMlXtWnGoXbKpm0Essqp3bJpK4E0OXmed3+hUBDP8w5FI91M0rdcyLLILElOCbaZilSWeXMncRx4klTCY1spfG3dhZJWx3GcDUR0EEB3ZMw0ET2gtT6SZWWzjmlrBIJCl0hAKfWgZVmHszqXZVxbCSxpCS2JJA6umIhe8ZKKVLPbaBJ+S9toqVRa53nedgAbAKwIwH4FcAzAa0R0l4i8F7PPz189k6RFRA+LyNcAXojDV0oNW5b1eW4Cxpg9AHZkSaaa6hhzb065uDSCH2LmRB8Sk9gY4293g43Qo/1pV80m8yQMfZSZ781cB1zXHRKRZ2IMpgD8A+DamL4ZItqitX4/jbQx5iEA7wLoihn3V/ACckWMJN/QWj9b1x5tGBsbW6uUOh5pPy0iL3Z2dn6ilJqanp5ep5TaJSLhF4NppdRNaU8gPmapVLrO87yfIoXuWyJ6uVKp+HmFjo6OQSJ6FcBtYT+UUmstyxqvkWuUgDFmP4AnQu2/e563qlgs+u9DNZ8xZhRAX7VRRPbath0XuXk7Y8xeAE+FgL6fnJzsHRwcLIfBR0ZGLunq6poAsDLUvp+Zw7b1r9PGmJMAbg8Z7WDmoThZuK67WkS+DD18fcPMdzSQUBR/EzN/nIC/SUQ+DPXV4dclsTHmHAD/SfHCNzc3t7Kvr++HJKeMMacA3BL0nyuXyzcPDAxMxo0fHR29slAo/Ajg6qD/fE9Pzw29vb1/x42fmJi4vFwu+5G/LOg/y8zXNJLQ2dAES5JANMQ7mfn1jBI6ycx3NiMhItqstf4oAX+ziHwQ6qvDj5NQNIn/ALCKmX+JSeIvABRD7fuY+ekGBPYBeDI05tTMzExvf3+/vz2Hk91/ET8RSeI6/DoCpVJpjed5fmKGvzMAXpqdnT3oed5Ud3d3v4jsAqBr9Ei0Rmv9VRqBBPzvROQVETnq2xJRdRu9tRF+bCVOKWT+Kvl/TSIFk6SW/LAjKfjV5K8rZABi8dOOEv7FI7Z8x6zwEWbemLbyMfJr5qiSiJ96oclymBOR3bZtP9+M89WxxpjdAHY2sN3DzM8ljWl4I3Nd9x7/OE1ENcdpETnmH3e11n41zv0l4J8RkU+J6AAz+xtF4teQQG7PFslwmcAiLfSyhC72Qv9/I/Avns2OT7QJskoAAAAASUVORK5CYII=\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-screenshot:hover{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAED0lEQVRoQ+2ZycsdRRTFf2ejqHFAMQqiYBTUoElUHLNx3GgCgpuYRF2o0UT9CxwQ/BMkMSbZSKLiQgQHUDCJgjiAxiEiESdEcJbEedgcKaj3UV+/6q7u/jovPPkK3qbr1ql76p5bt6qemPKmKfefeQKHOoLFCNg+H1gi6fFJOmv7VmCvpD1N87Yh8ApwNXCzpB2TIGF7DRDm2inpmt4EbB8LfAMcGUHWSHryYJKwfRMwmuMP4BRJv9TN2RgB2wuB72BWsq+V9MTBIGF7NZBiGzhJ0o+9CIRBtt8FLqgADC6nRDbpVO9Iuqi3hCKB5cDrGZDVkp4aIhIV2aSQyyW9MScCkcQqIOfsnCORkc3I31b5VtyFRmg1IQ7dt0ja3icSQ2C2JhAjUU2ykd+dE7tBNp2i2olAJJFuc+nCt564QTadF6IzgUhiVGiqyinKaQjZpJP2ItBXTkPJZhACXeU0pGwGI9BWTkPLZlACBTldG4o5EA6E1dY66edcyNrs8Q36zg1vVaTazNs7iXPgDVJJzYs7VRvHRzaDEohyugJ4CTi84sg/wHWSdnVxsGQ7aQLXS9pZcqpL/6AEplpCU5HE8YpJ9YrXUKQ6baN1+HPaRm1fBqwFQnKGK2ZoPwCvAo8Ai4FnMpPMHMwapHUj8DFwbw3+Dklv9iZgexOwvktSRduxU2VDlErwmyXV+lCbxLbDdndlCT3TX3vV7JgnKfRuSVflfMkSsL0ZuDMz4E/gL+CETN+/wCpJzzaRtn0D8DRwWMbu1/gCcnSm7zFJd1W/jxGwvQx4r2IYnlbuA14GAomQFw8B6YtBKFSnNj2BxEJ3IvB1pdB9CjwQ8yqYhcg/DJxZ8WOZpA/SbzkC24DbEqOfgPMkBRKzmu23gEuSj1sk5SI3Y2J7C3BHMuZz4FxJf6fgto8APgIWJd+3SUrHjr9O294HnJUMWi8pSGqs2V4CvJ88fH0i6eyChKr4KyS9WIO/Ang+6RvDz0XgABCeFEdtkaQv65yy/QVweuwPY0+T9FuNQ8cAXwHHxf7wdHiypN9r7BfEl8GjYv9+SceXJLQ/mSDYTh2Baog3SHq0pYT2STqno4RWSnqhBn8l8FzSN4bfJol/jkn8bXUS228DFyfft0paVyCwFbg9sQkSDEkctueZZju8iO+tJPEYfo7A0piYKd73wP3xnB+20cvjNnphxdmlkj4sEMjhfwY8COyOY0fb6Bkl/K6FLKxS+M1KpDhJY8mvrG5doRwlf66QZfGbjhLh4pEt35kV3iUp/IvTunU8qtTil/7gaHOY2yjpntaez9b5RmBDYewmSXfX2RRvZLYvbThOh+NuqMa9Ww1+yLnXgO2SwkZR24oEens2oYHzBCa00PMSOtQL/f+NwH+Hg8hAnbrYgQAAAABJRU5ErkJggg==\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-play{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACgklEQVRoQ+3ZPYsTQRjA8eeZZCFlWttAwCIkZOaZJt8hlvkeHrlccuAFT6wEG0FQOeQQLCIWih6chQgKgkkKIyqKCVYip54IWmiQkTmyYhFvd3Zn3yDb7szu/7cv7GaDkPEFM94PK0DSZ9DzDAyHw7uI2HRDlVJX5/N5r9FoHCYdr/fvCRiNRmpJ6AEidoUQ15NG+AH8BgD2n9AHANAmohdJQfwAfgGA4xF4bjabnW21Whob62ILoKNfAsAGEd2PU2ATcNSNiDf0/cE5/xAHxDpgEf0NADaJ6HLUiKgAbvcjpdSGlPJZVJCoAUfdSqkLxWLxTLlc/mkbEgtgET1TSnWklLdtIuIEuN23crlcp16vv7cBSQKgu38AwBYRXQyLSArg3hsjRDxNRE+CQhIF/BN9qVAobFYqle+mkLQAdLd+8K0T0U0TRJoAbvc9fVkJId75gaQRoLv1C2STiPTb7rFLWgE6+g0RncwyYEJEtawCvjDGmpzzp5kD6NfxfD7frtVqB17xen2a7oG3ALBm+oMoFQBEPD+dTvtBfpImDXjIGFvjnD/3c7ksG5MU4HDxWeZa0HB3XhKAXcdxOn5vUi9gnIDXSqm2lHLPK8pkfVyAbSLqm4T5HRs1YB8RO0KIid8g03FRAT4rpbpSyh3TINPxUQB2GGM9zvkn05gg420CJovLZT9ISNA5tgB9ItoOGhFmnh/AcZ/X9xhj65zzV2Eiwsz1A1j2B8dHAOgS0W6YnduY6wkYj8d3lFKn/j66Ea84jtOrVqtfbQSE3YYnYDAY5Eql0hYAnNDv6kKIx2F3anO+J8DmzqLY1goQxVE12ebqDJgcrSjGrs5AFEfVZJt/AF0m+jHzUTtnAAAAAElFTkSuQmCC\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-play:hover{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACEElEQVRoQ+2ZXStEQRjH/3/yIXwDdz7J+i7kvdisXCk3SiFJW27kglBcSFFKbqwQSa4krykuKB09Naf2Yndn5jgzc06d53Znd36/mWfeniVyHsw5PwqB0DOonYEoijYBlOpAFwCMkHwLDS/9mwhEDUCfAAyTXA4tYSLwC6CtCegegH6S56FETAR+AHRoACcBTJAUWa+RloBAXwAYIrnt0yBNgZi7qtbHgw8RFwLC/QFglOScawlXAjH3gUqrE1cirgVi7mkAYyS/0xbxJSDcdwAGSa6nKeFTIOZeUyL3aYiEEBDuLwDjJGf+KxFKIOY+BdBL8iipSGiBmHtWbbuftiJZERBuOfgGSK7aSGRJIObeUml1ayKSRQHhlgtkiaTcdltGVgUE+ppkV54FaiS78yrwqlLoOI8Cch2XV548W7WRpTVwA6DP9kGUFYEpAOUkT9LQAvtq1M+0udKkQSgBqSlJWWYxKXj8vRACK+o6bbRIdYI+Ba7U7rKjg7L53JdAhWTZBsy0rWuBXZUuNVMg23auBF7UIl2yBbJt70JAoKV6/WwLk6R9mgKSJlJ1kLTxFmkJyCla8UZd15GJQKvyumyJ8gy8DAEvfZoINPqD41EtUjmUgoaJwAaAnjrKebVI34OSq85NBNqlCAWgE0CV5GEWwI3vQlmCbcSinYFCwPEIFDPgeIC1P1/MgHaIHDf4Aydx2TF7wnKeAAAAAElFTkSuQmCC\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-pause{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABA0lEQVRoQ+1YwQqCUBAcfWXXsLr2AXWTPXno8yVB8AP6Aa3oHI+kCDqYaawJljSe133uzO44bx0M/HEG/v1gAd9mkAyQgY4I/F8LJUlyrQFtD2AtIkcNoFEU+Z7n7QD4DfFHEVlocrVmgAUAIAOl3mILPcDgEFcUhyrUKMGUUcroc3NQRimj9XJBGaWMvvPydKN0o6/9QTdKN6rZANxj6EbpRulGuZnjYqs8BbyR8Ub2Izeys+u6yyAIDpo/ehzHM2NMDsA0xFsRmWhyfTIDWSXxCEBmrd2EYXjSHJqm6bQoii2AOYBL5Z0xgFxEVppcrQvQJO0zhgX0iXbdWWSADHRE4AZQ731AhEUeNwAAAABJRU5ErkJggg==\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-pause:hover{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAA7klEQVRoQ+2YSwrCQBBEX6HiVvxsPYDewfN7By/gD9ciQkvERQwJdBSiYs0mEDo96aruombEjy/9+P/jAj7NoBkwA28i8H8tFBFRA9oeWEo6ZgCNiDGwAYpn3TpKmmVytWbABQBmoNRbbqEHGB7iiuJYhRol2DJqGX1uDsuoZdRmLuNZSzGWUcuoZdRHSp/IylNgK2ErYSthK3FHwLcSvpXIjoLt9Jfa6TMwl3TIMBkRE2AH9BriL5KGmVyvWIltJXEfKN6tJJ0ym0bECFgDU+Ba+WZQFCdpkcnVuoBM0i5jXECXaNftZQbMwJsI3AAPN3dAQflHegAAAABJRU5ErkJggg==\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-record{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAC+UlEQVRoQ+1ZS2sTURT+zlDJYE3XSq219QHVuEjnJDT+Bff9Abqw2voAEfGxqygUqWhVFHGl/yMLu9BwByxk5SNI66ML6U7axjhHbmhgWiftncxoOiV3FcI53z3f/e65594zhIQPSnj86BBot4IdBToKRFyBnbeFlFIScVEiuYvIWC6Xe2YK8pcC7SYA4CMzH4mDQBXAqilQBDsLQLfPf9FxnF4i8kwwmypARI+Wl5dvmIBEsUmlUkNE9NaHsVCpVAZGR0d/m+A2JSAid3K53E0TkCg2pVKpz7KseR/GfKVSGYxMAMA0M1+JEpyJb6lUOm5ZVnkrAsVisaunp+esiByr1Wp3R0ZGvmifzZK4XQQWHMc52MgBpdQuAOcAXABwuB400ZTjONdaIjA7O5u2bVsnWU1EujzP+5nP5xdMVjvIJkCBD8x8VCm1G8AYgAkAAxt8Z5j5YmgCSqlTAJ4D2OcD/AXgATNfbYVEAIFPIvKKiE4D6GuCea8xX6gtpJT6DmBvECgRFRzHeROWRAABE4iWCbwHEFhkPM/L5vP5dyaz+23+KwHXdR3P854S0YG1ILSCuthNMfNM2OC1/RYENLY+ygcBnPfht6ZAA6BYLNr6dyqVokKhsGpaNQ2TWJstreXaE2aed133sojcj41AKyvdzCdAgSXLsk4MDw9/a/i4rntbRPxFNZoC/5jAV2be759DKTUJ4FZSFFi0bbs/k8noy2R9dAjEuWU2YgXkQOK3kD6BMsysi2Z9JC2Jdcw/ALzwPO+xvmcl7Rj177JVEbkO4BARjSflFDJJuW1dBxJPoCIiL4noDIB1BS0pW6j+oJmbm+uuVqvjRKQfLr0bZHnIzJf0f6HeAybahrUJqAPruhLlcnnPysqKfpXp11n/Gv62zoHAroS+AafT6QkiGrIsazKbzX7eVIHEt1US39gCkOzWYthkjNE+tuZujDGZQ8XRXn8N4KT5lLFZ6uaYPt+nwyDuvC80YdhvB9uOAu1WoaNAR4GIK/AHvdr+QAexB7EAAAAASUVORK5CYII=\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-record:hover{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACfUlEQVRoQ+2ZSYsUQRCFvycK4nJXXEbHBdwO4kn/gv9CD467ICIutxEFkREdFUU86T/xojcPntyQcT2INw+uISFVkD1Wd2dWlU7nUHlqisiX+fJFZGREi8yHMt8/HYG5VrBToFOg4QnMPxcyM2t4KE2nT0i6EwvylwIjQOCFpE1tEPgGfI0FamC3AFgazP8IrJL0KwZzkAI3gLMxIA1ttgCPA4w3wHpJP2NwBxG4KOlcDEgTGzNbA8wEGP57vA0CU5JONtlczFwz2wY8HUbAzBYCB4CtwCVJb33OIAXmioC70LoyBsxsEXAQOApsLIhelnS6FgEzW+5BBvwA/FS+SPJFa40KBZ5L2mxmS4AJ4IjHxCzwaUnHkgmY2V7gLrAyAPwOXJN0qg6DCgIvgQfAPsDjo2pcKddLciEz+wCs6AO6W9KjVBIVBGIgahN4BvRLMjslPYlZPbT53wR2AbeBtcUmXEFPdh5U06mbd/shBBzbr/Jx4FCAX0+BEsDMFocEYrNmFcE+BD4XsXZL0oyZnQCutkagzkn3m1NBwDe/Q9L74MAuFEqUn5op8I8JvJO0elacTALnc1HAH3Njkvwx+WeYWUegTa/pwaqIgexdyIN4uyRPmqULZRXEvulPwD3gpr+zcrtGQxfzRHYG2AAczuUWiom3kc4D2RN4BdwH9gM9CS0XFyoLGu9UuN974eIFVDiuSzruH5LqgRhtU20q8kBPV8LMlhVVmVdnYwX+SMdAZVeieAF7eeltmElJr4cpkH1bJfvGVvatxdR4bMu+teZuWxtKxWncXn8I7EldtQV7vz79fp9KwZp//9CksB8F206BuVahU6BToOEJ/Ab7+KdABdTt8AAAAABJRU5ErkJggg==\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-recordStop{background:url(\"data:image/png;base64,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\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-recordStop:hover{background:url(\"data:image/png;base64,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\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-fullscreen{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAHTElEQVRoQ+1Zb4xcVRX/nZl5u2/LrrO0EFKoBYpVaRu3u/e+3WlDZJdIRLQhNLIiEggxqURIjGmqTTAmWiRpjH4wghq+KIQYupYQEvEDmEVdyu7OfbPbzQaEYqtSwTb4Z3aV7s6b9445mzvm7XRm3oy7oanZ82ny5txzz++ec8+/S7jIiS5y/bEG4EJbcJkFpqenryqXy6cbKBUB+AeANIBuAG8AuAzAn06ePOkNDw+H9dZOTU11h2H4EwB7ALwL4FIA7wFw7O9aSxkAE9H9SqnHazGc50LGGFFQlGuW/pbNZq/aunXrYtICY8xmAD8C8HEAnUn8sf9/oLX+SiKAQqFweRRFvwewvgbzmwA+BOAkgEsAZAG85rpubseOHaVmlTHGfBTAYwA6gKU7WCaiOWaWPT9mv1eLO6S1/mYiAGPMddYtUtXMRPRVx3F+FkXRup07d/7FGDMEYExrHTSrfIVvfHx8Uy6XO22MWae1fu/IkSPpbdu2pRcWFmpakYgeVEo92gyAdQCKADI1HZL581rrp4lIfHPV6Pjx45cEQfCvBgL3a62/nwhgZmbm0lKp9OeYf56rMqmc9v4oikb6+/v/uhoIGigvAUGChdBBrfXhRAD5fL6XiCZsZDhHRAeY+VBVlIiYeTQMw725XG5uJSDqKc/M9xDR1wFsF/lEdKdS6ulEABMTExvS6fQMgCsBhPPz825nZ+dnieinANrjApj5mSAI7t61a9fC/+JSDZS/t62t7WgQBH+0IVoA7GsqjDIz+b4vCyXcnSuXy9fmcrkz+Xz+TgB3ENHeqlN43HXdB7dv3x60AqKR8p7nPXHixIn2YrEo7itRipn5057n/SrRAhbA320eEAGbtdbvyvfJycn16XR6BIBEnzg9PD8//63BwcGwGRBJylcEG2MkbEtUFAS3NgVAmI0xkl23Wt/bppR6rSK0UChcGUXRcwBUFYjDWuuDSffBHpBk82XEzPfKyVc+Wlf+HQDJGQLgDs/zjiZawJrudQBXAzirlNpIRMs2nJiY+HA6nRYQH4kJ7NZaS/htSBLlgiB4jJnFJZeoWnn7jYwxDxCRJK/LmXnI87yXEgHEzHs2m81urlce5PP5fiL6BYAPAmhrJZmNjo5murq6ngdwcy3lK0rKYc7Nze1n5gNE9Cml1HgiAGviguu6A0nlge/7N83Nzf12aGionHTy1f+Pjo5KdBuOu00tGZKpmfmHAJ5oygJjY2Nd3d3di0nKt6rwSvjFK6Iocnp7e/+ZaIGVbHSh1q51ZBfq5Cv7rllgzQIrPIGLwoUkqdVLqssASCKbnp6+ure3VyrSRGLmVHWpkbioRYbx8fErHMcZbKofsGMVKRHu01pLc1+XJMGUSqXPEdGTrZQSIlAycVdX1+FSqXRw9+7dUvXWJFE+k8lI53e71vrZphKZMeYPMvvJZDK3SfNea1GsZpoH8EWl1NFmLTE7O9u2sLDwNoANAA65rvtwrcw/NTV1TRiGp2w/8AXP836eCMAWWicAXENEvymXy/sGBgakvP4v1ajnzzDzl7TWzyX1A1KquK4r7hkf2xxQSn2vem2sHwijKLqlv7//xUQAtpyW6YBMJUJm3hNvJBo0I3XL3fim1kVfAHB9/Dsz3+95nkztlsgClYr1BgBRKpW6oa+v75VEAMJgjDkrNbj8jndCzXZSSXfU930l/bRtWyvsC+KKAEYq98kYIzy3W4abtNajiQCsBQTAByzzsNZ6ZLWUrygwOTl5YyqVEgXjriQjzVcdx9nb09Nz1vf9F5j5EzK5Y+ZBz/NeTgRw7Nixjra2NpkLycBW5jK3OY7zUq2hU6NmJMkK8r/v+3uYWXrsZdMOAM86jnN3EAS/BjAgjgDgy1rrHycCsBNkCZ9X2DtwIxGNVS9cqfLWPalQKNzFzN8GcK2dQCxtRUTSxPQx827L+13P876WCMA27W8BOG82Wlm8GsrHZNHIyEhqy5YtvwTwyXqWI6KHlFKPJAKwYVSiULVZl9aupvJxZexIU+J8TRBE9B2l1DcSAdjLKneg1nh9fzabfbRYLG4qlUpvd3R0bCqXy7tOnTr1VKOHjVqb2jC5j4gmwzAM0+l0OgzDVCqVkvGhuO8yYuZHPM97KBGA7/vXM/O0TBpqMMvo+x17waWGkhLgMrGK1vrJpCRWkRcrD+STvCvIXiJLhgNdddzoAa21vCmcR8uKOWPMRgBSPrRSpcpY8T6l1FNJ0UfeBTKZjNyxlqg60cUXL1PUupBsIO9XMkqX96v4mFvcS0Z+Mg86TUTtzCxvCh1E9BmllPxXk+zrzxQRzTBzJxG5zCzuIjJ32DG+WCOuk1hFqoKlfNSMBWSU5zDzFnEPInqLmSWpbZANARzRWr8jQHt6ev4tAuX34uLi+iiKiknjdskzlepzdna2s729PSgWi24YhuszmYxn99sYRdHSGx0RnUmlUqf7+vqO1zuYVlylJbO/X8xrAN6vk15zoQt90v+3FvgPXUePXrKTg9MAAAAASUVORK5CYII=\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-fullscreen:hover{background:url(\"data:image/png;base64,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\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-fullscreenExit{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADd0lEQVRoQ+2Zz2sdVRTHv+fJBDW6anDVXen6wZszYxYBiYgtFGst3VSDunKjpS0GpUlqfjVpsVVs6aaL0or4YxMVFCJZ2ZLdPUP+gq5bQnTxtNAkfTnlhnnlkmQy9yV9780rudt77tzv5/y4v4bQ4Y06XD/2ANodwec/AiJygJnvtdvTWfPnRkBEJAiCN8rl8kMfiPn5+Ve7u7v3rays0Orq6lJfX99/PuN2auMDoAD+BvA2M6/mTWSMOUtE48D6AjHGzN/kjdlNvy+AnWOOmQ/lTSYiEwDOWzsimgrDcCRvzG76GwGw8/zJzO9sN6GInAMwbW1UdSSKoqndCMwb6wNwGsB39Q+p6h/M/C4R2dTa1AoHYBWKyCkA1+pqiWi2Wq0e7e/vf7yRoJAAKcQggMtuJKIoOtoxACnE0/xOi/SXMAxPuhCFjUBdpIjYVWXSEf0TM3/g9BeriDMKdSPEz8z8vrU1xgwT0YXCrEJZy1iSJKOqOub0/8jMA0mSfKKqNwoPkHp7ioiGHIhRIvpHVa93BEBa2JcAfOlALAHo6RgAKzRJkk9V1S6xL7kpV4idOM31taxaIKJHqmpPnMMA9hcOQES2PDJkAT1XAAC+ZebPfWB3auNzmLObVsNRUNUXVHUujuM7OxXnMy4XwOcj29mIyOuq+lapVGrYCelKpkEQ3CyXy4tbzdN0AGPMxr2iYZ+sra3FcRybtgCIiK2BKw2rdgaUSqWoUqlIkQAepFDdAF7cBq5ERI9rtdr1OI7tmE2t6SmUEYFHAEaexYW/1QC2EF+ru5GIvg7D0D2GNJxprQY4o6qv1I/b6SpzOYqiLxpWng5oOQAzXxWRWwA+dkRfYOb1p5hGW6sBJpn5KytSRG4D+KguWFXHoyhy7xdeLC0F2ChSRL4H8OFuINoKYIUbY34gogHH3eeZef1K6tPaDpCm068A3nMEDzHzxY4BUNWSiPxORO6z5aDPPlGICNQ9bYyZIaLjjudzIQoFkKbTbwCO+UI0HcB9J/LdeY0xs0R02IGYYObRrWqiFQCfEZEtSHsfmGZm+4qxbbM/hQD8BeBNa0hEM2EYnmgLgP3lFARBT1dXly4vL//b29tbzQNIU+llAHeJaLFSqRzJes5vegR8xGbZLCwsHKzVav8z8/0sm0ID+MDvAfh4qZk2exFopnd9vv0ELrXBQO7fD10AAAAASUVORK5CYII=\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-fullscreenExit:hover{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAC/ElEQVRoQ+2Zy49NQRCHvx+ReK6IlZ34E7CUiCAR4xEbTLCyQRATYswwb2IQZDYWgojHZpCQECts+ResiQwLj0RClNSkb9Lu3HtPz7mZc8+V6eXt6tP1VVV3VdcVbT7U5vozC9BqD/7/HjCzlZLet9rS9fbP9ICZvQPWSfqRAmFmS4ClMHm+JiR9S1mXVyYFwIBXwEZJv7I2MrPjQH8A6JN0OWtNM/OpAL7HS0mbsjYzswGgN8gNS+rJWtPM/HQAfJ9nkrY22tDMTgMjQaZH0nAzCmatTQE4ClyNPvQU2CbJQ2vKKB2Aa2hmR4DrkbbPgQ5Jv6sJSgkQILqA0dgTkjraBiBAxPHtPz2UtDuGKK0HKkqamd8qg5HS9yXtjebLdYjrHNRqiAeS9gQvnQGGSnML1bvGzOwc0BfN35PUaWYHgRulBwjW9ju+O4JwqM/AWFsABIgLwKkIYgJY1jYAAeJQuGIXVIVcKTKxh8WfBin9J+AVpx/eFWUEqFkyNACKp0rhgWYArkg6kQibSyylmPOklQdibijBX+fSLHFRJkDid+qKmdlaYENOI0zeEcBNSZ9qbVIEQHWuyGOTNZLetgrAz8ClPFpHa1ZL8rf5lFGEB2oBfAxQi4D5DeDmAP7mGJPka0oD4LnDr9imH/xFe8AP4vLIjBclxWXItCOtaIBjwOKo3HaFRyWdnLbmYUHhAJKumdkt4ECk9JCkSitmWixFAwxKOjt5uZvdBvZH2vZLit8XSSBFA/yjpJndAfY1A9FSgOCJu0BnBNErqfIkzfRCywECxCNgR6Rtt6TzmdqHBmyKXG4ZM4sTWc04NzNPWE+AuG3ZlZInSuGBinXMbBzYGVkrE6JUACGcHgPbUyGKAIj7REmZ18y897o5ghiQ5E/bltRChwE/kF7Xj0jyLkbDYWbzgBfA+iA4LmlXqwD8LydvszjAF0lfswBCKC0E3gBeP22p186f8RBKUbaejJmtAr5L+lBPptQAKfCzAClWmkmZWQ/MpHVTvv0X9iFAQGQyevIAAAAASUVORK5CYII=\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-audio{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACrUlEQVRoQ+2ZPYgTURCAZzbBXJnCeL2Cnb87b9MEtPBUrrMQFAtrtT5/ClGs9LBWWz0RtbBUFCF4oJDsbO68wsLA2YqQSmLlvpEHu7IuMdlLcus+yUKKhJfZ+ebnvZl5CJY/aLn+MAP41x7M1QPMfFtr/crzvHfTAs8FoNPp1LTWzwHgqIg0lFLvrQHwfX8BER8DwC6jNCIecF13wwoA3/dvIuKNpLJa60Oe560XGoCZd4rICiKeTCtaeABmPg4AJmRqg6xcaABmvg4At4aFRyEBhoVM4UMoCplHADCfJTEL5YEsIVNID5iQAYCHALCYxeq5b6PMfF5EBAAEESthGK7W6/XPRpFWq7W3VCqtZg2ZcT3g+/6i4zjzIlLSWn/yPO/DIGMNLCWY2Sj/+xGRK0qpZfNDEASnROTFVi0fr8+aA8z8Ld6KEfGt67oLYwMAwEUium8EREn7OgeAjwCwPyo/nrque3YSgAtE9GDaAM1mc65arc4Zuf1+P2w0Gt9jJZl5DQAORt+fENG5wgEw8zUAMB/zbBBRwyqAIAjuiMjlSOlNItpjFUCqWl0josMzgChR/9hGAWBbknjmAdPhDdqa0gfZzAMJKyVP4v8hhJYRcSni+0JEu63ahZj5anyQici6UuqIVQDdbrfS6/UqRulyufyTiH5sF8AlIro37VpoWEHIzGZ2tM+sEZFnSqkzk9RCS0R01wjIsZz+mug53hDRia0AnI4bGgDYISItz/M2jYC8Gpp2u30MEWuO4zha665Sqp0ZYFStX/iWchRAItFGzoHSsrJ2ZFl1mHg6bfVYJeGJv85CC++BpIJZ5kSFC6G0ha0e7mYJqcJ7IOkRay84UhD2XjHFIFZf8iW9YcYoYRi+tO6aNeupOs66iU/icV46zf/MAKZpzXFk/QL+JG1PUPhRiQAAAABJRU5ErkJggg==\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-audio:hover{background:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACSElEQVRoQ+2Zu4sUQRCHf5+C+gf4yBXMfMYHGvjCzEBQDIzV+HwEohipGKupD0QNDE8UEwUFTe68wEDhTMVUMFJ+0tArzbjs9u3Ojt0wBR0M9MzUV1XdXVWNKhcq1189wP/2YKcesH1d0nPgdVvgnQDY3iTpqaT9kuaAt9UA2D4o6aGkzVHpXcByFQC2r0q60lB2D7BUNIDtjZIeSDoyRNGyAWwfiiET4n6YlAtg+7Kka2PCozyAMSHT5CkLIIbMfUlbMhdmOQCZIVOeB2LI3JN0NNPq6bTZe8D2aUmOY72kN8DnoIXt7eF5FSEzkQdsB+OEsFwr6RPwbpixhqYStoPyqVwAbkaAY5KeTWD5wStZHrD9XdJgK34FhBP9H8kFOAvciQBhn3/RAcBHSTvjfx4DJ6cBOAPcbRvA9gZJYQT5DfwYKGl7UdLu+PwIOFUiwCVJYQRZBuZqA7gh6XxUegXYVhtAmq0uAnt7gLhQm9vorBZx74Hcc6D3QLKH/z2JGyVnlYs4pCfzEe4rsLW2XehicpAtAftqAwiZbhhBfgE/ZwVwDrjddi40KiG0HXpHO+KcJ8CJaXKheeBWBOgqnf6W1BwvgcOrATieFDTrJL0HViJAVwXNgVgPrJH0BfiQDTDKtREiNK7KLSnHASQLLacP1PxcVkWWq8PU3emq2yqJJ0b1Qsv2QKpdZp+orBBqmrfq5m5mSJXtgUZI1XnB0YCo94opCal6L/ka3ghtlIXqrllzT9VJ5k19Ek/y0zbf6QHatOYk3/oDujC8QMWgjf4AAAAASUVORK5CYII=\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-mute{background:url(\"data:image/png;base64,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\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-mute:hover{background:url(\"data:image/png;base64,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\") no-repeat 50%;background-size:100% 100%}.jessibuca-container .jessibuca-icon-text{font-size:14px;width:30px}.jessibuca-container .jessibuca-speed{font-size:14px;color:#fff}.jessibuca-container .jessibuca-quality-menu-list{position:absolute;left:50%;bottom:100%;visibility:hidden;opacity:0;transform:translateX(-50%);transition:visibility .3s,opacity .3s;background-color:rgba(0,0,0,.5);border-radius:4px}.jessibuca-container .jessibuca-quality-menu-list.jessibuca-quality-menu-shown{visibility:visible;opacity:1}.jessibuca-container .icon-title-tips{pointer-events:none;position:absolute;left:50%;bottom:100%;visibility:hidden;opacity:0;transform:translateX(-50%);transition:visibility .3s ease 0s,opacity .3s ease 0s;background-color:rgba(0,0,0,.5);border-radius:4px}.jessibuca-container .icon-title{display:inline-block;padding:5px 10px;font-size:12px;white-space:nowrap;color:#fff}.jessibuca-container .jessibuca-quality-menu{padding:8px 0}.jessibuca-container .jessibuca-quality-menu-item{display:block;height:25px;margin:0;padding:0 10px;cursor:pointer;font-size:14px;text-align:center;width:50px;color:hsla(0,0%,100%,.5);transition:color .3s,background-color .3s}.jessibuca-container .jessibuca-quality-menu-item:hover{background-color:hsla(0,0%,100%,.2)}.jessibuca-container .jessibuca-quality-menu-item:focus{outline:none}.jessibuca-container .jessibuca-quality-menu-item.jessibuca-quality-menu-item-active{color:#2298fc}.jessibuca-container .jessibuca-volume-panel-wrap{position:absolute;left:50%;bottom:100%;visibility:hidden;opacity:0;transform:translateX(-50%) translateY(22%);transition:visibility .3s,opacity .3s;background-color:rgba(0,0,0,.5);border-radius:4px;height:120px;width:50px;overflow:hidden}.jessibuca-container .jessibuca-volume-panel-wrap.jessibuca-volume-panel-wrap-show{visibility:visible;opacity:1}.jessibuca-container .jessibuca-volume-panel{cursor:pointer;position:absolute;top:21px;height:60px;width:50px;overflow:hidden}.jessibuca-container .jessibuca-volume-panel-text{position:absolute;left:0;top:0;width:50px;height:20px;line-height:20px;text-align:center;color:#fff;font-size:12px}.jessibuca-container .jessibuca-volume-panel-handle{position:absolute;top:48px;left:50%;width:12px;height:12px;border-radius:12px;margin-left:-6px;background:#fff}.jessibuca-container .jessibuca-volume-panel-handle:before{bottom:-54px;background:#fff}.jessibuca-container .jessibuca-volume-panel-handle:after{bottom:6px;background:hsla(0,0%,100%,.2)}.jessibuca-container .jessibuca-volume-panel-handle:after,.jessibuca-container .jessibuca-volume-panel-handle:before{content:\"\";position:absolute;display:block;left:50%;width:3px;margin-left:-1px;height:60px}\n/*# sourceMappingURL=data:application/json;base64,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bEIsTUFBTyxDQUNQLEtBQU0sQ0FDTixVQUFXLENBQ1gsV0FBWSxDQUNaLGdCQUFpQixDQUNqQixpQkFBa0IsQ0FDbEIsVUFBVyxDQUNYLGNBQWlCLENBRW5CLG9EQUNFLGlCQUFrQixDQUNsQixRQUFTLENBQ1QsUUFBUyxDQUNULFVBQVcsQ0FDWCxXQUFZLENBQ1osa0JBQW1CLENBQ25CLGdCQUFpQixDQUNqQixlQUFrQixDQUNsQiwyREFDRSxZQUFhLENBQ2IsZUFBa0IsQ0FDcEIsMERBQ0UsVUFBVyxDQUNYLDZCQUFzQyxDQUN4QyxxSEFDRSxVQUFXLENBQ1gsaUJBQWtCLENBQ2xCLGFBQWMsQ0FDZCxRQUFTLENBQ1QsU0FBVSxDQUNWLGdCQUFpQixDQUNqQixXQUFjIiwiZmlsZSI6InN0eWxlLnNjc3MiLCJzb3VyY2VzQ29udGVudCI6WyJAa2V5ZnJhbWVzIHJvdGF0aW9uIHtcbiAgZnJvbSB7XG4gICAgLXdlYmtpdC10cmFuc2Zvcm06IHJvdGF0ZSgwZGVnKTsgfVxuICB0byB7XG4gICAgLXdlYmtpdC10cmFuc2Zvcm06IHJvdGF0ZSgzNjBkZWcpOyB9IH1cblxuLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1pY29uIHtcbiAgY3Vyc29yOiBwb2ludGVyO1xuICB3aWR0aDogMTZweDtcbiAgaGVpZ2h0OiAxNnB4OyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtcG9zdGVyIHtcbiAgcG9zaXRpb246IGFic29sdXRlO1xuICB6LWluZGV4OiAxMDtcbiAgbGVmdDogMDtcbiAgdG9wOiAwO1xuICByaWdodDogMDtcbiAgYm90dG9tOiAwO1xuICBoZWlnaHQ6IDEwMCU7XG4gIHdpZHRoOiAxMDAlO1xuICBiYWNrZ3JvdW5kLXBvc2l0aW9uOiBjZW50ZXIgY2VudGVyO1xuICBiYWNrZ3JvdW5kLXJlcGVhdDogbm8tcmVwZWF0O1xuICBiYWNrZ3JvdW5kLXNpemU6IGNvbnRhaW47XG4gIHBvaW50ZXItZXZlbnRzOiBub25lOyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtcGxheS1iaWcge1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIGRpc3BsYXk6IG5vbmU7XG4gIGhlaWdodDogMTAwJTtcbiAgd2lkdGg6IDEwMCU7XG4gIGJhY2tncm91bmQ6IHJnYmEoMCwgMCwgMCwgMC40KTtcbiAgYmFja2dyb3VuZC1pbWFnZTogdXJsKFwiLi4vYXNzZXRzL3BsYXkucG5nXCIpO1xuICBiYWNrZ3JvdW5kLXJlcGVhdDogbm8tcmVwZWF0O1xuICBiYWNrZ3JvdW5kLXBvc2l0aW9uOiBjZW50ZXI7XG4gIGN1cnNvcjogcG9pbnRlcjtcbiAgYmFja2dyb3VuZC1zaXplOiA0OHB4IDQ4cHg7IH1cbiAgLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1wbGF5LWJpZzpob3ZlciB7XG4gICAgYmFja2dyb3VuZC1pbWFnZTogdXJsKFwiLi4vYXNzZXRzL3BsYXktaG92ZXIucG5nXCIpOyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtbG9hZGluZyB7XG4gIGRpc3BsYXk6IG5vbmU7XG4gIGZsZXgtZGlyZWN0aW9uOiBjb2x1bW47XG4gIGp1c3RpZnktY29udGVudDogY2VudGVyO1xuICBhbGlnbi1pdGVtczogY2VudGVyO1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIHotaW5kZXg6IDIwO1xuICBsZWZ0OiAwO1xuICB0b3A6IDA7XG4gIHJpZ2h0OiAwO1xuICBib3R0b206IDA7XG4gIHdpZHRoOiAxMDAlO1xuICBoZWlnaHQ6IDEwMCU7XG4gIHBvaW50ZXItZXZlbnRzOiBub25lOyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtbG9hZGluZy10ZXh0IHtcbiAgbGluZS1oZWlnaHQ6IDIwcHg7XG4gIGZvbnQtc2l6ZTogMTNweDtcbiAgY29sb3I6ICNmZmY7XG4gIG1hcmdpbi10b3A6IDEwcHg7IH1cblxuLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1jb250cm9scyB7XG4gIGJhY2tncm91bmQtY29sb3I6ICMxNjE2MTY7XG4gIGRpc3BsYXk6IGZsZXg7XG4gIGZsZXgtZGlyZWN0aW9uOiBjb2x1bW47XG4gIGp1c3RpZnktY29udGVudDogZmxleC1lbmQ7XG4gIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgei1pbmRleDogNDA7XG4gIGxlZnQ6IDA7XG4gIHJpZ2h0OiAwO1xuICBib3R0b206IDA7XG4gIGhlaWdodDogMzhweDtcbiAgcGFkZGluZy1sZWZ0OiAxM3B4O1xuICBwYWRkaW5nLXJpZ2h0OiAxM3B4O1xuICBmb250LXNpemU6IDE0cHg7XG4gIGNvbG9yOiAjZmZmO1xuICBvcGFjaXR5OiAwO1xuICB2aXNpYmlsaXR5OiBoaWRkZW47XG4gIHRyYW5zaXRpb246IGFsbCAwLjJzIGVhc2UtaW4tb3V0O1xuICB1c2VyLXNlbGVjdDogbm9uZTsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWNvbnRyb2xzIC5qZXNzaWJ1Y2EtY29udHJvbHMtaXRlbSB7XG4gICAgcG9zaXRpb246IHJlbGF0aXZlO1xuICAgIGRpc3BsYXk6IGZsZXg7XG4gICAganVzdGlmeS1jb250ZW50OiBjZW50ZXI7XG4gICAgcGFkZGluZzogMCA4cHg7IH1cbiAgICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWNvbnRyb2xzIC5qZXNzaWJ1Y2EtY29udHJvbHMtaXRlbTpob3ZlciAuaWNvbi10aXRsZS10aXBzIHtcbiAgICAgIHZpc2liaWxpdHk6IHZpc2libGU7XG4gICAgICBvcGFjaXR5OiAxOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtY29udHJvbHMgLmplc3NpYnVjYS1taWNyb3Bob25lLWNsb3NlIHtcbiAgICBkaXNwbGF5OiBub25lOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtY29udHJvbHMgLmplc3NpYnVjYS1pY29uLWF1ZGlvIHtcbiAgICBkaXNwbGF5OiBub25lOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtY29udHJvbHMgLmplc3NpYnVjYS1wbGF5IHtcbiAgICBkaXNwbGF5OiBub25lOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtY29udHJvbHMgLmplc3NpYnVjYS1wYXVzZSB7XG4gICAgZGlzcGxheTogbm9uZTsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWNvbnRyb2xzIC5qZXNzaWJ1Y2EtZnVsbHNjcmVlbi1leGl0IHtcbiAgICBkaXNwbGF5OiBub25lOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtY29udHJvbHMgLmplc3NpYnVjYS1zY3JlZW5zaG90IHtcbiAgICBkaXNwbGF5OiBub25lOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtY29udHJvbHMgLmplc3NpYnVjYS1yZWNvcmQge1xuICAgIGRpc3BsYXk6IG5vbmU7IH1cbiAgLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1jb250cm9scyAuamVzc2lidWNhLWZ1bGxzY3JlZW4ge1xuICAgIGRpc3BsYXk6IG5vbmU7IH1cbiAgLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1jb250cm9scyAuamVzc2lidWNhLXJlY29yZC1zdG9wIHtcbiAgICBkaXNwbGF5OiBub25lOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtY29udHJvbHMgLmplc3NpYnVjYS1pY29uLWF1ZGlvLCAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWNvbnRyb2xzIC5qZXNzaWJ1Y2EtaWNvbi1tdXRlIHtcbiAgICB6LWluZGV4OiAxOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtY29udHJvbHMgLmplc3NpYnVjYS1jb250cm9scy1ib3R0b20ge1xuICAgIGRpc3BsYXk6IGZsZXg7XG4gICAganVzdGlmeS1jb250ZW50OiBzcGFjZS1iZXR3ZWVuO1xuICAgIGhlaWdodDogMTAwJTsgfVxuICAgIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtY29udHJvbHMgLmplc3NpYnVjYS1jb250cm9scy1ib3R0b20gLmplc3NpYnVjYS1jb250cm9scy1sZWZ0IHtcbiAgICAgIGRpc3BsYXk6IGZsZXg7XG4gICAgICBhbGlnbi1pdGVtczogY2VudGVyOyB9XG4gICAgLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1jb250cm9scyAuamVzc2lidWNhLWNvbnRyb2xzLWJvdHRvbSAuamVzc2lidWNhLWNvbnRyb2xzLXJpZ2h0IHtcbiAgICAgIGRpc3BsYXk6IGZsZXg7XG4gICAgICBhbGlnbi1pdGVtczogY2VudGVyOyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyLmplc3NpYnVjYS1jb250cm9scy1zaG93IC5qZXNzaWJ1Y2EtY29udHJvbHMge1xuICBvcGFjaXR5OiAxO1xuICB2aXNpYmlsaXR5OiB2aXNpYmxlOyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyLmplc3NpYnVjYS1oaWRlLWN1cnNvciAqIHtcbiAgY3Vyc29yOiBub25lICFpbXBvcnRhbnQ7IH1cblxuLmplc3NpYnVjYS1jb250YWluZXIuamVzc2lidWNhLWZ1bGxzY3JlZW4td2ViIHtcbiAgcG9zaXRpb246IGZpeGVkO1xuICB6LWluZGV4OiA5OTk5O1xuICBsZWZ0OiAwO1xuICB0b3A6IDA7XG4gIHJpZ2h0OiAwO1xuICBib3R0b206IDA7XG4gIHdpZHRoOiAxMDAlICFpbXBvcnRhbnQ7XG4gIGhlaWdodDogMTAwJSAhaW1wb3J0YW50O1xuICBiYWNrZ3JvdW5kOiAjMDAwOyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtaWNvbi1sb2FkaW5nIHtcbiAgd2lkdGg6IDUwcHg7XG4gIGhlaWdodDogNTBweDtcbiAgYmFja2dyb3VuZDogdXJsKFwiLi4vYXNzZXRzL2xvYWRpbmcucG5nXCIpIG5vLXJlcGVhdCBjZW50ZXI7XG4gIGJhY2tncm91bmQtc2l6ZTogMTAwJSAxMDAlO1xuICBhbmltYXRpb246IHJvdGF0aW9uIDFzIGxpbmVhciBpbmZpbml0ZTsgfVxuXG4uamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWljb24tc2NyZWVuc2hvdCB7XG4gIGJhY2tncm91bmQ6IHVybChcIi4uL2Fzc2V0cy9zY3JlZW5zaG90LnBuZ1wiKSBuby1yZXBlYXQgY2VudGVyO1xuICBiYWNrZ3JvdW5kLXNpemU6IDEwMCUgMTAwJTsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWljb24tc2NyZWVuc2hvdDpob3ZlciB7XG4gICAgYmFja2dyb3VuZDogdXJsKFwiLi4vYXNzZXRzL3NjcmVlbnNob3QtaG92ZXIucG5nXCIpIG5vLXJlcGVhdCBjZW50ZXI7XG4gICAgYmFja2dyb3VuZC1zaXplOiAxMDAlIDEwMCU7IH1cblxuLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1pY29uLXBsYXkge1xuICBiYWNrZ3JvdW5kOiB1cmwoXCIuLi9hc3NldHMvcGxheS5wbmdcIikgbm8tcmVwZWF0IGNlbnRlcjtcbiAgYmFja2dyb3VuZC1zaXplOiAxMDAlIDEwMCU7IH1cbiAgLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1pY29uLXBsYXk6aG92ZXIge1xuICAgIGJhY2tncm91bmQ6IHVybChcIi4uL2Fzc2V0cy9wbGF5LWhvdmVyLnBuZ1wiKSBuby1yZXBlYXQgY2VudGVyO1xuICAgIGJhY2tncm91bmQtc2l6ZTogMTAwJSAxMDAlOyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtaWNvbi1wYXVzZSB7XG4gIGJhY2tncm91bmQ6IHVybChcIi4uL2Fzc2V0cy9wYXVzZS5wbmdcIikgbm8tcmVwZWF0IGNlbnRlcjtcbiAgYmFja2dyb3VuZC1zaXplOiAxMDAlIDEwMCU7IH1cbiAgLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1pY29uLXBhdXNlOmhvdmVyIHtcbiAgICBiYWNrZ3JvdW5kOiB1cmwoXCIuLi9hc3NldHMvcGF1c2UtaG92ZXIucG5nXCIpIG5vLXJlcGVhdCBjZW50ZXI7XG4gICAgYmFja2dyb3VuZC1zaXplOiAxMDAlIDEwMCU7IH1cblxuLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1pY29uLXJlY29yZCB7XG4gIGJhY2tncm91bmQ6IHVybChcIi4uL2Fzc2V0cy9yZWNvcmQucG5nXCIpIG5vLXJlcGVhdCBjZW50ZXI7XG4gIGJhY2tncm91bmQtc2l6ZTogMTAwJSAxMDAlOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtaWNvbi1yZWNvcmQ6aG92ZXIge1xuICAgIGJhY2tncm91bmQ6IHVybChcIi4uL2Fzc2V0cy9yZWNvcmQtaG92ZXIucG5nXCIpIG5vLXJlcGVhdCBjZW50ZXI7XG4gICAgYmFja2dyb3VuZC1zaXplOiAxMDAlIDEwMCU7IH1cblxuLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1pY29uLXJlY29yZFN0b3Age1xuICBiYWNrZ3JvdW5kOiB1cmwoXCIuLi9hc3NldHMvcmVjb3JkLXN0b3AucG5nXCIpIG5vLXJlcGVhdCBjZW50ZXI7XG4gIGJhY2tncm91bmQtc2l6ZTogMTAwJSAxMDAlOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtaWNvbi1yZWNvcmRTdG9wOmhvdmVyIHtcbiAgICBiYWNrZ3JvdW5kOiB1cmwoXCIuLi9hc3NldHMvcmVjb3JkLXN0b3AtaG92ZXIucG5nXCIpIG5vLXJlcGVhdCBjZW50ZXI7XG4gICAgYmFja2dyb3VuZC1zaXplOiAxMDAlIDEwMCU7IH1cblxuLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1pY29uLWZ1bGxzY3JlZW4ge1xuICBiYWNrZ3JvdW5kOiB1cmwoXCIuLi9hc3NldHMvZnVsbHNjcmVlbi5wbmdcIikgbm8tcmVwZWF0IGNlbnRlcjtcbiAgYmFja2dyb3VuZC1zaXplOiAxMDAlIDEwMCU7IH1cbiAgLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1pY29uLWZ1bGxzY3JlZW46aG92ZXIge1xuICAgIGJhY2tncm91bmQ6IHVybChcIi4uL2Fzc2V0cy9mdWxsc2NyZWVuLWhvdmVyLnBuZ1wiKSBuby1yZXBlYXQgY2VudGVyO1xuICAgIGJhY2tncm91bmQtc2l6ZTogMTAwJSAxMDAlOyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtaWNvbi1mdWxsc2NyZWVuRXhpdCB7XG4gIGJhY2tncm91bmQ6IHVybChcIi4uL2Fzc2V0cy9leGl0LWZ1bGxzY3JlZW4ucG5nXCIpIG5vLXJlcGVhdCBjZW50ZXI7XG4gIGJhY2tncm91bmQtc2l6ZTogMTAwJSAxMDAlOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtaWNvbi1mdWxsc2NyZWVuRXhpdDpob3ZlciB7XG4gICAgYmFja2dyb3VuZDogdXJsKFwiLi4vYXNzZXRzL2V4aXQtZnVsbHNjcmVlbi1ob3Zlci5wbmdcIikgbm8tcmVwZWF0IGNlbnRlcjtcbiAgICBiYWNrZ3JvdW5kLXNpemU6IDEwMCUgMTAwJTsgfVxuXG4uamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWljb24tYXVkaW8ge1xuICBiYWNrZ3JvdW5kOiB1cmwoXCIuLi9hc3NldHMvYXVkaW8ucG5nXCIpIG5vLXJlcGVhdCBjZW50ZXI7XG4gIGJhY2tncm91bmQtc2l6ZTogMTAwJSAxMDAlOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtaWNvbi1hdWRpbzpob3ZlciB7XG4gICAgYmFja2dyb3VuZDogdXJsKFwiLi4vYXNzZXRzL2F1ZGlvLWhvdmVyLnBuZ1wiKSBuby1yZXBlYXQgY2VudGVyO1xuICAgIGJhY2tncm91bmQtc2l6ZTogMTAwJSAxMDAlOyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtaWNvbi1tdXRlIHtcbiAgYmFja2dyb3VuZDogdXJsKFwiLi4vYXNzZXRzL211dGUucG5nXCIpIG5vLXJlcGVhdCBjZW50ZXI7XG4gIGJhY2tncm91bmQtc2l6ZTogMTAwJSAxMDAlOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtaWNvbi1tdXRlOmhvdmVyIHtcbiAgICBiYWNrZ3JvdW5kOiB1cmwoXCIuLi9hc3NldHMvbXV0ZS1ob3Zlci5wbmdcIikgbm8tcmVwZWF0IGNlbnRlcjtcbiAgICBiYWNrZ3JvdW5kLXNpemU6IDEwMCUgMTAwJTsgfVxuXG4uamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLWljb24tdGV4dCB7XG4gIGZvbnQtc2l6ZTogMTRweDtcbiAgd2lkdGg6IDMwcHg7IH1cblxuLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1zcGVlZCB7XG4gIGZvbnQtc2l6ZTogMTRweDtcbiAgY29sb3I6ICNmZmY7IH1cblxuLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS1xdWFsaXR5LW1lbnUtbGlzdCB7XG4gIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgbGVmdDogNTAlO1xuICBib3R0b206IDEwMCU7XG4gIHZpc2liaWxpdHk6IGhpZGRlbjtcbiAgb3BhY2l0eTogMDtcbiAgdHJhbnNmb3JtOiB0cmFuc2xhdGVYKC01MCUpO1xuICB0cmFuc2l0aW9uOiB2aXNpYmlsaXR5IDMwMG1zLCBvcGFjaXR5IDMwMG1zO1xuICBiYWNrZ3JvdW5kLWNvbG9yOiByZ2JhKDAsIDAsIDAsIDAuNSk7XG4gIGJvcmRlci1yYWRpdXM6IDRweDsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLXF1YWxpdHktbWVudS1saXN0Lmplc3NpYnVjYS1xdWFsaXR5LW1lbnUtc2hvd24ge1xuICAgIHZpc2liaWxpdHk6IHZpc2libGU7XG4gICAgb3BhY2l0eTogMTsgfVxuXG4uamVzc2lidWNhLWNvbnRhaW5lciAuaWNvbi10aXRsZS10aXBzIHtcbiAgcG9pbnRlci1ldmVudHM6IG5vbmU7XG4gIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgbGVmdDogNTAlO1xuICBib3R0b206IDEwMCU7XG4gIHZpc2liaWxpdHk6IGhpZGRlbjtcbiAgb3BhY2l0eTogMDtcbiAgdHJhbnNmb3JtOiB0cmFuc2xhdGVYKC01MCUpO1xuICB0cmFuc2l0aW9uOiB2aXNpYmlsaXR5IDMwMG1zIGVhc2UgMHMsIG9wYWNpdHkgMzAwbXMgZWFzZSAwcztcbiAgYmFja2dyb3VuZC1jb2xvcjogcmdiYSgwLCAwLCAwLCAwLjUpO1xuICBib3JkZXItcmFkaXVzOiA0cHg7IH1cblxuLmplc3NpYnVjYS1jb250YWluZXIgLmljb24tdGl0bGUge1xuICBkaXNwbGF5OiBpbmxpbmUtYmxvY2s7XG4gIHBhZGRpbmc6IDVweCAxMHB4O1xuICBmb250LXNpemU6IDEycHg7XG4gIHdoaXRlLXNwYWNlOiBub3dyYXA7XG4gIGNvbG9yOiB3aGl0ZTsgfVxuXG4uamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLXF1YWxpdHktbWVudSB7XG4gIHBhZGRpbmc6IDhweCAwOyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtcXVhbGl0eS1tZW51LWl0ZW0ge1xuICBkaXNwbGF5OiBibG9jaztcbiAgaGVpZ2h0OiAyNXB4O1xuICBtYXJnaW46IDA7XG4gIHBhZGRpbmc6IDAgMTBweDtcbiAgY3Vyc29yOiBwb2ludGVyO1xuICBmb250LXNpemU6IDE0cHg7XG4gIHRleHQtYWxpZ246IGNlbnRlcjtcbiAgd2lkdGg6IDUwcHg7XG4gIGNvbG9yOiByZ2JhKDI1NSwgMjU1LCAyNTUsIDAuNSk7XG4gIHRyYW5zaXRpb246IGNvbG9yIDMwMG1zLCBiYWNrZ3JvdW5kLWNvbG9yIDMwMG1zOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtcXVhbGl0eS1tZW51LWl0ZW06aG92ZXIge1xuICAgIGJhY2tncm91bmQtY29sb3I6IHJnYmEoMjU1LCAyNTUsIDI1NSwgMC4yKTsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLXF1YWxpdHktbWVudS1pdGVtOmZvY3VzIHtcbiAgICBvdXRsaW5lOiBub25lOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2EtcXVhbGl0eS1tZW51LWl0ZW0uamVzc2lidWNhLXF1YWxpdHktbWVudS1pdGVtLWFjdGl2ZSB7XG4gICAgY29sb3I6ICMyMjk4RkM7IH1cblxuLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS12b2x1bWUtcGFuZWwtd3JhcCB7XG4gIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgbGVmdDogNTAlO1xuICBib3R0b206IDEwMCU7XG4gIHZpc2liaWxpdHk6IGhpZGRlbjtcbiAgb3BhY2l0eTogMDtcbiAgdHJhbnNmb3JtOiB0cmFuc2xhdGVYKC01MCUpIHRyYW5zbGF0ZVkoMjIlKTtcbiAgdHJhbnNpdGlvbjogdmlzaWJpbGl0eSAzMDBtcywgb3BhY2l0eSAzMDBtcztcbiAgYmFja2dyb3VuZC1jb2xvcjogcmdiYSgwLCAwLCAwLCAwLjUpO1xuICBib3JkZXItcmFkaXVzOiA0cHg7XG4gIGhlaWdodDogMTIwcHg7XG4gIHdpZHRoOiA1MHB4O1xuICBvdmVyZmxvdzogaGlkZGVuOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2Etdm9sdW1lLXBhbmVsLXdyYXAuamVzc2lidWNhLXZvbHVtZS1wYW5lbC13cmFwLXNob3cge1xuICAgIHZpc2liaWxpdHk6IHZpc2libGU7XG4gICAgb3BhY2l0eTogMTsgfVxuXG4uamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLXZvbHVtZS1wYW5lbCB7XG4gIGN1cnNvcjogcG9pbnRlcjtcbiAgcG9zaXRpb246IGFic29sdXRlO1xuICB0b3A6IDIxcHg7XG4gIGhlaWdodDogNjBweDtcbiAgd2lkdGg6IDUwcHg7XG4gIG92ZXJmbG93OiBoaWRkZW47IH1cblxuLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS12b2x1bWUtcGFuZWwtdGV4dCB7XG4gIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgbGVmdDogMDtcbiAgdG9wOiAwO1xuICB3aWR0aDogNTBweDtcbiAgaGVpZ2h0OiAyMHB4O1xuICBsaW5lLWhlaWdodDogMjBweDtcbiAgdGV4dC1hbGlnbjogY2VudGVyO1xuICBjb2xvcjogI2ZmZjtcbiAgZm9udC1zaXplOiAxMnB4OyB9XG5cbi5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2Etdm9sdW1lLXBhbmVsLWhhbmRsZSB7XG4gIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgdG9wOiA0OHB4O1xuICBsZWZ0OiA1MCU7XG4gIHdpZHRoOiAxMnB4O1xuICBoZWlnaHQ6IDEycHg7XG4gIGJvcmRlci1yYWRpdXM6IDEycHg7XG4gIG1hcmdpbi1sZWZ0OiAtNnB4O1xuICBiYWNrZ3JvdW5kOiAjZmZmOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2Etdm9sdW1lLXBhbmVsLWhhbmRsZTo6YmVmb3JlIHtcbiAgICBib3R0b206IC01NHB4O1xuICAgIGJhY2tncm91bmQ6ICNmZmY7IH1cbiAgLmplc3NpYnVjYS1jb250YWluZXIgLmplc3NpYnVjYS12b2x1bWUtcGFuZWwtaGFuZGxlOjphZnRlciB7XG4gICAgYm90dG9tOiA2cHg7XG4gICAgYmFja2dyb3VuZDogcmdiYSgyNTUsIDI1NSwgMjU1LCAwLjIpOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyIC5qZXNzaWJ1Y2Etdm9sdW1lLXBhbmVsLWhhbmRsZTo6YmVmb3JlLCAuamVzc2lidWNhLWNvbnRhaW5lciAuamVzc2lidWNhLXZvbHVtZS1wYW5lbC1oYW5kbGU6OmFmdGVyIHtcbiAgICBjb250ZW50OiAnJztcbiAgICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gICAgZGlzcGxheTogYmxvY2s7XG4gICAgbGVmdDogNTAlO1xuICAgIHdpZHRoOiAzcHg7XG4gICAgbWFyZ2luLWxlZnQ6IC0xcHg7XG4gICAgaGVpZ2h0OiA2MHB4OyB9XG4iXX0= */";
     styleInject(css_248z$1);
 
     class Control {

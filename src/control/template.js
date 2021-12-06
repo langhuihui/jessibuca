@@ -30,6 +30,7 @@ export default (player, control) => {
                                           <div class="jessibuca-volume-panel">
                                                  <div class="jessibuca-volume-panel-handle"></div>
                                           </div>
+                                          <div class="jessibuca-volume-panel-text"></div>
                                      </div>
                                  </div>
                              ` : ''}
@@ -84,6 +85,10 @@ export default (player, control) => {
 
     Object.defineProperty(control, '$volumePanelWrap', {
         value: player.$container.querySelector('.jessibuca-volume-panel-wrap'),
+    });
+
+    Object.defineProperty(control, '$volumePanelText', {
+        value: player.$container.querySelector('.jessibuca-volume-panel-text'),
     });
 
     Object.defineProperty(control, '$volumePanel', {

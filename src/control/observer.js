@@ -58,6 +58,7 @@ export default (player, control) => {
                 setStyle(control.$volumeOff, 'display', 'none');
             }
         }
+        control.$volumePanelText && (control.$volumePanelText.innerHTML = parseInt(percentage * 100))
     }
 
     player.on(EVENTS.volumechange, () => {
