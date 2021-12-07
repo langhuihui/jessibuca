@@ -6496,71 +6496,79 @@
 	decoder.postRun = function () {
 	  var buffer = [];
 	  var wcsVideoDecoder = {
-	    hasInit: false,
-	    isEmitInfo: false,
-	    decoder: new VideoDecoder({
-	      output: function (videoFrame) {
-	        if (!wcsVideoDecoder.isEmitInfo) {
-	          decoder$1.opt.debug && console.log('Jessibuca: [worker] Webcodecs Video Decoder initSize');
-	          postMessage({
-	            cmd: "initSize",
-	            w: videoFrame.codedWidth,
-	            h: videoFrame.codedHeight
-	          });
-	          wcsVideoDecoder.isEmitInfo = true;
-	          this.offscreenCanvas = new OffscreenCanvas(videoFrame.codedWidth, videoFrame.codedHeight);
-	          this.offscreenCanvasCtx = this.offscreenCanvas.getContext("2d");
-	        }
-
-	        this.offscreenCanvasCtx.drawImage(videoFrame, 0, 0, videoFrame.codedWidth, videoFrame.codedHeight);
-	        let image_bitmap = this.offscreenCanvas.transferToImageBitmap();
-	        postMessage({
-	          cmd: WORKER_CMD_TYPE.render,
-	          buffer: image_bitmap,
-	          delay: decoder$1.delay,
-	          ts: 0
-	        }, [image_bitmap]);
-	        setTimeout(function () {
-	          if (videoFrame.close) {
-	            videoFrame.close();
-	          } else {
-	            videoFrame.destroy();
-	          }
-	        }, 100);
-	      },
-	      error: function (error) {
-	        console.error(error);
-	      }
-	    }),
-	    decode: function (payload, ts) {
-	      const isIframe = payload[0] >> 4 === 1;
-
-	      if (!wcsVideoDecoder.hasInit) {
-	        if (isIframe && payload[1] === 0) {
-	          const videoCodec = payload[0] & 0x0F;
-	          decoder$1.setVideoCodec(videoCodec);
-	          const config = formatVideoDecoderConfigure(payload.slice(5));
-	          wcsVideoDecoder.decoder.configure(config);
-	          wcsVideoDecoder.hasInit = true;
-	        }
-	      } else {
-	        const chunk = new EncodedVideoChunk({
-	          data: payload.slice(5),
-	          timestamp: ts,
-	          type: isIframe ? ENCODED_VIDEO_TYPE.key : ENCODED_VIDEO_TYPE.delta
-	        });
-	        wcsVideoDecoder.decoder.decode(chunk);
-	      }
-	    },
-
-	    reset() {
-	      wcsVideoDecoder.hasInit = false;
-	      wcsVideoDecoder.isEmitInfo = false;
-	      wcsVideoDecoder.offscreenCanvas = null;
-	      wcsVideoDecoder.offscreenCanvasCtx = null;
-	    }
-
+	    decode: function () {},
+	    reset: function () {}
 	  };
+
+	  if ("VideoEncoder" in self) {
+	    wcsVideoDecoder = {
+	      hasInit: false,
+	      isEmitInfo: false,
+	      decoder: new VideoDecoder({
+	        output: function (videoFrame) {
+	          if (!wcsVideoDecoder.isEmitInfo) {
+	            decoder$1.opt.debug && console.log('Jessibuca: [worker] Webcodecs Video Decoder initSize');
+	            postMessage({
+	              cmd: "initSize",
+	              w: videoFrame.codedWidth,
+	              h: videoFrame.codedHeight
+	            });
+	            wcsVideoDecoder.isEmitInfo = true;
+	            this.offscreenCanvas = new OffscreenCanvas(videoFrame.codedWidth, videoFrame.codedHeight);
+	            this.offscreenCanvasCtx = this.offscreenCanvas.getContext("2d");
+	          }
+
+	          this.offscreenCanvasCtx.drawImage(videoFrame, 0, 0, videoFrame.codedWidth, videoFrame.codedHeight);
+	          let image_bitmap = this.offscreenCanvas.transferToImageBitmap();
+	          postMessage({
+	            cmd: WORKER_CMD_TYPE.render,
+	            buffer: image_bitmap,
+	            delay: decoder$1.delay,
+	            ts: 0
+	          }, [image_bitmap]);
+	          setTimeout(function () {
+	            if (videoFrame.close) {
+	              videoFrame.close();
+	            } else {
+	              videoFrame.destroy();
+	            }
+	          }, 100);
+	        },
+	        error: function (error) {
+	          console.error(error);
+	        }
+	      }),
+	      decode: function (payload, ts) {
+	        const isIframe = payload[0] >> 4 === 1;
+
+	        if (!wcsVideoDecoder.hasInit) {
+	          if (isIframe && payload[1] === 0) {
+	            const videoCodec = payload[0] & 0x0F;
+	            decoder$1.setVideoCodec(videoCodec);
+	            const config = formatVideoDecoderConfigure(payload.slice(5));
+	            wcsVideoDecoder.decoder.configure(config);
+	            wcsVideoDecoder.hasInit = true;
+	          }
+	        } else {
+	          const chunk = new EncodedVideoChunk({
+	            data: payload.slice(5),
+	            timestamp: ts,
+	            type: isIframe ? ENCODED_VIDEO_TYPE.key : ENCODED_VIDEO_TYPE.delta
+	          });
+	          wcsVideoDecoder.decoder.decode(chunk);
+	        }
+	      },
+
+	      reset() {
+	        wcsVideoDecoder.hasInit = false;
+	        wcsVideoDecoder.isEmitInfo = false;
+	        wcsVideoDecoder.offscreenCanvas = null;
+	        wcsVideoDecoder.offscreenCanvasCtx = null;
+	      }
+
+	    };
+	  }
+
 	  var decoder$1 = {
 	    opt: {},
 	    useOffscreen: function () {

@@ -5,9 +5,9 @@ module.exports = {
         repo: "langhuihui/jessibuca/tree/v3",
         docsBranch: "v2",
         sidebar: "auto",
-        nav:[
-            { text: 'API', link: '/api' },
-            { text: '2.X', link: 'http://jessibuca.monibuca.com/' },
+        nav: [
+            {text: 'API', link: '/api'},
+            {text: '2.X', link: 'http://jessibuca.monibuca.com/'},
         ],
         logo: 'logo.png',
     },
