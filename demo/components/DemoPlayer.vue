@@ -159,7 +159,7 @@ export default {
                         },
                         vod: this.vod,
                         forceNoOffscreen: !this.useOffscreen,
-                        isNotMute: false,
+                        isNotMute: true,
                     },
                     options
                 )

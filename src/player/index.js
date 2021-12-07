@@ -16,6 +16,7 @@ import Control from "../control";
 import './style.scss'
 import observer from "./observer";
 import MseDecoder from "../decoder/mediaSource";
+import NoSleep from "../utils/noSleep";
 
 export default class Player extends Emitter {
     constructor(container, options) {
@@ -107,15 +108,12 @@ export default class Player extends Emitter {
         //
         this.control = new Control(this);
 
+        this.keepScreenOn = new NoSleep(this);
+
 
         events(this);
         observer(this);
 
-        if (this._opt.isNotMute) {
-            this.mute(true);
-        }
-
-        this.enableWakeLock();
 
         if (this._opt.useWCS) {
             this.debug.log('Player', 'use WCS')
@@ -281,6 +279,13 @@ export default class Player extends Emitter {
 
             this.clearCheckHeartTimeout();
             this.init().then(() => {
+                //
+                if (this._opt.isNotMute) {
+                    this.mute(false);
+                }
+
+                this.enableWakeLock();
+
                 this.stream.fetchStream(url);
 
                 //
@@ -358,6 +363,9 @@ export default class Player extends Emitter {
             this.recording = false;
             // 声音要清除掉。。。。
             this.audio.pause();
+            //
+            this.releaseWakeLock();
+            //
             setTimeout(() => {
                 resolve()
             }, 0)
@@ -519,21 +527,15 @@ export default class Player extends Emitter {
 
     enableWakeLock() {
         if (this._opt.keepScreenOn) {
-            if ("wakeLock" in navigator) {
-                navigator.wakeLock.request("screen").then((lock) => {
-                    this._wakeLock = lock;
-                })
-            }
+            this.keepScreenOn.enable();
         }
     }
 
     releaseWakeLock() {
-        if (this._wakeLock) {
-            this._wakeLock.release();
-            this._wakeLock = null;
+        if (this._opt.keepScreenOn) {
+            this.keepScreenOn.disable();
         }
     }
-
 
     destroy() {
         this._loading = false;
@@ -587,6 +589,7 @@ export default class Player extends Emitter {
         this.clearCheckLoadingTimeout();
         //
         this.releaseWakeLock();
+        this.keepScreenOn = null;
 
         // 其他没法解耦的，通过 destroy 方式
         this.emit('destroy');
