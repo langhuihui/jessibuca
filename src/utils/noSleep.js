@@ -46,8 +46,8 @@ export default class NoSleep {
             this.noSleepVideo.setAttribute("title", "No Sleep");
             this.noSleepVideo.setAttribute("playsinline", "");
 
-            this._addSourceToVideo(this.noSleepVideo, "webm", webm);
-            this._addSourceToVideo(this.noSleepVideo, "mp4", mp4);
+            this._addSourceToVideo(this.noSleepVideo, "webm", WEBM);
+            this._addSourceToVideo(this.noSleepVideo, "mp4", MP4);
 
             this.noSleepVideo.addEventListener("loadedmetadata", () => {
                 if (this.noSleepVideo.duration <= 1) {
