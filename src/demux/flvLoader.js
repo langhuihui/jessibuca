@@ -48,7 +48,8 @@ export default class FlvLoader {
                 case FLV_MEDIA_TYPE.video:
                     if (player._opt.hasVideo) {
                         const isIframe = payload[0] >> 4 === 1;
-                        if (player._opt.useWCS) {
+                        // 没有使用离屏渲染
+                        if (player._opt.useWCS && !player._opt.useOffscreen) {
                             // this.player.debug.log('FlvDemux', 'decodeVideo useWCS')
                             webcodecsDecoder.decodeVideo(payload, ts, isIframe);
                         } else if (player._opt.useMSE) {

@@ -160,6 +160,7 @@ export default {
                         vod: this.vod,
                         forceNoOffscreen: !this.useOffscreen,
                         isNotMute: true,
+                        timeout: 10
                     },
                     options
                 )

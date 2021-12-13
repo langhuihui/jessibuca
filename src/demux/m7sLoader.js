@@ -24,7 +24,7 @@ export default class M7sLoader {
                     if (dv.byteLength > 5) {
                         const payload = new Uint8Array(data, 5);
                         const isIframe = dv.getUint8(5) >> 4 === 1;
-                        if (player._opt.useWCS) {
+                        if (player._opt.useWCS && !player._opt.useOffscreen) {
                             // this.player.debug.log('FlvDemux', 'decodeVideo useWCS')
                             webcodecsDecoder.decodeVideo(payload, ts, isIframe);
                         } else if (player._opt.useMSE) {

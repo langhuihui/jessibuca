@@ -89,6 +89,8 @@ export default class DecoderWorker {
     decodeAudio(arrayBuffer, ts) {
         if (this.player._opt.useWCS) {
             this._decodeAudioNoDelay(arrayBuffer, ts);
+        } else if (this.player._opt.useMSE) {
+            this._decodeAudioNoDelay(arrayBuffer, ts);
         } else {
             this._decodeAudio(arrayBuffer, ts);
         }
@@ -102,7 +104,6 @@ export default class DecoderWorker {
             ts: Math.max(ts, 0)
         }
         // this.player.debug.log('decoderWorker', 'decodeAudio',options);
-
         this.decoderWorker.postMessage({
             cmd: WORKER_SEND_TYPE.decode,
             buffer: arrayBuffer,

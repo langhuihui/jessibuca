@@ -10,6 +10,7 @@ export default class WebcodecsDecoder extends Emitter {
         this.hasInit = false;
         this.isInitInfo = false;
         this.decoder = null;
+        this.bufferList = [];
         this.initDecoder();
         player.debug.log('Webcodecs', 'init')
     }

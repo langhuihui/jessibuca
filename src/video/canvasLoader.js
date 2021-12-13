@@ -33,7 +33,6 @@ export default class CanvasVideoLoader extends CommonLoader {
     }
 
 
-
     _initContextGl() {
         this.contextGl = createContextGL(this.$videoElement);
         const webgl = createWebGL(this.contextGl);
@@ -48,7 +47,7 @@ export default class CanvasVideoLoader extends CommonLoader {
 
     // 渲染类型
     _initCanvasRender() {
-        if (this.player._opt.useWCS) {
+        if (this.player._opt.useWCS && !this._supportOffscreen()) {
             this.renderType = CANVAS_RENDER_TYPE.webcodecs;
             this._initContext2D();
         } else if (this._supportOffscreen()) {

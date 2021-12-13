@@ -6355,7 +6355,8 @@
 	    console.log('Program failed to compile: ' + gl.getProgramInfoLog(program));
 	  }
 
-	  gl.useProgram(program);
+	  gl.useProgram(program); // initBuffers
+
 	  var vertexPosBuffer = gl.createBuffer();
 	  gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
 	  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([1, 1, -1, 1, 1, -1, -1, -1]), gl.STATIC_DRAW);
@@ -6495,31 +6496,30 @@
 
 	decoder.postRun = function () {
 	  var buffer = [];
-	  var wcsVideoDecoder = {
-	    decode: function () {},
-	    reset: function () {}
-	  };
+	  var wcsVideoDecoder = {};
 
 	  if ("VideoEncoder" in self) {
 	    wcsVideoDecoder = {
 	      hasInit: false,
 	      isEmitInfo: false,
+	      offscreenCanvas: null,
+	      offscreenCanvasCtx: null,
 	      decoder: new VideoDecoder({
 	        output: function (videoFrame) {
 	          if (!wcsVideoDecoder.isEmitInfo) {
 	            decoder$1.opt.debug && console.log('Jessibuca: [worker] Webcodecs Video Decoder initSize');
 	            postMessage({
-	              cmd: "initSize",
+	              cmd: WORKER_CMD_TYPE.initVideo,
 	              w: videoFrame.codedWidth,
 	              h: videoFrame.codedHeight
 	            });
 	            wcsVideoDecoder.isEmitInfo = true;
-	            this.offscreenCanvas = new OffscreenCanvas(videoFrame.codedWidth, videoFrame.codedHeight);
-	            this.offscreenCanvasCtx = this.offscreenCanvas.getContext("2d");
+	            wcsVideoDecoder.offscreenCanvas = new OffscreenCanvas(videoFrame.codedWidth, videoFrame.codedHeight);
+	            wcsVideoDecoder.offscreenCanvasCtx = wcsVideoDecoder.offscreenCanvas.getContext("2d");
 	          }
 
-	          this.offscreenCanvasCtx.drawImage(videoFrame, 0, 0, videoFrame.codedWidth, videoFrame.codedHeight);
-	          let image_bitmap = this.offscreenCanvas.transferToImageBitmap();
+	          wcsVideoDecoder.offscreenCanvasCtx.drawImage(videoFrame, 0, 0, videoFrame.codedWidth, videoFrame.codedHeight);
+	          let image_bitmap = wcsVideoDecoder.offscreenCanvas.transferToImageBitmap();
 	          postMessage({
 	            cmd: WORKER_CMD_TYPE.render,
 	            buffer: image_bitmap,
@@ -6716,7 +6716,7 @@
 
 	      const _doDecode = data => {
 	        // this.opt.debug && console.log('Jessibuca: [worker]: _doDecode');
-	        if (decoder$1.opt.useWCS && decoder$1.useOffscreen() && data.type === MEDIA_TYPE.video) {
+	        if (decoder$1.opt.useWCS && decoder$1.useOffscreen() && data.type === MEDIA_TYPE.video && wcsVideoDecoder.decode) {
 	          wcsVideoDecoder.decode(data.payload, data.ts);
 	        } else {
 	          // this.opt.debug && console.log('Jessibuca: [worker]: _doDecode  wasm');
@@ -6775,7 +6775,7 @@
 	      this.stopId = null;
 	      audioDecoder.clear();
 	      videoDecoder.clear();
-	      wcsVideoDecoder.reset();
+	      wcsVideoDecoder.reset && wcsVideoDecoder.reset();
 	      this.firstTimestamp = 0;
 	      this.startTimestamp = 0;
 	      this.delay = -1;

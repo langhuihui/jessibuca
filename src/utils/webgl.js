@@ -57,6 +57,7 @@ export default (gl) => {
 
     gl.useProgram(program);
 
+    // initBuffers
     var vertexPosBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([1, 1, -1, 1, 1, -1, -1, -1]), gl.STATIC_DRAW);
