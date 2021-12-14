@@ -9,25 +9,27 @@ sidebarDepth: 2
 sidebar: auto
 features:
 - title: 无插件
-  details: 基于MediaSource/WebAssembly(wasm)实现的纯JavaScript直播播放器
+  details: 基于MediaSource/WebAssembly(wasm)实现的纯JavaScript直播播放器。
 - title: 低延时
-  details: 能够在 PC\Android\iOS 浏览器Webview 内实现2秒以内低延迟直播播放
-- title: 自带控制条
-  details: 可以通过配置显示/隐藏底部控制条
+  details: 能够在 PC\Android\iOS 浏览器Webview 内实现2秒以内低延迟直播播放。
+- title: 自带底部UI
+  details: 支持原子化配置是否显示(加载中、播放/暂停、音量调节、截屏、录制/暂停录制、全屏/取消全屏、流量显示)。
 - title: 支持创建多个播放实例
   details: 支持创建多个播放实例，WebWorker多核解码，提升多画面播放性能。
 - title: 支持多种视频缩放模式
-  details: 支持填充，等比，等比缩放 3中视频缩放模式
-- title: 自带底部UI
-  details: 支持原子化配置是否显示(加载中、播放/暂停、音量调节、截屏、录制/暂停录制、全屏/取消全屏、流量显示)
+  details: 支持填充，等比，等比缩放 3中视频缩放模式。
+- title: 支持OffscreenCanvas
+  details: 提升Webgl渲染性能。
 - title: 支持H264/H265
   details: 软解码H.264/H.265+AAC/PCMA/PCMU流，WebGL视频渲染，WebAudio音频播放。
 - title: 支持MediaSource硬解码
-  details: 支持MediaSource硬解码H.264视频。(Safari on iOS不支持)
+  details: 支持MediaSource硬解码H.264视频。(Safari on iOS不支持)。
 - title: 支持Webcodecs硬解码
-  details: 支持Webcodecs硬解码H.264视频。(需在chrome 94版本以上，需要https或者localhost环境)
+  details: 支持Webcodecs硬解码H.264视频。(需在chrome 94版本以上，需要https或者localhost环境),支持在WebWorker中硬解码。
 - title: 支持视频录制
-  details: 支持录制MP4和WebM格式的视频录制。(基于MediaRecorder)
+  details: 支持录制MP4和WebM格式(video/webm;codecs=h264)的视频录制。(基于MediaRecorder)。
+- title: 支持视频录制 - 开发中
+  details: 支持录制MP4格式(MPEG-4)的视频录制。
 
 footer: GPL Licensed | Copyright © 2020-present dexter
 ---

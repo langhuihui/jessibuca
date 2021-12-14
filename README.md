@@ -19,6 +19,7 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 支持解码8kHz PCM_ALAW, PCM_MULAW的G.711音频
 - 支持填充，等比，等比缩放 3中视频缩放模式
 - 自带底部UI,支持原子化配置是否显示(播放/暂停、音量调节、截屏、录制/暂停录制、全屏/取消全屏、流量显示)
+- 支持OffscreenCanvas，提升Webgl渲染性能。
 - 支持WebWorker多核解码，提升多画面播放性能。
 - 支持WebCodecs硬件解码API
 - 支持MediaSourceExtensions 硬件解码
