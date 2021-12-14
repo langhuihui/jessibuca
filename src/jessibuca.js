@@ -23,6 +23,7 @@ class Jessibuca extends Emitter {
         delete _opt.container;
 
         this._opt = _opt;
+        // todo videoBuffer 时间有问题。
         this.$container = $container;
         this.href = null;
         this.events = new Events(this);
@@ -256,7 +257,7 @@ class Jessibuca extends Emitter {
         time = Number(time)
 
         this.player.updateOption({
-            videoBuffer: time
+            videoBuffer: time * 1000
         })
     }
 
