@@ -48,7 +48,7 @@ jobs:
       - name: set version
         if: startsWith(github.ref, 'refs/tags/')
         run: export version=$(git describe --abbrev=0 --tags) && sed -i "s/#VERSION#/$version/"  demo/components/version.js
-        
+
       - name: build
         run: npm run build:demo
 
@@ -71,3 +71,13 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: "demo.zip"
+
+      - name: zip2
+        if: startsWith(github.ref, 'refs/tags/')
+        run: zip -r ./dist.zip dist/*
+
+      - name: Release2
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: "dist.zip"
