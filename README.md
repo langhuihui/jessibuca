@@ -34,6 +34,16 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 ## API
 [API](/demo/api.md)
 
+
+## 2.x 地址
+
+[http://jessibuca.monibuca.com/](http://jessibuca.monibuca.com/)
+
+## 3.x 地址
+
+[https://j.m7s.live/](https://j.m7s.live/)
+
+
 ## 源码目录结构
 
 - wasm/obj 存放emscripten编译好的ffmpeg解码库的字节码库
