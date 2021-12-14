@@ -3,7 +3,7 @@ import Debug from "../utils/debug";
 import Events from "../utils/events";
 import property from './property';
 import events from './events';
-import {fpsStatus, isFullScreen, now, supportMSE, supportOffscreenV2, supportWCS} from "../utils";
+import {fpsStatus, isEmpty, isFullScreen, isNotEmpty, now, supportMSE, supportOffscreenV2, supportWCS} from "../utils";
 import Video from "../video";
 import Audio from "../audio";
 import Stream from "../stream";
@@ -77,9 +77,9 @@ export default class Player extends Emitter {
         this._stats = {
             buf: 0, // 当前缓冲区时长，单位毫秒,
             fps: 0, // 当前视频帧率
-            abps: '', // 当前音频码率，单位bit
-            vbps: '', // 当前视频码率，单位bit
-            ts: '' // 当前视频帧pts，单位毫秒
+            abps: 0, // 当前音频码率，单位bit
+            vbps: 0, // 当前视频码率，单位bit
+            ts: 0 // 当前视频帧pts，单位毫秒
         }
 
         this._wakeLock = null;
@@ -363,8 +363,10 @@ export default class Player extends Emitter {
             this.recording = false;
             // 声音要清除掉。。。。
             this.audio.pause();
-            //
+            // 释放lock
             this.releaseWakeLock();
+            // 重置 stats
+            this.resetStats();
             //
             setTimeout(() => {
                 resolve()
@@ -504,13 +506,25 @@ export default class Player extends Emitter {
 
         if (timestamp < 1 * 1000) {
             this._stats.fps += 1;
+            if (options.abps) {
+                this._stats.abps += options.abps;
+            }
+            if (options.vbps) {
+                this._stats.vbps += options.vbps;
+            }
             return;
         }
-        this._stats.ts = options.ts;
-        this._stats.buf = options.buf;
+        if (isNotEmpty(options.ts)) {
+            this._stats.ts = options.ts;
+        }
+        if (isNotEmpty(options.buf)) {
+            this._stats.buf = options.buf;
+        }
         this.emit(EVENTS.stats, this._stats);
         this.emit(EVENTS.performance, fpsStatus(this._stats.fps));
         this._stats.fps = 0;
+        this._stats.abps = 0;
+        this._stats.vbps = 0;
         this._startBpsTime = _nowTime;
     }
 
@@ -519,9 +533,9 @@ export default class Player extends Emitter {
         this._stats = {
             buf: 0, //ms
             fps: 0,
-            abps: '',
-            vbps: '',
-            ts: ''
+            abps: 0,
+            vbps: 0,
+            ts: 0
         }
     }
 

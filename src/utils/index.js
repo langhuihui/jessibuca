@@ -339,3 +339,11 @@ export function saveBlobToFile(fileName, blob) {
     evt.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
     aLink.dispatchEvent(evt);
 }
+
+export function isEmpty(value) {
+    return value === null || value === undefined
+}
+
+export function isNotEmpty(value) {
+    return !isEmpty(value)
+}

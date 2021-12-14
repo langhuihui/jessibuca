@@ -41,6 +41,7 @@ export default class WebcodecsDecoder extends Emitter {
         this.player.video.render({
             videoFrame
         })
+
         this.player.updateStats({ts: 0, buf: 0})
 
         // release resource

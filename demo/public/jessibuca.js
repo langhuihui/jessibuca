@@ -656,6 +656,12 @@
     function supportMSE() {
       return window.MediaSource && window.MediaSource.isTypeSupported(MP4_CODECS.avc);
     }
+    function isEmpty(value) {
+      return value === null || value === undefined;
+    }
+    function isNotEmpty(value) {
+      return !isEmpty(value);
+    }
 
     var events$1 = (player => {
       try {
@@ -8122,6 +8128,9 @@
           switch (type) {
             case FLV_MEDIA_TYPE.audio:
               if (player._opt.hasAudio) {
+                player.updateStats({
+                  abps: payload.byteLength
+                });
                 decoderWorker.decodeAudio(payload, ts);
               }
 
@@ -8129,6 +8138,9 @@
 
             case FLV_MEDIA_TYPE.video:
               if (player._opt.hasVideo) {
+                player.updateStats({
+                  vbps: payload.byteLength
+                });
                 const isIframe = payload[0] >> 4 === 1; // 没有使用离屏渲染
 
                 if (player._opt.useWCS && !player._opt.useOffscreen) {
@@ -8203,6 +8215,9 @@
           case MEDIA_TYPE.audio:
             if (player._opt.hasAudio) {
               const payload = new Uint8Array(data, 5);
+              player.updateStats({
+                abps: payload.byteLength
+              });
               decoderWorker.decodeAudio(payload, ts);
             }
 
@@ -8213,6 +8228,9 @@
               if (dv.byteLength > 5) {
                 const payload = new Uint8Array(data, 5);
                 const isIframe = dv.getUint8(5) >> 4 === 1;
+                player.updateStats({
+                  vbps: payload.byteLength
+                });
 
                 if (player._opt.useWCS && !player._opt.useOffscreen) {
                   // this.player.debug.log('FlvDemux', 'decodeVideo useWCS')
@@ -10017,6 +10035,10 @@
 
           this.appendBuffer(result.buffer);
           player.handleRender();
+          player.updateStats({
+            ts: 0,
+            buf: 0
+          });
         } else {
           player.debug.log('MediaSource', 'timeInit set false , cacheTrack = {}');
           this.timeInit = false;
@@ -10336,11 +10358,11 @@
           // 当前缓冲区时长，单位毫秒,
           fps: 0,
           // 当前视频帧率
-          abps: '',
+          abps: 0,
           // 当前音频码率，单位bit
-          vbps: '',
+          vbps: 0,
           // 当前视频码率，单位bit
-          ts: '' // 当前视频帧pts，单位毫秒
+          ts: 0 // 当前视频帧pts，单位毫秒
 
         };
         this._wakeLock = null;
@@ -10607,9 +10629,11 @@
           this.loading = false;
           this.recording = false; // 声音要清除掉。。。。
 
-          this.audio.pause(); //
+          this.audio.pause(); // 释放lock
 
-          this.releaseWakeLock(); //
+          this.releaseWakeLock(); // 重置 stats
+
+          this.resetStats(); //
 
           setTimeout(() => {
             resolve();
@@ -10755,14 +10779,31 @@
 
         if (timestamp < 1 * 1000) {
           this._stats.fps += 1;
+
+          if (options.abps) {
+            this._stats.abps += options.abps;
+          }
+
+          if (options.vbps) {
+            this._stats.vbps += options.vbps;
+          }
+
           return;
         }
 
-        this._stats.ts = options.ts;
-        this._stats.buf = options.buf;
+        if (isNotEmpty(options.ts)) {
+          this._stats.ts = options.ts;
+        }
+
+        if (isNotEmpty(options.buf)) {
+          this._stats.buf = options.buf;
+        }
+
         this.emit(EVENTS.stats, this._stats);
         this.emit(EVENTS.performance, fpsStatus(this._stats.fps));
         this._stats.fps = 0;
+        this._stats.abps = 0;
+        this._stats.vbps = 0;
         this._startBpsTime = _nowTime;
       }
 
@@ -10772,9 +10813,9 @@
           buf: 0,
           //ms
           fps: 0,
-          abps: '',
-          vbps: '',
-          ts: ''
+          abps: 0,
+          vbps: 0,
+          ts: 0
         };
       }
 

@@ -16,6 +16,9 @@ export default class M7sLoader {
             case MEDIA_TYPE.audio:
                 if (player._opt.hasAudio) {
                     const payload = new Uint8Array(data, 5)
+                    player.updateStats({
+                        abps: payload.byteLength
+                    })
                     decoderWorker.decodeAudio(payload, ts)
                 }
                 break;
@@ -24,6 +27,9 @@ export default class M7sLoader {
                     if (dv.byteLength > 5) {
                         const payload = new Uint8Array(data, 5);
                         const isIframe = dv.getUint8(5) >> 4 === 1;
+                        player.updateStats({
+                            vbps: payload.byteLength
+                        })
                         if (player._opt.useWCS && !player._opt.useOffscreen) {
                             // this.player.debug.log('FlvDemux', 'decodeVideo useWCS')
                             webcodecsDecoder.decodeVideo(payload, ts, isIframe);

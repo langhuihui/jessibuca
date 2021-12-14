@@ -42,11 +42,17 @@ export default class FlvLoader {
             switch (type) {
                 case FLV_MEDIA_TYPE.audio:
                     if (player._opt.hasAudio) {
+                        player.updateStats({
+                            abps: payload.byteLength
+                        })
                         decoderWorker.decodeAudio(payload, ts);
                     }
                     break
                 case FLV_MEDIA_TYPE.video:
                     if (player._opt.hasVideo) {
+                        player.updateStats({
+                            vbps: payload.byteLength
+                        })
                         const isIframe = payload[0] >> 4 === 1;
                         // 没有使用离屏渲染
                         if (player._opt.useWCS && !player._opt.useOffscreen) {
