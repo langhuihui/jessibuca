@@ -15,9 +15,10 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 注：以http-flv请求时，存在跨域请求的问题，需要设置access-control-allow-origin, websocket-flv默认不存在此问题
 - 支持HTTPS/WSS加密视频传输，保证视频内容传输安全
 - 手机浏览器内打开视频不会变成全屏播放
+- 手机浏览器内打开长时间不会息屏
 - 支持解码8kHz PCM_ALAW, PCM_MULAW的G.711音频
 - 支持填充，等比，等比缩放 3中视频缩放模式
-- 支持音量调节
+- 自带底部UI,支持原子化配置是否显示(播放/暂停、音量调节、截屏、录制/暂停录制、全屏/取消全屏、流量显示)
 - 支持WebWorker多核解码，提升多画面播放性能。
 - 支持WebCodecs硬件解码API
 - 支持MediaSourceExtensions 硬件解码

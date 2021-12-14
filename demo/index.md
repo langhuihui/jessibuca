@@ -18,8 +18,8 @@ features:
   details: 支持创建多个播放实例，WebWorker多核解码，提升多画面播放性能。
 - title: 支持多种视频缩放模式
   details: 支持填充，等比，等比缩放 3中视频缩放模式
-- title: 支持音量调节
-  details: 支持0-1的音量调节
+- title: 自带底部UI
+  details: 支持原子化配置是否显示(加载中、播放/暂停、音量调节、截屏、录制/暂停录制、全屏/取消全屏、流量显示)
 - title: 支持H264/H265
   details: 软解码H.264/H.265+AAC/PCMA/PCMU流，WebGL视频渲染，WebAudio音频播放。
 - title: 支持MediaSource硬解码
