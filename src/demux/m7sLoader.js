@@ -1,8 +1,9 @@
 import {MEDIA_TYPE} from "../constant";
+import CommonLoader from "./commonLoader";
 
-export default class M7sLoader {
+export default class M7sLoader extends CommonLoader {
     constructor(player) {
-        this.player = player;
+        super(player);
         player.debug.log('M7sDemux', 'init')
     }
 
@@ -46,11 +47,17 @@ export default class M7sLoader {
         }
     }
 
+    _doDecode(payload, type, ts, isIframe){
+
+    }
+
     close() {
 
     }
 
     destroy() {
+        super.destroy();
 
+        this.player.debug.log('M7sDemux', 'destroy')
     }
 }

@@ -5,12 +5,14 @@ export default class CommonLoader extends Emitter {
     constructor(player) {
         super();
         this.player = player;
+
         this.stopId = null;
         this.firstTimestamp = null;
         this.startTimestamp = null;
         this.delay = -1;
         this.bufferList = [];
         this.dropping = false;
+        this.initInterval();
     }
 
     getDelay(timestamp) {
@@ -32,48 +34,79 @@ export default class CommonLoader extends Emitter {
     //
     initInterval() {
         const videoBuffer = this.player._opt.videoBuffer;
-        this.stopId = setInterval(() => {
+        this.player.debug.log('common dumex', `init Interval`);
+
+        let _loop = () => {
             let data;
             if (this.bufferList.length) {
                 if (this.dropping) {
-                    // // 连续的把视频帧给丢掉一直丢到关键帧停下来。。。
                     data = this.bufferList.shift();
                     while (!data.isIFrame && this.bufferList.length) {
-                        // 持续丢帧。
                         data = this.bufferList.shift();
                     }
 
                     if (data.isIFrame) {
                         this.dropping = false;
-                        data.decoder.decode(data.payload, data.ts)
+                        this._doDecoderDecode(data);
                     }
                 } else {
                     data = this.bufferList[0];
                     if (this.getDelay(data.ts) === -1) {
                         this.bufferList.shift()
-                        data.decoder.decode(data.payload, data.ts)
+                        this._doDecoderDecode(data);
                     } else if (this.delay > videoBuffer + 1000) {
+                        this.dropping = true
+                    } else {
+                        while (this.bufferList.length) {
+                            data = this.bufferList[0]
+                            if (this.getDelay(data.ts) > videoBuffer) {
+                                // drop frame
+                                this.bufferList.shift()
+                                this._doDecoderDecode(data);
+                            } else {
+                                this.player.debug.log('common dumex', `delay is ${this.delay}`);
 
+                                break;
+                            }
+                        }
                     }
                 }
             }
-        }, 10)
+        }
+        _loop();
+        this.stopId = setInterval(_loop, 10)
+    }
+
+    _doDecoderDecode(data) {
+        const player = this.player;
+        const {decoderWorker, webcodecsDecoder, mseDecoder} = player;
+
+        if (data.type === MEDIA_TYPE.audio) {
+            decoderWorker.decodeAudio(data.payload, data.ts)
+        } else if (data.type === MEDIA_TYPE.video) {
+            if (player._opt.useWCS && !player._opt.useOffscreen) {
+                // this.player.debug.log('FlvDemux', 'decodeVideo useWCS')
+                webcodecsDecoder.decodeVideo(data.payload, data.ts, data.isIframe);
+            } else if (player._opt.useMSE) {
+                // this.player.debug.log('FlvDemux', 'decodeVideo useMSE')
+                mseDecoder.decodeVideo(data.payload, data.ts, data.isIframe);
+            }
+        }
     }
 
     pushBuffer(payload, options) {
+        // this.player.debug.log('common Demux', 'pushBuffer', options);
         // 音频
         if (options.type === MEDIA_TYPE.audio) {
             this.bufferList.push({
                 ts: options.ts,
                 payload: payload,
-                decoder: options.decoder,
                 type: MEDIA_TYPE.audio,
             })
         } else if (options.type === MEDIA_TYPE.video) {
             this.bufferList.push({
                 ts: options.ts,
                 payload: payload,
-                decoder: options.decoder,
                 type: MEDIA_TYPE.video,
                 isIFrame: options.isIFrame
             })

@@ -41,7 +41,7 @@ export default class WebcodecsDecoder extends Emitter {
             videoFrame
         })
 
-        this.player.updateStats({ts: 0, buf: 0})
+        this.player.updateStats({fps: true, ts: 0, buf: this.player.demux.delay})
 
         // release resource
         setTimeout(function () {
@@ -58,6 +58,7 @@ export default class WebcodecsDecoder extends Emitter {
     }
 
     decodeVideo(payload, ts, isIframe) {
+        this.player.debug.log('Webcodecs decoder', 'decodeVideo');
         if (!this.hasInit) {
             if (isIframe && payload[1] === 0) {
                 const videoCodec = (payload[0] & 0x0F);
@@ -77,7 +78,6 @@ export default class WebcodecsDecoder extends Emitter {
             this.decoder.decode(chunk);
         }
     }
-
 
     destroy() {
         this.decoder.close();

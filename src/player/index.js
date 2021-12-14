@@ -505,7 +505,9 @@ export default class Player extends Emitter {
         const timestamp = _nowTime - this._startBpsTime;
 
         if (timestamp < 1 * 1000) {
-            this._stats.fps += 1;
+            if (options.fps) {
+                this._stats.fps += 1;
+            }
             if (options.abps) {
                 this._stats.abps += options.abps;
             }

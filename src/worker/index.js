@@ -4,10 +4,15 @@ export default class DecoderWorker {
     constructor(player) {
         this.player = player;
         this.decoderWorker = new Worker(player._opt.decoder)
+        this._initDecoderWorker();
+        player.debug.log('decoderWorker', 'init')
+    }
+
+    _initDecoderWorker() {
         const {
             debug,
             events: {proxy},
-        } = player;
+        } = this.player;
 
         this.decoderWorker.onmessage = (event) => {
             const msg = event.data;
@@ -48,7 +53,7 @@ export default class DecoderWorker {
                     this.player.handleRender();
                     this.player.video.render(msg);
                     this.player.emit(EVENTS.timeUpdate, msg.ts)
-                    this.player.updateStats({ts: msg.ts, buf: msg.delay})
+                    this.player.updateStats({fps: true, ts: msg.ts, buf: msg.delay})
                     break;
                 case WORKER_CMD_TYPE.playAudio:
                     // debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.playAudio, `msg ts:${msg.ts}`);
@@ -61,7 +66,6 @@ export default class DecoderWorker {
                     player[msg.cmd] && player[msg.cmd](msg);
             }
         }
-        player.debug.log('decoderWorker', 'init')
     }
 
     _initWork() {
@@ -87,7 +91,7 @@ export default class DecoderWorker {
     }
 
     decodeAudio(arrayBuffer, ts) {
-        if (this.player._opt.useWCS) {
+        if (this.player._opt.useWCS && !this.player._opt.useOffscreen) {
             this._decodeAudioNoDelay(arrayBuffer, ts);
         } else if (this.player._opt.useMSE) {
             this._decodeAudioNoDelay(arrayBuffer, ts);

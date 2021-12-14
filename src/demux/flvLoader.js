@@ -1,8 +1,10 @@
-import {FLV_MEDIA_TYPE} from "../constant";
+import {FLV_MEDIA_TYPE, MEDIA_TYPE} from "../constant";
+import CommonLoader from "./commonLoader";
 
-export default class FlvLoader {
+export default class FlvLoader extends CommonLoader {
     constructor(player) {
-        this.player = player;
+        super(player);
+        // this.player = player;
         const input = this._inputFlv();
         this.flvDemux = this.dispatchFlvData(input);
         player.debug.log('FlvDemux', 'init')
@@ -45,7 +47,8 @@ export default class FlvLoader {
                         player.updateStats({
                             abps: payload.byteLength
                         })
-                        decoderWorker.decodeAudio(payload, ts);
+                        decoderWorker.decodeAudio(payload, ts)
+                        // this._doDecode(payload, type, ts)
                     }
                     break
                 case FLV_MEDIA_TYPE.video:
@@ -65,8 +68,43 @@ export default class FlvLoader {
                             // this.player.debug.log('FlvDemux', 'decodeVideo')
                             decoderWorker.decodeVideo(payload, ts, isIframe);
                         }
+                        // this._doDecode(payload, type, ts, isIframe);
+
                     }
                     break
+            }
+        }
+    }
+
+    _doDecode(payload, type, ts, isIframe) {
+        const player = this.player;
+        const {decoderWorker, webcodecsDecoder, mseDecoder} = player;
+        let options = {
+            ts: ts,
+            type: null,
+        }
+        if (player._opt.useWCS && !player._opt.useOffscreen) {
+            if (type === FLV_MEDIA_TYPE.video) {
+                options.type = MEDIA_TYPE.video;
+            } else if (type === FLV_MEDIA_TYPE.audio) {
+                options.type = MEDIA_TYPE.audio;
+            }
+            // this.pushBuffer(payload, options)
+            webcodecsDecoder.decodeVideo(payload, ts, isIframe);
+        } else if (player._opt.useMSE) {
+            if (type === FLV_MEDIA_TYPE.video) {
+                options.type = MEDIA_TYPE.video;
+            } else if (type === FLV_MEDIA_TYPE.audio) {
+                options.type = MEDIA_TYPE.audio;
+            }
+
+            // this.pushBuffer(payload, options)
+            mseDecoder.decodeVideo(payload, ts, isIframe);
+        } else {
+            if (type === FLV_MEDIA_TYPE.video) {
+                decoderWorker.decodeVideo(payload, ts, isIframe);
+            } else if (type === FLV_MEDIA_TYPE.audio) {
+                decoderWorker.decodeAudio(payload, ts);
             }
         }
     }
@@ -99,6 +137,7 @@ export default class FlvLoader {
     }
 
     destroy() {
+        super.destroy();
         this.player.debug.log('FlvDemux', 'destroy')
     }
 }

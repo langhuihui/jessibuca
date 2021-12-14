@@ -36,7 +36,6 @@ export default class MseDecoder extends Emitter {
             this.player.emit(EVENTS.mseSourceClose);
         })
 
-
         player.debug.log('MediaSource', 'init')
     }
 
@@ -65,6 +64,7 @@ export default class MseDecoder extends Emitter {
     }
 
     decodeVideo(payload, ts, isIframe) {
+        this.player.debug.log('MediaSource decoder', 'decodeVideo');
         if (!this.hasInit) {
             if (isIframe && payload[1] === 0) {
                 this._decodeConfigurationRecord(payload, ts, isIframe)
@@ -164,7 +164,7 @@ export default class MseDecoder extends Emitter {
             // appendBuffer
             this.appendBuffer(result.buffer)
             player.handleRender();
-            player.updateStats({ts: 0, buf: 0})
+            player.updateStats({fps: true, ts: 0, buf: player.demux.delay})
         } else {
             player.debug.log('MediaSource', 'timeInit set false , cacheTrack = {}');
             this.timeInit = false;
@@ -204,11 +204,6 @@ export default class MseDecoder extends Emitter {
             this.isInitInfo = true;
         }
     }
-
-    decodeAudio(payload, ts) {
-
-    }
-
 
     appendBuffer(buffer) {
         const {
