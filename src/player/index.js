@@ -556,10 +556,7 @@ export default class Player extends Emitter {
         this._playing = false;
         this._hasLoaded = false;
 
-        if (this.events) {
-            this.events.destroy();
-            this.events = null;
-        }
+
         if (this.decoderWorker) {
             this.decoderWorker.destroy();
             this.decoderWorker = null;
@@ -598,6 +595,10 @@ export default class Player extends Emitter {
             this.mseDecoder = null;
         }
 
+        if (this.events) {
+            this.events.destroy();
+            this.events = null;
+        }
 
         this.clearCheckHeartTimeout();
         this.clearCheckLoadingTimeout();

@@ -90,7 +90,6 @@ export default class VideoLoader extends CommonLoader {
 
     destroy() {
         this.player.$container.removeChild(this.$videoElement);
-        this.player = null;
         this.init = false;
         this.player.debug.log('Video', 'destroy');
     }

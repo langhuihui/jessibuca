@@ -1244,7 +1244,6 @@
 
       destroy() {
         this.player.$container.removeChild(this.$videoElement);
-        this.player = null;
         this.init = false;
         this.player.debug.log('Video', 'destroy');
       }
@@ -4669,11 +4668,6 @@
         this._playing = false;
         this._hasLoaded = false;
 
-        if (this.events) {
-          this.events.destroy();
-          this.events = null;
-        }
-
         if (this.decoderWorker) {
           this.decoderWorker.destroy();
           this.decoderWorker = null;
@@ -4712,6 +4706,11 @@
         if (this.mseDecoder) {
           this.mseDecoder.destroy();
           this.mseDecoder = null;
+        }
+
+        if (this.events) {
+          this.events.destroy();
+          this.events = null;
         }
 
         this.clearCheckHeartTimeout();
