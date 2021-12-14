@@ -146,12 +146,34 @@ worker地址
 ### loadingText
 - **类型**：`string`
 - **默认值**：``
-- **用法**：加载过程中文案。
+- **用法**：
+加载过程中文案。
 
 ### background
 - **类型**：`string`
 - **默认值**：``
-- **用法**：背景图片。
+- **用法**：
+背景图片。
+
+### useMSE
+- **类型**：`boolean`
+- **默认值**：`false`
+- **用法**：
+是否开启MediaSource硬解码
+
+> 视频编码只支持H.264视频（Safari on iOS不支持）
+
+> 不支持 forceNoOffscreen 为 false (开启离屏渲染)
+
+### useWCS
+- **类型**：`boolean`
+- **默认值**：`false`
+- **用法**：
+  是否开启Webcodecs硬解码
+
+> 视频编码只支持H.264视频 (需在chrome 94版本以上，需要https或者localhost环境)
+
+> 支持 forceNoOffscreen 为 false （开启离屏渲染）
 
 ## 方法
 
