@@ -12,12 +12,12 @@ export const DEMUX_TYPE = {
 
 // default player options
 export const DEFAULT_PLAYER_OPTIONS = {
-    videoBuffer: 1, //second
+    videoBuffer: 1000, //1000ms == 1 second
     isResize: true,
     isFullResize: false,
     isFlv: false,
     debug: false,
-    timeout: 10,
+    timeout: 10, // second
     supportDblclickFullscreen: false,
     showBandwidth: false, //
     keepScreenOn: false,

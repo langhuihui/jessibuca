@@ -1,7 +1,7 @@
 import Player from './player';
 import Events from "./utils/events";
 import {DEMUX_TYPE, EVENTS, JESSIBUCA_EVENTS, PLAYER_PLAY_PROTOCOL, SCALE_MODE_TYPE} from "./constant";
-import {supportWCS} from "./utils";
+import {isNotEmpty, supportWCS} from "./utils";
 import Emitter from "./utils/emitter";
 
 
@@ -22,8 +22,12 @@ class Jessibuca extends Emitter {
 
         delete _opt.container;
 
+        // s -> ms
+        if (isNotEmpty(_opt.videoBuffer)) {
+            _opt.videoBuffer = Number(_opt.videoBuffer) * 1000
+        }
+
         this._opt = _opt;
-        // todo videoBuffer 时间有问题。
         this.$container = $container;
         this.href = null;
         this.events = new Events(this);
@@ -251,11 +255,11 @@ class Jessibuca extends Emitter {
 
     /**
      *
-     * @param time {number}
+     * @param time {number} s
      */
     setBufferTime(time) {
         time = Number(time)
-
+        // s -> ms
         this.player.updateOption({
             videoBuffer: time * 1000
         })
