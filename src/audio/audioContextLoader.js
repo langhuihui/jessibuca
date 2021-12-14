@@ -39,12 +39,12 @@ export default class AudioContextLoader extends Emitter {
 
         this.playing = false;
 
-
         this.audioInfo = {
             encType: '',
             channels: '',
             sampleRate: ''
         }
+        this.init = false;
         this.player.debug.log('AudioContext', 'init');
     }
 
@@ -62,8 +62,9 @@ export default class AudioContextLoader extends Emitter {
         }
 
         // audio 基本信息
-        if (this.audioInfo.sampleRate && this.audioInfo.channels && this.audioInfo.encType) {
+        if (this.audioInfo.sampleRate && this.audioInfo.channels && this.audioInfo.encType && !this.init) {
             this.player.emit(EVENTS.audioInfo, this.audioInfo);
+            this.init = true;
         }
     }
 
@@ -205,6 +206,7 @@ export default class AudioContextLoader extends Emitter {
         this.audioContext.close();
         this.audioContext = null;
         this.gainNode = null;
+        this.init = false;
         if (this.scriptNode) {
             this.scriptNode.onaudioprocess = noop;
             this.scriptNode = null;

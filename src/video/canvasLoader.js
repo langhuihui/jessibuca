@@ -163,6 +163,7 @@ export default class CanvasVideoLoader extends CommonLoader {
         }
 
         this.player.$container.removeChild(this.$videoElement);
+        this.init = false;
         this.player.debug.log(`CanvasVideoLoader`, 'destroy');
     }
 }

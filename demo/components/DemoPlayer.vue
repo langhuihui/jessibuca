@@ -223,7 +223,7 @@ export default {
             });
 
             this.jessibuca.on('start', function () {
-                console.log('start');
+                console.log('frame start');
             })
 
             this.jessibuca.on("performance", function (performance) {

@@ -21,7 +21,7 @@
       isFullResize: false,
       isFlv: false,
       debug: false,
-      timeout: 30,
+      timeout: 10,
       supportDblclickFullscreen: false,
       showBandwidth: false,
       //
@@ -119,7 +119,6 @@
       streamMessage: 'streamMessage',
       streamError: 'streamError',
       volumechange: 'volumechange',
-      frameStart: 'frameStart',
       destroy: 'destroy',
       mseSourceOpen: 'mseSourceOpen',
       mseSourceClose: 'mseSourceClose',
@@ -136,7 +135,7 @@
       error: EVENTS.error,
       kBps: EVENTS.kBps,
       log: EVENTS.log,
-      start: EVENTS.frameStart,
+      start: EVENTS.start,
       timeout: EVENTS.timeout,
       fullscreen: 'fullscreen',
       play: EVENTS.play,
@@ -903,6 +902,7 @@
     class CommonLoader extends Emitter {
       constructor() {
         super();
+        this.init = false;
       }
 
       initCanvasViewSize() {
@@ -926,8 +926,9 @@
         } // video 基本信息
 
 
-        if (this.videoInfo.encType && this.videoInfo.height && this.videoInfo.width) {
+        if (this.videoInfo.encType && this.videoInfo.height && this.videoInfo.width && !this.init) {
           this.player.emit(EVENTS.videoInfo, this.videoInfo);
+          this.init = true;
         }
       }
 
@@ -1144,6 +1145,7 @@
           encTypeCode: ''
         };
         this.player.$container.removeChild(this.$videoElement);
+        this.init = false;
         this.player.debug.log(`CanvasVideoLoader`, 'destroy');
       }
 
@@ -1233,8 +1235,9 @@
 
       destroy() {
         this.player.$container.removeChild(this.$videoElement);
-        this.player.debug.log('Video', 'destroy');
         this.player = null;
+        this.init = false;
+        this.player.debug.log('Video', 'destroy');
       }
 
     }
@@ -1295,6 +1298,7 @@
           channels: '',
           sampleRate: ''
         };
+        this.init = false;
         this.player.debug.log('AudioContext', 'init');
       }
 
@@ -1312,8 +1316,9 @@
         } // audio 基本信息
 
 
-        if (this.audioInfo.sampleRate && this.audioInfo.channels && this.audioInfo.encType) {
+        if (this.audioInfo.sampleRate && this.audioInfo.channels && this.audioInfo.encType && !this.init) {
           this.player.emit(EVENTS.audioInfo, this.audioInfo);
+          this.init = true;
         }
       } //
 
@@ -1459,6 +1464,7 @@
         this.audioContext.close();
         this.audioContext = null;
         this.gainNode = null;
+        this.init = false;
 
         if (this.scriptNode) {
           this.scriptNode.onaudioprocess = noop;

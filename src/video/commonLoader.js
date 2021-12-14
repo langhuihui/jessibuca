@@ -4,6 +4,7 @@ import {CONTROL_HEIGHT, EVENTS, VIDEO_ENC_TYPE} from "../constant";
 export default class CommonLoader extends Emitter {
     constructor() {
         super();
+        this.init = false;
     }
 
     initCanvasViewSize() {
@@ -27,8 +28,9 @@ export default class CommonLoader extends Emitter {
         }
 
         // video 基本信息
-        if (this.videoInfo.encType && this.videoInfo.height && this.videoInfo.width) {
+        if (this.videoInfo.encType && this.videoInfo.height && this.videoInfo.width && !this.init) {
             this.player.emit(EVENTS.videoInfo, this.videoInfo);
+            this.init = true;
         }
     }
 

@@ -26,7 +26,9 @@ declare namespace Jessibuca {
         keepScreenOn?: boolean,
         isNotMute?: boolean,
         loadingText?: boolean,
-        background?: string
+        background?: string,
+        useWCS?: boolean,
+        useMSE?: boolean
     }
 
     interface JessibucaConstructor {
