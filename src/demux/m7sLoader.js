@@ -1,4 +1,4 @@
-import {MEDIA_TYPE} from "../constant";
+import {FLV_MEDIA_TYPE, MEDIA_TYPE} from "../constant";
 import CommonLoader from "./commonLoader";
 
 export default class M7sLoader extends CommonLoader {
@@ -20,7 +20,9 @@ export default class M7sLoader extends CommonLoader {
                     player.updateStats({
                         abps: payload.byteLength
                     })
-                    decoderWorker.decodeAudio(payload, ts)
+                    if (payload.byteLength > 0) {
+                        this._doDecode(payload, type, ts)
+                    }
                 }
                 break;
             case MEDIA_TYPE.video:
@@ -31,15 +33,8 @@ export default class M7sLoader extends CommonLoader {
                         player.updateStats({
                             vbps: payload.byteLength
                         })
-                        if (player._opt.useWCS && !player._opt.useOffscreen) {
-                            // this.player.debug.log('FlvDemux', 'decodeVideo useWCS')
-                            webcodecsDecoder.decodeVideo(payload, ts, isIframe);
-                        } else if (player._opt.useMSE) {
-                            // this.player.debug.log('FlvDemux', 'decodeVideo useMSE')
-                            mseDecoder.decodeVideo(payload, ts, isIframe);
-                        } else {
-                            // this.player.debug.log('FlvDemux', 'decodeVideo')
-                            decoderWorker.decodeVideo(payload, ts, isIframe);
+                        if (payload.byteLength > 0) {
+                            this._doDecode(payload, type, ts, isIframe)
                         }
                     }
                 }
@@ -47,17 +42,8 @@ export default class M7sLoader extends CommonLoader {
         }
     }
 
-    _doDecode(payload, type, ts, isIframe){
-
-    }
-
-    close() {
-
-    }
-
     destroy() {
         super.destroy();
-
         this.player.debug.log('M7sDemux', 'destroy')
     }
 }

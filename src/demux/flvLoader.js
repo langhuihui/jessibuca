@@ -4,14 +4,12 @@ import CommonLoader from "./commonLoader";
 export default class FlvLoader extends CommonLoader {
     constructor(player) {
         super(player);
-        // this.player = player;
-        const input = this._inputFlv();
-        this.flvDemux = this.dispatchFlvData(input);
+        this.input = this._inputFlv();
+        this.flvDemux = this.dispatchFlvData(this.input);
         player.debug.log('FlvDemux', 'init')
     }
 
     dispatch(data) {
-        // this.player.debug.log('FlvDemux', 'dispatch');
         this.flvDemux(data);
     }
 
@@ -20,9 +18,7 @@ export default class FlvLoader extends CommonLoader {
         const tmp = new ArrayBuffer(4)
         const tmp8 = new Uint8Array(tmp)
         const tmp32 = new Uint32Array(tmp)
-
         const player = this.player;
-        const {decoderWorker, webcodecsDecoder, mseDecoder} = player;
 
         while (true) {
             tmp8[3] = 0
@@ -47,8 +43,9 @@ export default class FlvLoader extends CommonLoader {
                         player.updateStats({
                             abps: payload.byteLength
                         })
-                        decoderWorker.decodeAudio(payload, ts)
-                        // this._doDecode(payload, type, ts)
+                        if (payload.byteLength > 0) {
+                            this._doDecode(payload, MEDIA_TYPE.audio, ts)
+                        }
                     }
                     break
                 case FLV_MEDIA_TYPE.video:
@@ -56,55 +53,12 @@ export default class FlvLoader extends CommonLoader {
                         player.updateStats({
                             vbps: payload.byteLength
                         })
-                        const isIframe = payload[0] >> 4 === 1;
-                        // 没有使用离屏渲染
-                        if (player._opt.useWCS && !player._opt.useOffscreen) {
-                            // this.player.debug.log('FlvDemux', 'decodeVideo useWCS')
-                            webcodecsDecoder.decodeVideo(payload, ts, isIframe);
-                        } else if (player._opt.useMSE) {
-                            // this.player.debug.log('FlvDemux', 'decodeVideo useMSE')
-                            mseDecoder.decodeVideo(payload, ts, isIframe);
-                        } else {
-                            // this.player.debug.log('FlvDemux', 'decodeVideo')
-                            decoderWorker.decodeVideo(payload, ts, isIframe);
+                        const isIFrame = payload[0] >> 4 === 1;
+                        if (payload.byteLength > 0) {
+                            this._doDecode(payload, MEDIA_TYPE.video, ts, isIFrame);
                         }
-                        // this._doDecode(payload, type, ts, isIframe);
-
                     }
                     break
-            }
-        }
-    }
-
-    _doDecode(payload, type, ts, isIframe) {
-        const player = this.player;
-        const {decoderWorker, webcodecsDecoder, mseDecoder} = player;
-        let options = {
-            ts: ts,
-            type: null,
-        }
-        if (player._opt.useWCS && !player._opt.useOffscreen) {
-            if (type === FLV_MEDIA_TYPE.video) {
-                options.type = MEDIA_TYPE.video;
-            } else if (type === FLV_MEDIA_TYPE.audio) {
-                options.type = MEDIA_TYPE.audio;
-            }
-            // this.pushBuffer(payload, options)
-            webcodecsDecoder.decodeVideo(payload, ts, isIframe);
-        } else if (player._opt.useMSE) {
-            if (type === FLV_MEDIA_TYPE.video) {
-                options.type = MEDIA_TYPE.video;
-            } else if (type === FLV_MEDIA_TYPE.audio) {
-                options.type = MEDIA_TYPE.audio;
-            }
-
-            // this.pushBuffer(payload, options)
-            mseDecoder.decodeVideo(payload, ts, isIframe);
-        } else {
-            if (type === FLV_MEDIA_TYPE.video) {
-                decoderWorker.decodeVideo(payload, ts, isIframe);
-            } else if (type === FLV_MEDIA_TYPE.audio) {
-                decoderWorker.decodeAudio(payload, ts);
             }
         }
     }
@@ -133,11 +87,13 @@ export default class FlvLoader extends CommonLoader {
     }
 
     close() {
-
+        this.input && this.input.return(null)
     }
 
     destroy() {
         super.destroy();
+        this.input = null;
+        this.flvDemux = null;
         this.player.debug.log('FlvDemux', 'destroy')
     }
 }

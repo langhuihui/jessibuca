@@ -17,19 +17,19 @@
                     type="checkbox"
                     v-model="useMSE"
                     ref="vod"
-                    @change="restartPlay"
+                    @change="restartPlay('mse')"
                 /><span>MediaSource</span>
                 <input
                     type="checkbox"
                     v-model="useWCS"
                     ref="vod"
-                    @change="restartPlay"
+                    @change="restartPlay('wcs')"
                 /><span>webcodecs</span>
                 <input
                     type="checkbox"
                     ref="offscreen"
                     v-model="useOffscreen"
-                    @change="restartPlay"
+                    @change="restartPlay('offscreen')"
                 /><span>离屏渲染</span>
                 <input type="checkbox" ref="resize" @change="changeResize"/><span>禁止画面拉伸</span>
             </div>
@@ -120,7 +120,7 @@ export default {
             volume: 1,
             rotate: 0,
             useWCS: false,
-            useMSE: false,
+            useMSE: true,
             useOffscreen: false,
             recording: false,
             recordType: 'webm'
@@ -247,17 +247,6 @@ export default {
                 console.log('kBps', kBps);
             });
 
-            // 显示时间戳 PTS
-            this.jessibuca.on('videoFrame', function () {
-                console.log('videoFrame', kBps);
-
-            })
-
-            //
-            this.jessibuca.on('metadata', function () {
-
-            });
-
             this.jessibuca.on("play", () => {
                 this.playing = true;
                 this.loaded = true;
@@ -331,7 +320,17 @@ export default {
         },
 
 
-        restartPlay() {
+        restartPlay(type) {
+
+            if (type === 'mse') {
+                this.useWCS = false;
+                this.useOffscreen = false;
+            } else if (type === 'wcs') {
+                this.useMSE = false
+            } else if (type === 'offscreen') {
+                this.useMSE = false
+            }
+
             this.destroy();
             setTimeout(() => {
                 this.play();

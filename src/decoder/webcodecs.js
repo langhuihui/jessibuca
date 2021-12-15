@@ -58,7 +58,7 @@ export default class WebcodecsDecoder extends Emitter {
     }
 
     decodeVideo(payload, ts, isIframe) {
-        this.player.debug.log('Webcodecs decoder', 'decodeVideo');
+        // this.player.debug.log('Webcodecs decoder', 'decodeVideo', ts, isIframe);
         if (!this.hasInit) {
             if (isIframe && payload[1] === 0) {
                 const videoCodec = (payload[0] & 0x0F);

@@ -567,6 +567,7 @@ export default class Player extends Emitter {
             this.video.destroy();
             this.video = null;
         }
+
         if (this.audio) {
             this.audio.destroy();
             this.audio = null;
@@ -596,6 +597,12 @@ export default class Player extends Emitter {
             this.mseDecoder.destroy();
             this.mseDecoder = null;
         }
+
+        if (this.demux) {
+            this.demux.destroy();
+            this.demux = null;
+        }
+
 
         if (this.events) {
             this.events.destroy();

@@ -100,7 +100,6 @@ export default class DecoderWorker {
         }
     }
 
-
     //
     _decodeAudio(arrayBuffer, ts) {
         const options = {

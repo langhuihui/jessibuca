@@ -64,24 +64,24 @@ export default class MseDecoder extends Emitter {
     }
 
     decodeVideo(payload, ts, isIframe) {
-        this.player.debug.log('MediaSource decoder', 'decodeVideo');
         if (!this.hasInit) {
             if (isIframe && payload[1] === 0) {
                 this._decodeConfigurationRecord(payload, ts, isIframe)
                 this.hasInit = true;
             }
         } else {
-            this.bufferList.push({
-                payload,
-                ts,
-                isIframe
-            })
-            if (!this.decodeInterval) {
-                this._doDecode();
-                this.decodeInterval = setInterval(() => {
-                    this._doDecode();
-                }, FRAG_DURATION)
-            }
+            // this.bufferList.push({
+            //     payload,
+            //     ts,
+            //     isIframe
+            // })
+            // if (!this.decodeInterval) {
+            //     this._doDecode();
+            //     this.decodeInterval = setInterval(() => {
+            //         this._doDecode();
+            //     }, FRAG_DURATION)
+            // }
+            this._decodeVideo(payload, ts, isIframe);
         }
     }
 
@@ -164,7 +164,7 @@ export default class MseDecoder extends Emitter {
             // appendBuffer
             this.appendBuffer(result.buffer)
             player.handleRender();
-            player.updateStats({fps: true, ts: 0, buf: player.demux.delay})
+            player.updateStats({fps: true, ts: ts, buf: player.demux.delay})
         } else {
             player.debug.log('MediaSource', 'timeInit set false , cacheTrack = {}');
             this.timeInit = false;

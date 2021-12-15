@@ -77,6 +77,34 @@ export default class CommonLoader extends Emitter {
         this.stopId = setInterval(_loop, 10)
     }
 
+    _doDecode(payload, type, ts, isIFrame) {
+        const player = this.player;
+        const {decoderWorker} = player;
+        let options = {
+            ts: ts,
+            type: type,
+            isIFrame: false
+        }
+        if (player._opt.useWCS && !player._opt.useOffscreen) {
+            if (type === MEDIA_TYPE.video) {
+                options.isIFrame = isIFrame;
+            }
+            this.pushBuffer(payload, options)
+        } else if (player._opt.useMSE) {
+            if (type === MEDIA_TYPE.video) {
+                options.isIFrame = isIFrame;
+            }
+            this.pushBuffer(payload, options)
+        } else {
+            //
+            if (type === MEDIA_TYPE.video) {
+                decoderWorker.decodeVideo(payload, ts, isIFrame);
+            } else if (type === MEDIA_TYPE.audio) {
+                decoderWorker.decodeAudio(payload, ts);
+            }
+        }
+    }
+
     _doDecoderDecode(data) {
         const player = this.player;
         const {decoderWorker, webcodecsDecoder, mseDecoder} = player;
@@ -85,17 +113,14 @@ export default class CommonLoader extends Emitter {
             decoderWorker.decodeAudio(data.payload, data.ts)
         } else if (data.type === MEDIA_TYPE.video) {
             if (player._opt.useWCS && !player._opt.useOffscreen) {
-                // this.player.debug.log('FlvDemux', 'decodeVideo useWCS')
-                webcodecsDecoder.decodeVideo(data.payload, data.ts, data.isIframe);
+                webcodecsDecoder.decodeVideo(data.payload, data.ts, data.isIFrame);
             } else if (player._opt.useMSE) {
-                // this.player.debug.log('FlvDemux', 'decodeVideo useMSE')
-                mseDecoder.decodeVideo(data.payload, data.ts, data.isIframe);
+                mseDecoder.decodeVideo(data.payload, data.ts, data.isIFrame);
             }
         }
     }
 
     pushBuffer(payload, options) {
-        // this.player.debug.log('common Demux', 'pushBuffer', options);
         // 音频
         if (options.type === MEDIA_TYPE.audio) {
             this.bufferList.push({
@@ -111,6 +136,10 @@ export default class CommonLoader extends Emitter {
                 isIFrame: options.isIFrame
             })
         }
+    }
+
+    close() {
+
     }
 
     destroy() {
