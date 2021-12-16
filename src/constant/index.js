@@ -17,6 +17,8 @@ export const DEFAULT_PLAYER_OPTIONS = {
     isFullResize: false,
     isFlv: false,
     debug: false,
+    loadingTimeout: 10, // loading timeout
+    heartTimeout: 10,  // heart timeout
     timeout: 10, // second
     supportDblclickFullscreen: false,
     showBandwidth: false, //
@@ -147,7 +149,6 @@ export const JESSIBUCA_EVENTS = {
 export const EVENTS_ERROR = {
     fetchError: "fetchError",
     websocketError: 'websocketError',
-    websocketCloseSuccess: 'websocketCloseSuccess',
     websocketClosedByError: 'websocketClosedByError',
 }
 

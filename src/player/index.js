@@ -1,4 +1,4 @@
-import {DEFAULT_PLAYER_OPTIONS, EVENTS, EVENTS_ERROR} from "../constant";
+import {DEFAULT_PLAYER_OPTIONS, EVENTS, EVENTS_ERROR, JESSIBUCA_EVENTS} from "../constant";
 import Debug from "../utils/debug";
 import Events from "../utils/events";
 import property from './property';
@@ -292,11 +292,13 @@ export default class Player extends Emitter {
                 this.checkLoadingTimeout();
                 // fetch error
                 this.stream.once(EVENTS_ERROR.fetchError, (error) => {
+                    this.emit(JESSIBUCA_EVENTS.error, error)
                     reject(error)
                 })
 
                 // ws
                 this.stream.once(EVENTS_ERROR.websocketError, (error) => {
+                    this.emit(JESSIBUCA_EVENTS.error, error)
                     reject(error)
                 })
 
@@ -361,11 +363,11 @@ export default class Player extends Emitter {
             this.playing = false;
             this.loading = false;
             this.recording = false;
-            // 声音要清除掉。。。。
+            // release audio buffer
             this.audio.pause();
-            // 释放lock
+            // release lock
             this.releaseWakeLock();
-            // 重置 stats
+            // reset stats
             this.resetStats();
             //
             setTimeout(() => {
@@ -453,7 +455,7 @@ export default class Player extends Emitter {
             this.pause(false).then(() => {
                 this.emit(EVENTS.timeout, 'heart timeout');
             });
-        }, this._opt.timeout * 1000)
+        }, this._opt.heartTimeout * 1000)
     }
 
     //
@@ -470,7 +472,7 @@ export default class Player extends Emitter {
             this.pause(false).then(() => {
                 this.emit(EVENTS.timeout, 'loading timeout');
             });
-        }, this._opt.timeout * 1000)
+        }, this._opt.loadingTimeout * 1000)
     }
 
     clearCheckLoadingTimeout() {

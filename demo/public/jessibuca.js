@@ -21,6 +21,10 @@
       isFullResize: false,
       isFlv: false,
       debug: false,
+      loadingTimeout: 10,
+      // loading timeout
+      heartTimeout: 10,
+      // heart timeout
       timeout: 10,
       // second
       supportDblclickFullscreen: false,
@@ -149,7 +153,6 @@
     const EVENTS_ERROR = {
       fetchError: "fetchError",
       websocketError: 'websocketError',
-      websocketCloseSuccess: 'websocketCloseSuccess',
       websocketClosedByError: 'websocketClosedByError'
     };
     const WEBSOCKET_STATUS = {
@@ -10749,10 +10752,12 @@
             this.checkLoadingTimeout(); // fetch error
 
             this.stream.once(EVENTS_ERROR.fetchError, error => {
+              this.emit(JESSIBUCA_EVENTS.error, error);
               reject(error);
             }); // ws
 
             this.stream.once(EVENTS_ERROR.websocketError, error => {
+              this.emit(JESSIBUCA_EVENTS.error, error);
               reject(error);
             }); // success
 
@@ -10815,11 +10820,11 @@
           this.clearCheckLoadingTimeout();
           this.playing = false;
           this.loading = false;
-          this.recording = false; // 声音要清除掉。。。。
+          this.recording = false; // release audio buffer
 
-          this.audio.pause(); // 释放lock
+          this.audio.pause(); // release lock
 
-          this.releaseWakeLock(); // 重置 stats
+          this.releaseWakeLock(); // reset stats
 
           this.resetStats(); //
 
@@ -10912,7 +10917,7 @@
           this.pause(false).then(() => {
             this.emit(EVENTS.timeout, 'heart timeout');
           });
-        }, this._opt.timeout * 1000);
+        }, this._opt.heartTimeout * 1000);
       } //
 
 
@@ -10929,7 +10934,7 @@
           this.pause(false).then(() => {
             this.emit(EVENTS.timeout, 'loading timeout');
           });
-        }, this._opt.timeout * 1000);
+        }, this._opt.loadingTimeout * 1000);
       }
 
       clearCheckLoadingTimeout() {
@@ -11109,6 +11114,17 @@
 
         if (isNotEmpty(_opt.videoBuffer)) {
           _opt.videoBuffer = Number(_opt.videoBuffer) * 1000;
+        } // setting
+
+
+        if (isNotEmpty(_opt.timeout)) {
+          if (isEmpty(_opt.loadingTimeout)) {
+            _opt.loadingTimeout = _opt.timeout;
+          }
+
+          if (isEmpty(_opt.heartTimeout)) {
+            _opt.heartTimeout = _opt.timeout;
+          }
         }
 
         this._opt = _opt;
@@ -11179,8 +11195,11 @@
 
 
       setTimeout(time) {
+        time = Number(time);
         this.player.updateOption({
-          timeout: Number(time)
+          timeout: time,
+          loadingTimeout: time,
+          heartTimeout: time
         });
       }
       /**

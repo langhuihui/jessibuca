@@ -1,7 +1,7 @@
 import Player from './player';
 import Events from "./utils/events";
 import {DEMUX_TYPE, EVENTS, JESSIBUCA_EVENTS, PLAYER_PLAY_PROTOCOL, SCALE_MODE_TYPE} from "./constant";
-import {isNotEmpty, supportWCS} from "./utils";
+import {isEmpty, isNotEmpty, supportWCS} from "./utils";
 import Emitter from "./utils/emitter";
 
 
@@ -25,6 +25,17 @@ class Jessibuca extends Emitter {
         // s -> ms
         if (isNotEmpty(_opt.videoBuffer)) {
             _opt.videoBuffer = Number(_opt.videoBuffer) * 1000
+        }
+
+        // setting
+        if (isNotEmpty(_opt.timeout)) {
+            if (isEmpty(_opt.loadingTimeout)) {
+                _opt.loadingTimeout = _opt.timeout;
+            }
+
+            if (isEmpty(_opt.heartTimeout)) {
+                _opt.heartTimeout = _opt.timeout
+            }
         }
 
         this._opt = _opt;
@@ -88,8 +99,11 @@ class Jessibuca extends Emitter {
      * @param value {number}
      */
     setTimeout(time) {
+        time = Number(time);
         this.player.updateOption({
-            timeout: Number(time)
+            timeout: time,
+            loadingTimeout: time,
+            heartTimeout: time
         })
     }
 
