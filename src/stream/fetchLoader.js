@@ -26,7 +26,7 @@ export default class FetchLoader extends Emitter {
                         if (done) {
                             demux.close();
                         } else {
-                            this.streamRate(value.byteLength);
+                            this.streamRate && this.streamRate(value.byteLength);
                             demux.dispatch(value);
                             fetchNext();
                         }

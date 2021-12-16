@@ -1556,7 +1556,7 @@
               if (done) {
                 demux.close();
               } else {
-                this.streamRate(value.byteLength);
+                this.streamRate && this.streamRate(value.byteLength);
                 demux.dispatch(value);
                 fetchNext();
               }
@@ -1614,7 +1614,7 @@
           this.socketStatus = WEBSOCKET_STATUS.open;
         });
         proxy(this.socket, 'message', event => {
-          this.streamRate(event.data.byteLength);
+          this.streamRate && this.streamRate(event.data.byteLength);
 
           this._handleMessage(event.data);
         });

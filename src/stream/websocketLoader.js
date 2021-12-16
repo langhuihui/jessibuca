@@ -32,7 +32,7 @@ export default class WebsocketLoader extends Emitter {
         });
 
         proxy(this.socket, 'message', event => {
-            this.streamRate(event.data.byteLength);
+            this.streamRate && this.streamRate(event.data.byteLength);
             this._handleMessage(event.data);
         });
 
