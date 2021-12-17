@@ -17,7 +17,7 @@ export default (player) => {
         //
     }
     //
-    player.on(EVENTS.load, () => {
+    player.on(EVENTS.decoderWorkerInit, () => {
         player.debug.log('player', 'has loaded');
         player._hasLoaded = true;
     })

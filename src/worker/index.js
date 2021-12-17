@@ -19,7 +19,9 @@ export default class DecoderWorker {
             switch (msg.cmd) {
                 case WORKER_CMD_TYPE.init:
                     debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.init);
-                    this.player.emit(EVENTS.load);
+                    if (!this.player.loaded) {
+                        this.player.emit(EVENTS.load);
+                    }
                     this.player.emit(EVENTS.decoderWorkerInit);
                     this._initWork();
                     break;

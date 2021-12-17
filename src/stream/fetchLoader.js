@@ -1,5 +1,5 @@
 import Emitter from "../utils/emitter";
-import {EVENTS, EVENTS_ERROR} from "../constant";
+import {EVENTS, EVENTS_ERROR, JESSIBUCA_EVENTS} from "../constant";
 import {calculationRate} from "../utils";
 
 export default class FetchLoader extends Emitter {
@@ -35,20 +35,28 @@ export default class FetchLoader extends Emitter {
                     demux.close();
                     // 这边会报用户 aborted a request 错误。
                     this.emit(EVENTS_ERROR.fetchError, e);
+                    this.player.emit(EVENTS.error, e);
+                    this.abort();
                 })
             }
             fetchNext();
         }).catch((e) => {
+            this.abort();
             this.emit(EVENTS_ERROR.fetchError, e)
+            this.player.emit(EVENTS.error, e);
         })
     }
 
-
-    destroy() {
+    abort() {
         if (this.abortController) {
             this.abortController.abort();
             this.abortController = null
         }
+    }
+
+
+    destroy() {
+        this.abort()
         this.streamRate = null;
     }
 }

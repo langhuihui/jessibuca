@@ -148,6 +148,8 @@ class Jessibuca extends Emitter {
      *
      */
     close() {
+        // clear url
+        this._opt.url = '';
         return this.player.close();
     }
 
@@ -167,6 +169,7 @@ class Jessibuca extends Emitter {
     play(url) {
         return new Promise((resolve, reject) => {
             if (!url && !this._opt.url) {
+                this.emit(JESSIBUCA_EVENTS.error, 'player is not pause or url is null')
                 reject();
                 return;
             }
@@ -247,7 +250,7 @@ class Jessibuca extends Emitter {
                     })
                 })
             } else {
-                this.player.once(EVENTS.load, () => {
+                this.player.once(EVENTS.decoderWorkerInit, () => {
                     this.player.play(url).then(() => {
                         resolve();
                     }).catch(() => {

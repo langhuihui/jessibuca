@@ -46,6 +46,7 @@ export default class WebsocketLoader extends Emitter {
         proxy(this.socket, 'error', error => {
             debug.log('websocketLoader', 'socket error');
             this.emit(EVENTS_ERROR.websocketError, error);
+            this.player.emit(EVENTS.error, error);
             this.socketStatus = WEBSOCKET_STATUS.error;
             demux.close();
             debug.log('websocketLoader', `socket error:`, error);

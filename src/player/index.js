@@ -292,13 +292,11 @@ export default class Player extends Emitter {
                 this.checkLoadingTimeout();
                 // fetch error
                 this.stream.once(EVENTS_ERROR.fetchError, (error) => {
-                    this.emit(JESSIBUCA_EVENTS.error, error)
                     reject(error)
                 })
 
                 // ws
                 this.stream.once(EVENTS_ERROR.websocketError, (error) => {
-                    this.emit(JESSIBUCA_EVENTS.error, error)
                     reject(error)
                 })
 
