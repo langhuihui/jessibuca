@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="cont"></div>
+  <script src="./jessibuca.js"></script>
+
+  <script>
+    let url='https://www.asdf.com/asdf.flv'
+       let timer;
+
+const player = new window.Jessibuca({
+  container: document.getElementById('cont'),
+  decoder: './decoder.js',
+  videoBuffer: 0.2,
+  isNotMute:true,
+  debug: false,
+  isResize: false,
+});
+
+
+player.on('load', function () {
+  if (url) {
+    player.play(url);
+  }
+});
+
+player.on('error', function () {
+  if (url) {
+    console.log('播放异常 1.5秒后发起重新播放');
+    timer = setTimeout(() => {
+      console.log('重新播放', url);
+      player.close().then(() => {
+        player.play(url);
+      });
+    }, 1500);
+  }
+});
+  </script>
+</body>
+</html>
