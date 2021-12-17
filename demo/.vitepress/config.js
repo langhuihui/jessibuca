@@ -7,7 +7,9 @@ module.exports = {
         sidebar: "auto",
         nav: [
             {text: 'API', link: '/api'},
-            {text: '2.X', link: 'http://jessibuca.monibuca.com/'},
+            {text: 'Document', link: '/document'},
+            {text: 'HTTP', link: 'http://jessibuca.monibuca.com/'},
+            {text: 'HTTPS', link: 'https://j.m7s.live/'},
         ],
         logo: 'logo.png',
     },
