@@ -35,11 +35,11 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 [API](/demo/api.md)
 
 
-## 2.x 地址
+## HTTP 地址
 
 [http://jessibuca.monibuca.com/](http://jessibuca.monibuca.com/)
 
-## 3.x 地址
+## HTTPS 地址
 
 [https://j.m7s.live/](https://j.m7s.live/)
 
