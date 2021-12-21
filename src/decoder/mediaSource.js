@@ -257,7 +257,8 @@ export default class MseDecoder extends Emitter {
 
 
     removeBuffer(start, end) {
-        if (this.isStateOpen) {
+
+        if (this.isStateOpen && this.sourceBuffer.updating === false) {
             try {
                 this.sourceBuffer.remove(start, end)
             } catch (e) {
