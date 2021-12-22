@@ -390,6 +390,7 @@ class Jessibuca extends Emitter {
     destroy() {
         this.player.destroy();
         this.player = null;
+        this.off();
     }
 }
 

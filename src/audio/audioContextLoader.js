@@ -214,6 +214,9 @@ export default class AudioContextLoader extends Emitter {
         this.audioBufferSourceNode = null;
         this.mediaStreamAudioDestinationNode = null;
         this.hasInitScriptNode = false;
+        this.off();
+        this.player.debug.log('AudioContext', 'destroy');
+
     }
 
 }

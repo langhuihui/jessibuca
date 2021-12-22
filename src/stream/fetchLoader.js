@@ -57,6 +57,8 @@ export default class FetchLoader extends Emitter {
 
     destroy() {
         this.abort()
+        this.off();
         this.streamRate = null;
+        this.player.debug.log('FetchStream', 'destroy');
     }
 }

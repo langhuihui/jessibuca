@@ -278,11 +278,28 @@ export default class Player extends Emitter {
             this._opt.url = url;
 
             this.clearCheckHeartTimeout();
+
             this.init().then(() => {
                 //
                 if (this._opt.isNotMute) {
                     this.mute(false);
                 }
+
+
+                if (this.webcodecsDecoder) {
+                    this.webcodecsDecoder.once(EVENTS_ERROR.webcodecsH265NotSupport, () => {
+                        this.emit(EVENTS_ERROR.webcodecsH265NotSupport)
+                        this.emit(EVENTS.error, 'webcodecs H265 Not Support');
+                    })
+                }
+
+                if (this.mseDecoder) {
+                    this.mseDecoder.once(EVENTS_ERROR.mediaSourceH265NotSupport, () => {
+                        this.emit(EVENTS_ERROR.mediaSourceH265NotSupport)
+                        this.emit(EVENTS.error, 'mediaSource H265 Not Support');
+                    })
+                }
+
 
                 this.enableWakeLock();
 
@@ -308,6 +325,7 @@ export default class Player extends Emitter {
                         this.video.play();
                     }
                 })
+
             }).catch((e) => {
                 reject(e)
             })

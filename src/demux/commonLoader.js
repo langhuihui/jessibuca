@@ -152,5 +152,6 @@ export default class CommonLoader extends Emitter {
         this.delay = -1;
         this.bufferList = [];
         this.dropping = false;
+        this.off();
     }
 }

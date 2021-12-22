@@ -8,6 +8,7 @@ export default class AudioLoader extends Emitter {
         super();
         this.player = player;
         this.$video = player.video.$videoElement;
+        this.player.debug.log('Audio', 'init');
 
     }
 
@@ -35,6 +36,8 @@ export default class AudioLoader extends Emitter {
     }
 
     destroy() {
+        this.off();
+        this.player.debug.log('Audio', 'destroy');
         this.player = null;
     }
 }

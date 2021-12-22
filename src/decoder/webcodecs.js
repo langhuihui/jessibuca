@@ -1,6 +1,6 @@
 import {formatVideoDecoderConfigure, noop} from "../utils";
 import Emitter from "../utils/emitter";
-import {ENCODED_VIDEO_TYPE, EVENTS} from "../constant";
+import {ENCODED_VIDEO_TYPE, EVENTS, EVENTS_ERROR, VIDEO_ENC_CODE} from "../constant";
 
 
 export default class WebcodecsDecoder extends Emitter {
@@ -65,6 +65,13 @@ export default class WebcodecsDecoder extends Emitter {
                 this.player.video.updateVideoInfo({
                     encTypeCode: videoCodec
                 })
+
+                // 如果解码出来的是
+                if (videoCodec === VIDEO_ENC_CODE.h265) {
+                    this.emit(EVENTS_ERROR.webcodecsH265NotSupport)
+                    return;
+                }
+
                 const config = formatVideoDecoderConfigure(payload.slice(5));
                 this.decoder.configure(config);
                 this.hasInit = true;
@@ -84,6 +91,7 @@ export default class WebcodecsDecoder extends Emitter {
         this.decoder = null;
         this.hasInit = false;
         this.isInitInfo = false;
+        this.off();
         this.player.debug.log('Webcodecs', 'destroy')
         this.player = null;
     }

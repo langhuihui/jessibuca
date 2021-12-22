@@ -1,5 +1,5 @@
 import Emitter from "../utils/emitter";
-import {EVENTS, FRAG_DURATION, MEDIA_SOURCE_STATE, MP4_CODECS, VIDEO_ENC_CODE} from "../constant";
+import {EVENTS, EVENTS_ERROR, FRAG_DURATION, MEDIA_SOURCE_STATE, MP4_CODECS, VIDEO_ENC_CODE} from "../constant";
 import MP4 from "../remux/fmp4-generator";
 import {parseAVCDecoderConfigurationRecord} from "../utils/h264";
 import {parseHEVCDecoderConfigurationRecord} from "../utils/h265";
@@ -18,7 +18,6 @@ export default class MseDecoder extends Emitter {
         this.sequenceNumber = 0;
         this.mediaSourceOpen = false;
         this.bufferList = [];
-        this.decodeInterval = null;
         this.dropping = false;
         this.player.video.$videoElement.src = window.URL.createObjectURL(this.mediaSource);
         const {
@@ -64,23 +63,25 @@ export default class MseDecoder extends Emitter {
     }
 
     decodeVideo(payload, ts, isIframe) {
+        const player = this.player;
+
         if (!this.hasInit) {
             if (isIframe && payload[1] === 0) {
-                this._decodeConfigurationRecord(payload, ts, isIframe)
+                const videoCodec = (payload[0] & 0x0F);
+                player.video.updateVideoInfo({
+                    encTypeCode: videoCodec
+                })
+
+                // 如果解码出来的是
+                if (videoCodec === VIDEO_ENC_CODE.h265) {
+                    this.emit(EVENTS_ERROR.mediaSourceH265NotSupport)
+                    return;
+                }
+
+                this._decodeConfigurationRecord(payload, ts, isIframe, videoCodec)
                 this.hasInit = true;
             }
         } else {
-            // this.bufferList.push({
-            //     payload,
-            //     ts,
-            //     isIframe
-            // })
-            // if (!this.decodeInterval) {
-            //     this._doDecode();
-            //     this.decodeInterval = setInterval(() => {
-            //         this._doDecode();
-            //     }, FRAG_DURATION)
-            // }
             this._decodeVideo(payload, ts, isIframe);
         }
     }
@@ -93,13 +94,7 @@ export default class MseDecoder extends Emitter {
     }
 
 
-    _decodeConfigurationRecord(payload, ts, isIframe) {
-        const player = this.player;
-
-        const videoCodec = (payload[0] & 0x0F);
-        player.video.updateVideoInfo({
-            encTypeCode: videoCodec
-        })
+    _decodeConfigurationRecord(payload, ts, isIframe, videoCodec) {
         let data = payload.slice(5);
         let config = {};
 
@@ -273,16 +268,7 @@ export default class MseDecoder extends Emitter {
         }
     }
 
-    stopDecodeInterval() {
-        if (this.decodeInterval) {
-            clearInterval(this.decodeInterval);
-            this.decodeInterval = null;
-        }
-    }
-
-
     destroy() {
-        this.stopDecodeInterval();
         this.stop();
         this.bufferList = [];
         this.mediaSource = null;
@@ -293,7 +279,7 @@ export default class MseDecoder extends Emitter {
         this.sequenceNumber = 0;
         this.cacheTrack = null;
         this.timeInit = false;
-
+        this.off();
         this.player.debug.log('MediaSource', 'destroy')
     }
 }
