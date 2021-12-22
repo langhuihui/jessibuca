@@ -1,6 +1,6 @@
 import Player from './player';
 import Events from "./utils/events";
-import {DEMUX_TYPE, EVENTS, JESSIBUCA_EVENTS, PLAYER_PLAY_PROTOCOL, SCALE_MODE_TYPE} from "./constant";
+import {DEMUX_TYPE, EVENTS, EVENTS_ERROR, JESSIBUCA_EVENTS, PLAYER_PLAY_PROTOCOL, SCALE_MODE_TYPE} from "./constant";
 import {isEmpty, isNotEmpty, supportWCS} from "./utils";
 import Emitter from "./utils/emitter";
 
@@ -239,6 +239,14 @@ class Jessibuca extends Emitter {
             this.player.updateOption({
                 protocol,
                 demuxType
+            })
+
+            this.player.once(EVENTS_ERROR.mediaSourceH265NotSupport, () => {
+                this.close();
+            })
+
+            this.player.once(EVENTS_ERROR.webcodecsH265NotSupport, () => {
+                this.close();
             })
 
             if (this.hasLoaded()) {
