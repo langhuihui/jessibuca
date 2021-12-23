@@ -525,11 +525,11 @@ jessibuca.on('timeUpdate',function (ts) {console.log('timeUpdate',ts);})
 
 ### videoInfo
 当解析出视频信息时回调，2个回调参数
-1. w：视频宽
-2. h：视频高
+1. width：视频宽
+2. height：视频高
 ```js
 
-jessibuca.on("videoInfo",function(data){console.log('width:',data.w,'height:',data.h)})
+jessibuca.on("videoInfo",function(data){console.log('width:',data.width,'height:',data.width)})
 ```
 
 ### audioInfo
@@ -546,7 +546,7 @@ jessibuca.on("audioInfo",function(data){console.log('numOfChannels:',data.numOfC
 信息，包含错误信息
 ```js
 
-jessibuca.on("load",function(data){console.log('data:',data)})
+jessibuca.on("log",function(data){console.log('data:',data)})
 ```
 
 ### error
@@ -554,7 +554,7 @@ jessibuca.on("load",function(data){console.log('data:',data)})
 
 ```js
 
-jessibuca.on("load",function(data){console.log('error:',data)})
+jessibuca.on("error",function(data){console.log('error:',data)})
 ```
 ### kBps
 当前网速， 单位KB 每秒1次,
