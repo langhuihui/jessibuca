@@ -8,7 +8,7 @@ export default (player) => {
 
 
     if (_opt.supportDblclickFullscreen) {
-        proxy(player.$videoElement, 'dblclick', () => {
+        proxy(player.$container, 'dblclick', () => {
             player.fullscreen = !player.fullscreen;
         })
     }

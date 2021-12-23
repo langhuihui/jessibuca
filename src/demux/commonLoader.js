@@ -64,8 +64,7 @@ export default class CommonLoader extends Emitter {
                                 this.bufferList.shift()
                                 this._doDecoderDecode(data);
                             } else {
-                                this.player.debug.log('common dumex', `delay is ${this.delay}`);
-
+                                // this.player.debug.log('common dumex', `delay is ${this.delay}`);
                                 break;
                             }
                         }
