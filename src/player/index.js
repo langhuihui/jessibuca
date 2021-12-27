@@ -470,6 +470,7 @@ export default class Player extends Emitter {
         this._checkHeartTimeout = setTimeout(() => {
             this.pause(false).then(() => {
                 this.emit(EVENTS.timeout, 'heart timeout');
+                this.emit(EVENTS.delayTimeout);
             });
         }, this._opt.heartTimeout * 1000)
     }
@@ -487,6 +488,7 @@ export default class Player extends Emitter {
         this._checkLoadingTimeout = setTimeout(() => {
             this.pause(false).then(() => {
                 this.emit(EVENTS.timeout, 'loading timeout');
+                this.emit(EVENTS.loadingTimeout);
             });
         }, this._opt.loadingTimeout * 1000)
     }
