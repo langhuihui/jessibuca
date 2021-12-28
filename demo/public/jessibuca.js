@@ -108,11 +108,15 @@
       error: "error",
       kBps: 'kBps',
       timeout: 'timeout',
+      delayTimeout: 'delayTimeout',
+      loadingTimeout: 'loadingTimeout',
       stats: 'stats',
       performance: "performance",
       record: 'record',
       recording: 'recording',
       recordingTimestamp: 'recordingTimestamp',
+      recordStart: 'recordStart',
+      recordEnd: 'recordEnd',
       recordCreateError: 'recordCreateError',
       buffer: 'buffer',
       videoFrame: 'videoFrame',
@@ -142,13 +146,17 @@
       log: EVENTS.log,
       start: EVENTS.start,
       timeout: EVENTS.timeout,
+      loadingTimeout: EVENTS.loadingTimeout,
+      delayTimeout: EVENTS.delayTimeout,
       fullscreen: 'fullscreen',
       play: EVENTS.play,
       pause: EVENTS.pause,
       mute: EVENTS.mute,
       stats: EVENTS.stats,
       performance: EVENTS.performance,
-      recordingTimestamp: EVENTS.recordingTimestamp
+      recordingTimestamp: EVENTS.recordingTimestamp,
+      recordStart: EVENTS.recordStart,
+      recordEnd: EVENTS.recordEnd
     };
     const EVENTS_ERROR = {
       fetchError: "fetchError",
@@ -7915,6 +7923,7 @@
           this.emit(EVENTS.recording, true);
           this.recorder.startRecording();
           debug.log('Recorder', 'start recording');
+          this.player.emit(EVENTS.recordStart);
           this.recordingInterval = window.setInterval(() => {
             this.recordingTimestamp += 1;
             this.player.emit(EVENTS.recordingTimestamp, this.recordingTimestamp);
@@ -7929,6 +7938,7 @@
 
         this.recorder.stopRecording(() => {
           this.player.debug.log('Recorder', 'stop recording');
+          this.player.emit(EVENTS.recordEnd);
           downloadRecord(this.recorder.getBlob(), this.fileName, this.fileType);
 
           this._reset();
@@ -9005,7 +9015,7 @@
 
     }
 
-    var css_248z = ".jessibuca-container{position:relative}.jessibuca-container.jessibuca-fullscreen-web{position:fixed;z-index:9999;left:0;top:0;right:0;bottom:0;width:100%!important;height:100%!important;background:#000}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInN0eWxlLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEscUJBQ0UsaUJBQW9CLENBQ3BCLDhDQUNFLGNBQWUsQ0FDZixZQUFhLENBQ2IsTUFBTyxDQUNQLEtBQU0sQ0FDTixPQUFRLENBQ1IsUUFBUyxDQUNULG9CQUFzQixDQUN0QixxQkFBdUIsQ0FDdkIsZUFBa0IiLCJmaWxlIjoic3R5bGUuc2NzcyIsInNvdXJjZXNDb250ZW50IjpbIi5qZXNzaWJ1Y2EtY29udGFpbmVyIHtcbiAgcG9zaXRpb246IHJlbGF0aXZlOyB9XG4gIC5qZXNzaWJ1Y2EtY29udGFpbmVyLmplc3NpYnVjYS1mdWxsc2NyZWVuLXdlYiB7XG4gICAgcG9zaXRpb246IGZpeGVkO1xuICAgIHotaW5kZXg6IDk5OTk7XG4gICAgbGVmdDogMDtcbiAgICB0b3A6IDA7XG4gICAgcmlnaHQ6IDA7XG4gICAgYm90dG9tOiAwO1xuICAgIHdpZHRoOiAxMDAlICFpbXBvcnRhbnQ7XG4gICAgaGVpZ2h0OiAxMDAlICFpbXBvcnRhbnQ7XG4gICAgYmFja2dyb3VuZDogIzAwMDsgfVxuIl19 */";
+    var css_248z = ".jessibuca-container{position:relative;width:100%;height:100%}.jessibuca-container.jessibuca-fullscreen-web{position:fixed;z-index:9999;left:0;top:0;right:0;bottom:0;width:100%!important;height:100%!important;background:#000}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInN0eWxlLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEscUJBQ0UsaUJBQWtCLENBQ2xCLFVBQVcsQ0FDWCxXQUFjLENBQ2QsOENBQ0UsY0FBZSxDQUNmLFlBQWEsQ0FDYixNQUFPLENBQ1AsS0FBTSxDQUNOLE9BQVEsQ0FDUixRQUFTLENBQ1Qsb0JBQXNCLENBQ3RCLHFCQUF1QixDQUN2QixlQUFrQiIsImZpbGUiOiJzdHlsZS5zY3NzIiwic291cmNlc0NvbnRlbnQiOlsiLmplc3NpYnVjYS1jb250YWluZXIge1xuICBwb3NpdGlvbjogcmVsYXRpdmU7XG4gIHdpZHRoOiAxMDAlO1xuICBoZWlnaHQ6IDEwMCU7IH1cbiAgLmplc3NpYnVjYS1jb250YWluZXIuamVzc2lidWNhLWZ1bGxzY3JlZW4td2ViIHtcbiAgICBwb3NpdGlvbjogZml4ZWQ7XG4gICAgei1pbmRleDogOTk5OTtcbiAgICBsZWZ0OiAwO1xuICAgIHRvcDogMDtcbiAgICByaWdodDogMDtcbiAgICBib3R0b206IDA7XG4gICAgd2lkdGg6IDEwMCUgIWltcG9ydGFudDtcbiAgICBoZWlnaHQ6IDEwMCUgIWltcG9ydGFudDtcbiAgICBiYWNrZ3JvdW5kOiAjMDAwOyB9XG4iXX0= */";
     styleInject(css_248z);
 
     var observer = (player => {
@@ -10944,6 +10954,7 @@
         this._checkHeartTimeout = setTimeout(() => {
           this.pause(false).then(() => {
             this.emit(EVENTS.timeout, 'heart timeout');
+            this.emit(EVENTS.delayTimeout);
           });
         }, this._opt.heartTimeout * 1000);
       } //
@@ -10961,6 +10972,7 @@
         this._checkLoadingTimeout = setTimeout(() => {
           this.pause(false).then(() => {
             this.emit(EVENTS.timeout, 'loading timeout');
+            this.emit(EVENTS.loadingTimeout);
           });
         }, this._opt.loadingTimeout * 1000);
       }

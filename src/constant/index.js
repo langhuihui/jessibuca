@@ -108,6 +108,8 @@ export const EVENTS = {
     record: 'record',
     recording: 'recording',
     recordingTimestamp: 'recordingTimestamp',
+    recordStart: 'recordStart',
+    recordEnd: 'recordEnd',
     recordCreateError: 'recordCreateError',
     buffer: 'buffer',
     videoFrame: 'videoFrame',
@@ -147,7 +149,9 @@ export const JESSIBUCA_EVENTS = {
     mute: EVENTS.mute,
     stats: EVENTS.stats,
     performance: EVENTS.performance,
-    recordingTimestamp: EVENTS.recordingTimestamp
+    recordingTimestamp: EVENTS.recordingTimestamp,
+    recordStart: EVENTS.recordStart,
+    recordEnd: EVENTS.recordEnd
 }
 
 export const EVENTS_ERROR = {

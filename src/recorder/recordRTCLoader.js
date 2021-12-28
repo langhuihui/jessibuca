@@ -43,6 +43,7 @@ export default class RecordRTCLoader extends Emitter {
         }
 
         try {
+
             const stream = this.player.video.$videoElement.captureStream(25);
             const audioStream = this.player.audio.mediaStreamAudioDestinationNode.stream;
             stream.addTrack(audioStream.getAudioTracks()[0]);
@@ -56,6 +57,7 @@ export default class RecordRTCLoader extends Emitter {
             this.emit(EVENTS.recording, true);
             this.recorder.startRecording();
             debug.log('Recorder', 'start recording');
+            this.player.emit(EVENTS.recordStart);
             this.recordingInterval = window.setInterval(() => {
                 this.recordingTimestamp += 1;
                 this.player.emit(EVENTS.recordingTimestamp, this.recordingTimestamp);
@@ -69,6 +71,7 @@ export default class RecordRTCLoader extends Emitter {
         }
         this.recorder.stopRecording(() => {
             this.player.debug.log('Recorder', 'stop recording');
+            this.player.emit(EVENTS.recordEnd)
             downloadRecord(this.recorder.getBlob(), this.fileName, this.fileType);
             this._reset();
             this.emit(EVENTS.recording, false);

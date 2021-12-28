@@ -578,6 +578,23 @@ jessibuca.on("start",function(){console.log('start render')})
 jessibuca.on("timeout",function(){console.log('timeout')})
 ```
 
+### loadingTimeout
+当play()的时候，如果没有数据返回，则回调
+```js
+
+jessibuca.on("loadingTimeout",function(){console.log('timeout')})
+```
+
+
+### loadingTimeout
+当play()的时候，如果没有数据返回，则回调
+```js
+
+jessibuca.on("loadingTimeout",function(){console.log('timeout')})
+```
+
+
+
 ### fullscreen
 当前是否全屏
 ```js
@@ -621,7 +638,26 @@ jessibuca.on("stats",function(s){console.log("stats is",s)})
 jessibuca.on("performance",function(performance){console.log("performance is",performance)})
 ```
 
+### recordStart
+录制开始的事件
 
+```js
+jessibuca.on("recordStart",function(){console.log("record start")})
+```
+
+### recordEnd
+录制结束的事件
+
+```js
+jessibuca.on("recordEnd",function(){console.log("record end")})
+```
+
+### recordingTimestamp
+录制的时候，返回的录制时长，1s一次
+
+```js
+jessibuca.on("recordingTimestamp",function(timestamp){console.log("recordingTimestamp is",timestamp)})
+```
 
 
 
