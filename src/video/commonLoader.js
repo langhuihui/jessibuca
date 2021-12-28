@@ -7,12 +7,6 @@ export default class CommonLoader extends Emitter {
         this.init = false;
     }
 
-    initCanvasViewSize() {
-        this.$videoElement.width = this.videoInfo.width;
-        this.$videoElement.height = this.videoInfo.height;
-        this.resize();
-    }
-
     //
     updateVideoInfo(data) {
         if (data.encTypeCode) {

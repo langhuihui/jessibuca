@@ -35,7 +35,7 @@ export default (player) => {
 
     proxy(window, 'fullscreenchange', () => {
         //
-        if (player._wakeLock !== null && "visible" === document.visibilityState) {
+        if (player.keepScreenOn !== null && "visible" === document.visibilityState) {
             player.enableWakeLock();
         }
     })

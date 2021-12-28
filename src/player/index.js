@@ -82,8 +82,6 @@ export default class Player extends Emitter {
             ts: 0 // 当前视频帧pts，单位毫秒
         }
 
-        this._wakeLock = null;
-
         property(this);
 
         this.events = new Events(this);

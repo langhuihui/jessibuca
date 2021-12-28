@@ -68,6 +68,12 @@ export default class CanvasVideoLoader extends CommonLoader {
         this.bitmaprenderer = this.$videoElement.getContext('bitmaprenderer');
     }
 
+    initCanvasViewSize() {
+        this.$videoElement.width = this.videoInfo.width;
+        this.$videoElement.height = this.videoInfo.height;
+        this.resize();
+    }
+
     //
     render(msg) {
         switch (this.renderType) {

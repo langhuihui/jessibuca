@@ -87,6 +87,13 @@ export default class VideoLoader extends CommonLoader {
         }
     }
 
+    initCanvasViewSize() {
+        this.$videoElement.width = this.player.width;
+        // this.$videoElement.height = this.player._opt.hasControl ? this.player.height - CONTROL_HEIGHT : this.player.height;
+        this.$videoElement.height = this.player.height;
+        this.resize();
+    }
+
 
     destroy() {
         this.player.$container.removeChild(this.$videoElement);

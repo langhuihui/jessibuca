@@ -695,7 +695,11 @@
     var events$1 = (player => {
       try {
         const screenfullChange = () => {
-          player.emit(JESSIBUCA_EVENTS.fullscreen, player.fullscreen);
+          player.emit(JESSIBUCA_EVENTS.fullscreen, player.fullscreen); // 如果不是fullscreen,则触发下 resize 方法
+
+          if (!player.fullscreen) {
+            player.resize();
+          }
         };
 
         screenfull.on('change', screenfullChange);
@@ -947,12 +951,6 @@
       constructor() {
         super();
         this.init = false;
-      }
-
-      initCanvasViewSize() {
-        this.$videoElement.width = this.videoInfo.width;
-        this.$videoElement.height = this.videoInfo.height;
-        this.resize();
       } //
 
 
@@ -1087,6 +1085,12 @@
 
       _bindOffscreen() {
         this.bitmaprenderer = this.$videoElement.getContext('bitmaprenderer');
+      }
+
+      initCanvasViewSize() {
+        this.$videoElement.width = this.videoInfo.width;
+        this.$videoElement.height = this.videoInfo.height;
+        this.resize();
       } //
 
 
@@ -1276,6 +1280,13 @@
         } else if (type === SCREENSHOT_TYPE.download) {
           downloadImg(file, filename);
         }
+      }
+
+      initCanvasViewSize() {
+        this.$videoElement.width = this.player.width; // this.$videoElement.height = this.player._opt.hasControl ? this.player.height - CONTROL_HEIGHT : this.player.height;
+
+        this.$videoElement.height = this.player.height;
+        this.resize();
       }
 
       destroy() {
@@ -9053,7 +9064,7 @@
       });
       proxy(window, 'fullscreenchange', () => {
         //
-        if (player._wakeLock !== null && "visible" === document.visibilityState) {
+        if (player.keepScreenOn !== null && "visible" === document.visibilityState) {
           player.enableWakeLock();
         }
       });
@@ -10582,7 +10593,6 @@
           ts: 0 // 当前视频帧pts，单位毫秒
 
         };
-        this._wakeLock = null;
         property$1(this);
         this.events = new Events(this);
         this.video = new Video(this);

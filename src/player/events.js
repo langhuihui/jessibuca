@@ -7,7 +7,13 @@ export default (player) => {
 
     try {
         const screenfullChange = () => {
-            player.emit(JESSIBUCA_EVENTS.fullscreen,player.fullscreen)
+            player.emit(JESSIBUCA_EVENTS.fullscreen, player.fullscreen)
+
+            // 如果不是fullscreen,则触发下 resize 方法
+            if (!player.fullscreen) {
+                player.resize();
+            }
+
         };
         screenfull.on('change', screenfullChange);
         player.events.destroys.push(() => {
