@@ -160,6 +160,7 @@ export const EVENTS_ERROR = {
     websocketClosedByError: 'websocketClosedByError',
     webcodecsH265NotSupport: 'webcodecsH265NotSupport',
     mediaSourceH265NotSupport: 'mediaSourceH265NotSupport',
+    wasmDecodeError: 'wasmDecodeError'
 }
 
 
