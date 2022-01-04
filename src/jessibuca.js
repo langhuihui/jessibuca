@@ -1,8 +1,10 @@
 import Player from './player';
 import Events from "./utils/events";
 import {DEMUX_TYPE, EVENTS, EVENTS_ERROR, JESSIBUCA_EVENTS, PLAYER_PLAY_PROTOCOL, SCALE_MODE_TYPE} from "./constant";
-import {isEmpty, isNotEmpty, supportWCS} from "./utils";
+import {isEmpty, isNotEmpty, supportWCS, uuid16} from "./utils";
 import Emitter from "./utils/emitter";
+import {dynamicLoadAegis} from "./utils/aegis";
+import Aegis from "aegis-web-sdk";
 
 
 class Jessibuca extends Emitter {
@@ -44,6 +46,17 @@ class Jessibuca extends Emitter {
         this.events = new Events(this);
         this.player = new Player($container, _opt);
         this._bindEvents();
+        this._initAegis();
+    }
+
+    _initAegis() {
+        const aegis = new Aegis({
+            id: '3ogWGfLmpllRGka9pY', // 上报 id
+            // uin: uuid16(), // 用户唯一 ID（可选）
+            reportApiSpeed: false, // 接口测速
+            reportAssetSpeed: false, // 静态资源测速
+            spa: false // spa 应用页面跳转的时候开启 pv 计算
+        });
     }
 
     _bindEvents() {
