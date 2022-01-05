@@ -3,11 +3,17 @@ import Events from "./utils/events";
 import {DEMUX_TYPE, EVENTS, EVENTS_ERROR, JESSIBUCA_EVENTS, PLAYER_PLAY_PROTOCOL, SCALE_MODE_TYPE} from "./constant";
 import {isEmpty, isNotEmpty, supportWCS, uuid16} from "./utils";
 import Emitter from "./utils/emitter";
-import {dynamicLoadAegis} from "./utils/aegis";
 import Aegis from "aegis-web-sdk";
 
 
 class Jessibuca extends Emitter {
+    static ERROR = EVENTS_ERROR
+
+    static TIMEOUT = {
+        loadingTimeout: EVENTS.loadingTimeout,
+        delayTimeout: EVENTS.delayTimeout,
+    }
+
     constructor(options) {
         super()
         let _opt = options;
@@ -182,7 +188,7 @@ class Jessibuca extends Emitter {
     play(url) {
         return new Promise((resolve, reject) => {
             if (!url && !this._opt.url) {
-                this.emit(JESSIBUCA_EVENTS.error, 'player is not pause or url is null')
+                this.emit(EVENTS.error, EVENTS_ERROR.playError)
                 reject();
                 return;
             }

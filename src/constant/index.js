@@ -14,7 +14,7 @@ export const DEMUX_TYPE = {
 export const DEFAULT_PLAYER_OPTIONS = {
     videoBuffer: 1000, //1000ms == 1 second
     isResize: true,
-    isFullResize: false,
+    isFullResize: false, //
     isFlv: false,
     debug: false,
     loadingTimeout: 10, // loading timeout
@@ -155,9 +155,9 @@ export const JESSIBUCA_EVENTS = {
 }
 
 export const EVENTS_ERROR = {
+    playError:'playIsNotPauseOrUrlIsNull',
     fetchError: "fetchError",
     websocketError: 'websocketError',
-    websocketClosedByError: 'websocketClosedByError',
     webcodecsH265NotSupport: 'webcodecsH265NotSupport',
     mediaSourceH265NotSupport: 'mediaSourceH265NotSupport',
     wasmDecodeError: 'wasmDecodeError'

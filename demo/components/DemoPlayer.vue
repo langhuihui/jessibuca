@@ -25,18 +25,13 @@
                     ref="vod"
                     @change="restartPlay('wcs')"
                 /><span>webcodecs</span>
-                <input
-                    type="checkbox"
-                    ref="offscreen"
-                    v-model="useOffscreen"
-                    @change="restartPlay('offscreen')"
-                /><span>离屏渲染</span>
-                <input type="checkbox" ref="resize" @change="changeResize"/><span>禁止画面拉伸</span>
+
             </div>
             <div id="container" ref="container"></div>
             <div class="input">
                 <div>输入URL：</div>
                 <input
+                    type="input"
                     autocomplete="on"
                     ref="playUrl"
                     value=""
@@ -83,6 +78,18 @@
                 </div>
             </div>
             <div class="input" v-if="loaded">
+                <input
+                    type="checkbox"
+                    ref="offscreen"
+                    v-model="useOffscreen"
+                    @change="restartPlay('offscreen')"
+                /><span>离屏渲染</span>
+
+                <select v-model="scale" @change="scaleChange">
+                    <option value="0">完全填充(拉伸)</option>
+                    <option value="1">等比缩放</option>
+                    <option value="2">完全填充(未拉伸)</option>
+                </select>
                 <button v-if="!playing" @click="clearView">清屏</button>
                 <template v-if="playing">
                     <select v-model="recordType">
@@ -123,7 +130,8 @@ export default {
             useMSE: true,
             useOffscreen: false,
             recording: false,
-            recordType: 'webm'
+            recordType: 'webm',
+            scale: 0
         };
     },
     mounted() {
@@ -150,7 +158,7 @@ export default {
                         loadingText: "疯狂加载中...",
                         // hasAudio:false,
                         debug: false,
-                        supportDblclickFullscreen:true,
+                        supportDblclickFullscreen: true,
                         showBandwidth: this.showBandwidth, // 显示网速
                         operateBtns: {
                             fullscreen: this.showOperateBtns,
@@ -342,9 +350,8 @@ export default {
             this.jessibuca.setBufferTime(Number(this.$refs.buffer.value));
         },
 
-        changeResize() {
-            const value = this.$refs.resize.checked ? 1 : 0;
-            this.jessibuca.setScaleMode(value);
+        scaleChange() {
+            this.jessibuca.setScaleMode(this.scale);
         },
     },
 };
@@ -387,6 +394,7 @@ export default {
 
 .input {
     display: flex;
+    align-items: center;
     margin-top: 10px;
     color: white;
     place-content: stretch;
@@ -396,7 +404,7 @@ export default {
     bottom: 0px;
 }
 
-.input input {
+.input input[type='input'] {
     flex: auto;
 }
 

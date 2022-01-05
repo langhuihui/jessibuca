@@ -66,14 +66,17 @@ worker地址
 - **默认值**：`true`
 - **用法**：
 
-1. 当为`true`的时候：视频画面做等比缩放后,高或宽对齐canvas区域,画面不被拉伸,但有黑边。
-2. 当为`false`的时候：视频画面完全填充canvas区域,画面会被拉伸。
+1. 当为`true`的时候：视频画面做等比缩放后,高或宽对齐canvas区域,画面不被拉伸,但有黑边。 等同于 `setScaleMode(1)`
+2. 当为`false`的时候：视频画面完全填充canvas区域,画面会被拉伸。等同于 `setScaleMode(0)`
 
-### isFullSize
+
+
+### isFullResize
 - **类型**：`boolean`
 - **默认值**：`false`
 - **用法**：
-1. 当为`true`的时候：视频画面做等比缩放后,完全填充canvas区域,画面不被拉伸,没有黑边,但画面显示不全。
+1. 当为`true`的时候：视频画面做等比缩放后,完全填充canvas区域,画面不被拉伸,没有黑边,但画面显示不全。等同于 `setScaleMode(2)`
+
 
 ### isFlv
 - **类型**：`boolean`
@@ -254,7 +257,7 @@ jessibuca.on('timeout',function(){
 
 1. `0` 视频画面完全填充canvas区域,画面会被拉伸  等同于参数 `isResize` 为false
 2. `1` 视频画面做等比缩放后,高或宽对齐canvas区域,画面不被拉伸,但有黑边 等同于参数 `isResize` 为true
-3. `2` 视频画面做等比缩放后,完全填充canvas区域,画面不被拉伸,没有黑边,但画面显示不全 等同于参数 `isFullSize` 为true
+3. `2` 视频画面做等比缩放后,完全填充canvas区域,画面不被拉伸,没有黑边,但画面显示不全 等同于参数 `isFullResize` 为true
 
 ```js
 jessibuca.setScaleMode(0)
@@ -552,10 +555,30 @@ jessibuca.on("log",function(data){console.log('data:',data)})
 ### error
 错误信息
 
+目前已有的错误信息：
+1. jessibuca.ERROR.playError ;播放错误，url 为空的时候，调用play方法
+2. jessibuca.ERROR.fetchError ;http 请求失败
+3. jessibuca.ERROR.websocketError;  websocket 请求失败
+4. jessibuca.ERROR.webcodecsH265NotSupport; webcodecs 解码 h265 失败
+5. jessibuca.ERROR.mediaSourceH265NotSupport; mediaSource 解码 h265 失败
+6. jessibuca.ERROR.wasmDecodeError ; wasm 解码失败
+
+
+
+
 ```js
 
-jessibuca.on("error",function(data){console.log('error:',data)})
+jessibuca.on("error",function(error){
+    if(error === jessibuca.ERROR.fetchError){
+        //
+    }
+    else if(error === jessibuca.ERROR.webcodecsH265NotSupport){
+        //
+    }
+    console.log('error:',error)
+})
 ```
+
 ### kBps
 当前网速， 单位KB 每秒1次,
 ```js
@@ -573,9 +596,13 @@ jessibuca.on("start",function(){console.log('start render')})
 
 ### timeout
 当设定的超时时间内无数据返回,则回调
+
+1. jessibuca.TIMEOUT.loadingTimeout ; 同loadingTimeout
+2. jessibuca.TIMEOUT.delayTimeout  ; 同delayTimeout
+
 ```js
 
-jessibuca.on("timeout",function(){console.log('timeout')})
+jessibuca.on("timeout",function(error){console.log('timeout:',error)})
 ```
 
 ### loadingTimeout
@@ -586,11 +613,11 @@ jessibuca.on("loadingTimeout",function(){console.log('timeout')})
 ```
 
 
-### loadingTimeout
-当play()的时候，如果没有数据返回，则回调
+### delayTimeout
+当播放过程中，如果超过timeout之后没有数据渲染，则抛出异常。
 ```js
 
-jessibuca.on("loadingTimeout",function(){console.log('timeout')})
+jessibuca.on("delayTimeout",function(){console.log('timeout')})
 ```
 
 

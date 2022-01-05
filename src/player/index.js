@@ -287,14 +287,14 @@ export default class Player extends Emitter {
                 if (this.webcodecsDecoder) {
                     this.webcodecsDecoder.once(EVENTS_ERROR.webcodecsH265NotSupport, () => {
                         this.emit(EVENTS_ERROR.webcodecsH265NotSupport)
-                        this.emit(EVENTS.error, 'webcodecs H265 Not Support');
+                        this.emit(EVENTS.error, EVENTS_ERROR.webcodecsH265NotSupport);
                     })
                 }
 
                 if (this.mseDecoder) {
                     this.mseDecoder.once(EVENTS_ERROR.mediaSourceH265NotSupport, () => {
                         this.emit(EVENTS_ERROR.mediaSourceH265NotSupport)
-                        this.emit(EVENTS.error, 'mediaSource H265 Not Support');
+                        this.emit(EVENTS.error, EVENTS_ERROR.mediaSourceH265NotSupport);
                     })
                 }
 
@@ -467,7 +467,7 @@ export default class Player extends Emitter {
     checkHeartTimeout() {
         this._checkHeartTimeout = setTimeout(() => {
             this.pause(false).then(() => {
-                this.emit(EVENTS.timeout, 'heart timeout');
+                this.emit(EVENTS.timeout, EVENTS.delayTimeout);
                 this.emit(EVENTS.delayTimeout);
             });
         }, this._opt.heartTimeout * 1000)
@@ -485,7 +485,7 @@ export default class Player extends Emitter {
     checkLoadingTimeout() {
         this._checkLoadingTimeout = setTimeout(() => {
             this.pause(false).then(() => {
-                this.emit(EVENTS.timeout, 'loading timeout');
+                this.emit(EVENTS.timeout, EVENTS.loadingTimeout);
                 this.emit(EVENTS.loadingTimeout);
             });
         }, this._opt.loadingTimeout * 1000)

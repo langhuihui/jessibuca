@@ -35,7 +35,7 @@ export default class FetchLoader extends Emitter {
                     demux.close();
                     // 这边会报用户 aborted a request 错误。
                     this.emit(EVENTS_ERROR.fetchError, e);
-                    this.player.emit(EVENTS.error, e);
+                    this.player.emit(EVENTS.error, EVENTS_ERROR.fetchError);
                     this.abort();
                 })
             }
@@ -43,7 +43,7 @@ export default class FetchLoader extends Emitter {
         }).catch((e) => {
             this.abort();
             this.emit(EVENTS_ERROR.fetchError, e)
-            this.player.emit(EVENTS.error, e);
+            this.player.emit(EVENTS.error, EVENTS_ERROR.fetchError);
         })
     }
 

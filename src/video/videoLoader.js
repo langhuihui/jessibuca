@@ -19,7 +19,7 @@ export default class VideoLoader extends CommonLoader {
             height: '',
             encType: '',
         }
-        this.resize();
+        this.initCanvasViewSize();
 
         const {proxy} = this.player.events;
 
@@ -89,9 +89,30 @@ export default class VideoLoader extends CommonLoader {
 
     initCanvasViewSize() {
         this.$videoElement.width = this.player.width;
-        // this.$videoElement.height = this.player._opt.hasControl ? this.player.height - CONTROL_HEIGHT : this.player.height;
-        this.$videoElement.height = this.player.height;
+        this.$videoElement.height = this.player._opt.hasControl ? this.player.height - CONTROL_HEIGHT : this.player.height;
+        // this.$videoElement.height = this.player.height;
         this.resize();
+    }
+
+    resize() {
+        const option = this.player._opt;
+        let objectFill = 'contain';
+        const rotate = option.rotate;
+
+        // 默认是true
+        // 视频画面做等比缩放后,高或宽对齐canvas区域,画面不被拉伸,但有黑边
+
+        // 视频画面完全填充canvas区域,画面会被拉伸
+        if (!option.isResize) {
+            objectFill = 'fill';
+        }
+
+        // 视频画面做等比缩放后,完全填充canvas区域,画面不被拉伸,没有黑边,但画面显示不全
+        if (option.isFullResize) {
+            objectFill = 'none';
+        }
+        this.$videoElement.style.objectFit = objectFill;
+        this.$videoElement.style.transform = 'rotate(' + rotate + 'deg)';
     }
 
 
