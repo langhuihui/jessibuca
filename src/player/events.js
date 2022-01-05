@@ -12,6 +12,10 @@ export default (player) => {
             // 如果不是fullscreen,则触发下 resize 方法
             if (!player.fullscreen) {
                 player.resize();
+            } else {
+                if(player._opt.useMSE){
+                    player.resize();
+                }
             }
 
         };
