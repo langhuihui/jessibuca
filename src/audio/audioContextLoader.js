@@ -182,13 +182,17 @@ export default class AudioContextLoader extends Emitter {
 
     clear() {
         // 全部清空。
-        while (this.bufferList.length) {
-            this.bufferList.shift();
-        }
+        // while (this.bufferList.length) {
+        //     this.bufferList.shift();
+        // }
+        this.bufferList = [];
     }
 
     play(buffer, ts) {
         this.bufferList.push(buffer);
+        if (this.bufferList.length > 20) {
+            this.player.debug.warn('AudioContext', `bufferList is large: ${this.bufferList.length}`)
+        }
     }
 
     pause() {
