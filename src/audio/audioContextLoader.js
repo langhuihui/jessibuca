@@ -181,10 +181,6 @@ export default class AudioContextLoader extends Emitter {
     }
 
     clear() {
-        // 全部清空。
-        // while (this.bufferList.length) {
-        //     this.bufferList.shift();
-        // }
         this.bufferList = [];
     }
 
