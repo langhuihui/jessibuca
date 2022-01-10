@@ -127,7 +127,8 @@ export const EVENTS = {
     mseSourceBufferError: 'mseSourceBufferError',
     mseSourceBufferBusy: 'mseSourceBufferBusy',
     videoWaiting: 'videoWaiting',
-    videoTimeUpdate: 'videoTimeUpdate'
+    videoTimeUpdate: 'videoTimeUpdate',
+    videoSyncAudio: 'videoSyncAudio',
 }
 
 
@@ -155,7 +156,7 @@ export const JESSIBUCA_EVENTS = {
 }
 
 export const EVENTS_ERROR = {
-    playError:'playIsNotPauseOrUrlIsNull',
+    playError: 'playIsNotPauseOrUrlIsNull',
     fetchError: "fetchError",
     websocketError: 'websocketError',
     webcodecsH265NotSupport: 'webcodecsH265NotSupport',
@@ -250,3 +251,6 @@ export const MEDIA_SOURCE_STATE = {
 
 // frag duration
 export const FRAG_DURATION = Math.ceil(1000 / 25)
+
+
+export const AUDIO_SYNC_VIDEO_DIFF = 200;

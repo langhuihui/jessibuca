@@ -82,6 +82,10 @@ export default class Player extends Emitter {
             ts: 0 // 当前视频帧pts，单位毫秒
         }
 
+        //
+        this._videoTimestamp = 0;
+        this._audioTimestamp = 0;
+
         property(this);
 
         this.events = new Events(this);
@@ -206,6 +210,41 @@ export default class Player extends Emitter {
 
     get recording() {
         return this.recorder.recording;
+    }
+
+    set audioTimestamp(value) {
+        if (value === null) {
+            return;
+        }
+        this._audioTimestamp = value;
+    }
+
+    //
+    get audioTimestamp() {
+        return this._audioTimestamp;
+    }
+
+    //
+    set videoTimestamp(value) {
+        if (value === null) {
+            return;
+        }
+        this._videoTimestamp = value;
+        // just for wasm
+        if (!this._opt.useWCS && !this._opt.useMSE) {
+            if (this.audioTimestamp && this.videoTimestamp) {
+                this.audio.emit(EVENTS.videoSyncAudio, {
+                    audioTimestamp: this.audioTimestamp,
+                    videoTimestamp: this.videoTimestamp,
+                    diff: this.audioTimestamp - this.videoTimestamp
+                })
+            }
+        }
+    }
+
+    //
+    get videoTimestamp() {
+        return this._videoTimestamp;
     }
 
 
@@ -384,6 +423,9 @@ export default class Player extends Emitter {
             // reset stats
             this.resetStats();
             //
+            this._audioTimestamp = 0;
+            this._videoTimestamp = 0;
+            //
             setTimeout(() => {
                 resolve()
             }, 0)
@@ -519,27 +561,31 @@ export default class Player extends Emitter {
             this._startBpsTime = now();
         }
 
+        if (isNotEmpty(options.ts)) {
+            this._stats.ts = options.ts;
+        }
+
+        if (isNotEmpty(options.buf)) {
+            this._stats.buf = options.buf;
+        }
+
+        if (options.fps) {
+            this._stats.fps += 1;
+        }
+        if (options.abps) {
+            this._stats.abps += options.abps;
+        }
+        if (options.vbps) {
+            this._stats.vbps += options.vbps;
+        }
+
         const _nowTime = now();
         const timestamp = _nowTime - this._startBpsTime;
 
         if (timestamp < 1 * 1000) {
-            if (options.fps) {
-                this._stats.fps += 1;
-            }
-            if (options.abps) {
-                this._stats.abps += options.abps;
-            }
-            if (options.vbps) {
-                this._stats.vbps += options.vbps;
-            }
             return;
         }
-        if (isNotEmpty(options.ts)) {
-            this._stats.ts = options.ts;
-        }
-        if (isNotEmpty(options.buf)) {
-            this._stats.buf = options.buf;
-        }
+
         this.emit(EVENTS.stats, this._stats);
         this.emit(EVENTS.performance, fpsStatus(this._stats.fps));
         this._stats.fps = 0;
@@ -632,6 +678,10 @@ export default class Player extends Emitter {
         //
         this.releaseWakeLock();
         this.keepScreenOn = null;
+        // reset stats
+        this.resetStats();
+        this._audioTimestamp = 0;
+        this._videoTimestamp = 0;
 
         // 其他没法解耦的，通过 destroy 方式
         this.emit('destroy');

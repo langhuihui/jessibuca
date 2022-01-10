@@ -135,7 +135,8 @@
       mseSourceBufferError: 'mseSourceBufferError',
       mseSourceBufferBusy: 'mseSourceBufferBusy',
       videoWaiting: 'videoWaiting',
-      videoTimeUpdate: 'videoTimeUpdate'
+      videoTimeUpdate: 'videoTimeUpdate',
+      videoSyncAudio: 'videoSyncAudio'
     };
     const JESSIBUCA_EVENTS = {
       load: EVENTS.load,
@@ -229,6 +230,7 @@
       open: 'open',
       closed: 'closed'
     }; // frag duration
+    const AUDIO_SYNC_VIDEO_DIFF = 200;
 
     class Debug {
       constructor(master) {
@@ -1054,6 +1056,8 @@
 
 
       render(msg) {
+        this.player.videoTimestamp = msg.ts;
+
         switch (this.renderType) {
           case CANVAS_RENDER_TYPE.offscreen:
             this.bitmaprenderer.transferFromImageBitmap(msg.buffer);
@@ -1232,8 +1236,7 @@
         proxy(this.$videoElement, 'waiting', () => {
           this.player.emit(EVENTS.videoWaiting);
         });
-        proxy(this.$videoElement, 'timeupdate', event => {
-          this.player.emit(EVENTS.videoTimeUpdate, event.timeStamp);
+        proxy(this.$videoElement, 'timeupdate', event => {// this.player.emit(EVENTS.videoTimeUpdate, event.timeStamp);
         });
         this.player.debug.log('Video', 'init');
       }
@@ -1373,13 +1376,22 @@
         this.audioEnabled(true); // default setting 0
 
         this.gainNode.gain.value = 0;
-        this.playing = false;
+        this.playing = false; //
+
+        this.audioSyncVideoOption = {
+          diff: null
+        };
         this.audioInfo = {
           encType: '',
           channels: '',
           sampleRate: ''
         };
-        this.init = false;
+        this.init = false; // update
+
+        this.on(EVENTS.videoSyncAudio, options => {
+          this.player.debug.log('AudioContext', `videoSyncAudio , audioTimestamp: ${options.audioTimestamp},videoTimestamp: ${options.videoTimestamp},diff:${options.diff}`);
+          this.audioSyncVideoOption = options;
+        });
         this.player.debug.log('AudioContext', 'init');
       }
 
@@ -1434,10 +1446,44 @@
           const outputBuffer = audioProcessingEvent.outputBuffer;
 
           if (this.bufferList.length && this.playing) {
-            const buffer = this.bufferList.shift();
+            // just for wasm
+            if (!this.player._opt.useWCS && !this.player._opt.useMSE) {
+              // audio > video
+              // wait
+              if (this.audioSyncVideoOption.diff > AUDIO_SYNC_VIDEO_DIFF) {
+                this.player.debug.warn('AudioContext', `audioSyncVideoOption more than diff :${this.audioSyncVideoOption.diff}`); // wait
+
+                return;
+              } // audio < video
+              // throw away then chase video
+              else if (this.audioSyncVideoOption.diff < -AUDIO_SYNC_VIDEO_DIFF) {
+                this.player.debug.warn('AudioContext', `audioSyncVideoOption less than diff :${this.audioSyncVideoOption.diff}`); //
+
+                let bufferItem = this.bufferList.shift(); //
+
+                while (bufferItem.ts - this.player.videoTimestamp < -AUDIO_SYNC_VIDEO_DIFF && this.bufferList.length > 0) {
+                  // this.player.debug.warn('AudioContext', `audioSyncVideoOption less than inner ts is:${bufferItem.ts}, videoTimestamp is ${this.player.videoTimestamp},diff:${bufferItem.ts - this.player.videoTimestamp}`)
+                  bufferItem = this.bufferList.shift();
+                }
+
+                if (this.bufferList.length === 0) {
+                  return;
+                }
+              }
+            }
+
+            if (this.bufferList.length === 0) {
+              return;
+            }
+
+            const bufferItem = this.bufferList.shift(); // update audio time stamp
+
+            if (bufferItem && bufferItem.ts) {
+              this.player.audioTimestamp = bufferItem.ts;
+            }
 
             for (let channel = 0; channel < channels; channel++) {
-              const b = buffer[channel];
+              const b = bufferItem.buffer[channel];
               const nowBuffering = outputBuffer.getChannelData(channel);
 
               for (let i = 0; i < 1024; i++) {
@@ -1521,22 +1567,29 @@
       }
 
       clear() {
-        // 全部清空。
-        // while (this.bufferList.length) {
-        //     this.bufferList.shift();
-        // }
         this.bufferList = [];
       }
 
       play(buffer, ts) {
-        this.bufferList.push(buffer);
+        this.bufferList.push({
+          buffer,
+          ts
+        });
 
         if (this.bufferList.length > 20) {
-          this.player.debug.warn('AudioContext', `bufferList is large: ${this.bufferList.length}`);
-        }
+          this.player.debug.warn('AudioContext', `bufferList is large: ${this.bufferList.length}`); // out of memory
+
+          if (this.bufferList.length > 50) {
+            this.bufferList.shift();
+          }
+        } // this.player.debug.log('AudioContext', `bufferList is ${this.bufferList.length}`)
+
       }
 
       pause() {
+        this.audioSyncVideoOption = {
+          diff: null
+        };
         this.playing = false;
         this.clear();
       }
@@ -1560,6 +1613,9 @@
         this.audioBufferSourceNode = null;
         this.mediaStreamAudioDestinationNode = null;
         this.hasInitScriptNode = false;
+        this.audioSyncVideoOption = {
+          diff: null
+        };
         this.off();
         this.player.debug.log('AudioContext', 'destroy');
       }
@@ -8113,7 +8169,7 @@
               break;
 
             default:
-              player[msg.cmd] && player[msg.cmd](msg);
+              this.player[msg.cmd] && this.player[msg.cmd](msg);
           }
         };
       }
@@ -10622,7 +10678,10 @@
           // 当前视频码率，单位bit
           ts: 0 // 当前视频帧pts，单位毫秒
 
-        };
+        }; //
+
+        this._videoTimestamp = 0;
+        this._audioTimestamp = 0;
         property$1(this);
         this.events = new Events(this);
         this.video = new Video(this);
@@ -10736,6 +10795,43 @@
 
       get recording() {
         return this.recorder.recording;
+      }
+
+      set audioTimestamp(value) {
+        if (value === null) {
+          return;
+        }
+
+        this._audioTimestamp = value;
+      } //
+
+
+      get audioTimestamp() {
+        return this._audioTimestamp;
+      } //
+
+
+      set videoTimestamp(value) {
+        if (value === null) {
+          return;
+        }
+
+        this._videoTimestamp = value; // just for wasm
+
+        if (!this._opt.useWCS && !this._opt.useMSE) {
+          if (this.audioTimestamp && this.videoTimestamp) {
+            this.audio.emit(EVENTS.videoSyncAudio, {
+              audioTimestamp: this.audioTimestamp,
+              videoTimestamp: this.videoTimestamp,
+              diff: this.audioTimestamp - this.videoTimestamp
+            });
+          }
+        }
+      } //
+
+
+      get videoTimestamp() {
+        return this._videoTimestamp;
       }
       /**
        *
@@ -10906,6 +11002,9 @@
 
           this.resetStats(); //
 
+          this._audioTimestamp = 0;
+          this._videoTimestamp = 0; //
+
           setTimeout(() => {
             resolve();
           }, 0);
@@ -11046,32 +11145,32 @@
           this._startBpsTime = now();
         }
 
-        const _nowTime = now();
-
-        const timestamp = _nowTime - this._startBpsTime;
-
-        if (timestamp < 1 * 1000) {
-          if (options.fps) {
-            this._stats.fps += 1;
-          }
-
-          if (options.abps) {
-            this._stats.abps += options.abps;
-          }
-
-          if (options.vbps) {
-            this._stats.vbps += options.vbps;
-          }
-
-          return;
-        }
-
         if (isNotEmpty(options.ts)) {
           this._stats.ts = options.ts;
         }
 
         if (isNotEmpty(options.buf)) {
           this._stats.buf = options.buf;
+        }
+
+        if (options.fps) {
+          this._stats.fps += 1;
+        }
+
+        if (options.abps) {
+          this._stats.abps += options.abps;
+        }
+
+        if (options.vbps) {
+          this._stats.vbps += options.vbps;
+        }
+
+        const _nowTime = now();
+
+        const timestamp = _nowTime - this._startBpsTime;
+
+        if (timestamp < 1 * 1000) {
+          return;
         }
 
         this.emit(EVENTS.stats, this._stats);
@@ -11165,7 +11264,11 @@
         this.clearCheckLoadingTimeout(); //
 
         this.releaseWakeLock();
-        this.keepScreenOn = null; // 其他没法解耦的，通过 destroy 方式
+        this.keepScreenOn = null; // reset stats
+
+        this.resetStats();
+        this._audioTimestamp = 0;
+        this._videoTimestamp = 0; // 其他没法解耦的，通过 destroy 方式
 
         this.emit('destroy'); // 接触所有绑定事件
 

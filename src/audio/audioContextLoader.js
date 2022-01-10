@@ -1,5 +1,5 @@
 import Emitter from "../utils/emitter";
-import {AUDIO_ENC_TYPE, EVENTS, VIDEO_ENC_TYPE} from "../constant";
+import {AUDIO_ENC_TYPE, AUDIO_SYNC_VIDEO_DIFF, EVENTS, VIDEO_ENC_TYPE} from "../constant";
 import {clamp, noop} from "../utils";
 
 export default class AudioContextLoader extends Emitter {
@@ -38,6 +38,11 @@ export default class AudioContextLoader extends Emitter {
         this.gainNode.gain.value = 0;
 
         this.playing = false;
+        //
+        this.audioSyncVideoOption = {
+            diff: null
+        };
+
 
         this.audioInfo = {
             encType: '',
@@ -45,6 +50,13 @@ export default class AudioContextLoader extends Emitter {
             sampleRate: ''
         }
         this.init = false;
+
+        // update
+        this.on(EVENTS.videoSyncAudio, (options) => {
+            this.player.debug.log('AudioContext', `videoSyncAudio , audioTimestamp: ${options.audioTimestamp},videoTimestamp: ${options.videoTimestamp},diff:${options.diff}`)
+            this.audioSyncVideoOption = options;
+        })
+
         this.player.debug.log('AudioContext', 'init');
     }
 
@@ -100,9 +112,48 @@ export default class AudioContextLoader extends Emitter {
             const outputBuffer = audioProcessingEvent.outputBuffer;
 
             if (this.bufferList.length && this.playing) {
-                const buffer = this.bufferList.shift();
+
+                // just for wasm
+                if (!this.player._opt.useWCS && !this.player._opt.useMSE) {
+                    // audio > video
+                    // wait
+                    if (this.audioSyncVideoOption.diff > AUDIO_SYNC_VIDEO_DIFF) {
+                        this.player.debug.warn('AudioContext', `audioSyncVideoOption more than diff :${this.audioSyncVideoOption.diff}`)
+                        // wait
+                        return;
+                    }
+                        // audio < video
+                    // throw away then chase video
+                    else if (this.audioSyncVideoOption.diff < -AUDIO_SYNC_VIDEO_DIFF) {
+                        this.player.debug.warn('AudioContext', `audioSyncVideoOption less than diff :${this.audioSyncVideoOption.diff}`)
+
+                        //
+                        let bufferItem = this.bufferList.shift();
+                        //
+                        while ((bufferItem.ts - this.player.videoTimestamp < -AUDIO_SYNC_VIDEO_DIFF) && this.bufferList.length > 0) {
+                            // this.player.debug.warn('AudioContext', `audioSyncVideoOption less than inner ts is:${bufferItem.ts}, videoTimestamp is ${this.player.videoTimestamp},diff:${bufferItem.ts - this.player.videoTimestamp}`)
+                            bufferItem = this.bufferList.shift();
+                        }
+
+                        if (this.bufferList.length === 0) {
+                            return;
+                        }
+                    }
+                }
+
+                if (this.bufferList.length === 0) {
+                    return;
+                }
+
+                const bufferItem = this.bufferList.shift();
+
+                // update audio time stamp
+                if (bufferItem && bufferItem.ts) {
+                    this.player.audioTimestamp = bufferItem.ts;
+                }
+
                 for (let channel = 0; channel < channels; channel++) {
-                    const b = buffer[channel]
+                    const b = bufferItem.buffer[channel]
                     const nowBuffering = outputBuffer.getChannelData(channel);
                     for (let i = 0; i < 1024; i++) {
                         nowBuffering[i] = b[i] || 0
@@ -185,13 +236,26 @@ export default class AudioContextLoader extends Emitter {
     }
 
     play(buffer, ts) {
-        this.bufferList.push(buffer);
+        this.bufferList.push({
+            buffer,
+            ts
+        });
+
         if (this.bufferList.length > 20) {
             this.player.debug.warn('AudioContext', `bufferList is large: ${this.bufferList.length}`)
+
+            // out of memory
+            if (this.bufferList.length > 50) {
+                this.bufferList.shift();
+            }
         }
+        // this.player.debug.log('AudioContext', `bufferList is ${this.bufferList.length}`)
     }
 
     pause() {
+        this.audioSyncVideoOption = {
+            diff: null
+        };
         this.playing = false;
         this.clear();
     }
@@ -214,6 +278,9 @@ export default class AudioContextLoader extends Emitter {
         this.audioBufferSourceNode = null;
         this.mediaStreamAudioDestinationNode = null;
         this.hasInitScriptNode = false;
+        this.audioSyncVideoOption = {
+            diff: null
+        };
         this.off();
         this.player.debug.log('AudioContext', 'destroy');
 

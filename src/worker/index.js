@@ -65,7 +65,7 @@ export default class DecoderWorker {
                     }
                     break;
                 default:
-                    player[msg.cmd] && player[msg.cmd](msg);
+                    this.player[msg.cmd] && this.player[msg.cmd](msg);
             }
         }
     }

@@ -76,6 +76,7 @@ export default class CanvasVideoLoader extends CommonLoader {
 
     //
     render(msg) {
+        this.player.videoTimestamp = msg.ts;
         switch (this.renderType) {
             case CANVAS_RENDER_TYPE.offscreen:
                 this.bitmaprenderer.transferFromImageBitmap(msg.buffer);
