@@ -38,5 +38,7 @@ features:
   details: 支持语音通讯(支持采集PCM/G711A/G711U格式的数据、支持采样率16000Hz或8000Hz，采样精度32bits或者16bits，支持单通道或双通道)
 - title: 支持倍数播放 - 开发中
   details: 支持音视频流的倍数播放
+- title: 支持HLS直播协议 - 开发中
+  details: 支持HLS直播协议
 footer: GPL Licensed | Copyright © 2020-present dexter
 ---
