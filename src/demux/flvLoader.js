@@ -37,6 +37,7 @@ export default class FlvLoader extends CommonLoader {
                 ts = tmp32[0]
             }
             const payload = yield length
+            // console.log('ts',ts);
             switch (type) {
                 case FLV_MEDIA_TYPE.audio:
                     if (player._opt.hasAudio) {

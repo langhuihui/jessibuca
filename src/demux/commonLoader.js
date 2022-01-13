@@ -31,6 +31,13 @@ export default class CommonLoader extends Emitter {
         return this.delay
     }
 
+    resetDelay() {
+        this.firstTimestamp = null;
+        this.startTimestamp = null;
+        this.delay = -1;
+        this.dropping = false;
+    }
+
     //
     initInterval() {
         const videoBuffer = this.player._opt.videoBuffer;
@@ -40,25 +47,30 @@ export default class CommonLoader extends Emitter {
             let data;
             if (this.bufferList.length) {
                 if (this.dropping) {
+                    // this.player.debug.log('common dumex', `is dropping`);
                     data = this.bufferList.shift();
                     while (!data.isIFrame && this.bufferList.length) {
                         data = this.bufferList.shift();
                     }
-
                     if (data.isIFrame) {
                         this.dropping = false;
+
                         this._doDecoderDecode(data);
                     }
                 } else {
                     data = this.bufferList[0];
                     if (this.getDelay(data.ts) === -1) {
+                        // this.player.debug.log('common dumex', `delay is -1`);
                         this.bufferList.shift()
                         this._doDecoderDecode(data);
                     } else if (this.delay > videoBuffer + 1000) {
+                        // this.player.debug.log('common dumex', `delay is ${this.delay}, set dropping is true`);
+                        this.resetDelay();
                         this.dropping = true
                     } else {
                         while (this.bufferList.length) {
                             data = this.bufferList[0]
+
                             if (this.getDelay(data.ts) > videoBuffer) {
                                 // drop frame
                                 this.bufferList.shift()
