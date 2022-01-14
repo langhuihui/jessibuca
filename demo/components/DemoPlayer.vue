@@ -131,16 +131,19 @@ export default {
             useOffscreen: false,
             recording: false,
             recordType: 'webm',
-            scale: 0
+            scale: 0,
+            vConsole:null
         };
     },
     mounted() {
+        this.vConsole = new window.VConsole();
         this.version = VERSION === '#VERSION#' ? '' : VERSION;
         this.create();
         window.onerror = (msg) => (this.err = msg);
     },
     unmounted() {
         this.jessibuca.destroy();
+        this.vConsole.destroy();
     },
     methods: {
         create(options) {
