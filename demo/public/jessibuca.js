@@ -8246,6 +8246,7 @@
 	  }
 
 	  _decodeAudioNoDelay(arrayBuffer, ts) {
+	    // console.log('_decodeAudioNoDelay', arrayBuffer);
 	    this.decoderWorker.postMessage({
 	      cmd: WORKER_SEND_TYPE.audioDecode,
 	      buffer: arrayBuffer,
@@ -8316,9 +8317,18 @@
 	          // this.player.debug.log('common dumex', `is dropping`);
 	          data = this.bufferList.shift();
 
+	          if (data.type === MEDIA_TYPE.audio && data.payload[1] === 0) {
+	            this._doDecoderDecode(data);
+	          }
+
 	          while (!data.isIFrame && this.bufferList.length) {
 	            data = this.bufferList.shift();
-	          }
+
+	            if (data.type === MEDIA_TYPE.audio && data.payload[1] === 0) {
+	              this._doDecoderDecode(data);
+	            }
+	          } // i frame
+
 
 	          if (data.isIFrame) {
 	            this.dropping = false;
@@ -8370,7 +8380,7 @@
 	      ts: ts,
 	      type: type,
 	      isIFrame: false
-	    };
+	    }; // use offscreen
 
 	    if (player._opt.useWCS && !player._opt.useOffscreen) {
 	      if (type === MEDIA_TYPE.video) {
@@ -8379,6 +8389,7 @@
 
 	      this.pushBuffer(payload, options);
 	    } else if (player._opt.useMSE) {
+	      // use mse
 	      if (type === MEDIA_TYPE.video) {
 	        options.isIFrame = isIFrame;
 	      }
@@ -8486,7 +8497,7 @@
 	        ts = tmp32[0];
 	      }
 
-	      const payload = yield length; // console.log('ts',ts);
+	      const payload = yield length;
 
 	      switch (type) {
 	        case FLV_MEDIA_TYPE.audio:

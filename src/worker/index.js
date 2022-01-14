@@ -118,6 +118,7 @@ export default class DecoderWorker {
 
 
     _decodeAudioNoDelay(arrayBuffer, ts) {
+        // console.log('_decodeAudioNoDelay', arrayBuffer);
         this.decoderWorker.postMessage({
             cmd: WORKER_SEND_TYPE.audioDecode,
             buffer: arrayBuffer,

@@ -6696,20 +6696,26 @@
 	      }
 	    },
 	    getDelay: function (timestamp) {
-	      if (!timestamp) return -1;
-	      this.firstTimestamp = timestamp;
-	      this.startTimestamp = Date.now();
-	      this.delay = -1;
+	      if (!timestamp) {
+	        return -1;
+	      }
 
-	      this.getDelay = function (timestamp) {
+	      if (!this.firstTimestamp) {
+	        this.firstTimestamp = timestamp;
+	        this.startTimestamp = Date.now();
+	        this.delay = -1;
+	      } else {
 	        if (timestamp) {
 	          this.delay = Date.now() - this.startTimestamp - (timestamp - this.firstTimestamp);
 	        }
+	      }
 
-	        return this.delay;
-	      };
-
-	      return -1;
+	      return this.delay;
+	    },
+	    resetDelay: function () {
+	      this.firstTimestamp = null;
+	      this.startTimestamp = null;
+	      this.delay = -1;
 	    },
 	    init: function () {
 	      decoder$1.opt.debug && console.log('Jessibuca: [worker] init');
@@ -6727,12 +6733,20 @@
 	      const loop = () => {
 	        if (buffer.length) {
 	          if (this.dropping) {
-	            // // 连续的把视频帧给丢掉一直丢到关键帧停下来。。。
-	            data = buffer.shift();
+	            // // dropping
+	            data = buffer.shift(); //
+
+	            if (data.type === MEDIA_TYPE.audio && data.payload[1] === 0) {
+	              _doDecode(data);
+	            }
 
 	            while (!data.isIFrame && buffer.length) {
-	              // 持续丢帧。
-	              data = buffer.shift();
+	              // dropping
+	              data = buffer.shift(); //
+
+	              if (data.type === MEDIA_TYPE.audio && data.payload[1] === 0) {
+	                _doDecode(data);
+	              }
 	            }
 
 	            if (data.isIFrame) {
@@ -6744,10 +6758,13 @@
 	            var data = buffer[0];
 
 	            if (this.getDelay(data.ts) === -1) {
+	              // this.opt.debug && console.log('Jessibuca: [worker]: common dumex delay is -1');
 	              buffer.shift();
 
 	              _doDecode(data);
 	            } else if (this.delay > this.opt.videoBuffer + 1000) {
+	              // this.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, set dropping is true`);
+	              this.resetDelay();
 	              this.dropping = true;
 	            } else {
 	              while (buffer.length) {
@@ -6759,6 +6776,7 @@
 
 	                  _doDecode(data);
 	                } else {
+	                  // this.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}`);
 	                  break;
 	                }
 	              }
@@ -6776,9 +6794,10 @@
 	      audioDecoder.clear();
 	      videoDecoder.clear();
 	      wcsVideoDecoder.reset && wcsVideoDecoder.reset();
-	      this.firstTimestamp = 0;
-	      this.startTimestamp = 0;
+	      this.firstTimestamp = null;
+	      this.startTimestamp = null;
 	      this.delay = -1;
+	      this.dropping = false;
 
 	      if (this.webglObj) {
 	        this.webglObj.destroy();

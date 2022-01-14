@@ -49,12 +49,18 @@ export default class CommonLoader extends Emitter {
                 if (this.dropping) {
                     // this.player.debug.log('common dumex', `is dropping`);
                     data = this.bufferList.shift();
+                    if (data.type === MEDIA_TYPE.audio && data.payload[1] === 0) {
+                        this._doDecoderDecode(data);
+                    }
                     while (!data.isIFrame && this.bufferList.length) {
                         data = this.bufferList.shift();
+                        if (data.type === MEDIA_TYPE.audio && data.payload[1] === 0) {
+                            this._doDecoderDecode(data);
+                        }
                     }
+                    // i frame
                     if (data.isIFrame) {
                         this.dropping = false;
-
                         this._doDecoderDecode(data);
                     }
                 } else {
@@ -96,12 +102,14 @@ export default class CommonLoader extends Emitter {
             type: type,
             isIFrame: false
         }
+        // use offscreen
         if (player._opt.useWCS && !player._opt.useOffscreen) {
             if (type === MEDIA_TYPE.video) {
                 options.isIFrame = isIFrame;
             }
             this.pushBuffer(payload, options)
         } else if (player._opt.useMSE) {
+            // use mse
             if (type === MEDIA_TYPE.video) {
                 options.isIFrame = isIFrame;
             }
