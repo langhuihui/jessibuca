@@ -27,7 +27,6 @@
 #ifndef AVUTIL_MURMUR3_H
 #define AVUTIL_MURMUR3_H
 
-#include <stddef.h>
 #include <stdint.h>
 
 #include "version.h"

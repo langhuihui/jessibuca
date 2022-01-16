@@ -39,21 +39,43 @@ extern "C"
 {
 #include <libavcodec/avcodec.h>
 #include <libswresample/swresample.h>
+#include <libavformat/avformat.h>
+    void FFmpegLogFunc(void *ptr, int level, const char *fmt, va_list vl)
+    {
+        emscripten_log(level, fmt, vl);
+    }
+    void initAvLog()
+    {
+        //emscripten_log(0, "initAvLog");
+        //av_log_set_callback(FFmpegLogFunc);
+    }
 }
+
 //const int SamplingFrequencies[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350, 0, 0, 0};
 //const int AudioObjectTypes[] = {};
+#include "mp4.h"
 class FFmpeg
 {
 public:
     AVCodec *codec = nullptr;
+    AVCodec *enc_codec = nullptr;
     AVCodecParserContext *parser = nullptr;
     AVCodecContext *dec_ctx = nullptr;
     AVFrame *frame;
     AVPacket *pkt;
     val jsObject;
     bool initialized = false;
+    MP4 *mp4 = nullptr;
+    AVStream *outStream;
+    u32 timestamp = 0;
+    u32 mp4Ts = 0;
+    AVCodecParameters *par = nullptr;
     FFmpeg(val &&v) : jsObject(forward<val>(v))
     {
+    }
+    virtual ~FFmpeg()
+    {
+        clear();
     }
     void initCodec(enum AVCodecID id)
     {
@@ -63,6 +85,7 @@ public:
         }
         pkt = av_packet_alloc();
         codec = avcodec_find_decoder(id);
+        enc_codec = avcodec_find_encoder(id);
         parser = av_parser_init(codec->id);
         dec_ctx = avcodec_alloc_context3(codec);
         frame = av_frame_alloc();
@@ -72,21 +95,33 @@ public:
         initCodec(id);
         dec_ctx->extradata_size = input.length();
         dec_ctx->extradata = (u8 *)input.data();
-        // // dec_ctx->extradata = (u8 *)malloc(dec_ctx->extradata_size);
-        // // memcpy(dec_ctx->extradata, input.c_str(), dec_ctx->extradata_size);
         avcodec_open2(dec_ctx, codec, NULL);
+        avcodec_parameters_from_context(par, dec_ctx);
+        if (outStream != nullptr)
+            avcodec_parameters_copy(outStream->codecpar, par);
         initialized = true;
     }
-    virtual ~FFmpeg()
+    virtual void setMp4(int p)
     {
-        clear();
+        mp4 = (MP4 *)p;
+        mp4Ts = timestamp;
+        outStream = avformat_new_stream(mp4->output_fmtctx, enc_codec);
+        if (par != nullptr)
+            avcodec_parameters_copy(outStream->codecpar, par);
+        outStream->id = mp4->output_fmtctx->nb_streams - 1;
     }
     virtual int decode(string input)
     {
         int ret = 0;
-        pkt->data = (u8 *)(input.data());
+        pkt->data = (u8 *)input.data();
         pkt->size = input.length();
+        //av_packet_from_data(pkt, (u8 *)input.data(), input.length());
         ret = avcodec_send_packet(dec_ctx, pkt);
+        if (mp4 != nullptr)
+        {
+            pkt->stream_index = outStream->index;
+            ret = mp4->write(pkt);
+        }
         while (ret >= 0)
         {
             ret = avcodec_receive_frame(dec_ctx, frame);
@@ -147,12 +182,19 @@ public:
     {
         FFmpeg::clear();
     }
-    int decode(string input) override
+    void setMp4(int p) override
     {
+        FFmpeg::setMp4(p);
+        outStream->time_base = (AVRational){1, dec_ctx->sample_rate};
+    }
+    int decode(u32 ts, string input)
+    {
+        timestamp = ts;
         u8 flag = (u8)input[0];
         u8 audioType = flag >> 4;
         if (initialized)
         {
+            pkt->dts = pkt->pts = (int64_t)(ts - mp4Ts);
             return FFmpeg::decode(input.substr(audioType == 10 ? 2 : 1));
         }
         else
@@ -190,6 +232,9 @@ public:
             }
             if (initialized)
             {
+                if (outStream)
+                    outStream->time_base = (AVRational){1, dec_ctx->sample_rate};
+
                 jsObject.call<void>("initAudioPlanar", n_channel, sample_rate);
             }
         }
@@ -197,8 +242,8 @@ public:
     }
     void _decode() override
     {
-        auto nb_samples = frame->nb_samples;
-        auto bytes_per_sample = av_get_bytes_per_sample(AV_SAMPLE_FMT_FLTP);
+        int nb_samples = frame->nb_samples;
+        int bytes_per_sample = av_get_bytes_per_sample(AV_SAMPLE_FMT_FLTP);
         if (dec_ctx->sample_fmt == AV_SAMPLE_FMT_FLTP && sample_rate == dec_ctx->sample_rate && dec_ctx->channel_layout == n_channel)
         {
             jsObject.call<void>("playAudioPlanar", int(frame->data), nb_samples *bytes_per_sample *n_channel);
@@ -211,15 +256,15 @@ public:
             au_convert_ctx = swr_alloc_set_opts(NULL, n_channel == 2 ? AV_CH_LAYOUT_STEREO : AV_CH_LAYOUT_MONO, AV_SAMPLE_FMT_FLTP, sample_rate,
                                                 dec_ctx->channel_layout, dec_ctx->sample_fmt, dec_ctx->sample_rate,
                                                 0, NULL);
-            auto ret = swr_init(au_convert_ctx);
-            auto out_buffer_size = av_samples_get_buffer_size(NULL, n_channel, nb_samples, AV_SAMPLE_FMT_FLTP, 0);
-            auto buffer = (uint8_t *)av_malloc(out_buffer_size);
+            int ret = swr_init(au_convert_ctx);
+            int out_buffer_size = av_samples_get_buffer_size(NULL, n_channel, nb_samples, AV_SAMPLE_FMT_FLTP, 0);
+            uint8_t *buffer = (uint8_t *)av_malloc(out_buffer_size);
             out_buffer[0] = buffer;
             out_buffer[1] = buffer + (out_buffer_size / 2);
             emscripten_log(0, "au_convert_ctx init sample_rate:%d->%d,ret:%d", dec_ctx->sample_rate, sample_rate, ret);
         }
         // // 转换
-        auto ret = swr_convert(au_convert_ctx, out_buffer, nb_samples, (const uint8_t **)frame->data, nb_samples);
+        int ret = swr_convert(au_convert_ctx, out_buffer, nb_samples, (const uint8_t **)frame->data, nb_samples);
         while (ret > 0)
         {
             jsObject.call<void>("playAudioPlanar", int(&out_buffer), ret);
@@ -237,7 +282,6 @@ public:
     u32 v = 0;
     int NAL_unit_length = 0;
     u32 compositionTime = 0;
-
     FFmpegVideoDecoder(val &&v) : FFmpeg(move(v))
     {
         //        emscripten_log(0, "FFMpegVideoDecoder init");
@@ -257,8 +301,14 @@ public:
             y = 0;
         }
     }
-    int decode(string data) override
+    void setMp4(int p) override
     {
+        FFmpeg::setMp4(p);
+        outStream->time_base = (AVRational){1, 90000};
+    }
+    int decode(u32 ts, string data)
+    {
+        timestamp = ts;
         if (!initialized)
         {
             int codec_id = ((int)data[0]) & 0x0F;
@@ -281,7 +331,13 @@ public:
         }
         else
         {
-            compositionTime = (((u32)data[2]) << 16) + (((u32)data[3]) << 8) + (u32)data[4];
+            u8 *cts_ptr = (u8 *)(&compositionTime);
+            *cts_ptr = data[4];
+            *(cts_ptr + 1) = data[3];
+            *(cts_ptr + 2) = data[2];
+            pkt->dts = (int64_t)(ts - mp4Ts);
+            pkt->pts = pkt->dts + (int64_t)compositionTime;
+            emscripten_log(0, "set pts %d", pkt->pts);
             return FFmpeg::decode(data.substr(5));
         }
         return 0;
@@ -292,6 +348,8 @@ public:
         {
             videoWidth = frame->width;
             videoHeight = frame->height;
+            dec_ctx->width = videoWidth;
+            dec_ctx->height = videoHeight;
             jsObject.call<void>("setVideoSize", videoWidth, videoHeight);
             int size = videoWidth * videoHeight;
             if (y)
@@ -333,6 +391,7 @@ EMSCRIPTEN_BINDINGS(FFmpegAudioDecoder)
         .constructor<val>()
         .PROP(sample_rate)
         .FUNC(clear)
+        .FUNC(setMp4)
         .FUNC(decode);
 }
 #undef FUNC
@@ -344,5 +403,6 @@ EMSCRIPTEN_BINDINGS(FFmpegVideoDecoder)
     class_<FFmpegVideoDecoder>("VideoDecoder")
         .constructor<val>()
         .FUNC(clear)
+        .FUNC(setMp4)
         .FUNC(decode);
 }

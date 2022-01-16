@@ -1,11 +1,11 @@
-prefix=../obj2
+prefix=../obj
 exec_prefix=${prefix}
-libdir=../obj2/lib
-includedir=../obj2/include
+libdir=../obj/lib
+includedir=../obj/include
 
 Name: libavutil
 Description: FFmpeg utility library
-Version: 56.70.100
+Version: 56.51.100
 Requires: 
 Requires.private: 
 Conflicts:

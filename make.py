@@ -20,15 +20,17 @@ sargs = {
     'ASSERTIONS': 0,
     'ERROR_ON_UNDEFINED_SYMBOLS': 0,
     'DISABLE_EXCEPTION_CATCHING': 1,
-    # 'ALLOW_MEMORY_GROWTH':1,
+    'ALLOW_MEMORY_GROWTH':1,
     # 'ENVIRONMENT':'"worker"',
-    'INVOKE_RUN':0,
-    'USE_PTHREADS':  0
+    'INVOKE_RUN': 0,
+    'USE_PTHREADS':  0,
+    'FORCE_FILESYSTEM':1,
+    'EXPORTED_FUNCTIONS': ["_initAvLog"]
     # 'DEMANGLE_SUPPORT':1
 }
 emcc_args = [
     # '-m32',
-    '-Oz',
+    # '-Oz',
     '--memory-init-file', '0',
     # '--closure', '1',
     # '--llvm-lto','1',
@@ -41,7 +43,7 @@ emcc_args = [
 #     emcc_args.append('--post-js cocosCom.js')
 print ('building...')
 
-emcc_args = ['obj/lib/libavcodec.a','obj/lib/libavutil.a','obj/lib/libswresample.a']+emcc_args
+emcc_args = ['obj/lib/libavcodec.a','obj/lib/libavutil.a','obj/lib/libswresample.a','obj/lib/libavformat.a']+emcc_args
 
 os.system('emcc Jessibuca.cpp ' +
           (' '.join(emcc_args)) + ' -o '+args['-o']+'.js')

@@ -1,12 +1,12 @@
-prefix=../obj2
+prefix=../obj
 exec_prefix=${prefix}
-libdir=../obj2/lib
-includedir=../obj2/include
+libdir=../obj/lib
+includedir=../obj/include
 
 Name: libavformat
 Description: FFmpeg container format library
-Version: 58.76.100
-Requires: libavcodec >= 58.134.100, libavutil >= 56.70.100
+Version: 58.45.100
+Requires: libavcodec >= 58.91.100, libavutil >= 56.51.100
 Requires.private: 
 Conflicts:
 Libs: -L${libdir}  -lavformat -lm

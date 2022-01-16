@@ -19,6 +19,7 @@ disables = [
 ]
 enables = [
     'small','cross-compile','gpl','avcodec','swresample','ffmpeg','avformat',
+    "protocol=file",
     'muxer=mp4',
     'parser=h264',
     'parser=hevc',

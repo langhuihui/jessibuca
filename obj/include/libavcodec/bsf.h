@@ -215,7 +215,7 @@ int av_bsf_send_packet(AVBSFContext *ctx, AVPacket *pkt);
 int av_bsf_receive_packet(AVBSFContext *ctx, AVPacket *pkt);
 
 /**
- * Reset the internal bitstream filter state. Should be called e.g. when seeking.
+ * Reset the internal bitstream filter state / flush internal buffers.
  */
 void av_bsf_flush(AVBSFContext *ctx);
 
