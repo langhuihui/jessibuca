@@ -1,0 +1,9 @@
+Debug
+.vs
+.vscode
+*.zip
+*.rar
+node_modules
+.idea
+.cache
+.parcel-cache

@@ -1,0 +1,47 @@
+lockfileVersion: 5.3
+
+specifiers:
+  '@types/emscripten': ^1.39.6
+  afsm: ^1.0.1
+  eventemitter3: ^4.0.7
+  fastrx: ^3.0.11
+  loglevel: ^1.8.0
+
+dependencies:
+  '@types/emscripten': 1.39.6
+  afsm: 1.0.1
+  eventemitter3: 4.0.7
+  fastrx: 3.0.11
+  loglevel: 1.8.0
+
+packages:
+
+  /@types/emscripten/1.39.6:
+    resolution: {integrity: sha512-H90aoynNhhkQP6DRweEjJp5vfUVdIj7tdPLsu7pq89vODD/lcugKfZOsfgwpvM6XUewEp2N5dCg1Uf3Qe55Dcg==}
+    dev: false
+
+  /afsm/1.0.1:
+    resolution: {integrity: sha512-jHCEQY++RvBodMqElOG7K8ZJiZNnFfLCnZUbzTuRAIKMLTvcNp23kgG3wFoCMVHXc8tBf3CT4iOVvPkCd4tOeg==}
+    dependencies:
+      eventemitter3: 4.0.7
+    dev: false
+
+  /core-js/3.20.2:
+    resolution: {integrity: sha512-nuqhq11DcOAbFBV4zCbKeGbKQsUDRqTX0oqx7AttUBuqe3h20ixsE039QHelbL6P4h+9kytVqyEtyZ6gsiwEYw==}
+    requiresBuild: true
+    dev: false
+
+  /eventemitter3/4.0.7:
+    resolution: {integrity: sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==}
+    dev: false
+
+  /fastrx/3.0.11:
+    resolution: {integrity: sha512-1UcfZxPyXGicRRJsCakFE97PI07s3aq3LiL8EpkWiR2nBLZAI+ch+8iZq4VDSUSm8XyaTSw7UmhYuZKiX9SMmA==}
+    dependencies:
+      core-js: 3.20.2
+    dev: false
+
+  /loglevel/1.8.0:
+    resolution: {integrity: sha512-G6A/nJLRgWOuuwdNuA6koovfEV1YpqqAG4pRUlFaz3jj2QNZ8M4vBqnVA+HBTmU/AMNUtlOsMmSpF6NyOjztbA==}
+    engines: {node: '>= 0.6.0'}
+    dev: false
