@@ -93,6 +93,5 @@ export default class WebcodecsDecoder extends Emitter {
         this.isInitInfo = false;
         this.off();
         this.player.debug.log('Webcodecs', 'destroy')
-        this.player = null;
     }
 }

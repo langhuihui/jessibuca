@@ -127,10 +127,9 @@ export default class DecoderWorker {
     }
 
     destroy() {
-        this.player.debug.log(`decoderWorker`, 'destroy');
         this.decoderWorker.postMessage({cmd: WORKER_SEND_TYPE.close})
         this.decoderWorker.terminate();
         this.decoderWorker = null;
-        this.player = null;
+        this.player.debug.log(`decoderWorker`, 'destroy');
     }
 }

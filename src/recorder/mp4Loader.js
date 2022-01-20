@@ -162,6 +162,5 @@ export default class MP4RecorderLoader extends Emitter {
     destroy() {
         this._reset();
         this.player.debug.log('Recorder', 'destroy');
-        this.player = null;
     }
 }

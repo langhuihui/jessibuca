@@ -38,6 +38,5 @@ export default class AudioLoader extends Emitter {
     destroy() {
         this.off();
         this.player.debug.log('Audio', 'destroy');
-        this.player = null;
     }
 }

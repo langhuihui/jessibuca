@@ -33,7 +33,6 @@ export default class Control {
     }
 
     destroy() {
-        this.player.debug.log('control', 'destroy');
         if (this.$poster) {
             this.player.$container.removeChild(this.$poster);
         }
@@ -41,6 +40,6 @@ export default class Control {
         if (this.$controls) {
             this.player.$container.removeChild(this.$controls);
         }
-        this.player = null;
+        this.player.debug.log('control', 'destroy');
     }
 }

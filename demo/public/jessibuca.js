@@ -1783,6 +1783,12 @@
 	    const {
 	      demux
 	    } = this.player;
+
+	    if (!demux) {
+	      this.player.debug.warn('websocketLoader', 'websocket handle message demux is null');
+	      return;
+	    }
+
 	    demux.dispatch(message);
 	  }
 
@@ -8091,7 +8097,6 @@
 	    this._reset();
 
 	    this.player.debug.log('Recorder', 'destroy');
-	    this.player = null;
 	  }
 
 	}
@@ -8255,13 +8260,12 @@
 	  }
 
 	  destroy() {
-	    this.player.debug.log(`decoderWorker`, 'destroy');
 	    this.decoderWorker.postMessage({
 	      cmd: WORKER_SEND_TYPE.close
 	    });
 	    this.decoderWorker.terminate();
 	    this.decoderWorker = null;
-	    this.player = null;
+	    this.player.debug.log(`decoderWorker`, 'destroy');
 	  }
 
 	}
@@ -8732,7 +8736,6 @@
 	    this.isInitInfo = false;
 	    this.off();
 	    this.player.debug.log('Webcodecs', 'destroy');
-	    this.player = null;
 	  }
 
 	}
@@ -9142,8 +9145,6 @@
 	  }
 
 	  destroy() {
-	    this.player.debug.log('control', 'destroy');
-
 	    if (this.$poster) {
 	      this.player.$container.removeChild(this.$poster);
 	    }
@@ -9154,7 +9155,7 @@
 	      this.player.$container.removeChild(this.$controls);
 	    }
 
-	    this.player = null;
+	    this.player.debug.log('control', 'destroy');
 	  }
 
 	}

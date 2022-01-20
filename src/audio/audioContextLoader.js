@@ -283,7 +283,6 @@ export default class AudioContextLoader extends Emitter {
         };
         this.off();
         this.player.debug.log('AudioContext', 'destroy');
-
     }
 
 }
