@@ -56,6 +56,10 @@ export default class WebsocketLoader extends Emitter {
     //
     _handleMessage(message) {
         const {demux} = this.player;
+        if (!demux) {
+            this.player.debug.warn('websocketLoader', 'websocket handle message demux is null');
+            return;
+        }
         demux.dispatch(message);
     }
 

@@ -23,7 +23,7 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 支持WebWorker多核解码，提升多画面播放性能。
 - 支持WebCodecs硬件解码API
 - 支持MediaSourceExtensions 硬件解码
-- 支持视频录制(WebM、MP4格式)
+- 支持视频录制(WebM、MP4格式)，(MP4格式支持在IOS VLC播放器显示时长播放，Android VLC播放器无法显示时长播放,PC VLC播放器可以播放)
 
 ## 开发中
 - 支持录制MP4格式(MPEG-4)的视频录制

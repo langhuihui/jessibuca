@@ -29,7 +29,7 @@ features:
 - title: 支持Webcodecs硬解码
   details: 支持Webcodecs硬解码H.264视频。(需在chrome 94版本以上，需要https或者localhost环境),支持在WebWorker中硬解码。
 - title: 支持视频录制
-  details: 支持录制MP4和WebM格式(video/webm;codecs=h264)的视频录制。(基于MediaRecorder)。
+  details: 支持录制MP4和WebM格式(video/webm;codecs=h264)的视频录制。(基于MediaRecorder),(MP4格式支持在IOS VLC播放器显示时长播放，Android VLC播放器无法显示时长播放，PC VLC播放器可以播放)。
 - title: 支持视频录制 - 开发中
   details: 支持录制MP4格式(MPEG-4)的视频录制。
 - title: 支持webrtc - 开发中
