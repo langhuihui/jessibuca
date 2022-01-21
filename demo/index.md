@@ -40,5 +40,7 @@ features:
   details: 支持音视频流的倍数播放
 - title: 支持HLS直播协议 - 开发中
   details: 支持HLS直播协议
+- title: 支持fmp4格式直播协议 - 开发中
+  details: 支持fmp4格式直播协议
 footer: GPL Licensed | Copyright © 2020-present dexter
 ---
