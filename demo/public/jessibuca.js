@@ -334,7 +334,10 @@
 	var property$1 = (player => {
 	  Object.defineProperty(player, 'rect', {
 	    get: () => {
-	      return player.$container.getBoundingClientRect();
+	      const clientRect = player.$container.getBoundingClientRect();
+	      clientRect.width = Math.max(clientRect.width, player.$container.clientWidth);
+	      clientRect.height = Math.max(clientRect.height, player.$container.clientHeight);
+	      return clientRect;
 	    }
 	  });
 	  ['bottom', 'height', 'left', 'right', 'top', 'width'].forEach(key => {
