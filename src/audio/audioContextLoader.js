@@ -50,6 +50,7 @@ export default class AudioContextLoader extends Emitter {
             sampleRate: ''
         }
         this.init = false;
+        this.hasAudio = false;
 
         // update
         this.on(EVENTS.videoSyncAudio, (options) => {
@@ -107,12 +108,11 @@ export default class AudioContextLoader extends Emitter {
         const channels = this.audioInfo.channels;
 
         const scriptNode = this.audioContext.createScriptProcessor(1024, 0, channels);
-
+        // tips: if audio isStateSuspended  onaudioprocess method not working
         scriptNode.onaudioprocess = (audioProcessingEvent) => {
             const outputBuffer = audioProcessingEvent.outputBuffer;
 
             if (this.bufferList.length && this.playing) {
-
                 // just for wasm
                 if (!this.player._opt.useWCS && !this.player._opt.useMSE) {
                     // audio > video
@@ -171,7 +171,6 @@ export default class AudioContextLoader extends Emitter {
 
     mute(flag) {
         if (flag) {
-
             if (!this.isMute) {
                 this.player.emit(EVENTS.mute, flag);
             }
@@ -236,6 +235,13 @@ export default class AudioContextLoader extends Emitter {
     }
 
     play(buffer, ts) {
+        // if is mute
+        if (this.isMute) {
+            return;
+        }
+
+        this.hasAudio = true;
+
         this.bufferList.push({
             buffer,
             ts
@@ -271,6 +277,7 @@ export default class AudioContextLoader extends Emitter {
         this.audioContext = null;
         this.gainNode = null;
         this.init = false;
+        this.hasAudio = false;
         if (this.scriptNode) {
             this.scriptNode.onaudioprocess = noop;
             this.scriptNode = null;
