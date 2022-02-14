@@ -1414,7 +1414,8 @@
 	      channels: '',
 	      sampleRate: ''
 	    };
-	    this.init = false; // update
+	    this.init = false;
+	    this.hasAudio = false; // update
 
 	    this.on(EVENTS.videoSyncAudio, options => {
 	      this.player.debug.log('AudioContext', `videoSyncAudio , audioTimestamp: ${options.audioTimestamp},videoTimestamp: ${options.videoTimestamp},diff:${options.diff}`);
@@ -1468,7 +1469,7 @@
 	    }
 
 	    const channels = this.audioInfo.channels;
-	    const scriptNode = this.audioContext.createScriptProcessor(1024, 0, channels);
+	    const scriptNode = this.audioContext.createScriptProcessor(1024, 0, channels); // tips: if audio isStateSuspended  onaudioprocess method not working
 
 	    scriptNode.onaudioprocess = audioProcessingEvent => {
 	      const outputBuffer = audioProcessingEvent.outputBuffer;
@@ -1599,6 +1600,12 @@
 	  }
 
 	  play(buffer, ts) {
+	    // if is mute
+	    if (this.isMute) {
+	      return;
+	    }
+
+	    this.hasAudio = true;
 	    this.bufferList.push({
 	      buffer,
 	      ts
@@ -1632,6 +1639,7 @@
 	    this.audioContext = null;
 	    this.gainNode = null;
 	    this.init = false;
+	    this.hasAudio = false;
 
 	    if (this.scriptNode) {
 	      this.scriptNode.onaudioprocess = noop;
@@ -8041,8 +8049,19 @@
 
 	    try {
 	      const stream = this.player.video.$videoElement.captureStream(25);
-	      const audioStream = this.player.audio.mediaStreamAudioDestinationNode.stream;
-	      stream.addTrack(audioStream.getAudioTracks()[0]);
+
+	      if (this.player.audio.mediaStreamAudioDestinationNode && this.player.audio.mediaStreamAudioDestinationNode.stream && !this.player.audio.isStateSuspended() && this.player.audio.hasAudio) {
+	        const audioStream = this.player.audio.mediaStreamAudioDestinationNode.stream;
+
+	        if (audioStream.getAudioTracks().length > 0) {
+	          const audioTrack = audioStream.getAudioTracks()[0];
+
+	          if (audioTrack && audioTrack.enabled) {
+	            stream.addTrack(audioTrack);
+	          }
+	        }
+	      }
+
 	      this.recorder = RecordRTC_1(stream, options);
 	    } catch (e) {
 	      debug.error('Recorder', e);
@@ -10816,7 +10835,7 @@
 	  }
 
 	  get volume() {
-	    return this.audio.volume;
+	    return this.audio && this.audio.volume;
 	  }
 
 	  set volume(value) {
@@ -10845,7 +10864,7 @@
 	  }
 
 	  get recording() {
-	    return this.recorder.recording;
+	    return this.recorder && this.recorder.recording;
 	  }
 
 	  set audioTimestamp(value) {

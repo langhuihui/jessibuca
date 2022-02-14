@@ -180,7 +180,7 @@ export default class Player extends Emitter {
     }
 
     get volume() {
-        return this.audio.volume;
+        return this.audio && this.audio.volume;
     }
 
     set volume(value) {
@@ -209,7 +209,7 @@ export default class Player extends Emitter {
     }
 
     get recording() {
-        return this.recorder.recording;
+        return this.recorder && this.recorder.recording;
     }
 
     set audioTimestamp(value) {
