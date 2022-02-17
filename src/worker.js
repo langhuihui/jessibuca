@@ -1,6 +1,6 @@
 import Module from './decoder/decoder'
 import createWebGL from './utils/webgl';
-import {WORKER_CMD_TYPE, MEDIA_TYPE, WORKER_SEND_TYPE, ENCODED_VIDEO_TYPE} from "./constant";
+import {WORKER_CMD_TYPE, MEDIA_TYPE, WORKER_SEND_TYPE, ENCODED_VIDEO_TYPE, DEFAULT_PLAYER_OPTIONS} from "./constant";
 import {formatVideoDecoderConfigure} from "./utils";
 
 if (!Date.now) Date.now = function () {
@@ -88,7 +88,12 @@ Module.postRun = function () {
     }
 
     var decoder = {
-        opt: {},
+        opt: {
+            debug: DEFAULT_PLAYER_OPTIONS.debug,
+            forceNoOffscreen: DEFAULT_PLAYER_OPTIONS.forceNoOffscreen,
+            useWCS: DEFAULT_PLAYER_OPTIONS.useWCS,
+            videoBuffer: DEFAULT_PLAYER_OPTIONS.videoBuffer
+        },
         useOffscreen: function () {
             return !this.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined';
         },
@@ -314,7 +319,11 @@ Module.postRun = function () {
         var msg = event.data
         switch (msg.cmd) {
             case WORKER_SEND_TYPE.init:
-                decoder.opt = JSON.parse(msg.opt)
+                try {
+                    decoder.opt = JSON.parse(msg.opt)
+                } catch (e) {
+
+                }
                 audioDecoder.sample_rate = msg.sampleRate
                 decoder.init();
                 break

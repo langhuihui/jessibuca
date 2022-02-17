@@ -71,9 +71,14 @@ export default class DecoderWorker {
     }
 
     _initWork() {
+        const opt = {
+            debug: this.player._opt.debug,
+            forceNoOffscreen: this.player._opt.forceNoOffscreen,
+            useWCS: this.player._opt.useWCS,
+        }
         this.decoderWorker.postMessage({
             cmd: WORKER_SEND_TYPE.init,
-            opt: JSON.stringify(this.player._opt),
+            opt: JSON.stringify(opt),
             sampleRate: this.player.audio.audioContext.sampleRate
         })
     }

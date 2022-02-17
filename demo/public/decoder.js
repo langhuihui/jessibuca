@@ -6417,6 +6417,64 @@
 	});
 
 	// 播放协议
+	const PLAYER_PLAY_PROTOCOL = {
+	  websocket: 0,
+	  fetch: 1
+	};
+	const DEMUX_TYPE = {
+	  flv: 'flv',
+	  m7s: 'm7s'
+	}; // default player options
+
+	const DEFAULT_PLAYER_OPTIONS = {
+	  videoBuffer: 1000,
+	  //1000ms == 1 second
+	  isResize: true,
+	  isFullResize: false,
+	  //
+	  isFlv: false,
+	  debug: false,
+	  loadingTimeout: 10,
+	  // loading timeout
+	  heartTimeout: 10,
+	  // heart timeout
+	  timeout: 10,
+	  // second
+	  supportDblclickFullscreen: false,
+	  showBandwidth: false,
+	  //
+	  keepScreenOn: false,
+	  isNotMute: false,
+	  hasAudio: true,
+	  hasVideo: true,
+	  operateBtns: {
+	    fullscreen: false,
+	    screenshot: false,
+	    play: false,
+	    audio: false,
+	    record: false
+	  },
+	  hasControl: false,
+	  loadingText: '',
+	  background: '',
+	  decoder: 'decoder.js',
+	  url: '',
+	  //
+	  rotate: 0,
+	  // text: '',
+	  forceNoOffscreen: true,
+	  // 默认是不采用
+	  hiddenAutoPause: false,
+	  protocol: PLAYER_PLAY_PROTOCOL.fetch,
+	  demuxType: DEMUX_TYPE.flv,
+	  //
+	  useWCS: false,
+	  //
+	  useMSE: false,
+	  //
+	  useOffscreen: false //
+
+	};
 	const WORKER_CMD_TYPE = {
 	  init: 'init',
 	  initVideo: 'initVideo',
@@ -6570,7 +6628,12 @@
 	  }
 
 	  var decoder$1 = {
-	    opt: {},
+	    opt: {
+	      debug: DEFAULT_PLAYER_OPTIONS.debug,
+	      forceNoOffscreen: DEFAULT_PLAYER_OPTIONS.forceNoOffscreen,
+	      useWCS: DEFAULT_PLAYER_OPTIONS.useWCS,
+	      videoBuffer: DEFAULT_PLAYER_OPTIONS.videoBuffer
+	    },
 	    useOffscreen: function () {
 	      return !this.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined';
 	    },
@@ -6841,7 +6904,10 @@
 
 	    switch (msg.cmd) {
 	      case WORKER_SEND_TYPE.init:
-	        decoder$1.opt = JSON.parse(msg.opt);
+	        try {
+	          decoder$1.opt = JSON.parse(msg.opt);
+	        } catch (e) {}
+
 	        audioDecoder.sample_rate = msg.sampleRate;
 	        decoder$1.init();
 	        break;
