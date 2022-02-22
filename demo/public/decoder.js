@@ -6635,7 +6635,7 @@
 	      videoBuffer: DEFAULT_PLAYER_OPTIONS.videoBuffer
 	    },
 	    useOffscreen: function () {
-	      return !this.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined';
+	      return !decoder$1.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined';
 	    },
 	    initAudioPlanar: function (channels, samplerate) {
 	      postMessage({
@@ -6784,11 +6784,11 @@
 	      decoder$1.opt.debug && console.log('Jessibuca: [worker] init');
 
 	      const _doDecode = data => {
-	        // this.opt.debug && console.log('Jessibuca: [worker]: _doDecode');
+	        // decoder.opt.debug && console.log('Jessibuca: [worker]: _doDecode');
 	        if (decoder$1.opt.useWCS && decoder$1.useOffscreen() && data.type === MEDIA_TYPE.video && wcsVideoDecoder.decode) {
 	          wcsVideoDecoder.decode(data.payload, data.ts);
 	        } else {
-	          // this.opt.debug && console.log('Jessibuca: [worker]: _doDecode  wasm');
+	          decoder$1.opt.debug && console.log('Jessibuca: [worker]: _doDecode  wasm');
 	          data.decoder.decode(data.payload, data.ts);
 	        }
 	      };
@@ -6821,25 +6821,25 @@
 	            var data = buffer[0];
 
 	            if (this.getDelay(data.ts) === -1) {
-	              // this.opt.debug && console.log('Jessibuca: [worker]: common dumex delay is -1');
+	              decoder$1.opt.debug && console.log('Jessibuca: [worker]: common dumex delay is -1');
 	              buffer.shift();
 
 	              _doDecode(data);
-	            } else if (this.delay > this.opt.videoBuffer + 1000) {
-	              // this.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, set dropping is true`);
+	            } else if (this.delay > decoder$1.opt.videoBuffer + 1000) {
+	              decoder$1.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, set dropping is true`);
 	              this.resetDelay();
 	              this.dropping = true;
 	            } else {
 	              while (buffer.length) {
 	                data = buffer[0];
 
-	                if (this.getDelay(data.ts) > this.opt.videoBuffer) {
+	                if (this.getDelay(data.ts) > decoder$1.opt.videoBuffer) {
 	                  // 丢帧。。。
 	                  buffer.shift();
 
 	                  _doDecode(data);
 	                } else {
-	                  // this.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}`);
+	                  decoder$1.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay},opt.videoBuffer is ${decoder$1.opt.videoBuffer}`);
 	                  break;
 	                }
 	              }
@@ -6851,7 +6851,7 @@
 	      this.stopId = setInterval(loop, 10);
 	    },
 	    close: function () {
-	      this.opt.debug && console.log('Jessibuca: [worker]: close');
+	      decoder$1.opt.debug && console.log('Jessibuca: [worker]: close');
 	      clearInterval(this.stopId);
 	      this.stopId = null;
 	      audioDecoder.clear();
@@ -6905,7 +6905,7 @@
 	    switch (msg.cmd) {
 	      case WORKER_SEND_TYPE.init:
 	        try {
-	          decoder$1.opt = JSON.parse(msg.opt);
+	          decoder$1.opt = Object.assign(decoder$1.opt, JSON.parse(msg.opt));
 	        } catch (e) {}
 
 	        audioDecoder.sample_rate = msg.sampleRate;

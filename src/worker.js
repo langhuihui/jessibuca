@@ -95,7 +95,7 @@ Module.postRun = function () {
             videoBuffer: DEFAULT_PLAYER_OPTIONS.videoBuffer
         },
         useOffscreen: function () {
-            return !this.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined';
+            return !decoder.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined';
         },
         initAudioPlanar: function (channels, samplerate) {
             postMessage({cmd: WORKER_CMD_TYPE.initAudio, sampleRate: samplerate, channels: channels})
@@ -213,11 +213,11 @@ Module.postRun = function () {
         init: function () {
             decoder.opt.debug && console.log('Jessibuca: [worker] init');
             const _doDecode = (data) => {
-                // this.opt.debug && console.log('Jessibuca: [worker]: _doDecode');
+                // decoder.opt.debug && console.log('Jessibuca: [worker]: _doDecode');
                 if (decoder.opt.useWCS && decoder.useOffscreen() && data.type === MEDIA_TYPE.video && wcsVideoDecoder.decode) {
                     wcsVideoDecoder.decode(data.payload, data.ts)
                 } else {
-                    // this.opt.debug && console.log('Jessibuca: [worker]: _doDecode  wasm');
+                    decoder.opt.debug && console.log('Jessibuca: [worker]: _doDecode  wasm');
                     data.decoder.decode(data.payload, data.ts)
                 }
             }
@@ -245,22 +245,22 @@ Module.postRun = function () {
                     } else {
                         var data = buffer[0]
                         if (this.getDelay(data.ts) === -1) {
-                            // this.opt.debug && console.log('Jessibuca: [worker]: common dumex delay is -1');
+                            decoder.opt.debug && console.log('Jessibuca: [worker]: common dumex delay is -1');
                             buffer.shift()
                             _doDecode(data);
-                        } else if (this.delay > this.opt.videoBuffer + 1000) {
-                            // this.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, set dropping is true`);
+                        } else if (this.delay > decoder.opt.videoBuffer + 1000) {
+                            decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, set dropping is true`);
                             this.resetDelay();
                             this.dropping = true
                         } else {
                             while (buffer.length) {
                                 data = buffer[0]
-                                if (this.getDelay(data.ts) > this.opt.videoBuffer) {
+                                if (this.getDelay(data.ts) > decoder.opt.videoBuffer) {
                                     // 丢帧。。。
                                     buffer.shift()
                                     _doDecode(data);
                                 } else {
-                                    // this.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}`);
+                                    decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay},opt.videoBuffer is ${decoder.opt.videoBuffer}`);
                                     break
                                 }
                             }
@@ -271,7 +271,7 @@ Module.postRun = function () {
             this.stopId = setInterval(loop, 10);
         },
         close: function () {
-            this.opt.debug && console.log('Jessibuca: [worker]: close');
+            decoder.opt.debug && console.log('Jessibuca: [worker]: close');
             clearInterval(this.stopId);
             this.stopId = null;
             audioDecoder.clear();
@@ -320,7 +320,7 @@ Module.postRun = function () {
         switch (msg.cmd) {
             case WORKER_SEND_TYPE.init:
                 try {
-                    decoder.opt = JSON.parse(msg.opt)
+                    decoder.opt = Object.assign(decoder.opt, JSON.parse(msg.opt))
                 } catch (e) {
 
                 }

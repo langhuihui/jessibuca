@@ -75,6 +75,7 @@ export default class DecoderWorker {
             debug: this.player._opt.debug,
             forceNoOffscreen: this.player._opt.forceNoOffscreen,
             useWCS: this.player._opt.useWCS,
+            videoBuffer: this.player._opt.videoBuffer
         }
         this.decoderWorker.postMessage({
             cmd: WORKER_SEND_TYPE.init,
