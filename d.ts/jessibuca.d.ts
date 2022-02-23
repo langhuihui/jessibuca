@@ -1,7 +1,7 @@
 declare namespace Jessibuca {
 
     /** 超时信息 */
-    enum Timeout {
+    enum TIMEOUT {
         /** 当play()的时候，如果没有数据返回 */
         loadingTimeout = 'loadingTimeout',
         /** 当播放过程中，如果超过timeout之后没有数据渲染 */
@@ -9,8 +9,8 @@ declare namespace Jessibuca {
     }
 
     /** 错误信息 */
-    enum Error {
-        /** 播放错误，url 为空的时候，调用play方法 */
+    enum ERROR {
+        /** 播放错误，url 为空的时候，调用 play 方法 */
         playError = 'playError',
         /** http 请求失败 */
         fetchError = 'fetchError',
@@ -142,9 +142,6 @@ declare namespace Jessibuca {
 
 
 declare class Jessibuca {
-
-    static readonly ERROR:typeof Jessibuca.Error
-    static readonly TIMEOUT:typeof Jessibuca.Timeout
 
     constructor(config?: Jessibuca.Config);
     /**
@@ -430,7 +427,7 @@ declare class Jessibuca {
         console.log('error:',error)
     })
      */
-    on(event: 'error', callback: (err: Jessibuca.Error) => void): void;
+    on(event: 'error', callback: (err: Jessibuca.ERROR) => void): void;
 
     /**
      * 当前网速， 单位KB 每秒1次,
@@ -451,7 +448,7 @@ declare class Jessibuca {
      * @example
      * jessibuca.on("timeout",function(error){console.log('timeout:',error)})
      */
-    on(event: 'timeout', callback: (error: Jessibuca.Timeout) => void): void;
+    on(event: 'timeout', callback: (error: Jessibuca.TIMEOUT) => void): void;
 
     /**
      * 当play()的时候，如果没有数据返回，则回调
