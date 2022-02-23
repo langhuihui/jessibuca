@@ -27,7 +27,7 @@ declare namespace Jessibuca {
     interface Config {
         /**
          * 播放器容器
-         * *  若为 string ，则底层调用的是 document.getElementById('id'
+         * *  若为 string ，则底层调用的是 document.getElementById('id')
          * */
         container: HTMLElement | string;
         /**
@@ -51,7 +51,7 @@ declare namespace Jessibuca {
          */
         hasAudio?: boolean;
         /**
-         * 设置旋转角度，只支持，0(默认) ，180，270 三个值
+         * 设置旋转角度，只支持，0(默认)，180，270 三个值
          */
         rotate?: boolean;
         /**
@@ -128,13 +128,14 @@ declare namespace Jessibuca {
         /**
          * 是否开启MediaSource硬解码
          * * 视频编码只支持H.264视频（Safari on iOS不支持）
-         * * 不支持 forceNoOffscreen 为 false (开启离屏渲染
+         * * 不支持 forceNoOffscreen 为 false (开启离屏渲染)
          */
         useMSE?: boolean;
         /**
          * 是否开启Webcodecs硬解码
          * *  视频编码只支持H.264视频 (需在chrome 94版本以上，需要https或者localhost环境)
-         * *  支持 forceNoOffscreen 为 false （开启离屏渲染         */
+         * *  支持 forceNoOffscreen 为 false （开启离屏渲染)
+         * */
         useWCS?: boolean;
     }
 }
