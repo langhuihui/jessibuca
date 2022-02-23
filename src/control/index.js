@@ -14,6 +14,19 @@ export default class Control {
         this.player.debug.log('Control', 'init');
     }
 
+    destroy() {
+        if (this.$poster) {
+            this.player.$container.removeChild(this.$poster);
+        }
+        if (this.$loading) {
+            this.player.$container.removeChild(this.$loading);
+        }
+        if (this.$controls) {
+            this.player.$container.removeChild(this.$controls);
+        }
+        this.player.debug.log('control', 'destroy');
+    }
+
     autoSize() {
         const player = this.player;
         player.$container.style.padding = '0 0';
@@ -32,14 +45,5 @@ export default class Control {
         }
     }
 
-    destroy() {
-        if (this.$poster) {
-            this.player.$container.removeChild(this.$poster);
-        }
-        this.player.$container.removeChild(this.$loading);
-        if (this.$controls) {
-            this.player.$container.removeChild(this.$controls);
-        }
-        this.player.debug.log('control', 'destroy');
-    }
+
 }

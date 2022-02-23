@@ -15,6 +15,18 @@ export default class WebsocketLoader extends Emitter {
         });
     }
 
+    destroy() {
+        if (this.socket) {
+            this.socket.close();
+            this.socket = null;
+        }
+        this.socketStatus = WEBSOCKET_STATUS.notConnect;
+        this.streamRate = null;
+        this.wsUrl = null;
+        this.off();
+        this.player.debug.log('websocketLoader', 'destroy');
+    }
+
     _createWebSocket() {
         const player = this.player;
         const {
@@ -70,14 +82,4 @@ export default class WebsocketLoader extends Emitter {
     }
 
 
-    destroy() {
-        if (this.socket) {
-            this.socket.close();
-            this.socket = null;
-        }
-        this.socketStatus = WEBSOCKET_STATUS.notConnect;
-        this.streamRate = null;
-        this.off();
-        this.player.debug.log('websocketLoader', 'destroy');
-    }
 }

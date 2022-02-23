@@ -14,6 +14,18 @@ export default class WebcodecsDecoder extends Emitter {
         player.debug.log('Webcodecs', 'init')
     }
 
+    destroy() {
+        if (this.decoder) {
+            this.decoder.close();
+            this.decoder = null;
+        }
+
+        this.hasInit = false;
+        this.isInitInfo = false;
+        this.off();
+        this.player.debug.log('Webcodecs', 'destroy')
+    }
+
     initDecoder() {
         const _this = this;
         this.decoder = new VideoDecoder({
@@ -86,12 +98,5 @@ export default class WebcodecsDecoder extends Emitter {
         }
     }
 
-    destroy() {
-        this.decoder.close();
-        this.decoder = null;
-        this.hasInit = false;
-        this.isInitInfo = false;
-        this.off();
-        this.player.debug.log('Webcodecs', 'destroy')
-    }
+
 }
