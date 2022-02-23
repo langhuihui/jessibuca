@@ -61,6 +61,35 @@ export default class AudioContextLoader extends Emitter {
         this.player.debug.log('AudioContext', 'init');
     }
 
+
+    destroy() {
+        this.closeAudio();
+        this.audioContext.close();
+        this.audioContext = null;
+        this.gainNode = null;
+        this.init = false;
+        this.hasAudio = false;
+        this.playing = false;
+
+        if (this.scriptNode) {
+            this.scriptNode.onaudioprocess = noop;
+            this.scriptNode = null;
+        }
+        this.audioBufferSourceNode = null;
+        this.mediaStreamAudioDestinationNode = null;
+        this.hasInitScriptNode = false;
+        this.audioSyncVideoOption = {
+            diff: null
+        };
+        this.audioInfo = {
+            encType: '',
+            channels: '',
+            sampleRate: ''
+        }
+        this.off();
+        this.player.debug.log('AudioContext', 'destroy');
+    }
+
     updateAudioInfo(data) {
         if (data.encTypeCode) {
             this.audioInfo.encType = AUDIO_ENC_TYPE[data.encTypeCode];
@@ -118,14 +147,14 @@ export default class AudioContextLoader extends Emitter {
                     // audio > video
                     // wait
                     if (this.audioSyncVideoOption.diff > AUDIO_SYNC_VIDEO_DIFF) {
-                        this.player.debug.warn('AudioContext', `audioSyncVideoOption more than diff :${this.audioSyncVideoOption.diff}`)
+                        this.player.debug.warn('AudioContext', `audioSyncVideoOption more than diff :${this.audioSyncVideoOption.diff}, waiting`)
                         // wait
                         return;
                     }
                         // audio < video
                     // throw away then chase video
                     else if (this.audioSyncVideoOption.diff < -AUDIO_SYNC_VIDEO_DIFF) {
-                        this.player.debug.warn('AudioContext', `audioSyncVideoOption less than diff :${this.audioSyncVideoOption.diff}`)
+                        this.player.debug.warn('AudioContext', `audioSyncVideoOption less than diff :${this.audioSyncVideoOption.diff}, dropping`)
 
                         //
                         let bufferItem = this.bufferList.shift();
@@ -271,25 +300,6 @@ export default class AudioContextLoader extends Emitter {
     }
 
 
-    destroy() {
-        this.closeAudio();
-        this.audioContext.close();
-        this.audioContext = null;
-        this.gainNode = null;
-        this.init = false;
-        this.hasAudio = false;
-        if (this.scriptNode) {
-            this.scriptNode.onaudioprocess = noop;
-            this.scriptNode = null;
-        }
-        this.audioBufferSourceNode = null;
-        this.mediaStreamAudioDestinationNode = null;
-        this.hasInitScriptNode = false;
-        this.audioSyncVideoOption = {
-            diff: null
-        };
-        this.off();
-        this.player.debug.log('AudioContext', 'destroy');
-    }
+
 
 }

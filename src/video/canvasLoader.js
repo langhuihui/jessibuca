@@ -32,6 +32,39 @@ export default class CanvasVideoLoader extends CommonLoader {
         this.player.debug.log('CanvasVideo', 'init');
     }
 
+    destroy() {
+        if (this.contextGl) {
+            this.contextGl = null;
+        }
+
+        if (this.context2D) {
+            this.context2D = null;
+        }
+
+        if (this.contextGlRender) {
+            this.contextGlDestroy && this.contextGlDestroy();
+            this.contextGlDestroy = null;
+            this.contextGlRender = null;
+        }
+        if (this.bitmaprenderer) {
+            this.bitmaprenderer = null;
+        }
+
+        this.renderType = null;
+
+        this.videoInfo = {
+            width: '',
+            height: '',
+            encType: '',
+            encTypeCode: ''
+        }
+
+        this.player.$container.removeChild(this.$videoElement);
+        this.init = false;
+        this.off();
+        this.player.debug.log(`CanvasVideoLoader`, 'destroy');
+    }
+
 
     _initContextGl() {
         this.contextGl = createContextGL(this.$videoElement);
@@ -185,36 +218,5 @@ export default class CanvasVideoLoader extends CommonLoader {
         this.$videoElement.style.top = top + "px"
     }
 
-    destroy() {
-        if (this.contextGl) {
-            this.contextGl = null;
-        }
 
-        if (this.context2D) {
-            this.context2D = null;
-        }
-
-        if (this.contextGlRender) {
-            this.contextGlDestroy && this.contextGlDestroy();
-            this.contextGlDestroy = null;
-            this.contextGlRender = null;
-        }
-        if (this.bitmaprenderer) {
-            this.bitmaprenderer = null;
-        }
-
-        this.renderType = null;
-
-        this.videoInfo = {
-            width: '',
-            height: '',
-            encType: '',
-            encTypeCode: ''
-        }
-
-        this.player.$container.removeChild(this.$videoElement);
-        this.init = false;
-        this.off();
-        this.player.debug.log(`CanvasVideoLoader`, 'destroy');
-    }
 }

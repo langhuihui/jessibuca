@@ -7,6 +7,11 @@ export default class M7sLoader extends CommonLoader {
         player.debug.log('M7sDemux', 'init')
     }
 
+    destroy() {
+        super.destroy();
+        this.player.debug.log('M7sDemux', 'destroy')
+    }
+
     dispatch(data) {
         const player = this.player;
         const {decoderWorker, webcodecsDecoder, mseDecoder} = player;
@@ -42,8 +47,5 @@ export default class M7sLoader extends CommonLoader {
         }
     }
 
-    destroy() {
-        super.destroy();
-        this.player.debug.log('M7sDemux', 'destroy')
-    }
+
 }

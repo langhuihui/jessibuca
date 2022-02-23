@@ -15,6 +15,19 @@ export default class CommonLoader extends Emitter {
         this.initInterval();
     }
 
+    destroy() {
+        if (this.stopId) {
+            clearInterval(this.stopId);
+            this.stopId = null;
+        }
+        this.firstTimestamp = null;
+        this.startTimestamp = null;
+        this.delay = -1;
+        this.bufferList = [];
+        this.dropping = false;
+        this.off();
+    }
+
     getDelay(timestamp) {
         if (!timestamp) {
             return -1
@@ -161,16 +174,5 @@ export default class CommonLoader extends Emitter {
 
     }
 
-    destroy() {
-        if (this.stopId) {
-            clearInterval(this.stopId);
-            this.stopId = null;
-        }
-        this.firstTimestamp = null;
-        this.startTimestamp = null;
-        this.delay = -1;
-        this.bufferList = [];
-        this.dropping = false;
-        this.off();
-    }
+
 }

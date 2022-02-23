@@ -133,6 +133,79 @@ export default class Player extends Emitter {
     }
 
 
+    destroy() {
+        this._loading = false;
+        this._playing = false;
+        this._hasLoaded = false;
+
+        if (this.decoderWorker) {
+            this.decoderWorker.destroy();
+            this.decoderWorker = null;
+        }
+        if (this.video) {
+            this.video.destroy();
+            this.video = null;
+        }
+
+        if (this.audio) {
+            this.audio.destroy();
+            this.audio = null;
+        }
+
+        if (this.stream) {
+            this.stream.destroy();
+            this.stream = null;
+        }
+
+        if (this.recorder) {
+            this.recorder.destroy();
+            this.recorder = null;
+        }
+
+        if (this.control) {
+            this.control.destroy();
+            this.control = null;
+        }
+
+        if (this.webcodecsDecoder) {
+            this.webcodecsDecoder.destroy();
+            this.webcodecsDecoder = null;
+        }
+
+        if (this.mseDecoder) {
+            this.mseDecoder.destroy();
+            this.mseDecoder = null;
+        }
+
+        if (this.demux) {
+            this.demux.destroy();
+            this.demux = null;
+        }
+
+
+        if (this.events) {
+            this.events.destroy();
+            this.events = null;
+        }
+
+        this.clearCheckHeartTimeout();
+        this.clearCheckLoadingTimeout();
+        //
+        this.releaseWakeLock();
+        this.keepScreenOn = null;
+        // reset stats
+        this.resetStats();
+        this._audioTimestamp = 0;
+        this._videoTimestamp = 0;
+
+        // 其他没法解耦的，通过 destroy 方式
+        this.emit('destroy');
+        // 接触所有绑定事件
+        this.off();
+
+        this.debug.log('play', 'destroy end');
+    }
+
     set fullscreen(value) {
         this.emit(EVENTS.fullscreen, value);
     }
@@ -615,80 +688,6 @@ export default class Player extends Emitter {
         if (this._opt.keepScreenOn) {
             this.keepScreenOn.disable();
         }
-    }
-
-    destroy() {
-        this._loading = false;
-        this._playing = false;
-        this._hasLoaded = false;
-
-
-        if (this.decoderWorker) {
-            this.decoderWorker.destroy();
-            this.decoderWorker = null;
-        }
-        if (this.video) {
-            this.video.destroy();
-            this.video = null;
-        }
-
-        if (this.audio) {
-            this.audio.destroy();
-            this.audio = null;
-        }
-
-        if (this.stream) {
-            this.stream.destroy();
-            this.stream = null;
-        }
-
-        if (this.recorder) {
-            this.recorder.destroy();
-            this.recorder = null;
-        }
-
-        if (this.control) {
-            this.control.destroy();
-            this.control = null;
-        }
-
-        if (this.webcodecsDecoder) {
-            this.webcodecsDecoder.destroy();
-            this.webcodecsDecoder = null;
-        }
-
-        if (this.mseDecoder) {
-            this.mseDecoder.destroy();
-            this.mseDecoder = null;
-        }
-
-        if (this.demux) {
-            this.demux.destroy();
-            this.demux = null;
-        }
-
-
-        if (this.events) {
-            this.events.destroy();
-            this.events = null;
-        }
-
-        this.clearCheckHeartTimeout();
-        this.clearCheckLoadingTimeout();
-        //
-        this.releaseWakeLock();
-        this.keepScreenOn = null;
-        // reset stats
-        this.resetStats();
-        this._audioTimestamp = 0;
-        this._videoTimestamp = 0;
-
-        // 其他没法解耦的，通过 destroy 方式
-        this.emit('destroy');
-        // 接触所有绑定事件
-        this.off();
-
-        this.debug.log('play', 'destroy end');
     }
 
 }

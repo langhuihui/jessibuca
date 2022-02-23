@@ -38,6 +38,21 @@ export default class MseDecoder extends Emitter {
         player.debug.log('MediaSource', 'init')
     }
 
+    destroy() {
+        this.stop();
+        this.bufferList = [];
+        this.mediaSource = null;
+        this.mediaSourceOpen = false;
+        this.sourceBuffer = null;
+        this.hasInit = false;
+        this.isInitInfo = false;
+        this.sequenceNumber = 0;
+        this.cacheTrack = null;
+        this.timeInit = false;
+        this.off();
+        this.player.debug.log('MediaSource', 'destroy')
+    }
+
     get state() {
         return this.mediaSource.readyState
     }
@@ -268,18 +283,5 @@ export default class MseDecoder extends Emitter {
         }
     }
 
-    destroy() {
-        this.stop();
-        this.bufferList = [];
-        this.mediaSource = null;
-        this.mediaSourceOpen = false;
-        this.sourceBuffer = null;
-        this.hasInit = false;
-        this.isInitInfo = false;
-        this.sequenceNumber = 0;
-        this.cacheTrack = null;
-        this.timeInit = false;
-        this.off();
-        this.player.debug.log('MediaSource', 'destroy')
-    }
+
 }

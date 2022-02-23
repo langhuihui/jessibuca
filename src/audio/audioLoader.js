@@ -12,6 +12,11 @@ export default class AudioLoader extends Emitter {
 
     }
 
+    destroy() {
+        this.off();
+        this.player.debug.log('Audio', 'destroy');
+    }
+
     get volume() {
         return this.$video.volume;
     }
@@ -35,8 +40,5 @@ export default class AudioLoader extends Emitter {
         this.player.emit(EVENTS.volumechange, this.player.volume);
     }
 
-    destroy() {
-        this.off();
-        this.player.debug.log('Audio', 'destroy');
-    }
+
 }

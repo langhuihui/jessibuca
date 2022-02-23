@@ -9,6 +9,13 @@ export default class FlvLoader extends CommonLoader {
         player.debug.log('FlvDemux', 'init')
     }
 
+    destroy() {
+        super.destroy();
+        this.input = null;
+        this.flvDemux = null;
+        this.player.debug.log('FlvDemux', 'destroy')
+    }
+
     dispatch(data) {
         this.flvDemux(data);
     }
@@ -90,10 +97,5 @@ export default class FlvLoader extends CommonLoader {
         this.input && this.input.return(null)
     }
 
-    destroy() {
-        super.destroy();
-        this.input = null;
-        this.flvDemux = null;
-        this.player.debug.log('FlvDemux', 'destroy')
-    }
+
 }

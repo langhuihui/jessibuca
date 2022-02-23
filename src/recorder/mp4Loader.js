@@ -50,6 +50,11 @@ export default class MP4RecorderLoader extends Emitter {
         player.debug.log('MP4Recorder', 'init');
     }
 
+    destroy() {
+        this._reset();
+        this.player.debug.log('Recorder', 'destroy');
+    }
+
     setFileName(fileName, fileType) {
         this.fileName = fileName;
 
@@ -159,8 +164,5 @@ export default class MP4RecorderLoader extends Emitter {
         this.mdatBytesLength = 0;
     }
 
-    destroy() {
-        this._reset();
-        this.player.debug.log('Recorder', 'destroy');
-    }
+
 }

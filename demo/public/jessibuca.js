@@ -261,7 +261,7 @@
 	  open: 'open',
 	  closed: 'closed'
 	}; // frag duration
-	const AUDIO_SYNC_VIDEO_DIFF = 200;
+	const AUDIO_SYNC_VIDEO_DIFF = 1000;
 
 	class Debug {
 	  constructor(master) {
@@ -1039,6 +1039,38 @@
 	    this.player.debug.log('CanvasVideo', 'init');
 	  }
 
+	  destroy() {
+	    if (this.contextGl) {
+	      this.contextGl = null;
+	    }
+
+	    if (this.context2D) {
+	      this.context2D = null;
+	    }
+
+	    if (this.contextGlRender) {
+	      this.contextGlDestroy && this.contextGlDestroy();
+	      this.contextGlDestroy = null;
+	      this.contextGlRender = null;
+	    }
+
+	    if (this.bitmaprenderer) {
+	      this.bitmaprenderer = null;
+	    }
+
+	    this.renderType = null;
+	    this.videoInfo = {
+	      width: '',
+	      height: '',
+	      encType: '',
+	      encTypeCode: ''
+	    };
+	    this.player.$container.removeChild(this.$videoElement);
+	    this.init = false;
+	    this.off();
+	    this.player.debug.log(`CanvasVideoLoader`, 'destroy');
+	  }
+
 	  _initContextGl() {
 	    this.contextGl = createContextGL(this.$videoElement);
 	    const webgl = createWebGL(this.contextGl);
@@ -1204,38 +1236,6 @@
 	    this.$videoElement.style.top = top + "px";
 	  }
 
-	  destroy() {
-	    if (this.contextGl) {
-	      this.contextGl = null;
-	    }
-
-	    if (this.context2D) {
-	      this.context2D = null;
-	    }
-
-	    if (this.contextGlRender) {
-	      this.contextGlDestroy && this.contextGlDestroy();
-	      this.contextGlDestroy = null;
-	      this.contextGlRender = null;
-	    }
-
-	    if (this.bitmaprenderer) {
-	      this.bitmaprenderer = null;
-	    }
-
-	    this.renderType = null;
-	    this.videoInfo = {
-	      width: '',
-	      height: '',
-	      encType: '',
-	      encTypeCode: ''
-	    };
-	    this.player.$container.removeChild(this.$videoElement);
-	    this.init = false;
-	    this.off();
-	    this.player.debug.log(`CanvasVideoLoader`, 'destroy');
-	  }
-
 	}
 
 	class VideoLoader extends CommonLoader$1 {
@@ -1267,6 +1267,14 @@
 	    proxy(this.$videoElement, 'timeupdate', event => {// this.player.emit(EVENTS.videoTimeUpdate, event.timeStamp);
 	    });
 	    this.player.debug.log('Video', 'init');
+	  }
+
+	  destroy() {
+	    this.player.$container.removeChild(this.$videoElement);
+	    this.$videoElement = null;
+	    this.init = false;
+	    this.off();
+	    this.player.debug.log('Video', 'destroy');
 	  }
 
 	  play() {
@@ -1345,13 +1353,6 @@
 	    this.$videoElement.style.transform = 'rotate(' + rotate + 'deg)';
 	  }
 
-	  destroy() {
-	    this.player.$container.removeChild(this.$videoElement);
-	    this.init = false;
-	    this.off();
-	    this.player.debug.log('Video', 'destroy');
-	  }
-
 	}
 
 	class Video {
@@ -1424,6 +1425,35 @@
 	    this.player.debug.log('AudioContext', 'init');
 	  }
 
+	  destroy() {
+	    this.closeAudio();
+	    this.audioContext.close();
+	    this.audioContext = null;
+	    this.gainNode = null;
+	    this.init = false;
+	    this.hasAudio = false;
+	    this.playing = false;
+
+	    if (this.scriptNode) {
+	      this.scriptNode.onaudioprocess = noop;
+	      this.scriptNode = null;
+	    }
+
+	    this.audioBufferSourceNode = null;
+	    this.mediaStreamAudioDestinationNode = null;
+	    this.hasInitScriptNode = false;
+	    this.audioSyncVideoOption = {
+	      diff: null
+	    };
+	    this.audioInfo = {
+	      encType: '',
+	      channels: '',
+	      sampleRate: ''
+	    };
+	    this.off();
+	    this.player.debug.log('AudioContext', 'destroy');
+	  }
+
 	  updateAudioInfo(data) {
 	    if (data.encTypeCode) {
 	      this.audioInfo.encType = AUDIO_ENC_TYPE[data.encTypeCode];
@@ -1480,13 +1510,13 @@
 	          // audio > video
 	          // wait
 	          if (this.audioSyncVideoOption.diff > AUDIO_SYNC_VIDEO_DIFF) {
-	            this.player.debug.warn('AudioContext', `audioSyncVideoOption more than diff :${this.audioSyncVideoOption.diff}`); // wait
+	            this.player.debug.warn('AudioContext', `audioSyncVideoOption more than diff :${this.audioSyncVideoOption.diff}, waiting`); // wait
 
 	            return;
 	          } // audio < video
 	          // throw away then chase video
 	          else if (this.audioSyncVideoOption.diff < -AUDIO_SYNC_VIDEO_DIFF) {
-	            this.player.debug.warn('AudioContext', `audioSyncVideoOption less than diff :${this.audioSyncVideoOption.diff}`); //
+	            this.player.debug.warn('AudioContext', `audioSyncVideoOption less than diff :${this.audioSyncVideoOption.diff}, dropping`); //
 
 	            let bufferItem = this.bufferList.shift(); //
 
@@ -1633,29 +1663,6 @@
 	    this.playing = true;
 	  }
 
-	  destroy() {
-	    this.closeAudio();
-	    this.audioContext.close();
-	    this.audioContext = null;
-	    this.gainNode = null;
-	    this.init = false;
-	    this.hasAudio = false;
-
-	    if (this.scriptNode) {
-	      this.scriptNode.onaudioprocess = noop;
-	      this.scriptNode = null;
-	    }
-
-	    this.audioBufferSourceNode = null;
-	    this.mediaStreamAudioDestinationNode = null;
-	    this.hasInitScriptNode = false;
-	    this.audioSyncVideoOption = {
-	      diff: null
-	    };
-	    this.off();
-	    this.player.debug.log('AudioContext', 'destroy');
-	  }
-
 	}
 
 	class Audio {
@@ -1681,6 +1688,13 @@
 	      player.emit(EVENTS.kBps, (rate / 1024).toFixed(2));
 	    });
 	    player.debug.log('FetchStream', 'init');
+	  }
+
+	  destroy() {
+	    this.abort();
+	    this.off();
+	    this.streamRate = null;
+	    this.player.debug.log('FetchStream', 'destroy');
 	  }
 
 	  fetchStream(url) {
@@ -1731,13 +1745,6 @@
 	    }
 	  }
 
-	  destroy() {
-	    this.abort();
-	    this.off();
-	    this.streamRate = null;
-	    this.player.debug.log('FetchStream', 'destroy');
-	  }
-
 	}
 
 	class WebsocketLoader extends Emitter {
@@ -1751,6 +1758,19 @@
 	    this.streamRate = calculationRate(rate => {
 	      player.emit(EVENTS.kBps, (rate / 1024).toFixed(2));
 	    });
+	  }
+
+	  destroy() {
+	    if (this.socket) {
+	      this.socket.close();
+	      this.socket = null;
+	    }
+
+	    this.socketStatus = WEBSOCKET_STATUS.notConnect;
+	    this.streamRate = null;
+	    this.wsUrl = null;
+	    this.off();
+	    this.player.debug.log('websocketLoader', 'destroy');
 	  }
 
 	  _createWebSocket() {
@@ -1807,18 +1827,6 @@
 	    this.wsUrl = url;
 
 	    this._createWebSocket();
-	  }
-
-	  destroy() {
-	    if (this.socket) {
-	      this.socket.close();
-	      this.socket = null;
-	    }
-
-	    this.socketStatus = WEBSOCKET_STATUS.notConnect;
-	    this.streamRate = null;
-	    this.off();
-	    this.player.debug.log('websocketLoader', 'destroy');
 	  }
 
 	}
@@ -8020,6 +8028,12 @@
 	    player.debug.log('Recorder', 'init');
 	  }
 
+	  destroy() {
+	    this._reset();
+
+	    this.player.debug.log('Recorder', 'destroy');
+	  }
+
 	  setFileName(fileName, fileType) {
 	    this.fileName = fileName;
 
@@ -8115,12 +8129,6 @@
 	    this.recordingInterval = null;
 	  }
 
-	  destroy() {
-	    this._reset();
-
-	    this.player.debug.log('Recorder', 'destroy');
-	  }
-
 	}
 
 	class Recorder {
@@ -8143,6 +8151,15 @@
 	    this._initDecoderWorker();
 
 	    player.debug.log('decoderWorker', 'init');
+	  }
+
+	  destroy() {
+	    this.decoderWorker.postMessage({
+	      cmd: WORKER_SEND_TYPE.close
+	    });
+	    this.decoderWorker.terminate();
+	    this.decoderWorker = null;
+	    this.player.debug.log(`decoderWorker`, 'destroy');
 	  }
 
 	  _initDecoderWorker() {
@@ -8212,8 +8229,8 @@
 	          break;
 
 	        case WORKER_CMD_TYPE.playAudio:
-	          // debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.playAudio, `msg ts:${msg.ts}`);
-	          // 只有在 playing 的时候。
+	          debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.playAudio, `msg ts:${msg.ts}`); // 只有在 playing 的时候。
+
 	          if (this.player.playing) {
 	            this.player.audio.play(msg.buffer, msg.ts);
 	          }
@@ -8287,15 +8304,6 @@
 	    }, [arrayBuffer.buffer]);
 	  }
 
-	  destroy() {
-	    this.decoderWorker.postMessage({
-	      cmd: WORKER_SEND_TYPE.close
-	    });
-	    this.decoderWorker.terminate();
-	    this.decoderWorker = null;
-	    this.player.debug.log(`decoderWorker`, 'destroy');
-	  }
-
 	}
 
 	class CommonLoader extends Emitter {
@@ -8309,6 +8317,20 @@
 	    this.bufferList = [];
 	    this.dropping = false;
 	    this.initInterval();
+	  }
+
+	  destroy() {
+	    if (this.stopId) {
+	      clearInterval(this.stopId);
+	      this.stopId = null;
+	    }
+
+	    this.firstTimestamp = null;
+	    this.startTimestamp = null;
+	    this.delay = -1;
+	    this.bufferList = [];
+	    this.dropping = false;
+	    this.off();
 	  }
 
 	  getDelay(timestamp) {
@@ -8476,20 +8498,6 @@
 
 	  close() {}
 
-	  destroy() {
-	    if (this.stopId) {
-	      clearInterval(this.stopId);
-	      this.stopId = null;
-	    }
-
-	    this.firstTimestamp = null;
-	    this.startTimestamp = null;
-	    this.delay = -1;
-	    this.bufferList = [];
-	    this.dropping = false;
-	    this.off();
-	  }
-
 	}
 
 	class FlvLoader extends CommonLoader {
@@ -8498,6 +8506,13 @@
 	    this.input = this._inputFlv();
 	    this.flvDemux = this.dispatchFlvData(this.input);
 	    player.debug.log('FlvDemux', 'init');
+	  }
+
+	  destroy() {
+	    super.destroy();
+	    this.input = null;
+	    this.flvDemux = null;
+	    this.player.debug.log('FlvDemux', 'destroy');
 	  }
 
 	  dispatch(data) {
@@ -8592,19 +8607,17 @@
 	    this.input && this.input.return(null);
 	  }
 
-	  destroy() {
-	    super.destroy();
-	    this.input = null;
-	    this.flvDemux = null;
-	    this.player.debug.log('FlvDemux', 'destroy');
-	  }
-
 	}
 
 	class M7sLoader extends CommonLoader {
 	  constructor(player) {
 	    super(player);
 	    player.debug.log('M7sDemux', 'init');
+	  }
+
+	  destroy() {
+	    super.destroy();
+	    this.player.debug.log('M7sDemux', 'destroy');
 	  }
 
 	  dispatch(data) {
@@ -8647,11 +8660,6 @@
 	    }
 	  }
 
-	  destroy() {
-	    super.destroy();
-	    this.player.debug.log('M7sDemux', 'destroy');
-	  }
-
 	}
 
 	class Demux {
@@ -8679,6 +8687,18 @@
 	    this.decoder = null;
 	    this.initDecoder();
 	    player.debug.log('Webcodecs', 'init');
+	  }
+
+	  destroy() {
+	    if (this.decoder) {
+	      this.decoder.close();
+	      this.decoder = null;
+	    }
+
+	    this.hasInit = false;
+	    this.isInitInfo = false;
+	    this.off();
+	    this.player.debug.log('Webcodecs', 'destroy');
 	  }
 
 	  initDecoder() {
@@ -8755,15 +8775,6 @@
 	      });
 	      this.decoder.decode(chunk);
 	    }
-	  }
-
-	  destroy() {
-	    this.decoder.close();
-	    this.decoder = null;
-	    this.hasInit = false;
-	    this.isInitInfo = false;
-	    this.off();
-	    this.player.debug.log('Webcodecs', 'destroy');
 	  }
 
 	}
@@ -9153,6 +9164,22 @@
 	    this.player.debug.log('Control', 'init');
 	  }
 
+	  destroy() {
+	    if (this.$poster) {
+	      this.player.$container.removeChild(this.$poster);
+	    }
+
+	    if (this.$loading) {
+	      this.player.$container.removeChild(this.$loading);
+	    }
+
+	    if (this.$controls) {
+	      this.player.$container.removeChild(this.$controls);
+	    }
+
+	    this.player.debug.log('control', 'destroy');
+	  }
+
 	  autoSize() {
 	    const player = this.player;
 	    player.$container.style.padding = '0 0';
@@ -9170,20 +9197,6 @@
 	      const padding = (playerHeight - playerWidth / canvasRatio) / 2;
 	      player.$container.style.padding = `${padding}px 0`;
 	    }
-	  }
-
-	  destroy() {
-	    if (this.$poster) {
-	      this.player.$container.removeChild(this.$poster);
-	    }
-
-	    this.player.$container.removeChild(this.$loading);
-
-	    if (this.$controls) {
-	      this.player.$container.removeChild(this.$controls);
-	    }
-
-	    this.player.debug.log('control', 'destroy');
 	  }
 
 	}
@@ -10311,6 +10324,21 @@
 	    player.debug.log('MediaSource', 'init');
 	  }
 
+	  destroy() {
+	    this.stop();
+	    this.bufferList = [];
+	    this.mediaSource = null;
+	    this.mediaSourceOpen = false;
+	    this.sourceBuffer = null;
+	    this.hasInit = false;
+	    this.isInitInfo = false;
+	    this.sequenceNumber = 0;
+	    this.cacheTrack = null;
+	    this.timeInit = false;
+	    this.off();
+	    this.player.debug.log('MediaSource', 'destroy');
+	  }
+
 	  get state() {
 	    return this.mediaSource.readyState;
 	  }
@@ -10547,21 +10575,6 @@
 	    }
 	  }
 
-	  destroy() {
-	    this.stop();
-	    this.bufferList = [];
-	    this.mediaSource = null;
-	    this.mediaSourceOpen = false;
-	    this.sourceBuffer = null;
-	    this.hasInit = false;
-	    this.isInitInfo = false;
-	    this.sequenceNumber = 0;
-	    this.cacheTrack = null;
-	    this.timeInit = false;
-	    this.off();
-	    this.player.debug.log('MediaSource', 'destroy');
-	  }
-
 	}
 
 	// tks: https://github.com/richtr/NoSleep.js
@@ -10794,6 +10807,77 @@
 	    }
 
 	    this.debug.log('Player options', this._opt);
+	  }
+
+	  destroy() {
+	    this._loading = false;
+	    this._playing = false;
+	    this._hasLoaded = false;
+
+	    if (this.decoderWorker) {
+	      this.decoderWorker.destroy();
+	      this.decoderWorker = null;
+	    }
+
+	    if (this.video) {
+	      this.video.destroy();
+	      this.video = null;
+	    }
+
+	    if (this.audio) {
+	      this.audio.destroy();
+	      this.audio = null;
+	    }
+
+	    if (this.stream) {
+	      this.stream.destroy();
+	      this.stream = null;
+	    }
+
+	    if (this.recorder) {
+	      this.recorder.destroy();
+	      this.recorder = null;
+	    }
+
+	    if (this.control) {
+	      this.control.destroy();
+	      this.control = null;
+	    }
+
+	    if (this.webcodecsDecoder) {
+	      this.webcodecsDecoder.destroy();
+	      this.webcodecsDecoder = null;
+	    }
+
+	    if (this.mseDecoder) {
+	      this.mseDecoder.destroy();
+	      this.mseDecoder = null;
+	    }
+
+	    if (this.demux) {
+	      this.demux.destroy();
+	      this.demux = null;
+	    }
+
+	    if (this.events) {
+	      this.events.destroy();
+	      this.events = null;
+	    }
+
+	    this.clearCheckHeartTimeout();
+	    this.clearCheckLoadingTimeout(); //
+
+	    this.releaseWakeLock();
+	    this.keepScreenOn = null; // reset stats
+
+	    this.resetStats();
+	    this._audioTimestamp = 0;
+	    this._videoTimestamp = 0; // 其他没法解耦的，通过 destroy 方式
+
+	    this.emit('destroy'); // 接触所有绑定事件
+
+	    this.off();
+	    this.debug.log('play', 'destroy end');
 	  }
 
 	  set fullscreen(value) {
@@ -11279,77 +11363,6 @@
 	    if (this._opt.keepScreenOn) {
 	      this.keepScreenOn.disable();
 	    }
-	  }
-
-	  destroy() {
-	    this._loading = false;
-	    this._playing = false;
-	    this._hasLoaded = false;
-
-	    if (this.decoderWorker) {
-	      this.decoderWorker.destroy();
-	      this.decoderWorker = null;
-	    }
-
-	    if (this.video) {
-	      this.video.destroy();
-	      this.video = null;
-	    }
-
-	    if (this.audio) {
-	      this.audio.destroy();
-	      this.audio = null;
-	    }
-
-	    if (this.stream) {
-	      this.stream.destroy();
-	      this.stream = null;
-	    }
-
-	    if (this.recorder) {
-	      this.recorder.destroy();
-	      this.recorder = null;
-	    }
-
-	    if (this.control) {
-	      this.control.destroy();
-	      this.control = null;
-	    }
-
-	    if (this.webcodecsDecoder) {
-	      this.webcodecsDecoder.destroy();
-	      this.webcodecsDecoder = null;
-	    }
-
-	    if (this.mseDecoder) {
-	      this.mseDecoder.destroy();
-	      this.mseDecoder = null;
-	    }
-
-	    if (this.demux) {
-	      this.demux.destroy();
-	      this.demux = null;
-	    }
-
-	    if (this.events) {
-	      this.events.destroy();
-	      this.events = null;
-	    }
-
-	    this.clearCheckHeartTimeout();
-	    this.clearCheckLoadingTimeout(); //
-
-	    this.releaseWakeLock();
-	    this.keepScreenOn = null; // reset stats
-
-	    this.resetStats();
-	    this._audioTimestamp = 0;
-	    this._videoTimestamp = 0; // 其他没法解耦的，通过 destroy 方式
-
-	    this.emit('destroy'); // 接触所有绑定事件
-
-	    this.off();
-	    this.debug.log('play', 'destroy end');
 	  }
 
 	}

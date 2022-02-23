@@ -16,6 +16,13 @@ export default class FetchLoader extends Emitter {
         player.debug.log('FetchStream', 'init');
     }
 
+    destroy() {
+        this.abort()
+        this.off();
+        this.streamRate = null;
+        this.player.debug.log('FetchStream', 'destroy');
+    }
+
     fetchStream(url) {
         const {demux} = this.player;
         fetch(url, {signal: this.abortController.signal}).then((res) => {
@@ -55,10 +62,5 @@ export default class FetchLoader extends Emitter {
     }
 
 
-    destroy() {
-        this.abort()
-        this.off();
-        this.streamRate = null;
-        this.player.debug.log('FetchStream', 'destroy');
-    }
+
 }

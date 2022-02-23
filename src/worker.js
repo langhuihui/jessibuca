@@ -16,6 +16,7 @@ Module.printErr = function (text) {
 
 Module.postRun = function () {
     var buffer = []
+    var tempAudioBuffer = [];
     var wcsVideoDecoder = {};
     if ("VideoEncoder" in self) {
         wcsVideoDecoder = {
@@ -99,7 +100,6 @@ Module.postRun = function () {
         },
         initAudioPlanar: function (channels, samplerate) {
             postMessage({cmd: WORKER_CMD_TYPE.initAudio, sampleRate: samplerate, channels: channels})
-            var buffer = []
             var outputArray = [];
             var remain = 0
             this.playAudioPlanar = function (data, len, ts) {
@@ -113,9 +113,9 @@ Module.postRun = function () {
                 if (remain) {
                     len = 1024 - remain
                     if (frameCount >= len) {
-                        outputArray[0] = Float32Array.of(...buffer[0], ...origin[0].subarray(0, len))
+                        outputArray[0] = Float32Array.of(...tempAudioBuffer[0], ...origin[0].subarray(0, len))
                         if (channels == 2) {
-                            outputArray[1] = Float32Array.of(...buffer[1], ...origin[1].subarray(0, len))
+                            outputArray[1] = Float32Array.of(...tempAudioBuffer[1], ...origin[1].subarray(0, len))
                         }
                         postMessage({
                             cmd: WORKER_CMD_TYPE.playAudio,
@@ -126,9 +126,9 @@ Module.postRun = function () {
                         frameCount -= len
                     } else {
                         remain += frameCount
-                        buffer[0] = Float32Array.of(...buffer[0], ...origin[0])
+                        tempAudioBuffer[0] = Float32Array.of(...tempAudioBuffer[0], ...origin[0])
                         if (channels == 2) {
-                            buffer[1] = Float32Array.of(...buffer[1], ...origin[1])
+                            tempAudioBuffer[1] = Float32Array.of(...tempAudioBuffer[1], ...origin[1])
                         }
                         return
                     }
@@ -145,9 +145,9 @@ Module.postRun = function () {
                     }, outputArray.map(x => x.buffer))
                 }
                 if (remain) {
-                    buffer[0] = origin[0].slice(start)
+                    tempAudioBuffer[0] = origin[0].slice(start)
                     if (channels == 2) {
-                        buffer[1] = origin[1].slice(start)
+                        tempAudioBuffer[1] = origin[1].slice(start)
                     }
                 }
             }
@@ -217,7 +217,7 @@ Module.postRun = function () {
                 if (decoder.opt.useWCS && decoder.useOffscreen() && data.type === MEDIA_TYPE.video && wcsVideoDecoder.decode) {
                     wcsVideoDecoder.decode(data.payload, data.ts)
                 } else {
-                    decoder.opt.debug && console.log('Jessibuca: [worker]: _doDecode  wasm');
+                    // decoder.opt.debug && console.log('Jessibuca: [worker]: _doDecode  wasm');
                     data.decoder.decode(data.payload, data.ts)
                 }
             }
@@ -249,7 +249,7 @@ Module.postRun = function () {
                             buffer.shift()
                             _doDecode(data);
                         } else if (this.delay > decoder.opt.videoBuffer + 1000) {
-                            decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, set dropping is true`);
+                            // decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, set dropping is true`);
                             this.resetDelay();
                             this.dropping = true
                         } else {
@@ -260,7 +260,7 @@ Module.postRun = function () {
                                     buffer.shift()
                                     _doDecode(data);
                                 } else {
-                                    decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay},opt.videoBuffer is ${decoder.opt.videoBuffer}`);
+                                    // decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay},opt.videoBuffer is ${decoder.opt.videoBuffer}`);
                                     break
                                 }
                             }
@@ -289,6 +289,7 @@ Module.postRun = function () {
                 this.offscreenCanvasCtx = null;
             }
             buffer = [];
+            tempAudioBuffer = [];
             delete this.playAudioPlanar;
             delete this.draw;
         },

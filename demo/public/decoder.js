@@ -6554,6 +6554,7 @@
 
 	decoder.postRun = function () {
 	  var buffer = [];
+	  var tempAudioBuffer = [];
 	  var wcsVideoDecoder = {};
 
 	  if ("VideoEncoder" in self) {
@@ -6643,7 +6644,6 @@
 	        sampleRate: samplerate,
 	        channels: channels
 	      });
-	      var buffer = [];
 	      var outputArray = [];
 	      var remain = 0;
 
@@ -6661,10 +6661,10 @@
 	          len = 1024 - remain;
 
 	          if (frameCount >= len) {
-	            outputArray[0] = Float32Array.of(...buffer[0], ...origin[0].subarray(0, len));
+	            outputArray[0] = Float32Array.of(...tempAudioBuffer[0], ...origin[0].subarray(0, len));
 
 	            if (channels == 2) {
-	              outputArray[1] = Float32Array.of(...buffer[1], ...origin[1].subarray(0, len));
+	              outputArray[1] = Float32Array.of(...tempAudioBuffer[1], ...origin[1].subarray(0, len));
 	            }
 
 	            postMessage({
@@ -6676,10 +6676,10 @@
 	            frameCount -= len;
 	          } else {
 	            remain += frameCount;
-	            buffer[0] = Float32Array.of(...buffer[0], ...origin[0]);
+	            tempAudioBuffer[0] = Float32Array.of(...tempAudioBuffer[0], ...origin[0]);
 
 	            if (channels == 2) {
-	              buffer[1] = Float32Array.of(...buffer[1], ...origin[1]);
+	              tempAudioBuffer[1] = Float32Array.of(...tempAudioBuffer[1], ...origin[1]);
 	            }
 
 	            return;
@@ -6701,10 +6701,10 @@
 	        }
 
 	        if (remain) {
-	          buffer[0] = origin[0].slice(start);
+	          tempAudioBuffer[0] = origin[0].slice(start);
 
 	          if (channels == 2) {
-	            buffer[1] = origin[1].slice(start);
+	            tempAudioBuffer[1] = origin[1].slice(start);
 	          }
 	        }
 	      };
@@ -6788,7 +6788,7 @@
 	        if (decoder$1.opt.useWCS && decoder$1.useOffscreen() && data.type === MEDIA_TYPE.video && wcsVideoDecoder.decode) {
 	          wcsVideoDecoder.decode(data.payload, data.ts);
 	        } else {
-	          decoder$1.opt.debug && console.log('Jessibuca: [worker]: _doDecode  wasm');
+	          // decoder.opt.debug && console.log('Jessibuca: [worker]: _doDecode  wasm');
 	          data.decoder.decode(data.payload, data.ts);
 	        }
 	      };
@@ -6826,7 +6826,7 @@
 
 	              _doDecode(data);
 	            } else if (this.delay > decoder$1.opt.videoBuffer + 1000) {
-	              decoder$1.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, set dropping is true`);
+	              // decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, set dropping is true`);
 	              this.resetDelay();
 	              this.dropping = true;
 	            } else {
@@ -6839,7 +6839,7 @@
 
 	                  _doDecode(data);
 	                } else {
-	                  decoder$1.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay},opt.videoBuffer is ${decoder$1.opt.videoBuffer}`);
+	                  // decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay},opt.videoBuffer is ${decoder.opt.videoBuffer}`);
 	                  break;
 	                }
 	              }
@@ -6870,6 +6870,7 @@
 	      }
 
 	      buffer = [];
+	      tempAudioBuffer = [];
 	      delete this.playAudioPlanar;
 	      delete this.draw;
 	    },

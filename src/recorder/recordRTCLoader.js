@@ -15,6 +15,11 @@ export default class RecordRTCLoader extends Emitter {
         player.debug.log('Recorder', 'init');
     }
 
+    destroy() {
+        this._reset();
+        this.player.debug.log('Recorder', 'destroy');
+    }
+
     setFileName(fileName, fileType) {
         this.fileName = fileName;
 
@@ -99,8 +104,5 @@ export default class RecordRTCLoader extends Emitter {
         this.recordingInterval = null;
     }
 
-    destroy() {
-        this._reset();
-        this.player.debug.log('Recorder', 'destroy');
-    }
+
 }

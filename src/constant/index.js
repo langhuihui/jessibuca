@@ -253,4 +253,4 @@ export const MEDIA_SOURCE_STATE = {
 export const FRAG_DURATION = Math.ceil(1000 / 25)
 
 
-export const AUDIO_SYNC_VIDEO_DIFF = 200;
+export const AUDIO_SYNC_VIDEO_DIFF = 1000;

@@ -8,6 +8,13 @@ export default class DecoderWorker {
         player.debug.log('decoderWorker', 'init')
     }
 
+    destroy() {
+        this.decoderWorker.postMessage({cmd: WORKER_SEND_TYPE.close})
+        this.decoderWorker.terminate();
+        this.decoderWorker = null;
+        this.player.debug.log(`decoderWorker`, 'destroy');
+    }
+
     _initDecoderWorker() {
         const {
             debug,
@@ -58,7 +65,7 @@ export default class DecoderWorker {
                     this.player.updateStats({fps: true, ts: msg.ts, buf: msg.delay})
                     break;
                 case WORKER_CMD_TYPE.playAudio:
-                    // debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.playAudio, `msg ts:${msg.ts}`);
+                    debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.playAudio, `msg ts:${msg.ts}`);
                     // 只有在 playing 的时候。
                     if (this.player.playing) {
                         this.player.audio.play(msg.buffer, msg.ts);
@@ -132,10 +139,5 @@ export default class DecoderWorker {
         }, [arrayBuffer.buffer])
     }
 
-    destroy() {
-        this.decoderWorker.postMessage({cmd: WORKER_SEND_TYPE.close})
-        this.decoderWorker.terminate();
-        this.decoderWorker = null;
-        this.player.debug.log(`decoderWorker`, 'destroy');
-    }
+
 }
