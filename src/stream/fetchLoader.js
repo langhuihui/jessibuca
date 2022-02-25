@@ -1,6 +1,6 @@
 import Emitter from "../utils/emitter";
 import {EVENTS, EVENTS_ERROR, JESSIBUCA_EVENTS} from "../constant";
-import {calculationRate} from "../utils";
+import {calculationRate, now} from "../utils";
 
 export default class FetchLoader extends Emitter {
     constructor(player) {
@@ -25,6 +25,7 @@ export default class FetchLoader extends Emitter {
 
     fetchStream(url) {
         const {demux} = this.player;
+        this.player._times.streamStart = now();
         fetch(url, {signal: this.abortController.signal}).then((res) => {
             const reader = res.body.getReader();
             this.emit(EVENTS.streamSuccess);
@@ -60,7 +61,6 @@ export default class FetchLoader extends Emitter {
             this.abortController = null
         }
     }
-
 
 
 }

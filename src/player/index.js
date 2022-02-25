@@ -3,7 +3,17 @@ import Debug from "../utils/debug";
 import Events from "../utils/events";
 import property from './property';
 import events from './events';
-import {fpsStatus, isEmpty, isFullScreen, isNotEmpty, now, supportMSE, supportOffscreenV2, supportWCS} from "../utils";
+import {
+    fpsStatus,
+    initPlayTimes,
+    isEmpty,
+    isFullScreen,
+    isNotEmpty,
+    now,
+    supportMSE,
+    supportOffscreenV2,
+    supportWCS
+} from "../utils";
 import Video from "../video";
 import Audio from "../audio";
 import Stream from "../stream";
@@ -82,6 +92,9 @@ export default class Player extends Emitter {
             ts: 0 // 当前视频帧pts，单位毫秒
         }
 
+        // 各个步骤的时间统计
+        this._times = initPlayTimes();
+
         //
         this._videoTimestamp = 0;
         this._audioTimestamp = 0;
@@ -137,6 +150,8 @@ export default class Player extends Emitter {
         this._loading = false;
         this._playing = false;
         this._hasLoaded = false;
+
+        this._times = initPlayTimes();
 
         if (this.decoderWorker) {
             this.decoderWorker.destroy();
@@ -382,6 +397,7 @@ export default class Player extends Emitter {
 
             this.loading = true;
             this.playing = false;
+            this._times.playInitStart = now();
             if (!url) {
                 url = this._opt.url;
             }
@@ -390,6 +406,7 @@ export default class Player extends Emitter {
             this.clearCheckHeartTimeout();
 
             this.init().then(() => {
+                this._times.playStart = now();
                 //
                 if (this._opt.isNotMute) {
                     this.mute(false);
@@ -410,7 +427,6 @@ export default class Player extends Emitter {
                     })
                 }
 
-
                 this.enableWakeLock();
 
                 this.stream.fetchStream(url);
@@ -430,6 +446,7 @@ export default class Player extends Emitter {
                 // success
                 this.stream.once(EVENTS.streamSuccess, () => {
                     resolve();
+                    this._times.streamResponse = now();
                     //
                     if (this._opt.useMSE) {
                         this.video.play();
@@ -498,6 +515,8 @@ export default class Player extends Emitter {
             //
             this._audioTimestamp = 0;
             this._videoTimestamp = 0;
+            //
+            this._times = initPlayTimes();
             //
             setTimeout(() => {
                 resolve()
@@ -690,4 +709,15 @@ export default class Player extends Emitter {
         }
     }
 
+    handlePlayToRenderTimes() {
+        const _times = this._times;
+        _times.playTimestamp = _times.playStart - _times.playInitStart;
+        _times.streamTimestamp = _times.streamStart - _times.playStart;
+        _times.streamResponseTimestamp = _times.streamResponse - _times.streamStart;
+        _times.demuxTimestamp = _times.demuxStart - _times.streamResponse;
+        _times.decodeTimestamp = _times.decodeStart - _times.demuxStart;
+        _times.videoTimestamp = _times.videoStart - _times.decodeStart;
+        _times.allTimestamp = _times.videoStart - _times.playInitStart;
+        this.emit(EVENTS.playToRenderTimes, _times);
+    }
 }

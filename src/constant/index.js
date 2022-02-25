@@ -129,6 +129,7 @@ export const EVENTS = {
     videoWaiting: 'videoWaiting',
     videoTimeUpdate: 'videoTimeUpdate',
     videoSyncAudio: 'videoSyncAudio',
+    playToRenderTimes: 'playToRenderTimes'
 }
 
 
@@ -152,7 +153,8 @@ export const JESSIBUCA_EVENTS = {
     performance: EVENTS.performance,
     recordingTimestamp: EVENTS.recordingTimestamp,
     recordStart: EVENTS.recordStart,
-    recordEnd: EVENTS.recordEnd
+    recordEnd: EVENTS.recordEnd,
+    playToRenderTimes: EVENTS.playToRenderTimes
 }
 
 export const EVENTS_ERROR = {

@@ -1,4 +1,4 @@
-import {formatVideoDecoderConfigure, noop} from "../utils";
+import {formatVideoDecoderConfigure, noop, now} from "../utils";
 import Emitter from "../utils/emitter";
 import {ENCODED_VIDEO_TYPE, EVENTS, EVENTS_ERROR, VIDEO_ENC_CODE} from "../constant";
 
@@ -48,6 +48,11 @@ export default class WebcodecsDecoder extends Emitter {
             this.isInitInfo = true;
         }
 
+        if (!this.player._times.videoStart) {
+            this.player._times.videoStart = now();
+            this.player.handlePlayToRenderTimes();
+        }
+
         this.player.handleRender();
         this.player.video.render({
             videoFrame
@@ -82,6 +87,9 @@ export default class WebcodecsDecoder extends Emitter {
                 if (videoCodec === VIDEO_ENC_CODE.h265) {
                     this.emit(EVENTS_ERROR.webcodecsH265NotSupport)
                     return;
+                }
+                if (!this.player._times.decodeStart) {
+                    this.player._times.decodeStart = now();
                 }
 
                 const config = formatVideoDecoderConfigure(payload.slice(5));

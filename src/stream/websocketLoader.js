@@ -1,6 +1,6 @@
 import Emitter from "../utils/emitter";
 import {EVENTS, EVENTS_ERROR, WEBSOCKET_STATUS} from "../constant";
-import {calculationRate} from "../utils";
+import {calculationRate, now} from "../utils";
 
 export default class WebsocketLoader extends Emitter {
     constructor(player) {
@@ -77,6 +77,7 @@ export default class WebsocketLoader extends Emitter {
 
 
     fetchStream(url) {
+        this.player._times.streamStart = now();
         this.wsUrl = url;
         this._createWebSocket();
     }

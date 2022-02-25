@@ -167,7 +167,8 @@
 	  mseSourceBufferBusy: 'mseSourceBufferBusy',
 	  videoWaiting: 'videoWaiting',
 	  videoTimeUpdate: 'videoTimeUpdate',
-	  videoSyncAudio: 'videoSyncAudio'
+	  videoSyncAudio: 'videoSyncAudio',
+	  playToRenderTimes: 'playToRenderTimes'
 	};
 	const JESSIBUCA_EVENTS = {
 	  load: EVENTS.load,
@@ -189,7 +190,8 @@
 	  performance: EVENTS.performance,
 	  recordingTimestamp: EVENTS.recordingTimestamp,
 	  recordStart: EVENTS.recordStart,
-	  recordEnd: EVENTS.recordEnd
+	  recordEnd: EVENTS.recordEnd,
+	  playToRenderTimes: EVENTS.playToRenderTimes
 	};
 	const EVENTS_ERROR = {
 	  playError: 'playIsNotPauseOrUrlIsNull',
@@ -722,6 +724,38 @@
 	}
 	function isNotEmpty(value) {
 	  return !isEmpty(value);
+	}
+	function initPlayTimes() {
+	  return {
+	    playInitStart: '',
+	    //1
+	    playStart: '',
+	    // 2
+	    streamStart: '',
+	    //3
+	    streamResponse: '',
+	    // 4
+	    demuxStart: '',
+	    // 5
+	    decodeStart: '',
+	    // 6
+	    videoStart: '',
+	    // 7
+	    playTimestamp: '',
+	    // playStart- playInitStart
+	    streamTimestamp: '',
+	    // streamStart - playStart
+	    streamResponseTimestamp: '',
+	    // streamResponse - streamStart
+	    demuxTimestamp: '',
+	    // demuxStart - streamResponse
+	    decodeTimestamp: '',
+	    // decodeStart - demuxStart
+	    videoTimestamp: '',
+	    // videoStart - decodeStart
+	    allTimestamp: '' // videoStart - playInitStart
+
+	  };
 	}
 
 	var events$1 = (player => {
@@ -1701,6 +1735,7 @@
 	    const {
 	      demux
 	    } = this.player;
+	    this.player._times.streamStart = now();
 	    fetch(url, {
 	      signal: this.abortController.signal
 	    }).then(res => {
@@ -1824,6 +1859,7 @@
 	  }
 
 	  fetchStream(url) {
+	    this.player._times.streamStart = now();
 	    this.wsUrl = url;
 
 	    this._createWebSocket();
@@ -8189,6 +8225,11 @@
 
 	        case WORKER_CMD_TYPE.videoCode:
 	          debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.videoCode, msg.code);
+
+	          if (!this.player._times.decodeStart) {
+	            this.player._times.decodeStart = now();
+	          }
+
 	          this.player.video.updateVideoInfo({
 	            encTypeCode: msg.code
 	          });
@@ -8226,6 +8267,12 @@
 	            ts: msg.ts,
 	            buf: msg.delay
 	          });
+
+	          if (!this.player._times.videoStart) {
+	            this.player._times.videoStart = now();
+	            this.player.handlePlayToRenderTimes();
+	          }
+
 	          break;
 
 	        case WORKER_CMD_TYPE.playAudio:
@@ -8561,6 +8608,10 @@
 	          break;
 
 	        case FLV_MEDIA_TYPE.video:
+	          if (!player._times.demuxStart) {
+	            player._times.demuxStart = now();
+	          }
+
 	          if (player._opt.hasVideo) {
 	            player.updateStats({
 	              vbps: payload.byteLength
@@ -8643,6 +8694,10 @@
 
 	      case MEDIA_TYPE.video:
 	        if (player._opt.hasVideo) {
+	          if (!player._times.demuxStart) {
+	            player._times.demuxStart = now();
+	          }
+
 	          if (dv.byteLength > 5) {
 	            const payload = new Uint8Array(data, 5);
 	            const isIframe = dv.getUint8(5) >> 4 === 1;
@@ -8726,6 +8781,11 @@
 	      this.isInitInfo = true;
 	    }
 
+	    if (!this.player._times.videoStart) {
+	      this.player._times.videoStart = now();
+	      this.player.handlePlayToRenderTimes();
+	    }
+
 	    this.player.handleRender();
 	    this.player.video.render({
 	      videoFrame
@@ -8761,6 +8821,10 @@
 	        if (videoCodec === VIDEO_ENC_CODE.h265) {
 	          this.emit(EVENTS_ERROR.webcodecsH265NotSupport);
 	          return;
+	        }
+
+	        if (!this.player._times.decodeStart) {
+	          this.player._times.decodeStart = now();
 	        }
 
 	        const config = formatVideoDecoderConfigure(payload.slice(5));
@@ -10378,6 +10442,10 @@
 	          return;
 	        }
 
+	        if (!player._times.decodeStart) {
+	          player._times.decodeStart = now();
+	        }
+
 	        this._decodeConfigurationRecord(payload, ts, isIframe, videoCodec);
 
 	        this.hasInit = true;
@@ -10466,6 +10534,11 @@
 	        ts: ts,
 	        buf: player.demux.delay
 	      });
+
+	      if (!player._times.videoStart) {
+	        player._times.videoStart = now();
+	        player.handlePlayToRenderTimes();
+	      }
 	    } else {
 	      player.debug.log('MediaSource', 'timeInit set false , cacheTrack = {}');
 	      this.timeInit = false;
@@ -10767,7 +10840,9 @@
 	      // 当前视频码率，单位bit
 	      ts: 0 // 当前视频帧pts，单位毫秒
 
-	    }; //
+	    }; // 各个步骤的时间统计
+
+	    this._times = initPlayTimes(); //
 
 	    this._videoTimestamp = 0;
 	    this._audioTimestamp = 0;
@@ -10813,6 +10888,7 @@
 	    this._loading = false;
 	    this._playing = false;
 	    this._hasLoaded = false;
+	    this._times = initPlayTimes();
 
 	    if (this.decoderWorker) {
 	      this.decoderWorker.destroy();
@@ -11055,6 +11131,7 @@
 
 	      this.loading = true;
 	      this.playing = false;
+	      this._times.playInitStart = now();
 
 	      if (!url) {
 	        url = this._opt.url;
@@ -11063,7 +11140,8 @@
 	      this._opt.url = url;
 	      this.clearCheckHeartTimeout();
 	      this.init().then(() => {
-	        //
+	        this._times.playStart = now(); //
+
 	        if (this._opt.isNotMute) {
 	          this.mute(false);
 	        }
@@ -11096,7 +11174,8 @@
 	        }); // success
 
 	        this.stream.once(EVENTS.streamSuccess, () => {
-	          resolve(); //
+	          resolve();
+	          this._times.streamResponse = now(); //
 
 	          if (this._opt.useMSE) {
 	            this.video.play();
@@ -11164,6 +11243,8 @@
 
 	      this._audioTimestamp = 0;
 	      this._videoTimestamp = 0; //
+
+	      this._times = initPlayTimes(); //
 
 	      setTimeout(() => {
 	        resolve();
@@ -11365,6 +11446,18 @@
 	    }
 	  }
 
+	  handlePlayToRenderTimes() {
+	    const _times = this._times;
+	    _times.playTimestamp = _times.playStart - _times.playInitStart;
+	    _times.streamTimestamp = _times.streamStart - _times.playStart;
+	    _times.streamResponseTimestamp = _times.streamResponse - _times.streamStart;
+	    _times.demuxTimestamp = _times.demuxStart - _times.streamResponse;
+	    _times.decodeTimestamp = _times.decodeStart - _times.demuxStart;
+	    _times.videoTimestamp = _times.videoStart - _times.decodeStart;
+	    _times.allTimestamp = _times.videoStart - _times.playInitStart;
+	    this.emit(EVENTS.playToRenderTimes, _times);
+	  }
+
 	}
 
 	class Jessibuca extends Emitter {
@@ -11406,6 +11499,16 @@
 	    this.player = new Player($container, _opt);
 
 	    this._bindEvents();
+	  }
+	  /**
+	   *
+	   */
+
+
+	  destroy() {
+	    this.player.destroy();
+	    this.player = null;
+	    this.off();
 	  }
 
 	  _bindEvents() {
@@ -11777,16 +11880,6 @@
 
 	  isRecording() {
 	    return this.player.recorder.recording;
-	  }
-	  /**
-	   *
-	   */
-
-
-	  destroy() {
-	    this.player.destroy();
-	    this.player = null;
-	    this.off();
 	  }
 
 	}

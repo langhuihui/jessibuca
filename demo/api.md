@@ -686,6 +686,32 @@ jessibuca.on("recordEnd",function(){console.log("record end")})
 jessibuca.on("recordingTimestamp",function(timestamp){console.log("recordingTimestamp is",timestamp)})
 ```
 
+### playToRenderTimes
+监听调用play方法 经过 初始化-> 网络请求-> 解封装 -> 解码 -> 渲染 一系列过程的时间消耗
+
+```js
+jessibuca.on("playToRenderTimes",function(times){console.log("playToRenderTimes is",times)})
+```
+数据结构如下。
+```
+{
+    playInitStart: '', //1
+    playStart: '', // 2
+    streamStart: '', //3
+    demuxStart: '', // 5
+    decodeStart: '', // 6
+    videoStart: '', // 7
+    playTimestamp: '',// playStart- playInitStart
+    streamTimestamp: '',// streamStart - playStart
+    streamResponseTimestamp: '',// streamResponse - streamStart
+    demuxTimestamp: '', // demuxStart - streamResponse
+    decodeTimestamp: '', // decodeStart - demuxStart
+    videoTimestamp: '',// videoStart - decodeStart
+    allTimestamp: '' // videoStart - playInitStart
+}
+
+```
+
 
 
 

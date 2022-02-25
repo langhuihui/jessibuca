@@ -1,5 +1,6 @@
 import {FLV_MEDIA_TYPE, MEDIA_TYPE} from "../constant";
 import CommonLoader from "./commonLoader";
+import {now} from "../utils";
 
 export default class FlvLoader extends CommonLoader {
     constructor(player) {
@@ -56,6 +57,9 @@ export default class FlvLoader extends CommonLoader {
                     }
                     break
                 case FLV_MEDIA_TYPE.video:
+                    if (!player._times.demuxStart) {
+                        player._times.demuxStart = now();
+                    }
                     if (player._opt.hasVideo) {
                         player.updateStats({
                             vbps: payload.byteLength

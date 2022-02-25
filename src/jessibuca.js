@@ -53,6 +53,15 @@ class Jessibuca extends Emitter {
         this._bindEvents();
     }
 
+    /**
+     *
+     */
+    destroy() {
+        this.player.destroy();
+        this.player = null;
+        this.off();
+    }
+
     _bindEvents() {
         // 对外的事件
         Object.keys(JESSIBUCA_EVENTS).forEach((key) => {
@@ -399,14 +408,7 @@ class Jessibuca extends Emitter {
         return this.player.recorder.recording;
     }
 
-    /**
-     *
-     */
-    destroy() {
-        this.player.destroy();
-        this.player = null;
-        this.off();
-    }
+
 }
 
 

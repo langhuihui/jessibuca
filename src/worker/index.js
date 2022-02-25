@@ -1,4 +1,5 @@
 import {EVENTS, MEDIA_TYPE, WORKER_CMD_TYPE, WORKER_SEND_TYPE} from "../constant";
+import {now} from "../utils";
 
 export default class DecoderWorker {
     constructor(player) {
@@ -34,6 +35,9 @@ export default class DecoderWorker {
                     break;
                 case WORKER_CMD_TYPE.videoCode:
                     debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.videoCode, msg.code);
+                    if (!this.player._times.decodeStart) {
+                        this.player._times.decodeStart = now();
+                    }
                     this.player.video.updateVideoInfo({
                         encTypeCode: msg.code
                     })
@@ -63,6 +67,10 @@ export default class DecoderWorker {
                     this.player.video.render(msg);
                     this.player.emit(EVENTS.timeUpdate, msg.ts)
                     this.player.updateStats({fps: true, ts: msg.ts, buf: msg.delay})
+                    if (!this.player._times.videoStart) {
+                        this.player._times.videoStart = now();
+                        this.player.handlePlayToRenderTimes();
+                    }
                     break;
                 case WORKER_CMD_TYPE.playAudio:
                     debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.playAudio, `msg ts:${msg.ts}`);
@@ -92,6 +100,8 @@ export default class DecoderWorker {
     }
 
     decodeVideo(arrayBuffer, ts, isIFrame) {
+
+
         const options = {
             type: MEDIA_TYPE.video,
             ts: Math.max(ts, 0),
