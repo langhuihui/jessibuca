@@ -1,4 +1,6 @@
 // todo: 待定
+import {HOT_KEY} from "../constant";
+
 export default (player, control) => {
     const {
         events: {proxy}
@@ -14,6 +16,22 @@ export default (player, control) => {
         }
     }
 
+    //
+    addHotkey(HOT_KEY.esc, () => {
+        if (player.fullscreen) {
+            player.fullscreen = false;
+        }
+    })
+
+    //
+    addHotkey(HOT_KEY.arrowUp, () => {
+        player.volume += 0.05;
+    })
+
+    //
+    addHotkey(HOT_KEY.arrowDown, () => {
+        player.volume -= 0.05;
+    })
 
     proxy(window, 'keydown', event => {
         if (control.isFocus) {

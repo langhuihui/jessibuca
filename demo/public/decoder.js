@@ -6434,6 +6434,8 @@
 	  //
 	  isFlv: false,
 	  debug: false,
+	  hotKey: false,
+	  // 快捷键
 	  loadingTimeout: 10,
 	  // loading timeout
 	  heartTimeout: 10,

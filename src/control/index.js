@@ -3,6 +3,7 @@ import observer from './observer';
 import property from './property';
 import events from './events';
 import './style.scss'
+import hotkey from "./hotkey";
 
 export default class Control {
     constructor(player) {
@@ -11,6 +12,9 @@ export default class Control {
         observer(player, this);
         property(player, this);
         events(player, this);
+        if (player._opt.hotKey) {
+            hotkey(player, this);
+        }
         this.player.debug.log('Control', 'init');
     }
 

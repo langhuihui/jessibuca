@@ -2,7 +2,8 @@ import {clamp, setStyle} from "../utils";
 
 export default (player, control) => {
     const {
-        events: {proxy}
+        events: {proxy},
+        debug
     } = player;
 
     function volumeChangeFromEvent(event) {

@@ -17,6 +17,7 @@ export const DEFAULT_PLAYER_OPTIONS = {
     isFullResize: false, //
     isFlv: false,
     debug: false,
+    hotKey: false, // 快捷键
     loadingTimeout: 10, // loading timeout
     heartTimeout: 10,  // heart timeout
     timeout: 10, // second
@@ -256,3 +257,10 @@ export const FRAG_DURATION = Math.ceil(1000 / 25)
 
 
 export const AUDIO_SYNC_VIDEO_DIFF = 1000;
+
+
+export const HOT_KEY = {
+    esc: 27, //
+    arrowUp: 38, //
+    arrowDown: 40, //
+}
