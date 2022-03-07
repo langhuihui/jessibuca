@@ -195,6 +195,15 @@ worker地址
 
 > 支持 forceNoOffscreen 为 false （开启离屏渲染）
 
+
+### hotKey
+- **类型**：`boolean`
+- **默认值**：`false`
+- **用法**：
+  是否开启键盘快捷键
+
+> 目前支持的键盘快捷键有：esc -> 退出全屏；arrowUp -> 声音增加；arrowDown -> 声音减少；
+
 ## 方法
 
 ### setDebug(flag)
