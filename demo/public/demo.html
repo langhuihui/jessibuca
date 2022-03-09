@@ -95,7 +95,7 @@
             <input
                     autocomplete="on"
                     id="playUrl"
-                    value="http://flv.bdplay.nodemedia.cn/live/bbb.flv"
+                    value="ws://localhost:8081/jessica/live/rtc"
             />
             <button id="play">播放</button>
             <button id="pause" style="display: none">停止</button>
@@ -143,6 +143,9 @@
         jessibuca.onPlay = () => console.log('onPlay');
         jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
         jessibuca.onMute = msg => console.log('onMute', msg);
+        jessibuca.on('stats', function (stats) {
+            console.log('stats', stats);
+        })
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
         $destroy.style.display = 'none';

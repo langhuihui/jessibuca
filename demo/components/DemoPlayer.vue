@@ -10,7 +10,7 @@
         <input
             autocomplete="on"
             ref="playUrl"
-            value="ws://114.255.88.234:1985/myapp/dev7.flv?audioOnly=1"
+            value="ws://localhost:8081/jessica/live/rtc"
         />
         <button v-if="!playing" @click="play">播放</button>
         <button v-else @click="pause">停止</button>

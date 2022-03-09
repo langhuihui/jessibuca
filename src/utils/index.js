@@ -116,3 +116,10 @@ export function bufferStatus(buffer, settingBuffer) {
     }
     return result;
 }
+
+export function createEmptyImageBitmap(width, height) {
+    const $canvasElement = document.createElement("canvas");
+    $canvasElement.width = width;
+    $canvasElement.height = height;
+    return createImageBitmap($canvasElement, 0, 0, width, height);
+}

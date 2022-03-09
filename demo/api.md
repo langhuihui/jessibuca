@@ -449,7 +449,7 @@ jessibuca.on("audioInfo",function(data){console.log('numOfChannels:',data.numOfC
 信息，包含错误信息
 ```js
 
-jessibuca.on("load",function(data){console.log('data:',data)})
+jessibuca.on("log",function(data){console.log('data:',data)})
 ```
 
 ### error
@@ -457,7 +457,7 @@ jessibuca.on("load",function(data){console.log('data:',data)})
 
 ```js
 
-jessibuca.on("load",function(data){console.log('error:',data)})
+jessibuca.on("error",function(data){console.log('error:',data)})
 ```
 ### kBps
 当前网速， 单位KB 每秒1次,
