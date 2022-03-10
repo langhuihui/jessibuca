@@ -121,6 +121,7 @@ export default {
             loaded: false, // mute
             showOperateBtns: false,
             showBandwidth: false,
+            hotKey: true,
             err: "",
             speed: 0,
             performance: "",
@@ -161,6 +162,7 @@ export default {
                         loadingText: "疯狂加载中...",
                         // hasAudio:false,
                         debug: false,
+                        hotKey:true,
                         // hasAudio:false,
                         supportDblclickFullscreen: true,
                         showBandwidth: this.showBandwidth, // 显示网速
