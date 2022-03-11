@@ -49,7 +49,10 @@ export default class RecordRTCLoader extends Emitter {
 
         try {
             const stream = this.player.video.$videoElement.captureStream(25);
-            if (this.player.audio.mediaStreamAudioDestinationNode && this.player.audio.mediaStreamAudioDestinationNode.stream && !this.player.audio.isStateSuspended() && this.player.audio.hasAudio) {
+            if (this.player.audio.mediaStreamAudioDestinationNode &&
+                this.player.audio.mediaStreamAudioDestinationNode.stream &&
+                !this.player.audio.isStateSuspended() &&
+                this.player.audio.hasAudio) {
                 const audioStream = this.player.audio.mediaStreamAudioDestinationNode.stream;
                 if (audioStream.getAudioTracks().length > 0) {
                     const audioTrack = audioStream.getAudioTracks()[0];
