@@ -18,6 +18,8 @@ v2:https://github.com/bosscheng/jessibuca-vue-demo
 
 v3:https://github.com/bosscheng/jessibuca-vue-demo/tree/v3
 
+typescript:https://github.com/bosscheng/jessibuca-vue-ts-demo
+
 
 ## Uni-app run in hBuilderX
 
