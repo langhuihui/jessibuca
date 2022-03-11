@@ -10,7 +10,21 @@ options 支持的参数有：
 
 播放器容器。
 
-> 若为 string ，则底层调用的是 document.getElementById('id')
+> 若为 string ，则底层调用的是 document.querySelector(container)
+
+源码
+```js
+
+let $container = options.container;
+if (typeof options.container === 'string') {
+    $container = document.querySelector(options.container);
+}
+if (!$container) {
+    throw new Error('Jessibuca need container option');
+    return;
+}
+```
+
 
 ### videoBuffer
 - **类型**：`number`
