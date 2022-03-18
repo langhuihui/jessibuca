@@ -47,3 +47,14 @@ Desktop,Android,Webview中已默认开启!
 需要https加载web,播放https/wss-flv流. 如果控制台打印 "WCS is not supported or experimental-web-platform-features not enabled" 请将当前页面使用https访问
 
 
+### http vs https
+
+#### http
+
+在http 协议里面，是不能播放https 或者 wss 协议的，会报跨域报错。
+
+
+#### https
+
+在https 协议里面，是不能播放http 或者 ws 协议的，会报跨域报错。
+
