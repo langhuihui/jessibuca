@@ -321,14 +321,6 @@ class MP4 {
         return result;
     }
 
-    static stsdOld(meta) {
-        return meta.type === "audio" ?
-            MP4.box(MP4.types.stsd, MP4.constants.STSD_PREFIX, MP4.mp4a(meta)) :
-            meta.videoType === 'avc' ?
-                MP4.box(MP4.types.stsd, MP4.constants.STSD_PREFIX, MP4.avc1(meta)) :
-                MP4.box(MP4.types.stsd, MP4.constants.STSD_PREFIX, MP4.hvc1(meta))
-    }
-
     // Sample description box
     static stsd(meta) {
         if (meta.type === 'audio') {
@@ -344,7 +336,6 @@ class MP4 {
             }
         }
     }
-
 
     static mp4a(meta) {
         let channelCount = meta.channelCount;
@@ -396,6 +387,7 @@ class MP4 {
         return MP4.box(MP4.types.esds, data);
     }
 
+    // avc
     static avc1(meta) {
         let avcc = meta.avcc;
         const width = meta.codecWidth;
@@ -430,6 +422,7 @@ class MP4 {
         return MP4.box(MP4.types.avc1, data, MP4.box(MP4.types.avcC, avcc))
     }
 
+    // hvc
     static hvc1(meta) {
         let avcc = meta.avcc;
         const width = meta.codecWidth;
@@ -465,7 +458,6 @@ class MP4 {
     }
 
     // Movie Extends box
-
     static mvex(meta) {
         return MP4.box(MP4.types.mvex, MP4.trex(meta))
     }
@@ -491,7 +483,7 @@ class MP4 {
     static moof(track, baseMediaDecodeTime) {
         return MP4.box(MP4.types.moof, MP4.mfhd(track.sequenceNumber), MP4.traf(track, baseMediaDecodeTime))
     }
-
+    //
     static mfhd(sequenceNumber) {
         let data = new Uint8Array([
             0x00, 0x00, 0x00, 0x00,
@@ -530,12 +522,6 @@ class MP4 {
     }
 
     // Sample Dependency Type box
-    static sdtpOld(A) {
-        let e = new Uint8Array(4 + 1),
-            t = A.flags;
-        return e[4] = t.isLeading << 6 | t.dependsOn << 4 | t.isDependedOn << 2 | t.hasRedundancy, MP4.box(MP4.types.sdtp, e)
-    }
-
     static sdtp(track) {
         let data = new Uint8Array(4 + 1);
         let flags = track.flags;
@@ -545,7 +531,7 @@ class MP4 {
             | flags.hasRedundancy;
         return MP4.box(MP4.types.sdtp, data);
     }
-
+    // trun
     static trun(track, offset) {
         let dataSize = 12 + 16;
         let data = new Uint8Array(dataSize);
@@ -585,8 +571,7 @@ class MP4 {
 
         return MP4.box(MP4.types.trun, data);
     }
-
-
+    // mdat
     static mdat(data) {
         return MP4.box(MP4.types.mdat, data)
     }

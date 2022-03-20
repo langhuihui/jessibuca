@@ -9593,10 +9593,6 @@
         MP4$1.box(MP4$1.types.stco, MP4$1.constants.STCO) // Chunk offset
         );
         return result;
-      }
-
-      static stsdOld(meta) {
-        return meta.type === "audio" ? MP4$1.box(MP4$1.types.stsd, MP4$1.constants.STSD_PREFIX, MP4$1.mp4a(meta)) : meta.videoType === 'avc' ? MP4$1.box(MP4$1.types.stsd, MP4$1.constants.STSD_PREFIX, MP4$1.avc1(meta)) : MP4$1.box(MP4$1.types.stsd, MP4$1.constants.STSD_PREFIX, MP4$1.hvc1(meta));
       } // Sample description box
 
 
@@ -9648,7 +9644,8 @@
         ].concat([configSize]).concat(config).concat([0x06, 0x01, 0x02 // GASpecificConfig
         ]));
         return MP4$1.box(MP4$1.types.esds, data);
-      }
+      } // avc
+
 
       static avc1(meta) {
         let avcc = meta.avcc;
@@ -9656,7 +9653,8 @@
         const height = meta.codecHeight;
         let data = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, width >>> 8 & 255, width & 255, height >>> 8 & 255, height & 255, 0, 72, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 255, 255]);
         return MP4$1.box(MP4$1.types.avc1, data, MP4$1.box(MP4$1.types.avcC, avcc));
-      }
+      } // hvc
+
 
       static hvc1(meta) {
         let avcc = meta.avcc;
@@ -9687,7 +9685,8 @@
 
       static moof(track, baseMediaDecodeTime) {
         return MP4$1.box(MP4$1.types.moof, MP4$1.mfhd(track.sequenceNumber), MP4$1.traf(track, baseMediaDecodeTime));
-      }
+      } //
+
 
       static mfhd(sequenceNumber) {
         let data = new Uint8Array([0x00, 0x00, 0x00, 0x00, sequenceNumber >>> 24 & 0xFF, // sequence_number: int32
@@ -9712,18 +9711,13 @@
       } // Sample Dependency Type box
 
 
-      static sdtpOld(A) {
-        let e = new Uint8Array(4 + 1),
-            t = A.flags;
-        return e[4] = t.isLeading << 6 | t.dependsOn << 4 | t.isDependedOn << 2 | t.hasRedundancy, MP4$1.box(MP4$1.types.sdtp, e);
-      }
-
       static sdtp(track) {
         let data = new Uint8Array(4 + 1);
         let flags = track.flags;
         data[4] = flags.isLeading << 6 | flags.dependsOn << 4 | flags.isDependedOn << 2 | flags.hasRedundancy;
         return MP4$1.box(MP4$1.types.sdtp, data);
-      }
+      } // trun
+
 
       static trun(track, offset) {
         let dataSize = 12 + 16;
@@ -9744,7 +9738,8 @@
         cts >>> 24 & 0xFF, // sample_composition_time_offset
         cts >>> 16 & 0xFF, cts >>> 8 & 0xFF, cts & 0xFF], 12);
         return MP4$1.box(MP4$1.types.trun, data);
-      }
+      } // mdat
+
 
       static mdat(data) {
         return MP4$1.box(MP4$1.types.mdat, data);
