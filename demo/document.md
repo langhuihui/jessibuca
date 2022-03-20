@@ -133,6 +133,8 @@ https://github.com/langhuihui/jessibuca/issues/126
 
 这是录制的是webm 格式的视频，对于移动端的兼容性不是很好。等后续支持录制MP4格式(MPEG-4)的视频录制就可以解决这个问题了。
 
+另外：
+> MP4格式支持在IOS VLC播放器显示时长播放，Android VLC播放器无法显示时长播放，PC VLC播放器可以播放
 
 ### 创建多个以上播放实例会非常卡顿，还会导致页面黑屏
 
