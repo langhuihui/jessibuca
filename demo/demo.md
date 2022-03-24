@@ -40,3 +40,31 @@ v3:https://github.com/bosscheng/jessibuca-uni-app-demo/tree/v3
 v2:https://github.com/bosscheng/jessibuca-react-demo
 
 v3:https://github.com/bosscheng/jessibuca-react-demo/tree/v3
+
+
+## 弹幕
+
+pc:https://github.com/bosscheng/jessibuca-danmu-demo
+h5:https://github.com/bosscheng/jessibuca-mobile-danmu-demo
+
+
+## 轮播
+https://github.com/bosscheng/jessibuca-loop-demo
+
+
+## 自动播放
+
+
+## WASM Worker 4画面
+
+## WASM Worker 9画面
+
+## WebCodecs 硬解码h264
+
+## WebCodecs 硬解码h264 4画面
+
+
+## MediaSource 硬解码h264
+
+## MediaSource 硬解码h264 4画面
+
