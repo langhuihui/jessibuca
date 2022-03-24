@@ -81,7 +81,9 @@ export function downloadImg(content, fileName) {
     aLink.download = fileName;
     aLink.href = URL.createObjectURL(content);
     aLink.click();
-    URL.revokeObjectURL(content);
+    setTimeout(() => {
+        URL.revokeObjectURL(content);
+    }, isIOS() ? 1000 : 0)
 }
 
 export function checkFull() {
@@ -162,7 +164,9 @@ export function downloadRecord(blob, name, suffix) {
     a.href = url;
     a.download = (name || now()) + '.' + (suffix || FILE_SUFFIX.webm);
     a.click();
-    window.URL.revokeObjectURL(url);
+    setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+    }, isIOS() ? 1000 : 0)
 }
 
 export const env = '__ENV__';
