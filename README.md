@@ -52,6 +52,11 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 
 [https://j.m7s.live/](https://j.m7s.live/)
 
+## DEMO
+
+[Demo](/demo/demo.md)
+
+
 
 ## 源码目录结构
 
