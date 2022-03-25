@@ -53,7 +53,7 @@ https://github.com/bosscheng/jessibuca-loop-demo
 
 
 ## 自动播放
-
+https://github.com/bosscheng/jessibuca-auto-demo
 
 ## WASM Worker 4画面
 
