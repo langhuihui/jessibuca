@@ -62,6 +62,10 @@ https://github.com/bosscheng/jessibuca-2x2-demo
 https://github.com/bosscheng/jessibuca-3x3-demo
 
 ## WebCodecs 硬解码h264
+https://github.com/bosscheng/jessibuca-webcodecs-demo
+
+## WebCodecs 硬解码h264 离屏渲染 OffscreenCanvas
+https://github.com/bosscheng/jessibuca-webcodecs-offscreenCanvas-demo
 
 ## WebCodecs 硬解码h264 4画面
 
