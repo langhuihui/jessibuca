@@ -33,6 +33,7 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 支持HLS格式协议
 - 支持fmp4格式协议
 - 支持crypto解密播放
+- 支持WebTransport协议播放
 
 
 ## 本地测试
