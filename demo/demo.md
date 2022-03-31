@@ -70,6 +70,9 @@ https://github.com/bosscheng/jessibuca-webcodecs-offscreenCanvas-demo
 ## WebCodecs 硬解码h264 4画面
 https://github.com/bosscheng/jessibuca-webcodecs-2x2-demo
 
+## WebCodecs 硬解码h264 9画面
+https://github.com/bosscheng/jessibuca-webcodecs-3x3-demo
+
 ## MediaSource 硬解码h264
 https://github.com/bosscheng/jessibuca-MSE-demo
 
