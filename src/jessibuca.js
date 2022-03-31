@@ -107,7 +107,7 @@ class Jessibuca extends Emitter {
      *
      */
     audioResume() {
-        this.player.audio.audioEnabled(true);
+        this.player.audio && this.player.audio.audioEnabled(true);
     }
 
     /**
@@ -397,7 +397,7 @@ class Jessibuca extends Emitter {
      * @returns {Boolean}
      */
     isMute() {
-        return this.player.audio.isMute;
+        return this.player.audio ? this.player.audio.isMute : true;
     }
 
     /**

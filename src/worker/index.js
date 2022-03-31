@@ -44,7 +44,7 @@ export default class DecoderWorker {
                     break;
                 case WORKER_CMD_TYPE.audioCode:
                     debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.audioCode, msg.code);
-                    this.player.audio.updateAudioInfo({
+                    this.player.audio && this.player.audio.updateAudioInfo({
                         encTypeCode: msg.code
                     })
                     break;
@@ -58,8 +58,10 @@ export default class DecoderWorker {
                     break;
                 case WORKER_CMD_TYPE.initAudio:
                     debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.initAudio, `channels:${msg.channels},sampleRate:${msg.sampleRate}`);
-                    this.player.audio.updateAudioInfo(msg);
-                    this.player.audio.initScriptNode(msg);
+                    if (this.player.audio) {
+                        this.player.audio.updateAudioInfo(msg);
+                        this.player.audio.initScriptNode(msg);
+                    }
                     break;
                 case WORKER_CMD_TYPE.render:
                     // debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.render, `msg ts:${msg.ts}`);
@@ -75,7 +77,7 @@ export default class DecoderWorker {
                 case WORKER_CMD_TYPE.playAudio:
                     debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.playAudio, `msg ts:${msg.ts}`);
                     // 只有在 playing 的时候。
-                    if (this.player.playing) {
+                    if (this.player.playing && this.player.audio) {
                         this.player.audio.play(msg.buffer, msg.ts);
                     }
                     break;
@@ -95,12 +97,11 @@ export default class DecoderWorker {
         this.decoderWorker.postMessage({
             cmd: WORKER_SEND_TYPE.init,
             opt: JSON.stringify(opt),
-            sampleRate: this.player.audio.audioContext.sampleRate
+            sampleRate: (this.player.audio && this.player.audio.audioContext.sampleRate) || 0
         })
     }
 
     decodeVideo(arrayBuffer, ts, isIFrame) {
-
 
         const options = {
             type: MEDIA_TYPE.video,

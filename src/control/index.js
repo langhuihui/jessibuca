@@ -37,8 +37,8 @@ export default class Control {
         const playerWidth = player.width;
         const playerHeight = player.height;
         const playerRatio = playerWidth / playerHeight;
-        const canvasWidth = player.audio.$videoElement.width;
-        const canvasHeight = player.audio.$videoElement.height;
+        const canvasWidth = player.video.$videoElement.width;
+        const canvasHeight = player.video.$videoElement.height;
         const canvasRatio = canvasWidth / canvasHeight;
         if (playerRatio > canvasRatio) {
             const padding = (playerWidth - playerHeight * canvasRatio) / 2;

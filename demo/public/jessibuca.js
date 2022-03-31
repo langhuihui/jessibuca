@@ -8118,7 +8118,7 @@
 	    try {
 	      const stream = this.player.video.$videoElement.captureStream(25);
 
-	      if (this.player.audio.mediaStreamAudioDestinationNode && this.player.audio.mediaStreamAudioDestinationNode.stream && !this.player.audio.isStateSuspended() && this.player.audio.hasAudio) {
+	      if (this.player.audio && this.player.audio.mediaStreamAudioDestinationNode && this.player.audio.mediaStreamAudioDestinationNode.stream && !this.player.audio.isStateSuspended() && this.player.audio.hasAudio && this.player._opt.hasAudio) {
 	        const audioStream = this.player.audio.mediaStreamAudioDestinationNode.stream;
 
 	        if (audioStream.getAudioTracks().length > 0) {
@@ -8255,7 +8255,7 @@
 
 	        case WORKER_CMD_TYPE.audioCode:
 	          debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.audioCode, msg.code);
-	          this.player.audio.updateAudioInfo({
+	          this.player.audio && this.player.audio.updateAudioInfo({
 	            encTypeCode: msg.code
 	          });
 	          break;
@@ -8271,8 +8271,12 @@
 
 	        case WORKER_CMD_TYPE.initAudio:
 	          debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.initAudio, `channels:${msg.channels},sampleRate:${msg.sampleRate}`);
-	          this.player.audio.updateAudioInfo(msg);
-	          this.player.audio.initScriptNode(msg);
+
+	          if (this.player.audio) {
+	            this.player.audio.updateAudioInfo(msg);
+	            this.player.audio.initScriptNode(msg);
+	          }
+
 	          break;
 
 	        case WORKER_CMD_TYPE.render:
@@ -8296,7 +8300,7 @@
 	        case WORKER_CMD_TYPE.playAudio:
 	          debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.playAudio, `msg ts:${msg.ts}`); // 只有在 playing 的时候。
 
-	          if (this.player.playing) {
+	          if (this.player.playing && this.player.audio) {
 	            this.player.audio.play(msg.buffer, msg.ts);
 	          }
 
@@ -8318,7 +8322,7 @@
 	    this.decoderWorker.postMessage({
 	      cmd: WORKER_SEND_TYPE.init,
 	      opt: JSON.stringify(opt),
-	      sampleRate: this.player.audio.audioContext.sampleRate
+	      sampleRate: this.player.audio && this.player.audio.audioContext.sampleRate || 0
 	    });
 	  }
 
@@ -8492,9 +8496,6 @@
 
 	  _doDecode(payload, type, ts, isIFrame) {
 	    const player = this.player;
-	    const {
-	      decoderWorker
-	    } = player;
 	    let options = {
 	      ts: ts,
 	      type: type,
@@ -8517,9 +8518,11 @@
 	    } else {
 	      //
 	      if (type === MEDIA_TYPE.video) {
-	        decoderWorker.decodeVideo(payload, ts, isIFrame);
+	        player.decoderWorker && player.decoderWorker.decodeVideo(payload, ts, isIFrame);
 	      } else if (type === MEDIA_TYPE.audio) {
-	        decoderWorker.decodeAudio(payload, ts);
+	        if (player._opt.hasAudio) {
+	          player.decoderWorker && player.decoderWorker.decodeAudio(payload, ts);
+	        }
 	      }
 	    }
 	  }
@@ -8527,13 +8530,14 @@
 	  _doDecoderDecode(data) {
 	    const player = this.player;
 	    const {
-	      decoderWorker,
 	      webcodecsDecoder,
 	      mseDecoder
 	    } = player;
 
 	    if (data.type === MEDIA_TYPE.audio) {
-	      decoderWorker.decodeAudio(data.payload, data.ts);
+	      if (player._opt.hasAudio) {
+	        player.decoderWorker && player.decoderWorker.decodeAudio(data.payload, data.ts);
+	      }
 	    } else if (data.type === MEDIA_TYPE.video) {
 	      if (player._opt.useWCS && !player._opt.useOffscreen) {
 	        webcodecsDecoder.decodeVideo(data.payload, data.ts, data.isIFrame);
@@ -9322,8 +9326,8 @@
 	    const playerWidth = player.width;
 	    const playerHeight = player.height;
 	    const playerRatio = playerWidth / playerHeight;
-	    const canvasWidth = player.audio.$videoElement.width;
-	    const canvasHeight = player.audio.$videoElement.height;
+	    const canvasWidth = player.video.$videoElement.width;
+	    const canvasHeight = player.video.$videoElement.height;
 	    const canvasRatio = canvasWidth / canvasHeight;
 
 	    if (playerRatio > canvasRatio) {
@@ -10886,6 +10890,10 @@
 	      }
 	    }
 
+	    if (!this._opt.hasAudio) {
+	      this._opt.operateBtns.audio = false;
+	    }
+
 	    this._opt.hasControl = this._hasControl(); //
 
 	    this._loading = false;
@@ -10917,9 +10925,17 @@
 	    property$1(this);
 	    this.events = new Events(this);
 	    this.video = new Video(this);
-	    this.audio = new Audio(this);
+
+	    if (this._opt.hasAudio) {
+	      this.audio = new Audio(this);
+	    }
+
 	    this.recorder = new Recorder(this);
-	    this.decoderWorker = new DecoderWorker(this);
+
+	    if (!this._onlyMseOrWcsVideo()) {
+	      this.decoderWorker = new DecoderWorker(this);
+	    }
+
 	    this.stream = null;
 	    this.demux = null;
 
@@ -11069,11 +11085,11 @@
 	  }
 
 	  get volume() {
-	    return this.audio && this.audio.volume;
+	    return this.audio && this.audio.volume || 0;
 	  }
 
 	  set volume(value) {
-	    this.audio.setVolume(value);
+	    this.audio && this.audio.setVolume(value);
 	  }
 
 	  set loading(value) {
@@ -11124,7 +11140,7 @@
 
 	    if (!this._opt.useWCS && !this._opt.useMSE) {
 	      if (this.audioTimestamp && this.videoTimestamp) {
-	        this.audio.emit(EVENTS.videoSyncAudio, {
+	        this.audio && this.audio.emit(EVENTS.videoSyncAudio, {
 	          audioTimestamp: this.audioTimestamp,
 	          videoTimestamp: this.videoTimestamp,
 	          diff: this.audioTimestamp - this.videoTimestamp
@@ -11174,7 +11190,7 @@
 	        }
 	      }
 
-	      if (!this.decoderWorker) {
+	      if (!this.decoderWorker && !this._onlyMseOrWcsVideo()) {
 	        this.decoderWorker = new DecoderWorker(this);
 	        this.once(EVENTS.decoderWorkerInit, () => {
 	          resolve();
@@ -11303,7 +11319,7 @@
 	      this.loading = false;
 	      this.recording = false; // release audio buffer
 
-	      this.audio.pause(); // release lock
+	      this.audio && this.audio.pause(); // release lock
 
 	      this.releaseWakeLock(); // reset stats
 
@@ -11340,7 +11356,7 @@
 
 
 	  mute(flag) {
-	    this.audio.mute(flag);
+	    this.audio && this.audio.mute(flag);
 	  }
 	  /**
 	   *
@@ -11390,6 +11406,10 @@
 	    }
 
 	    return result;
+	  }
+
+	  _onlyMseOrWcsVideo() {
+	    return this._opt.hasAudio === false && (this._opt.useMSE || this._opt.useWCS && !this._opt.useOffscreen);
 	  }
 
 	  checkHeart() {
@@ -11629,7 +11649,7 @@
 
 
 	  audioResume() {
-	    this.player.audio.audioEnabled(true);
+	    this.player.audio && this.player.audio.audioEnabled(true);
 	  }
 	  /**
 	   * 设置超时时长, 单位秒 在连接成功之前和播放中途,如果超过设定时长无数据返回,则回调timeout事件
@@ -11938,7 +11958,7 @@
 
 
 	  isMute() {
-	    return this.player.audio.isMute;
+	    return this.player.audio ? this.player.audio.isMute : true;
 	  }
 	  /**
 	   * 是否在录制视频

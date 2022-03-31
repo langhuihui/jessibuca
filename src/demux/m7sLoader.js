@@ -15,7 +15,6 @@ export default class M7sLoader extends CommonLoader {
 
     dispatch(data) {
         const player = this.player;
-        const {decoderWorker, webcodecsDecoder, mseDecoder} = player;
         const dv = new DataView(data)
         const type = dv.getUint8(0);
         const ts = dv.getUint32(1, false);

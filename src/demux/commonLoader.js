@@ -109,7 +109,6 @@ export default class CommonLoader extends Emitter {
 
     _doDecode(payload, type, ts, isIFrame) {
         const player = this.player;
-        const {decoderWorker} = player;
         let options = {
             ts: ts,
             type: type,
@@ -130,19 +129,23 @@ export default class CommonLoader extends Emitter {
         } else {
             //
             if (type === MEDIA_TYPE.video) {
-                decoderWorker.decodeVideo(payload, ts, isIFrame);
+                player.decoderWorker && player.decoderWorker.decodeVideo(payload, ts, isIFrame);
             } else if (type === MEDIA_TYPE.audio) {
-                decoderWorker.decodeAudio(payload, ts);
+                if (player._opt.hasAudio) {
+                    player.decoderWorker && player.decoderWorker.decodeAudio(payload, ts);
+                }
             }
         }
     }
 
     _doDecoderDecode(data) {
         const player = this.player;
-        const {decoderWorker, webcodecsDecoder, mseDecoder} = player;
+        const {webcodecsDecoder, mseDecoder} = player;
 
         if (data.type === MEDIA_TYPE.audio) {
-            decoderWorker.decodeAudio(data.payload, data.ts)
+            if (player._opt.hasAudio) {
+                player.decoderWorker && player.decoderWorker.decodeAudio(data.payload, data.ts)
+            }
         } else if (data.type === MEDIA_TYPE.video) {
             if (player._opt.useWCS && !player._opt.useOffscreen) {
                 webcodecsDecoder.decodeVideo(data.payload, data.ts, data.isIFrame);

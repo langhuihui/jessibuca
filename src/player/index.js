@@ -70,6 +70,9 @@ export default class Player extends Emitter {
             }
         }
 
+        if (!this._opt.hasAudio) {
+            this._opt.operateBtns.audio = false
+        }
 
         this._opt.hasControl = this._hasControl();
         //
@@ -103,14 +106,18 @@ export default class Player extends Emitter {
 
         this.events = new Events(this);
         this.video = new Video(this);
-        this.audio = new Audio(this);
-        this.recorder = new Recorder(this);
-        this.decoderWorker = new DecoderWorker(this);
 
+        if (this._opt.hasAudio) {
+            this.audio = new Audio(this);
+        }
+        this.recorder = new Recorder(this);
+
+        if (!this._onlyMseOrWcsVideo()) {
+            this.decoderWorker = new DecoderWorker(this);
+        }
 
         this.stream = null;
         this.demux = null;
-
 
         if (this._opt.useWCS) {
             this.webcodecsDecoder = new WebcodecsDecoder(this)
@@ -268,11 +275,11 @@ export default class Player extends Emitter {
     }
 
     get volume() {
-        return this.audio && this.audio.volume;
+        return (this.audio && this.audio.volume) || 0;
     }
 
     set volume(value) {
-        this.audio.setVolume(value);
+        this.audio && this.audio.setVolume(value);
     }
 
     set loading(value) {
@@ -321,7 +328,7 @@ export default class Player extends Emitter {
         // just for wasm
         if (!this._opt.useWCS && !this._opt.useMSE) {
             if (this.audioTimestamp && this.videoTimestamp) {
-                this.audio.emit(EVENTS.videoSyncAudio, {
+                this.audio && this.audio.emit(EVENTS.videoSyncAudio, {
                     audioTimestamp: this.audioTimestamp,
                     videoTimestamp: this.videoTimestamp,
                     diff: this.audioTimestamp - this.videoTimestamp
@@ -370,7 +377,7 @@ export default class Player extends Emitter {
                 }
             }
 
-            if (!this.decoderWorker) {
+            if (!this.decoderWorker && !this._onlyMseOrWcsVideo()) {
                 this.decoderWorker = new DecoderWorker(this);
 
                 this.once(EVENTS.decoderWorkerInit, () => {
@@ -507,7 +514,7 @@ export default class Player extends Emitter {
             this.loading = false;
             this.recording = false;
             // release audio buffer
-            this.audio.pause();
+            this.audio && this.audio.pause();
             // release lock
             this.releaseWakeLock();
             // reset stats
@@ -542,7 +549,7 @@ export default class Player extends Emitter {
      * @param flag
      */
     mute(flag) {
-        this.audio.mute(flag)
+        this.audio && this.audio.mute(flag)
     }
 
     /**
@@ -590,6 +597,10 @@ export default class Player extends Emitter {
         }
 
         return result;
+    }
+
+    _onlyMseOrWcsVideo() {
+        return this._opt.hasAudio === false && (this._opt.useMSE || (this._opt.useWCS && !this._opt.useOffscreen))
     }
 
     checkHeart() {
