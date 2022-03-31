@@ -76,3 +76,5 @@ https://github.com/bosscheng/jessibuca-MSE-demo
 ## MediaSource 硬解码h264 4画面
 https://github.com/bosscheng/jessibuca-MSE-2x2-demo
 
+## MediaSource 硬解码h264 9画面
+https://github.com/bosscheng/jessibuca-MSE-3x3-demo
