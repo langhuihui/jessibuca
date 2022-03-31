@@ -44,5 +44,8 @@ features:
   details: 支持fmp4格式直播协议
 - title: 支持crypto解密播放 - 开发中
   details: 支持crypto解密播放
+- title: 支持WebTransport协议播放 - 开发中
+  details: 支持WebTransport协议播放
+
 footer: GPL Licensed | Copyright © 2020-present dexter
 ---
