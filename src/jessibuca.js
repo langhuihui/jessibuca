@@ -49,8 +49,7 @@ class Jessibuca extends Emitter {
         this.$container = $container;
         this.href = null;
         this.events = new Events(this);
-        this.player = new Player($container, _opt);
-        this._bindEvents();
+        this._initPlayer($container, _opt);
     }
 
     /**
@@ -60,6 +59,18 @@ class Jessibuca extends Emitter {
         this.player.destroy();
         this.player = null;
         this.off();
+    }
+
+    _initPlayer($container, options) {
+        this.player = new Player($container, options);
+        this._bindEvents();
+    }
+
+    _resetPlayer(options = {}) {
+        this.player.destroy();
+        this.player = null;
+        const _options = Object.assign(this._opt, options);
+        this._initPlayer(this.$container, _options);
     }
 
     _bindEvents() {
@@ -258,11 +269,31 @@ class Jessibuca extends Emitter {
             })
 
             this.player.once(EVENTS_ERROR.mediaSourceH265NotSupport, () => {
-                this.close();
+                this.close().then(() => {
+                    if (this.player._opt.autoWasm) {
+                        this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play')
+                        this._resetPlayer({useMSE: false})
+                        this.play(url).then(() => {
+                            resolve();
+                        }).catch(() => {
+                            reject();
+                        });
+                    }
+                });
             })
 
             this.player.once(EVENTS_ERROR.webcodecsH265NotSupport, () => {
-                this.close();
+                this.close().then(() => {
+                    if (this.player._opt.autoWasm) {
+                        this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play')
+                        this._resetPlayer({useWCS: false})
+                        this.play(url).then(() => {
+                            resolve();
+                        }).catch(() => {
+                            reject();
+                        });
+                    }
+                });
             })
 
             if (this.hasLoaded()) {

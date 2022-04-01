@@ -179,7 +179,8 @@
                 audio: showOperateBtns,
             },
             useMSE: true,
-            hasAudio: false
+            hasAudio: false,
+            autoWasm:true
         },);
 
         jessibuca.onLog = msg => console.error(msg);
@@ -205,17 +206,15 @@
             var id = i + 1;
             var $playHref = document.getElementById('playUrl' + id);
             if ($playHref.value) {
-                (function (index) {
-                    let player = playList[index];
-                    console.log($playHref.value);
-                    setTimeout(() => {
-                        player && player.play($playHref.value).then(() => {
-                            console.log('play success')
-                        }).catch((e) => {
-                            console.error(e);
-                        });
-                    }, 0)
-                })(i)
+                let player = playList[i];
+                console.log($playHref.value);
+                setTimeout(() => {
+                    player && player.play($playHref.value).then(() => {
+                        console.log('play success')
+                    }).catch((e) => {
+                        console.error(e);
+                    });
+                }, 0)
             }
         }
 

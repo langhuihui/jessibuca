@@ -6474,7 +6474,9 @@
 	  //
 	  useMSE: false,
 	  //
-	  useOffscreen: false //
+	  useOffscreen: false,
+	  //
+	  autoWasm: false // 自动降级到 wasm 模式
 
 	};
 	const WORKER_CMD_TYPE = {

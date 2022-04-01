@@ -47,7 +47,8 @@ export const DEFAULT_PLAYER_OPTIONS = {
     demuxType: DEMUX_TYPE.flv, //
     useWCS: false, //
     useMSE: false, //
-    useOffscreen: false //
+    useOffscreen: false, //
+    autoWasm: false // 自动降级到 wasm 模式
 }
 
 

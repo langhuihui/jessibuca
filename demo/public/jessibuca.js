@@ -62,7 +62,9 @@
       //
       useMSE: false,
       //
-      useOffscreen: false //
+      useOffscreen: false,
+      //
+      autoWasm: false // 自动降级到 wasm 模式
 
     };
     const WORKER_CMD_TYPE = {
@@ -9292,6 +9294,10 @@
           this.player.$container.removeChild(this.$controls);
         }
 
+        if (this.$playBig) {
+          this.player.$container.removeChild(this.$playBig);
+        }
+
         this.player.debug.log('control', 'destroy');
       }
 
@@ -11214,14 +11220,20 @@
             if (this.webcodecsDecoder) {
               this.webcodecsDecoder.once(EVENTS_ERROR.webcodecsH265NotSupport, () => {
                 this.emit(EVENTS_ERROR.webcodecsH265NotSupport);
-                this.emit(EVENTS.error, EVENTS_ERROR.webcodecsH265NotSupport);
+
+                if (!this._opt.autoWasm) {
+                  this.emit(EVENTS.error, EVENTS_ERROR.webcodecsH265NotSupport);
+                }
               });
             }
 
             if (this.mseDecoder) {
               this.mseDecoder.once(EVENTS_ERROR.mediaSourceH265NotSupport, () => {
                 this.emit(EVENTS_ERROR.mediaSourceH265NotSupport);
-                this.emit(EVENTS.error, EVENTS_ERROR.mediaSourceH265NotSupport);
+
+                if (!this._opt.autoWasm) {
+                  this.emit(EVENTS.error, EVENTS_ERROR.mediaSourceH265NotSupport);
+                }
               });
             }
 
@@ -11571,9 +11583,8 @@
         this.$container = $container;
         this.href = null;
         this.events = new Events(this);
-        this.player = new Player($container, _opt);
 
-        this._bindEvents();
+        this._initPlayer($container, _opt);
       }
       /**
        *
@@ -11584,6 +11595,22 @@
         this.player.destroy();
         this.player = null;
         this.off();
+      }
+
+      _initPlayer($container, options) {
+        this.player = new Player($container, options);
+
+        this._bindEvents();
+      }
+
+      _resetPlayer() {
+        let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        this.player.destroy();
+        this.player = null;
+
+        const _options = Object.assign(this._opt, options);
+
+        this._initPlayer(this.$container, _options);
       }
 
       _bindEvents() {
@@ -11794,10 +11821,38 @@
             demuxType
           });
           this.player.once(EVENTS_ERROR.mediaSourceH265NotSupport, () => {
-            this.close();
+            this.close().then(() => {
+              if (this.player._opt.autoWasm) {
+                this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play');
+
+                this._resetPlayer({
+                  useMSE: false
+                });
+
+                this.play(url).then(() => {
+                  resolve();
+                }).catch(() => {
+                  reject();
+                });
+              }
+            });
           });
           this.player.once(EVENTS_ERROR.webcodecsH265NotSupport, () => {
-            this.close();
+            this.close().then(() => {
+              if (this.player._opt.autoWasm) {
+                this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play');
+
+                this._resetPlayer({
+                  useWCS: false
+                });
+
+                this.play(url).then(() => {
+                  resolve();
+                }).catch(() => {
+                  reject();
+                });
+              }
+            });
           });
 
           if (this.hasLoaded()) {

@@ -429,14 +429,18 @@ export default class Player extends Emitter {
                 if (this.webcodecsDecoder) {
                     this.webcodecsDecoder.once(EVENTS_ERROR.webcodecsH265NotSupport, () => {
                         this.emit(EVENTS_ERROR.webcodecsH265NotSupport)
-                        this.emit(EVENTS.error, EVENTS_ERROR.webcodecsH265NotSupport);
+                        if (!this._opt.autoWasm) {
+                            this.emit(EVENTS.error, EVENTS_ERROR.webcodecsH265NotSupport);
+                        }
                     })
                 }
 
                 if (this.mseDecoder) {
                     this.mseDecoder.once(EVENTS_ERROR.mediaSourceH265NotSupport, () => {
                         this.emit(EVENTS_ERROR.mediaSourceH265NotSupport)
-                        this.emit(EVENTS.error, EVENTS_ERROR.mediaSourceH265NotSupport);
+                        if (!this._opt.autoWasm) {
+                            this.emit(EVENTS.error, EVENTS_ERROR.mediaSourceH265NotSupport);
+                        }
                     })
                 }
 

@@ -28,6 +28,11 @@ export default class Control {
         if (this.$controls) {
             this.player.$container.removeChild(this.$controls);
         }
+
+        if(this.$playBig){
+            this.player.$container.removeChild(this.$playBig);
+        }
+
         this.player.debug.log('control', 'destroy');
     }
 
