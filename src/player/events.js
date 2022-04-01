@@ -29,7 +29,7 @@ export default (player) => {
     //
     player.on(EVENTS.decoderWorkerInit, () => {
         player.debug.log('player', 'has loaded');
-        player._hasLoaded = true;
+        player.loaded = true;
     })
 
     //

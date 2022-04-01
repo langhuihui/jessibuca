@@ -114,6 +114,8 @@ export default class Player extends Emitter {
 
         if (!this._onlyMseOrWcsVideo()) {
             this.decoderWorker = new DecoderWorker(this);
+        } else {
+            this.loaded = true;
         }
 
         this.stream = null;
@@ -242,6 +244,10 @@ export default class Player extends Emitter {
 
     get webFullscreen() {
         return this.$container.classList.contains('jessibuca-fullscreen-web')
+    }
+
+    set loaded(value) {
+        this._hasLoaded = value;
     }
 
     get loaded() {
