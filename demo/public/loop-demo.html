@@ -91,17 +91,39 @@
     <div class="container-shell">
         <div id="container"></div>
         <div class="input">
-            <div>输入URL：</div>
+            <span>视频轮播演示,每个视频播放30秒</span>
+        </div>
+        <div class="input">
+            <div>URL1：</div>
             <input
                 autocomplete="on"
                 id="playUrl"
                 value="http://flv.bdplay.nodemedia.cn/live/bbb.flv"
             />
+
+        </div>
+        <div class="input">
+            <div>URL2：</div>
+
+            <input
+                autocomplete="on"
+                id="playUrl2"
+                value="https://flvplayer.js.org/assets/video/weathering-with-you.flv"
+            />
+        </div>
+        <div class="input">
+            <div>URL3：</div>
+            <input
+                autocomplete="on"
+                id="playUrl3"
+                value="https://ks3-cn-beijing.ksyun.com/ksplayer/h265/outside_demo/v1.1.3/720P2M30fpsh265-wasmtest.flv"
+            />
+        </div>
+        <div class="input">
             <button id="play">播放</button>
             <button id="pause" style="display: none">停止</button>
-        </div>
-        <div class="input" style="line-height: 30px">
-            <button id="destroy">销毁</button>
+            <button id="destroy" style="margin-left: 20px">销毁</button>
+
         </div>
     </div>
 </div>
@@ -110,6 +132,9 @@
     var $player = document.getElementById('play');
     var $pause = document.getElementById('pause');
     var $playHref = document.getElementById('playUrl');
+    var $playHref2 = document.getElementById('playUrl2');
+    var $playHref3 = document.getElementById('playUrl3');
+
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
 
@@ -117,6 +142,8 @@
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var jessibuca = null;
+    var index = 0;
+    let looper = null
 
     function create() {
         jessibuca = new Jessibuca({
@@ -151,14 +178,22 @@
 
     create();
 
+    function startFunc() {
+        var urlList = [$playHref.value, $playHref2.value, $playHref3.value];
+        jessibuca.play(urlList[index++ % 3]);
+        looper = setTimeout(() => {
+            jessibuca.pause().then(() => {
+                startFunc();
+            });
+
+        }, 30 * 1000);
+    }
+
     $player.addEventListener('click', function () {
-        var href = $playHref.value;
-        if (href) {
-            jessibuca.play(href);
-            $player.style.display = 'none';
-            $pause.style.display = 'inline-block';
-            $destroy.style.display = 'inline-block';
-        }
+        startFunc()
+        $player.style.display = 'none';
+        $pause.style.display = 'inline-block';
+        $destroy.style.display = 'inline-block'
     }, false)
 
 
@@ -166,13 +201,16 @@
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
         jessibuca.pause();
+        clearTimeout(looper);
     })
 
     $destroy.addEventListener('click', function () {
         if (jessibuca) {
             jessibuca.destroy();
+            clearTimeout(looper);
+            create();
         }
-        create();
+
     })
 
 </script>

@@ -6,7 +6,7 @@ import cssnano from 'cssnano'; // 压缩css
 import replace from 'rollup-plugin-replace'; // 变量替换，可以将动态设置的变量提取出来在配置文件中设置
 import nodeResolve from 'rollup-plugin-node-resolve';
 import json from '@rollup/plugin-json'; // 解析json格式
-import copy from 'rollup-copy-plugin';  // 直接复制文件和文件夹。
+import copy from 'rollup-plugin-copy';  // 直接复制文件和文件夹。
 import {terser} from 'rollup-plugin-terser'; // 压缩
 import base64 from 'postcss-base64'; // 图片变成base64
 
@@ -55,9 +55,15 @@ const baseConfig = {
             targets: [
                 {
                     src: "src/decoder/decoder.wasm",
-                    dest: isProd ? 'dist/decoder.wasm' : 'demo/public/decoder.wasm'
+                    dest: isProd ? 'dist' : 'demo/public'
+                },
+                {
+                    src: 'd.ts/jessibuca.d.ts',
+                    dest: isProd ? 'dist' : 'demo/public'
                 }
-            ]
+            ],
+            verbose: true, // Output copied items to console.
+            copyOnce: true //  Copy items once. Useful in watch mode.
         })
     ],
 };

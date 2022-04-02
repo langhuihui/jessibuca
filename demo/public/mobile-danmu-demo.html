@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+        }
+
+        html,
+        body, .wrap {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        #container {
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+        }
+
+        .danmustage {
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            z-index: 2;
+            color: #fff;
+            overflow: hidden;
+            font-size: 20px;
+            /*transform: rotate(270deg);*/
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div id="container"></div>
+    <div class="danmustage"></div>
+</div>
+<script src="./zepto.js"></script>
+<script src="./danMu.js"></script>
+<script src="./jessibuca.js"></script>
+
+<script>
+
+
+    //初始的弹幕数据
+    var danmuData = [
+        '哈哈哈哈哈哈哈',
+        '弹幕来袭~',
+        '前面的 你肥皂掉了！！',
+        "前方高能，一大波弹幕来袭！",
+        "不约，叔叔我们不约~",
+        "今天没吃药，感觉自己萌萌哒",
+        "走开，让专业的来",
+        "23333333333~~~~~",
+        "请允许我做一个悲伤的表情",
+        "警察叔叔，就是这个人",
+        "为什么放弃治疗",
+        "放开那个人，让我来",
+        "噗……节操去了哪里啊都！！",
+        "膜拜老司机",
+        "你咋不上天呢",
+        "666",
+        "666666666666666666666666~~~",
+        "放开她，让我来！！！",
+        "德里克。。。。test 。。。",
+        "666~~~~~~~~~！！！！！",
+        "前方高能 非战斗人员紧急撤离",
+        "妈妈问我为什么跪着看电脑_(:_」∠)_",
+        "他说的好有道理 我竟无言以对",
+        '小六 你好靓吖',
+        '我基本是只废猫(≥◇≤)',
+        '这个是真的耶',
+        '弹幕走一波~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        '我似乎听到有人说我帅',
+        '什么？！你刚才说我帅？',
+        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~我是天空中最亮的星星~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        '好多人啊',
+        '喂，妖妖灵吗，这里有人在装逼。。',
+        '对方不想和你说话,并向你扔了一条狗。。。',
+        '前面那个说我帅的别走啊啊啊啊',
+        '你们玩，我静静地看着',
+        '我就静静看着你',
+        '超级羞羞',
+        '好想你',
+        '我想你！',
+        '你真帅~',
+        '你肚子好大！！',
+        '最近变胖了，悲伤'
+    ];
+
+    //实例化弹幕
+    var dm = new danMu({
+        device: 'm',//m代表移动端弹幕,不设置或设为pc代表pc端弹幕
+        stage: $(".danmustage"),
+        comments: danmuData,
+        danMuHtml: "<span>{comment}</span>",
+        colors: ["#fff", "#00ccff", "#ff0000", "#00ff00", "#fef500"],
+        flyTime: 7000,
+        timeInterval: 1200,
+        randomSort: true,
+        hSpacing: 0.8,
+        direction:'v'
+    });
+    console.log(dm);
+    dm.pause();
+
+
+    const player = new window.Jessibuca({
+        container: document.getElementById("container"),
+        decoder: "./decoder.js",
+        rotate: 270,
+        isResize: false,
+    });
+
+    // 测试的 demo 地址。
+    // 感谢nodemedia提供的测试地址。
+    if (player.hasLoaded()) {
+        player.play("http://flv.bdplay.nodemedia.cn/live/bbb.flv");
+        dm.play();
+    } else {
+        player.on('load', function () {
+            dm.play();
+            player.play("http://flv.bdplay.nodemedia.cn/live/bbb.flv");
+        })
+    }
+
+
+</script>
+</body>
+</html>

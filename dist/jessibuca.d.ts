@@ -142,6 +142,11 @@ declare namespace Jessibuca {
          * 目前支持的键盘快捷键有：esc -> 退出全屏；arrowUp -> 声音增加；arrowDown -> 声音减少；
          */
         hotKey?: boolean;
+        /**
+         *  在使用MSE或者Webcodecs 播放H265的时候，是否自动降级到wasm模式。
+         *  设置为false 则直接关闭播放，抛出Error 异常，设置为true 则会自动切换成wasm模式播放。
+         */
+        autoWasm?:boolean;
     }
 }
 

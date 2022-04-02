@@ -90,6 +90,12 @@
 <div class="root">
     <div class="container-shell">
         <div id="container"></div>
+        <div class="input" style="width: 640px">
+            使用Chrome86及之后提供的WebCodecs API来进行硬解码,为实验特性,需要手动开启 enable chrome://flags/#enable-experimental-web-platform-features, or pass --enable-blink-features=WebCodecs flag via the command line.
+            <br>
+            <br>
+            Chrome94之后,Desktop,Android,Webview中已默认开启!需要https加载web,播放https/wss-flv流. 如果控制台打印 "WCS is not supported or experimental-web-platform-features not enabled" 请将当前页面使用https访问
+        </div>
         <div class="input">
             <div>输入URL：</div>
             <input
@@ -133,6 +139,7 @@
                 play: showOperateBtns,
                 audio: showOperateBtns,
             },
+            useWCS: true, // webcodecs 解码
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
         },);

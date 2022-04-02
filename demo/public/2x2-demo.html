@@ -31,10 +31,17 @@
             text-shadow: 1px 1px black;
         }
 
-        #container {
+        .container {
             background: rgba(13, 14, 27, 0.7);
-            width: 640px;
-            height: 398px;
+            width: 320px;
+            height: 199px;
+            display: inline-block;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        #container {
+
         }
 
         .input {
@@ -79,7 +86,7 @@
         }
 
         @media (max-width: 720px) {
-            #container {
+            .container {
                 width: 90vw;
                 height: 52.7vw;
             }
@@ -89,14 +96,48 @@
 <body class="page">
 <div class="root">
     <div class="container-shell">
-        <div id="container"></div>
+        <div>
+            <div class="container" id="container1"></div>
+            <div class="container" id="container2"></div>
+        </div>
+        <div>
+            <div class="container" id="container3"></div>
+            <div class="container" id="container4"></div>
+        </div>
+
         <div class="input">
             <div>输入URL：</div>
             <input
                 autocomplete="on"
-                id="playUrl"
+                id="playUrl1"
                 value="http://flv.bdplay.nodemedia.cn/live/bbb.flv"
             />
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl2"
+                value="http://flv.bdplay.nodemedia.cn/live/bbb.flv"
+            />
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl3"
+                value="http://flv.bdplay.nodemedia.cn/live/bbb.flv"
+            />
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl4"
+                value="http://flv.bdplay.nodemedia.cn/live/bbb.flv"
+            />
+        </div>
+        <div class="input">
             <button id="play">播放</button>
             <button id="pause" style="display: none">停止</button>
         </div>
@@ -109,17 +150,17 @@
 <script>
     var $player = document.getElementById('play');
     var $pause = document.getElementById('pause');
-    var $playHref = document.getElementById('playUrl');
-    var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
 
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
-    var jessibuca = null;
+    var playList = [];
 
-    function create() {
-        jessibuca = new Jessibuca({
+    function create(id) {
+        var $container = document.getElementById('container' + id);
+
+        var jessibuca = new Jessibuca({
             container: $container,
             videoBuffer: 0.2, // 缓存时长
             isResize: false,
@@ -143,36 +184,65 @@
         jessibuca.onPlay = () => console.log('onPlay');
         jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
         jessibuca.onMute = msg => console.log('onMute', msg);
+        playList.push(jessibuca);
+    }
+
+
+    for (let i = 0; i < 4; i++) {
+        create(i + 1);
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
         $destroy.style.display = 'none';
     }
 
 
-    create();
-
     $player.addEventListener('click', function () {
-        var href = $playHref.value;
-        if (href) {
-            jessibuca.play(href);
-            $player.style.display = 'none';
-            $pause.style.display = 'inline-block';
-            $destroy.style.display = 'inline-block';
+        for (let i = 0; i < 4; i++) {
+            var id = i + 1;
+            var $playHref = document.getElementById('playUrl' + id);
+            let player = playList[i];
+            if ($playHref.value) {
+                console.log($playHref.value);
+                setTimeout(() => {
+                    player && player.play($playHref.value).then(() => {
+
+                    }).catch((e) => {
+                        console.error(e);
+                    });
+                }, 0)
+            }
         }
+
+
+        $player.style.display = 'none';
+        $pause.style.display = 'inline-block';
+        $destroy.style.display = 'inline-block';
     }, false)
 
 
     $pause.addEventListener('click', function () {
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
-        jessibuca.pause();
+        for (let i = 0; i < 4; i++) {
+            let player = playList[i];
+            player && player.pause()
+        }
     })
 
     $destroy.addEventListener('click', function () {
-        if (jessibuca) {
-            jessibuca.destroy();
+        for (let i = 0; i < 4; i++) {
+            let player = playList[i];
+            player && player.destroy()
         }
-        create();
+        playList = [];
+        setTimeout(() => {
+            for (let i = 0; i < 4; i++) {
+                create(i + 1);
+            }
+            $player.style.display = 'inline-block';
+            $pause.style.display = 'none';
+            $destroy.style.display = 'none';
+        }, 100)
     })
 
 </script>

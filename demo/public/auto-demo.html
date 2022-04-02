@@ -91,32 +91,29 @@
     <div class="container-shell">
         <div id="container"></div>
         <div class="input">
-            <div>输入URL：</div>
-            <input
-                autocomplete="on"
-                id="playUrl"
-                value="http://flv.bdplay.nodemedia.cn/live/bbb.flv"
-            />
-            <button id="play">播放</button>
-            <button id="pause" style="display: none">停止</button>
+            iPhone，chrome等要求自动播放时，音频必须静音，需要由一个真实的用户交互
+            <br>
+            操作来恢复，不能使用代码。
+            <br>
+            https://developers.google.com/web/updates/2017/09/autoplay-policy-changes
         </div>
-        <div class="input" style="line-height: 30px">
-            <button id="destroy">销毁</button>
+        <div class="input">
+            自动播放是默认静音的，需要手动触发cancelMute()
+            <br>
+            我绑定了container窗口的点击事件，来激活声音。
         </div>
+
     </div>
 </div>
 
 <script>
-    var $player = document.getElementById('play');
-    var $pause = document.getElementById('pause');
-    var $playHref = document.getElementById('playUrl');
     var $container = document.getElementById('container');
-    var $destroy = document.getElementById('destroy');
 
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var jessibuca = null;
+    var playUrl = 'http://flv.bdplay.nodemedia.cn/live/bbb.flv';
 
     function create() {
         jessibuca = new Jessibuca({
@@ -143,37 +140,24 @@
         jessibuca.onPlay = () => console.log('onPlay');
         jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
         jessibuca.onMute = msg => console.log('onMute', msg);
-        $player.style.display = 'inline-block';
-        $pause.style.display = 'none';
-        $destroy.style.display = 'none';
-    }
 
+        jessibuca.play(playUrl).then(()=>{
+            console.log('play success')
+        }).catch((e)=>{
+            console.error(e);
+        });
+    }
 
     create();
 
-    $player.addEventListener('click', function () {
-        var href = $playHref.value;
-        if (href) {
-            jessibuca.play(href);
-            $player.style.display = 'none';
-            $pause.style.display = 'inline-block';
-            $destroy.style.display = 'inline-block';
-        }
-    }, false)
 
 
-    $pause.addEventListener('click', function () {
-        $player.style.display = 'inline-block';
-        $pause.style.display = 'none';
-        jessibuca.pause();
-    })
 
-    $destroy.addEventListener('click', function () {
-        if (jessibuca) {
-            jessibuca.destroy();
-        }
-        create();
-    })
+    $container.addEventListener('click',function (){
+        jessibuca.cancelMute()
+    },false)
+
+
 
 </script>
 

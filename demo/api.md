@@ -210,6 +210,15 @@ worker地址
 > 支持 forceNoOffscreen 为 false （开启离屏渲染）
 
 
+### autoWasm
+- **类型**：`boolean`
+- **默认值**：`false`
+- **用法**：
+  在使用MSE或者Webcodecs 播放H265的时候，是否自动降级到wasm模式。
+
+> 设置为false 则直接关闭播放，抛出Error 异常，设置为true 则会自动切换成wasm模式播放。
+
+
 ### hotKey
 - **类型**：`boolean`
 - **默认值**：`false`
@@ -217,6 +226,9 @@ worker地址
   是否开启键盘快捷键
 
 > 目前支持的键盘快捷键有：esc -> 退出全屏；arrowUp -> 声音增加；arrowDown -> 声音减少；
+
+
+
 
 ## 方法
 

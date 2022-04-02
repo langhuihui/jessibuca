@@ -90,6 +90,9 @@
 <div class="root">
     <div class="container-shell">
         <div id="container"></div>
+        <div class="input" style="width: 640px">
+            使用Media Source Extensions API进行视频解码, 在除iOS以外的绝大部分平台能实现硬件加速的H264解码. 支持低延迟与追帧消延迟.Windows系统下,360浏览器可播放使用MSE加速解码H265, win10商店购买hevc解码器后最新edge可硬件加速解码播放H265.
+        </div>
         <div class="input">
             <div>输入URL：</div>
             <input
@@ -115,7 +118,6 @@
 
 
     var showOperateBtns = true; // 是否显示按钮
-    var forceNoOffscreen = true; //
     var jessibuca = null;
 
     function create() {
@@ -133,8 +135,7 @@
                 play: showOperateBtns,
                 audio: showOperateBtns,
             },
-            forceNoOffscreen: forceNoOffscreen,
-            isNotMute: false,
+            useMSE:true // 使用 Media Source Extensions API进行解码
         },);
 
         jessibuca.onLog = msg => console.error(msg);
