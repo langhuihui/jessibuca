@@ -1,4 +1,4 @@
-import {EVENTS, MEDIA_TYPE, WORKER_CMD_TYPE, WORKER_SEND_TYPE} from "../constant";
+import {EVENTS, EVENTS_ERROR, MEDIA_TYPE, WASM_ERROR, WORKER_CMD_TYPE, WORKER_SEND_TYPE} from "../constant";
 import {now} from "../utils";
 
 export default class DecoderWorker {
@@ -75,10 +75,18 @@ export default class DecoderWorker {
                     }
                     break;
                 case WORKER_CMD_TYPE.playAudio:
-                    debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.playAudio, `msg ts:${msg.ts}`);
+                    // debug.log(`decoderWorker`, 'onmessage:', WORKER_CMD_TYPE.playAudio, `msg ts:${msg.ts}`);
                     // 只有在 playing 的时候。
                     if (this.player.playing && this.player.audio) {
                         this.player.audio.play(msg.buffer, msg.ts);
+                    }
+                    break;
+                case WORKER_CMD_TYPE.wasmError:
+                    if (msg.message) {
+                        if (msg.message.indexOf(WASM_ERROR.invalidNalUnitSize) !== -1) {
+                            this.player.emit(EVENTS.error, EVENTS_ERROR.wasmDecodeError);
+                            this.player.emit(EVENTS_ERROR.wasmDecodeError);
+                        }
                     }
                     break;
                 default:

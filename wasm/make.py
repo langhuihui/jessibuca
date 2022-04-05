@@ -25,6 +25,7 @@ emcc_args = [
     # '--llvm-lto','1',
     '--bind',
     '-I.', '-Iobj/include',
+    '--pre-js','./pre.js',
     '--post-js','./post.js'
 ]+["-s "+k+"="+str(v) for k, v in sargs.items()]
 

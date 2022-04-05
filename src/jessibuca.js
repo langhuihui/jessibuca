@@ -274,9 +274,11 @@ class Jessibuca extends Emitter {
                         this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play')
                         this._resetPlayer({useMSE: false})
                         this.play(url).then(() => {
-                            resolve();
+                            // resolve();
+                            this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play success')
                         }).catch(() => {
-                            reject();
+                            // reject();
+                            this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play error')
                         });
                     }
                 });
@@ -288,12 +290,41 @@ class Jessibuca extends Emitter {
                         this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play')
                         this._resetPlayer({useWCS: false})
                         this.play(url).then(() => {
-                            resolve();
+                            // resolve();
+                            this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play success')
                         }).catch(() => {
-                            reject();
+                            // reject();
+                            this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play error')
                         });
                     }
                 });
+            })
+
+            // 解码报错。
+            this.player.once(EVENTS_ERROR.wasmDecodeError, () => {
+                if (this.player._opt.wasmDecodeErrorReplay) {
+                    this.close().then(() => {
+                        this.player.debug.log('Jessibuca', 'wasm decode error and reset player and play')
+                        this._resetPlayer({useWCS: false})
+                        this.play(url).then(() => {
+                            // resolve();
+                            this.player.debug.log('Jessibuca', 'wasm decode error and reset player and play success')
+                        }).catch(() => {
+                            // reject();
+                            this.player.debug.log('Jessibuca', 'wasm decode error and reset player and play error')
+                        });
+                    })
+                }
+            })
+
+            this.player.once(EVENTS.delayTimeout, () => {
+                if (this.player._opt.heartTimeoutReplay) {
+                    this.play(url).then(() => {
+                        // resolve();
+                    }).catch(() => {
+                        // reject();
+                    });
+                }
             })
 
             if (this.hasLoaded()) {

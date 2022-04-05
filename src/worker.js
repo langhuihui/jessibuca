@@ -6,13 +6,6 @@ import {formatVideoDecoderConfigure} from "./utils";
 if (!Date.now) Date.now = function () {
     return new Date().getTime();
 };
-Module.print = function (text) {
-    postMessage({cmd: WORKER_CMD_TYPE.print, text: text})
-}
-Module.printErr = function (text) {
-    postMessage({cmd: WORKER_CMD_TYPE.printErr, text: text})
-}
-
 
 Module.postRun = function () {
     var buffer = []
@@ -249,7 +242,7 @@ Module.postRun = function () {
                             buffer.shift()
                             _doDecode(data);
                         } else if (this.delay > decoder.opt.videoBuffer + 1000) {
-                            // decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, set dropping is true`);
+                            decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, set dropping is true`);
                             this.resetDelay();
                             this.dropping = true
                         } else {

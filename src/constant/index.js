@@ -48,7 +48,9 @@ export const DEFAULT_PLAYER_OPTIONS = {
     useWCS: false, //
     useMSE: false, //
     useOffscreen: false, //
-    autoWasm: false // 自动降级到 wasm 模式
+    autoWasm: false, // 自动降级到 wasm 模式
+    heartTimeoutReplay: false,// 心跳超时之后自动再播放。
+    wasmDecodeErrorReplay: false // 解码失败重新播放。
 }
 
 
@@ -57,13 +59,17 @@ export const WORKER_CMD_TYPE = {
     initVideo: 'initVideo',
     render: 'render',
     playAudio: 'playAudio',
-    print: 'print',
-    printErr: 'printErr',
     initAudio: 'initAudio',
     kBps: 'kBps',
     decode: 'decode',
     audioCode: 'audioCode',
-    videoCode: 'videoCode'
+    videoCode: 'videoCode',
+    wasmError: 'wasmError'
+}
+
+export const WASM_ERROR = {
+    invalidNalUnitSize: 'Invalid NAL unit size',
+    // errorSplittingTheInputIntoNALUnits: 'Error splitting the input into NAL units'
 }
 
 export const MEDIA_TYPE = {
