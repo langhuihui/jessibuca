@@ -228,7 +228,21 @@ worker地址
 > 目前支持的键盘快捷键有：esc -> 退出全屏；arrowUp -> 声音增加；arrowDown -> 声音减少；
 
 
+### heartTimeoutReplay
+- **类型**：`boolean`
+- **默认值**：`false`
+- **用法**：
+  是否开启心跳超时之后自动再播放
 
+> heartTimeout 心跳超时之后自动再播放,不再抛出异常，而直接重新播放视频地址。
+
+### wasmDecodeErrorReplay
+- **类型**：`boolean`
+- **默认值**：`false`
+- **用法**：
+  是否开启解码失败重新播放
+
+> wasm解码报错之后，不再抛出异常，而是直接重新播放视频地址。
 
 ## 方法
 
