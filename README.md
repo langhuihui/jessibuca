@@ -32,7 +32,8 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 支持webrtc标准流播放
 - 支持语音通讯：支持采集PCM/G711A/G711U格式的数据、支持采样率16000Hz或8000Hz，采样精度32bits或者16bits，支持单通道或双通道
 - 支持音视频流的倍数播放
-- 支持HLS格式协议
+- 支持HLS H264格式协议
+- 支持HLS H265格式协议
 - 支持fmp4格式协议
 - 支持crypto解密播放
 - 支持WebTransport协议播放
