@@ -1,13 +1,14 @@
 // 播放协议
 export const PLAYER_PLAY_PROTOCOL = {
     websocket: 0,
-    fetch: 1
-}
+    fetch: 1,
+    webtransport: 2,
+};
 
 export const DEMUX_TYPE = {
     flv: 'flv',
     m7s: 'm7s'
-}
+};
 
 
 // default player options
@@ -51,7 +52,7 @@ export const DEFAULT_PLAYER_OPTIONS = {
     autoWasm: false, // 自动降级到 wasm 模式
     heartTimeoutReplay: false,// 心跳超时之后自动再播放。
     wasmDecodeErrorReplay: false // 解码失败重新播放。
-}
+};
 
 
 export const WORKER_CMD_TYPE = {
@@ -65,22 +66,22 @@ export const WORKER_CMD_TYPE = {
     audioCode: 'audioCode',
     videoCode: 'videoCode',
     wasmError: 'wasmError'
-}
+};
 
 export const WASM_ERROR = {
     invalidNalUnitSize: 'Invalid NAL unit size',
     // errorSplittingTheInputIntoNALUnits: 'Error splitting the input into NAL units'
-}
+};
 
 export const MEDIA_TYPE = {
     audio: 1,
     video: 2
-}
+};
 
 export const FLV_MEDIA_TYPE = {
     audio: 8,
     video: 9
-}
+};
 
 export const WORKER_SEND_TYPE = {
     init: 'init',
@@ -88,7 +89,7 @@ export const WORKER_SEND_TYPE = {
     audioDecode: 'audioDecode',
     videoDecode: 'videoDecode',
     close: 'close'
-}
+};
 
 
 //
@@ -138,7 +139,7 @@ export const EVENTS = {
     videoTimeUpdate: 'videoTimeUpdate',
     videoSyncAudio: 'videoSyncAudio',
     playToRenderTimes: 'playToRenderTimes'
-}
+};
 
 
 export const JESSIBUCA_EVENTS = {
@@ -163,7 +164,7 @@ export const JESSIBUCA_EVENTS = {
     recordStart: EVENTS.recordStart,
     recordEnd: EVENTS.recordEnd,
     playToRenderTimes: EVENTS.playToRenderTimes
-}
+};
 
 export const EVENTS_ERROR = {
     playError: 'playIsNotPauseOrUrlIsNull',
@@ -172,7 +173,7 @@ export const EVENTS_ERROR = {
     webcodecsH265NotSupport: 'webcodecsH265NotSupport',
     mediaSourceH265NotSupport: 'mediaSourceH265NotSupport',
     wasmDecodeError: 'wasmDecodeError'
-}
+};
 
 
 export const WEBSOCKET_STATUS = {
@@ -180,52 +181,52 @@ export const WEBSOCKET_STATUS = {
     open: 'open',
     close: 'close',
     error: 'error'
-}
+};
 
 export const BUFFER_STATUS = {
     empty: 'empty',
     buffering: 'buffering',
     full: 'full'
-}
+};
 
 
 export const SCREENSHOT_TYPE = {
     download: 'download',
     base64: 'base64',
     blob: 'blob'
-}
+};
 
 
 export const VIDEO_ENC_TYPE = {
     7: 'H264(AVC)', //
     12: 'H265(HEVC)' //
-}
+};
 
 export const VIDEO_ENC_CODE = {
     h264: 7,
     h265: 12
-}
+};
 
 
 export const AUDIO_ENC_TYPE = {
     10: 'AAC',
     7: 'ALAW',
     8: 'MULAW'
-}
+};
 
 export const H265_NAL_TYPE = {
     vps: 32,
     sps: 33,
     pps: 34
-}
+};
 
-export const CONTROL_HEIGHT = 38
+export const CONTROL_HEIGHT = 38;
 
 export const SCALE_MODE_TYPE = {
     full: 0, //  视频画面完全填充canvas区域,画面会被拉伸
     auto: 1, // 视频画面做等比缩放后,高或宽对齐canvas区域,画面不被拉伸,但有黑边
     fullAuto: 2 // 视频画面做等比缩放后,完全填充canvas区域,画面不被拉伸,没有黑边,但画面显示不全
-}
+};
 
 
 export const FILE_SUFFIX = {
@@ -238,29 +239,29 @@ export const CANVAS_RENDER_TYPE = {
     webcodecs: 'webcodecs',
     webgl: 'webgl',
     offscreen: 'offscreen'
-}
+};
 
 export const ENCODED_VIDEO_TYPE = {
     key: 'key',
     delta: 'delta'
-}
+};
 
 
 export const MP4_CODECS = {
     avc: 'video/mp4; codecs="avc1.64002A"',
     hev: 'video/mp4; codecs="hev1.1.6.L123.b0"',
-}
+};
 
 
 export const MEDIA_SOURCE_STATE = {
     ended: 'ended',
     open: 'open',
     closed: 'closed'
-}
+};
 
 
 // frag duration
-export const FRAG_DURATION = Math.ceil(1000 / 25)
+export const FRAG_DURATION = Math.ceil(1000 / 25);
 
 
 export const AUDIO_SYNC_VIDEO_DIFF = 1000;
@@ -270,4 +271,4 @@ export const HOT_KEY = {
     esc: 27, //
     arrowUp: 38, //
     arrowDown: 40, //
-}
+};

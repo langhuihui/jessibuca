@@ -146,7 +146,15 @@ declare namespace Jessibuca {
          *  在使用MSE或者Webcodecs 播放H265的时候，是否自动降级到wasm模式。
          *  设置为false 则直接关闭播放，抛出Error 异常，设置为true 则会自动切换成wasm模式播放。
          */
-        autoWasm?:boolean;
+        autoWasm?: boolean;
+        /**
+         * heartTimeout 心跳超时之后自动再播放,不再抛出异常，而直接重新播放视频地址。
+         */
+        heartTimeoutReplay?: boolean,
+        /**
+         * wasm解码报错之后，不再抛出异常，而是直接重新播放视频地址。
+         */
+        wasmDecodeErrorReplay?: boolean,
     }
 }
 
@@ -581,7 +589,7 @@ declare class Jessibuca {
      * @param event
      * @param callback
      */
-    on(event: 'playToRenderTimes', callback: (times:{
+    on(event: 'playToRenderTimes', callback: (times: {
         playInitStart: number, // 1 初始化
         playStart: number, // 2 初始化
         streamStart: number, // 3 网络请求

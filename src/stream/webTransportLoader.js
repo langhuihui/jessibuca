@@ -23,7 +23,7 @@ export default class WebTransportLoader extends Emitter {
         }
     }
 
-    _createWebTransport() {
+    async _createWebTransport() {
         const player = this.player;
         const {
             debug,
@@ -32,15 +32,10 @@ export default class WebTransportLoader extends Emitter {
         } = player;
 
         this.transport = new WebTransport(this.wtUrl);
-
-        this.transport.createBidirectionalStream().then((stream)=>{
-            stream.readable.pipeThrough(new WritableStream(new OPut(this._handleMessage)));
+        await this.transport.ready
+        return this.transport.createBidirectionalStream().then((stream)=>{
+            stream.readable.pipeTo(new WritableStream(demux.input));
         })
-
-    }
-
-    * _handleMessage(){
-
     }
 
     fetchStream(url) {

@@ -27,27 +27,8 @@ export default class FetchLoader extends Emitter {
         const {demux} = this.player;
         this.player._times.streamStart = now();
         fetch(url, {signal: this.abortController.signal}).then((res) => {
-            const reader = res.body.getReader();
             this.emit(EVENTS.streamSuccess);
-            const fetchNext = () => {
-                reader.read().then(({done, value}) => {
-                        if (done) {
-                            demux.close();
-                        } else {
-                            this.streamRate && this.streamRate(value.byteLength);
-                            demux.dispatch(value);
-                            fetchNext();
-                        }
-                    }
-                ).catch((e) => {
-                    demux.close();
-                    // 这边会报用户 aborted a request 错误。
-                    this.emit(EVENTS_ERROR.fetchError, e);
-                    this.player.emit(EVENTS.error, EVENTS_ERROR.fetchError);
-                    this.abort();
-                })
-            }
-            fetchNext();
+            res.body.pipeTo(new WritableStream(demux.input));
         }).catch((e) => {
             this.abort();
             this.emit(EVENTS_ERROR.fetchError, e)

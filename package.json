@@ -6,6 +6,7 @@
         "build:wasm": "python wasm/make.py --wasm && npm run build && npm run build:demo",
         "build:demo": "vitepress build demo",
         "dev": "vitepress dev demo",
+        "dev:https": "vitepress dev demo",
         "dev:ip": "vitepress dev demo --host 0.0.0.0",
         "dev:watch": "npx cross-env NODE_ENV=development rollup -c -m -w"
     },

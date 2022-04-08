@@ -1,20 +1,20 @@
 import Player from './player';
 import Events from "./utils/events";
-import {DEMUX_TYPE, EVENTS, EVENTS_ERROR, JESSIBUCA_EVENTS, PLAYER_PLAY_PROTOCOL, SCALE_MODE_TYPE} from "./constant";
-import {isEmpty, isNotEmpty, supportWCS, uuid16} from "./utils";
+import { DEMUX_TYPE, EVENTS, EVENTS_ERROR, JESSIBUCA_EVENTS, PLAYER_PLAY_PROTOCOL, SCALE_MODE_TYPE } from "./constant";
+import { isEmpty, isNotEmpty, supportWCS, uuid16 } from "./utils";
 import Emitter from "./utils/emitter";
 
 
 class Jessibuca extends Emitter {
-    static ERROR = EVENTS_ERROR
+    static ERROR = EVENTS_ERROR;
 
     static TIMEOUT = {
         loadingTimeout: EVENTS.loadingTimeout,
         delayTimeout: EVENTS.delayTimeout,
-    }
+    };
 
     constructor(options) {
-        super()
+        super();
         let _opt = options;
         let $container = options.container;
         if (typeof options.container === 'string') {
@@ -31,7 +31,7 @@ class Jessibuca extends Emitter {
 
         // s -> ms
         if (isNotEmpty(_opt.videoBuffer)) {
-            _opt.videoBuffer = Number(_opt.videoBuffer) * 1000
+            _opt.videoBuffer = Number(_opt.videoBuffer) * 1000;
         }
 
         // setting
@@ -41,7 +41,7 @@ class Jessibuca extends Emitter {
             }
 
             if (isEmpty(_opt.heartTimeout)) {
-                _opt.heartTimeout = _opt.timeout
+                _opt.heartTimeout = _opt.timeout;
             }
         }
 
@@ -77,9 +77,9 @@ class Jessibuca extends Emitter {
         // 对外的事件
         Object.keys(JESSIBUCA_EVENTS).forEach((key) => {
             this.player.on(JESSIBUCA_EVENTS[key], (value) => {
-                this.emit(key, value)
-            })
-        })
+                this.emit(key, value);
+            });
+        });
     }
 
     /**
@@ -89,7 +89,7 @@ class Jessibuca extends Emitter {
     setDebug(value) {
         this.player.updateOption({
             isDebug: !!value
-        })
+        });
     }
 
     /**
@@ -131,7 +131,7 @@ class Jessibuca extends Emitter {
             timeout: time,
             loadingTimeout: time,
             heartTimeout: time
-        })
+        });
     }
 
     /**
@@ -143,7 +143,7 @@ class Jessibuca extends Emitter {
         let options = {
             isFullResize: false,
             isResize: false
-        }
+        };
         switch (type) {
             case SCALE_MODE_TYPE.full:
                 options.isFullResize = false;
@@ -185,7 +185,7 @@ class Jessibuca extends Emitter {
      *
      */
     clearView() {
-        this.player.video.clearView()
+        this.player.video.clearView();
     }
 
     /**
@@ -196,7 +196,7 @@ class Jessibuca extends Emitter {
     play(url) {
         return new Promise((resolve, reject) => {
             if (!url && !this._opt.url) {
-                this.emit(EVENTS.error, EVENTS_ERROR.playError)
+                this.emit(EVENTS.error, EVENTS_ERROR.playError);
                 reject();
                 return;
             }
@@ -214,11 +214,11 @@ class Jessibuca extends Emitter {
                             this.clearView();
                             this.player.play(this._opt.url).then(() => {
                                 resolve();
-                            }).catch(() => {
+                            }).catch((err) => {
                                 this.player.pause().then(() => {
-                                    reject();
-                                })
-                            })
+                                    reject(err);
+                                });
+                            });
                         }
                     } else {
                         // url 发生改变了
@@ -228,7 +228,7 @@ class Jessibuca extends Emitter {
                             return this._play(url);
                         }).catch(() => {
                             reject();
-                        })
+                        });
                     }
                 } else {
                     return this._play(url);
@@ -241,10 +241,10 @@ class Jessibuca extends Emitter {
                 }).catch(() => {
                     this.player.pause().then(() => {
                         reject();
-                    })
-                })
+                    });
+                });
             }
-        })
+        });
     }
 
     /**
@@ -255,67 +255,73 @@ class Jessibuca extends Emitter {
      */
     _play(url) {
         return new Promise((resolve, reject) => {
-            this._opt.url = url;
             //  新的url
-            const isHttp = url.indexOf("http") === 0;
+            const isHttp = !(url.indexOf("ws") === 0);
             //
-            const protocol = isHttp ? PLAYER_PLAY_PROTOCOL.fetch : PLAYER_PLAY_PROTOCOL.websocket
+            const protocol = url.indexOf("http") === 0 ? PLAYER_PLAY_PROTOCOL.fetch : url.indexOf("ws") === 0 ? PLAYER_PLAY_PROTOCOL.websocket : url.indexOf("wt") === 0 ? PLAYER_PLAY_PROTOCOL.webtransport : new Error("不支持的协议");
+            if (protocol instanceof Error) {
+                throw protocol;
+            }
+            if (protocol == PLAYER_PLAY_PROTOCOL.webtransport) {
+                url = url.replace(/^wt/, "https");
+            }
+            this._opt.url = url;
             //
             const demuxType = (isHttp || url.indexOf(".flv") !== -1 || this._opt.isFlv) ? DEMUX_TYPE.flv : DEMUX_TYPE.m7s;
 
             this.player.updateOption({
                 protocol,
                 demuxType
-            })
+            });
 
             this.player.once(EVENTS_ERROR.mediaSourceH265NotSupport, () => {
                 this.close().then(() => {
                     if (this.player._opt.autoWasm) {
-                        this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play')
-                        this._resetPlayer({useMSE: false})
+                        this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play');
+                        this._resetPlayer({ useMSE: false });
                         this.play(url).then(() => {
                             // resolve();
-                            this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play success')
+                            this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play success');
                         }).catch(() => {
                             // reject();
-                            this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play error')
+                            this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play error');
                         });
                     }
                 });
-            })
+            });
 
             this.player.once(EVENTS_ERROR.webcodecsH265NotSupport, () => {
                 this.close().then(() => {
                     if (this.player._opt.autoWasm) {
-                        this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play')
-                        this._resetPlayer({useWCS: false})
+                        this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play');
+                        this._resetPlayer({ useWCS: false });
                         this.play(url).then(() => {
                             // resolve();
-                            this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play success')
+                            this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play success');
                         }).catch(() => {
                             // reject();
-                            this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play error')
+                            this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play error');
                         });
                     }
                 });
-            })
+            });
 
             // 解码报错。
             this.player.once(EVENTS_ERROR.wasmDecodeError, () => {
                 if (this.player._opt.wasmDecodeErrorReplay) {
                     this.close().then(() => {
-                        this.player.debug.log('Jessibuca', 'wasm decode error and reset player and play')
-                        this._resetPlayer({useWCS: false})
+                        this.player.debug.log('Jessibuca', 'wasm decode error and reset player and play');
+                        this._resetPlayer({ useWCS: false });
                         this.play(url).then(() => {
                             // resolve();
-                            this.player.debug.log('Jessibuca', 'wasm decode error and reset player and play success')
+                            this.player.debug.log('Jessibuca', 'wasm decode error and reset player and play success');
                         }).catch(() => {
                             // reject();
-                            this.player.debug.log('Jessibuca', 'wasm decode error and reset player and play error')
+                            this.player.debug.log('Jessibuca', 'wasm decode error and reset player and play error');
                         });
-                    })
+                    });
                 }
-            })
+            });
 
             this.player.once(EVENTS.delayTimeout, () => {
                 if (this.player._opt.heartTimeoutReplay) {
@@ -325,7 +331,7 @@ class Jessibuca extends Emitter {
                         // reject();
                     });
                 }
-            })
+            });
 
             if (this.hasLoaded()) {
                 this.player.play(url).then(() => {
@@ -333,8 +339,8 @@ class Jessibuca extends Emitter {
                 }).catch(() => {
                     this.player.pause().then(() => {
                         reject();
-                    })
-                })
+                    });
+                });
             } else {
                 this.player.once(EVENTS.decoderWorkerInit, () => {
                     this.player.play(url).then(() => {
@@ -342,11 +348,11 @@ class Jessibuca extends Emitter {
                     }).catch(() => {
                         this.player.pause().then(() => {
                             reject();
-                        })
-                    })
-                })
+                        });
+                    });
+                });
             }
-        })
+        });
     }
 
     /**
@@ -361,11 +367,11 @@ class Jessibuca extends Emitter {
      * @param time {number} s
      */
     setBufferTime(time) {
-        time = Number(time)
+        time = Number(time);
         // s -> ms
         this.player.updateOption({
             videoBuffer: time * 1000
-        })
+        });
     }
 
     /**
@@ -373,14 +379,14 @@ class Jessibuca extends Emitter {
      * @param deg {number}
      */
     setRotate(deg) {
-        deg = parseInt(deg, 10)
+        deg = parseInt(deg, 10);
         const list = [0, 90, 270];
         if (this._opt.rotate === deg || list.indexOf(deg) === -1) {
             return;
         }
         this.player.updateOption({
             rotate: deg
-        })
+        });
         this.resize();
     }
 
@@ -398,7 +404,7 @@ class Jessibuca extends Emitter {
     setKeepScreenOn() {
         this.player.updateOption({
             keepScreenOn: true
-        })
+        });
     }
 
     /**
@@ -420,7 +426,7 @@ class Jessibuca extends Emitter {
      * @param type {string} download,base64,blob
      */
     screenshot(filename, format, quality, type) {
-        return this.player.video.screenshot(filename, format, quality, type)
+        return this.player.video.screenshot(filename, format, quality, type);
     }
 
     /**
@@ -432,12 +438,12 @@ class Jessibuca extends Emitter {
     startRecord(fileName, fileType) {
         return new Promise((resolve, reject) => {
             if (this.player.playing) {
-                this.player.startRecord(fileName, fileType)
+                this.player.startRecord(fileName, fileType);
                 resolve();
             } else {
                 reject();
             }
-        })
+        });
     }
 
     stopRecordAndSave() {

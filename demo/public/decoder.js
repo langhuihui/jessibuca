@@ -2103,7 +2103,9 @@
 	      }
 
 	      try {
-	        if (FS.trackingDelegate["willMovePath"]) ;
+	        if (FS.trackingDelegate["willMovePath"]) {
+	          FS.trackingDelegate["willMovePath"](old_path, new_path);
+	        }
 	      } catch (e) {
 	        err("FS.trackingDelegate['willMovePath']('" + old_path + "', '" + new_path + "') threw an exception: " + e.message);
 	      }
@@ -2119,7 +2121,7 @@
 	      }
 
 	      try {
-	        if (FS.trackingDelegate["onMovePath"]) ;
+	        if (FS.trackingDelegate["onMovePath"]) FS.trackingDelegate["onMovePath"](old_path, new_path);
 	      } catch (e) {
 	        err("FS.trackingDelegate['onMovePath']('" + old_path + "', '" + new_path + "') threw an exception: " + e.message);
 	      }
@@ -2146,7 +2148,9 @@
 	      }
 
 	      try {
-	        if (FS.trackingDelegate["willDeletePath"]) ;
+	        if (FS.trackingDelegate["willDeletePath"]) {
+	          FS.trackingDelegate["willDeletePath"](path);
+	        }
 	      } catch (e) {
 	        err("FS.trackingDelegate['willDeletePath']('" + path + "') threw an exception: " + e.message);
 	      }
@@ -2155,7 +2159,7 @@
 	      FS.destroyNode(node);
 
 	      try {
-	        if (FS.trackingDelegate["onDeletePath"]) ;
+	        if (FS.trackingDelegate["onDeletePath"]) FS.trackingDelegate["onDeletePath"](path);
 	      } catch (e) {
 	        err("FS.trackingDelegate['onDeletePath']('" + path + "') threw an exception: " + e.message);
 	      }
@@ -2194,7 +2198,9 @@
 	      }
 
 	      try {
-	        if (FS.trackingDelegate["willDeletePath"]) ;
+	        if (FS.trackingDelegate["willDeletePath"]) {
+	          FS.trackingDelegate["willDeletePath"](path);
+	        }
 	      } catch (e) {
 	        err("FS.trackingDelegate['willDeletePath']('" + path + "') threw an exception: " + e.message);
 	      }
@@ -2203,7 +2209,7 @@
 	      FS.destroyNode(node);
 
 	      try {
-	        if (FS.trackingDelegate["onDeletePath"]) ;
+	        if (FS.trackingDelegate["onDeletePath"]) FS.trackingDelegate["onDeletePath"](path);
 	      } catch (e) {
 	        err("FS.trackingDelegate['onDeletePath']('" + path + "') threw an exception: " + e.message);
 	      }
@@ -2459,7 +2465,19 @@
 	      }
 
 	      try {
-	        var trackingFlags; if (FS.trackingDelegate["onOpenFile"]) ;
+	        if (FS.trackingDelegate["onOpenFile"]) {
+	          var trackingFlags = 0;
+
+	          if ((flags & 2097155) !== 1) {
+	            trackingFlags |= FS.tracking.openFlags.READ;
+	          }
+
+	          if ((flags & 2097155) !== 0) {
+	            trackingFlags |= FS.tracking.openFlags.WRITE;
+	          }
+
+	          FS.trackingDelegate["onOpenFile"](path, trackingFlags);
+	        }
 	      } catch (e) {
 	        err("FS.trackingDelegate['onOpenFile']('" + path + "', flags) threw an exception: " + e.message);
 	      }
@@ -6516,7 +6534,8 @@
 	// 播放协议
 	const PLAYER_PLAY_PROTOCOL = {
 	  websocket: 0,
-	  fetch: 1
+	  fetch: 1,
+	  webtransport: 2
 	};
 	const DEMUX_TYPE = {
 	  flv: 'flv',
