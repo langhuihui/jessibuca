@@ -34,7 +34,7 @@
                     type="input"
                     autocomplete="on"
                     ref="playUrl"
-                    value=""
+                    value="wt://monibuca.com:4433/live/test"
                 />
                 <button v-if="!playing" @click="play">播放</button>
                 <button v-else @click="pause">停止</button>
@@ -161,9 +161,9 @@ export default {
                         // background: "bg.jpg",
                         loadingText: "疯狂加载中...",
                         // hasAudio:false,
-                        debug: false,
+                        debug: true,
                         hotKey:true,
-                        // hasAudio:false,
+                        hasAudio:false,
                         supportDblclickFullscreen: true,
                         showBandwidth: this.showBandwidth, // 显示网速
                         operateBtns: {
