@@ -159,4 +159,12 @@ export default class DecoderWorker {
     }
 
 
+    updateWorkConfig(config) {
+        this.decoderWorker.postMessage({
+            cmd: WORKER_SEND_TYPE.updateConfig,
+            key: config.key,
+            value: config.value
+        })
+    }
+
 }

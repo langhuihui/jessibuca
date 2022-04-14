@@ -87,7 +87,8 @@ export const WORKER_SEND_TYPE = {
     decode: 'decode',
     audioDecode: 'audioDecode',
     videoDecode: 'videoDecode',
-    close: 'close'
+    close: 'close',
+    updateConfig:'updateConfig'
 }
 
 

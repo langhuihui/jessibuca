@@ -53,11 +53,10 @@ export default class CommonLoader extends Emitter {
 
     //
     initInterval() {
-        const videoBuffer = this.player._opt.videoBuffer;
         this.player.debug.log('common dumex', `init Interval`);
-
         let _loop = () => {
             let data;
+            const videoBuffer = this.player._opt.videoBuffer;
             if (this.bufferList.length) {
                 if (this.dropping) {
                     // this.player.debug.log('common dumex', `is dropping`);

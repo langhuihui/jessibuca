@@ -6601,7 +6601,8 @@
 	  decode: 'decode',
 	  audioDecode: 'audioDecode',
 	  videoDecode: 'videoDecode',
-	  close: 'close'
+	  close: 'close',
+	  updateConfig: 'updateConfig'
 	}; //
 	const ENCODED_VIDEO_TYPE = {
 	  key: 'key',
@@ -7017,6 +7018,10 @@
 
 	      case WORKER_SEND_TYPE.close:
 	        decoder$1.close();
+	        break;
+
+	      case WORKER_SEND_TYPE.updateConfig:
+	        decoder$1.opt[msg.key] = msg.value;
 	        break;
 	    }
 	  };

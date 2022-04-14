@@ -100,7 +100,8 @@
       decode: 'decode',
       audioDecode: 'audioDecode',
       videoDecode: 'videoDecode',
-      close: 'close'
+      close: 'close',
+      updateConfig: 'updateConfig'
     }; //
 
     const EVENTS = {
@@ -8367,6 +8368,14 @@
         }, [arrayBuffer.buffer]);
       }
 
+      updateWorkConfig(config) {
+        this.decoderWorker.postMessage({
+          cmd: WORKER_SEND_TYPE.updateConfig,
+          key: config.key,
+          value: config.value
+        });
+      }
+
     }
 
     class CommonLoader extends Emitter {
@@ -8423,11 +8432,11 @@
 
 
       initInterval() {
-        const videoBuffer = this.player._opt.videoBuffer;
         this.player.debug.log('common dumex', `init Interval`);
 
         let _loop = () => {
           let data;
+          const videoBuffer = this.player._opt.videoBuffer;
 
           if (this.bufferList.length) {
             if (this.dropping) {
@@ -11943,6 +11952,11 @@
 
         this.player.updateOption({
           videoBuffer: time * 1000
+        }); // update worker config
+
+        this.player.decoderWorker && this.player.decoderWorker.updateWorkConfig({
+          key: 'videoBuffer',
+          value: time * 1000
         });
       }
       /**

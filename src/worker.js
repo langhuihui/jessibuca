@@ -333,6 +333,9 @@ Module.postRun = function () {
             case WORKER_SEND_TYPE.close:
                 decoder.close()
                 break
+            case WORKER_SEND_TYPE.updateConfig:
+                decoder.opt[msg.key] = msg.value;
+                break
         }
     }
 

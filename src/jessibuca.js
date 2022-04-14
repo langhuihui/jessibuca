@@ -366,6 +366,11 @@ class Jessibuca extends Emitter {
         this.player.updateOption({
             videoBuffer: time * 1000
         })
+        // update worker config
+        this.player.decoderWorker && this.player.decoderWorker.updateWorkConfig({
+            key: 'videoBuffer',
+            value: time * 1000
+        })
     }
 
     /**
