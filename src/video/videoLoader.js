@@ -101,7 +101,7 @@ export default class VideoLoader extends CommonLoader {
 
     resize() {
         this.$videoElement.width = this.player.width;
-        this.$videoElement.height = this.player._opt.hasControl ? this.player.height - CONTROL_HEIGHT : this.player.height;
+        this.$videoElement.height = (this.player._opt.hasControl && !this.player._opt.controlAutoHide) ? this.player.height - CONTROL_HEIGHT : this.player.height;
         const option = this.player._opt;
         let objectFill = 'contain';
         const rotate = option.rotate;

@@ -32,8 +32,9 @@ export const DEFAULT_PLAYER_OPTIONS = {
         screenshot: false,
         play: false,
         audio: false,
-        record: false
+        record: false,
     },
+    controlAutoHide: false,
     hasControl: false,
     loadingText: '',
     background: '',
@@ -50,7 +51,8 @@ export const DEFAULT_PLAYER_OPTIONS = {
     useOffscreen: false, //
     autoWasm: false, // 自动降级到 wasm 模式
     heartTimeoutReplay: false,// 心跳超时之后自动再播放。
-    wasmDecodeErrorReplay: false // 解码失败重新播放。
+    wasmDecodeErrorReplay: false, // 解码失败重新播放。
+    openWebglAlignment: false,//  https://github.com/langhuihui/jessibuca/issues/152
 }
 
 
@@ -88,7 +90,7 @@ export const WORKER_SEND_TYPE = {
     audioDecode: 'audioDecode',
     videoDecode: 'videoDecode',
     close: 'close',
-    updateConfig:'updateConfig'
+    updateConfig: 'updateConfig'
 }
 
 

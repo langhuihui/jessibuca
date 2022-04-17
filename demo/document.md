@@ -182,12 +182,13 @@ https://github.com/langhuihui/jessibuca/issues/126
 
 - 对于宽度不是8的倍数的时候就会出现这样的问题
 
+原问题： https://github.com/langhuihui/jessibuca/issues/152
+
 例如：540x960 分辨率
 
 在使用WebGL对YUV420P进行渲染时，WebGL图像预处理默认每次取4字节的数据，但是540x960分辨率下的U、V分量宽度是540/2=270不能被4整除，导致绿屏。
 
 #### 解决方案
 
-可以通过设置`gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);` 的方式来解决，但是会损耗一部分性能。
-
-
+1. 可以通过设置`gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);` 的方式来解决，但是会损耗一部分性能。
+2. `openWebglAlignment` 设为 `true`

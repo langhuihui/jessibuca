@@ -1,7 +1,13 @@
 import icons from './icons';
 
 export default (player, control) => {
-    player.$container.classList.add('jessibuca-controls-show');
+
+    if (player._opt.hasControl && player._opt.controlAutoHide) {
+        player.$container.classList.add('jessibuca-controls-show-auto-hide');
+    }
+    else {
+        player.$container.classList.add('jessibuca-controls-show');
+    }
     const options = player._opt;
     const operateBtns = options.operateBtns;
 

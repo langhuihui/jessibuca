@@ -116,4 +116,17 @@ export default (player, control) => {
         e.stopPropagation();
         player.fullscreen = false;
     })
+
+    if (player._opt.hasControl && player._opt.controlAutoHide) {
+        //
+        proxy(player.$container, 'mouseover', () => {
+            if (!player.fullscreen) {
+                setStyle(control.$controls, 'display', 'block');
+            }
+        })
+
+        proxy(player.$container, 'mouseout', () => {
+            setStyle(control.$controls, 'display', 'none');
+        })
+    }
 }

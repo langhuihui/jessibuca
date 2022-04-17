@@ -54,7 +54,7 @@ export default class AudioContextLoader extends Emitter {
 
         // update
         this.on(EVENTS.videoSyncAudio, (options) => {
-            this.player.debug.log('AudioContext', `videoSyncAudio , audioTimestamp: ${options.audioTimestamp},videoTimestamp: ${options.videoTimestamp},diff:${options.diff}`)
+            // this.player.debug.log('AudioContext', `videoSyncAudio , audioTimestamp: ${options.audioTimestamp},videoTimestamp: ${options.videoTimestamp},diff:${options.diff}`)
             this.audioSyncVideoOption = options;
         })
 

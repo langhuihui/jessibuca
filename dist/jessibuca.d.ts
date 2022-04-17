@@ -155,6 +155,11 @@ declare namespace Jessibuca {
          * wasm解码报错之后，不再抛出异常，而是直接重新播放视频地址。
          */
         wasmDecodeErrorReplay?: boolean,
+        /**
+         * https://github.com/langhuihui/jessibuca/issues/152 解决方案
+         * 例如：WebGL图像预处理默认每次取4字节的数据，但是540x960分辨率下的U、V分量宽度是540/2=270不能被4整除，导致绿屏。
+         */
+        openWebglAlignment?: boolean
     }
 }
 
@@ -367,7 +372,7 @@ declare class Jessibuca {
 
      const fileBlob = jessibuca.screenshot("test",'blob')
      */
-    screenshot(filename?: string, format?: string, quality?: number, type?: string);
+    screenshot(filename?: string, format?: string, quality?: number, type?: string): void;
 
     /**
      * 开始录制。
@@ -377,14 +382,14 @@ declare class Jessibuca {
      @example
      jessibuca.startRecord('xxx','webm')
      */
-    startRecord(fileName: string, fileType: string)
+    startRecord(fileName: string, fileType: string): void;
 
     /**
      * 暂停录制并下载。
      @example
      jessibuca.stopRecordAndSave()
      */
-    stopRecordAndSave();
+    stopRecordAndSave(): void;
 
     /**
      * 返回是否正在播放中状态。

@@ -186,6 +186,14 @@
         }
     }
 
+    &.jessibuca-controls-show-auto-hide {
+        .jessibuca-controls {
+            opacity: 0.8;
+            visibility: visible;
+            display: none;
+        }
+    }
+
     &.jessibuca-hide-cursor {
         * {
             cursor: none !important;
@@ -414,7 +422,7 @@
         overflow: hidden;
     }
 
-    .jessibuca-volume-panel-text{
+    .jessibuca-volume-panel-text {
         position: absolute;
         left: 0;
         top: 0;

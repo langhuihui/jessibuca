@@ -367,7 +367,7 @@ declare class Jessibuca {
 
      const fileBlob = jessibuca.screenshot("test",'blob')
      */
-    screenshot(filename?: string, format?: string, quality?: number, type?: string);
+    screenshot(filename?: string, format?: string, quality?: number, type?: string): void;
 
     /**
      * 开始录制。
@@ -377,14 +377,14 @@ declare class Jessibuca {
      @example
      jessibuca.startRecord('xxx','webm')
      */
-    startRecord(fileName: string, fileType: string)
+    startRecord(fileName: string, fileType: string):void;
 
     /**
      * 暂停录制并下载。
      @example
      jessibuca.stopRecordAndSave()
      */
-    stopRecordAndSave();
+    stopRecordAndSave():void;
 
     /**
      * 返回是否正在播放中状态。

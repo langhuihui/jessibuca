@@ -1,4 +1,4 @@
-export default (gl) => {
+export default (gl, openWebglAlignment) => {
     var vertexShaderScript = [
         'attribute vec4 vertexPos;',
         'attribute vec4 texturePos;',
@@ -33,6 +33,9 @@ export default (gl) => {
         '}'
     ].join('\n');
 
+    if (openWebglAlignment) {
+        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    }
     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexShaderScript);
     gl.compileShader(vertexShader);

@@ -68,7 +68,7 @@ export default class CanvasVideoLoader extends CommonLoader {
 
     _initContextGl() {
         this.contextGl = createContextGL(this.$videoElement);
-        const webgl = createWebGL(this.contextGl);
+        const webgl = createWebGL(this.contextGl, this.player._opt.openWebglAlignment);
         this.contextGlRender = webgl.render;
         this.contextGlDestroy = webgl.destroy
     }
@@ -180,7 +180,7 @@ export default class CanvasVideoLoader extends CommonLoader {
         const option = this.player._opt;
         const width = this.player.width;
         let height = this.player.height;
-        if (option.hasControl) {
+        if (option.hasControl && !option.controlAutoHide) {
             height -= CONTROL_HEIGHT;
         }
         let resizeWidth = this.$videoElement.width;

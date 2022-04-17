@@ -291,6 +291,4 @@ export default class MseDecoder extends Emitter {
             this.mediaSource.endOfStream();
         }
     }
-
-
 }
