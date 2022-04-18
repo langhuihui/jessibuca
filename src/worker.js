@@ -86,7 +86,8 @@ Module.postRun = function () {
             debug: DEFAULT_PLAYER_OPTIONS.debug,
             forceNoOffscreen: DEFAULT_PLAYER_OPTIONS.forceNoOffscreen,
             useWCS: DEFAULT_PLAYER_OPTIONS.useWCS,
-            videoBuffer: DEFAULT_PLAYER_OPTIONS.videoBuffer
+            videoBuffer: DEFAULT_PLAYER_OPTIONS.videoBuffer,
+            openWebglAlignment: DEFAULT_PLAYER_OPTIONS.openWebglAlignment
         },
         useOffscreen: function () {
             return !decoder.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined';
@@ -158,7 +159,7 @@ Module.postRun = function () {
             if (decoder.useOffscreen()) {
                 this.offscreenCanvas = new OffscreenCanvas(w, h);
                 this.offscreenCanvasGL = this.offscreenCanvas.getContext("webgl");
-                this.webglObj = createWebGL(this.offscreenCanvasGL)
+                this.webglObj = createWebGL(this.offscreenCanvasGL, decoder.opt.openWebglAlignment)
                 this.draw = function (ts, y, u, v) {
                     this.webglObj.render(w, h, Module.HEAPU8.subarray(y, y + size), Module.HEAPU8.subarray(u, u + qsize), Module.HEAPU8.subarray(v, v + (qsize)))
                     let image_bitmap = this.offscreenCanvas.transferToImageBitmap();

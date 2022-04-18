@@ -140,6 +140,26 @@ https://github.com/langhuihui/jessibuca/issues/126
 
 例如 h265,1280*720，wasm 肯定会卡顿的。 建议降低分辨率。还需要增大videoBuffer 大小。
 
+#### h265 优化方案
+
+1. 降低分辨率
+2. 增大videoBuffer大小
+3. 设置hasAudio 为false，不demux和decode音频数据。
+4. 条件允许(支持OffscreenCanvas)也可以配合设置 forceNoOffscreen 为 false  开启离屏渲染模式，提升性能。
+
+#### h264 优化方案
+
+1. 降低分辨率
+2. 增大videoBuffer大小
+3. 设置hasAudio 为false，不demux和decode音频数据。
+4. 条件允许(支持OffscreenCanvas)也可以配合设置 forceNoOffscreen 为 false  开启离屏渲染模式，提升性能。
+5. 如果是https情况下 设置 useWCS 为 true。
+6. 如果是http情况下 设置 useMSE 为 true。（暂不支持 forceNoOffscreen 参数）
+
+> 某些显卡在支持OffscreenCanvas上面会存在问题，所以谨慎使用。
+
+
+
 
 ### 可以播放本地视频吗？
 
