@@ -136,6 +136,24 @@ https://github.com/langhuihui/jessibuca/issues/126
 另外：
 > MP4格式支持在IOS VLC播放器显示时长播放，Android VLC播放器无法显示时长播放，PC VLC播放器可以播放
 
+
+### 无音频的flv视频流，无法录制，录制的文件大小都是0
+
+原问题：https://github.com/langhuihui/jessibuca/issues/128
+
+- 1、无音频视频录制不成功，文件大小为0
+- 2、静音视频录制不成功，文件大小为0
+
+解决方案：
+
+### 如果没有音频数据
+
+设置 hasAudio 为false 就可以解决了。
+
+> 目前如果声音在静音或者没有音频数据的时候，一定要设置hasAudio，不然MediaRecorder会录制失败。
+
+
+
 ### 创建多个以上播放实例会非常卡顿，还会导致页面黑屏
 
 例如 h265,1280*720，wasm 肯定会卡顿的。 建议降低分辨率。还需要增大videoBuffer 大小。
