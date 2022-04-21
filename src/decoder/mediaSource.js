@@ -148,15 +148,15 @@ export default class MseDecoder extends Emitter {
         let bytes = arrayBuffer.byteLength;
         let cts = 0;
         let dts = ts;
-
+        // player.debug.log('MediaSource', '_decodeVideo', ts);
         const $video = player.video.$videoElement;
 
         if ($video.buffered.length > 1) {
             this.removeBuffer($video.buffered.start(0), $video.buffered.end(0));
             this.timeInit = false;
         }
-        if ($video.drop && dts - this.cacheTrack.dts > 1000) {
-            $video.drop = false;
+        if (this.dropping && dts - this.cacheTrack.dts > 1000) {
+            this.dropping = false;
             this.cacheTrack = {};
         } else if (this.cacheTrack && dts > this.cacheTrack.dts) {
             // 需要额外加8个size
@@ -233,7 +233,7 @@ export default class MseDecoder extends Emitter {
             this.sourceBuffer = this.mediaSource.addSourceBuffer(MP4_CODECS.avc);
             proxy(this.sourceBuffer, 'error', (error) => {
                 this.player.emit(EVENTS.mseSourceBufferError, error);
-                this.dropSourceBuffer(true)
+                // this.dropSourceBuffer(false)
             })
         }
 
@@ -249,7 +249,7 @@ export default class MseDecoder extends Emitter {
         } else {
             if (this.sourceBuffer.updating === true) {
                 this.player.emit(EVENTS.mseSourceBufferBusy);
-                this.dropSourceBuffer(true);
+                // this.dropSourceBuffer(false);
             }
         }
     }

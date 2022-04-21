@@ -8320,7 +8320,8 @@
           debug: this.player._opt.debug,
           forceNoOffscreen: this.player._opt.forceNoOffscreen,
           useWCS: this.player._opt.useWCS,
-          videoBuffer: this.player._opt.videoBuffer
+          videoBuffer: this.player._opt.videoBuffer,
+          openWebglAlignment: this.player._opt.openWebglAlignment
         };
         this.decoderWorker.postMessage({
           cmd: WORKER_SEND_TYPE.init,
@@ -10602,7 +10603,8 @@
         let arrayBuffer = payload.slice(5);
         let bytes = arrayBuffer.byteLength;
         let cts = 0;
-        let dts = ts;
+        let dts = ts; // player.debug.log('MediaSource', '_decodeVideo', ts);
+
         const $video = player.video.$videoElement;
 
         if ($video.buffered.length > 1) {
@@ -10610,8 +10612,8 @@
           this.timeInit = false;
         }
 
-        if ($video.drop && dts - this.cacheTrack.dts > 1000) {
-          $video.drop = false;
+        if (this.dropping && dts - this.cacheTrack.dts > 1000) {
+          this.dropping = false;
           this.cacheTrack = {};
         } else if (this.cacheTrack && dts > this.cacheTrack.dts) {
           // 需要额外加8个size
@@ -10692,8 +10694,7 @@
         if (this.sourceBuffer === null) {
           this.sourceBuffer = this.mediaSource.addSourceBuffer(MP4_CODECS.avc);
           proxy(this.sourceBuffer, 'error', error => {
-            this.player.emit(EVENTS.mseSourceBufferError, error);
-            this.dropSourceBuffer(true);
+            this.player.emit(EVENTS.mseSourceBufferError, error); // this.dropSourceBuffer(false)
           });
         }
 
@@ -10708,8 +10709,7 @@
           this.player.emit(EVENTS.mseSourceBufferError, 'mediaSource is closed');
         } else {
           if (this.sourceBuffer.updating === true) {
-            this.player.emit(EVENTS.mseSourceBufferBusy);
-            this.dropSourceBuffer(true);
+            this.player.emit(EVENTS.mseSourceBufferBusy); // this.dropSourceBuffer(false);
           }
         }
       }
