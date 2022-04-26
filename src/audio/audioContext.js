@@ -1,6 +1,50 @@
 import { audioContextUnlock } from "../utils";
 
 export default (jessibuca) => {
+    let WaveViews = {};
+    let bufferArray = []
+    let cvs;
+    WaveViews.draw = function () {
+        //绘制画布
+        cvs = document.getElementById("cvs");
+        if (typeof (cvs) == 'undefined' || cvs == null) {
+            console.error('WaveViews not found')
+        } else {
+            let ctx = cvs.getContext('2d');
+            let audioBuffer = [[], []];
+            bufferArray.forEach((val) => {
+                audioBuffer[0] = audioBuffer[0].concat(...val[0])
+                audioBuffer[1] = audioBuffer[1].concat(...val[1])
+            })
+            bufferArray.length = 0
+            let lth;
+            let arr;
+            try {
+                lth = audioBuffer[0].length;
+                arr = audioBuffer[0];
+            } catch (e) {
+                lth = audioBuffer[1].length;
+                arr = audioBuffer[1];
+            }
+            if (lth == null || arr == null) {
+                return;
+            }
+            ctx.clearRect(0, 0, cvs.width, cvs.height); //清理画布
+            let w = Math.floor(lth / cvs.width / 2);
+            ctx.fillStyle = '#33ee56'
+            var max = cvs.width / 2
+            for (let i = 0; i < max; i++) {
+                //中线
+                ctx.fillRect(i, cvs.height / 2, cvs.width, 1);
+                //计算最高值
+                let waveHeight = (arr[i * w] * cvs.height) > cvs.height ? cvs.height : (arr[i * w] * cvs.height);
+                //双向波纹
+                // ctx.fillRect(2*i, (cvs.height - arr[i * w] * cvs.height) , 1, waveHeight*8);
+                ctx.fillRect(2 * i, (cvs.height - arr[i * w] * cvs.height) / 2, 1, waveHeight * 8);
+            }
+        }
+    }
+
     jessibuca._audioContext = new (window.AudioContext || window.webkitAudioContext)();
     jessibuca._gainNode = jessibuca._audioContext.createGain();
     //
@@ -65,10 +109,14 @@ export default (jessibuca) => {
             _audioPlayBuffers = [];
         }
         jessibuca._gainNode.connect(context.destination);
-        jessibuca._playAudio = (fromBuffer) => _audioPlayBuffers.push(fromBuffer)
+        jessibuca._playAudio = (fromBuffer) => {
+            _audioPlayBuffers.push(fromBuffer)
+            bufferArray.push(fromBuffer)
+            if (bufferArray.length === 6) {
+                WaveViews.draw();
+            }
+        }
     }
-
-
     jessibuca._destroyAudioContext = () => {
         jessibuca._audioContext.close();
         jessibuca._audioContext = null;

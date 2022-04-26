@@ -110,7 +110,7 @@ export default {
   },
   mounted() {
     this.version = VERSION === '#VERSION#' ? '' : VERSION;
-    this.create();
+    window.onload = () => this.create();
     window.onerror = (msg) => (this.err = msg);
   },
   unmounted() {
@@ -129,7 +129,7 @@ export default {
                 // background: "bg.jpg",
                 loadingText: "加载中",
                 // hasAudio:false,
-                debug: true,
+                debug: false,
                 showBandwidth: this.showBandwidth, // 显示网速
                 operateBtns: {
                   fullscreen: this.showOperateBtns,
@@ -261,6 +261,24 @@ export default {
 
       if (this.$refs.playUrl.value) {
         if (this.jessibuca.hasLoaded()) {
+          let url = this.$refs.playUrl.value;
+          let raw = url.split('?');
+          if(raw.length >= 2){
+            let url2 = '?' + raw[1];
+            let urlParams = new URLSearchParams(url2);
+            let res = urlParams.get('audioOnly');
+            if(res != null && res == 1){
+              //the target stream only contains audio
+              this.jessibuca.setAudioOnly(true);
+            }else{
+              //the target stream contains video
+              this.jessibuca.setAudioOnly(false);
+            }
+          }else {
+            console.log('[DemoPlayer.vue] unable to extract params, raw-->' + raw);
+            this.jessibuca.setAudioOnly(false);
+          }
+
           this.jessibuca.play(this.$refs.playUrl.value);
         } else {
           this.jessibuca.on("load", () => {

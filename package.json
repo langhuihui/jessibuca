@@ -1,6 +1,6 @@
 {
   "name": "jessibuca",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "build": "parcel build src/index.js --dist-dir ./demo/public --no-source-maps",
     "build:watch": "parcel build src/index.js --dist-dir ./demo/public",
