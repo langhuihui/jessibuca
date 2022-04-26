@@ -83,6 +83,7 @@
 </template>
 <script>
 import {VERSION} from "./version";
+import Jessibuca from "../../src/jessibuca";
 
 export default {
   name: "DemoPlayer",
