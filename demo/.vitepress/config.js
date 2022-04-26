@@ -9,6 +9,7 @@ module.exports = {
             {text: 'API', link: '/api'},
             { text: 'DEMO', link: '/demo' },
             {text: 'Document', link: '/document'},
+            {text: 'PRO', link: '/pro'},
             {text: 'HTTP', link: 'http://jessibuca.monibuca.com/'},
             {text: 'HTTPS', link: 'https://j.m7s.live/'},
         ],
