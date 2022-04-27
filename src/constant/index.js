@@ -21,6 +21,10 @@ export const DEFAULT_PLAYER_OPTIONS = {
     loadingTimeout: 10, // loading timeout
     heartTimeout: 10,  // heart timeout
     timeout: 10, // second
+    loadingTimeoutRetry: false, // loading timeout retry
+    heartTimeoutRetry: false, // heart timeout retry
+    loadingTimeoutRetryTimes: 3, // loading timeout retry fail times
+    heartTimeoutRetryTimes: 3, // heart timeout retry fail times
     supportDblclickFullscreen: false,
     showBandwidth: false, //
     keepScreenOn: false,
