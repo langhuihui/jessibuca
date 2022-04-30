@@ -26,10 +26,18 @@
       // 快捷键
       loadingTimeout: 10,
       // loading timeout
-      heartTimeout: 10,
+      heartTimeout: 5,
       // heart timeout
       timeout: 10,
       // second
+      loadingTimeoutReplay: false,
+      // loading timeout replay
+      heartTimeoutReplay: false,
+      // heart timeout replay。
+      loadingTimeoutReplayTimes: 3,
+      // loading timeout replay fail times
+      heartTimeoutReplayTimes: 3,
+      // heart timeout replay fail times
       supportDblclickFullscreen: false,
       showBandwidth: false,
       //
@@ -65,11 +73,9 @@
       //
       useOffscreen: false,
       //
-      autoWasm: false,
+      autoWasm: true,
       // 自动降级到 wasm 模式
-      heartTimeoutReplay: false,
-      // 心跳超时之后自动再播放。
-      wasmDecodeErrorReplay: false,
+      wasmDecodeErrorReplay: true,
       // 解码失败重新播放。
       openWebglAlignment: false //  https://github.com/langhuihui/jessibuca/issues/152
 
@@ -319,7 +325,7 @@
       }
 
       destroy() {
-        this.master.debug.log(`Events`, 'destroy');
+        this.master.debug && this.master.debug.log(`Events`, 'destroy');
         this.destroys.forEach(event => event());
       }
 
@@ -11632,7 +11638,8 @@
 
         this._opt = _opt;
         this.$container = $container;
-        this.href = null;
+        this._loadingTimeoutReplayTimes = 0;
+        this._heartTimeoutReplayTimes = 0;
         this.events = new Events(this);
 
         this._initPlayer($container, _opt);
@@ -11643,8 +11650,20 @@
 
 
       destroy() {
-        this.player.destroy();
-        this.player = null;
+        if (this.events) {
+          this.events.destroy();
+          this.events = null;
+        }
+
+        if (this.player) {
+          this.player.destroy();
+          this.player = null;
+        }
+
+        this.$container = null;
+        this._opt = null;
+        this._loadingTimeoutReplayTimes = 0;
+        this._heartTimeoutReplayTimes = 0;
         this.off();
       }
 
@@ -11928,10 +11947,25 @@
                 });
               });
             }
-          });
+          }); // 监听 delay timeout
+
           this.player.once(EVENTS.delayTimeout, () => {
-            if (this.player._opt.heartTimeoutReplay) {
-              this.play(url).then(() => {// resolve();
+            if (this.player._opt.heartTimeoutReplay && this._heartTimeoutReplayTimes < this.player._opt.heartTimeoutReplayTimes) {
+              this._heartTimeoutReplayTimes += 1;
+              this.play(url).then(() => {
+                // resolve();
+                this._heartTimeoutReplayTimes = 0;
+              }).catch(() => {// reject();
+              });
+            }
+          }); // 监听 loading timeout
+
+          this.player.once(EVENTS.loadingTimeout, () => {
+            if (this.player._opt.loadingTimeoutReplay && this._loadingTimeoutReplayTimes < this.player._opt.loadingTimeoutReplayTimes) {
+              this._loadingTimeoutReplayTimes += 1;
+              this.play(url).then(() => {
+                // resolve();
+                this._loadingTimeoutReplayTimes = 0;
               }).catch(() => {// reject();
               });
             }

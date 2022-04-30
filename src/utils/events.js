@@ -19,7 +19,7 @@ export default class Events {
     }
 
     destroy() {
-        this.master.debug.log(`Events`, 'destroy');
+        this.master.debug && this.master.debug.log(`Events`, 'destroy');
         this.destroys.forEach(event => event());
     }
 }

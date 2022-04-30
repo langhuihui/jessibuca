@@ -6540,10 +6540,18 @@
 	  // 快捷键
 	  loadingTimeout: 10,
 	  // loading timeout
-	  heartTimeout: 10,
+	  heartTimeout: 5,
 	  // heart timeout
 	  timeout: 10,
 	  // second
+	  loadingTimeoutReplay: false,
+	  // loading timeout replay
+	  heartTimeoutReplay: false,
+	  // heart timeout replay。
+	  loadingTimeoutReplayTimes: 3,
+	  // loading timeout replay fail times
+	  heartTimeoutReplayTimes: 3,
+	  // heart timeout replay fail times
 	  supportDblclickFullscreen: false,
 	  showBandwidth: false,
 	  //
@@ -6579,11 +6587,9 @@
 	  //
 	  useOffscreen: false,
 	  //
-	  autoWasm: false,
+	  autoWasm: true,
 	  // 自动降级到 wasm 模式
-	  heartTimeoutReplay: false,
-	  // 心跳超时之后自动再播放。
-	  wasmDecodeErrorReplay: false,
+	  wasmDecodeErrorReplay: true,
 	  // 解码失败重新播放。
 	  openWebglAlignment: false //  https://github.com/langhuihui/jessibuca/issues/152
 

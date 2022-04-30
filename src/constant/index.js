@@ -19,12 +19,12 @@ export const DEFAULT_PLAYER_OPTIONS = {
     debug: false,
     hotKey: false, // 快捷键
     loadingTimeout: 10, // loading timeout
-    heartTimeout: 10,  // heart timeout
+    heartTimeout: 5,  // heart timeout
     timeout: 10, // second
-    loadingTimeoutRetry: false, // loading timeout retry
-    heartTimeoutRetry: false, // heart timeout retry
-    loadingTimeoutRetryTimes: 3, // loading timeout retry fail times
-    heartTimeoutRetryTimes: 3, // heart timeout retry fail times
+    loadingTimeoutReplay: false, // loading timeout replay
+    heartTimeoutReplay: false,// heart timeout replay。
+    loadingTimeoutReplayTimes: 3, // loading timeout replay fail times
+    heartTimeoutReplayTimes: 3, // heart timeout replay fail times
     supportDblclickFullscreen: false,
     showBandwidth: false, //
     keepScreenOn: false,
@@ -53,9 +53,8 @@ export const DEFAULT_PLAYER_OPTIONS = {
     useWCS: false, //
     useMSE: false, //
     useOffscreen: false, //
-    autoWasm: false, // 自动降级到 wasm 模式
-    heartTimeoutReplay: false,// 心跳超时之后自动再播放。
-    wasmDecodeErrorReplay: false, // 解码失败重新播放。
+    autoWasm: true, // 自动降级到 wasm 模式
+    wasmDecodeErrorReplay: true, // 解码失败重新播放。
     openWebglAlignment: false,//  https://github.com/langhuihui/jessibuca/issues/152
 }
 

@@ -47,7 +47,8 @@ class Jessibuca extends Emitter {
 
         this._opt = _opt;
         this.$container = $container;
-        this.href = null;
+        this._loadingTimeoutReplayTimes = 0;
+        this._heartTimeoutReplayTimes = 0;
         this.events = new Events(this);
         this._initPlayer($container, _opt);
     }
@@ -56,8 +57,19 @@ class Jessibuca extends Emitter {
      *
      */
     destroy() {
-        this.player.destroy();
-        this.player = null;
+        if (this.events) {
+            this.events.destroy();
+            this.events = null;
+        }
+
+        if (this.player) {
+            this.player.destroy();
+            this.player = null;
+        }
+        this.$container = null;
+        this._opt = null;
+        this._loadingTimeoutReplayTimes = 0;
+        this._heartTimeoutReplayTimes = 0;
         this.off();
     }
 
@@ -317,15 +329,32 @@ class Jessibuca extends Emitter {
                 }
             })
 
+            // 监听 delay timeout
             this.player.once(EVENTS.delayTimeout, () => {
-                if (this.player._opt.heartTimeoutReplay) {
+                if (this.player._opt.heartTimeoutReplay && this._heartTimeoutReplayTimes < this.player._opt.heartTimeoutReplayTimes) {
+                    this._heartTimeoutReplayTimes += 1;
                     this.play(url).then(() => {
                         // resolve();
+                        this._heartTimeoutReplayTimes = 0;
                     }).catch(() => {
                         // reject();
                     });
                 }
             })
+
+            // 监听 loading timeout
+            this.player.once(EVENTS.loadingTimeout, () => {
+                if (this.player._opt.loadingTimeoutReplay && this._loadingTimeoutReplayTimes < this.player._opt.loadingTimeoutReplayTimes) {
+                    this._loadingTimeoutReplayTimes += 1;
+                    this.play(url).then(() => {
+                        // resolve();
+                        this._loadingTimeoutReplayTimes = 0;
+                    }).catch(() => {
+                        // reject();
+                    });
+                }
+            })
+
 
             if (this.hasLoaded()) {
                 this.player.play(url).then(() => {
