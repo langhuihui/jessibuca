@@ -152,6 +152,18 @@ declare namespace Jessibuca {
          */
         heartTimeoutReplay?: boolean,
         /**
+         * heartTimeoutReplay 从试次数，超过之后，不再自动播放
+         */
+        heartTimeoutReplayTimes?: number,
+        /**
+         * loadingTimeout loading之后自动再播放,不再抛出异常，而直接重新播放视频地址。
+         */
+        loadingTimeoutReplay?: boolean,
+        /**
+         * heartTimeoutReplay 从试次数，超过之后，不再自动播放
+         */
+        loadingTimeoutReplayTimes?: number
+        /**
          * wasm解码报错之后，不再抛出异常，而是直接重新播放视频地址。
          */
         wasmDecodeErrorReplay?: boolean,
