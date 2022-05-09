@@ -370,3 +370,95 @@ export function initPlayTimes() {
         allTimestamp: '' // videoStart - playInitStart
     }
 }
+
+// create watermark
+export function createWatermark(options) {
+    let defaultConfig = {
+        container: '',
+        left: '',
+        right: '',
+        top: '',
+        bottom: '',
+        image: {
+            src: '',
+            width: '100',
+            height: '60',
+        },
+        text: {
+            content: '',
+            fontSize: '14',
+            color: '#000'
+        },
+    }
+    defaultConfig = Object.assign(defaultConfig, options)
+
+    const $container = defaultConfig.container;
+
+    if ($container) {
+        return
+    }
+
+    let shadowRoot = null;
+    const otDiv = document.createElement('div');
+    otDiv.setAttribute('style', 'pointer-events: none !important; display: block !important');
+
+    if (typeof otDiv.attachShadow === "function") {
+        shadowRoot = otDiv.attachShadow({mode: 'open'});
+    } else if (otDiv.shadowRoot) {
+        shadowRoot = otDiv.shadowRoot;
+    } else {
+        shadowRoot = otDiv;
+    }
+
+    const nodeList = $container.children;
+    const index = Math.floor(Math.random() * (nodeList.length - 1));
+
+    if (nodeList[index]) {
+        $container.insertBefore(otDiv, nodeList[index]);
+    } else {
+        $container.appendChild(otDiv);
+    }
+
+
+    const maskDiv = document.createElement('div');
+    let innerDom = null;
+    if (defaultConfig.text && defaultConfig.text.content) {
+        innerDom = document.createTextNode(defaultConfig.text);
+    } else if (defaultConfig.image && defaultConfig.image.src) {
+        innerDom = document.createElement('img')
+        innerDom.style.height = '100%'
+        innerDom.style.width = '100%'
+        innerDom.src = defaultConfig.image.src;
+    }
+
+    if (!innerDom) {
+        return;
+    }
+
+    maskDiv.appendChild(innerDom);
+
+    maskDiv.style.visibility = '';
+    maskDiv.style.position = "absolute";
+    maskDiv.style.display = 'block'
+    maskDiv.style['-ms-user-select'] = "none";
+    maskDiv.style.left = defaultConfig.left;
+    maskDiv.style.right = defaultConfig.right;
+    maskDiv.style.top = defaultConfig.top;
+    maskDiv.style.bottom = defaultConfig.bottom;
+    maskDiv.style.overflow = 'hidden';
+    maskDiv.style.zIndex = "9999999";
+    if (defaultConfig.text && defaultConfig.text.content) {
+        maskDiv.style.fontSize = defaultConfig.text.fontSize;
+        maskDiv.style.color = defaultConfig.text.color;
+    } else if (defaultConfig.image && defaultConfig.image.src) {
+        maskDiv.style.width = defaultConfig.image.width + 'px';
+        maskDiv.style.height = defaultConfig.image.height + 'px';
+    }
+
+    shadowRoot.appendChild(maskDiv)
+
+    // remove function
+    return () => {
+        $container.removeChild(otDiv);
+    }
+}
