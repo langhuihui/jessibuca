@@ -7,7 +7,7 @@ import {
     fpsStatus,
     initPlayTimes,
     isEmpty,
-    isFullScreen,
+    isFullScreen, isMobile,
     isNotEmpty,
     now,
     supportMSE,
@@ -231,7 +231,17 @@ export default class Player extends Emitter {
     }
 
     set fullscreen(value) {
-        this.emit(EVENTS.fullscreen, value);
+        if (isMobile()) {
+            this.emit(EVENTS.webFullscreen, value);
+            setTimeout(() => {
+                this.updateOption({
+                    rotate: value ? 270 : 0,
+                })
+                this.resize();
+            }, 10)
+        } else {
+            this.emit(EVENTS.fullscreen, value);
+        }
     }
 
     get fullscreen() {

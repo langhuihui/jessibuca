@@ -1,4 +1,4 @@
-import {MP4_CODECS} from "../constant";
+import {MP4_CODECS, FILE_SUFFIX} from "../constant";
 
 export function noop() {
 }
@@ -346,6 +346,10 @@ export function saveBlobToFile(fileName, blob) {
 
 export function isEmpty(value) {
     return value === null || value === undefined
+}
+
+export function isBoolean(value) {
+    return value === true || value === false;
 }
 
 export function isNotEmpty(value) {

@@ -1,6 +1,6 @@
 import Emitter from "../utils/emitter";
 import {CONTROL_HEIGHT, EVENTS, SCREENSHOT_TYPE, VIDEO_ENC_TYPE} from "../constant";
-import {dataURLToFile, downloadImg, now} from "../utils";
+import {dataURLToFile, downloadImg, isMobile, now} from "../utils";
 import CommonLoader from "./commonLoader";
 
 export default class VideoLoader extends CommonLoader {
@@ -100,11 +100,30 @@ export default class VideoLoader extends CommonLoader {
     }
 
     resize() {
-        this.$videoElement.width = this.player.width;
-        this.$videoElement.height = (this.player._opt.hasControl && !this.player._opt.controlAutoHide) ? this.player.height - CONTROL_HEIGHT : this.player.height;
+        let width = this.player.width;
+        let height = this.player.height;
         const option = this.player._opt;
-        let objectFill = 'contain';
         const rotate = option.rotate;
+        if (option.hasControl && !option.controlAutoHide) {
+            if (isMobile() && this.player.fullscreen) {
+                width -= CONTROL_HEIGHT;
+            } else {
+                height -= CONTROL_HEIGHT;
+            }
+        }
+
+        this.$videoElement.width = width;
+        this.$videoElement.height = height;
+
+        if (rotate === 270 || rotate === 90) {
+            this.$videoElement.width = height;
+            this.$videoElement.height = width;
+        }
+        let resizeWidth = this.$videoElement.width;
+        let resizeHeight = this.$videoElement.height;
+        let left = ((width - resizeWidth) / 2)
+        let top = ((height - resizeHeight) / 2)
+        let objectFill = 'contain';
 
         // 默认是true
         // 视频画面做等比缩放后,高或宽对齐canvas区域,画面不被拉伸,但有黑边
@@ -120,6 +139,8 @@ export default class VideoLoader extends CommonLoader {
         }
         this.$videoElement.style.objectFit = objectFill;
         this.$videoElement.style.transform = 'rotate(' + rotate + 'deg)';
+        this.$videoElement.style.left = left + "px"
+        this.$videoElement.style.top = top + "px"
     }
 
 

@@ -1,5 +1,5 @@
 import {EVENTS} from "../constant";
-import {bpsSize, getStyle, setStyle} from "../utils";
+import {bpsSize, getStyle, isBoolean, setStyle} from "../utils";
 import screenfull from "screenfull";
 
 export default (player, control) => {
@@ -74,12 +74,14 @@ export default (player, control) => {
         }
     })
 
+    const screenfullChange = (fullscreen) => {
+        let isFullScreen = isBoolean(fullscreen) ? fullscreen : player.fullscreen
+        setStyle(control.$fullscreenExit, 'display', isFullScreen ? 'flex' : 'none');
+        setStyle(control.$fullscreen, 'display', isFullScreen ? 'none' : 'flex');
+        // control.autoSize();
+    };
     try {
-        const screenfullChange = () => {
-            setStyle(control.$fullscreenExit, 'display', player.fullscreen ? 'flex' : 'none');
-            setStyle(control.$fullscreen, 'display', player.fullscreen ? 'none' : 'flex');
-            // control.autoSize();
-        };
+
         screenfull.on('change', screenfullChange);
         player.events.destroys.push(() => {
             screenfull.off('change', screenfullChange);
@@ -87,6 +89,12 @@ export default (player, control) => {
     } catch (error) {
         //
     }
+
+    //
+    player.on(EVENTS.webFullscreen, (value) => {
+        screenfullChange(value);
+    })
+
 
     player.on(EVENTS.recording, () => {
         setStyle(control.$record, 'display', player.recording ? 'none' : 'flex');
@@ -117,6 +125,4 @@ export default (player, control) => {
         const bps = bpsSize(rate);
         control.$speed && (control.$speed.innerHTML = bps);
     })
-
-
 }

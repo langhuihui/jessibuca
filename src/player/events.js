@@ -65,20 +65,9 @@ export default (player) => {
 
     player.on(EVENTS.webFullscreen, (value) => {
         if (value) {
-            player.$container.classList.add('webmediaplayer-fullscreen-web')
-            const {clientHeight: bodyHeight, clientWidth: bodyWidth} = document.body;
-            const {clientHeight: playerHeight, clientWidth: playerWidth} = player.video.$videoElement;
-            const bodyRatio = bodyWidth / bodyHeight;
-            const playerRatio = playerWidth / playerHeight;
-            const needSpin = bodyRatio < playerRatio;
-            if (needSpin) {
-                const scale = Math.min(bodyHeight / playerWidth, bodyWidth / playerHeight);
-                player.video.$videoElement.style.transform = `rotate(90deg) scale(${scale},${scale})`;
-            }
-
+            player.$container.classList.add('jessibuca-fullscreen-web')
         } else {
-            player.$container.classList.remove('webmediaplayer-fullscreen-web')
-            player.video.$videoElement.style.transform = null;
+            player.$container.classList.remove('jessibuca-fullscreen-web')
         }
     })
 

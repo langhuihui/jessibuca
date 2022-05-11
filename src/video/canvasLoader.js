@@ -1,5 +1,13 @@
 import Emitter from "../utils/emitter";
-import {createContextGL, createEmptyImageBitmap, dataURLToFile, downloadImg, now, supportOffscreen} from "../utils";
+import {
+    createContextGL,
+    createEmptyImageBitmap,
+    dataURLToFile,
+    downloadImg,
+    isMobile,
+    now,
+    supportOffscreen
+} from "../utils";
 import createWebGL from "../utils/webgl";
 import {CANVAS_RENDER_TYPE, CONTROL_HEIGHT, EVENTS, SCREENSHOT_TYPE, VIDEO_ENC_TYPE} from "../constant";
 import CommonLoader from "./commonLoader";
@@ -178,10 +186,14 @@ export default class CanvasVideoLoader extends CommonLoader {
     resize() {
         this.player.debug.log('canvasVideo', 'resize');
         const option = this.player._opt;
-        const width = this.player.width;
+        let width = this.player.width;
         let height = this.player.height;
         if (option.hasControl && !option.controlAutoHide) {
-            height -= CONTROL_HEIGHT;
+            if (isMobile() && this.player.fullscreen) {
+                width -= CONTROL_HEIGHT;
+            } else {
+                height -= CONTROL_HEIGHT;
+            }
         }
         let resizeWidth = this.$videoElement.width;
         let resizeHeight = this.$videoElement.height;

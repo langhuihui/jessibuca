@@ -52,14 +52,26 @@
         height: 100%;
         width: 100%;
         background: rgba(0, 0, 0, 0.4);
-        background-image: url("../assets/play.png");
-        background-repeat: no-repeat;
-        background-position: center;
-        cursor: pointer;
-        background-size: 48px 48px;
+
+        &:after {
+            cursor: pointer;
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: block;
+            width: 48px;
+            height: 48px;
+            background-image: url("../assets/play.png");
+            background-repeat: no-repeat;
+            background-position: center;
+        }
 
         &:hover {
-            background-image: url("../assets/play-hover.png");
+            &:after {
+                background-image: url("../assets/play-hover.png");
+            }
         }
     }
 
@@ -90,6 +102,7 @@
 
     .jessibuca-controls {
         background-color: #161616;
+        box-sizing: border-box;
         display: flex;
         flex-direction: column;
         justify-content: flex-end;
@@ -107,6 +120,7 @@
         visibility: hidden;
         transition: all 0.2s ease-in-out;
         user-select: none;
+        transition: width .5s ease-in;
 
         .jessibuca-controls-item {
             position: relative;
@@ -198,18 +212,6 @@
         * {
             cursor: none !important;
         }
-    }
-
-    &.jessibuca-fullscreen-web {
-        position: fixed;
-        z-index: 9999;
-        left: 0;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        width: 100% !important;
-        height: 100% !important;
-        background: #000;
     }
 
 
@@ -463,5 +465,30 @@
             margin-left: -1px;
             height: 60px
         }
+    }
+
+
+    //
+    &.jessibuca-fullscreen-web {
+        .jessibuca-controls {
+            width: 100vh;
+            transform: translateX(-13vw) translateY(-47.8vh) rotate(270deg);
+            transition: width .5s ease-in
+        }
+
+        .jessibuca-play-big {
+            &:after {
+                transform: rotate(270deg);
+            }
+        }
+
+        .jessibuca-loading {
+            flex-direction: row;
+        }
+
+        .jessibuca-loading-text {
+            transform: rotate(270deg);
+        }
+
     }
 }

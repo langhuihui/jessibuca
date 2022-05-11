@@ -1,4 +1,4 @@
-import {clamp, setStyle} from "../utils";
+import {clamp, isMobile, setStyle} from "../utils";
 
 export default (player, control) => {
     const {
@@ -9,8 +9,15 @@ export default (player, control) => {
     function volumeChangeFromEvent(event) {
         const {bottom: panelBottom, height: panelHeight} = control.$volumePanel.getBoundingClientRect();
         const {height: handleHeight} = control.$volumeHandle.getBoundingClientRect();
+
+        let moveLen = event.y;
+
+        // if (isMobile() && player.fullscreen) {
+        //     moveLen = event.x;
+        // }
+
         const percentage =
-            clamp(panelBottom - event.y - handleHeight / 2, 0, panelHeight - handleHeight / 2) / (panelHeight - handleHeight);
+            clamp(panelBottom - moveLen - handleHeight / 2, 0, panelHeight - handleHeight / 2) / (panelHeight - handleHeight);
         return percentage;
     }
 
