@@ -9,14 +9,19 @@ https://github.com/bosscheng/jessibuca-demo/tree/v3
 
 ## H5(Mobile)
 
-
 https://github.com/bosscheng/jessibuca-mobile-demo/tree/v3
 
 ### 在线demo
 [online H5(Mobile)](http://jessibuca.monibuca.com/mobile-demo.html)
 
-## Vue
 
+## H5(Mobile) 支持web fullscreen
+
+
+### 在线demo
+[online H5(Mobile) web fullscreen](http://jessibuca.monibuca.com/mobile-fullscreen.html)
+
+## Vue
 
 https://github.com/bosscheng/jessibuca-vue-demo/tree/v3
 
