@@ -88,6 +88,12 @@ Audio Context的部分音频节点提供了playbackRate属性以实现倍速播�
 
 支持直播流crypto解密播放
 
-## 支持
+## 支持SIMD软解码加速
+
+使用Chrome/Edge 91, Firefox89及之后正式提供的SIMD指令集加速解码, 在1080P以上分辨率带来100%-300%的性能提升 尤其在HEVC的解码上提升非常明显.
+
+> Safari暂不支持
+
+## 支持作者
 
 <img src="/public/wx.jpg"><img src="/public/alipay.jpg">
