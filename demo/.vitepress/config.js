@@ -12,6 +12,7 @@ module.exports = {
             {text: 'PRO', link: '/pro'},
             {text: 'HTTP', link: 'http://jessibuca.monibuca.com/'},
             {text: 'HTTPS', link: 'https://j.m7s.live/'},
+            {text: 'Monibuca', link: 'https://m7s.live/'},
         ],
         logo: 'logo.png',
     },

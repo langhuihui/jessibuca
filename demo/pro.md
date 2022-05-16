@@ -69,3 +69,25 @@ Audio Context的部分音频节点提供了playbackRate属性以实现倍速播�
 ## 支持截图加自定义水印
 
 支持调用截图接口的时候，添加自定义水印，例如公司名称，公司logo。
+
+
+## 支持HLS H264直播流
+
+支持播放HLS H264直播流内容
+
+## 支持HLS H265直播流
+
+支持播放HLS H265直播流内容
+
+
+## 支持fmp4直播协议
+
+支持fmp4直播协议
+
+## 支持直播流crypto解密播放
+
+支持直播流crypto解密播放
+
+## 支持
+
+<img src="/public/wx.jpg"><img src="/public/alipay.jpg">
