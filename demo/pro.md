@@ -94,6 +94,14 @@ Audio Context的部分音频节点提供了playbackRate属性以实现倍速播�
 
 > Safari暂不支持
 
+## 支持Windows系统下360浏览器可播放使用MSE加速解码H265
+
+支持Windows系统下360浏览器可播放使用MSE加速解码H265
+
+## 支持window系统下win10商店购买hevc解码器后最新edge可硬件加速解码播放H265
+
+支持window系统下win10商店购买hevc解码器后最新edge可硬件加速解码播放H265
+
 ## 支持作者
 
 <img src="/public/wx.jpg"><img src="/public/alipay.jpg">

@@ -39,7 +39,8 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 支持crypto解密播放
 - 支持WebTransport协议播放
 - 支持SIMD软解码加速
-
+- 支持Windows系统下360浏览器可播放使用MSE加速解码H265
+- 支持window系统下win10商店购买hevc解码器后最新edge可硬件加速解码播放H265
 
 ## 本地测试
 

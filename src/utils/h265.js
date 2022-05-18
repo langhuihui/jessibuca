@@ -51,6 +51,7 @@ export function parseHEVCDecoderConfigurationRecord(arrayBuffer) {
 
     meta.codecWidth = config.codec_size.width;
     meta.codecHeight = config.codec_size.height;
+
     meta.presentWidth = config.present_size.width;
     meta.presentHeight = config.present_size.height;
 
