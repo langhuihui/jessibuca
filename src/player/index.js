@@ -475,9 +475,7 @@ export default class Player extends Emitter {
                     resolve();
                     this._times.streamResponse = now();
                     //
-                    if (this._opt.useMSE) {
-                        this.video.play();
-                    }
+                    this.video.play();
                 })
 
             }).catch((e) => {

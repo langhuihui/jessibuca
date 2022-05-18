@@ -8,7 +8,7 @@ export default class Video {
     }
 
     static getLoaderFactory(opt) {
-        if (opt.useMSE) {
+        if (opt.useMSE || (opt.useWCS && opt.wcsUseVideoRender)) {
             return VideoLoader;
         } else {
             return CanvasVideoLoader;

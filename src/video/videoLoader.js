@@ -19,6 +19,13 @@ export default class VideoLoader extends CommonLoader {
             height: '',
             encType: '',
         }
+        const _opt = this.player._opt;
+        if (_opt.useWCS && _opt.wcsUseVideoRender) {
+            this.trackGenerator = new MediaStreamTrackGenerator({kind: 'video'});
+            $videoElement.srcObject = new MediaStream([this.trackGenerator]);
+            this.vwriter = this.trackGenerator.writable.getWriter();
+        }
+
         this.resize();
 
         const {proxy} = this.player.events;
@@ -36,12 +43,22 @@ export default class VideoLoader extends CommonLoader {
         })
 
         this.player.debug.log('Video', 'init');
-
     }
 
     destroy() {
         this.player.$container.removeChild(this.$videoElement);
-        this.$videoElement = null;
+        if (this.$videoElement) {
+            this.$videoElement.src = ''
+            this.$videoElement = null;
+        }
+        if (this.trackGenerator) {
+            this.trackGenerator = null;
+        }
+        if (this.vwriter) {
+            this.trackGenerator = null;
+        }
+
+
         this.init = false;
         this.off();
         this.player.debug.log('Video', 'destroy');
@@ -99,6 +116,14 @@ export default class VideoLoader extends CommonLoader {
         this.resize();
     }
 
+    //
+    render(msg) {
+        if (this.vwriter) {
+            this.vwriter.write(msg.videoFrame);
+        }
+    }
+
+
     resize() {
         let width = this.player.width;
         let height = this.player.height;
@@ -142,6 +167,4 @@ export default class VideoLoader extends CommonLoader {
         this.$videoElement.style.left = left + "px"
         this.$videoElement.style.top = top + "px"
     }
-
-
 }

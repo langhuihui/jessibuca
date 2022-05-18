@@ -6583,6 +6583,7 @@
 	  //
 	  useWCS: false,
 	  //
+	  wcsUseVideoRender: false,
 	  useMSE: false,
 	  //
 	  useOffscreen: false,
