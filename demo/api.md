@@ -239,6 +239,15 @@ worker地址
 
 > 支持 forceNoOffscreen 为 false （开启离屏渲染）
 
+
+### wcsUseVideoRender
+- **类型**：`boolean`
+- **默认值**：`false`
+- **用法**： webcodecs硬解码是否通过video标签渲染
+
+> webcodecs硬解码之后，默认是通过canvas 渲染出来的，可以通过配置通过video标签渲染，提升渲染性能。
+
+
 ### autoWasm
 
 - **类型**：`boolean`
