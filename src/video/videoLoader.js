@@ -123,7 +123,6 @@ export default class VideoLoader extends CommonLoader {
         }
     }
 
-
     resize() {
         let width = this.player.width;
         let height = this.player.height;

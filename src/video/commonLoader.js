@@ -31,4 +31,8 @@ export default class CommonLoader extends Emitter {
     play(){
 
     }
+
+    pause() {
+
+    }
 }

@@ -310,12 +310,12 @@ export default class Player extends Emitter {
     }
 
     set recording(value) {
-        if (this.playing) {
-            if (value) {
+        if (value) {
+            if (this.playing) {
                 this.recorder.startRecord();
-            } else {
-                this.recorder.stopRecordAndSave();
             }
+        } else {
+            this.recorder.stopRecordAndSave();
         }
     }
 
@@ -525,7 +525,6 @@ export default class Player extends Emitter {
                 this.mseDecoder = null;
             }
 
-
             this.clearCheckHeartTimeout();
             this.clearCheckLoadingTimeout();
             this.playing = false;
@@ -533,6 +532,7 @@ export default class Player extends Emitter {
             this.recording = false;
             // release audio buffer
             this.audio && this.audio.pause();
+            this.video && this.video.pause();
             // release lock
             this.releaseWakeLock();
             // reset stats

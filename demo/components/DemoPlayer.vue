@@ -15,6 +15,12 @@
                 />
                 <input
                     type="checkbox"
+                    v-model="isDebug"
+                    ref="isDebug"
+                    @change="restartPlay"
+                /><span>日志</span>
+                <input
+                    type="checkbox"
                     v-model="useMSE"
                     ref="vod"
                     @change="restartPlay('mse')"
@@ -109,13 +115,12 @@ import {VERSION} from "./version";
 
 export default {
     name: "DemoPlayer",
+    jessibuca: null,
     props: {},
     data() {
         return {
-            jessibuca: null,
             version: '',
             wasm: false,
-            vc: "ff",
             playing: false,
             quieting: true,
             loaded: false, // mute
@@ -131,6 +136,7 @@ export default {
             useMSE: true,
             useOffscreen: false,
             recording: false,
+            isDebug:false,
             recordType: 'webm',
             scale: 0,
             vConsole: null
@@ -143,13 +149,15 @@ export default {
         window.onerror = (msg) => (this.err = msg);
     },
     unmounted() {
-        this.jessibuca.destroy();
+        if (this.$options && this.$options.jessibuca) {
+            this.$options.jessibuca.destroy();
+        }
         this.vConsole.destroy();
     },
     methods: {
         create(options) {
             options = options || {};
-            this.jessibuca = new window.Jessibuca(
+            const jessibuca = new window.Jessibuca(
                 Object.assign(
                     {
                         container: this.$refs.container,
@@ -162,7 +170,7 @@ export default {
                         // background: "bg.jpg",
                         loadingText: "疯狂加载中...",
                         // hasAudio:false,
-                        debug: false,
+                        debug: this.isDebug,
                         hotKey: true,
                         // hasAudio:false,
                         supportDblclickFullscreen: true,
@@ -170,6 +178,7 @@ export default {
                         operateBtns: {
                             fullscreen: this.showOperateBtns,
                             screenshot: this.showOperateBtns,
+                            record: this.showOperateBtns,
                             play: this.showOperateBtns,
                             audio: this.showOperateBtns,
                         },
@@ -181,43 +190,45 @@ export default {
                     options
                 )
             );
+
+            this.$options.jessibuca = jessibuca;
             var _this = this;
-            this.jessibuca.on("load", function () {
+            jessibuca.on("load", function () {
                 console.log("on load");
             });
 
-            this.jessibuca.on("log", function (msg) {
+            jessibuca.on("log", function (msg) {
                 console.log("on log", msg);
             });
-            this.jessibuca.on("record", function (msg) {
+            jessibuca.on("record", function (msg) {
                 console.log("on record:", msg);
             });
-            this.jessibuca.on("pause", function () {
+            jessibuca.on("pause", function () {
                 console.log("on pause");
                 _this.playing = false;
             });
-            this.jessibuca.on("play", function () {
+            jessibuca.on("play", function () {
                 console.log("on play");
                 _this.playing = true;
             });
-            this.jessibuca.on("fullscreen", function (msg) {
+            jessibuca.on("fullscreen", function (msg) {
                 console.log("on fullscreen", msg);
             });
 
-            this.jessibuca.on("mute", function (msg) {
+            jessibuca.on("mute", function (msg) {
                 console.log("on mute", msg);
                 _this.quieting = msg;
             });
 
-            this.jessibuca.on("mute", function (msg) {
+            jessibuca.on("mute", function (msg) {
                 console.log("on mute2", msg);
             });
 
-            this.jessibuca.on("audioInfo", function (msg) {
+            jessibuca.on("audioInfo", function (msg) {
                 console.log("audioInfo", msg);
             });
 
-            this.jessibuca.on("bps", function (bps) {
+            jessibuca.on("bps", function (bps) {
                 // console.log('bps', bps);
             });
             // let _ts = 0;
@@ -226,23 +237,23 @@ export default {
             //     _ts = ts;
             // });
 
-            this.jessibuca.on("videoInfo", function (info) {
+            jessibuca.on("videoInfo", function (info) {
                 console.log("videoInfo", info);
             });
 
-            this.jessibuca.on("error", function (error) {
+            jessibuca.on("error", function (error) {
                 console.log("error", error);
             });
 
-            this.jessibuca.on("timeout", function () {
+            jessibuca.on("timeout", function () {
                 console.log("timeout");
             });
 
-            this.jessibuca.on('start', function () {
+            jessibuca.on('start', function () {
                 console.log('frame start');
             })
 
-            this.jessibuca.on("performance", function (performance) {
+            jessibuca.on("performance", function (performance) {
                 var show = "卡顿";
                 if (performance === 2) {
                     show = "非常流畅";
@@ -251,29 +262,29 @@ export default {
                 }
                 _this.performance = show;
             });
-            this.jessibuca.on('buffer', function (buffer) {
+            jessibuca.on('buffer', function (buffer) {
                 console.log('buffer', buffer);
             })
 
-            this.jessibuca.on('stats', function (stats) {
+            jessibuca.on('stats', function (stats) {
                 console.log('stats', stats);
             })
 
-            this.jessibuca.on('kBps', function (kBps) {
+            jessibuca.on('kBps', function (kBps) {
                 console.log('kBps', kBps);
             });
 
-            this.jessibuca.on("play", () => {
+            jessibuca.on("play", () => {
                 this.playing = true;
                 this.loaded = true;
-                this.quieting = this.jessibuca.isMute();
+                this.quieting = jessibuca.isMute();
             });
 
-            this.jessibuca.on('recordingTimestamp', (ts) => {
+            jessibuca.on('recordingTimestamp', (ts) => {
                 console.log('recordingTimestamp', ts);
             })
 
-            this.jessibuca.on('playToRenderTimes', (times) => {
+            jessibuca.on('playToRenderTimes', (times) => {
                 console.log(times);
             })
 
@@ -285,31 +296,31 @@ export default {
 
 
             if (this.$refs.playUrl.value) {
-                this.jessibuca.play(this.$refs.playUrl.value);
+                this.$options.jessibuca.play(this.$refs.playUrl.value);
             }
         },
         mute() {
-            this.jessibuca.mute();
+            this.$options.jessibuca.mute();
         },
         cancelMute() {
-            this.jessibuca.cancelMute();
+            this.$options.jessibuca.cancelMute();
         },
 
         pause() {
-            this.jessibuca.pause();
+            this.$options.jessibuca.pause();
             this.playing = false;
             this.err = "";
             this.performance = "";
         },
         volumeChange() {
-            this.jessibuca.setVolume(this.volume);
+            this.$options.jessibuca.setVolume(this.volume);
         },
         rotateChange() {
-            this.jessibuca.setRotate(this.rotate);
+            this.$options.jessibuca.setRotate(this.rotate);
         },
         destroy() {
-            if (this.jessibuca) {
-                this.jessibuca.destroy();
+            if (this.$options.jessibuca) {
+                this.$options.jessibuca.destroy();
             }
             this.create();
             this.playing = false;
@@ -318,25 +329,25 @@ export default {
         },
 
         fullscreen() {
-            this.jessibuca.setFullscreen(true);
+            this.$options.jessibuca.setFullscreen(true);
         },
 
         clearView() {
-            this.jessibuca.clearView();
+            this.$options.jessibuca.clearView();
         },
 
         startRecord() {
             const time = new Date().getTime();
-            this.jessibuca.startRecord(time, this.recordType);
+            this.$options.jessibuca.startRecord(time, this.recordType);
         },
 
         stopAndSaveRecord() {
-            this.jessibuca.stopRecordAndSave();
+            this.$options.jessibuca.stopRecordAndSave();
         },
 
 
         screenShot() {
-            this.jessibuca.screenshot();
+            this.$options.jessibuca.screenshot();
         },
 
 
@@ -358,11 +369,11 @@ export default {
         },
 
         changeBuffer() {
-            this.jessibuca.setBufferTime(Number(this.$refs.buffer.value));
+            this.$options.jessibuca.setBufferTime(Number(this.$refs.buffer.value));
         },
 
         scaleChange() {
-            this.jessibuca.setScaleMode(this.scale);
+            this.$options.jessibuca.setScaleMode(this.scale);
         },
     },
 };
