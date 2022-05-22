@@ -13,6 +13,8 @@ export default class WebsocketLoader extends Emitter {
         this.streamRate = calculationRate(rate => {
             player.emit(EVENTS.kBps, (rate / 1024).toFixed(2));
         });
+
+        player.debug.log('WebsocketLoader', 'init');
     }
 
     destroy() {
