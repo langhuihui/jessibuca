@@ -114,6 +114,11 @@ export default (player, control) => {
         player.recording = false;
     })
 
+    proxy(control.$recordingStop, 'click', (e) => {
+        e.stopPropagation();
+        player.recording = false;
+    })
+
     proxy(control.$fullscreen, 'click', (e) => {
         e.stopPropagation();
         player.fullscreen = true;

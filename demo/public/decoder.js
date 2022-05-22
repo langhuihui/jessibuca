@@ -6521,7 +6521,8 @@
 	// 播放协议
 	const PLAYER_PLAY_PROTOCOL = {
 	  websocket: 0,
-	  fetch: 1
+	  fetch: 1,
+	  webrtc: 2
 	};
 	const DEMUX_TYPE = {
 	  flv: 'flv',

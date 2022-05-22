@@ -7,6 +7,12 @@
     }
 }
 
+@keyframes magentaPulse {
+    from { background-color: #630030; -webkit-box-shadow: 0 0 9px #333; }
+    50% { background-color: #a9014b; -webkit-box-shadow: 0 0 18px #a9014b; }
+    to { background-color: #630030; -webkit-box-shadow: 0 0 9px #333; }
+}
+
 
 .jessibuca-container {
 
@@ -72,6 +78,42 @@
             &:after {
                 background-image: url("../assets/play-hover.png");
             }
+        }
+    }
+
+    .jessibuca-recording{
+        display: none;
+        position: absolute;
+        left: 50%;
+        top: 0;
+        padding: 0 3px;
+        transform: translateX(-50%);
+        justify-content: space-around;
+        align-items: center;
+        width: 95px;
+        height: 20px;
+        background: #000000;
+        opacity: 0.5;
+        border-radius: 0px 0px 8px 8px;
+
+        .jessibuca-recording-red-point{
+            width: 8px;
+            height: 8px;
+            background: #FF1F1F;
+            border-radius: 50%;
+            animation: magentaPulse 1s linear infinite;
+        }
+
+        .jessibuca-recording-time{
+            font-size: 14px;
+            font-weight: 500;
+            color: #DDDDDD;
+        }
+
+        .jessibuca-icon-recordStop{
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
         }
     }
 

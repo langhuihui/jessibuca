@@ -1,7 +1,8 @@
 // 播放协议
 export const PLAYER_PLAY_PROTOCOL = {
     websocket: 0,
-    fetch: 1
+    fetch: 1,
+    webrtc: 2,
 }
 
 export const DEMUX_TYPE = {

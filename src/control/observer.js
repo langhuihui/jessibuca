@@ -1,5 +1,5 @@
 import {EVENTS} from "../constant";
-import {bpsSize, getStyle, isBoolean, setStyle} from "../utils";
+import {bpsSize, formatTimeTips, getStyle, isBoolean, setStyle} from "../utils";
 import screenfull from "screenfull";
 
 export default (player, control) => {
@@ -99,11 +99,13 @@ export default (player, control) => {
     player.on(EVENTS.recording, () => {
         setStyle(control.$record, 'display', player.recording ? 'none' : 'flex');
         setStyle(control.$recordStop, 'display', player.recording ? 'flex' : 'none');
+        setStyle(control.$recording, 'display', player.recording ? 'flex' : 'none')
     })
 
     //
     player.on(EVENTS.recordingTimestamp, (timestamp) => {
         // console.log(timestamp);
+        control.$recordingTime && (control.$recordingTime.innerHTML = formatTimeTips(timestamp))
     })
 
     player.on(EVENTS.playing, (flag) => {
