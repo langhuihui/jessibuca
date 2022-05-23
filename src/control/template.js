@@ -21,13 +21,13 @@ export default (player, control) => {
                 ${options.loadingText ? `<div class="jessibuca-loading-text">${options.loadingText}</div>` : ''}
             </div>
             ${options.hasControl && operateBtns.play ? `<div class="jessibuca-play-big"></div>` : ''}
-            ${options.hasControl && `
+            ${options.hasControl ? `
                 <div class="jessibuca-recording">
                     <div class="jessibuca-recording-red-point"></div>
                     <div class="jessibuca-recording-time">00:00:01</div>
                     <div class="jessibuca-icon-recordStop jessibuca-recording-stop">${icons.recordStop}</div>
                 </div>
-            `}
+            `:''}
             ${options.hasControl ? `
                 <div class="jessibuca-controls">
                     <div class="jessibuca-controls-bottom">
