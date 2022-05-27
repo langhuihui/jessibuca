@@ -13,15 +13,15 @@ using namespace std;
 using namespace emscripten;
 typedef unsigned char u8;
 typedef unsigned int u32;
-#define PROP(name, type)                        \
-    type name;                                  \
-    val get##name() const                       \
-    {                                           \
-        return val(name);                       \
-    }                                           \
-    void set##name(val value)                   \
-    {                                           \
-        name = value.as<type>();                \
+#define PROP(name, type)         \
+    type name;                   \
+    val get##name() const        \
+    {                            \
+        return val(name);        \
+    }                            \
+    void set##name(val value)    \
+    {                            \
+        name = value.as<type>(); \
     }
 
 extern "C"
@@ -68,7 +68,7 @@ public:
     {
         clear();
     }
-    virtual int decode(string input,u32 timestamp)
+    virtual int decode(string input, u32 timestamp)
     {
         int ret = 0;
         pkt->data = (u8 *)(input.data());
@@ -134,13 +134,13 @@ public:
     {
         FFmpeg::clear();
     }
-    int decode(string input,u32 timestamp) override
+    int decode(string input, u32 timestamp) override
     {
         u8 flag = (u8)input[0];
         u8 audioType = flag >> 4;
         if (initialized)
         {
-            return FFmpeg::decode(input.substr(audioType == 10 ? 2 : 1),timestamp);
+            return FFmpeg::decode(input.substr(audioType == 10 ? 2 : 1), timestamp);
         }
         else
         {
@@ -173,7 +173,7 @@ public:
                 initialized = true;
                 break;
             default:
-//                emscripten_log(0, "audio type not support:%d", audioType);
+                //                emscripten_log(0, "audio type not support:%d", audioType);
                 break;
             }
             if (initialized)
@@ -189,7 +189,7 @@ public:
         auto bytes_per_sample = av_get_bytes_per_sample(AV_SAMPLE_FMT_FLTP);
         if (dec_ctx->sample_fmt == AV_SAMPLE_FMT_FLTP && sample_rate == dec_ctx->sample_rate && dec_ctx->channel_layout == n_channel)
         {
-            jsObject.call<void>("playAudioPlanar", int(frame->data), nb_samples *bytes_per_sample *n_channel);
+            jsObject.call<void>("playAudioPlanar", int(frame->data), nb_samples * bytes_per_sample * n_channel);
             return;
         }
         if (!au_convert_ctx)
@@ -207,7 +207,7 @@ public:
         auto ret = swr_convert(au_convert_ctx, out_buffer, nb_samples, (const uint8_t **)frame->data, nb_samples);
         while (ret > 0)
         {
-            jsObject.call<void>("playAudioPlanar", int(&out_buffer), ret,timestamp);
+            jsObject.call<void>("playAudioPlanar", int(&out_buffer), ret, timestamp);
             ret = swr_convert(au_convert_ctx, out_buffer, nb_samples, (const uint8_t **)frame->data, 0);
         }
     }
@@ -240,32 +240,30 @@ public:
             y = 0;
         }
     }
-    int decode(string data,u32 timestamp) override
+    int decode(string data, u32 timestamp) override
     {
-        if (!initialized)
+        int codec_id = ((int)data[0]) & 0x0F;
+        if (((int)(data[0]) >> 4) == 1 && data[1] == 0)
         {
-            int codec_id = ((int)data[0]) & 0x0F;
-            if (((int)(data[0]) >> 4) == 1 && data[1] == 0)
-            {
-                //                emscripten_log(0, "codec = %d", codec_id);
+            //                emscripten_log(0, "codec = %d", codec_id);
+            if (!initialized)
                 jsObject.call<void>("setVideoCodec", codec_id);
-                switch (codec_id)
-                {
-                case 7:
-                    initCodec(AV_CODEC_ID_H264, data.substr(5));
-                    break;
-                case 12:
-                    initCodec(AV_CODEC_ID_H265, data.substr(5));
-                    break;
-                default:
-                    emscripten_log(0, "codec not support: %d", codec_id);
-                    return -1;
-                }
+            switch (codec_id)
+            {
+            case 7:
+                initCodec(AV_CODEC_ID_H264, data.substr(5));
+                break;
+            case 12:
+                initCodec(AV_CODEC_ID_H265, data.substr(5));
+                break;
+            default:
+                emscripten_log(0, "codec not support: %d", codec_id);
+                return -1;
             }
         }
         else
         {
-            return FFmpeg::decode(data.substr(5),timestamp);
+            return FFmpeg::decode(data.substr(5), timestamp);
         }
         return 0;
     }
@@ -303,7 +301,7 @@ public:
             memcpy((u8 *)dst, (const u8 *)(frame->data[2] + i * frame->linesize[2]), halfw);
             dst += halfw;
         }
-        jsObject.call<void>("draw",timestamp, y, u, v);
+        jsObject.call<void>("draw", timestamp, y, u, v);
     }
 };
 
