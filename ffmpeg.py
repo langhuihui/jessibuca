@@ -3,7 +3,8 @@
 import os
 
 args = [
-    'extra-cflags="-c -Oz -fPIC"',
+    'extra-cflags="-c -Oz -fPIC -msse -msse2 -msse3 -msimd128 -pthread"',
+    'extra-cxxflags="-msse -msse2 -msse3 -msimd128 -pthread"',
     'cc=emcc',
     'cxx=em++',
     'ar=emar',
@@ -15,7 +16,7 @@ args = [
     ]
 disables = [
     'everything','all','avdevice','postproc','avfilter','programs','asm','parsers','muxers','demuxers','filters',
-    'doc','devices','network','bsfs','shared','hwaccels','debug','protocols','indevs','outdevs','runtime-cpudetect','pthreads'
+    'doc','devices','network','bsfs','shared','hwaccels','debug','protocols','indevs','outdevs','runtime-cpudetect'
 ]
 enables = [
     'small','cross-compile','gpl','avcodec','swresample','ffmpeg','avformat',
@@ -30,7 +31,7 @@ enables = [
     'decoder=pcm_mulaw',
     'encoder=pcm_alaw',
     'encoder=pcm_mulaw',
-    'encoder=aac','static'
+    'encoder=aac','static','pthreads'
 ]
 enables = ['enable-'+item for i,item in enumerate(enables)]
 disables = ['disable-'+item for i,item in enumerate(disables)]

@@ -32,7 +32,7 @@ extern "C"
 class FFmpeg
 {
 public:
-    AVCodec *codec = nullptr;
+    const AVCodec *codec = nullptr;
     AVCodecParserContext *parser = nullptr;
     AVCodecContext *dec_ctx = nullptr;
     AVFrame *frame;
