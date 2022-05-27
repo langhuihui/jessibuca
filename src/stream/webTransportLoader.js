@@ -1,7 +1,6 @@
 import Emitter from "../utils/emitter";
 import {calculationRate, now} from "../utils";
 import {EVENTS} from "../constant";
-import OPut from 'oput'
 
 export default class WebTransportLoader extends Emitter {
     constructor(player) {
@@ -19,11 +18,24 @@ export default class WebTransportLoader extends Emitter {
 
     destroy() {
         if (this.transport) {
-            this.transport = null;
+            // console.log(this.transport.state)
+            // this.transport.close().then(()=>{
+            //
+            // }).catch((e)=>{
+            //     console.error(e);
+            // });
+
+            this.transport.closed.then(() => {
+                // console.log(`The HTTP/3 connection to ${url} closed gracefully.`);
+                this.player.debug.log('WebTransportLoader', 'destroy');
+                this.transport = null;
+            }).catch((error) => {
+                console.error('The HTTP/3 connection to ${url} closed due to ${error}.');
+            });
         }
     }
 
-    async _createWebTransport() {
+    _createWebTransport() {
         const player = this.player;
         const {
             debug,
@@ -32,10 +44,12 @@ export default class WebTransportLoader extends Emitter {
         } = player;
 
         this.transport = new WebTransport(this.wtUrl);
-        await this.transport.ready
-        return this.transport.createBidirectionalStream().then((stream)=>{
-            stream.readable.pipeTo(new WritableStream(demux.input));
+        this.transport.ready.then(() => {
+            this.transport.createBidirectionalStream().then((stream) => {
+                stream.readable.pipeTo(new WritableStream(demux.input));
+            })
         })
+
     }
 
     fetchStream(url) {

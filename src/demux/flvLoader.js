@@ -63,6 +63,8 @@ export default class FlvLoader extends CommonLoader {
                         });
                         const isIFrame = payload[0] >> 4 === 1;
                         if (payload.byteLength > 0) {
+                            console.log(ts,isIFrame);
+                            // console.log(payload);
                             this._doDecode(payload, MEDIA_TYPE.video, ts, isIFrame);
                         }
                     }
@@ -72,7 +74,7 @@ export default class FlvLoader extends CommonLoader {
     }
 
     close() {
-        this.input && this.input.return(null);
+        this.input = null
     }
 
 }

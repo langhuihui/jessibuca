@@ -2,12 +2,14 @@
  * @type {import('vite').UserConfig}
  */
 import fs from 'fs';
+
 const config = {
     server: {
         host: '0.0.0.0',
+        port: 3001,
         https: {
-            cert: fs.readFileSync('/Users/dexter/m7s4/monibuca/monibuca.com_bundle.pem'),
-            key: fs.readFileSync('/Users/dexter/m7s4/monibuca/monibuca.com.key'),
+            cert: fs.readFileSync('/Users/wancheng/Documents/GitHub/jessibuca-webTransport/demo/monibuca.com.pem'),
+            key: fs.readFileSync('/Users/wancheng/Documents/GitHub/jessibuca-webTransport/demo/monibuca.com.key'),
         }
     }
 };
