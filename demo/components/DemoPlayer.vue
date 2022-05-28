@@ -133,7 +133,7 @@ export default {
             volume: 1,
             rotate: 0,
             useWCS: false,
-            useMSE: true,
+            useMSE: false,
             useOffscreen: false,
             recording: false,
             isDebug:false,
