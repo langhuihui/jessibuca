@@ -35,4 +35,8 @@ export default class CommonLoader extends Emitter {
     pause() {
 
     }
+
+    clearView() {
+
+    }
 }

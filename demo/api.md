@@ -395,6 +395,7 @@ jessibuca.destroy()
 ```js
 jessibuca.clearView()
 ```
+> 仅canvas渲染支持
 
 ### play([url])
 
