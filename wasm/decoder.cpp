@@ -130,10 +130,6 @@ public:
             free(out_buffer[0]);
         //        emscripten_log(0, "FFMpegAudioDecoder destory");
     }
-    void clear() override
-    {
-        FFmpeg::clear();
-    }
     int decode(string input, u32 timestamp) override
     {
         u8 flag = (u8)input[0];
@@ -228,12 +224,6 @@ public:
     ~FFmpegVideoDecoder()
     {
         //        emscripten_log(0, "FFMpegVideoDecoder destory");
-    }
-    void clear() override
-    {
-        videoWidth = 0;
-        videoHeight = 0;
-        FFmpeg::clear();
         if (y)
         {
             free((void *)y);

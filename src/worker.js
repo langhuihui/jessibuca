@@ -1,14 +1,14 @@
-import Module from './decoder/decoder'
+import Module from './decoder/decoder';
 import createWebGL from './utils/webgl';
-import {WORKER_CMD_TYPE, MEDIA_TYPE, WORKER_SEND_TYPE, ENCODED_VIDEO_TYPE, DEFAULT_PLAYER_OPTIONS} from "./constant";
-import {formatVideoDecoderConfigure} from "./utils";
+import { WORKER_CMD_TYPE, MEDIA_TYPE, WORKER_SEND_TYPE, ENCODED_VIDEO_TYPE, DEFAULT_PLAYER_OPTIONS } from "./constant";
+import { formatVideoDecoderConfigure } from "./utils";
 
 if (!Date.now) Date.now = function () {
     return new Date().getTime();
 };
 
 Module.postRun = function () {
-    var buffer = []
+    var buffer = [];
     var tempAudioBuffer = [];
     var wcsVideoDecoder = {};
     if ("VideoEncoder" in self) {
@@ -25,7 +25,7 @@ Module.postRun = function () {
                             cmd: WORKER_CMD_TYPE.initVideo,
                             w: videoFrame.codedWidth,
                             h: videoFrame.codedHeight
-                        })
+                        });
                         wcsVideoDecoder.isEmitInfo = true;
                         wcsVideoDecoder.offscreenCanvas = new OffscreenCanvas(videoFrame.codedWidth, videoFrame.codedHeight);
                         wcsVideoDecoder.offscreenCanvasCtx = wcsVideoDecoder.offscreenCanvas.getContext("2d");
@@ -38,15 +38,15 @@ Module.postRun = function () {
                         buffer: image_bitmap,
                         delay: decoder.delay,
                         ts: 0
-                    }, [image_bitmap])
+                    }, [image_bitmap]);
 
                     setTimeout(function () {
                         if (videoFrame.close) {
-                            videoFrame.close()
+                            videoFrame.close();
                         } else {
-                            videoFrame.destroy()
+                            videoFrame.destroy();
                         }
-                    }, 100)
+                    }, 100);
 
                 },
                 error: function (error) {
@@ -68,7 +68,7 @@ Module.postRun = function () {
                         data: payload.slice(5),
                         timestamp: ts,
                         type: isIframe ? ENCODED_VIDEO_TYPE.key : ENCODED_VIDEO_TYPE.delta
-                    })
+                    });
                     wcsVideoDecoder.decoder.decode(chunk);
                 }
             },
@@ -78,7 +78,7 @@ Module.postRun = function () {
                 wcsVideoDecoder.offscreenCanvas = null;
                 wcsVideoDecoder.offscreenCanvasCtx = null;
             }
-        }
+        };
     }
 
     var decoder = {
@@ -93,110 +93,110 @@ Module.postRun = function () {
             return !decoder.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined';
         },
         initAudioPlanar: function (channels, samplerate) {
-            postMessage({cmd: WORKER_CMD_TYPE.initAudio, sampleRate: samplerate, channels: channels})
+            postMessage({ cmd: WORKER_CMD_TYPE.initAudio, sampleRate: samplerate, channels: channels });
             var outputArray = [];
-            var remain = 0
+            var remain = 0;
             this.playAudioPlanar = function (data, len, ts) {
                 var frameCount = len;
-                var origin = []
-                var start = 0
+                var origin = [];
+                var start = 0;
                 for (var channel = 0; channel < 2; channel++) {
                     var fp = Module.HEAPU32[(data >> 2) + channel] >> 2;
                     origin[channel] = Module.HEAPF32.subarray(fp, fp + frameCount);
                 }
                 if (remain) {
-                    len = 1024 - remain
+                    len = 1024 - remain;
                     if (frameCount >= len) {
-                        outputArray[0] = Float32Array.of(...tempAudioBuffer[0], ...origin[0].subarray(0, len))
+                        outputArray[0] = Float32Array.of(...tempAudioBuffer[0], ...origin[0].subarray(0, len));
                         if (channels == 2) {
-                            outputArray[1] = Float32Array.of(...tempAudioBuffer[1], ...origin[1].subarray(0, len))
+                            outputArray[1] = Float32Array.of(...tempAudioBuffer[1], ...origin[1].subarray(0, len));
                         }
                         postMessage({
                             cmd: WORKER_CMD_TYPE.playAudio,
                             buffer: outputArray,
                             ts
-                        }, outputArray.map(x => x.buffer))
-                        start = len
-                        frameCount -= len
+                        }, outputArray.map(x => x.buffer));
+                        start = len;
+                        frameCount -= len;
                     } else {
-                        remain += frameCount
-                        tempAudioBuffer[0] = Float32Array.of(...tempAudioBuffer[0], ...origin[0])
+                        remain += frameCount;
+                        tempAudioBuffer[0] = Float32Array.of(...tempAudioBuffer[0], ...origin[0]);
                         if (channels == 2) {
-                            tempAudioBuffer[1] = Float32Array.of(...tempAudioBuffer[1], ...origin[1])
+                            tempAudioBuffer[1] = Float32Array.of(...tempAudioBuffer[1], ...origin[1]);
                         }
-                        return
+                        return;
                     }
                 }
                 for (remain = frameCount; remain >= 1024; remain -= 1024) {
-                    outputArray[0] = origin[0].slice(start, start += 1024)
+                    outputArray[0] = origin[0].slice(start, start += 1024);
                     if (channels == 2) {
-                        outputArray[1] = origin[1].slice(start - 1024, start)
+                        outputArray[1] = origin[1].slice(start - 1024, start);
                     }
                     postMessage({
                         cmd: WORKER_CMD_TYPE.playAudio,
                         buffer: outputArray,
                         ts
-                    }, outputArray.map(x => x.buffer))
+                    }, outputArray.map(x => x.buffer));
                 }
                 if (remain) {
-                    tempAudioBuffer[0] = origin[0].slice(start)
+                    tempAudioBuffer[0] = origin[0].slice(start);
                     if (channels == 2) {
-                        tempAudioBuffer[1] = origin[1].slice(start)
+                        tempAudioBuffer[1] = origin[1].slice(start);
                     }
                 }
-            }
+            };
         },
         setVideoCodec: function (code) {
-            postMessage({cmd: WORKER_CMD_TYPE.videoCode, code})
+            postMessage({ cmd: WORKER_CMD_TYPE.videoCode, code });
         },
         setAudioCodec: function (code) {
-            postMessage({cmd: WORKER_CMD_TYPE.audioCode, code})
+            postMessage({ cmd: WORKER_CMD_TYPE.audioCode, code });
         },
         setVideoSize: function (w, h) {
-            postMessage({cmd: WORKER_CMD_TYPE.initVideo, w: w, h: h})
-            var size = w * h
-            var qsize = size >> 2
+            postMessage({ cmd: WORKER_CMD_TYPE.initVideo, w: w, h: h });
+            var size = w * h;
+            var qsize = size >> 2;
             if (decoder.useOffscreen()) {
                 this.offscreenCanvas = new OffscreenCanvas(w, h);
                 this.offscreenCanvasGL = this.offscreenCanvas.getContext("webgl");
-                this.webglObj = createWebGL(this.offscreenCanvasGL, decoder.opt.openWebglAlignment)
+                this.webglObj = createWebGL(this.offscreenCanvasGL, decoder.opt.openWebglAlignment);
                 this.draw = function (ts, y, u, v) {
-                    this.webglObj.render(w, h, Module.HEAPU8.subarray(y, y + size), Module.HEAPU8.subarray(u, u + qsize), Module.HEAPU8.subarray(v, v + (qsize)))
+                    this.webglObj.render(w, h, Module.HEAPU8.subarray(y, y + size), Module.HEAPU8.subarray(u, u + qsize), Module.HEAPU8.subarray(v, v + (qsize)));
                     let image_bitmap = this.offscreenCanvas.transferToImageBitmap();
                     postMessage({
                         cmd: WORKER_CMD_TYPE.render,
                         buffer: image_bitmap,
                         delay: this.delay,
                         ts
-                    }, [image_bitmap])
-                }
+                    }, [image_bitmap]);
+                };
             } else {
                 this.draw = function (ts, y, u, v) {
                     var yuv = [Module.HEAPU8.subarray(y, y + size), Module.HEAPU8.subarray(u, u + qsize), Module.HEAPU8.subarray(v, v + (qsize))];
-                    var outputArray = yuv.map(buffer => Uint8Array.from(buffer))
+                    var outputArray = yuv.map(buffer => Uint8Array.from(buffer));
                     postMessage({
                         cmd: WORKER_CMD_TYPE.render,
                         output: outputArray,
                         delay: this.delay,
                         ts
-                    }, outputArray.map(x => x.buffer))
-                }
+                    }, outputArray.map(x => x.buffer));
+                };
             }
         },
         getDelay: function (timestamp) {
             if (!timestamp) {
-                return -1
+                return -1;
             }
             if (!this.firstTimestamp) {
-                this.firstTimestamp = timestamp
-                this.startTimestamp = Date.now()
+                this.firstTimestamp = timestamp;
+                this.startTimestamp = Date.now();
                 this.delay = -1;
             } else {
                 if (timestamp) {
-                    this.delay = (Date.now() - this.startTimestamp) - (timestamp - this.firstTimestamp)
+                    this.delay = (Date.now() - this.startTimestamp) - (timestamp - this.firstTimestamp);
                 }
             }
-            return this.delay
+            return this.delay;
         },
         resetDelay: function () {
             this.firstTimestamp = null;
@@ -209,12 +209,12 @@ Module.postRun = function () {
             const _doDecode = (data) => {
                 // decoder.opt.debug && console.log('Jessibuca: [worker]: _doDecode');
                 if (decoder.opt.useWCS && decoder.useOffscreen() && data.type === MEDIA_TYPE.video && wcsVideoDecoder.decode) {
-                    wcsVideoDecoder.decode(data.payload, data.ts)
+                    wcsVideoDecoder.decode(data.payload, data.ts);
                 } else {
                     // decoder.opt.debug && console.log('Jessibuca: [worker]: _doDecode  wasm');
-                    data.decoder.decode(data.payload, data.ts)
+                    data.decoder.decode(data.payload, data.ts);
                 }
-            }
+            };
             const loop = () => {
                 if (buffer.length) {
                     if (this.dropping) {
@@ -237,31 +237,31 @@ Module.postRun = function () {
                             _doDecode(data);
                         }
                     } else {
-                        var data = buffer[0]
+                        var data = buffer[0];
                         if (this.getDelay(data.ts) === -1) {
                             decoder.opt.debug && console.log('Jessibuca: [worker]: common dumex delay is -1');
-                            buffer.shift()
+                            buffer.shift();
                             _doDecode(data);
                         } else if (this.delay > decoder.opt.videoBuffer + 1000) {
                             decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, set dropping is true`);
                             this.resetDelay();
-                            this.dropping = true
+                            this.dropping = true;
                         } else {
                             while (buffer.length) {
-                                data = buffer[0]
+                                data = buffer[0];
                                 if (this.getDelay(data.ts) > decoder.opt.videoBuffer) {
                                     // 丢帧。。。
-                                    buffer.shift()
+                                    buffer.shift();
                                     _doDecode(data);
                                 } else {
                                     // decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay},opt.videoBuffer is ${decoder.opt.videoBuffer}`);
-                                    break
+                                    break;
                                 }
                             }
                         }
                     }
                 }
-            }
+            };
             this.stopId = setInterval(loop, 10);
         },
         close: function () {
@@ -295,7 +295,7 @@ Module.postRun = function () {
                     payload: bufferData,
                     decoder: audioDecoder,
                     type: MEDIA_TYPE.audio,
-                })
+                });
             } else if (options.type === MEDIA_TYPE.video) {
                 buffer.push({
                     ts: options.ts,
@@ -303,28 +303,28 @@ Module.postRun = function () {
                     decoder: videoDecoder,
                     type: MEDIA_TYPE.video,
                     isIFrame: options.isIFrame
-                })
+                });
             }
         }
-    }
-    var audioDecoder = new Module.AudioDecoder(decoder)
-    var videoDecoder = new Module.VideoDecoder(decoder)
-    postMessage({cmd: WORKER_SEND_TYPE.init})
+    };
+    var audioDecoder = new Module.AudioDecoder(decoder);
+    var videoDecoder = new Module.VideoDecoder(decoder);
+    postMessage({ cmd: WORKER_SEND_TYPE.init });
     self.onmessage = function (event) {
-        var msg = event.data
+        var msg = event.data;
         switch (msg.cmd) {
             case WORKER_SEND_TYPE.init:
                 try {
-                    decoder.opt = Object.assign(decoder.opt, JSON.parse(msg.opt))
+                    decoder.opt = Object.assign(decoder.opt, JSON.parse(msg.opt));
                 } catch (e) {
 
                 }
-                audioDecoder.sample_rate = msg.sampleRate
+                audioDecoder.sample_rate = msg.sampleRate;
                 decoder.init();
-                break
+                break;
             case WORKER_SEND_TYPE.decode:
-                decoder.pushBuffer(msg.buffer, msg.options)
-                break
+                decoder.pushBuffer(msg.buffer, msg.options);
+                break;
             case WORKER_SEND_TYPE.audioDecode:
                 audioDecoder.decode(msg.buffer, msg.ts);
                 break;
@@ -332,12 +332,12 @@ Module.postRun = function () {
                 videoDecoder.decode(msg.buffer, msg.ts);
                 break;
             case WORKER_SEND_TYPE.close:
-                decoder.close()
-                break
+                decoder.close();
+                break;
             case WORKER_SEND_TYPE.updateConfig:
                 decoder.opt[msg.key] = msg.value;
-                break
+                break;
         }
-    }
+    };
 
-}
+};

@@ -11,11 +11,12 @@ args = {'-o': '../src/decoder/decoder'}
 sargs = {
     'WASM': 1,
     'TOTAL_MEMORY': 67108864,
-    'ASSERTIONS': 0,
+    'ASSERTIONS': 1,
     'ERROR_ON_UNDEFINED_SYMBOLS': 0,
     'DISABLE_EXCEPTION_CATCHING': 1,
     'INVOKE_RUN':0,
-    'USE_PTHREADS':  0
+    'USE_PTHREADS':  0,
+    'ALLOW_MEMORY_GROWTH':1,
 }
 emcc_args = [
     # '-m32',

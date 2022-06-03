@@ -1495,7 +1495,7 @@
       }
 
       static getLoaderFactory(opt) {
-        if (opt.useMSE || opt.useWCS && opt.wcsUseVideoRender) {
+        if (opt.useMSE || opt.useWCS && !opt.useOffscreen && opt.wcsUseVideoRender) {
           return VideoLoader;
         } else {
           return CanvasVideoLoader;
