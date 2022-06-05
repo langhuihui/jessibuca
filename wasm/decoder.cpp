@@ -41,6 +41,8 @@ public:
     bool initialized = false;
     FFmpeg(val &&v) : jsObject(forward<val>(v))
     {
+        pkt = av_packet_alloc();
+        frame = av_frame_alloc();
     }
     void initCodec(enum AVCodecID id)
     {
@@ -48,11 +50,9 @@ public:
         {
             clear();
         }
-        pkt = av_packet_alloc();
         codec = avcodec_find_decoder(id);
         parser = av_parser_init(codec->id);
         dec_ctx = avcodec_alloc_context3(codec);
-        frame = av_frame_alloc();
     }
     void initCodec(enum AVCodecID id, string input)
     {
@@ -67,6 +67,8 @@ public:
     virtual ~FFmpeg()
     {
         clear();
+        av_frame_free(&frame);
+        av_packet_free(&pkt);
     }
     virtual int decode(string input, u32 timestamp)
     {
@@ -84,25 +86,12 @@ public:
         return 0;
     }
     virtual void _decode(u32 timestamp){};
-    virtual void clear()
+    void clear()
     {
-        if (parser)
-        {
-            av_parser_close(parser);
-            parser = nullptr;
-        }
-        if (dec_ctx)
-        {
-            avcodec_free_context(&dec_ctx);
-        }
-        if (frame)
-        {
-            av_frame_free(&frame);
-        }
-        if (pkt)
-        {
-            av_packet_free(&pkt);
-        }
+        av_parser_close(parser);
+        parser = nullptr;
+        avcodec_free_context(&dec_ctx);
+
         codec = nullptr;
         initialized = false;
     }
@@ -236,19 +225,20 @@ public:
         if (((int)(data[0]) >> 4) == 1 && data[1] == 0)
         {
             //                emscripten_log(0, "codec = %d", codec_id);
-            if (!initialized)
-                jsObject.call<void>("setVideoCodec", codec_id);
-            switch (codec_id)
-            {
-            case 7:
-                initCodec(AV_CODEC_ID_H264, data.substr(5));
-                break;
-            case 12:
-                initCodec(AV_CODEC_ID_H265, data.substr(5));
-                break;
-            default:
-                emscripten_log(0, "codec not support: %d", codec_id);
-                return -1;
+            if (!initialized){
+              jsObject.call<void>("setVideoCodec", codec_id);
+              switch (codec_id)
+              {
+              case 7:
+                  initCodec(AV_CODEC_ID_H264, data.substr(5));
+                  break;
+              case 12:
+                  initCodec(AV_CODEC_ID_H265, data.substr(5));
+                  break;
+              default:
+                  emscripten_log(0, "codec not support: %d", codec_id);
+                  return -1;
+              }
             }
         }
         else

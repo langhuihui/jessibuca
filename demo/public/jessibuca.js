@@ -1086,6 +1086,8 @@
 
       pause() {}
 
+      clearView() {}
+
     }
 
     class CanvasVideoLoader extends CommonLoader$1 {
