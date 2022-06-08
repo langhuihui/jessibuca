@@ -245,6 +245,8 @@ worker地址
 - **默认值**：`false`
 - **用法**： webcodecs硬解码是否通过video标签渲染
 
+> forceNoOffscreen 设置为false之后（通过OffscreenCanvas渲染之），wcsUseVideoRender不会生效。
+
 > webcodecs硬解码之后，默认是通过canvas 渲染出来的，可以通过配置通过video标签渲染，提升渲染性能。
 
 
@@ -477,6 +479,8 @@ jessibuca.setVolume(1)
 - **返回值**：`boolean`
 - **用法**： 返回是否加载完毕
 
+> 仅为兼容老的2.x语法，3.x版本不需要这个事件。
+
 ```js
 var result = jessibuca.hasLoaded()
 console.log(result) // true
@@ -605,6 +609,9 @@ jessibuca.on("load", function () {
 ### load
 
 监听 jessibuca 初始化事件。
+
+> 仅为兼容老的2.x语法，3.x版本不需要这个事件。
+
 
 ```js
 
