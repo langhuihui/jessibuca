@@ -8,9 +8,18 @@
 }
 
 @keyframes magentaPulse {
-    from { background-color: #630030; -webkit-box-shadow: 0 0 9px #333; }
-    50% { background-color: #a9014b; -webkit-box-shadow: 0 0 18px #a9014b; }
-    to { background-color: #630030; -webkit-box-shadow: 0 0 9px #333; }
+    from {
+        background-color: #630030;
+        -webkit-box-shadow: 0 0 9px #333;
+    }
+    50% {
+        background-color: #a9014b;
+        -webkit-box-shadow: 0 0 18px #a9014b;
+    }
+    to {
+        background-color: #630030;
+        -webkit-box-shadow: 0 0 9px #333;
+    }
 }
 
 
@@ -81,7 +90,7 @@
         }
     }
 
-    .jessibuca-recording{
+    .jessibuca-recording {
         display: none;
         position: absolute;
         left: 50%;
@@ -97,7 +106,7 @@
         border-radius: 0px 0px 8px 8px;
         z-index: 1;
 
-        .jessibuca-recording-red-point{
+        .jessibuca-recording-red-point {
             width: 8px;
             height: 8px;
             background: #FF1F1F;
@@ -105,13 +114,13 @@
             animation: magentaPulse 1s linear infinite;
         }
 
-        .jessibuca-recording-time{
+        .jessibuca-recording-time {
             font-size: 14px;
             font-weight: 500;
             color: #DDDDDD;
         }
 
-        .jessibuca-icon-recordStop{
+        .jessibuca-icon-recordStop {
             width: 16px;
             height: 16px;
             cursor: pointer;
@@ -155,6 +164,7 @@
         right: 0;
         bottom: 0;
         height: 38px;
+        width: 100%;
         padding-left: 13px;
         padding-right: 13px;
         font-size: 14px;
@@ -515,13 +525,13 @@
     &.jessibuca-fullscreen-web {
         .jessibuca-controls {
             width: 100vh;
-            transform: translateX(-13vw) translateY(-47.8vh) rotate(270deg);
-            transition: width .5s ease-in
+            //transform: translateX(call(50vh - 100vw)) translateY(0) rotate(270deg);
+            //transition: width 0.5s ease-in
         }
 
         .jessibuca-play-big {
             &:after {
-                transform: rotate(270deg);
+                transform: translate(-50%,-50%) rotate(270deg);
             }
         }
 

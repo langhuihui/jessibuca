@@ -1,5 +1,5 @@
-import {EVENTS} from "../constant";
-import {bpsSize, formatTimeTips, getStyle, isBoolean, setStyle} from "../utils";
+import {CONTROL_HEIGHT, EVENTS} from "../constant";
+import {bpsSize, formatTimeTips, getStyle, isBoolean, isMobile, setStyle} from "../utils";
 import screenfull from "screenfull";
 
 export default (player, control) => {
@@ -34,6 +34,7 @@ export default (player, control) => {
                 playerWidth = player.width;
                 playerHeight = player.height;
                 player.emit(EVENTS.resize);
+                screenfullH5Control();
             }
         });
     });
@@ -80,6 +81,23 @@ export default (player, control) => {
         setStyle(control.$fullscreen, 'display', isFullScreen ? 'none' : 'flex');
         // control.autoSize();
     };
+    const screenfullH5Control = () => {
+        if (isMobile() && control.$controls) {
+            setTimeout(() => {
+                if (player.fullscreen) {
+                    console.log(player.width, player.height);
+                    let translateX = player.height / 2 - player.width + CONTROL_HEIGHT / 2;
+                    let translateY = player.height / 2 - CONTROL_HEIGHT / 2;
+
+                    control.$controls.style.transform = `translateX(${-translateX}px) translateY(-${translateY}px) rotate(-90deg)`
+                } else {
+                    control.$controls.style.transform = `translateX(0) translateY(0) rotate(0)`
+                }
+
+            }, 10)
+        }
+    }
+
     try {
 
         screenfull.on('change', screenfullChange);
@@ -93,6 +111,7 @@ export default (player, control) => {
     //
     player.on(EVENTS.webFullscreen, (value) => {
         screenfullChange(value);
+        screenfullH5Control();
     })
 
 
