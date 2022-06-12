@@ -86,6 +86,8 @@ worker地址
 1. 当为`true`的时候：视频画面做等比缩放后,高或宽对齐canvas区域,画面不被拉伸,但有黑边。 等同于 `setScaleMode(1)`
 2. 当为`false`的时候：视频画面完全填充canvas区域,画面会被拉伸。等同于 `setScaleMode(0)`
 
+> video标签(useMSE,useWCS+wcsUseVideoRender)渲染的页面暂不支持这个属性。
+
 ### isFullResize
 
 - **类型**：`boolean`
@@ -93,6 +95,8 @@ worker地址
 - **用法**：
 
 1. 当为`true`的时候：视频画面做等比缩放后,完全填充canvas区域,画面不被拉伸,没有黑边,但画面显示不全。等同于 `setScaleMode(2)`
+
+> video标签(useMSE,useWCS+wcsUseVideoRender)渲染的页面暂不支持这个属性。
 
 ### isFlv
 
@@ -201,6 +205,8 @@ worker地址
 - **默认值**：`false`
 - **用法**： 开启屏幕常亮，在手机浏览器上, canvas标签渲染视频并不会像video标签那样保持屏幕常亮。
 
+> PC端不会生效，仅手机端生效
+
 ### isNotMute
 
 - **类型**：`boolean`
@@ -244,6 +250,8 @@ worker地址
 - **类型**：`boolean`
 - **默认值**：`false`
 - **用法**： webcodecs硬解码是否通过video标签渲染
+
+> forceNoOffscreen 设置为false之后（通过OffscreenCanvas渲染之），wcsUseVideoRender不会生效。
 
 > webcodecs硬解码之后，默认是通过canvas 渲染出来的，可以通过配置通过video标签渲染，提升渲染性能。
 
@@ -340,6 +348,9 @@ jessibuca.on('timeout', function () {
 2. `1` 视频画面做等比缩放后,高或宽对齐canvas区域,画面不被拉伸,但有黑边 等同于参数 `isResize` 为true
 3. `2` 视频画面做等比缩放后,完全填充canvas区域,画面不被拉伸,没有黑边,但画面显示不全 等同于参数 `isFullResize` 为true
 
+> video标签(useMSE,useWCS+wcsUseVideoRender)渲染的页面暂不支持这个方法。
+
+
 ```js
 jessibuca.setScaleMode(0)
 
@@ -395,7 +406,9 @@ jessibuca.destroy()
 ```js
 jessibuca.clearView()
 ```
-> 仅canvas渲染支持
+
+> video标签(useMSE,useWCS+wcsUseVideoRender)渲染的页面暂不支持这个方法。
+
 
 ### play([url])
 
@@ -476,6 +489,8 @@ jessibuca.setVolume(1)
 
 - **返回值**：`boolean`
 - **用法**： 返回是否加载完毕
+
+> 仅为兼容老的2.x语法，3.x版本不需要这个事件。
 
 ```js
 var result = jessibuca.hasLoaded()
@@ -605,6 +620,9 @@ jessibuca.on("load", function () {
 ### load
 
 监听 jessibuca 初始化事件。
+
+> 仅为兼容老的2.x语法，3.x版本不需要这个事件。
+
 
 ```js
 

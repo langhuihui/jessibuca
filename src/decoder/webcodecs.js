@@ -8,6 +8,7 @@ export default class WebcodecsDecoder extends Emitter {
         super();
         this.player = player;
         this.hasInit = false;
+        this.isDecodeFirstIIframe = false;
         this.isInitInfo = false;
         this.decoder = null;
         this.initDecoder();
@@ -22,6 +23,7 @@ export default class WebcodecsDecoder extends Emitter {
 
         this.hasInit = false;
         this.isInitInfo = false;
+        this.isDecodeFirstIIframe = false;
         this.off();
         this.player.debug.log('Webcodecs', 'destroy')
     }
@@ -97,14 +99,21 @@ export default class WebcodecsDecoder extends Emitter {
                 this.hasInit = true;
             }
         } else {
-            const chunk = new EncodedVideoChunk({
-                data: payload.slice(5),
-                timestamp: ts,
-                type: isIframe ? ENCODED_VIDEO_TYPE.key : ENCODED_VIDEO_TYPE.delta
-            })
-            this.decoder.decode(chunk);
+            // fix : Uncaught DOMException: Failed to execute 'decode' on 'VideoDecoder': A key frame is required after configure() or flush().
+            if (!this.isDecodeFirstIIframe && isIframe) {
+                this.isDecodeFirstIIframe = true;
+            }
+
+            if (this.isDecodeFirstIIframe) {
+                const chunk = new EncodedVideoChunk({
+                    data: payload.slice(5),
+                    timestamp: ts,
+                    type: isIframe ? ENCODED_VIDEO_TYPE.key : ENCODED_VIDEO_TYPE.delta
+                })
+                this.decoder.decode(chunk);
+            } else {
+                this.player.debug.warn('Webcodecs', 'VideoDecoder isDecodeFirstIIframe false')
+            }
         }
     }
-
-
 }

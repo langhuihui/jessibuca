@@ -98,13 +98,20 @@ https://github.com/bosscheng/jessibuca-3x3-demo
 [online WASM Worker 9画面 https](http://jessibuca.com/3x3-demo.html)
 
 
-## WebCodecs 硬解码h264
+## WebCodecs 硬解码h264(canvas渲染)
 https://github.com/bosscheng/jessibuca-webcodecs-demo
 
 ### 在线demo
-[online WebCodecs 硬解码h264](http://jessibuca.monibuca.com/webcodecs-demo.html)
+[online WebCodecs 硬解码h264](http://jessibuca.monibuca.com/webcodecs-canvas-demo.html)
 
-[online WebCodecs 硬解码h264 https](http://jessibuca.com/webcodecs-demo.html)
+[online WebCodecs 硬解码h264 https](http://jessibuca.com/webcodecs-canvas-demo.html)
+
+## WebCodecs 硬解码h264(video渲染)
+
+### 在线demo
+[online WebCodecs 硬解码h264](http://jessibuca.monibuca.com/webcodecs-video-demo.html)
+
+[online WebCodecs 硬解码h264 https](http://jessibuca.com/webcodecs-video-demo.html)
 
 
 ## WebCodecs 硬解码h264 离屏渲染 OffscreenCanvas
