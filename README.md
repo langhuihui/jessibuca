@@ -30,6 +30,7 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 支持视频录制(WebM、MP4格式)，(MP4格式支持在IOS VLC播放器显示时长播放，Android VLC播放器无法显示时长播放,PC VLC播放器可以播放)
 
 ## PRO版本
+- wasm解码模式下默认work线程中发起Http-Flv、WS请求，减少主线程往worker线程传递数据，提升性能。
 - 支持录制MP4格式(MPEG-4)的视频录制(暂支持H264，不支持音频数据)
 - 支持webrtc标准流播放
 - 支持语音通讯：支持采集PCM/G711A/G711U格式的数据、支持采样率16000Hz或8000Hz，采样精度32bits或者16bits，支持单通道或双通道
@@ -41,9 +42,12 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 支持crypto解密播放
 - 支持WebTransport协议播放
 - 支持SIMD软解码加速
+- 电子放大
 - 支持Windows系统下360浏览器可播放使用MSE加速解码H265
 - 支持window系统下win10商店购买hevc解码器后最新edge可硬件加速解码播放H265
-
+- 支持打包成单一文件能力,支持 js 和 wasm胶水文件打包成单一文件，方便npm安装
+- 支持播放器自定义水印,支持播放器播放过程中，显示水印，例如公司名称，公司logo等
+- 支持截图加自定义水印,支持调用截图接口的时候，添加自定义水印，例如公司名称，公司logo
 ## 本地测试
 
 - 执行yarn 或者npm i
