@@ -3,8 +3,7 @@
 import os
 
 args = [
-    'extra-cflags="-c -Oz -fPIC -msse -msse2 -msse3 -msimd128"',
-     'extra-cxxflags="-msse -msse2 -msse3 -msimd128"',
+    'extra-cflags="-c -Oz -fPIC"',
     'cc=emcc',
     'cxx=em++',
     'ar=emar',
