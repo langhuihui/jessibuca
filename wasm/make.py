@@ -6,7 +6,7 @@ import os
 import sys
 import getopt
 from subprocess import Popen, PIPE, STDOUT
-args = {'-o': '../src/decoder/decoder'}
+args = {'-o': '../src/decoder/decoder-smid'}
 
 sargs = {
     'WASM': 1,
