@@ -54,9 +54,9 @@ Module.postRun = function () {
                 }
             }),
             decode: function (payload, ts) {
-                const isIframe = payload[0] >> 4 === 1;
+                const isIFrame = payload[0] >> 4 === 1;
                 if (!wcsVideoDecoder.hasInit) {
-                    if (isIframe && payload[1] === 0) {
+                    if (isIFrame && payload[1] === 0) {
                         const videoCodec = (payload[0] & 0x0F);
                         decoder.setVideoCodec(videoCodec);
                         const config = formatVideoDecoderConfigure(payload.slice(5));
@@ -67,7 +67,7 @@ Module.postRun = function () {
                     const chunk = new EncodedVideoChunk({
                         data: payload.slice(5),
                         timestamp: ts,
-                        type: isIframe ? ENCODED_VIDEO_TYPE.key : ENCODED_VIDEO_TYPE.delta
+                        type: isIFrame ? ENCODED_VIDEO_TYPE.key : ENCODED_VIDEO_TYPE.delta
                     });
                     wcsVideoDecoder.decoder.decode(chunk);
                 }
