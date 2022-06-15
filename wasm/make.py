@@ -19,6 +19,7 @@ sargs = {
     'ALLOW_MEMORY_GROWTH':1,
 }
 emcc_args = [
+     '-msimd128',
     # '-m32',
     '-Oz',
     '--memory-init-file', '0',
