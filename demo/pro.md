@@ -10,9 +10,6 @@
 - 支持截图加自定义水印（图片或者文字）
 - 支持HLS H264直播流
 - 支持直播流crypto解密播放
-- 支持SIMD软解码加速
-- 支持Windows系统下360浏览器可播放使用MSE加速解码H265
-- 支持window系统下win10商店购买hevc解码器后最新edge可硬件加速解码播放H265
 
 ## wasm解码模式下默认work线程中发起Http-Flv、WS请求，减少主线程往worker线程传递数据，提升性能
 wasm解码模式下默认work线程中发起Http-Flv、WS请求，减少主线程往worker线程传递数据，提升性能
@@ -82,19 +79,6 @@ Audio Context的部分音频节点提供了playbackRate属性以实现倍速播�
 
 支持直播流crypto解密播放
 
-## 支持SIMD软解码加速
-
-使用Chrome/Edge 91, Firefox89及之后正式提供的SIMD指令集加速解码, 在1080P以上分辨率带来100%-300%的性能提升 尤其在HEVC的解码上提升非常明显.
-
-> Safari暂不支持
-
-## 支持Windows系统下360浏览器可播放使用MSE加速解码H265
-
-支持Windows系统下360浏览器可播放使用MSE加速解码H265
-
-## 支持window系统下win10商店购买hevc解码器后最新edge可硬件加速解码播放H265
-
-支持window系统下win10商店购买hevc解码器后最新edge可硬件加速解码播放H265
 
 ## 支持作者
 
