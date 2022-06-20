@@ -9,7 +9,7 @@ import {
     isEmpty,
     isFullScreen, isMobile,
     isNotEmpty,
-    now,
+    now, supportMediaStreamTrack,
     supportMSE,
     supportOffscreenV2,
     supportWCS
@@ -42,6 +42,10 @@ export default class Player extends Emitter {
 
         if (this._opt.useMSE) {
             this._opt.useMSE = supportMSE();
+        }
+
+        if (this._opt.wcsUseVideoRender) {
+            this._opt.wcsUseVideoRender = supportMediaStreamTrack()
         }
 
         // 如果使用mse则强制不允许 webcodecs
