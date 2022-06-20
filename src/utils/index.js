@@ -79,10 +79,11 @@ export function downloadFile(file, fileName) {
 export function downloadImg(content, fileName) {
     const aLink = document.createElement("a");
     aLink.download = fileName;
-    aLink.href = URL.createObjectURL(content);
+    const href = URL.createObjectURL(content);
+    aLink.href = href;
     aLink.click();
     setTimeout(() => {
-        URL.revokeObjectURL(content);
+        URL.revokeObjectURL(href);
     }, isIOS() ? 1000 : 0)
 }
 
@@ -296,7 +297,7 @@ export function isFullScreen() {
 
 export function bpsSize(value) {
     if (null == value || value === '') {
-        return "0 kb/s";
+        return "0kb/s";
     }
     let size = parseFloat(value);
     size = size.toFixed(2);
@@ -319,7 +320,7 @@ export function createEmptyImageBitmap(width, height) {
     const $canvasElement = document.createElement("canvas");
     $canvasElement.width = width;
     $canvasElement.height = height;
-    return createImageBitmap($canvasElement, 0, 0, width, height);
+    return window.createImageBitmap($canvasElement, 0, 0, width, height);
 }
 
 
@@ -340,8 +341,11 @@ export function saveBlobToFile(fileName, blob) {
     aLink.href = url;
     //创建内置事件并触发
     let evt = window.document.createEvent('MouseEvents');
-    evt.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+    evt.initEvent("click", true, true); //initEvent 不加后两个参数在FF下会报错  事件类型，是否冒泡，是否阻止浏览器的默认行为
     aLink.dispatchEvent(evt);
+    setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+    }, isIOS() ? 1000 : 0)
 }
 
 export function isEmpty(value) {
