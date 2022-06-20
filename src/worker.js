@@ -1,7 +1,7 @@
 import Module from './decoder/decoder';
 import createWebGL from './utils/webgl';
-import { WORKER_CMD_TYPE, MEDIA_TYPE, WORKER_SEND_TYPE, ENCODED_VIDEO_TYPE, DEFAULT_PLAYER_OPTIONS } from "./constant";
-import { formatVideoDecoderConfigure } from "./utils";
+import {WORKER_CMD_TYPE, MEDIA_TYPE, WORKER_SEND_TYPE, ENCODED_VIDEO_TYPE, DEFAULT_PLAYER_OPTIONS} from "./constant";
+import {formatVideoDecoderConfigure} from "./utils";
 
 if (!Date.now) Date.now = function () {
     return new Date().getTime();
@@ -93,7 +93,7 @@ Module.postRun = function () {
             return !decoder.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined';
         },
         initAudioPlanar: function (channels, samplerate) {
-            postMessage({ cmd: WORKER_CMD_TYPE.initAudio, sampleRate: samplerate, channels: channels });
+            postMessage({cmd: WORKER_CMD_TYPE.initAudio, sampleRate: samplerate, channels: channels});
             var outputArray = [];
             var remain = 0;
             this.playAudioPlanar = function (data, len, ts) {
@@ -147,13 +147,13 @@ Module.postRun = function () {
             };
         },
         setVideoCodec: function (code) {
-            postMessage({ cmd: WORKER_CMD_TYPE.videoCode, code });
+            postMessage({cmd: WORKER_CMD_TYPE.videoCode, code});
         },
         setAudioCodec: function (code) {
-            postMessage({ cmd: WORKER_CMD_TYPE.audioCode, code });
+            postMessage({cmd: WORKER_CMD_TYPE.audioCode, code});
         },
         setVideoSize: function (w, h) {
-            postMessage({ cmd: WORKER_CMD_TYPE.initVideo, w: w, h: h });
+            postMessage({cmd: WORKER_CMD_TYPE.initVideo, w: w, h: h});
             var size = w * h;
             var qsize = size >> 2;
             if (decoder.useOffscreen()) {
@@ -192,8 +192,15 @@ Module.postRun = function () {
                 this.startTimestamp = Date.now();
                 this.delay = -1;
             } else {
+
                 if (timestamp) {
-                    this.delay = (Date.now() - this.startTimestamp) - (timestamp - this.firstTimestamp);
+                    const localTimestamp = (Date.now() - this.startTimestamp);
+                    const timeTimestamp = (timestamp - this.firstTimestamp);
+                    if (localTimestamp >= timeTimestamp) {
+                        this.delay = localTimestamp - timeTimestamp;
+                    } else {
+                        this.delay = timeTimestamp - localTimestamp;
+                    }
                 }
             }
             return this.delay;
@@ -250,11 +257,16 @@ Module.postRun = function () {
                             while (buffer.length) {
                                 data = buffer[0];
                                 if (this.getDelay(data.ts) > decoder.opt.videoBuffer) {
-                                    // 丢帧。。。
+                                    decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, decode`);
                                     buffer.shift();
                                     _doDecode(data);
                                 } else {
-                                    // decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay},opt.videoBuffer is ${decoder.opt.videoBuffer}`);
+                                    decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay},opt.videoBuffer is ${decoder.opt.videoBuffer}`);
+                                    // if (this.delay < -1) {
+                                    //     this.resetDelay();
+                                    //     this.dropping = true;
+                                    //     break;
+                                    // }
                                     break;
                                 }
                             }
@@ -309,7 +321,7 @@ Module.postRun = function () {
     };
     var audioDecoder = new Module.AudioDecoder(decoder);
     var videoDecoder = new Module.VideoDecoder(decoder);
-    postMessage({ cmd: WORKER_SEND_TYPE.init });
+    postMessage({cmd: WORKER_SEND_TYPE.init});
     self.onmessage = function (event) {
         var msg = event.data;
         switch (msg.cmd) {
