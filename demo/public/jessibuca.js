@@ -49,6 +49,8 @@
 	const DEFAULT_PLAYER_OPTIONS = {
 	  videoBuffer: 1000,
 	  //1000ms == 1 second
+	  videoBufferDelay: 1000,
+	  // 1000ms
 	  isResize: true,
 	  isFullResize: false,
 	  //
@@ -621,10 +623,11 @@
 	function downloadImg(content, fileName) {
 	  const aLink = document.createElement("a");
 	  aLink.download = fileName;
-	  aLink.href = URL.createObjectURL(content);
+	  const href = URL.createObjectURL(content);
+	  aLink.href = href;
 	  aLink.click();
 	  setTimeout(() => {
-	    URL.revokeObjectURL(content);
+	    URL.revokeObjectURL(href);
 	  }, isIOS() ? 1000 : 0);
 	}
 	function now() {
@@ -734,12 +737,12 @@
 	}
 	function bpsSize(value) {
 	  if (null == value || value === '') {
-	    return "0 KB/S";
+	    return "0kb/s";
 	  }
 
 	  let size = parseFloat(value);
 	  size = size.toFixed(2);
-	  return size + 'KB/S';
+	  return size + 'kb/s';
 	}
 	function fpsStatus(fps) {
 	  let result = 0;
@@ -756,7 +759,7 @@
 	  const $canvasElement = document.createElement("canvas");
 	  $canvasElement.width = width;
 	  $canvasElement.height = height;
-	  return createImageBitmap($canvasElement, 0, 0, width, height);
+	  return window.createImageBitmap($canvasElement, 0, 0, width, height);
 	}
 	function supportMSE() {
 	  return window.MediaSource && window.MediaSource.isTypeSupported(MP4_CODECS.avc);
@@ -8437,6 +8440,7 @@
 	      forceNoOffscreen: this.player._opt.forceNoOffscreen,
 	      useWCS: this.player._opt.useWCS,
 	      videoBuffer: this.player._opt.videoBuffer,
+	      videoBufferDelay: this.player._opt.videoBufferDelay,
 	      openWebglAlignment: this.player._opt.openWebglAlignment
 	    };
 	    this.decoderWorker.postMessage({
@@ -8541,7 +8545,14 @@
 	      this.delay = -1;
 	    } else {
 	      if (timestamp) {
-	        this.delay = Date.now() - this.startTimestamp - (timestamp - this.firstTimestamp);
+	        const localTimestamp = Date.now() - this.startTimestamp;
+	        const timeTimestamp = timestamp - this.firstTimestamp;
+
+	        if (localTimestamp >= timeTimestamp) {
+	          this.delay = localTimestamp - timeTimestamp;
+	        } else {
+	          this.delay = timeTimestamp - localTimestamp;
+	        }
 	      }
 	    }
 
@@ -8562,6 +8573,7 @@
 	    let _loop = () => {
 	      let data;
 	      const videoBuffer = this.player._opt.videoBuffer;
+	      const videoBufferDelay = this.player._opt.videoBufferDelay;
 
 	      if (this.bufferList.length) {
 	        if (this.dropping) {
@@ -8594,7 +8606,7 @@
 	            this.bufferList.shift();
 
 	            this._doDecoderDecode(data);
-	          } else if (this.delay > videoBuffer + 1000) {
+	          } else if (this.delay > videoBuffer + videoBufferDelay) {
 	            // this.player.debug.log('common dumex', `delay is ${this.delay}, set dropping is true`);
 	            this.resetDelay();
 	            this.dropping = true;
@@ -10870,13 +10882,14 @@
 	    let dts = ts; // player.debug.log('MediaSource', '_decodeVideo', ts);
 
 	    const $video = player.video.$videoElement;
+	    const videoBufferDelay = player._opt.videoBufferDelay;
 
 	    if ($video.buffered.length > 1) {
 	      this.removeBuffer($video.buffered.start(0), $video.buffered.end(0));
 	      this.timeInit = false;
 	    }
 
-	    if (this.dropping && dts - this.cacheTrack.dts > 1000) {
+	    if (this.dropping && dts - this.cacheTrack.dts > videoBufferDelay) {
 	      this.dropping = false;
 	      this.cacheTrack = {};
 	    } else if (this.cacheTrack && dts > this.cacheTrack.dts) {

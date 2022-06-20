@@ -14,6 +14,7 @@ export const DEMUX_TYPE = {
 // default player options
 export const DEFAULT_PLAYER_OPTIONS = {
     videoBuffer: 1000, //1000ms == 1 second
+    videoBufferDelay: 1000,// 1000ms
     isResize: true,
     isFullResize: false, //
     isFlv: false,

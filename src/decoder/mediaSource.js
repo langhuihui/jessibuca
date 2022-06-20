@@ -150,12 +150,12 @@ export default class MseDecoder extends Emitter {
         let dts = ts;
         // player.debug.log('MediaSource', '_decodeVideo', ts);
         const $video = player.video.$videoElement;
-
+        const videoBufferDelay = player._opt.videoBufferDelay;
         if ($video.buffered.length > 1) {
             this.removeBuffer($video.buffered.start(0), $video.buffered.end(0));
             this.timeInit = false;
         }
-        if (this.dropping && dts - this.cacheTrack.dts > 1000) {
+        if (this.dropping && dts - this.cacheTrack.dts > videoBufferDelay) {
             this.dropping = false;
             this.cacheTrack = {};
         } else if (this.cacheTrack && dts > this.cacheTrack.dts) {

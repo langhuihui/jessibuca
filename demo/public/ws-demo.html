@@ -136,7 +136,7 @@
             },
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
-            heartTimeout: 100
+            heartTimeout: 100,
         },);
 
         jessibuca.onLog = msg => console.error(msg);
@@ -145,9 +145,9 @@
         jessibuca.onPlay = () => console.log('onPlay');
         jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
         jessibuca.onMute = msg => console.log('onMute', msg);
-        jessibuca.on('stats', (stats) => {
-            console.log('stats', stats);
-        })
+        // jessibuca.on('stats', (stats) => {
+        //     console.log('stats', stats);
+        // })
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
         $destroy.style.display = 'none';

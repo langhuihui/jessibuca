@@ -87,7 +87,8 @@ Module.postRun = function () {
             forceNoOffscreen: DEFAULT_PLAYER_OPTIONS.forceNoOffscreen,
             useWCS: DEFAULT_PLAYER_OPTIONS.useWCS,
             videoBuffer: DEFAULT_PLAYER_OPTIONS.videoBuffer,
-            openWebglAlignment: DEFAULT_PLAYER_OPTIONS.openWebglAlignment
+            openWebglAlignment: DEFAULT_PLAYER_OPTIONS.openWebglAlignment,
+            videoBufferDelay: DEFAULT_PLAYER_OPTIONS.videoBufferDelay
         },
         useOffscreen: function () {
             return !decoder.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined';
@@ -246,27 +247,22 @@ Module.postRun = function () {
                     } else {
                         var data = buffer[0];
                         if (this.getDelay(data.ts) === -1) {
-                            decoder.opt.debug && console.log('Jessibuca: [worker]: common dumex delay is -1');
+                            // decoder.opt.debug && console.log('Jessibuca: [worker]: common dumex delay is -1');
                             buffer.shift();
                             _doDecode(data);
-                        } else if (this.delay > decoder.opt.videoBuffer + 1000) {
-                            decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, set dropping is true`);
+                        } else if (this.delay > decoder.opt.videoBuffer + decoder.opt.videoBufferDelay) {
+                            // decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, set dropping is true`);
                             this.resetDelay();
                             this.dropping = true;
                         } else {
                             while (buffer.length) {
                                 data = buffer[0];
                                 if (this.getDelay(data.ts) > decoder.opt.videoBuffer) {
-                                    decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, decode`);
+                                    // decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, decode`);
                                     buffer.shift();
                                     _doDecode(data);
                                 } else {
-                                    decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay},opt.videoBuffer is ${decoder.opt.videoBuffer}`);
-                                    // if (this.delay < -1) {
-                                    //     this.resetDelay();
-                                    //     this.dropping = true;
-                                    //     break;
-                                    // }
+                                    // decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay},opt.videoBuffer is ${decoder.opt.videoBuffer}`);
                                     break;
                                 }
                             }

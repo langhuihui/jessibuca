@@ -7456,6 +7456,8 @@
 	const DEFAULT_PLAYER_OPTIONS = {
 	  videoBuffer: 1000,
 	  //1000ms == 1 second
+	  videoBufferDelay: 1000,
+	  // 1000ms
 	  isResize: true,
 	  isFullResize: false,
 	  //
@@ -7665,7 +7667,8 @@
 	      forceNoOffscreen: DEFAULT_PLAYER_OPTIONS.forceNoOffscreen,
 	      useWCS: DEFAULT_PLAYER_OPTIONS.useWCS,
 	      videoBuffer: DEFAULT_PLAYER_OPTIONS.videoBuffer,
-	      openWebglAlignment: DEFAULT_PLAYER_OPTIONS.openWebglAlignment
+	      openWebglAlignment: DEFAULT_PLAYER_OPTIONS.openWebglAlignment,
+	      videoBufferDelay: DEFAULT_PLAYER_OPTIONS.videoBufferDelay
 	    },
 	    useOffscreen: function () {
 	      return !decoder$1.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined';
@@ -7801,7 +7804,14 @@
 	        this.delay = -1;
 	      } else {
 	        if (timestamp) {
-	          this.delay = Date.now() - this.startTimestamp - (timestamp - this.firstTimestamp);
+	          const localTimestamp = Date.now() - this.startTimestamp;
+	          const timeTimestamp = timestamp - this.firstTimestamp;
+
+	          if (localTimestamp >= timeTimestamp) {
+	            this.delay = localTimestamp - timeTimestamp;
+	          } else {
+	            this.delay = timeTimestamp - localTimestamp;
+	          }
 	        }
 	      }
 
@@ -7853,12 +7863,12 @@
 	            var data = buffer[0];
 
 	            if (this.getDelay(data.ts) === -1) {
-	              decoder$1.opt.debug && console.log('Jessibuca: [worker]: common dumex delay is -1');
+	              // decoder.opt.debug && console.log('Jessibuca: [worker]: common dumex delay is -1');
 	              buffer.shift();
 
 	              _doDecode(data);
-	            } else if (this.delay > decoder$1.opt.videoBuffer + 1000) {
-	              decoder$1.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, set dropping is true`);
+	            } else if (this.delay > decoder$1.opt.videoBuffer + decoder$1.opt.videoBufferDelay) {
+	              // decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, set dropping is true`);
 	              this.resetDelay();
 	              this.dropping = true;
 	            } else {
@@ -7866,7 +7876,7 @@
 	                data = buffer[0];
 
 	                if (this.getDelay(data.ts) > decoder$1.opt.videoBuffer) {
-	                  // 丢帧。。。
+	                  // decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, decode`);
 	                  buffer.shift();
 
 	                  _doDecode(data);

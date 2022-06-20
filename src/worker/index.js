@@ -101,6 +101,7 @@ export default class DecoderWorker {
             forceNoOffscreen: this.player._opt.forceNoOffscreen,
             useWCS: this.player._opt.useWCS,
             videoBuffer: this.player._opt.videoBuffer,
+            videoBufferDelay: this.player._opt.videoBufferDelay,
             openWebglAlignment: this.player._opt.openWebglAlignment
         }
         this.decoderWorker.postMessage({
