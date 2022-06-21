@@ -485,7 +485,7 @@ class Jessibuca extends Emitter {
      * @returns {Boolean}
      */
     isPlaying() {
-        return this.player.playing;
+        return this.player ? this.player.playing : false;
     }
 
     /**

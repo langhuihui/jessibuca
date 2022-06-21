@@ -316,15 +316,15 @@ export default class Player extends Emitter {
     set recording(value) {
         if (value) {
             if (this.playing) {
-                this.recorder.startRecord();
+                this.recorder && this.recorder.startRecord();
             }
         } else {
-            this.recorder.stopRecordAndSave();
+            this.recorder && this.recorder.stopRecordAndSave();
         }
     }
 
     get recording() {
-        return this.recorder && this.recorder.recording;
+        return this.recorder ? this.recorder.recording : false;
     }
 
     set audioTimestamp(value) {
@@ -494,7 +494,7 @@ export default class Player extends Emitter {
     close() {
         return new Promise((resolve, reject) => {
             this._close().then(() => {
-                this.video.clearView();
+                this.video && this.video.clearView();
                 resolve()
             })
         })
@@ -534,9 +534,14 @@ export default class Player extends Emitter {
             this.playing = false;
             this.loading = false;
             this.recording = false;
-            // release audio buffer
-            this.audio && this.audio.pause();
-            this.video && this.video.pause();
+            if(this.audio){
+                this.audio.resetInit();
+                this.audio.pause();
+            }
+            if (this.video) {
+                this.video.resetInit();
+                this.video.pause();
+            }
             // release lock
             this.releaseWakeLock();
             // reset stats

@@ -764,6 +764,9 @@
 	function supportMSE() {
 	  return window.MediaSource && window.MediaSource.isTypeSupported(MP4_CODECS.avc);
 	}
+	function supportMediaStreamTrack() {
+	  return window.MediaStreamTrackGenerator && typeof window.MediaStreamTrackGenerator === 'function';
+	}
 	function isEmpty(value) {
 	  return value === null || value === undefined;
 	}
@@ -1087,6 +1090,22 @@
 	  constructor() {
 	    super();
 	    this.init = false;
+	  }
+
+	  resetInit() {
+	    this.init = false;
+	    this.videoInfo = {
+	      width: '',
+	      height: '',
+	      encType: '',
+	      encTypeCode: ''
+	    };
+	  }
+
+	  destroy() {
+	    this.resetInit();
+	    this.player.$container.removeChild(this.$videoElement);
+	    this.off();
 	  } //
 
 
@@ -1146,6 +1165,8 @@
 	  }
 
 	  destroy() {
+	    super.destroy();
+
 	    if (this.contextGl) {
 	      this.contextGl = null;
 	    }
@@ -1165,15 +1186,6 @@
 	    }
 
 	    this.renderType = null;
-	    this.videoInfo = {
-	      width: '',
-	      height: '',
-	      encType: '',
-	      encTypeCode: ''
-	    };
-	    this.player.$container.removeChild(this.$videoElement);
-	    this.init = false;
-	    this.off();
 	    this.player.debug.log(`CanvasVideoLoader`, 'destroy');
 	  }
 
@@ -1390,7 +1402,7 @@
 	  }
 
 	  destroy() {
-	    this.player.$container.removeChild(this.$videoElement);
+	    super.destroy();
 
 	    if (this.$videoElement) {
 	      this.$videoElement.src = '';
@@ -1405,8 +1417,6 @@
 	      this.trackGenerator = null;
 	    }
 
-	    this.init = false;
-	    this.off();
 	    this.player.debug.log('Video', 'destroy');
 	  }
 
@@ -1588,12 +1598,21 @@
 	    this.player.debug.log('AudioContext', 'init');
 	  }
 
+	  resetInit() {
+	    this.init = false;
+	    this.audioInfo = {
+	      encType: '',
+	      channels: '',
+	      sampleRate: ''
+	    };
+	  }
+
 	  destroy() {
 	    this.closeAudio();
+	    this.resetInit();
 	    this.audioContext.close();
 	    this.audioContext = null;
 	    this.gainNode = null;
-	    this.init = false;
 	    this.hasAudio = false;
 	    this.playing = false;
 
@@ -1607,11 +1626,6 @@
 	    this.hasInitScriptNode = false;
 	    this.audioSyncVideoOption = {
 	      diff: null
-	    };
-	    this.audioInfo = {
-	      encType: '',
-	      channels: '',
-	      sampleRate: ''
 	    };
 	    this.off();
 	    this.player.debug.log('AudioContext', 'destroy');
@@ -10976,7 +10990,12 @@
 	    }
 
 	    if (this.sourceBuffer.updating === false && this.isStateOpen) {
-	      this.sourceBuffer.appendBuffer(buffer);
+	      if (this.sourceBuffer.appendBuffer) {
+	        this.sourceBuffer.appendBuffer(buffer);
+	      } else {
+	        debug.log('MediaSource', 'this.sourceBuffer.appendBuffer function is undefined');
+	      }
+
 	      return;
 	    }
 
@@ -11174,6 +11193,10 @@
 
 	    if (this._opt.useMSE) {
 	      this._opt.useMSE = supportMSE();
+	    }
+
+	    if (this._opt.wcsUseVideoRender) {
+	      this._opt.wcsUseVideoRender = supportMediaStreamTrack();
 	    } // 如果使用mse则强制不允许 webcodecs
 
 
@@ -11431,15 +11454,15 @@
 	  set recording(value) {
 	    if (value) {
 	      if (this.playing) {
-	        this.recorder.startRecord();
+	        this.recorder && this.recorder.startRecord();
 	      }
 	    } else {
-	      this.recorder.stopRecordAndSave();
+	      this.recorder && this.recorder.stopRecordAndSave();
 	    }
 	  }
 
 	  get recording() {
-	    return this.recorder && this.recorder.recording;
+	    return this.recorder ? this.recorder.recording : false;
 	  }
 
 	  set audioTimestamp(value) {
@@ -11607,7 +11630,7 @@
 	  close() {
 	    return new Promise((resolve, reject) => {
 	      this._close().then(() => {
-	        this.video.clearView();
+	        this.video && this.video.clearView();
 	        resolve();
 	      });
 	    });
@@ -11646,10 +11669,18 @@
 	      this.clearCheckLoadingTimeout();
 	      this.playing = false;
 	      this.loading = false;
-	      this.recording = false; // release audio buffer
+	      this.recording = false;
 
-	      this.audio && this.audio.pause();
-	      this.video && this.video.pause(); // release lock
+	      if (this.audio) {
+	        this.audio.resetInit();
+	        this.audio.pause();
+	      }
+
+	      if (this.video) {
+	        this.video.resetInit();
+	        this.video.pause();
+	      } // release lock
+
 
 	      this.releaseWakeLock(); // reset stats
 
@@ -12386,7 +12417,7 @@
 
 
 	  isPlaying() {
-	    return this.player.playing;
+	    return this.player ? this.player.playing : false;
 	  }
 	  /**
 	   * 是否静音状态

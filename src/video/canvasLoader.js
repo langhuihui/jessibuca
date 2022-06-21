@@ -41,14 +41,13 @@ export default class CanvasVideoLoader extends CommonLoader {
     }
 
     destroy() {
+        super.destroy();
         if (this.contextGl) {
             this.contextGl = null;
         }
-
         if (this.context2D) {
             this.context2D = null;
         }
-
         if (this.contextGlRender) {
             this.contextGlDestroy && this.contextGlDestroy();
             this.contextGlDestroy = null;
@@ -60,16 +59,6 @@ export default class CanvasVideoLoader extends CommonLoader {
 
         this.renderType = null;
 
-        this.videoInfo = {
-            width: '',
-            height: '',
-            encType: '',
-            encTypeCode: ''
-        }
-
-        this.player.$container.removeChild(this.$videoElement);
-        this.init = false;
-        this.off();
         this.player.debug.log(`CanvasVideoLoader`, 'destroy');
     }
 

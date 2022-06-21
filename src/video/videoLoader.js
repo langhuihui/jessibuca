@@ -46,7 +46,7 @@ export default class VideoLoader extends CommonLoader {
     }
 
     destroy() {
-        this.player.$container.removeChild(this.$videoElement);
+        super.destroy();
         if (this.$videoElement) {
             this.$videoElement.src = ''
             this.$videoElement = null;
@@ -57,10 +57,6 @@ export default class VideoLoader extends CommonLoader {
         if (this.vwriter) {
             this.trackGenerator = null;
         }
-
-
-        this.init = false;
-        this.off();
         this.player.debug.log('Video', 'destroy');
     }
 

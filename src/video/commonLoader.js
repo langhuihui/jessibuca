@@ -7,6 +7,21 @@ export default class CommonLoader extends Emitter {
         this.init = false;
     }
 
+    resetInit() {
+        this.init = false;
+        this.videoInfo = {
+            width: '',
+            height: '',
+            encType: '',
+            encTypeCode: ''
+        }
+    }
+    destroy() {
+        this.resetInit();
+        this.player.$container.removeChild(this.$videoElement);
+        this.off();
+    }
+
     //
     updateVideoInfo(data) {
         if (data.encTypeCode) {
@@ -28,7 +43,7 @@ export default class CommonLoader extends Emitter {
         }
     }
 
-    play(){
+    play() {
 
     }
 

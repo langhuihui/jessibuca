@@ -61,16 +61,24 @@ export default class AudioContextLoader extends Emitter {
         this.player.debug.log('AudioContext', 'init');
     }
 
+    resetInit() {
+        this.init = false;
+        this.audioInfo = {
+            encType: '',
+            channels: '',
+            sampleRate: ''
+        }
+    }
+
 
     destroy() {
         this.closeAudio();
+        this.resetInit();
         this.audioContext.close();
         this.audioContext = null;
         this.gainNode = null;
-        this.init = false;
         this.hasAudio = false;
         this.playing = false;
-
         if (this.scriptNode) {
             this.scriptNode.onaudioprocess = noop;
             this.scriptNode = null;
@@ -81,11 +89,6 @@ export default class AudioContextLoader extends Emitter {
         this.audioSyncVideoOption = {
             diff: null
         };
-        this.audioInfo = {
-            encType: '',
-            channels: '',
-            sampleRate: ''
-        }
         this.off();
         this.player.debug.log('AudioContext', 'destroy');
     }
@@ -298,8 +301,6 @@ export default class AudioContextLoader extends Emitter {
     resume() {
         this.playing = true;
     }
-
-
 
 
 }
