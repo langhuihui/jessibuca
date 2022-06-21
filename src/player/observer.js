@@ -1,3 +1,5 @@
+import {getTarget} from "../utils";
+
 export default (player) => {
 
     const {
@@ -8,8 +10,12 @@ export default (player) => {
 
 
     if (_opt.supportDblclickFullscreen) {
-        proxy(player.$container, 'dblclick', () => {
-            player.fullscreen = !player.fullscreen;
+        proxy(player.$container, 'dblclick', (e) => {
+            const target = getTarget(e);
+            const nodeName = target.nodeName.toLowerCase();
+            if (nodeName === 'canvas' || nodeName === 'video') {
+                player.fullscreen = !player.fullscreen;
+            }
         })
     }
 

@@ -504,3 +504,9 @@ export function formatTimeTips(time) {
 
     return result;
 }
+
+export function getTarget(e) {
+    const event = e || window.event;
+    const target = event.target || event.srcElement;
+    return target;
+}
