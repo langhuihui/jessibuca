@@ -112,7 +112,9 @@
 	  // 自动降级到 wasm 模式
 	  wasmDecodeErrorReplay: true,
 	  // 解码失败重新播放。
-	  openWebglAlignment: false //  https://github.com/langhuihui/jessibuca/issues/152
+	  openWebglAlignment: false,
+	  //  https://github.com/langhuihui/jessibuca/issues/152
+	  wasmDecodeAudioSyncVideo: true // wasm 解码之后音视频同步
 
 	};
 	const WORKER_CMD_TYPE = {
@@ -1689,7 +1691,7 @@
 
 	      if (this.bufferList.length && this.playing) {
 	        // just for wasm
-	        if (!this.player._opt.useWCS && !this.player._opt.useMSE) {
+	        if (!this.player._opt.useWCS && !this.player._opt.useMSE && this.player._opt.wasmDecodeAudioSyncVideo) {
 	          // audio > video
 	          // wait
 	          if (this.audioSyncVideoOption.diff > AUDIO_SYNC_VIDEO_DIFF) {

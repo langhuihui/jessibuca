@@ -146,7 +146,7 @@ export default class AudioContextLoader extends Emitter {
 
             if (this.bufferList.length && this.playing) {
                 // just for wasm
-                if (!this.player._opt.useWCS && !this.player._opt.useMSE) {
+                if (!this.player._opt.useWCS && !this.player._opt.useMSE && this.player._opt.wasmDecodeAudioSyncVideo) {
                     // audio > video
                     // wait
                     if (this.audioSyncVideoOption.diff > AUDIO_SYNC_VIDEO_DIFF) {

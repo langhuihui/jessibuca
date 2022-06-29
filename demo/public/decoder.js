@@ -7519,7 +7519,9 @@
 	  // 自动降级到 wasm 模式
 	  wasmDecodeErrorReplay: true,
 	  // 解码失败重新播放。
-	  openWebglAlignment: false //  https://github.com/langhuihui/jessibuca/issues/152
+	  openWebglAlignment: false,
+	  //  https://github.com/langhuihui/jessibuca/issues/152
+	  wasmDecodeAudioSyncVideo: true // wasm 解码之后音视频同步
 
 	};
 	const WORKER_CMD_TYPE = {
