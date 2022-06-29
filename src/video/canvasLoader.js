@@ -115,6 +115,7 @@ export default class CanvasVideoLoader extends CommonLoader {
                 this.contextGlRender(this.$videoElement.width, this.$videoElement.height, msg.output[0], msg.output[1], msg.output[2]);
                 break;
             case CANVAS_RENDER_TYPE.webcodecs:
+                // can use  createImageBitmap in wexin
                 this.context2D.drawImage(msg.videoFrame, 0, 0, this.$videoElement.width, this.$videoElement.height);
                 break;
         }

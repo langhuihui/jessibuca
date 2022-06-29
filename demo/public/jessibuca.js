@@ -838,6 +838,11 @@
 
 	  return result;
 	}
+	function getTarget(e) {
+	  const event = e || window.event;
+	  const target = event.target || event.srcElement;
+	  return target;
+	}
 
 	var events$1 = (player => {
 	  try {
@@ -1246,6 +1251,7 @@
 	        break;
 
 	      case CANVAS_RENDER_TYPE.webcodecs:
+	        // can use  createImageBitmap in wexin
 	        this.context2D.drawImage(msg.videoFrame, 0, 0, this.$videoElement.width, this.$videoElement.height);
 	        break;
 	    }
@@ -9589,8 +9595,13 @@
 	  } = player;
 
 	  if (_opt.supportDblclickFullscreen) {
-	    proxy(player.$container, 'dblclick', () => {
-	      player.fullscreen = !player.fullscreen;
+	    proxy(player.$container, 'dblclick', e => {
+	      const target = getTarget(e);
+	      const nodeName = target.nodeName.toLowerCase();
+
+	      if (nodeName === 'canvas' || nodeName === 'video') {
+	        player.fullscreen = !player.fullscreen;
+	      }
 	    });
 	  } //
 

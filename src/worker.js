@@ -276,8 +276,8 @@ Module.postRun = function () {
             decoder.opt.debug && console.log('Jessibuca: [worker]: close');
             clearInterval(this.stopId);
             this.stopId = null;
-            audioDecoder.clear();
-            videoDecoder.clear();
+            audioDecoder.clear && audioDecoder.clear();
+            videoDecoder.clear && videoDecoder.clear();
             wcsVideoDecoder.reset && wcsVideoDecoder.reset();
             this.firstTimestamp = null;
             this.startTimestamp = null;
