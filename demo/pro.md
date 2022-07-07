@@ -1,6 +1,9 @@
 ## PRO 版本支持的特性
 - wasm解码模式下默认work线程中发起Http-Flv、WS请求，减少主线程往worker线程传递数据，提升性能
 - 支持录制MP4格式(MPEG-4)的视频录制(H264,仅支持视频)
+- Windows系统下,360浏览器可播放使用MSE加速解码H265。
+- Windows系统下,win10商店购买hevc解码器后最新edge可硬件加速解码播放H265。
+- macOS系统下，Safari浏览器可播放使用MSE加速解码H265。
 - 支持webrtc标准流播放
 - 支持语音通讯
 - 支持音视频流（TF卡流）的倍数播放
@@ -27,6 +30,53 @@ wasm解码模式下默认work线程中发起Http-Flv、WS请求，减少主线�
 ### 解决了啥问题
 
 支持全PC IOS Android 默认浏览器打开。
+
+## Windows系统下,360浏览器可播放使用MSE加速解码H265。
+Windows系统下,360浏览器可播放使用MSE加速解码H265。
+## Windows系统下,win10商店购买hevc解码器后最新edge可硬件加速解码播放H265。
+Windows系统下,win10商店购买hevc解码器后最新edge可硬件加速解码播放H265。
+
+### Chromium 内核的 Edge 在 Windows 系统下，额外支持了硬解 HEVC 视频，但必须满足如下条件：
+
+- 操作系统版本必须为 Windows 10 1709（16299.0）及以后版本。
+- 安装付费的 HEVC 视频扩展或免费的来自设备制造商的 HEVC 视频扩展且版本号必须大于等于 1.0.50361.0（由于一个存在了一年半以上的 Bug，老版本存在抖动的 Bug，Issue：https://techcommunity.microsoft.com/t5/discussions/hevc-video-decoding-broken-with-b-frames/td-p/2077247/page/4）。
+- 版本号必须大于等于 Edge 99 。
+
+在安装插件后，进入 edge://gpu 页面，可以查看 Edge 对于 HEVC 硬解支持的 Profile：
+
+### 指标：
+
+- 分辨率最高支持 8192px * 8192px。
+- 支持 HEVC Main / Main10 / Main Still Picture Profile。
+### 优势：
+
+- 在显卡支持的情况，性能是最好的。
+- HTMLVideoElement、MSE 等原生 API 的直接支持。
+### 劣势：
+
+- 不支持 Windows 8 和老版本 Windows 10。
+- 需要手动装插件。
+- HDR 支持不够好。
+
+## macOS系统下，Safari浏览器可播放使用MSE加速解码H265。
+
+由于 Apple 是 HEVC 标准的主要推动者，因此早在 17 年的 Safari 11 即完成了 HEVC 视频硬解的支持，无需安装任何插件开箱即用。
+
+### 指标：
+
+- 分辨率最高支持 8192px * 8192px。
+- 支持 HEVC Main / Main10 Profile，M1+ 机型支持部分 HEVC Rext Profile。
+### 优势：
+
+- 在显卡支持的情况，性能是最好的。
+- HTMLVideoElement、MSE 等原生 API 的直接支持。
+- 开箱即用，无需装插件。
+- HDR 支持最好（比如：杜比视界 Profile5，杜比全景声）。
+### 劣势：
+
+- 生态不足，缺乏大量 Chromium 内核下“可用、好用的”插件。
+- Safari 俗称“下一个 IE”，其浏览器 API 兼容性与实现，相比 Chromium 仍有差距。
+- 部分 HEVC 视频莫名其妙无法播放，哪怕视频本身没问题。
 
 ## 支持webrtc标准流播放
 
