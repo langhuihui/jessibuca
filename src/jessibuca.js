@@ -189,6 +189,7 @@ class Jessibuca extends Emitter {
     close() {
         // clear url
         this._opt.url = '';
+        this._opt.playOptions = {};
         return this.player.close();
     }
 
@@ -203,9 +204,10 @@ class Jessibuca extends Emitter {
     /**
      *
      * @param url {string}
+     * @param options {object}
      * @returns {Promise<unknown>}
      */
-    play(url) {
+    play(url, options = {}) {
         return new Promise((resolve, reject) => {
             if (!url && !this._opt.url) {
                 this.emit(EVENTS.error, EVENTS_ERROR.playError)
@@ -224,7 +226,7 @@ class Jessibuca extends Emitter {
                         } else {
                             // pause ->  play
                             this.clearView();
-                            this.player.play(this._opt.url).then(() => {
+                            this.player.play(this._opt.url, this._opt.playOptions).then(() => {
                                 resolve();
                             }).catch(() => {
                                 this.player.pause().then(() => {
@@ -237,18 +239,18 @@ class Jessibuca extends Emitter {
                         this.player.pause().then(() => {
                             // 清除 画面
                             this.clearView();
-                            return this._play(url);
+                            return this._play(url, options);
                         }).catch(() => {
                             reject();
                         })
                     }
                 } else {
-                    return this._play(url);
+                    return this._play(url, options);
                 }
             } else {
                 //  url 不存在的时候
                 //  就是从 play -> pause -> play
-                this.player.play(this._opt.url).then(() => {
+                this.player.play(this._opt.url, this._opt.playOptions).then(() => {
                     resolve();
                 }).catch(() => {
                     this.player.pause().then(() => {
@@ -262,12 +264,14 @@ class Jessibuca extends Emitter {
     /**
      *
      * @param url {string}
+     * @param options {object}
      * @returns {Promise<unknown>}
      * @private
      */
-    _play(url) {
+    _play(url, options = {}) {
         return new Promise((resolve, reject) => {
             this._opt.url = url;
+            this._opt.playOptions = options;
             //  新的url
             const isHttp = url.indexOf("http") === 0;
             //
@@ -285,7 +289,7 @@ class Jessibuca extends Emitter {
                     if (this.player._opt.autoWasm) {
                         this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play')
                         this._resetPlayer({useMSE: false})
-                        this.play(url).then(() => {
+                        this.play(url, options).then(() => {
                             // resolve();
                             this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play success')
                         }).catch(() => {
@@ -301,7 +305,7 @@ class Jessibuca extends Emitter {
                     if (this.player._opt.autoWasm) {
                         this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play')
                         this._resetPlayer({useWCS: false})
-                        this.play(url).then(() => {
+                        this.play(url, options).then(() => {
                             // resolve();
                             this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play success')
                         }).catch(() => {
@@ -318,7 +322,7 @@ class Jessibuca extends Emitter {
                     this.close().then(() => {
                         this.player.debug.log('Jessibuca', 'wasm decode error and reset player and play')
                         this._resetPlayer({useWCS: false})
-                        this.play(url).then(() => {
+                        this.play(url, options).then(() => {
                             // resolve();
                             this.player.debug.log('Jessibuca', 'wasm decode error and reset player and play success')
                         }).catch(() => {
@@ -333,7 +337,7 @@ class Jessibuca extends Emitter {
             this.player.once(EVENTS.delayTimeout, () => {
                 if (this.player._opt.heartTimeoutReplay && this._heartTimeoutReplayTimes < this.player._opt.heartTimeoutReplayTimes) {
                     this._heartTimeoutReplayTimes += 1;
-                    this.play(url).then(() => {
+                    this.play(url, options).then(() => {
                         // resolve();
                         this._heartTimeoutReplayTimes = 0;
                     }).catch(() => {
@@ -346,7 +350,7 @@ class Jessibuca extends Emitter {
             this.player.once(EVENTS.loadingTimeout, () => {
                 if (this.player._opt.loadingTimeoutReplay && this._loadingTimeoutReplayTimes < this.player._opt.loadingTimeoutReplayTimes) {
                     this._loadingTimeoutReplayTimes += 1;
-                    this.play(url).then(() => {
+                    this.play(url, options).then(() => {
                         // resolve();
                         this._loadingTimeoutReplayTimes = 0;
                     }).catch(() => {
@@ -357,7 +361,7 @@ class Jessibuca extends Emitter {
 
 
             if (this.hasLoaded()) {
-                this.player.play(url).then(() => {
+                this.player.play(url, options).then(() => {
                     resolve();
                 }).catch(() => {
                     this.player.pause().then(() => {
@@ -366,7 +370,7 @@ class Jessibuca extends Emitter {
                 })
             } else {
                 this.player.once(EVENTS.decoderWorkerInit, () => {
-                    this.player.play(url).then(() => {
+                    this.player.play(url, options).then(() => {
                         resolve();
                     }).catch(() => {
                         this.player.pause().then(() => {
@@ -408,7 +412,7 @@ class Jessibuca extends Emitter {
      */
     setRotate(deg) {
         deg = parseInt(deg, 10)
-        const list = [0, 90, 270];
+        const list = [0, 90, 180, 270];
         if (this._opt.rotate === deg || list.indexOf(deg) === -1) {
             return;
         }

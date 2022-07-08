@@ -416,7 +416,7 @@ export default class Player extends Emitter {
      * @param url
      * @returns {Promise<unknown>}
      */
-    play(url) {
+    play(url, options) {
         return new Promise((resolve, reject) => {
             if (!url && !this._opt.url) {
                 return reject();
@@ -460,7 +460,7 @@ export default class Player extends Emitter {
 
                 this.enableWakeLock();
 
-                this.stream.fetchStream(url);
+                this.stream.fetchStream(url, options);
 
                 //
                 this.checkLoadingTimeout();
@@ -534,7 +534,7 @@ export default class Player extends Emitter {
             this.playing = false;
             this.loading = false;
             this.recording = false;
-            if(this.audio){
+            if (this.audio) {
                 this.audio.resetInit();
                 this.audio.pause();
             }

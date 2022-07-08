@@ -78,7 +78,12 @@ export default class WebsocketLoader extends Emitter {
     }
 
 
-    fetchStream(url) {
+    /**
+     *
+     * @param url
+     * @param options
+     */
+    fetchStream(url, options) {
         this.player._times.streamStart = now();
         this.wsUrl = url;
         this._createWebSocket();

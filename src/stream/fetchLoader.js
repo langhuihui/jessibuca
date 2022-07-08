@@ -23,10 +23,20 @@ export default class FetchLoader extends Emitter {
         this.player.debug.log('FetchStream', 'destroy');
     }
 
-    fetchStream(url) {
+    /**
+     *
+     * @param url
+     * @param options
+     */
+    fetchStream(url, options = {}) {
         const {demux} = this.player;
         this.player._times.streamStart = now();
-        fetch(url, {signal: this.abortController.signal}).then((res) => {
+        const fetchOptions = Object.assign({
+            signal: this.abortController.signal,
+        }, {
+            headers: options.headers || {}
+        });
+        fetch(url, fetchOptions).then((res) => {
             const reader = res.body.getReader();
             this.emit(EVENTS.streamSuccess);
             const fetchNext = () => {
