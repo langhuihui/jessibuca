@@ -848,14 +848,16 @@
 
 	var events$1 = (player => {
 	  try {
-	    const screenfullChange = () => {
-	      player.emit(JESSIBUCA_EVENTS.fullscreen, player.fullscreen); // 如果不是fullscreen,则触发下 resize 方法
+	    const screenfullChange = e => {
+	      if (e.target === player.$container) {
+	        player.emit(JESSIBUCA_EVENTS.fullscreen, player.fullscreen); // 如果不是fullscreen,则触发下 resize 方法
 
-	      if (!player.fullscreen) {
-	        player.resize();
-	      } else {
-	        if (player._opt.useMSE) {
+	        if (!player.fullscreen) {
 	          player.resize();
+	        } else {
+	          if (player._opt.useMSE) {
+	            player.resize();
+	          }
 	        }
 	      }
 	    };
@@ -901,7 +903,10 @@
 	      player.$container.classList.add('jessibuca-fullscreen-web');
 	    } else {
 	      player.$container.classList.remove('jessibuca-fullscreen-web');
-	    }
+	    } //
+
+
+	    player.emit(JESSIBUCA_EVENTS.fullscreen, player.fullscreen);
 	  }); //
 
 	  player.on(EVENTS.resize, () => {
@@ -1881,15 +1886,25 @@
 	    this.streamRate = null;
 	    this.player.debug.log('FetchStream', 'destroy');
 	  }
+	  /**
+	   *
+	   * @param url
+	   * @param options
+	   */
+
 
 	  fetchStream(url) {
+	    let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 	    const {
 	      demux
 	    } = this.player;
 	    this.player._times.streamStart = now();
-	    fetch(url, {
+	    const fetchOptions = Object.assign({
 	      signal: this.abortController.signal
-	    }).then(res => {
+	    }, {
+	      headers: options.headers || {}
+	    });
+	    fetch(url, fetchOptions).then(res => {
 	      const reader = res.body.getReader();
 	      this.emit(EVENTS.streamSuccess);
 
@@ -2009,8 +2024,14 @@
 
 	    demux.dispatch(message);
 	  }
+	  /**
+	   *
+	   * @param url
+	   * @param options
+	   */
 
-	  fetchStream(url) {
+
+	  fetchStream(url, options) {
 	    this.player._times.streamStart = now();
 	    this.wsUrl = url;
 
@@ -11568,7 +11589,7 @@
 	   */
 
 
-	  play(url) {
+	  play(url, options) {
 	    return new Promise((resolve, reject) => {
 	      if (!url && !this._opt.url) {
 	        return reject();
@@ -11612,7 +11633,7 @@
 	        }
 
 	        this.enableWakeLock();
-	        this.stream.fetchStream(url); //
+	        this.stream.fetchStream(url, options); //
 
 	        this.checkLoadingTimeout(); // fetch error
 
@@ -12117,6 +12138,7 @@
 	  close() {
 	    // clear url
 	    this._opt.url = '';
+	    this._opt.playOptions = {};
 	    return this.player.close();
 	  }
 	  /**
@@ -12130,11 +12152,13 @@
 	  /**
 	   *
 	   * @param url {string}
+	   * @param options {object}
 	   * @returns {Promise<unknown>}
 	   */
 
 
 	  play(url) {
+	    let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 	    return new Promise((resolve, reject) => {
 	      if (!url && !this._opt.url) {
 	        this.emit(EVENTS.error, EVENTS_ERROR.playError);
@@ -12153,7 +12177,7 @@
 	            } else {
 	              // pause ->  play
 	              this.clearView();
-	              this.player.play(this._opt.url).then(() => {
+	              this.player.play(this._opt.url, this._opt.playOptions).then(() => {
 	                resolve();
 	              }).catch(() => {
 	                this.player.pause().then(() => {
@@ -12166,18 +12190,18 @@
 	            this.player.pause().then(() => {
 	              // 清除 画面
 	              this.clearView();
-	              return this._play(url);
+	              return this._play(url, options);
 	            }).catch(() => {
 	              reject();
 	            });
 	          }
 	        } else {
-	          return this._play(url);
+	          return this._play(url, options);
 	        }
 	      } else {
 	        //  url 不存在的时候
 	        //  就是从 play -> pause -> play
-	        this.player.play(this._opt.url).then(() => {
+	        this.player.play(this._opt.url, this._opt.playOptions).then(() => {
 	          resolve();
 	        }).catch(() => {
 	          this.player.pause().then(() => {
@@ -12190,14 +12214,17 @@
 	  /**
 	   *
 	   * @param url {string}
+	   * @param options {object}
 	   * @returns {Promise<unknown>}
 	   * @private
 	   */
 
 
 	  _play(url) {
+	    let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 	    return new Promise((resolve, reject) => {
-	      this._opt.url = url; //  新的url
+	      this._opt.url = url;
+	      this._opt.playOptions = options; //  新的url
 
 	      const isHttp = url.indexOf("http") === 0; //
 
@@ -12217,7 +12244,7 @@
 	              useMSE: false
 	            });
 
-	            this.play(url).then(() => {
+	            this.play(url, options).then(() => {
 	              // resolve();
 	              this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play success');
 	            }).catch(() => {
@@ -12236,7 +12263,7 @@
 	              useWCS: false
 	            });
 
-	            this.play(url).then(() => {
+	            this.play(url, options).then(() => {
 	              // resolve();
 	              this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play success');
 	            }).catch(() => {
@@ -12256,7 +12283,7 @@
 	              useWCS: false
 	            });
 
-	            this.play(url).then(() => {
+	            this.play(url, options).then(() => {
 	              // resolve();
 	              this.player.debug.log('Jessibuca', 'wasm decode error and reset player and play success');
 	            }).catch(() => {
@@ -12270,7 +12297,7 @@
 	      this.player.once(EVENTS.delayTimeout, () => {
 	        if (this.player._opt.heartTimeoutReplay && this._heartTimeoutReplayTimes < this.player._opt.heartTimeoutReplayTimes) {
 	          this._heartTimeoutReplayTimes += 1;
-	          this.play(url).then(() => {
+	          this.play(url, options).then(() => {
 	            // resolve();
 	            this._heartTimeoutReplayTimes = 0;
 	          }).catch(() => {// reject();
@@ -12281,7 +12308,7 @@
 	      this.player.once(EVENTS.loadingTimeout, () => {
 	        if (this.player._opt.loadingTimeoutReplay && this._loadingTimeoutReplayTimes < this.player._opt.loadingTimeoutReplayTimes) {
 	          this._loadingTimeoutReplayTimes += 1;
-	          this.play(url).then(() => {
+	          this.play(url, options).then(() => {
 	            // resolve();
 	            this._loadingTimeoutReplayTimes = 0;
 	          }).catch(() => {// reject();
@@ -12290,7 +12317,7 @@
 	      });
 
 	      if (this.hasLoaded()) {
-	        this.player.play(url).then(() => {
+	        this.player.play(url, options).then(() => {
 	          resolve();
 	        }).catch(() => {
 	          this.player.pause().then(() => {
@@ -12299,7 +12326,7 @@
 	        });
 	      } else {
 	        this.player.once(EVENTS.decoderWorkerInit, () => {
-	          this.player.play(url).then(() => {
+	          this.player.play(url, options).then(() => {
 	            resolve();
 	          }).catch(() => {
 	            this.player.pause().then(() => {
@@ -12344,7 +12371,7 @@
 
 	  setRotate(deg) {
 	    deg = parseInt(deg, 10);
-	    const list = [0, 90, 270];
+	    const list = [0, 90, 180, 270];
 
 	    if (this._opt.rotate === deg || list.indexOf(deg) === -1) {
 	      return;

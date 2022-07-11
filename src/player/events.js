@@ -6,18 +6,19 @@ export default (player) => {
 
 
     try {
-        const screenfullChange = () => {
-            player.emit(JESSIBUCA_EVENTS.fullscreen, player.fullscreen)
+        const screenfullChange = (e) => {
+            if (e.target === player.$container) {
+                player.emit(JESSIBUCA_EVENTS.fullscreen, player.fullscreen)
 
-            // 如果不是fullscreen,则触发下 resize 方法
-            if (!player.fullscreen) {
-                player.resize();
-            } else {
-                if(player._opt.useMSE){
+                // 如果不是fullscreen,则触发下 resize 方法
+                if (!player.fullscreen) {
                     player.resize();
+                } else {
+                    if (player._opt.useMSE) {
+                        player.resize();
+                    }
                 }
             }
-
         };
         screenfull.on('change', screenfullChange);
         player.events.destroys.push(() => {
@@ -69,6 +70,8 @@ export default (player) => {
         } else {
             player.$container.classList.remove('jessibuca-fullscreen-web')
         }
+        //
+        player.emit(JESSIBUCA_EVENTS.fullscreen, player.fullscreen)
     })
 
     //

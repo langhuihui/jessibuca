@@ -166,7 +166,7 @@
             isResize: false,
             text: "",
             loadingText: "加载中",
-            debug: true,
+            debug: false,
             showBandwidth: showOperateBtns, // 显示网速
             operateBtns: {
                 fullscreen: showOperateBtns,
@@ -178,12 +178,14 @@
             isNotMute: false,
         },);
 
-        jessibuca.onLog = msg => console.error(msg);
-        jessibuca.onRecord = (status) => console.log('onRecord', status);
-        jessibuca.onPause = () => console.log('onPause');
-        jessibuca.onPlay = () => console.log('onPlay');
-        jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
-        jessibuca.onMute = msg => console.log('onMute', msg);
+        // jessibuca.onLog = msg => console.error(msg);
+        // jessibuca.onRecord = (status) => console.log('onRecord', status);
+        // jessibuca.onPause = () => console.log('onPause');
+        // jessibuca.onPlay = () => console.log('onPlay');
+        // jessibuca.onMute = msg => console.log('onMute', msg);
+        jessibuca.on("fullscreen", function (flag) {
+            console.log('is fullscreen', id, flag)
+        })
         playList.push(jessibuca);
     }
 
