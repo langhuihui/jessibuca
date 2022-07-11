@@ -737,13 +737,13 @@ export default class Player extends Emitter {
 
     enableWakeLock() {
         if (this._opt.keepScreenOn) {
-            this.keepScreenOn.enable();
+            this.keepScreenOn && this.keepScreenOn.enable();
         }
     }
 
     releaseWakeLock() {
         if (this._opt.keepScreenOn) {
-            this.keepScreenOn.disable();
+            this.keepScreenOn && this.keepScreenOn.disable();
         }
     }
 

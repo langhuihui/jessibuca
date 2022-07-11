@@ -9,8 +9,8 @@ export default class Control {
     constructor(player) {
         this.player = player;
         template(player, this);
-        observer(player, this);
         property(player, this);
+        observer(player, this);
         events(player, this);
         if (player._opt.hotKey) {
             hotkey(player, this);
