@@ -9392,10 +9392,12 @@
 
 	  proxy(control.$play, 'click', e => {
 	    player.play();
+	    player.resumeAudioAfterPause();
 	  }); // 监听 play 方法
 
 	  proxy(control.$playBig, 'click', e => {
 	    player.play();
+	    player.resumeAudioAfterPause();
 	  });
 	  proxy(control.$volume, 'mouseover', () => {
 	    control.$volumePanelWrap.classList.add('jessibuca-volume-panel-wrap-show');
@@ -9407,8 +9409,9 @@
 	    e.stopPropagation();
 	    setStyle(control.$volumeOn, 'display', 'none');
 	    setStyle(control.$volumeOff, 'display', 'block');
-	    player.lastVolume = player.volume;
+	    const lastVolume = player.volume;
 	    player.volume = 0;
+	    player._lastVolume = lastVolume;
 	  });
 	  proxy(control.$volumeOff, 'click', e => {
 	    e.stopPropagation();
@@ -11306,18 +11309,25 @@
 
 	    this.stream = null;
 	    this.demux = null;
+	    this._lastVolume = null;
 
 	    if (this._opt.useWCS) {
 	      this.webcodecsDecoder = new WebcodecsDecoder(this);
+	      this.loaded = true;
 	    }
 
 	    if (this._opt.useMSE) {
 	      this.mseDecoder = new MseDecoder(this);
+	      this.loaded = true;
 	    } //
 
 
 	    this.control = new Control(this);
-	    this.keepScreenOn = new NoSleep(this);
+
+	    if (isMobile()) {
+	      this.keepScreenOn = new NoSleep(this);
+	    }
+
 	    events$1(this);
 	    observer(this);
 
@@ -11340,6 +11350,7 @@
 	    this._loading = false;
 	    this._playing = false;
 	    this._hasLoaded = false;
+	    this._lastVolume = null;
 	    this._times = initPlayTimes();
 
 	    if (this.decoderWorker) {
@@ -11471,7 +11482,14 @@
 	  }
 
 	  set volume(value) {
-	    this.audio && this.audio.setVolume(value);
+	    if (value !== this.volume) {
+	      this.audio && this.audio.setVolume(value);
+	      this._lastVolume = value;
+	    }
+	  }
+
+	  get lastVolume() {
+	    return this._lastVolume;
 	  }
 
 	  set loading(value) {
@@ -11554,6 +11572,12 @@
 	    return new Promise((resolve, reject) => {
 	      if (!this.stream) {
 	        this.stream = new Stream(this);
+	      }
+
+	      if (!this.audio) {
+	        if (this._opt.hasAudio) {
+	          this.audio = new Audio(this);
+	        }
 	      }
 
 	      if (!this.demux) {
@@ -11670,6 +11694,12 @@
 	    });
 	  }
 
+	  resumeAudioAfterPause() {
+	    if (this.lastVolume) {
+	      this.volume = this.lastVolume;
+	    }
+	  }
+
 	  _close() {
 	    return new Promise((resolve, reject) => {
 	      //
@@ -11699,16 +11729,16 @@
 	        this.mseDecoder = null;
 	      }
 
+	      if (this.audio) {
+	        this.audio.destroy();
+	        this.audio = null;
+	      }
+
 	      this.clearCheckHeartTimeout();
 	      this.clearCheckLoadingTimeout();
 	      this.playing = false;
 	      this.loading = false;
 	      this.recording = false;
-
-	      if (this.audio) {
-	        this.audio.resetInit();
-	        this.audio.pause();
-	      }
 
 	      if (this.video) {
 	        this.video.resetInit();
@@ -12178,7 +12208,9 @@
 	              // pause ->  play
 	              this.clearView();
 	              this.player.play(this._opt.url, this._opt.playOptions).then(() => {
-	                resolve();
+	                resolve(); // 恢复下之前的音量
+
+	                this.player.resumeAudioAfterPause();
 	              }).catch(() => {
 	                this.player.pause().then(() => {
 	                  reject();
@@ -12202,7 +12234,9 @@
 	        //  url 不存在的时候
 	        //  就是从 play -> pause -> play
 	        this.player.play(this._opt.url, this._opt.playOptions).then(() => {
-	          resolve();
+	          resolve(); // 恢复下之前的音量
+
+	          this.player.resumeAudioAfterPause();
 	        }).catch(() => {
 	          this.player.pause().then(() => {
 	            reject();

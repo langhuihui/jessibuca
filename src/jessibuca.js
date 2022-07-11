@@ -228,6 +228,8 @@ class Jessibuca extends Emitter {
                             this.clearView();
                             this.player.play(this._opt.url, this._opt.playOptions).then(() => {
                                 resolve();
+                                // 恢复下之前的音量
+                                this.player.resumeAudioAfterPause();
                             }).catch(() => {
                                 this.player.pause().then(() => {
                                     reject();
@@ -252,6 +254,8 @@ class Jessibuca extends Emitter {
                 //  就是从 play -> pause -> play
                 this.player.play(this._opt.url, this._opt.playOptions).then(() => {
                     resolve();
+                    // 恢复下之前的音量
+                    this.player.resumeAudioAfterPause();
                 }).catch(() => {
                     this.player.pause().then(() => {
                         reject();
@@ -381,6 +385,8 @@ class Jessibuca extends Emitter {
             }
         })
     }
+
+
 
     /**
      *

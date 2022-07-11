@@ -124,19 +124,24 @@ export default class Player extends Emitter {
 
         this.stream = null;
         this.demux = null;
+        this._lastVolume = null;
 
         if (this._opt.useWCS) {
             this.webcodecsDecoder = new WebcodecsDecoder(this)
+            this.loaded = true
         }
 
         if (this._opt.useMSE) {
             this.mseDecoder = new MseDecoder(this);
+            this.loaded = true
         }
 
         //
         this.control = new Control(this);
 
-        this.keepScreenOn = new NoSleep(this);
+        if (isMobile()) {
+            this.keepScreenOn = new NoSleep(this);
+        }
 
 
         events(this);
@@ -163,7 +168,7 @@ export default class Player extends Emitter {
         this._loading = false;
         this._playing = false;
         this._hasLoaded = false;
-
+        this._lastVolume = null;
         this._times = initPlayTimes();
 
         if (this.decoderWorker) {
@@ -287,7 +292,6 @@ export default class Player extends Emitter {
                 this.emit(EVENTS.pause);
             }
         }
-
     }
 
     get playing() {
@@ -299,7 +303,14 @@ export default class Player extends Emitter {
     }
 
     set volume(value) {
-        this.audio && this.audio.setVolume(value);
+        if (value !== this.volume) {
+            this.audio && this.audio.setVolume(value);
+            this._lastVolume = value;
+        }
+    }
+
+    get lastVolume() {
+        return this._lastVolume
     }
 
     set loading(value) {
@@ -381,6 +392,11 @@ export default class Player extends Emitter {
                 this.stream = new Stream(this);
             }
 
+            if (!this.audio) {
+                if (this._opt.hasAudio) {
+                    this.audio = new Audio(this);
+                }
+            }
             if (!this.demux) {
                 this.demux = new Demux(this);
             }
@@ -500,6 +516,12 @@ export default class Player extends Emitter {
         })
     }
 
+    resumeAudioAfterPause() {
+        if (this.lastVolume) {
+            this.volume = this.lastVolume;
+        }
+    }
+
     _close() {
         return new Promise((resolve, reject) => {
             //
@@ -529,15 +551,16 @@ export default class Player extends Emitter {
                 this.mseDecoder = null;
             }
 
+            if (this.audio) {
+                this.audio.destroy();
+                this.audio = null;
+            }
             this.clearCheckHeartTimeout();
             this.clearCheckLoadingTimeout();
             this.playing = false;
             this.loading = false;
             this.recording = false;
-            if (this.audio) {
-                this.audio.resetInit();
-                this.audio.pause();
-            }
+
             if (this.video) {
                 this.video.resetInit();
                 this.video.pause();

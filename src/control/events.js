@@ -48,11 +48,13 @@ export default (player, control) => {
     // 监听 play 方法
     proxy(control.$play, 'click', (e) => {
         player.play();
+        player.resumeAudioAfterPause()
     })
 
     // 监听 play 方法
     proxy(control.$playBig, 'click', (e) => {
         player.play();
+        player.resumeAudioAfterPause()
     })
 
     proxy(control.$volume, 'mouseover', () => {
@@ -67,8 +69,9 @@ export default (player, control) => {
         e.stopPropagation();
         setStyle(control.$volumeOn, 'display', 'none');
         setStyle(control.$volumeOff, 'display', 'block');
-        player.lastVolume = player.volume;
+        const lastVolume = player.volume;
         player.volume = 0;
+        player._lastVolume = lastVolume;
     })
 
     proxy(control.$volumeOff, 'click', (e) => {
