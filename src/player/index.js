@@ -35,15 +35,17 @@ export default class Player extends Emitter {
         this._opt = Object.assign({}, DEFAULT_PLAYER_OPTIONS, options)
         this.debug = new Debug(this);
 
-
+        //
         if (this._opt.useWCS) {
             this._opt.useWCS = supportWCS();
         }
 
+        //
         if (this._opt.useMSE) {
             this._opt.useMSE = supportMSE();
         }
 
+        //
         if (this._opt.wcsUseVideoRender) {
             this._opt.wcsUseVideoRender = supportMediaStreamTrack()
         }
@@ -60,10 +62,7 @@ export default class Player extends Emitter {
 
             this._opt.useWCS = false;
             this._opt.forceNoOffscreen = true;
-        } else if (this._opt.useWCS) {
-
         }
-
 
         if (!this._opt.forceNoOffscreen) {
             if (!supportOffscreenV2()) {
@@ -143,10 +142,8 @@ export default class Player extends Emitter {
             this.keepScreenOn = new NoSleep(this);
         }
 
-
         events(this);
         observer(this);
-
 
         if (this._opt.useWCS) {
             this.debug.log('Player', 'use WCS')

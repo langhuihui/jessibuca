@@ -7510,7 +7510,8 @@
 	  //
 	  useWCS: false,
 	  //
-	  wcsUseVideoRender: false,
+	  wcsUseVideoRender: true,
+	  // 默认设置为true
 	  useMSE: false,
 	  //
 	  useOffscreen: false,

@@ -13,7 +13,6 @@ export default class VideoLoader extends CommonLoader {
         $videoElement.style.top = 0;
         $videoElement.style.left = 0;
         player.$container.appendChild($videoElement);
-        this.$videoElement = $videoElement;
         this.videoInfo = {
             width: '',
             height: '',
@@ -25,6 +24,7 @@ export default class VideoLoader extends CommonLoader {
             $videoElement.srcObject = new MediaStream([this.trackGenerator]);
             this.vwriter = this.trackGenerator.writable.getWriter();
         }
+        this.$videoElement = $videoElement;
 
         this.resize();
 
@@ -49,20 +49,37 @@ export default class VideoLoader extends CommonLoader {
         super.destroy();
         if (this.$videoElement) {
             this.$videoElement.src = ''
+            this.$videoElement.removeAttribute('src');
             this.$videoElement = null;
         }
         if (this.trackGenerator) {
             this.trackGenerator = null;
         }
         if (this.vwriter) {
-            this.trackGenerator = null;
+            this.vwriter = null;
         }
         this.player.debug.log('Video', 'destroy');
     }
 
     play() {
         // this.$videoElement.autoplay = true;
-        this.$videoElement.play();
+        setTimeout(() => {
+            this.$videoElement.play().then(() => {
+                this.player.debug.log('Video', 'play');
+            }).catch((e) => {
+                this.player.debug.warn('Video', 'play', e);
+            })
+        }, 100)
+
+    }
+
+    pause() {
+        // 预防
+        // https://developer.chrome.com/blog/play-request-was-interrupted/
+        // http://alonesuperman.com/?p=23
+        setTimeout(() => {
+            this.$videoElement.pause();
+        }, 100)
     }
 
     clearView() {

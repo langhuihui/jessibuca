@@ -328,7 +328,7 @@ export function supportMSE() {
     return window.MediaSource && window.MediaSource.isTypeSupported(MP4_CODECS.avc);
 }
 
-export function supportMediaStreamTrack(){
+export function supportMediaStreamTrack() {
     return window.MediaStreamTrackGenerator && typeof window.MediaStreamTrackGenerator === 'function'
 }
 

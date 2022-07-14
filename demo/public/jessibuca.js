@@ -103,7 +103,8 @@
 	  //
 	  useWCS: false,
 	  //
-	  wcsUseVideoRender: false,
+	  wcsUseVideoRender: true,
+	  // 默认设置为true
 	  useMSE: false,
 	  //
 	  useOffscreen: false,
@@ -1383,7 +1384,6 @@
 	    $videoElement.style.top = 0;
 	    $videoElement.style.left = 0;
 	    player.$container.appendChild($videoElement);
-	    this.$videoElement = $videoElement;
 	    this.videoInfo = {
 	      width: '',
 	      height: '',
@@ -1399,6 +1399,7 @@
 	      this.vwriter = this.trackGenerator.writable.getWriter();
 	    }
 
+	    this.$videoElement = $videoElement;
 	    this.resize();
 	    const {
 	      proxy
@@ -1419,6 +1420,7 @@
 
 	    if (this.$videoElement) {
 	      this.$videoElement.src = '';
+	      this.$videoElement.removeAttribute('src');
 	      this.$videoElement = null;
 	    }
 
@@ -1427,7 +1429,7 @@
 	    }
 
 	    if (this.vwriter) {
-	      this.trackGenerator = null;
+	      this.vwriter = null;
 	    }
 
 	    this.player.debug.log('Video', 'destroy');
@@ -1435,7 +1437,22 @@
 
 	  play() {
 	    // this.$videoElement.autoplay = true;
-	    this.$videoElement.play();
+	    setTimeout(() => {
+	      this.$videoElement.play().then(() => {
+	        this.player.debug.log('Video', 'play');
+	      }).catch(e => {
+	        this.player.debug.warn('Video', 'play', e);
+	      });
+	    }, 100);
+	  }
+
+	  pause() {
+	    // 预防
+	    // https://developer.chrome.com/blog/play-request-was-interrupted/
+	    // http://alonesuperman.com/?p=23
+	    setTimeout(() => {
+	      this.$videoElement.pause();
+	    }, 100);
 	  }
 
 	  clearView() {}
@@ -10802,7 +10819,8 @@
 	    this.mediaSourceOpen = false;
 	    this.bufferList = [];
 	    this.dropping = false;
-	    this.player.video.$videoElement.src = window.URL.createObjectURL(this.mediaSource);
+	    this.mediaSourceObjectURL = window.URL.createObjectURL(this.mediaSource);
+	    this.player.video.$videoElement.src = this.mediaSourceObjectURL;
 	    const {
 	      debug,
 	      events: {
@@ -10830,6 +10848,12 @@
 	    this.sequenceNumber = 0;
 	    this.cacheTrack = null;
 	    this.timeInit = false;
+
+	    if (this.mediaSourceObjectURL) {
+	      window.URL.revokeObjectURL(this.mediaSourceObjectURL);
+	      this.mediaSourceObjectURL = null;
+	    }
+
 	    this.off();
 	    this.player.debug.log('MediaSource', 'destroy');
 	  }
@@ -11030,7 +11054,7 @@
 	      if (this.sourceBuffer.appendBuffer) {
 	        this.sourceBuffer.appendBuffer(buffer);
 	      } else {
-	        debug.log('MediaSource', 'this.sourceBuffer.appendBuffer function is undefined');
+	        debug.warn('MediaSource', 'this.sourceBuffer.appendBuffer function is undefined');
 	      }
 
 	      return;
@@ -11048,12 +11072,8 @@
 	  }
 
 	  stop() {
-	    if (this.isStateOpen) {
-	      if (this.sourceBuffer) {
-	        this.sourceBuffer.abort();
-	      }
-	    }
-
+	    this.abortSourceBuffer();
+	    this.removeSourceBuffer();
 	    this.endOfStream();
 	  }
 
@@ -11081,7 +11101,31 @@
 
 	  endOfStream() {
 	    if (this.isStateOpen) {
-	      this.mediaSource.endOfStream();
+	      try {
+	        this.mediaSource.endOfStream();
+	      } catch (e) {
+	        this.player.debug.warn('MediaSource', 'endOfStream() error', e);
+	      }
+	    }
+	  }
+
+	  abortSourceBuffer() {
+	    if (this.isStateOpen) {
+	      if (this.sourceBuffer) {
+	        this.sourceBuffer.abort();
+	      }
+	    }
+	  }
+
+	  removeSourceBuffer() {
+	    if (!this.isStateClosed) {
+	      if (this.mediaSource) {
+	        try {
+	          this.mediaSource.removeSourceBuffer(this.sourceBuffer);
+	        } catch (e) {
+	          this.player.debug.warn('MediaSource', 'removeSourceBuffer() error', e);
+	        }
+	      }
 	    }
 	  }
 
@@ -11222,15 +11266,17 @@
 	    super();
 	    this.$container = container;
 	    this._opt = Object.assign({}, DEFAULT_PLAYER_OPTIONS, options);
-	    this.debug = new Debug(this);
+	    this.debug = new Debug(this); //
 
 	    if (this._opt.useWCS) {
 	      this._opt.useWCS = supportWCS();
-	    }
+	    } //
+
 
 	    if (this._opt.useMSE) {
 	      this._opt.useMSE = supportMSE();
-	    }
+	    } //
+
 
 	    if (this._opt.wcsUseVideoRender) {
 	      this._opt.wcsUseVideoRender = supportMediaStreamTrack();
@@ -11248,7 +11294,7 @@
 
 	      this._opt.useWCS = false;
 	      this._opt.forceNoOffscreen = true;
-	    } else if (this._opt.useWCS) ;
+	    }
 
 	    if (!this._opt.forceNoOffscreen) {
 	      if (!supportOffscreenV2()) {

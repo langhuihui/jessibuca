@@ -20,7 +20,8 @@ export default class MseDecoder extends Emitter {
         this.mediaSourceOpen = false;
         this.bufferList = [];
         this.dropping = false;
-        this.player.video.$videoElement.src = window.URL.createObjectURL(this.mediaSource);
+        this.mediaSourceObjectURL = window.URL.createObjectURL(this.mediaSource);
+        this.player.video.$videoElement.src = this.mediaSourceObjectURL;
         const {
             debug,
             events: {proxy},
@@ -50,6 +51,10 @@ export default class MseDecoder extends Emitter {
         this.sequenceNumber = 0;
         this.cacheTrack = null;
         this.timeInit = false;
+        if (this.mediaSourceObjectURL) {
+            window.URL.revokeObjectURL(this.mediaSourceObjectURL);
+            this.mediaSourceObjectURL = null;
+        }
         this.off();
         this.player.debug.log('MediaSource', 'destroy')
     }
@@ -241,7 +246,7 @@ export default class MseDecoder extends Emitter {
             if (this.sourceBuffer.appendBuffer) {
                 this.sourceBuffer.appendBuffer(buffer);
             } else {
-                debug.log('MediaSource', 'this.sourceBuffer.appendBuffer function is undefined');
+                debug.warn('MediaSource', 'this.sourceBuffer.appendBuffer function is undefined');
             }
             return;
         }
@@ -259,12 +264,10 @@ export default class MseDecoder extends Emitter {
     }
 
     stop() {
-        if (this.isStateOpen) {
-            if (this.sourceBuffer) {
-                this.sourceBuffer.abort();
-            }
-        }
+        this.abortSourceBuffer();
+        this.removeSourceBuffer();
         this.endOfStream();
+
     }
 
     dropSourceBuffer(flag) {
@@ -292,7 +295,33 @@ export default class MseDecoder extends Emitter {
 
     endOfStream() {
         if (this.isStateOpen) {
-            this.mediaSource.endOfStream();
+            try {
+                this.mediaSource.endOfStream();
+            } catch (e) {
+                this.player.debug.warn('MediaSource', 'endOfStream() error', e);
+            }
         }
     }
+
+    abortSourceBuffer() {
+        if (this.isStateOpen) {
+            if (this.sourceBuffer) {
+                this.sourceBuffer.abort();
+            }
+        }
+    }
+
+    removeSourceBuffer() {
+        if (!this.isStateClosed) {
+            if (this.mediaSource) {
+                try {
+                    this.mediaSource.removeSourceBuffer(this.sourceBuffer);
+                } catch (e) {
+                    this.player.debug.warn('MediaSource', 'removeSourceBuffer() error', e);
+
+                }
+            }
+        }
+    }
+
 }

@@ -53,7 +53,7 @@ export const DEFAULT_PLAYER_OPTIONS = {
     protocol: PLAYER_PLAY_PROTOCOL.fetch,
     demuxType: DEMUX_TYPE.flv, //
     useWCS: false, //
-    wcsUseVideoRender: false,
+    wcsUseVideoRender: true,// 默认设置为true
     useMSE: false, //
     useOffscreen: false, //
     autoWasm: true, // 自动降级到 wasm 模式
