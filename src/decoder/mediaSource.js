@@ -234,31 +234,42 @@ export default class MseDecoder extends Emitter {
             events: {proxy},
         } = this.player;
 
+        if (this.isStateClosed) {
+            debug.warn('MediaSource', 'mediaSource is not attached to video or mediaSource is closed');
+            this.player.emit(EVENTS.mseSourceBufferError, 'mediaSource is not attached to video or mediaSource is closed')
+        } else if (this.isStateEnded) {
+            debug.warn('MediaSource', 'mediaSource is closed');
+            this.player.emit(EVENTS.mseSourceBufferError, 'mediaSource is closed')
+        } else {
+            if (this.sourceBuffer && this.sourceBuffer.updating === true) {
+                this.player.emit(EVENTS.mseSourceBufferBusy);
+                // this.dropSourceBuffer(false);
+            }
+        }
+
+        if (!this.isStateOpen) {
+            debug.warn('MediaSource', 'appendBuffer this.state is not open ,is ', this.state);
+            return;
+        }
+
+
         if (this.sourceBuffer === null) {
             this.sourceBuffer = this.mediaSource.addSourceBuffer(MP4_CODECS.avc);
             proxy(this.sourceBuffer, 'error', (error) => {
                 this.player.emit(EVENTS.mseSourceBufferError, error);
-                // this.dropSourceBuffer(false)
             })
         }
 
-        if (this.sourceBuffer.updating === false && this.isStateOpen) {
+        if (this.sourceBuffer.updating === false) {
             if (this.sourceBuffer.appendBuffer) {
-                this.sourceBuffer.appendBuffer(buffer);
+                try {
+                    this.sourceBuffer.appendBuffer(buffer);
+                } catch (e) {
+                    debug.warn('MediaSource', 'this.sourceBuffer.appendBuffer()', e);
+                }
+
             } else {
                 debug.warn('MediaSource', 'this.sourceBuffer.appendBuffer function is undefined');
-            }
-            return;
-        }
-
-        if (this.isStateClosed) {
-            this.player.emit(EVENTS.mseSourceBufferError, 'mediaSource is not attached to video or mediaSource is closed')
-        } else if (this.isStateEnded) {
-            this.player.emit(EVENTS.mseSourceBufferError, 'mediaSource is closed')
-        } else {
-            if (this.sourceBuffer.updating === true) {
-                this.player.emit(EVENTS.mseSourceBufferBusy);
-                // this.dropSourceBuffer(false);
             }
         }
     }
@@ -288,7 +299,7 @@ export default class MseDecoder extends Emitter {
             try {
                 this.sourceBuffer.remove(start, end)
             } catch (e) {
-                console.error(e)
+                this.player.debug.warn('MediaSource', 'removeBuffer() error', e);
             }
         }
     }
@@ -318,7 +329,6 @@ export default class MseDecoder extends Emitter {
                     this.mediaSource.removeSourceBuffer(this.sourceBuffer);
                 } catch (e) {
                     this.player.debug.warn('MediaSource', 'removeSourceBuffer() error', e);
-
                 }
             }
         }
