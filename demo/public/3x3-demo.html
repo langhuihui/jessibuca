@@ -116,11 +116,11 @@
             <div>
                 js为单线程运行时, 无法通过多线程提升并发性能.
             </div>
-            <div>将音视频解码在worker中进行, 能有效利用多核处理器提升多画面播放的流畅度. </div>
+            <div>将音视频解码在worker中进行, 能有效利用多核处理器提升多画面播放的流畅度.</div>
             <div>
                 chrome限制同源http请求最多6个并发, 因此超过6个并发请求我们采用websocket-flv来播放
             </div>
-            <div>请准备M7S服务端来测试. worker js不能跨域调用, </div>
+            <div>请准备M7S服务端来测试. worker js不能跨域调用,</div>
         </div>
         <div class="input">
             <div>输入URL：</div>
@@ -259,14 +259,14 @@
             var $playHref = document.getElementById('playUrl' + id);
             let player = playList[i];
             if ($playHref.value) {
-                console.log($playHref.value);
-                setTimeout(() => {
-                    player && player.play($playHref.value).then(() => {
+                setTimeout((url) => {
+                    console.log(url);
+                    player && player.play(url).then(() => {
 
                     }).catch((e) => {
                         console.error(e);
                     });
-                }, 0)
+                }, 0, $playHref.value)
             }
         }
 

@@ -211,14 +211,14 @@
             var $playHref = document.getElementById('playUrl' + id);
             let player = playList[i];
             if ($playHref.value) {
-                console.log($playHref.value);
-                setTimeout(() => {
-                    player && player.play($playHref.value).then(() => {
+                setTimeout((url) => {
+                    console.log(url);
+                    player && player.play(url).then(() => {
 
                     }).catch((e) => {
                         console.error(e);
                     });
-                }, 0)
+                }, 0, $playHref.value)
             }
         }
 
