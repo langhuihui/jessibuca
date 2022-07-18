@@ -13,7 +13,7 @@ export const DEMUX_TYPE = {
 
 // default player options
 export const DEFAULT_PLAYER_OPTIONS = {
-    videoBuffer: 1000, //1000ms == 1 second
+    videoBuffer: 1000, //1000ms  1 second
     videoBufferDelay: 1000,// 1000ms
     isResize: true,
     isFullResize: false, //
@@ -23,16 +23,16 @@ export const DEFAULT_PLAYER_OPTIONS = {
     loadingTimeout: 10, // loading timeout
     heartTimeout: 5,  // heart timeout
     timeout: 10, // second
-    loadingTimeoutReplay: false, // loading timeout replay
-    heartTimeoutReplay: false,// heart timeout replay。
+    loadingTimeoutReplay: true, // loading timeout replay. default is true
+    heartTimeoutReplay: false,// heart timeout replay.
     loadingTimeoutReplayTimes: 3, // loading timeout replay fail times
     heartTimeoutReplayTimes: 3, // heart timeout replay fail times
-    supportDblclickFullscreen: false,
-    showBandwidth: false, //
-    keepScreenOn: false,
-    isNotMute: false,
-    hasAudio: true,
-    hasVideo: true,
+    supportDblclickFullscreen: false, // support double click toggle fullscreen
+    showBandwidth: false, // show band width
+    keepScreenOn: false, //
+    isNotMute: false, //
+    hasAudio: true, //  has audio
+    hasVideo: true, // has video
     operateBtns: {
         fullscreen: false,
         screenshot: false,
@@ -40,18 +40,18 @@ export const DEFAULT_PLAYER_OPTIONS = {
         audio: false,
         record: false,
     },
-    controlAutoHide: false,
+    controlAutoHide: false, // control auto hide
     hasControl: false,
-    loadingText: '',
+    loadingText: '', // loading Text
     background: '',
     decoder: 'decoder.js',
-    url: '',//
-    rotate: 0,
+    url: '',// play url
+    rotate: 0, //
     // text: '',
     forceNoOffscreen: true, // 默认是不采用
-    hiddenAutoPause: false,
+    hiddenAutoPause: false, //
     protocol: PLAYER_PLAY_PROTOCOL.fetch,
-    demuxType: DEMUX_TYPE.flv, //
+    demuxType: DEMUX_TYPE.flv, // demux type
     useWCS: false, //
     wcsUseVideoRender: true,// 默认设置为true
     useMSE: false, //
@@ -181,7 +181,9 @@ export const EVENTS_ERROR = {
     websocketError: 'websocketError',
     webcodecsH265NotSupport: 'webcodecsH265NotSupport',
     mediaSourceH265NotSupport: 'mediaSourceH265NotSupport',
-    wasmDecodeError: 'wasmDecodeError'
+    wasmDecodeError: 'wasmDecodeError',
+    mediaSourceFull: 'mediaSourceFull',
+    mediaSourceAppendBufferError: 'mediaSourceAppendBufferError'
 }
 
 

@@ -469,6 +469,14 @@ export default class Player extends Emitter {
                             this.emit(EVENTS.error, EVENTS_ERROR.mediaSourceH265NotSupport);
                         }
                     })
+
+                    this.mseDecoder.once(EVENTS_ERROR.mediaSourceFull, () => {
+                        this.emit(EVENTS_ERROR.mediaSourceFull)
+                    })
+
+                    this.mseDecoder.once(EVENTS_ERROR.mediaSourceAppendBufferError, () => {
+                        this.emit(EVENTS_ERROR.mediaSourceAppendBufferError)
+                    })
                 }
 
                 this.enableWakeLock();

@@ -319,6 +319,34 @@ class Jessibuca extends Emitter {
                     }
                 });
             })
+            //  media source full error
+            this.player.once(EVENTS_ERROR.mediaSourceFull, () => {
+                this.pause().then(() => {
+                    this.player.debug.log('Jessibuca', 'media source full');
+                    this._resetPlayer()
+                    this.play(url).then(() => {
+                        // resolve();
+                        this.player.debug.log('Jessibuca', 'media source full and reset player and play success')
+                    }).catch(() => {
+                        // reject();
+                        this.player.debug.warn('Jessibuca', 'media source full and reset player and play error')
+                    });
+                })
+            })
+            // media source append buffer error
+            this.player.once(EVENTS_ERROR.mediaSourceAppendBufferError, () => {
+                this.pause().then(() => {
+                    this.player.debug.log('Jessibuca', 'media source append buffer error');
+                    this._resetPlayer()
+                    this.play(url).then(() => {
+                        // resolve();
+                        this.player.debug.log('Jessibuca', 'media source append buffer error and reset player and play success')
+                    }).catch(() => {
+                        // reject();
+                        this.player.debug.warn('Jessibuca', 'media source append buffer error and reset player and play error')
+                    });
+                })
+            })
 
             // 解码报错。
             this.player.once(EVENTS_ERROR.wasmDecodeError, () => {
@@ -336,6 +364,7 @@ class Jessibuca extends Emitter {
                     })
                 }
             })
+
 
             // 监听 delay timeout
             this.player.once(EVENTS.delayTimeout, () => {
@@ -385,7 +414,6 @@ class Jessibuca extends Emitter {
             }
         })
     }
-
 
 
     /**

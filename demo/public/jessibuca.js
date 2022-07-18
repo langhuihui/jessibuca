@@ -48,7 +48,7 @@
 
 	const DEFAULT_PLAYER_OPTIONS = {
 	  videoBuffer: 1000,
-	  //1000ms == 1 second
+	  //1000ms  1 second
 	  videoBufferDelay: 1000,
 	  // 1000ms
 	  isResize: true,
@@ -64,21 +64,26 @@
 	  // heart timeout
 	  timeout: 10,
 	  // second
-	  loadingTimeoutReplay: false,
-	  // loading timeout replay
+	  loadingTimeoutReplay: true,
+	  // loading timeout replay. default is true
 	  heartTimeoutReplay: false,
-	  // heart timeout replay。
+	  // heart timeout replay.
 	  loadingTimeoutReplayTimes: 3,
 	  // loading timeout replay fail times
 	  heartTimeoutReplayTimes: 3,
 	  // heart timeout replay fail times
 	  supportDblclickFullscreen: false,
+	  // support double click toggle fullscreen
 	  showBandwidth: false,
-	  //
+	  // show band width
 	  keepScreenOn: false,
+	  //
 	  isNotMute: false,
+	  //
 	  hasAudio: true,
+	  //  has audio
 	  hasVideo: true,
+	  // has video
 	  operateBtns: {
 	    fullscreen: false,
 	    screenshot: false,
@@ -87,20 +92,24 @@
 	    record: false
 	  },
 	  controlAutoHide: false,
+	  // control auto hide
 	  hasControl: false,
 	  loadingText: '',
+	  // loading Text
 	  background: '',
 	  decoder: 'decoder.js',
 	  url: '',
-	  //
+	  // play url
 	  rotate: 0,
+	  //
 	  // text: '',
 	  forceNoOffscreen: true,
 	  // 默认是不采用
 	  hiddenAutoPause: false,
+	  //
 	  protocol: PLAYER_PLAY_PROTOCOL.fetch,
 	  demuxType: DEMUX_TYPE.flv,
-	  //
+	  // demux type
 	  useWCS: false,
 	  //
 	  wcsUseVideoRender: true,
@@ -227,7 +236,9 @@
 	  websocketError: 'websocketError',
 	  webcodecsH265NotSupport: 'webcodecsH265NotSupport',
 	  mediaSourceH265NotSupport: 'mediaSourceH265NotSupport',
-	  wasmDecodeError: 'wasmDecodeError'
+	  wasmDecodeError: 'wasmDecodeError',
+	  mediaSourceFull: 'mediaSourceFull',
+	  mediaSourceAppendBufferError: 'mediaSourceAppendBufferError'
 	};
 	const WEBSOCKET_STATUS = {
 	  notConnect: 'notConnect',
@@ -11073,6 +11084,16 @@
 	          this.sourceBuffer.appendBuffer(buffer);
 	        } catch (e) {
 	          debug.warn('MediaSource', 'this.sourceBuffer.appendBuffer()', e);
+
+	          if (e.code === 22) {
+	            // The SourceBuffer is full, and cannot free space to append additional buffers
+	            this.stop();
+	            this.emit(EVENTS_ERROR.mediaSourceFull);
+	          } else if (e.code === 11) {
+	            //     Failed to execute 'appendBuffer' on 'SourceBuffer': The HTMLMediaElement.error attribute is not null.
+	            this.stop();
+	            this.emit(EVENTS_ERROR.mediaSourceAppendBufferError);
+	          } else ;
 	        }
 	      } else {
 	        debug.warn('MediaSource', 'this.sourceBuffer.appendBuffer function is undefined');
@@ -11708,6 +11729,12 @@
 	            if (!this._opt.autoWasm) {
 	              this.emit(EVENTS.error, EVENTS_ERROR.mediaSourceH265NotSupport);
 	            }
+	          });
+	          this.mseDecoder.once(EVENTS_ERROR.mediaSourceFull, () => {
+	            this.emit(EVENTS_ERROR.mediaSourceFull);
+	          });
+	          this.mseDecoder.once(EVENTS_ERROR.mediaSourceAppendBufferError, () => {
+	            this.emit(EVENTS_ERROR.mediaSourceAppendBufferError);
 	          });
 	        }
 
@@ -12360,6 +12387,38 @@
 	              this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play error');
 	            });
 	          }
+	        });
+	      }); //  media source full error
+
+	      this.player.once(EVENTS_ERROR.mediaSourceFull, () => {
+	        this.pause().then(() => {
+	          this.player.debug.log('Jessibuca', 'media source full');
+
+	          this._resetPlayer();
+
+	          this.play(url).then(() => {
+	            // resolve();
+	            this.player.debug.log('Jessibuca', 'media source full and reset player and play success');
+	          }).catch(() => {
+	            // reject();
+	            this.player.debug.warn('Jessibuca', 'media source full and reset player and play error');
+	          });
+	        });
+	      }); // media source append buffer error
+
+	      this.player.once(EVENTS_ERROR.mediaSourceAppendBufferError, () => {
+	        this.pause().then(() => {
+	          this.player.debug.log('Jessibuca', 'media source append buffer error');
+
+	          this._resetPlayer();
+
+	          this.play(url).then(() => {
+	            // resolve();
+	            this.player.debug.log('Jessibuca', 'media source append buffer error and reset player and play success');
+	          }).catch(() => {
+	            // reject();
+	            this.player.debug.warn('Jessibuca', 'media source append buffer error and reset player and play error');
+	          });
 	        });
 	      }); // 解码报错。
 

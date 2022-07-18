@@ -266,6 +266,17 @@ export default class MseDecoder extends Emitter {
                     this.sourceBuffer.appendBuffer(buffer);
                 } catch (e) {
                     debug.warn('MediaSource', 'this.sourceBuffer.appendBuffer()', e);
+                    if (e.code === 22) {
+                        // The SourceBuffer is full, and cannot free space to append additional buffers
+                        this.stop();
+                        this.emit(EVENTS_ERROR.mediaSourceFull);
+                    } else if (e.code === 11) {
+                        //     Failed to execute 'appendBuffer' on 'SourceBuffer': The HTMLMediaElement.error attribute is not null.
+                        this.stop();
+                        this.emit(EVENTS_ERROR.mediaSourceAppendBufferError)
+                    } else {
+                        //todo
+                    }
                 }
 
             } else {
