@@ -1,5 +1,15 @@
 # Document
-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
 ## 常见问题
 
 ### 延迟时间
@@ -32,8 +42,9 @@ MIMEType: application/wasm
 
 
 ### Media Source Extensions 硬解码H265
-Windows系统下,360浏览器可播放使用MSE加速解码H265, win10商店购买hevc解码器后最新edge可硬件加速解码播放H265.
 
+- Windows系统下,360浏览器可播放使用MSE加速解码H265.
+- Windows系统下,win10商店购买hevc解码器后最新edge可硬件加速解码播放H265.
 
 ### webcodecs
 
@@ -71,6 +82,9 @@ WebRTC标准是不支持h265的。
 各个浏览器对于OffscreenCanvas支持程度。
 
 https://caniuse.com/?search=OffscreenCanvas
+
+> 该特性是实验性特性，某些版本的浏览器会出现内存无缘无故变大的情况。谨慎使用。
+> https://github.com/langhuihui/jessibuca/issues/227
 
 ### 多个iframe一起播放视频，如果有一个视频地址播放不了会导致其他地址也无法播放
 
@@ -163,19 +177,22 @@ https://github.com/langhuihui/jessibuca/issues/126
 1. 降低分辨率
 2. 增大videoBuffer大小
 3. 设置hasAudio 为false，不demux和decode音频数据。
-4. 条件允许(支持OffscreenCanvas)也可以配合设置 forceNoOffscreen 为 false  开启离屏渲染模式，提升性能。
+4. ~~条件允许(支持OffscreenCanvas)也可以配合设置 forceNoOffscreen 为 false  开启离屏渲染模式，提升性能。~~
+5. pro版本支持360 或者edge浏览器 H265硬解码。
+> 某些显卡在支持OffscreenCanvas上面会存在问题，所以谨慎使用。
+> https://github.com/langhuihui/jessibuca/issues/227
 
 #### h264 优化方案
 
 1. 降低分辨率
 2. 增大videoBuffer大小
 3. 设置hasAudio 为false，不demux和decode音频数据。
-4. 条件允许(支持OffscreenCanvas)也可以配合设置 forceNoOffscreen 为 false  开启离屏渲染模式，提升性能。
+4. ~~条件允许(支持OffscreenCanvas)也可以配合设置 forceNoOffscreen 为 false  开启离屏渲染模式，提升性能。~~
 5. 如果是https情况下 设置 useWCS 为 true。
-6. 如果是http情况下 设置 useMSE 为 true。（暂不支持 forceNoOffscreen 参数）
+6. 如果是http情况下 设置 useMSE 为 true。
 
 > 某些显卡在支持OffscreenCanvas上面会存在问题，所以谨慎使用。
-
+> https://github.com/langhuihui/jessibuca/issues/227
 
 
 

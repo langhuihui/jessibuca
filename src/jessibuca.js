@@ -24,7 +24,7 @@ class Jessibuca extends Emitter {
             throw new Error('Jessibuca need container option');
             return;
         }
-        //
+        // check container node name
         if ($container.nodeName === 'CANVAS' || $container.nodeName === 'VIDEO') {
             throw new Error(`Jessibuca container type can not be ${$container.nodeName} type`);
             return;
