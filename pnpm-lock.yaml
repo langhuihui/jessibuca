@@ -1,18 +1,38 @@
-lockfileVersion: 5.3
+lockfileVersion: 5.4
 
-specifiers:
-  '@types/emscripten': ^1.39.6
-  afsm: ^1.0.1
-  eventemitter3: ^4.0.7
-  fastrx: ^3.0.11
-  loglevel: ^1.8.0
+importers:
 
-dependencies:
-  '@types/emscripten': 1.39.6
-  afsm: 1.0.1
-  eventemitter3: 4.0.7
-  fastrx: 3.0.11
-  loglevel: 1.8.0
+  .:
+    specifiers:
+      '@types/emscripten': ^1.39.6
+      eventemitter3: ^4.0.7
+      fastrx: ^3.0.11
+      loglevel: ^1.8.0
+    dependencies:
+      '@types/emscripten': 1.39.6
+      eventemitter3: 4.0.7
+      fastrx: 3.0.11
+      loglevel: 1.8.0
+
+  packages/conn:
+    specifiers:
+      afsm: ^2.1.5
+      eventemitter3: ^4.0.7
+    dependencies:
+      afsm: 2.1.5
+      eventemitter3: 4.0.7
+
+  packages/decoder:
+    specifiers: {}
+
+  packages/demuxer:
+    specifiers: {}
+
+  packages/renderer:
+    specifiers: {}
+
+  packages/ui:
+    specifiers: {}
 
 packages:
 
@@ -20,8 +40,8 @@ packages:
     resolution: {integrity: sha512-H90aoynNhhkQP6DRweEjJp5vfUVdIj7tdPLsu7pq89vODD/lcugKfZOsfgwpvM6XUewEp2N5dCg1Uf3Qe55Dcg==}
     dev: false
 
-  /afsm/1.0.1:
-    resolution: {integrity: sha512-jHCEQY++RvBodMqElOG7K8ZJiZNnFfLCnZUbzTuRAIKMLTvcNp23kgG3wFoCMVHXc8tBf3CT4iOVvPkCd4tOeg==}
+  /afsm/2.1.5:
+    resolution: {integrity: sha512-DXdZvFu2IGVf9c5EGWjls1YQ1jbl6C+P9iMhynxeG/IKSzIZRuwyxjStSf5m+Tv7VRCASgqK5qpaVaGm2Dn2zg==}
     dependencies:
       eventemitter3: 4.0.7
     dev: false
