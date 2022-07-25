@@ -18,9 +18,11 @@ importers:
     specifiers:
       afsm: ^2.1.5
       eventemitter3: ^4.0.7
+      streamrx: ^0.0.3
     dependencies:
       afsm: 2.1.5
       eventemitter3: 4.0.7
+      streamrx: 0.0.3
 
   packages/decoder:
     specifiers: {}
@@ -64,4 +66,8 @@ packages:
   /loglevel/1.8.0:
     resolution: {integrity: sha512-G6A/nJLRgWOuuwdNuA6koovfEV1YpqqAG4pRUlFaz3jj2QNZ8M4vBqnVA+HBTmU/AMNUtlOsMmSpF6NyOjztbA==}
     engines: {node: '>= 0.6.0'}
+    dev: false
+
+  /streamrx/0.0.3:
+    resolution: {integrity: sha512-AeuOYaERoVFGr9pZ8HWuWvgXbPYmsW4pvGBBkpzi9dBEoqscHXe0O1BvjT9oz65QODnrFNSf7IpkJEkfkEHmbg==}
     dev: false
