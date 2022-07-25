@@ -347,5 +347,4 @@ Module.postRun = function () {
                 break;
         }
     };
-
 };
