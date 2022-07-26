@@ -1,5 +1,6 @@
-import { ChangeState, FSM } from "afsm";
-import { ConnectionState, Connection } from ".";
+import { ChangeState, FSM, Includes } from "afsm";
+import { Connection } from ".";
+import { ConnectionState } from "./types";
 
 export class WebSocketFSM extends FSM {
   ws?: WebSocket;
@@ -7,8 +8,8 @@ export class WebSocketFSM extends FSM {
     super(conn.name, "WebSocket");
   }
   @ChangeState([ConnectionState.DISCONNECTED, FSM.INIT], ConnectionState.CONNECTED)
-  connect() {
-    const ws = new WebSocket(this.conn.url!);
+  connect(url: string) {
+    const ws = new WebSocket(url);
     ws.binaryType = 'arraybuffer';
     return new Promise<ReadableStream<Uint8Array>>((resolve, reject) => {
       ws.onerror = reject;
@@ -35,9 +36,8 @@ export class WebSocketFSM extends FSM {
   close() {
     this.ws?.close(1000, "close");
   }
+  @Includes(ConnectionState.CONNECTED)
   send(data: Uint8Array | ArrayBuffer) {
-    if (this.state == ConnectionState.CONNECTED) {
-      this.ws?.send(data);
-    }
+    this.ws?.send(data);
   }
 }

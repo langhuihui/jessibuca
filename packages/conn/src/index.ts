@@ -1,6 +1,9 @@
 import { ChangeState, FSM } from "afsm";
 import { WebSocketFSM } from "./ws";
 import { range, tap, map, fromEvent, concatMap, takeUntil, timer } from 'streamrx';
+import { ConnectionOptions, ConnectionState } from "./types";
+import { WebTransportFSM } from "./wt";
+import { HttpFSM } from "./http";
 /**
  * 使用尾递归优化，计算斐波那契数
  * @export
@@ -26,23 +29,13 @@ export function getReconnectionTimeout(reconnectionCount: number) {
   // fibonacci(6) = 13
   return n > 6 ? 13 * 1000 : fibonacci(n) * 1000;
 }
-export interface ConnectionOptions {
-  reconnectCount?: number; //重连次数
-  reconnectTimeout?: (reconnectionCount: number) => number; //重连超时间隔
-}
 
-export const enum ConnectionState {
-  CONNECTED = "connected",
-  DISCONNECTED = "disconnected",
-  RECONNECTED = "reconnected",
-}
-
-export type ConnectionEvent = ConnectionState | 'connecting' | 'disconnecting' | 'reconnecting';
 export class Connection extends FSM {
   readable?: ReadableStream<Uint8Array>;
-  netConn?: WebSocketFSM;
+  writable?: WritableStream<Uint8Array>;
+  netConn?: WebSocketFSM | WebTransportFSM | HttpFSM;
   constructor(public url?: string, public options?: ConnectionOptions) {
-    super(url, 'Connection');
+    super(url || 'conn', 'Connection');
     if (!this.options) {
       this.options = {};
     }
@@ -60,12 +53,20 @@ export class Connection extends FSM {
     }
     if (this.url.startsWith("ws://") || this.url.startsWith("wss://")) {
       this.netConn = new WebSocketFSM(this);
+    } else if (this.url.startsWith("http://") || this.url.startsWith("https://")) {
+      this.netConn = new HttpFSM(this);
+    } else if (this.url.startsWith("wt://")) {
+      this.url = this.url.replace("wt://", "https://");
+      this.netConn = new WebTransportFSM(this);
+    } else if (this.url.startsWith("webrtc://")) {
+    } else {
+      throw new Error("url is invalid");
     }
-    return this.netConn!.connect();
+    return this.readable = await this.netConn!.connect(this.url);
   }
   @ChangeState(ConnectionState.DISCONNECTED, ConnectionState.RECONNECTED)
   async reconnect() {
-    return this.netConn!.connect();
+    return this.readable = await this.netConn!.connect(this.url!);
   }
   @ChangeState(ConnectionState.CONNECTED, ConnectionState.DISCONNECTED)
   disconnect(reason: string) {
