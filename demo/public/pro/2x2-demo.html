@@ -175,8 +175,15 @@
                 play: showOperateBtns,
                 audio: showOperateBtns,
             },
-            forceNoOffscreen: forceNoOffscreen,
-            isNotMute: false,
+            watermarkConfig: {
+                image: {
+                    src: 'http://jessibuca.monibuca.com/jessibuca-logo.png',
+                    width: 40,
+                    height: 4408
+                },
+                right: 10,
+                top: 10
+            },
         },);
 
         // jessibuca.onLog = msg => console.error(msg);
