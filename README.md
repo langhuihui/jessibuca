@@ -30,6 +30,7 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 支持同一个播放地址音频采样和编码发生改变的时候音频自动切换
 - 支持视频录制(WebM、MP4格式)，(MP4格式支持在IOS VLC播放器显示时长播放，Android VLC播放器无法显示时长播放,PC VLC播放器可以播放)
 
+
 ## PRO版本
 - wasm解码模式下默认work线程中发起Http-Flv、WS请求，减少主线程往worker线程传递数据，提升性能。
 - Windows系统下,360浏览器可播放使用MSE加速解码H265。
@@ -50,13 +51,24 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 支持SIMD软解码加速(使用Chrome/Edge 91, Firefox89及之后正式提供的SIMD指令集加速解码, 在1080P以上分辨率带来100%-300%的性能提升)
 - 支持定制化服务开发。
 
-### 体验地址
+## 体验地址
+
+### Jessibuca
+#### https
+[https://jessibuca.com/player.html](https://jessibuca.com/player.html)
+
+#### http
+[http://jessibuca.monibuca.com/player.html](http://jessibuca.monibuca.com/player.html)
+
+### Jessibuca Pro
 
 #### https
 [https://jessibuca.com/player-pro.html](https://jessibuca.com/player-pro.html)
 
-#### http
+##### http
 [http://jessibuca.monibuca.com/player-pro.html](http://jessibuca.monibuca.com/player-pro.html)
+
+
 
 ## 本地测试
 
