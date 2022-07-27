@@ -56,7 +56,7 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 [https://jessibuca.com/player-pro.html](https://jessibuca.com/player-pro.html)
 
 #### http
-[http://jessibuca.monibuca.com/player-pro.html](http://jessibuca.monibuca.com//player-pro.html)
+[http://jessibuca.monibuca.com/player-pro.html](http://jessibuca.monibuca.com/player-pro.html)
 
 ## 本地测试
 

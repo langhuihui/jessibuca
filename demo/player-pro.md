@@ -10,6 +10,40 @@ sidebar: false
 > 注意：pro 试用开发包(10分钟断开, 刷新页面继续测试)
 
 
+# 其他demo
+
+## 2x2
+#### https
+[https://jessibuca.com/pro/2x2-demo.html](https://jessibuca.com/pro/2x2-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/2x2-demo.html](http://jessibuca.monibuca.com/pro/2x2-demo.html)
+
+## 2x2 simd
+#### https
+[https://jessibuca.com/pro/2x2-simd-demo.html](https://jessibuca.com/pro/2x2-simd-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/2x2-simd-demo.html](http://jessibuca.monibuca.com/pro/2x2-simd-demo.html)
+
+
+## 3x3
+#### https
+[https://jessibuca.com/pro/3x3-demo.html](https://jessibuca.com/pro/3x3-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/3x3-demo.html](http://jessibuca.monibuca.com/pro/3x3-demo.html)
+
+## 3x3 simd
+#### https
+[https://jessibuca.com/pro/3x3-simd-demo.html](https://jessibuca.com/pro/3x3-simd-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/3x3-simd-demo.html](http://jessibuca.monibuca.com/pro/3x3-simd-demo.html)
+
+
+
+
 # MSE H265硬解码
 
 Windows系统下,360浏览器可播放使用MSE加速解码H265。
