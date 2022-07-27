@@ -50,6 +50,14 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 支持SIMD软解码加速(使用Chrome/Edge 91, Firefox89及之后正式提供的SIMD指令集加速解码, 在1080P以上分辨率带来100%-300%的性能提升)
 - 支持定制化服务开发。
 
+### 体验地址
+
+#### https
+[https://jessibuca.com/player-pro.html](https://jessibuca.com/player-pro.html)
+
+#### http
+[http://jessibuca.monibuca.com/player-pro.html](http://jessibuca.monibuca.com//player-pro.html)
+
 ## 本地测试
 
 - 执行yarn 或者npm i
@@ -65,7 +73,7 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 
 ## HTTPS 地址
 
-[https://j.m7s.live/](https://j.m7s.live/)
+[https://jessibuca.com](https://jessibuca.com)
 
 ## DEMO
 
