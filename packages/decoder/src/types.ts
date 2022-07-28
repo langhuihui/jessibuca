@@ -1,144 +1,136 @@
+
+export type DecoderState = 'unconfigured' | 'configured' | 'closed';
+
 //视频解码器类型
-export const enum VideoDecoderType {
-
-    SoftwareDecoder             = 1, //软解码器
-    SoftwareDecoderWithSIMD     = 2, //支持SIMD软解码器
-    HardwareDecoder             = 20, //硬解码器
-    AutoDecoder                 = 100,//自动选择解码器
-}
-
-
-//视频参数相关定义
+export type VideoDecoderType = 'software-decoder' | 'software-simd-decoder' | 'hardware-decoder' | 'auto';
 
 //视频压缩格式
-export const enum VideoType {
-    AVC  = 1, //H264
-    HEVC = 2, //H265
-}
-
-//视频数据格式
-export const enum VideoDataType {
-    AVCC   = 1, //Nal 前4个字节是Nal长度
-    AnnexB = 2, //Nal 前4个字节是0 0 0 1
-}
+export type  VideoType = 'avc' | 'hevc';
 
 //像素格式
-export const enum PixelType {
-    YUV420P  = 1, //I420
-}
+export type PixelType = 'I420';
 
-
-export type VideoCodecInputInfo = {
+//视频解码器配置
+export interface VideoDecoderConfig {
 
     videoType: VideoType,
-    extraData: undefined | Uint8Array,
-    outPixelType?: PixelType
+    extraData?: BufferSource,
+    avc?:{
+        format: "avc" | "annexb";
+    },
+    hevc?:{
+        format: "hvcc" | "annexb";
+    }
+    outPixelType?: PixelType,
 
-}
+};
 
-export type VideoCodecOutputInfo = {
+export interface VideoCodecInfo {
 
     videoType: VideoType,
     width: number,
     height: number
-}
+};
 
 
-export type VideoPacket = {
+export interface VideoPacket {
 
-    videoDataType: VideoDataType,
-    data: Uint8Array,
+    data: BufferSource,
     keyFrame: boolean,
     pts: number
-}
+};
 
-export type VideoFrame = {
+export interface VideoFrame {
 
     pixelType: PixelType,
-    datas: Uint8Array[],
+    datas: BufferSource[],
     width: number,
     height: number,
     pts: number
+};
+
+export interface ErrorInfo {
+
+    error:string
 }
-
-
-
 
 export const enum VideoDecoderEvent {
-    VideoCodecInfo = "videoCodecOutInfo",
+    VideoCodecInfo = "videoCodecInfo",
     VideoFrame = "videoFrame",
     Error = "error"
-  }
+};
 
-}
+
+export interface VideoDecoderInterface  {
+
+    state(): DecoderState;
+    configure(config: VideoDecoderConfig): void;
+    decode(packet: VideoPacket): void;
+    flush(): void;
+    reset(): void;
+    close(): void;
+
+};
+
 
 //audio 参数
-
-
-export const enum AudioDecoderType {
-
-    SoftwareDecoder     = 1, //软解码器
-    AutoDecoder         = 100,//自动选择解码器
-}
-
-
+export type AudioDecoderType = 'software-decoder' | 'auto';
 
 
 //声音压缩格式
-export const enum AuidoType {
-    PCMA  = 1, 
-    PCMU  = 2,
-    AAC   = 3,
-}
+export type AuidoType  =  'pcma' | 'pcmu' | 'aac';
 
-//PCM 采样格式
-export const enum SampleType {
-    FLTP  = 1, //4 bytes float, [-1, 1]
-    PCM16 = 2, //2 bytes short, [-32768, 32767]
-}
+export type SampleType = 'f32-planar';
 
-
-export type AudioCodecInputInfo = {
+export interface AudioDecoderConfig {
 
     audioType: AuidoType,
-    extraData: undefined | Uint8Array,
+    extraData?: SourceBuffer,
     outSampleType?: SampleType,
     outSampleNum?:number //按指定采样点个数输出，内部会做队列缓存
-
 }
 
-export type AudioCodecOutputInfo = {
+export type AudioCodecInfo = {
 
     audioType: AuidoType,
     sampleRate: number,
     channles: number,
     depth: number,
-    profile?: number  //如果是aac 才有profile 
+    aac?: {
+        profile: number
+    }
 
 }
 
+export interface AudioPacket {
 
-export type AudioPacket = {
-
-    data: Uint8Array,
+    data: SourceBuffer,
     pts: number
 
 }
 
-export type AudioFrame = {
+export interface AudioFrame {
 
-    datas: Uint16Array[] | Float32Array[],
-    sampleRate: number,
+    datas: SourceBuffer[],
+    sampleNum: number,
     channles: number,
     pts: number,
 
 }
 
-
-
-
 export const enum AudioDecoderEvent {
-    AudioCodecInfo = "videoCodecOutInfo",
-    VideoFrame = "videoFrame",
+    AudioCodecInfo = "audioCodecInfo",
+    AudioFrame = "audioFrame",
     Error = "error"
 }
+
+export interface AudioDecoderInterface {
+
+    state(): DecoderState;
+    configure(config: AudioDecoderConfig): void;
+    decode(packet: AudioPacket): void;
+    flush(): void;
+    reset(): void;
+    close(): void;
+
+};
