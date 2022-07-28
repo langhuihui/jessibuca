@@ -10,8 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "afsm": "^2.2.1",
+    "afsm": "^2.2.2",
     "eventemitter3": "^4.0.7",
+    "oput": "^1.1.1",
     "streamrx": "^0.0.3"
   }
 }

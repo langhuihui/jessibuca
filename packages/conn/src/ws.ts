@@ -19,7 +19,7 @@ export class WebSocketFSM extends FSM {
           start: controller => {
             ws.onclose = e => {
               controller.close();
-              this.disconnect(e.code, e.reason).catch(() => { });
+              controller.error(e);
             };
             ws.onmessage = evt => controller.enqueue(evt.data);
           }
@@ -28,16 +28,14 @@ export class WebSocketFSM extends FSM {
     });
   }
   @ChangeState(ConnectionState.CONNECTED, ConnectionState.DISCONNECTED)
-  async disconnect(code = 0, reason: string = '') {
-    console.warn('websocket disconnected :', code, reason);
-    return this.conn.disconnect(reason);
+  disconnect(err: any) {
   }
   @ChangeState([], FSM.INIT)
   close() {
     this.ws?.close(1000, "close");
   }
   @Includes(ConnectionState.CONNECTED)
-  send(data: Uint8Array | ArrayBuffer) {
+  send(data: ArrayBufferLike | ArrayBufferView) {
     this.ws?.send(data);
   }
 }

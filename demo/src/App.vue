@@ -10,6 +10,14 @@ import Connection from './components/Connection.vue';
       <n-tab-pane name="connection" tab="Connection">
         <Connection />
       </n-tab-pane>
+      <n-tab-pane name="demuxer" tab="Demuxer">
+      </n-tab-pane>
+      <n-tab-pane name="decoder" tab="Decoder">
+      </n-tab-pane>
+      <n-tab-pane name="renderer" tab="Renderer">
+      </n-tab-pane>
+      <n-tab-pane name="ui" tab="UI">
+      </n-tab-pane>
     </n-tabs>
   </n-message-provider>
 </template>

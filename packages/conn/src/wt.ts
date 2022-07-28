@@ -17,16 +17,14 @@ export class WebTransportFSM extends FSM {
     return stream.readable;
   }
   @ChangeState(ConnectionState.CONNECTED, ConnectionState.DISCONNECTED)
-  disconnect(err = "") {
-    return this.conn.disconnect(err);
+  disconnect(err: any) {
   }
   @ChangeState([], FSM.INIT)
   close() {
     return this.wt?.close();
   }
   @Includes(ConnectionState.CONNECTED)
-  async  send(data: Uint8Array | ArrayBuffer) {
-    await this.writer?.ready;
+  async send(data: ArrayBufferLike | ArrayBufferView) {
     return this.writer?.write(data);
   }
 }

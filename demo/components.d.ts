@@ -9,8 +9,14 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     Connection: typeof import('./src/components/Connection.vue')['default']
     NButton: typeof import('naive-ui')['NButton']
+    NCol: typeof import('naive-ui')['NCol']
+    NIcon: typeof import('naive-ui')['NIcon']
     NInput: typeof import('naive-ui')['NInput']
     NMessageProvider: typeof import('naive-ui')['NMessageProvider']
+    NRow: typeof import('naive-ui')['NRow']
+    NSpace: typeof import('naive-ui')['NSpace']
+    NSpance: typeof import('naive-ui')['NSpance']
+    NStatistic: typeof import('naive-ui')['NStatistic']
     NTabPane: typeof import('naive-ui')['NTabPane']
     NTabs: typeof import('naive-ui')['NTabs']
   }
