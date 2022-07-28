@@ -54,7 +54,6 @@ export class TransmissionStatistics {
 }
 export class Connection extends FSM {
   oput?: Oput;
-  writable?: WritableStream<Uint8Array>;
   netConn?: WebSocketFSM | WebTransportFSM | HttpFSM | WebRTCFSM;
   up = new TransmissionStatistics();
   down = new TransmissionStatistics();
@@ -64,9 +63,10 @@ export class Connection extends FSM {
         console.timeEnd(this.url);
       }
       this.down.add(chunk.length);
-      this.oput?.write(chunk);
+      return this.oput?.write(chunk);
     }
   };
+  abortCtrl?: AbortController;
   constructor(public url?: string, public options?: ConnectionOptions) {
     super(url || 'conn', 'Connection');
     if (!this.options) {
@@ -78,9 +78,16 @@ export class Connection extends FSM {
   }
 
   @ChangeState(FSM.INIT, ConnectionState.CONNECTED)
-  async connect(url?: string) {
+  async connect(url?: string | File) {
     if (url) {
-      this.url = url;
+      if (typeof url === 'string')
+        this.url = url;
+      else {
+        this.url = url.name;
+        console.time(this.url);
+        this.onConnected(url.stream());
+        return;
+      }
     }
     if (!this.url) {
       throw new Error("url is required");
@@ -88,15 +95,19 @@ export class Connection extends FSM {
     console.log(`connect: ${this.url}`);
     console.time(this.url);
     if (this.url.startsWith("ws://") || this.url.startsWith("wss://")) {
-      this.netConn = new WebSocketFSM(this);
+      if (!(this.netConn instanceof WebSocketFSM))
+        this.netConn = new WebSocketFSM(this);
     } else if (this.url.startsWith("http://") || this.url.startsWith("https://")) {
-      this.netConn = new HttpFSM(this);
+      if (!(this.netConn instanceof HttpFSM))
+        this.netConn = new HttpFSM(this);
     } else if (this.url.startsWith("wt://")) {
       this.url = this.url.replace("wt://", "https://");
-      this.netConn = new WebTransportFSM(this);
+      if (!(this.netConn instanceof WebTransportFSM))
+        this.netConn = new WebTransportFSM(this);
     } else if (this.url.startsWith("webrtc://")) {
       this.url = this.url.replace("webrtc://", "https://");//TODO: http
-      this.netConn = new WebRTCFSM(this);
+      if (!(this.netConn instanceof WebRTCFSM))
+        this.netConn = new WebRTCFSM(this);
     } else {
       throw new Error("url is invalid");
     }
@@ -111,7 +122,9 @@ export class Connection extends FSM {
   onConnected(readable: ReadableStream<Uint8Array>) {
     console.log(`connected: ${this.url}`);
     this.oput = new Oput();
-    readable.pipeTo(new WritableStream(this.underlyingSink)).catch((err) => {
+    this.abortCtrl = new AbortController();
+    readable.pipeTo(new WritableStream(this.underlyingSink), this.abortCtrl).catch((err) => {
+      if (this.abortCtrl!.signal.aborted) return;
       this.netConn!.disconnect(err);
       this.disconnect(err);
     });
@@ -134,6 +147,7 @@ export class Connection extends FSM {
   }
   @ChangeState([], FSM.INIT)
   async close() {
+    this.abortCtrl?.abort();
     this.netConn?.close();
   }
   @Includes(ConnectionState.CONNECTED)

@@ -12,7 +12,7 @@
   "dependencies": {
     "afsm": "^2.2.2",
     "eventemitter3": "^4.0.7",
-    "oput": "^1.1.1",
+    "oput": "^1.2.0",
     "streamrx": "^0.0.3"
   }
 }

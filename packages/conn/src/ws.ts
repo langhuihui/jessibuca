@@ -17,10 +17,7 @@ export class WebSocketFSM extends FSM {
         this.ws = ws;
         resolve(new ReadableStream({
           start: controller => {
-            ws.onclose = e => {
-              controller.close();
-              controller.error(e);
-            };
+            ws.onclose = e => controller.error(e);
             ws.onmessage = evt => controller.enqueue(evt.data);
           }
         }));
