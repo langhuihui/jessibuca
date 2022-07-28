@@ -1,0 +1,14 @@
+prefix=../wasm/thirdparty/ffmpeg
+exec_prefix=${prefix}
+libdir=../wasm/thirdparty/ffmpeg/lib
+includedir=../wasm/thirdparty/ffmpeg/include
+
+Name: libavformat
+Description: FFmpeg container format library
+Version: 58.76.100
+Requires: libavcodec >= 58.134.100, libavutil >= 56.70.100
+Requires.private: 
+Conflicts:
+Libs: -L${libdir}  -lavformat -lm
+Libs.private: 
+Cflags: -I${includedir}

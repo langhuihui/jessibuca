@@ -1,0 +1,14 @@
+prefix=../wasm/thirdparty/ffmpeg
+exec_prefix=${prefix}
+libdir=../wasm/thirdparty/ffmpeg/lib
+includedir=../wasm/thirdparty/ffmpeg/include
+
+Name: libswresample
+Description: FFmpeg audio resampling library
+Version: 3.9.100
+Requires: libavutil >= 56.70.100
+Requires.private: 
+Conflicts:
+Libs: -L${libdir}  -lswresample -lm
+Libs.private: 
+Cflags: -I${includedir}
