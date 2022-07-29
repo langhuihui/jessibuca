@@ -1,5 +1,6 @@
 import EventEmitter from 'eventemitter3';
-import {DecoderState, VideoDecoderConfig, VideoPacket, VideoDecoderInterface} from './types'
+import {DecoderState, VideoDecoderConfig, VideoPacket, VideoDecoderInterface} from './types';
+import Module from '../wasm/out/decodervideo';
 
 
 
