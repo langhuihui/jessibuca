@@ -15,7 +15,8 @@ sargs = {
     'ERROR_ON_UNDEFINED_SYMBOLS': 0,
     'DISABLE_EXCEPTION_CATCHING': 1,
     'INVOKE_RUN':0,
-    'USE_PTHREADS':  0
+    'USE_PTHREADS':  0,
+    'MODULARIZE' : 1
 }
 emcc_args = [
     # '-m32',
@@ -25,7 +26,7 @@ emcc_args = [
     # '--llvm-lto','1',
     '--bind',
     '-I.', '-Ithirdparty/ffmpeg/include',
-    '--post-js','./post.js'
+    # '--post-js','./post.js'
 ]+["-s "+k+"="+str(v) for k, v in sargs.items()]
 
 print ('building...')

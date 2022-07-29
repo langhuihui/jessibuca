@@ -10,7 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/emscripten": "^1.39.6",
     "eventemitter3": "^4.0.7"
+  },
+  "devDependencies": {
+    "@types/emscripten": "^1.39.6"
   }
 }
