@@ -1,4 +1,6 @@
 
+import {EmscriptenModule} from '@types/emscripten'
+
 class VideoDecoder {
 
     constructor(val: any);
@@ -8,13 +10,10 @@ class VideoDecoder {
     delete(): void;
 };
 
-interface VideoDecoderModuleWithBindings extends EmscriptenModule {
-
+export interface WASMModule extends EmscriptenModule {
     VideoDecoder: typeof VideoDecoder
-    
 }
- 
-declare const VideoDecoderModule: EmscriptenModuleFactory<VideoDecoderModuleWithBindings>;
- 
-export default VideoDecoderModule;
+
+export default function CreateModule(mod?: any): WASMModule;
+
 

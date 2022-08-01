@@ -1,5 +1,5 @@
 
-export type DecoderState = 'unconfigured' | 'configured' | 'closed';
+export type DecoderState = 'uninitialized' | 'initialized' | 'configured' | 'closed';
 
 //视频解码器类型
 export type VideoDecoderType = 'software-decoder' | 'software-simd-decoder' | 'hardware-decoder' | 'auto';
@@ -11,7 +11,7 @@ export type  VideoType = 'avc' | 'hevc';
 export type PixelType = 'I420';
 
 //视频解码器配置
-export interface VideoDecoderConfig {
+export type VideoDecoderConfig = {
 
     videoType: VideoType,
     extraData?: BufferSource,
@@ -60,9 +60,9 @@ export const enum VideoDecoderEvent {
     Error = "error"
 };
 
-
 export interface VideoDecoderInterface  {
 
+    initialize():Promise<void>;
     state(): DecoderState;
     configure(config: VideoDecoderConfig): void;
     decode(packet: VideoPacket): void;
@@ -72,17 +72,15 @@ export interface VideoDecoderInterface  {
 
 };
 
-
 //audio 参数
 export type AudioDecoderType = 'software-decoder' | 'auto';
-
 
 //声音压缩格式
 export type AuidoType  =  'pcma' | 'pcmu' | 'aac';
 
 export type SampleType = 'f32-planar';
 
-export interface AudioDecoderConfig {
+export interface AudioDecoderConfig  {
 
     audioType: AuidoType,
     extraData?: SourceBuffer,
@@ -90,7 +88,7 @@ export interface AudioDecoderConfig {
     outSampleNum?:number //按指定采样点个数输出，内部会做队列缓存
 }
 
-export type AudioCodecInfo = {
+export interface AudioCodecInfo {
 
     audioType: AuidoType,
     sampleRate: number,

@@ -14,6 +14,15 @@ export class VideoHardDecoder extends EventEmitter implements VideoDecoderInterf
 
     };
 
+    initialize(): Promise<void>{
+    
+        return new Promise(resolve => {
+
+            resolve();
+        });
+
+    }
+
     state(): DecoderState {
 
         return this.decoderState;

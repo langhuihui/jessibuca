@@ -16,7 +16,8 @@ sargs = {
     'DISABLE_EXCEPTION_CATCHING': 1,
     'INVOKE_RUN':0,
     'USE_PTHREADS':  0,
-    'MODULARIZE' : 1
+    'MODULARIZE' : 1,
+    'EXPORT_ES6' : 1
 }
 emcc_args = [
     # '-m32',

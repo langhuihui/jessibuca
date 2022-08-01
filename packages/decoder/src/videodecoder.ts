@@ -49,6 +49,12 @@ export class VideoDecoder extends EventEmitter implements VideoDecoderInterface 
 
     };
 
+    initialize(): Promise<void>{ 
+
+        return this.decoder.initialize();
+    }
+
+
     state(): DecoderState {
 
         return this.decoder.state();
