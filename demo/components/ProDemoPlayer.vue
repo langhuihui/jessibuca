@@ -143,7 +143,7 @@ export default {
             rotate: 0,
             useWCS: false,
             useMSE: false,
-            useSIMD: false,
+            useSIMD: true,
             useOffscreen: false,
             recording: false,
             isDebug: false,

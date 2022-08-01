@@ -86,6 +86,7 @@ export default class Player extends Emitter {
         //
         this._checkHeartTimeout = null;
         this._checkLoadingTimeout = null;
+        this._checkStatsInterval = null;
 
         //
         this._startBpsTime = null;
@@ -220,6 +221,7 @@ export default class Player extends Emitter {
 
         this.clearCheckHeartTimeout();
         this.clearCheckLoadingTimeout();
+        this.clearStatsInterval();
         //
         this.releaseWakeLock();
         this.keepScreenOn = null;
@@ -501,6 +503,7 @@ export default class Player extends Emitter {
                     this._times.streamResponse = now();
                     //
                     this.video.play();
+                    this.checkStatsInterval();
                 })
 
             }).catch((e) => {
@@ -562,13 +565,14 @@ export default class Player extends Emitter {
             }
             this.clearCheckHeartTimeout();
             this.clearCheckLoadingTimeout();
+            this.clearStatsInterval();
             this.playing = false;
             this.loading = false;
             this.recording = false;
 
             if (this.video) {
                 this.video.resetInit();
-                this.video.pause();
+                this.video.pause(true);
             }
             // release lock
             this.releaseWakeLock();
@@ -673,6 +677,12 @@ export default class Player extends Emitter {
         }, this._opt.heartTimeout * 1000)
     }
 
+    checkStatsInterval() {
+        this._checkStatsInterval = setInterval(() => {
+            this.updateStats();
+        }, 1000)
+    }
+
     //
     clearCheckHeartTimeout() {
         if (this._checkHeartTimeout) {
@@ -695,6 +705,13 @@ export default class Player extends Emitter {
         if (this._checkLoadingTimeout) {
             clearTimeout(this._checkLoadingTimeout);
             this._checkLoadingTimeout = null;
+        }
+    }
+
+    clearStatsInterval() {
+        if (this._checkStatsInterval) {
+            clearInterval(this._checkStatsInterval);
+            this._checkStatsInterval = null;
         }
     }
 

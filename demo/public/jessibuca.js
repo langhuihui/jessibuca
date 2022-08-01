@@ -1457,13 +1457,17 @@
 	    }, 100);
 	  }
 
-	  pause() {
+	  pause(isNow) {
 	    // 预防
 	    // https://developer.chrome.com/blog/play-request-was-interrupted/
 	    // http://alonesuperman.com/?p=23
-	    setTimeout(() => {
-	      this.$videoElement.pause();
-	    }, 100);
+	    if (isNow) {
+	      this.$videoElement && this.$videoElement.pause();
+	    } else {
+	      setTimeout(() => {
+	        this.$videoElement && this.$videoElement.pause();
+	      }, 100);
+	    }
 	  }
 
 	  clearView() {}
@@ -9636,7 +9640,7 @@
 
 	}
 
-	var css_248z = ".jessibuca-container{position:relative;width:100%;height:100%;overflow:hidden}.jessibuca-container.jessibuca-fullscreen-web{position:fixed;z-index:9999;left:0;top:0;right:0;bottom:0;width:100vw!important;height:100vh!important;background:#000}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInN0eWxlLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEscUJBQ0UsaUJBQWtCLENBQ2xCLFVBQVcsQ0FDWCxXQUFZLENBQ1osZUFBa0IsQ0FDbEIsOENBQ0UsY0FBZSxDQUNmLFlBQWEsQ0FDYixNQUFPLENBQ1AsS0FBTSxDQUNOLE9BQVEsQ0FDUixRQUFTLENBQ1QscUJBQXVCLENBQ3ZCLHNCQUF3QixDQUN4QixlQUFrQiIsImZpbGUiOiJzdHlsZS5zY3NzIiwic291cmNlc0NvbnRlbnQiOlsiLmplc3NpYnVjYS1jb250YWluZXIge1xuICBwb3NpdGlvbjogcmVsYXRpdmU7XG4gIHdpZHRoOiAxMDAlO1xuICBoZWlnaHQ6IDEwMCU7XG4gIG92ZXJmbG93OiBoaWRkZW47IH1cbiAgLmplc3NpYnVjYS1jb250YWluZXIuamVzc2lidWNhLWZ1bGxzY3JlZW4td2ViIHtcbiAgICBwb3NpdGlvbjogZml4ZWQ7XG4gICAgei1pbmRleDogOTk5OTtcbiAgICBsZWZ0OiAwO1xuICAgIHRvcDogMDtcbiAgICByaWdodDogMDtcbiAgICBib3R0b206IDA7XG4gICAgd2lkdGg6IDEwMHZ3ICFpbXBvcnRhbnQ7XG4gICAgaGVpZ2h0OiAxMDB2aCAhaW1wb3J0YW50O1xuICAgIGJhY2tncm91bmQ6ICMwMDA7IH1cbiJdfQ== */";
+	var css_248z = ".jessibuca-container{position:relative;display:block;width:100%;height:100%;overflow:hidden}.jessibuca-container.jessibuca-fullscreen-web{position:fixed;z-index:9999;left:0;top:0;right:0;bottom:0;width:100vw!important;height:100vh!important;background:#000}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInN0eWxlLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEscUJBQ0UsaUJBQWtCLENBQ2xCLGFBQWMsQ0FDZCxVQUFXLENBQ1gsV0FBWSxDQUNaLGVBQWtCLENBQ2xCLDhDQUNFLGNBQWUsQ0FDZixZQUFhLENBQ2IsTUFBTyxDQUNQLEtBQU0sQ0FDTixPQUFRLENBQ1IsUUFBUyxDQUNULHFCQUF1QixDQUN2QixzQkFBd0IsQ0FDeEIsZUFBa0IiLCJmaWxlIjoic3R5bGUuc2NzcyIsInNvdXJjZXNDb250ZW50IjpbIi5qZXNzaWJ1Y2EtY29udGFpbmVyIHtcbiAgcG9zaXRpb246IHJlbGF0aXZlO1xuICBkaXNwbGF5OiBibG9jaztcbiAgd2lkdGg6IDEwMCU7XG4gIGhlaWdodDogMTAwJTtcbiAgb3ZlcmZsb3c6IGhpZGRlbjsgfVxuICAuamVzc2lidWNhLWNvbnRhaW5lci5qZXNzaWJ1Y2EtZnVsbHNjcmVlbi13ZWIge1xuICAgIHBvc2l0aW9uOiBmaXhlZDtcbiAgICB6LWluZGV4OiA5OTk5O1xuICAgIGxlZnQ6IDA7XG4gICAgdG9wOiAwO1xuICAgIHJpZ2h0OiAwO1xuICAgIGJvdHRvbTogMDtcbiAgICB3aWR0aDogMTAwdncgIWltcG9ydGFudDtcbiAgICBoZWlnaHQ6IDEwMHZoICFpbXBvcnRhbnQ7XG4gICAgYmFja2dyb3VuZDogIzAwMDsgfVxuIl19 */";
 	styleInject(css_248z);
 
 	var observer = (player => {
@@ -11346,7 +11350,8 @@
 	    this._hasLoaded = false; //
 
 	    this._checkHeartTimeout = null;
-	    this._checkLoadingTimeout = null; //
+	    this._checkLoadingTimeout = null;
+	    this._checkStatsInterval = null; //
 
 	    this._startBpsTime = null;
 	    this._isPlayingBeforePageHidden = false;
@@ -11480,7 +11485,8 @@
 	    }
 
 	    this.clearCheckHeartTimeout();
-	    this.clearCheckLoadingTimeout(); //
+	    this.clearCheckLoadingTimeout();
+	    this.clearStatsInterval(); //
 
 	    this.releaseWakeLock();
 	    this.keepScreenOn = null; // reset stats
@@ -11756,6 +11762,7 @@
 	          this._times.streamResponse = now(); //
 
 	          this.video.play();
+	          this.checkStatsInterval();
 	        });
 	      }).catch(e => {
 	        reject(e);
@@ -11818,13 +11825,14 @@
 
 	      this.clearCheckHeartTimeout();
 	      this.clearCheckLoadingTimeout();
+	      this.clearStatsInterval();
 	      this.playing = false;
 	      this.loading = false;
 	      this.recording = false;
 
 	      if (this.video) {
 	        this.video.resetInit();
-	        this.video.pause();
+	        this.video.pause(true);
 	      } // release lock
 
 
@@ -11932,6 +11940,12 @@
 	        this.emit(EVENTS.delayTimeout);
 	      });
 	    }, this._opt.heartTimeout * 1000);
+	  }
+
+	  checkStatsInterval() {
+	    this._checkStatsInterval = setInterval(() => {
+	      this.updateStats();
+	    }, 1000);
 	  } //
 
 
@@ -11956,6 +11970,13 @@
 	    if (this._checkLoadingTimeout) {
 	      clearTimeout(this._checkLoadingTimeout);
 	      this._checkLoadingTimeout = null;
+	    }
+	  }
+
+	  clearStatsInterval() {
+	    if (this._checkStatsInterval) {
+	      clearInterval(this._checkStatsInterval);
+	      this._checkStatsInterval = null;
 	    }
 	  }
 
@@ -12067,6 +12088,11 @@
 
 	    if (!$container) {
 	      throw new Error('Jessibuca need container option');
+	    } // check container node name
+
+
+	    if ($container.nodeName === 'CANVAS' || $container.nodeName === 'VIDEO') {
+	      throw new Error(`Jessibuca container type can not be ${$container.nodeName} type`);
 	    }
 
 	    $container.classList.add('jessibuca-container');

@@ -73,13 +73,17 @@ export default class VideoLoader extends CommonLoader {
 
     }
 
-    pause() {
+    pause(isNow) {
         // 预防
         // https://developer.chrome.com/blog/play-request-was-interrupted/
         // http://alonesuperman.com/?p=23
-        setTimeout(() => {
-            this.$videoElement.pause();
-        }, 100)
+        if (isNow) {
+            this.$videoElement && this.$videoElement.pause();
+        } else {
+            setTimeout(() => {
+                this.$videoElement && this.$videoElement.pause();
+            }, 100)
+        }
     }
 
     clearView() {
