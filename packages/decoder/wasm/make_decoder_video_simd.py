@@ -15,12 +15,14 @@ sargs = {
     'ERROR_ON_UNDEFINED_SYMBOLS': 0,
     'DISABLE_EXCEPTION_CATCHING': 1,
     'INVOKE_RUN':0,
-    'USE_PTHREADS':  0
+    'USE_PTHREADS': 0,
+    'MODULARIZE' : 1,
+    'EXPORT_ES6' : 1
 }
 emcc_args = [
     # '-m32',
     # '-fPIC',
-    # '-Oz',
+    '-O3',
     '--memory-init-file', '0',
     # '--closure', '1',
     # '--llvm-lto','1',
