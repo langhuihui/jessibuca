@@ -20,6 +20,9 @@ export default class MseDecoder extends Emitter {
         this.mediaSourceOpen = false;
         this.bufferList = [];
         this.dropping = false;
+        this.mediaSourceAppendBufferError = false;
+        this.mediaSourceAppendBufferFull = false;
+        this.mediaSourceLocked = false;
         this.mediaSourceObjectURL = window.URL.createObjectURL(this.mediaSource);
         this.player.video.$videoElement.src = this.mediaSourceObjectURL;
         const {
@@ -51,12 +54,16 @@ export default class MseDecoder extends Emitter {
         this.sequenceNumber = 0;
         this.cacheTrack = null;
         this.timeInit = false;
+        this.mediaSourceAppendBufferError = false;
+        this.mediaSourceAppendBufferFull = false;
+        this.mediaSourceLocked = false;
         if (this.mediaSourceObjectURL) {
             window.URL.revokeObjectURL(this.mediaSourceObjectURL);
             this.mediaSourceObjectURL = null;
         }
         this.off();
         this.player.debug.log('MediaSource', 'destroy')
+        this.player = null;
     }
 
     get state() {
@@ -110,10 +117,13 @@ export default class MseDecoder extends Emitter {
         }
     }
 
-    _doDecode() {
+    _doAppendBuffer() {
         const bufferItem = this.bufferList.shift();
         if (bufferItem) {
-            this._decodeVideo(bufferItem.payload, bufferItem.ts, bufferItem.isIframe);
+            if (this.mediaSourceAppendBufferError || this.mediaSourceAppendBufferFull) {
+                return;
+            }
+            this.appendBuffer(bufferItem);
         }
     }
 
@@ -245,40 +255,61 @@ export default class MseDecoder extends Emitter {
         } else {
             if (this.sourceBuffer && this.sourceBuffer.updating === true) {
                 this.player.emit(EVENTS.mseSourceBufferBusy);
+                this.bufferList.push(buffer);
                 return;
             }
         }
 
         if (!this.isStateOpen) {
             debug.warn('MediaSource', 'appendBuffer this.state is not open ,is ', this.state);
+            this.bufferList.push(buffer);
             return;
         }
 
+        if (this.mediaSourceLocked) {
+            this.bufferList.push(buffer);
+            return;
+        }
 
         if (this.sourceBuffer === null && this.mediaSource.sourceBuffers.length === 0) {
             this.sourceBuffer = this.mediaSource.addSourceBuffer(MP4_CODECS.avc);
             proxy(this.sourceBuffer, 'error', (error) => {
                 this.player.emit(EVENTS.mseSourceBufferError, error);
             })
+            proxy(this.sourceBuffer, 'updateend', () => {
+                // debug.log('MediaSource', 'this.sourceBuffer updateend');
+                this.mediaSourceLocked = false;
+                this._doAppendBuffer();
+            })
         }
 
-        if (this.sourceBuffer.updating === false) {
+        if (this.mediaSourceAppendBufferError || this.mediaSourceAppendBufferFull) {
+            debug.warn('MediaSource', `this.mediaSourceAppendBufferError is ${this.mediaSourceAppendBufferError}, this.mediaSourceAppendBufferFull is ${this.mediaSourceAppendBufferFull}`);
+            return;
+        }
+
+        if (this.sourceBuffer && this.sourceBuffer.updating === false ) {
             if (this.sourceBuffer.appendBuffer) {
                 try {
+                    this.mediaSourceFree = true;
                     this.sourceBuffer.appendBuffer(buffer);
                 } catch (e) {
-                    debug.warn('MediaSource', 'this.sourceBuffer.appendBuffer()', e);
+                    debug.warn('MediaSource', 'this.sourceBuffer.appendBuffer()', e.code, e);
                     if (e.code === 22) {
+                        // QuotaExceededError
                         // The SourceBuffer is full, and cannot free space to append additional buffers
                         this.stop();
-                        this.emit(EVENTS_ERROR.mediaSourceFull);
+                        this.mediaSourceAppendBufferFull = true;
+                        this.emit(EVENTS_ERROR.mediaSourceFull)
                     } else if (e.code === 11) {
                         //     Failed to execute 'appendBuffer' on 'SourceBuffer': The HTMLMediaElement.error attribute is not null.
                         this.stop();
-                        this.emit(EVENTS_ERROR.mediaSourceAppendBufferError)
+                        this.mediaSourceAppendBufferError = true;
+                        this.emit(EVENTS_ERROR.mediaSourceAppendBufferError);
+                        this.player.video.play();
                     } else {
-                        //todo
                         debug.error('MediaSource', 'appendBuffer error', e)
+                        this.player.emit(EVENTS.mseSourceBufferError, e);
                     }
                 }
 
@@ -295,10 +326,10 @@ export default class MseDecoder extends Emitter {
 
     }
 
-    dropSourceBuffer(flag) {
-        const video = this.player.video;
-        const $video = video.$videoElement;
-        this.dropping = flag;
+    dropSourceBuffer(isDropping) {
+        const $video = this.$videoElement;
+        this.dropping = isDropping;
+        // console.log('$video.buffered.length', $video.buffered.length, '$video.buffered.end(0)', $video.buffered.end(0), '$video.currentTime', $video.currentTime)
         if ($video.buffered.length > 0) {
             if ($video.buffered.end(0) - $video.currentTime > 1) {
                 $video.currentTime = $video.buffered.end(0);
@@ -341,7 +372,7 @@ export default class MseDecoder extends Emitter {
 
     removeSourceBuffer() {
         if (!this.isStateClosed) {
-            if (this.mediaSource) {
+            if (this.mediaSource && this.sourceBuffer) {
                 try {
                     this.mediaSource.removeSourceBuffer(this.sourceBuffer);
                 } catch (e) {

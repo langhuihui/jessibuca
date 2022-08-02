@@ -235,6 +235,7 @@
 	  fetchError: "fetchError",
 	  websocketError: 'websocketError',
 	  webcodecsH265NotSupport: 'webcodecsH265NotSupport',
+	  webcodecsDecodeError: 'webcodecsDecodeError',
 	  mediaSourceH265NotSupport: 'mediaSourceH265NotSupport',
 	  wasmDecodeError: 'wasmDecodeError',
 	  mediaSourceFull: 'mediaSourceFull',
@@ -335,13 +336,11 @@
 	    };
 
 	    this.error = function (name) {
-	      if (master._opt.debug) {
-	        for (var _len3 = arguments.length, args = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-	          args[_key3 - 1] = arguments[_key3];
-	        }
-
-	        console.error(`Jessibuca: [${name}]`, ...args);
+	      for (var _len3 = arguments.length, args = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+	        args[_key3 - 1] = arguments[_key3];
 	      }
+
+	      console.error(`Jessibuca: [${name}]`, ...args);
 	    };
 	  }
 
@@ -8319,7 +8318,7 @@
 
 	      this.recorder = RecordRTC_1(stream, options);
 	    } catch (e) {
-	      debug.error('Recorder', e);
+	      debug.error('Recorder', 'startRecord error', e);
 	      this.emit(EVENTS.recordCreateError);
 	    }
 
@@ -8906,6 +8905,7 @@
 	  destroy() {
 	    super.destroy();
 	    this.player.debug.log('M7sDemux', 'destroy');
+	    this.player = null;
 	  }
 
 	  dispatch(data) {
@@ -8945,6 +8945,8 @@
 	            if (payload.byteLength > 0) {
 	              this._doDecode(payload, type, ts, isIframe);
 	            }
+	          } else {
+	            this.player.debug.warn('M7sDemux', 'dispatch', 'dv byteLength is', dv.byteLength);
 	          }
 	        }
 
@@ -9045,7 +9047,7 @@
 	  }
 
 	  handleError(error) {
-	    this.player.debug.log('Webcodecs', 'VideoDecoder handleError', error);
+	    this.player.debug.error('Webcodecs', 'VideoDecoder handleError', error);
 	  }
 
 	  decodeVideo(payload, ts, isIframe) {
@@ -10834,6 +10836,9 @@
 	    this.mediaSourceOpen = false;
 	    this.bufferList = [];
 	    this.dropping = false;
+	    this.mediaSourceAppendBufferError = false;
+	    this.mediaSourceAppendBufferFull = false;
+	    this.mediaSourceLocked = false;
 	    this.mediaSourceObjectURL = window.URL.createObjectURL(this.mediaSource);
 	    this.player.video.$videoElement.src = this.mediaSourceObjectURL;
 	    const {
@@ -10863,6 +10868,9 @@
 	    this.sequenceNumber = 0;
 	    this.cacheTrack = null;
 	    this.timeInit = false;
+	    this.mediaSourceAppendBufferError = false;
+	    this.mediaSourceAppendBufferFull = false;
+	    this.mediaSourceLocked = false;
 
 	    if (this.mediaSourceObjectURL) {
 	      window.URL.revokeObjectURL(this.mediaSourceObjectURL);
@@ -10871,6 +10879,7 @@
 
 	    this.off();
 	    this.player.debug.log('MediaSource', 'destroy');
+	    this.player = null;
 	  }
 
 	  get state() {
@@ -10925,11 +10934,15 @@
 	    }
 	  }
 
-	  _doDecode() {
+	  _doAppendBuffer() {
 	    const bufferItem = this.bufferList.shift();
 
 	    if (bufferItem) {
-	      this._decodeVideo(bufferItem.payload, bufferItem.ts, bufferItem.isIframe);
+	      if (this.mediaSourceAppendBufferError || this.mediaSourceAppendBufferFull) {
+	        return;
+	      }
+
+	      this.appendBuffer(bufferItem);
 	    }
 	  }
 
@@ -11061,43 +11074,72 @@
 	    if (this.isStateClosed) {
 	      debug.warn('MediaSource', 'mediaSource is not attached to video or mediaSource is closed');
 	      this.player.emit(EVENTS.mseSourceBufferError, 'mediaSource is not attached to video or mediaSource is closed');
+	      return;
 	    } else if (this.isStateEnded) {
 	      debug.warn('MediaSource', 'mediaSource is closed');
 	      this.player.emit(EVENTS.mseSourceBufferError, 'mediaSource is closed');
+	      return;
 	    } else {
 	      if (this.sourceBuffer && this.sourceBuffer.updating === true) {
-	        this.player.emit(EVENTS.mseSourceBufferBusy); // this.dropSourceBuffer(false);
+	        this.player.emit(EVENTS.mseSourceBufferBusy);
+	        this.bufferList.push(buffer);
+	        return;
 	      }
 	    }
 
 	    if (!this.isStateOpen) {
 	      debug.warn('MediaSource', 'appendBuffer this.state is not open ,is ', this.state);
+	      this.bufferList.push(buffer);
 	      return;
 	    }
 
-	    if (this.sourceBuffer === null) {
+	    if (this.mediaSourceLocked) {
+	      this.bufferList.push(buffer);
+	      return;
+	    }
+
+	    if (this.sourceBuffer === null && this.mediaSource.sourceBuffers.length === 0) {
 	      this.sourceBuffer = this.mediaSource.addSourceBuffer(MP4_CODECS.avc);
 	      proxy(this.sourceBuffer, 'error', error => {
 	        this.player.emit(EVENTS.mseSourceBufferError, error);
 	      });
+	      proxy(this.sourceBuffer, 'updateend', () => {
+	        // debug.log('MediaSource', 'this.sourceBuffer updateend');
+	        this.mediaSourceLocked = false;
+
+	        this._doAppendBuffer();
+	      });
 	    }
 
-	    if (this.sourceBuffer.updating === false) {
+	    if (this.mediaSourceAppendBufferError || this.mediaSourceAppendBufferFull) {
+	      debug.warn('MediaSource', `this.mediaSourceAppendBufferError is ${this.mediaSourceAppendBufferError}, this.mediaSourceAppendBufferFull is ${this.mediaSourceAppendBufferFull}`);
+	      return;
+	    }
+
+	    if (this.sourceBuffer && this.sourceBuffer.updating === false) {
 	      if (this.sourceBuffer.appendBuffer) {
 	        try {
+	          this.mediaSourceFree = true;
 	          this.sourceBuffer.appendBuffer(buffer);
 	        } catch (e) {
-	          debug.warn('MediaSource', 'this.sourceBuffer.appendBuffer()', e);
+	          debug.warn('MediaSource', 'this.sourceBuffer.appendBuffer()', e.code, e);
 
 	          if (e.code === 22) {
+	            // QuotaExceededError
 	            // The SourceBuffer is full, and cannot free space to append additional buffers
 	            this.stop();
+	            this.mediaSourceAppendBufferFull = true;
 	            this.emit(EVENTS_ERROR.mediaSourceFull);
 	          } else if (e.code === 11) {
 	            //     Failed to execute 'appendBuffer' on 'SourceBuffer': The HTMLMediaElement.error attribute is not null.
 	            this.stop();
+	            this.mediaSourceAppendBufferError = true;
 	            this.emit(EVENTS_ERROR.mediaSourceAppendBufferError);
-	          } else ;
+	            this.player.video.play();
+	          } else {
+	            debug.error('MediaSource', 'appendBuffer error', e);
+	            this.player.emit(EVENTS.mseSourceBufferError, e);
+	          }
 	        }
 	      } else {
 	        debug.warn('MediaSource', 'this.sourceBuffer.appendBuffer function is undefined');
@@ -11111,10 +11153,9 @@
 	    this.endOfStream();
 	  }
 
-	  dropSourceBuffer(flag) {
-	    const video = this.player.video;
-	    const $video = video.$videoElement;
-	    this.dropping = flag;
+	  dropSourceBuffer(isDropping) {
+	    const $video = this.$videoElement;
+	    this.dropping = isDropping; // console.log('$video.buffered.length', $video.buffered.length, '$video.buffered.end(0)', $video.buffered.end(0), '$video.currentTime', $video.currentTime)
 
 	    if ($video.buffered.length > 0) {
 	      if ($video.buffered.end(0) - $video.currentTime > 1) {
@@ -11130,6 +11171,8 @@
 	      } catch (e) {
 	        this.player.debug.warn('MediaSource', 'removeBuffer() error', e);
 	      }
+	    } else {
+	      this.player.debug.warn('MediaSource', 'removeBuffer() this.isStateOpen is', this.isStateOpen, 'this.sourceBuffer.updating', this.sourceBuffer.updating);
 	    }
 	  }
 
@@ -11147,13 +11190,14 @@
 	    if (this.isStateOpen) {
 	      if (this.sourceBuffer) {
 	        this.sourceBuffer.abort();
+	        this.sourceBuffer = null;
 	      }
 	    }
 	  }
 
 	  removeSourceBuffer() {
 	    if (!this.isStateClosed) {
-	      if (this.mediaSource) {
+	      if (this.mediaSource && this.sourceBuffer) {
 	        try {
 	          this.mediaSource.removeSourceBuffer(this.sourceBuffer);
 	        } catch (e) {
@@ -11634,6 +11678,10 @@
 
 	  get videoTimestamp() {
 	    return this._videoTimestamp;
+	  }
+
+	  get isDebug() {
+	    return this._opt.debug === true;
 	  }
 	  /**
 	   *
@@ -12176,7 +12224,7 @@
 
 	  setDebug(value) {
 	    this.player.updateOption({
-	      isDebug: !!value
+	      debug: !!value
 	    });
 	  }
 	  /**
