@@ -13,9 +13,7 @@ export default class Debug {
         };
 
         this.error = (name, ...args) => {
-            if (master._opt.debug) {
-                console.error(`Jessibuca: [${name}]`, ...args);
-            }
+            console.error(`Jessibuca: [${name}]`, ...args);
         };
     }
 }

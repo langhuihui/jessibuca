@@ -11,6 +11,7 @@ export default class M7sLoader extends CommonLoader {
     destroy() {
         super.destroy();
         this.player.debug.log('M7sDemux', 'destroy')
+        this.player = null;
     }
 
     dispatch(data) {
@@ -44,6 +45,8 @@ export default class M7sLoader extends CommonLoader {
                         if (payload.byteLength > 0) {
                             this._doDecode(payload, type, ts, isIframe)
                         }
+                    } else {
+                        this.player.debug.warn('M7sDemux', 'dispatch', 'dv byteLength is', dv.byteLength)
                     }
                 }
                 break;

@@ -73,7 +73,7 @@ export default class WebcodecsDecoder extends Emitter {
     }
 
     handleError(error) {
-        this.player.debug.log('Webcodecs', 'VideoDecoder handleError', error)
+        this.player.debug.error('Webcodecs', 'VideoDecoder handleError', error)
     }
 
     decodeVideo(payload, ts, isIframe) {

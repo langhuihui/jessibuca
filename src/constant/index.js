@@ -180,10 +180,11 @@ export const EVENTS_ERROR = {
     fetchError: "fetchError",
     websocketError: 'websocketError',
     webcodecsH265NotSupport: 'webcodecsH265NotSupport',
+    webcodecsDecodeError: 'webcodecsDecodeError',
     mediaSourceH265NotSupport: 'mediaSourceH265NotSupport',
     wasmDecodeError: 'wasmDecodeError',
     mediaSourceFull: 'mediaSourceFull',
-    mediaSourceAppendBufferError: 'mediaSourceAppendBufferError'
+    mediaSourceAppendBufferError: 'mediaSourceAppendBufferError',
 }
 
 

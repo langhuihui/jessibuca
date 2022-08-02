@@ -63,7 +63,7 @@ export default class RecordRTCLoader extends Emitter {
             }
             this.recorder = RecordRTC(stream, options);
         } catch (e) {
-            debug.error('Recorder', e);
+            debug.error('Recorder', 'startRecord error', e);
             this.emit(EVENTS.recordCreateError);
         }
         if (this.recorder) {

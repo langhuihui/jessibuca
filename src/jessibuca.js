@@ -106,7 +106,7 @@ class Jessibuca extends Emitter {
      */
     setDebug(value) {
         this.player.updateOption({
-            isDebug: !!value
+            debug: !!value
         })
     }
 

@@ -372,6 +372,10 @@ export default class Player extends Emitter {
         return this._videoTimestamp;
     }
 
+    get isDebug(){
+        return this._opt.debug === true;
+    }
+
 
     /**
      *

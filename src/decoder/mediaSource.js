@@ -237,13 +237,15 @@ export default class MseDecoder extends Emitter {
         if (this.isStateClosed) {
             debug.warn('MediaSource', 'mediaSource is not attached to video or mediaSource is closed');
             this.player.emit(EVENTS.mseSourceBufferError, 'mediaSource is not attached to video or mediaSource is closed')
+            return;
         } else if (this.isStateEnded) {
             debug.warn('MediaSource', 'mediaSource is closed');
             this.player.emit(EVENTS.mseSourceBufferError, 'mediaSource is closed')
+            return;
         } else {
             if (this.sourceBuffer && this.sourceBuffer.updating === true) {
                 this.player.emit(EVENTS.mseSourceBufferBusy);
-                // this.dropSourceBuffer(false);
+                return;
             }
         }
 
@@ -253,7 +255,7 @@ export default class MseDecoder extends Emitter {
         }
 
 
-        if (this.sourceBuffer === null) {
+        if (this.sourceBuffer === null && this.mediaSource.sourceBuffers.length === 0) {
             this.sourceBuffer = this.mediaSource.addSourceBuffer(MP4_CODECS.avc);
             proxy(this.sourceBuffer, 'error', (error) => {
                 this.player.emit(EVENTS.mseSourceBufferError, error);
@@ -276,6 +278,7 @@ export default class MseDecoder extends Emitter {
                         this.emit(EVENTS_ERROR.mediaSourceAppendBufferError)
                     } else {
                         //todo
+                        debug.error('MediaSource', 'appendBuffer error', e)
                     }
                 }
 
@@ -312,6 +315,8 @@ export default class MseDecoder extends Emitter {
             } catch (e) {
                 this.player.debug.warn('MediaSource', 'removeBuffer() error', e);
             }
+        } else {
+            this.player.debug.warn('MediaSource', 'removeBuffer() this.isStateOpen is', this.isStateOpen, 'this.sourceBuffer.updating', this.sourceBuffer.updating);
         }
     }
 
@@ -329,6 +334,7 @@ export default class MseDecoder extends Emitter {
         if (this.isStateOpen) {
             if (this.sourceBuffer) {
                 this.sourceBuffer.abort();
+                this.sourceBuffer = null;
             }
         }
     }
