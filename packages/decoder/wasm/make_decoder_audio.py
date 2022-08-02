@@ -27,7 +27,7 @@ emcc_args = [
     # '--llvm-lto','1',
     '--bind',
     '-I.', '-Ithirdparty/ffmpeg/include',
-    '--post-js','./post.js'
+    # '--post-js','./post.js'
 ]+["-s "+k+"="+str(v) for k, v in sargs.items()]
 
 print ('building...')

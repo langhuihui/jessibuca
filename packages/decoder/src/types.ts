@@ -43,7 +43,7 @@ export interface VideoPacket {
 export interface VideoFrame {
 
     pixelType: PixelType,
-    datas: ArrayBuffer[],
+    datas: BufferSource[],
     width: number,
     height: number,
     pts: number
@@ -83,7 +83,7 @@ export type SampleType = 'f32-planar';
 export interface AudioDecoderConfig  {
 
     audioType: AuidoType,
-    extraData?: SourceBuffer,
+    extraData?: BufferSource,
     outSampleType?: SampleType,
     outSampleNum?:number //按指定采样点个数输出，内部会做队列缓存
 }
@@ -102,14 +102,14 @@ export interface AudioCodecInfo {
 
 export interface AudioPacket {
 
-    data: SourceBuffer,
+    data: BufferSource,
     pts: number
 
 }
 
 export interface AudioFrame {
 
-    datas: ArrayBuffer[],
+    datas: BufferSource[],
     sampleNum: number,
     channles: number,
     pts: number,
@@ -125,6 +125,7 @@ export const enum AudioDecoderEvent {
 export interface AudioDecoderInterface {
 
     state(): DecoderState;
+    initialize():Promise<void>;
     configure(config: AudioDecoderConfig): void;
     decode(packet: AudioPacket): void;
     flush(): void;

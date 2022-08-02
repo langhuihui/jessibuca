@@ -164,7 +164,7 @@ void VideoDecoder::clear() {
 void VideoDecoder::setCodec(u32 vtype, string extra)
 {
 
-    printf("Use NOT-SIMD Decoder, VideoDecoder::setCodec vtype %d, extra %d \n", vtype, extra.length());
+    printf("Use Video NOT-SIMD Decoder, VideoDecoder::setCodec vtype %d, extra %d \n", vtype, extra.length());
     
   
     clear();

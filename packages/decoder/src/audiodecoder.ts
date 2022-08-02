@@ -4,7 +4,7 @@ import { AudioSoftDecoder } from './audiosoftdecoder';
 
 export class AudioDecoder extends EventEmitter implements AudioDecoderInterface {
 
-    decoder: AudioSoftDecoder;
+    decoder: AudioDecoderInterface;
 
     constructor(adtype: AudioDecoderType) {
 
@@ -39,6 +39,13 @@ export class AudioDecoder extends EventEmitter implements AudioDecoderInterface 
         })
 
     };
+
+    
+    initialize(): Promise<void>{ 
+
+        return this.decoder.initialize();
+    }
+
 
     state(): DecoderState {
 

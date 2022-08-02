@@ -246,7 +246,7 @@ void VideoDecoder::parseHEVCExtraData(u8* extradata, int extradatalen) {
 void VideoDecoder::setCodec(u32 vtype, string extra)
 {
 
-    printf("Use SIMD Decoder, VideoDecoder::setCodec vtype %d, extra %d \n", vtype, extra.length());
+    printf("Use Video SIMD Decoder, VideoDecoder::setCodec vtype %d, extra %d \n", vtype, extra.length());
     
     clear();
 

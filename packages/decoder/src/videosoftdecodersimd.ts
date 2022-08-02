@@ -30,20 +30,23 @@ export class VideoSoftDecoderSIMD extends EventEmitter implements VideoDecoderIn
             opts.print = ((text: string) => console.log(text));
             opts.printErr = ((text: string) => console.log(`[JS] ERROR: ${text}`));
             opts.onAbort = (() => console.log("[JS] FATAL: WASM ABORTED"));
-            opts.postRUun = (() => {
+            opts.postRun = ((m: WASMModule) => {
 
-                if (this.module) {
-
-                    this.decoder = new this.module.VideoDecoder(this);
-                }
+                this.module = m;
+         
+                this.decoder = new this.module.VideoDecoder(this);
 
                 this.decoderState = 'initialized';
+
+                console.log(`video soft decoder simd initialize success`);
 
                 resolve();
 
             })
     
-            this.module = CreateModule(opts);
+            CreateModule(opts);
+
+      
 
         })
 
@@ -64,7 +67,23 @@ export class VideoSoftDecoderSIMD extends EventEmitter implements VideoDecoderIn
         }
 
         this.config = config;
-        this.decoder.setCodec(this.config.videoType, this.config.extraData);
+        let vtype = 0;
+
+        switch (this.config.videoType) {
+
+            case 'avc':
+                vtype = 1;
+                break;
+
+            case 'hevc':
+                vtype = 2;
+                break;     
+
+             default:
+                break;   
+        }
+
+        this.decoder.setCodec(vtype, this.config.extraData);
         this.decoderState = 'configured';
 
     }

@@ -16,7 +16,7 @@ extern "C"
 }
 
 enum AudioType {
-    
+
     Audio_PCMA  = 0x1,
     Audio_PCMU  = 0x2,
     Audio_AAC   = 0x4
@@ -177,7 +177,7 @@ AudioDecoder::~AudioDecoder() {
 
 void AudioDecoder::setCodec(u32 atype, string extra)
 {
-    
+    printf("Use Audio Decoder, AudioDecoder::setCodec atype %d, extra %d \n", atype, extra.length());
     clear();
  
     switch (atype)

@@ -32,7 +32,7 @@ emcc_args = [
 
 print ('building...')
 
-emcc_args = ['thirdparty/ffmpeg/lib/libavcodec.a','thirdparty/ffmpeg/lib/libavutil.a','thirdparty/ffmpeg/lib/libswresample.a']+emcc_args
+emcc_args = ['thirdparty/ffmpeg/lib/libavcodec.a','thirdparty/ffmpeg/lib/libavutil.a']+emcc_args
 
 os.system('emcc ./src/decodervideo/decodervideo.cpp ' +
           (' '.join(emcc_args)) + ' -o '+args['-o']+'.js')

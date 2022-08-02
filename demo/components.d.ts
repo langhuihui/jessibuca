@@ -16,7 +16,6 @@ declare module '@vue/runtime-core' {
     NP: typeof import('naive-ui')['NP']
     NRow: typeof import('naive-ui')['NRow']
     NSpace: typeof import('naive-ui')['NSpace']
-    NSpance: typeof import('naive-ui')['NSpance']
     NStatistic: typeof import('naive-ui')['NStatistic']
     NTabPane: typeof import('naive-ui')['NTabPane']
     NTabs: typeof import('naive-ui')['NTabs']

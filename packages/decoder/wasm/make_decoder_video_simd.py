@@ -28,13 +28,13 @@ emcc_args = [
     # '--llvm-lto','1',
     '--bind',
     '-I.', '-Ithirdparty/android', '-Ithirdparty/android/include', '-Ithirdparty/ffmpeg/include',
-    '--post-js','./post.js',
+    # '--post-js','./post.js',
     '-msimd128'
 ]+["-s "+k+"="+str(v) for k, v in sargs.items()]
 
 print ('building...')
 
-emcc_args = ['thirdparty/android/lib/libavcdec-simd.a', 'thirdparty/android/lib/libhevcdec-simd.a', 'thirdparty/ffmpeg/lib/libavcodec.a','thirdparty/ffmpeg/lib/libavutil.a','thirdparty/ffmpeg/lib/libswresample.a']+emcc_args
+emcc_args = ['thirdparty/android/lib/libavcdec-simd.a', 'thirdparty/android/lib/libhevcdec-simd.a']+emcc_args
 
 os.system('emcc ./src/decodervideo_simd/decodervideo.cpp ./thirdparty/android/log.c ./thirdparty/android/deocdervideo.cpp ./thirdparty/android/decoderavc.cpp ./thirdparty/android/decoderhevc.cpp ' +
           (' '.join(emcc_args)) + ' -o '+args['-o']+'.js')

@@ -35,20 +35,20 @@ export class AudioSoftDecoder extends EventEmitter implements AudioDecoderInterf
             opts.print = ((text: string) => console.log(text));
             opts.printErr = ((text: string) => console.log(`[JS] ERROR: ${text}`));
             opts.onAbort = (() => console.log("[JS] FATAL: WASM ABORTED"));
-            opts.postRUun = (() => {
+            opts.postRun = ((m: WASMModule) => {
 
-                if (this.module) {
-
-                    this.decoder = new this.module.AudioDecoder(this);
-                }
-
+                this.module = m;
+         
+                this.decoder = new this.module.AudioDecoder(this);
                 this.decoderState = 'initialized';
 
                 resolve();
 
             })
+
+            console.log(`audio soft decoder initialize call`);
     
-            this.module = CreateModule(opts);
+            CreateModule(opts);
 
         })
 
@@ -69,7 +69,29 @@ export class AudioSoftDecoder extends EventEmitter implements AudioDecoderInterf
         }
 
         this.config = config;
-        this.decoder.setCodec(this.config.audioType, this.config.extraData);
+
+
+        let atype = 0;
+
+        switch (this.config.audioType) {
+
+            case 'pcma':
+                atype = 1;
+                break;
+
+            case 'pcmu':
+                atype = 2;
+                break;     
+                
+            case 'aac':
+                atype = 4;
+                break;  
+
+             default:
+                break;   
+        }
+
+        this.decoder.setCodec(atype, this.config.extraData);
         this.decoderState = 'configured';
 
     }

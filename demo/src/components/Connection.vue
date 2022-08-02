@@ -5,6 +5,8 @@ import { MessageReactive, UploadCustomRequestOptions, UploadFileInfo, useMessage
 import { ConnectionState, ConnectionEvent } from '../../../packages/conn/src/types';
 import { TimelineDataSeries, TimelineGraphView } from 'webrtc-internals';
 import { ArchiveOutline as ArchiveIcon } from '@vicons/ionicons5';
+import {VideoDecoder, AudioDecoder } from '../../../packages/decoder/src'
+import { VideoDecoderConfig, AudioDecoderConfig } from '../../../packages/decoder/src/types'
 
 const message = useMessage();
 const url = ref("");
@@ -15,6 +17,7 @@ const removeMessage = () => {
     messageReactive = null;
   }
 };
+
 const conn = new Connection();
 conn.on(ConnectionEvent.Connecting, () => {
   messageReactive = message.loading(ConnectionEvent.Connecting);
@@ -102,6 +105,40 @@ function onRemove(options: { file: UploadFileInfo, fileList: Array<UploadFileInf
   conn.close();
   return true;
 }
+
+
+//测试编解码模块
+let vextra = new Uint8Array([1, 2, 3, 4]);
+let vconfig: VideoDecoderConfig = {
+    videoType: 'avc',
+    extraData: vextra,
+    avc:{
+        format: "avc"
+    },
+    outPixelType: 'I420',
+}
+
+let videoSoftDecoder = new VideoDecoder('software-decoder');
+await videoSoftDecoder.initialize();
+videoSoftDecoder.configure(vconfig);
+
+let videoSoftSimdDecoder = new VideoDecoder('software-simd-decoder');
+await videoSoftSimdDecoder.initialize();
+videoSoftSimdDecoder.configure(vconfig);
+
+let aextra = new Uint8Array([1, 2, 3, 4]);
+let aconfig: AudioDecoderConfig = {
+    audioType: 'aac',
+    extraData: aextra,
+    outSampleType: 'f32-planar',
+    outSampleNum:1024 
+}
+
+let audioSoftDecoder = new AudioDecoder('software-decoder');
+await audioSoftDecoder.initialize();
+audioSoftDecoder.configure(aconfig);
+
+
 </script>
 
 <template>
