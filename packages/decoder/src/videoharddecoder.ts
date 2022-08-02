@@ -2,7 +2,6 @@ import EventEmitter from 'eventemitter3';
 import {DecoderState, VideoDecoderConfig, VideoPacket, VideoDecoderInterface} from './types'
 
 
-
 export class VideoHardDecoder extends EventEmitter implements VideoDecoderInterface {
 
     decoderState: DecoderState;

@@ -1,6 +1,4 @@
 
-import {EmscriptenModule} from '@types/emscripten'
-
 class VideoDecoder {
 
     constructor(val: any);

@@ -5,7 +5,7 @@ export type DecoderState = 'uninitialized' | 'initialized' | 'configured' | 'clo
 export type VideoDecoderType = 'software-decoder' | 'software-simd-decoder' | 'hardware-decoder' | 'auto';
 
 //视频压缩格式
-export type  VideoType = 'avc' | 'hevc';
+export type  VideoType = 'avc' | 'hevc' | 'unknow';
 
 //像素格式
 export type PixelType = 'I420';
@@ -43,7 +43,7 @@ export interface VideoPacket {
 export interface VideoFrame {
 
     pixelType: PixelType,
-    datas: BufferSource[],
+    datas: ArrayBuffer[],
     width: number,
     height: number,
     pts: number
@@ -76,7 +76,7 @@ export interface VideoDecoderInterface  {
 export type AudioDecoderType = 'software-decoder' | 'auto';
 
 //声音压缩格式
-export type AuidoType  =  'pcma' | 'pcmu' | 'aac';
+export type AuidoType  =  'pcma' | 'pcmu' | 'aac' | 'unknow';
 
 export type SampleType = 'f32-planar';
 
@@ -92,7 +92,7 @@ export interface AudioCodecInfo {
 
     audioType: AuidoType,
     sampleRate: number,
-    channles: number,
+    channels: number,
     depth: number,
     aac?: {
         profile: number
@@ -109,7 +109,7 @@ export interface AudioPacket {
 
 export interface AudioFrame {
 
-    datas: SourceBuffer[],
+    datas: ArrayBuffer[],
     sampleNum: number,
     channles: number,
     pts: number,

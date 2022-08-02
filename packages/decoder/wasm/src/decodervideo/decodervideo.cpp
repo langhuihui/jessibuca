@@ -226,17 +226,7 @@ void  VideoDecoder::decode(string input, u32 isKeyFrame, u32 timestamp)
     u32 bufferLen = input.length();
     u8* buffer = (u8*)input.data();
 
-    // struct timeval tv;
-    // gettimeofday(&tv,NULL);
-    // int start = tv.tv_sec*1000 + tv.tv_usec/1000;
-
-
     Decoder::decode(buffer, bufferLen, timestamp);
-
-    // gettimeofday(&tv,NULL);
-    // int stop = tv.tv_sec*1000 + tv.tv_usec/1000;
-
-    //  printf("decoder frame  decodetime %d\n", stop - start);
 
 }
 
@@ -303,9 +293,9 @@ void  VideoDecoder::frameReady(u32 timestamp) {
 
   //  printf("C yuv[0-5] %d  %d  %d  %d %d %d \n", mYUV[0], mYUV[1], mYUV[2], mYUV[3], mYUV[4], mYUV[5]);
 
-   // printf("yuvData jspts %d ffpts %d pictype %d \n", timestamp, (u32)mFrame->pts, mFrame->pict_type);
+    u8* yuvArray[3] = {mYUV, mYUV + size, mYUV + size*5/4};
 
-    mJsObject.call<void>("yuvData", (u32)mYUV, (u32)mFrame->pts);
+    mJsObject.call<void>("yuvData", (u32)yuvArray, (u32)mFrame->pts);
 
 }
 

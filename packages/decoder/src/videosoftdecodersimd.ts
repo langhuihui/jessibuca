@@ -1,9 +1,9 @@
 import EventEmitter from 'eventemitter3';
 import { DecoderState, VideoDecoderConfig, VideoPacket, VideoDecoderInterface, VideoCodecInfo, VideoDecoderEvent, VideoFrame } from './types';
-import CreateModule, { WASMModule } from '../wasm/out/decodervideo';
+import CreateModule, { WASMModule } from '../wasm/out/decodervideo_simd';
 
 
-export class VideoSoftDecoder extends EventEmitter implements VideoDecoderInterface {
+export class VideoSoftDecoderSIMD extends EventEmitter implements VideoDecoderInterface {
 
     decoderState: DecoderState;
     decoder: any;

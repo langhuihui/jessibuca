@@ -16,11 +16,10 @@ extern "C"
 }
 
 enum AudioType {
-
-    Audio_PCM   = 0x1,
-    Audio_PCMA  = 0x2,
-    Audio_PCMU  = 0x4,
-    Audio_AAC   = 0x8
+    
+    Audio_PCMA  = 0x1,
+    Audio_PCMU  = 0x2,
+    Audio_AAC   = 0x4
 
 };
 

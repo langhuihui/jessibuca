@@ -423,9 +423,11 @@ void VideoDecoder::videoInfo(int width, int height){
 
 void VideoDecoder::yuvData(unsigned char* yuv, unsigned int timestamp) {
 
+    int size = mVideoWith*mVideoHeight;
+    unsigned char* yuvArray[3] = {yuv, yuv + size, yuv + size*5/4};
 
     // printf("yuv %d %d %d %d %d %d\n", yuv[0], yuv[1], yuv[2], yuv[mVideoWith*mVideoHeight/2], yuv[mVideoWith*mVideoHeight/2+1], yuv[mVideoWith*mVideoHeight/2+2]);
-    mJsObject.call<void>("yuvData", (u32)yuv, timestamp);
+    mJsObject.call<void>("yuvData", (u32)yuvArray, timestamp);
 
 }
 
