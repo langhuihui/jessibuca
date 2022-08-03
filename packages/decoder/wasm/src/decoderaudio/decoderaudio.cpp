@@ -3,6 +3,7 @@
 #include <sys/time.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 
 using namespace emscripten;
 using namespace std;
@@ -132,7 +133,9 @@ public:
 
     void decode(string input, u32 timestamp);
     virtual void clear();
-    virtual void frameReady(u32 timestamp) ;
+    virtual void frameReady(u32 timestamp);
+
+    void reportError(const char* format, ...);
 
 };
 
@@ -174,6 +177,19 @@ AudioDecoder::~AudioDecoder() {
     clear();
 
     printf("AudioDecoder dealloc \n");
+}
+
+void AudioDecoder::reportError(const char* format, ...) {
+
+    va_list ap;
+  
+    va_start(ap, format);
+    char* buf = nullptr;
+    vasprintf(&buf, format, ap); 
+    va_end(ap);
+
+
+    mJsObject.call<void>("errorInfo", string(buf));
 }
 
 void AudioDecoder::setCodec(string atype, string extra)

@@ -4,7 +4,7 @@ import { AudioSoftDecoder } from './audiosoftdecoder';
 
 export class AudioDecoder extends EventEmitter implements AudioDecoderInterface {
 
-    decoder: AudioDecoderInterface;
+    decoder: AudioSoftDecoder;
 
     constructor(adtype: AudioDecoderType) {
 
@@ -23,17 +23,17 @@ export class AudioDecoder extends EventEmitter implements AudioDecoderInterface 
             throw new Error(`Audio type [${adtype}] not support`);
         }
 
-        this.on(AudioDecoderEvent.AudioCodecInfo, (codecinfo: AudioCodecInfo) => {
+        this.decoder.on(AudioDecoderEvent.AudioCodecInfo, (codecinfo: AudioCodecInfo) => {
 
             this.emit(AudioDecoderEvent.AudioCodecInfo, codecinfo);
         })
 
-        this.on(AudioDecoderEvent.AudioFrame, (AudioFrame: AudioFrame) => {
+        this.decoder.on(AudioDecoderEvent.AudioFrame, (AudioFrame: AudioFrame) => {
 
             this.emit(AudioDecoderEvent.AudioFrame, AudioFrame);
         })
 
-        this.on(AudioDecoderEvent.Error, (error: ErrorInfo) => {
+        this.decoder.on(AudioDecoderEvent.Error, (error: ErrorInfo) => {
 
             this.emit(AudioDecoderEvent.Error, error);
         })

@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "decoderavc.h"
 #include "decoderhevc.h"
@@ -65,7 +66,6 @@ public:
     virtual void videoInfo(int width, int height);
     virtual void yuvData(unsigned char* yuv, unsigned int timestamp);
      
-
     void clear();
 
     void parseAVCExtraData(u8* extradata, int extradatalen);
@@ -73,6 +73,8 @@ public:
     bool convertAnnexB(u8* data, int datalen);
     int addCodecInfo(u8* data, int datalen);
     void copyCodecInfo(u8* data, int datalen);
+
+    void reportError(const char* format, ...);
 
 };
 
@@ -120,6 +122,19 @@ void VideoDecoder::clear() {
     }
 }
 
+void VideoDecoder::reportError(const char* format, ...) {
+
+    va_list ap;
+  
+    va_start(ap, format);
+    char* buf = nullptr;
+    vasprintf(&buf, format, ap); 
+    va_end(ap);
+
+
+    mJsObject.call<void>("errorInfo", string(buf));
+}
+
 void VideoDecoder::copyCodecInfo(u8* data, int datalen) {
 
     if (mCodecInfoLen + datalen > mCodecInfoMaxLen) {
@@ -153,7 +168,16 @@ void VideoDecoder::parseAVCExtraData(u8* extradata, int extradatalen) {
 
     u8 startCode[4] = {0, 0, 0, 1};
 
+    
     int offset = 5;
+
+    if (offset > extradatalen) {
+
+        printf("extradata len:%d too short, can not parse \n", extradatalen);
+        reportError("Parse AVC ExtraData error, because it's too short, len:%d, at least 5 bytes", extradatalen);
+        return;
+    }
+
     int spsnum = extradata[offset]&0x1F;
     offset += 1;
 
@@ -193,6 +217,13 @@ void VideoDecoder::parseHEVCExtraData(u8* extradata, int extradatalen) {
     u8 startCode[4] = {0, 0, 0, 1};
 
     int offset = 22;
+
+    if (offset > extradatalen) {
+
+        printf("extradata len:%d too short, can not parse \n", extradatalen);
+            reportError("Parse Hevc ExtraData error, because it's too short, len:%d, at least 22 bytes", extradatalen);
+        return;
+    }
 
     int nalsnum = extradata[offset];
     offset++;

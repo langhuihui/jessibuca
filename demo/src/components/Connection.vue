@@ -6,7 +6,7 @@ import { ConnectionState, ConnectionEvent } from '../../../packages/conn/src/typ
 import { TimelineDataSeries, TimelineGraphView } from 'webrtc-internals';
 import { ArchiveOutline as ArchiveIcon } from '@vicons/ionicons5';
 import {VideoDecoder, AudioDecoder } from '../../../packages/decoder/src'
-import { VideoDecoderConfig, AudioDecoderConfig } from '../../../packages/decoder/src/types'
+import { VideoDecoderConfig, AudioDecoderConfig, VideoDecoderEvent, ErrorInfo } from '../../../packages/decoder/src/types'
 
 const message = useMessage();
 const url = ref("");
@@ -123,8 +123,16 @@ await videoSoftDecoder.initialize();
 videoSoftDecoder.configure(vconfig);
 
 let videoSoftSimdDecoder = new VideoDecoder('software-simd-decoder');
+videoSoftSimdDecoder.on(VideoDecoderEvent.Error, (err: ErrorInfo) => {
+
+    console.log(`recv decoder error ${err.errMsg}`);
+
+});
 await videoSoftSimdDecoder.initialize();
 videoSoftSimdDecoder.configure(vconfig);
+
+
+console.log(`videoSoftSimdDecoder reg event suc`)
 
 let aextra = new Uint8Array([1, 2, 3, 4]);
 let aconfig: AudioDecoderConfig = {

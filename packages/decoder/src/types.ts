@@ -50,7 +50,7 @@ export interface VideoFrame {
 
 export interface ErrorInfo {
 
-    error:string
+    errMsg:string
 }
 
 export const enum VideoDecoderEvent {

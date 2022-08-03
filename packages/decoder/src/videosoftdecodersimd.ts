@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3';
-import { DecoderState, VideoDecoderConfig, VideoPacket, VideoDecoderInterface, VideoCodecInfo, VideoDecoderEvent, VideoFrame } from './types';
+import { DecoderState, VideoDecoderConfig, VideoPacket, VideoDecoderInterface, VideoCodecInfo, VideoDecoderEvent, VideoFrame, ErrorInfo } from './types';
 import CreateModule, { WASMModule } from '../wasm/out/decodervideo_simd';
 
 
@@ -159,6 +159,15 @@ export class VideoSoftDecoderSIMD extends EventEmitter implements VideoDecoderIn
 
         this.emit(VideoDecoderEvent.VideoFrame, vFrame);
 
+    }
+
+    errorInfo(errormsg: string): void {
+
+        let err : ErrorInfo = {
+            errMsg: errormsg
+        };
+
+        this.emit(VideoDecoderEvent.Error, err);
     }
 
 };

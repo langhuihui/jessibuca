@@ -3,6 +3,7 @@
 #include <sys/time.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 
 using namespace emscripten;
 using namespace std;
@@ -141,6 +142,8 @@ public:
     virtual void clear();
     virtual void frameReady(u32 timestamp);
 
+    void reportError(const char* format, ...);
+
 };
 
 
@@ -167,6 +170,19 @@ void VideoDecoder::clear() {
     mVideoHeight = 0;
 
     Decoder::clear();
+}
+
+void VideoDecoder::reportError(const char* format, ...) {
+
+    va_list ap;
+  
+    va_start(ap, format);
+    char* buf = nullptr;
+    vasprintf(&buf, format, ap); 
+    va_end(ap);
+
+
+    mJsObject.call<void>("errorInfo", string(buf));
 }
 
 void VideoDecoder::setCodec(string vtype, string format, string extra)

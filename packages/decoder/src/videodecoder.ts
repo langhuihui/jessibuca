@@ -6,7 +6,7 @@ import { VideoSoftDecoderSIMD } from './videosoftdecodersimd';
 
 export class VideoDecoder extends EventEmitter implements VideoDecoderInterface {
 
-    decoder: VideoDecoderInterface;
+    decoder: VideoSoftDecoder | VideoSoftDecoderSIMD | VideoHardDecoder;
 
     constructor(vdtype: VideoDecoderType) {
 
@@ -33,17 +33,17 @@ export class VideoDecoder extends EventEmitter implements VideoDecoderInterface 
             throw new Error(`video type [${vdtype}] not support`);
         }
 
-        this.on(VideoDecoderEvent.VideoCodecInfo, (codecinfo: VideoCodecInfo) => {
+        this.decoder.on(VideoDecoderEvent.VideoCodecInfo, (codecinfo: VideoCodecInfo) => {
 
             this.emit(VideoDecoderEvent.VideoCodecInfo, codecinfo);
         })
 
-        this.on(VideoDecoderEvent.VideoFrame, (videoFrame: VideoFrame) => {
+        this.decoder.on(VideoDecoderEvent.VideoFrame, (videoFrame: VideoFrame) => {
 
             this.emit(VideoDecoderEvent.VideoFrame, videoFrame);
         })
 
-        this.on(VideoDecoderEvent.Error, (error: ErrorInfo) => {
+        this.decoder.on(VideoDecoderEvent.Error, (error: ErrorInfo) => {
 
             this.emit(VideoDecoderEvent.Error, error);
         })

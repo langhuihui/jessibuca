@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3';
-import { DecoderState, AudioDecoderConfig, AudioPacket, AudioDecoderInterface, AudioCodecInfo, AudioDecoderEvent, AudioFrame, AuidoType } from './types';
+import { DecoderState, AudioDecoderConfig, AudioPacket, AudioDecoderInterface, AudioCodecInfo, AudioDecoderEvent, AudioFrame, ErrorInfo } from './types';
 import CreateModule, { WASMModule } from '../wasm/out/decoderaudio';
 import SpliteBuffer from './splitebuffer';
 
@@ -183,5 +183,15 @@ export class AudioSoftDecoder extends EventEmitter implements AudioDecoderInterf
          });
 
     }
+
+    errorInfo(errormsg: string): void {
+
+        let err : ErrorInfo = {
+            errMsg: errormsg
+        };
+
+        this.emit(AudioDecoderEvent.Error, err);
+    }
+
 
 };
