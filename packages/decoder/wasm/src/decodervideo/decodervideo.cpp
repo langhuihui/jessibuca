@@ -21,7 +21,14 @@ enum VideoType {
 
     Video_H264 = 0x01,
     Video_H265 = 0x02
+};
 
+enum VideoFormatType {
+
+    Format_AVC = 0x01,
+    Format_AVC_AnnexB = 0x02,
+    Format_HVCC = 0x03,
+    Format_HEVC_AnnexB = 0x04
 };
 
 
@@ -118,6 +125,7 @@ public:
     int mVideoWith = 0;
     int mVideoHeight = 0;
     int mVType = 0;
+    int mVFomat = 0;
 
     u8* mYUV = nullptr;
 
@@ -126,7 +134,7 @@ public:
     VideoDecoder(val&& v);
     virtual ~VideoDecoder();
 
-    void setCodec(u32 vtype, string extra);
+    void setCodec(string vtype, string format, string extra);
 
     void decode(string input, u32 isKeyFrame, u32 timestamp);
 
@@ -161,39 +169,61 @@ void VideoDecoder::clear() {
     Decoder::clear();
 }
 
-void VideoDecoder::setCodec(u32 vtype, string extra)
+void VideoDecoder::setCodec(string vtype, string format, string extra)
 {
-
-    printf("Use Video NOT-SIMD Decoder, VideoDecoder::setCodec vtype %d, extra %d \n", vtype, extra.length());
+    printf("Use Video NOT-SIMD Decoder, VideoDecoder::setCodec vtype %s, format %s, extra %d \n", vtype.c_str(), format.c_str(), extra.length());
     
-  
     clear();
 
-    enum AVCodecID codecID;
+    int videotype = 0;
+    int videoformat = 0;
+    enum AVCodecID codecID = AV_CODEC_ID_NONE;
 
-    switch (vtype)
-    {
-        case Video_H264: {
+    if (vtype.compare("avc") == 0) {
 
-            codecID = AV_CODEC_ID_H264;
+        videotype = Video_H264;
+        codecID = AV_CODEC_ID_H264;
 
-            break;
-        }
+        if (format.compare("avc") == 0) {
 
-        case Video_H265: {
+            videoformat = Format_AVC;
 
-            codecID = AV_CODEC_ID_HEVC;
-            break;
-        }
-    
-        default: {
+        } else if (format.compare("annexb") == 0) {
 
+            videoformat = Format_AVC_AnnexB;
+        } else {
+
+            printf("Video Decoder not support vtype %s, format %s \n", vtype.c_str(), format.c_str());
             return;
         }
+
+    } else if (vtype.compare("hevc") == 0) {
+
+        videotype = Video_H265;
+        codecID = AV_CODEC_ID_HEVC;
+
+        if (format.compare("hvcc") == 0) {
+
+            videoformat = Format_HVCC;
+
+        } else if (format.compare("annexb") == 0) {
+
+            videoformat = Format_HEVC_AnnexB;
+        }
+         else {
+
+            printf("Video Decoder not support vtype %s, format %s \n", vtype.c_str(), format.c_str());
+             return;
+        }
+
+    } else {
+
+        printf("Video Decoder not support vtype %s, format %s \n", vtype.c_str(), format.c_str());
+        return;
     }
 
-    mVType = vtype;
-
+    mVType = videotype;
+    mVFomat = videoformat;
 
     Decoder::initCodec(codecID);
     
@@ -237,7 +267,7 @@ void  VideoDecoder::frameReady(u32 timestamp) {
         mVideoWith = mFrame->width;
         mVideoHeight = mFrame->height;
 
-        mJsObject.call<void>("videoInfo", mVType, mVideoWith, mVideoHeight);
+        mJsObject.call<void>("videoInfo", mVideoWith, mVideoHeight);
 
         if (mYUV) {
             free(mYUV);
@@ -262,7 +292,6 @@ void  VideoDecoder::frameReady(u32 timestamp) {
 
             memcpy(mYUV + i*mVideoWith, mFrame->data[0] + i*mFrame->linesize[0], mVideoWith);
         }
-
     }
 
     if (halfw == mFrame->linesize[1]) {

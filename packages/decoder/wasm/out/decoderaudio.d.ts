@@ -1,7 +1,7 @@
 class AudioDecoder {
       
     constructor(val: any);
-    setCodec(atype: number, extra: string): void;
+    setCodec(atype: string, extra: string): void;
     decode(input: string, timestamp: number): void;
     clear(): void;
 };

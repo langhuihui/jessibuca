@@ -2,7 +2,7 @@
 class VideoDecoder {
 
     constructor(val: any);
-    setCodec(vtype: number, extra: string): void;
+    setCodec(vtype: string, format: string, extra: string): void;
     decode(input: string, isKeyFrame: string, timestamp: number): void;
     clear(): void;
     delete(): void;

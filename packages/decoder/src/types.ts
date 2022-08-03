@@ -27,7 +27,6 @@ export type VideoDecoderConfig = {
 
 export interface VideoCodecInfo {
 
-    videoType: VideoType,
     width: number,
     height: number
 };
@@ -90,7 +89,6 @@ export interface AudioDecoderConfig  {
 
 export interface AudioCodecInfo {
 
-    audioType: AuidoType,
     sampleRate: number,
     channels: number,
     depth: number,

@@ -3,7 +3,6 @@ import { DecoderState, AudioDecoderConfig, AudioPacket, AudioDecoderInterface, A
 import CreateModule, { WASMModule } from '../wasm/out/decoderaudio';
 import SpliteBuffer from './splitebuffer';
 
-
 export class AudioSoftDecoder extends EventEmitter implements AudioDecoderInterface {
 
     decoderState: DecoderState;
@@ -23,7 +22,6 @@ export class AudioSoftDecoder extends EventEmitter implements AudioDecoderInterf
         this.sampleRate = 0;
         this.channels = 0;
         this.useSpliteBuffer = false;
-
 
     };
 
@@ -70,28 +68,7 @@ export class AudioSoftDecoder extends EventEmitter implements AudioDecoderInterf
 
         this.config = config;
 
-
-        let atype = 0;
-
-        switch (this.config.audioType) {
-
-            case 'pcma':
-                atype = 1;
-                break;
-
-            case 'pcmu':
-                atype = 2;
-                break;     
-                
-            case 'aac':
-                atype = 4;
-                break;  
-
-             default:
-                break;   
-        }
-
-        this.decoder.setCodec(atype, this.config.extraData);
+        this.decoder.setCodec(this.config.audioType, this.config.extraData);
         this.decoderState = 'configured';
 
     }
@@ -139,36 +116,12 @@ export class AudioSoftDecoder extends EventEmitter implements AudioDecoderInterf
     }
 
     // wasm callback function
-    audioInfo(atype: number, sampleRate: number, channels: number): void {
+    audioInfo(sampleRate: number, channels: number): void {
 
         this.sampleRate = sampleRate;
         this.channels = channels;
 
-        let audioType: AuidoType = 'unknow';
-        switch (atype) {
-
-            case 1: {
-
-                audioType = 'pcma';
-                break;
-            }
-   
-            case 2: {
-                
-                audioType = 'pcmu';
-                break;
-            }
-
-            case 4: {
-                
-                audioType = 'aac';
-                break;
-            }
-
-        }
-
         let audioCodeInfo : AudioCodecInfo = {
-            audioType,
             sampleRate,
             channels,
             depth:16

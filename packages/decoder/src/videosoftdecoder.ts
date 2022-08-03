@@ -66,24 +66,7 @@ export class VideoSoftDecoder extends EventEmitter implements VideoDecoderInterf
 
         this.config = config;
 
-
-        let vtype = 0;
-
-        switch (this.config.videoType) {
-
-            case 'avc':
-                vtype = 1;
-                break;
-
-            case 'hevc':
-                vtype = 2;
-                break;     
-
-             default:
-                break;   
-        }
-
-        this.decoder.setCodec(vtype, this.config.extraData);
+        this.decoder.setCodec(this.config.videoType, this.config?.avc?.format ?? this.config?.hevc?.format ?? '' , this.config.extraData);
         this.decoderState = 'configured';
 
     }
@@ -131,13 +114,12 @@ export class VideoSoftDecoder extends EventEmitter implements VideoDecoderInterf
     }
 
     // wasm callback function
-    videoInfo(vtype: number, width: number, height: number): void {
+    videoInfo(width: number, height: number): void {
 
         this.width = width;
         this.height = height;
 
         let videoCodeInfo : VideoCodecInfo = {
-            videoType: vtype === 1 ? 'avc' : 'hevc',
             width: width,
             height: height
         };

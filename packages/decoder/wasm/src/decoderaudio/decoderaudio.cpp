@@ -17,9 +17,10 @@ extern "C"
 
 enum AudioType {
 
-    Audio_PCMA  = 0x1,
-    Audio_PCMU  = 0x2,
-    Audio_AAC   = 0x4
+    Audio_Unknow = 0,
+    Audio_PCMA   = 0x1,
+    Audio_PCMU   = 0x2,
+    Audio_AAC    = 0x4
 
 };
 
@@ -119,7 +120,7 @@ public:
     u8 *mOutBuffer[2];
 
     bool mNotifyAudioParam;
-    int mAVType;
+    int mAType;
 
 
 public:
@@ -127,7 +128,7 @@ public:
     AudioDecoder(val&& v);
     virtual ~AudioDecoder();
 
-    void setCodec(u32 atype, string extra);
+    void setCodec(string atype, string extra);
 
     void decode(string input, u32 timestamp);
     virtual void clear();
@@ -175,12 +176,34 @@ AudioDecoder::~AudioDecoder() {
     printf("AudioDecoder dealloc \n");
 }
 
-void AudioDecoder::setCodec(u32 atype, string extra)
+void AudioDecoder::setCodec(string atype, string extra)
 {
-    printf("Use Audio Decoder, AudioDecoder::setCodec atype %d, extra %d \n", atype, extra.length());
+    printf("Use Audio Decoder, AudioDecoder::setCodec atype %s, extra %d \n", atype.c_str(), extra.length());
+    
     clear();
+
+    int audiotype = Audio_Unknow;
+
+    if (atype.compare("aac") == 0) {
+
+        audiotype = Audio_AAC;
+
+    } else if (atype.compare("pcmu") == 0) {
+
+        audiotype = Audio_PCMA;
+
+    } else if (atype.compare("pcma") == 0) {
+
+        audiotype = Audio_PCMU;
+
+    } else {
+
+         printf("AudioDecoder not support type %s \n", atype.c_str());
+        return;
+    }
+
  
-    switch (atype)
+    switch (audiotype)
     {
         case Audio_AAC: {
 
@@ -219,7 +242,7 @@ void AudioDecoder::setCodec(u32 atype, string extra)
         }
     }
 
-    mAVType = atype;
+    mAType = audiotype;
 
     mInit = true;
 }
@@ -243,10 +266,9 @@ void  AudioDecoder::frameReady(u32 timestamp)  {
 
     auto nb_samples = mFrame->nb_samples;
 
-
     if (!mNotifyAudioParam) {
 
-        mJsObject.call<void>("audioInfo", mAVType, mFrame->sample_rate, mFrame->channels);
+        mJsObject.call<void>("audioInfo", mFrame->sample_rate, mFrame->channels);
         mNotifyAudioParam = true;
     }
 

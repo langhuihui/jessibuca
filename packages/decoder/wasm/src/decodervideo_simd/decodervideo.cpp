@@ -12,12 +12,6 @@ using namespace std;
 typedef unsigned char u8;
 typedef unsigned int u32;
 
-extern "C"
-{
-#include <libavcodec/avcodec.h>
-#include <libswresample/swresample.h>
-}
-
 
 //视频类型，全局统一定义，JS层也使用该定义
 enum VideoType {
@@ -27,6 +21,15 @@ enum VideoType {
 
 };
 
+enum VideoFormatType {
+
+    Format_AVC = 0x01,
+    Format_AVC_AnnexB = 0x02,
+    Format_HVCC = 0x03,
+    Format_HEVC_AnnexB = 0x04
+};
+
+
 
 class VideoDecoder : public DecoderVideoObserver {
 
@@ -35,17 +38,15 @@ public:
     int mVideoWith = 0;
     int mVideoHeight = 0;
     int mVType = 0;
+    int mVFormat = 0;
     DecoderVideo* mDecoderV;
 
 
     val mJsObject;
 
-    unsigned char* mSPS;
-    unsigned char* mPPS;
-    unsigned char* mVPS;
-    int mSPSLen;
-    int mPPSLen;
-    int mVPSLen;
+    unsigned char* mCodecInfo;
+    int mCodecInfoLen;
+    int mCodecInfoMaxLen;
 
     unsigned char* mBuf;
     int mBufMaxLen;
@@ -57,12 +58,13 @@ public:
     VideoDecoder(val&& v);
     virtual ~VideoDecoder();
 
-    void setCodec(u32 vtype, string extra);
+    void setCodec(string vtype, string format, string extra);
 
     void decode(string input, u32 isKeyFrame, u32 timestamp);
 
     virtual void videoInfo(int width, int height);
     virtual void yuvData(unsigned char* yuv, unsigned int timestamp);
+     
 
     void clear();
 
@@ -70,19 +72,18 @@ public:
     void parseHEVCExtraData(u8* extradata, int extradatalen);
     bool convertAnnexB(u8* data, int datalen);
     int addCodecInfo(u8* data, int datalen);
+    void copyCodecInfo(u8* data, int datalen);
 
 };
 
 
 VideoDecoder::VideoDecoder(val&& v) : mJsObject(move(v)) {
 
-    mSPS = NULL;
-    mPPS = NULL;
-    mVPS = NULL;
+    mCodecInfo = NULL;
+    mCodecInfoLen = 0;
+    mCodecInfoMaxLen = 0;
+
     mBuf = NULL;
-    mSPSLen = 0;
-    mPPSLen = 0;
-    mVPSLen = 0;
     mBufMaxLen = 0;
   
 }
@@ -105,22 +106,11 @@ void VideoDecoder::clear() {
         mDecoderV = nullptr;
     }
 
-    if (mSPS) {
-        free(mSPS);
-        mSPS = NULL;
-        mSPSLen = 0;
-    }
-
-    if (mPPS) {
-        free(mPPS);
-        mPPS = NULL;
-        mPPSLen = 0;
-    }
-
-    if (mVPS) {
-        free(mVPS);
-        mVPS = NULL;
-        mVPSLen = 0;
+    if (mCodecInfo) {
+        free(mCodecInfo);
+        mCodecInfo = NULL;
+        mCodecInfoLen = 0;
+        mCodecInfoMaxLen = 0;
     }
 
     if (mBuf) {
@@ -128,10 +118,40 @@ void VideoDecoder::clear() {
         mBuf = NULL;
         mBufMaxLen = 0;
     }
+}
+
+void VideoDecoder::copyCodecInfo(u8* data, int datalen) {
+
+    if (mCodecInfoLen + datalen > mCodecInfoMaxLen) {
+
+        if (mCodecInfoMaxLen == 0) {
+
+            mCodecInfoMaxLen =  (mCodecInfoLen + datalen) > 1024 ? (mCodecInfoLen + datalen) : 1024;
+            mCodecInfo = (u8*)malloc(mCodecInfoMaxLen);
+
+
+        } else {
+
+            mCodecInfoMaxLen = 2*(mCodecInfoLen + datalen);
+
+            u8* newBuffer = (u8*)malloc(mCodecInfoMaxLen);
+            memcpy(newBuffer, mCodecInfo, mCodecInfoLen);
+            free(mCodecInfo);
+
+            mCodecInfo = newBuffer;
+
+        }
+    }
+
+    memcpy(mCodecInfo + mCodecInfoLen, data, datalen);
+    mCodecInfoLen += datalen;
 
 }
 
+
 void VideoDecoder::parseAVCExtraData(u8* extradata, int extradatalen) {
+
+    u8 startCode[4] = {0, 0, 0, 1};
 
     int offset = 5;
     int spsnum = extradata[offset]&0x1F;
@@ -143,13 +163,11 @@ void VideoDecoder::parseAVCExtraData(u8* extradata, int extradatalen) {
     spslenptr[1] = extradata[offset];
     offset += 2;
 
-    mSPSLen = spslen + 4;
-    mSPS = (unsigned char*)malloc(mSPSLen);
-    mSPS[0] = 0;
-    mSPS[1] = 0;
-    mSPS[2] = 0;
-    mSPS[3] = 1;
-    memcpy(mSPS+4, &extradata[offset], spslen);
+    // copy sps
+    copyCodecInfo(startCode, 4);
+    copyCodecInfo(&extradata[offset], spslen);
+
+    printf("parse AVC sps len %d\n", spslen);
 
     offset += spslen;
 
@@ -162,17 +180,17 @@ void VideoDecoder::parseAVCExtraData(u8* extradata, int extradatalen) {
     ppslenptr[1] = extradata[offset];
     offset += 2;
 
-    mPPSLen = ppslen + 4;
-    mPPS = (unsigned char*)malloc(mPPSLen);
-    mPPS[0] = 0;
-    mPPS[1] = 0;
-    mPPS[2] = 0;
-    mPPS[3] = 1;
-    memcpy(mPPS+4, &extradata[offset], ppslen);
+    // copy pps
+    copyCodecInfo(startCode, 4);
+    copyCodecInfo(&extradata[offset], ppslen);
+
+     printf("parse AVC pps len %d\n", ppslen);
 
 }
 
 void VideoDecoder::parseHEVCExtraData(u8* extradata, int extradatalen) {
+
+    u8 startCode[4] = {0, 0, 0, 1};
 
     int offset = 22;
 
@@ -202,38 +220,13 @@ void VideoDecoder::parseHEVCExtraData(u8* extradata, int extradatalen) {
             onenallenptr[1] = extradata[offset];
             offset+=2;
 
-            if (naltype == 32) {
+            // copy vps, sps, pps
+            if (naltype == 32 || naltype == 33 || naltype == 34) {
 
-                mVPSLen = onenallen + 4;
-                mVPS = (unsigned char*)malloc(mVPSLen);
-                mVPS[0] = 0;
-                mVPS[1] = 0;
-                mVPS[2] = 0;
-                mVPS[3] = 1;
-                memcpy(mVPS+4, &extradata[offset], onenallen);
+                copyCodecInfo(startCode, 4);
+                copyCodecInfo(&extradata[offset], onenallen);
 
-            } else if (naltype == 33) {
-
-                mSPSLen = onenallen + 4;
-                mSPS = (unsigned char*)malloc(mSPSLen);
-                mSPS[0] = 0;
-                mSPS[1] = 0;
-                mSPS[2] = 0;
-                mSPS[3] = 1;
-                memcpy(mSPS+4, &extradata[offset], onenallen);
-
-            }
-            else if (naltype == 34) {
-
-                mPPSLen = onenallen + 4;
-                mPPS = (unsigned char*)malloc(mPPSLen);
-                mPPS[0] = 0;
-                mPPS[1] = 0;
-                mPPS[2] = 0;
-                mPPS[3] = 1;
-                memcpy(mPPS+4, &extradata[offset], onenallen);
-                
-            }
+            } 
 
             offset += onenallen;
 
@@ -243,38 +236,64 @@ void VideoDecoder::parseHEVCExtraData(u8* extradata, int extradatalen) {
 
 }
 
-void VideoDecoder::setCodec(u32 vtype, string extra)
+void VideoDecoder::setCodec(string vtype, string format, string extra)
 {
-
-    printf("Use Video SIMD Decoder, VideoDecoder::setCodec vtype %d, extra %d \n", vtype, extra.length());
+     printf("Use Video SIMD Decoder, VideoDecoder::setCodec vtype %s, format %s, extra %d \n", vtype.c_str(), format.c_str(), extra.length());
     
     clear();
 
-    switch (vtype)
-    {
-        case Video_H264: {
+    int videotype = 0;
+    int videoformat = 0;
 
+    if (vtype.compare("avc") == 0) {
+
+        videotype = Video_H264;
+
+        if (format.compare("avc") == 0) {
+
+            videoformat = Format_AVC;
             parseAVCExtraData((u8*)extra.data(), extra.length());
-            mDecoderV = new DecoderAVC(this);
 
+        } else if (format.compare("annexb") == 0) {
 
-            break;
-        }
+            videoformat = Format_AVC_AnnexB;
+        } else {
 
-        case Video_H265: {
-
-            parseHEVCExtraData((u8*)extra.data(), extra.length());
-            mDecoderV = new DecoderHEVC(this);
-            break;
-        }
-    
-        default: {
-
+            printf("Video Decoder not support vtype %s, format %s \n", vtype.c_str(), format.c_str());
             return;
         }
+
+        mDecoderV = new DecoderAVC(this);
+
+    } else if (vtype.compare("hevc") == 0) {
+
+        videotype = Video_H265;
+
+        if (format.compare("hvcc") == 0) {
+
+            videoformat = Format_HVCC;
+            parseHEVCExtraData((u8*)extra.data(), extra.length());
+
+        } else if (format.compare("annexb") == 0) {
+
+            videoformat = Format_HEVC_AnnexB;
+        }
+         else {
+
+            printf("Video Decoder not support vtype %s, format %s \n", vtype.c_str(), format.c_str());
+             return;
+        }
+
+         mDecoderV = new DecoderHEVC(this);
+
+    } else {
+
+        printf("Video Decoder not support vtype %s, format %s \n", vtype.c_str(), format.c_str());
+        return;
     }
 
-    mVType = vtype;
+    mVType = videotype;
+    mVFormat = videoformat;
 
     mDecoderV->init();
     
@@ -284,7 +303,7 @@ void VideoDecoder::setCodec(u32 vtype, string extra)
 bool VideoDecoder::convertAnnexB(u8* data, int datalen) {
 
     int offset = 0;
-    bool bf = false;
+    bool bf = false; //检测 帧里是否有codec 信息
 
     while(offset < datalen) {
 
@@ -345,16 +364,7 @@ bool VideoDecoder::convertAnnexB(u8* data, int datalen) {
 
 int VideoDecoder::addCodecInfo(u8* data, int datalen) {
 
-    int buflen = 0;
-
-    if (mVType == Video_H264) {
-
-        buflen = datalen + mSPSLen + mPPSLen;
-
-    } else {
-
-        buflen = datalen + mSPSLen + mPPSLen + mVPSLen;
-    }
+    int buflen = datalen + mCodecInfoLen;
 
     if (buflen > mBufMaxLen) {
 
@@ -366,20 +376,8 @@ int VideoDecoder::addCodecInfo(u8* data, int datalen) {
         mBufMaxLen = buflen;
     }
 
-
-    if (mVType == Video_H264) {
-
-        memcpy(mBuf, mSPS, mSPSLen);
-        memcpy(mBuf + mSPSLen, mPPS, mPPSLen);
-        memcpy(mBuf + mSPSLen + mPPSLen, data, datalen);
-
-    } else {
-
-        memcpy(mBuf, mVPS, mVPSLen);
-        memcpy(mBuf + mVPSLen, mSPS, mSPSLen);
-        memcpy(mBuf + mVPSLen + mSPSLen, mPPS, mPPSLen);
-        memcpy(mBuf + mVPSLen + mSPSLen + mPPSLen, data, datalen);
-    }
+    memcpy(mBuf, mCodecInfo, mCodecInfoLen);
+    memcpy(mBuf + mCodecInfoLen, data, datalen);
 
     return buflen;
 
@@ -387,7 +385,6 @@ int VideoDecoder::addCodecInfo(u8* data, int datalen) {
 
 void  VideoDecoder::decode(string input, u32 isKeyFrame, u32 timestamp)
 {
-
     if (!mInit) {
 
         printf("VideoDecoder has not Init when decode \n");
@@ -397,17 +394,24 @@ void  VideoDecoder::decode(string input, u32 isKeyFrame, u32 timestamp)
     u32 bufferLen = input.length();
     u8* buffer = (u8*)input.data();
 
-    bool bf = convertAnnexB(buffer, bufferLen);
+    if (mVFormat == Format_AVC_AnnexB || mVFormat == Format_HEVC_AnnexB) {
 
-    if (isKeyFrame && !bf) {
-
-        //给关键帧补齐sps/pps/vps信息
-        int len = addCodecInfo(buffer, bufferLen);
-        mDecoderV->decode(mBuf, len, timestamp);
+        mDecoderV->decode(buffer, bufferLen, timestamp);
 
     } else {
 
-        mDecoderV->decode(buffer, bufferLen, timestamp);
+        bool bf = convertAnnexB(buffer, bufferLen);
+
+        if (isKeyFrame && !bf) {
+
+            //给关键帧补齐sps/pps/vps信息
+            int len = addCodecInfo(buffer, bufferLen);
+            mDecoderV->decode(mBuf, len, timestamp);
+
+        } else {
+
+            mDecoderV->decode(buffer, bufferLen, timestamp);
+        }
 
     }
 
