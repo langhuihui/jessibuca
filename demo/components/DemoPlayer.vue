@@ -37,6 +37,7 @@
             <div class="input">
                 <div>输入URL：</div>
                 <input
+                    placeholder="支持ws-raw/ws-flv/http-flv协议"
                     type="input"
                     autocomplete="on"
                     ref="playUrl"
@@ -80,7 +81,7 @@
                         v-model="showBandwidth"
                         @change="restartPlay"
                     /><span>网速</span>
-                    <span v-if="performance">性能：{{ performance }}</span>
+                    <span v-if="fps">FPS：{{ fps }}</span>
                 </div>
             </div>
             <div class="input" v-if="loaded">
@@ -124,12 +125,13 @@ export default {
             playing: false,
             quieting: true,
             loaded: false, // mute
-            showOperateBtns: false,
-            showBandwidth: false,
+            showOperateBtns: true,
+            showBandwidth: true,
             hotKey: true,
             err: "",
             speed: 0,
             performance: "",
+            fps: '',
             volume: 1,
             rotate: 0,
             useWCS: false,
@@ -268,6 +270,7 @@ export default {
 
             jessibuca.on('stats', function (stats) {
                 console.log('stats', stats);
+                _this.fps = stats.fps;
             })
 
             jessibuca.on('kBps', function (kBps) {
@@ -378,7 +381,7 @@ export default {
     },
 };
 </script>
-<style>
+<style scoped>
 .root {
     display: flex;
     place-content: center;
@@ -443,6 +446,7 @@ export default {
     right: 10px;
     display: flex;
     place-content: center;
+    align-items: center;
     font-size: 12px;
 }
 
