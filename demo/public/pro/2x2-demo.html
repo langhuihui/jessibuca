@@ -162,7 +162,7 @@
 
         var jessibuca = new JessibucaPro({
             container: $container,
-            decoder: '/pro/decoder.js',
+            decoder: './decoder.js',
             videoBuffer: 0.2, // 缓存时长
             isResize: false,
             text: "",
@@ -176,10 +176,8 @@
                 audio: showOperateBtns,
             },
             watermarkConfig: {
-                image: {
-                    src: 'http://jessibuca.monibuca.com/jessibuca-logo.png',
-                    width: 40,
-                    height: 4408
+                text:{
+                    content:'jessibuca-pro'
                 },
                 right: 10,
                 top: 10

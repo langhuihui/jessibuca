@@ -81,7 +81,7 @@
                         v-model="showBandwidth"
                         @change="restartPlay"
                     /><span>网速</span>
-                    <span v-if="fps">FPS：{{ fps }}</span>
+                    <span v-if="fps" style="margin-left: 10px">FPS：{{ fps }}</span>
                 </div>
             </div>
             <div class="input" v-if="loaded">
