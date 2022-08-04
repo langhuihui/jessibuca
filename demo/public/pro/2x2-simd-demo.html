@@ -176,8 +176,8 @@
                 audio: showOperateBtns,
             },
             watermarkConfig: {
-                text:{
-                    content:'jessibuca-pro'
+                text: {
+                    content: 'jessibuca-pro'
                 },
                 right: 10,
                 top: 10
@@ -189,9 +189,14 @@
         // jessibuca.onPause = () => console.log('onPause');
         // jessibuca.onPlay = () => console.log('onPlay');
         // jessibuca.onMute = msg => console.log('onMute', msg);
-        jessibuca.on("fullscreen", function (flag) {
-            console.log('is fullscreen', id, flag)
+        // jessibuca.on("fullscreen", function (flag) {
+        //     console.log('is fullscreen', id, flag)
+        // })
+
+        jessibuca.on('videoInfo', (info) => {
+            console.log('videoInfo', info);
         })
+
         playList.push(jessibuca);
     }
 
