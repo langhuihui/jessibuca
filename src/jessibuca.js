@@ -354,6 +354,56 @@ class Jessibuca extends Emitter {
                 })
             })
 
+            this.player.once(EVENTS_ERROR.mediaSourceBufferListLarge, () => {
+                this.pause().then(() => {
+                    this.player.debug.log('Jessibuca', 'media source buffer list large');
+                    this._resetPlayer()
+                    this.play(url).then(() => {
+                        // resolve();
+                        this.player.debug.log('Jessibuca', 'media source buffer list large and reset player and play success')
+                    }).catch(() => {
+                        // reject();
+                        this.player.debug.warn('Jessibuca', 'media source buffer list large and reset player and play error')
+                    });
+                })
+            })
+
+            this.player.once(EVENTS_ERROR.mediaSourceAppendBufferEndTimeout, () => {
+                this.pause().then(() => {
+                    this.player.debug.log('Jessibuca', 'media source append buffer end timeout');
+                    this._resetPlayer()
+                    this.play(url).then(() => {
+                        // resolve();
+                        this.player.debug.log('Jessibuca', 'media source append buffer end timeout and reset player and play success')
+                    }).catch(() => {
+                        // reject();
+                        this.player.debug.warn('Jessibuca', 'media source append buffer end timeout and reset player and play error')
+                    });
+                })
+            })
+
+            this.player.once(EVENTS_ERROR.mseSourceBufferError, () => {
+                this.close().then(() => {
+                    this.player.debug.log('Jessibuca', 'mseSourceBufferError close success')
+                })
+            })
+
+            //
+            this.player.once(EVENTS_ERROR.webcodecsH265NotSupport, () => {
+                this.close().then(() => {
+                    if (this.player._opt.autoWasm) {
+                        this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play')
+                        this._resetPlayer({useWCS: false})
+                        this.play(url).then(() => {
+                            // resolve();
+                            this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play success')
+                        }).catch(() => {
+                            // reject();
+                            this.player.debug.warn('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play error')
+                        });
+                    }
+                });
+            })
             // 解码报错。
             this.player.once(EVENTS_ERROR.wasmDecodeError, () => {
                 if (this.player._opt.wasmDecodeErrorReplay) {

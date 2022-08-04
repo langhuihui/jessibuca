@@ -10,6 +10,8 @@ export const DEMUX_TYPE = {
     m7s: 'm7s'
 }
 
+export const MEDIA_SOURCE_UPDATE_END_TIMEOUT = 10 * 1000
+
 
 // default player options
 export const DEFAULT_PLAYER_OPTIONS = {
@@ -144,6 +146,7 @@ export const EVENTS = {
     mseSourceClose: 'mseSourceClose',
     mseSourceBufferError: 'mseSourceBufferError',
     mseSourceBufferBusy: 'mseSourceBufferBusy',
+    mseSourceBufferFull: 'mseSourceBufferFull',
     videoWaiting: 'videoWaiting',
     videoTimeUpdate: 'videoTimeUpdate',
     videoSyncAudio: 'videoSyncAudio',
@@ -182,9 +185,12 @@ export const EVENTS_ERROR = {
     webcodecsH265NotSupport: 'webcodecsH265NotSupport',
     webcodecsDecodeError: 'webcodecsDecodeError',
     mediaSourceH265NotSupport: 'mediaSourceH265NotSupport',
-    wasmDecodeError: 'wasmDecodeError',
-    mediaSourceFull: 'mediaSourceFull',
+    mediaSourceFull: EVENTS.mseSourceBufferFull,
+    mseSourceBufferError: EVENTS.mseSourceBufferError,
     mediaSourceAppendBufferError: 'mediaSourceAppendBufferError',
+    mediaSourceBufferListLarge: 'mediaSourceBufferListLarge',
+    mediaSourceAppendBufferEndTimeout: 'mediaSourceAppendBufferEndTimeout',
+    wasmDecodeError: 'wasmDecodeError',
 }
 
 

@@ -7451,7 +7451,7 @@
 	const DEMUX_TYPE = {
 	  flv: 'flv',
 	  m7s: 'm7s'
-	}; // default player options
+	};
 
 	const DEFAULT_PLAYER_OPTIONS = {
 	  videoBuffer: 1000,

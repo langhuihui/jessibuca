@@ -1,5 +1,13 @@
 import Emitter from "../utils/emitter";
-import {EVENTS, EVENTS_ERROR, FRAG_DURATION, MEDIA_SOURCE_STATE, MP4_CODECS, VIDEO_ENC_CODE} from "../constant";
+import {
+    EVENTS,
+    EVENTS_ERROR,
+    FRAG_DURATION,
+    MEDIA_SOURCE_STATE,
+    MEDIA_SOURCE_UPDATE_END_TIMEOUT,
+    MP4_CODECS,
+    VIDEO_ENC_CODE
+} from "../constant";
 import MP4 from "../remux/fmp4-generator";
 import {parseAVCDecoderConfigurationRecord} from "../utils/h264";
 import {parseHEVCDecoderConfigurationRecord} from "../utils/h265";
@@ -22,7 +30,10 @@ export default class MseDecoder extends Emitter {
         this.dropping = false;
         this.mediaSourceAppendBufferError = false;
         this.mediaSourceAppendBufferFull = false;
+        this.mediaSourceBufferListLarge = false;
         this.mediaSourceLocked = false;
+        this.mediaSourceAppendBufferEndTimeout = false;
+        this.checkAppendBufferEndTimeout = null;
         this.mediaSourceObjectURL = window.URL.createObjectURL(this.mediaSource);
         this.player.video.$videoElement.src = this.mediaSourceObjectURL;
         const {
@@ -56,7 +67,10 @@ export default class MseDecoder extends Emitter {
         this.timeInit = false;
         this.mediaSourceAppendBufferError = false;
         this.mediaSourceAppendBufferFull = false;
+        this.mediaSourceBufferListLarge = false;
         this.mediaSourceLocked = false;
+        this.mediaSourceAppendBufferEndTimeout = false;
+        this.checkAppendBufferEndTimeout = null;
         if (this.mediaSourceObjectURL) {
             window.URL.revokeObjectURL(this.mediaSourceObjectURL);
             this.mediaSourceObjectURL = null;
@@ -120,10 +134,25 @@ export default class MseDecoder extends Emitter {
     _doAppendBuffer() {
         const bufferItem = this.bufferList.shift();
         if (bufferItem) {
-            if (this.mediaSourceAppendBufferError || this.mediaSourceAppendBufferFull) {
+            if (this.mediaSourceAppendBufferError || this.mediaSourceAppendBufferFull || this.mediaSourceBufferListLarge || this.mediaSourceAppendBufferEndTimeout) {
                 return;
             }
             this.appendBuffer(bufferItem);
+        }
+    }
+
+    _doPendingBuffer(bufferItem) {
+        this.bufferList.push(bufferItem);
+        this.player.debug.log('MediaSource', '_doPendingBuffer buffer list is', this.bufferList.length);
+        if (this.bufferList.length > 10) {
+            this.player.debug.warn('MediaSource', '_doPendingBuffer buffer list is', this.bufferList.length);
+        }
+
+        if (this.bufferList.length > 500) {
+            this.player.debug.error('MediaSource', '_doPendingBuffer buffer list is', this.bufferList.length);
+            this.mediaSourceBufferListLarge = true;
+            this.stop();
+            this.emit(EVENTS_ERROR.mediaSourceBufferListLarge);
         }
     }
 
@@ -132,11 +161,8 @@ export default class MseDecoder extends Emitter {
         let data = payload.slice(5);
         let config = {};
 
-        if (videoCodec === VIDEO_ENC_CODE.h264) {
-            config = parseAVCDecoderConfigurationRecord(data)
-        } else if (videoCodec === VIDEO_ENC_CODE.h265) {
-            config = parseHEVCDecoderConfigurationRecord(data);
-        }
+        config = parseAVCDecoderConfigurationRecord(data)
+
         const metaData = {
             id: 1, // video tag data
             type: 'video',
@@ -246,28 +272,28 @@ export default class MseDecoder extends Emitter {
 
         if (this.isStateClosed) {
             debug.warn('MediaSource', 'mediaSource is not attached to video or mediaSource is closed');
-            this.player.emit(EVENTS.mseSourceBufferError, 'mediaSource is not attached to video or mediaSource is closed')
+            this.player.emit(EVENTS_ERROR.mseSourceBufferError, 'mediaSource is not attached to video or mediaSource is closed')
             return;
         } else if (this.isStateEnded) {
             debug.warn('MediaSource', 'mediaSource is closed');
-            this.player.emit(EVENTS.mseSourceBufferError, 'mediaSource is closed')
+            this.player.emit(EVENTS_ERROR.mseSourceBufferError, 'mediaSource is closed')
             return;
         } else {
             if (this.sourceBuffer && this.sourceBuffer.updating === true) {
                 this.player.emit(EVENTS.mseSourceBufferBusy);
-                this.bufferList.push(buffer);
+                this._doPendingBuffer(buffer);
                 return;
             }
         }
 
         if (!this.isStateOpen) {
             debug.warn('MediaSource', 'appendBuffer this.state is not open ,is ', this.state);
-            this.bufferList.push(buffer);
+            this._doPendingBuffer(buffer);
             return;
         }
 
         if (this.mediaSourceLocked) {
-            this.bufferList.push(buffer);
+            this._doPendingBuffer(buffer);
             return;
         }
 
@@ -277,21 +303,38 @@ export default class MseDecoder extends Emitter {
                 this.player.emit(EVENTS.mseSourceBufferError, error);
             })
             proxy(this.sourceBuffer, 'updateend', () => {
-                // debug.log('MediaSource', 'this.sourceBuffer updateend');
+                debug.log('MediaSource', 'this.sourceBuffer updateend');
                 this.mediaSourceLocked = false;
+                this._startCheckAppendBufferEndTimeout();
                 this._doAppendBuffer();
             })
         }
 
-        if (this.mediaSourceAppendBufferError || this.mediaSourceAppendBufferFull) {
-            debug.warn('MediaSource', `this.mediaSourceAppendBufferError is ${this.mediaSourceAppendBufferError}, this.mediaSourceAppendBufferFull is ${this.mediaSourceAppendBufferFull}`);
+        if (this.mediaSourceAppendBufferError) {
+            debug.error('MediaSource', `this.mediaSourceAppendBufferError is true`);
             return;
         }
+
+        if (this.mediaSourceAppendBufferFull) {
+            debug.error('MediaSource', `this.mediaSourceAppendBufferFull is true`);
+            return;
+        }
+
+        if (this.mediaSourceBufferListLarge) {
+            debug.error('MediaSource', `this.mediaSourceBufferListLarge is true`);
+            return;
+        }
+
+        if (this.mediaSourceAppendBufferEndTimeout) {
+            debug.error('MediaSource', `this.mediaSourceAppendBufferEndTimeout is true`);
+            return;
+        }
+
 
         if (this.sourceBuffer && this.sourceBuffer.updating === false ) {
             if (this.sourceBuffer.appendBuffer) {
                 try {
-                    this.mediaSourceFree = true;
+                    this.mediaSourceLocked = true;
                     this.sourceBuffer.appendBuffer(buffer);
                 } catch (e) {
                     debug.warn('MediaSource', 'this.sourceBuffer.appendBuffer()', e.code, e);
@@ -316,6 +359,8 @@ export default class MseDecoder extends Emitter {
             } else {
                 debug.warn('MediaSource', 'this.sourceBuffer.appendBuffer function is undefined');
             }
+        } else {
+            debug.warn('MediaSource', 'this.sourceBuffer is null or this.sourceBuffer.updating is false');
         }
     }
 
@@ -323,7 +368,7 @@ export default class MseDecoder extends Emitter {
         this.abortSourceBuffer();
         this.removeSourceBuffer();
         this.endOfStream();
-
+        this.bufferList = [];
     }
 
     dropSourceBuffer(isDropping) {
@@ -382,4 +427,23 @@ export default class MseDecoder extends Emitter {
         }
     }
 
+    _startCheckAppendBufferEndTimeout() {
+        this._stopCheckAppendBufferEndTimeout();
+        const {
+            debug,
+        } = this.player;
+        this.checkAppendBufferEndTimeout = setTimeout(() => {
+            debug.error('MediaSource', '_startCheckAppendBufferEndTimeout timeout');
+            this.mediaSourceAppendBufferEndTimeout = true;
+            this.stop();
+            this.emit(EVENTS_ERROR.mediaSourceAppendBufferEndTimeout);
+        }, MEDIA_SOURCE_UPDATE_END_TIMEOUT)
+    }
+
+    _stopCheckAppendBufferEndTimeout() {
+        if (this.checkAppendBufferEndTimeout) {
+            clearTimeout(this.checkAppendBufferEndTimeout);
+            this.checkAppendBufferEndTimeout = null;
+        }
+    }
 }

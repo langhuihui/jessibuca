@@ -44,7 +44,8 @@
 	const DEMUX_TYPE = {
 	  flv: 'flv',
 	  m7s: 'm7s'
-	}; // default player options
+	};
+	const MEDIA_SOURCE_UPDATE_END_TIMEOUT = 10 * 1000; // default player options
 
 	const DEFAULT_PLAYER_OPTIONS = {
 	  videoBuffer: 1000,
@@ -202,6 +203,7 @@
 	  mseSourceClose: 'mseSourceClose',
 	  mseSourceBufferError: 'mseSourceBufferError',
 	  mseSourceBufferBusy: 'mseSourceBufferBusy',
+	  mseSourceBufferFull: 'mseSourceBufferFull',
 	  videoWaiting: 'videoWaiting',
 	  videoTimeUpdate: 'videoTimeUpdate',
 	  videoSyncAudio: 'videoSyncAudio',
@@ -237,9 +239,12 @@
 	  webcodecsH265NotSupport: 'webcodecsH265NotSupport',
 	  webcodecsDecodeError: 'webcodecsDecodeError',
 	  mediaSourceH265NotSupport: 'mediaSourceH265NotSupport',
-	  wasmDecodeError: 'wasmDecodeError',
-	  mediaSourceFull: 'mediaSourceFull',
-	  mediaSourceAppendBufferError: 'mediaSourceAppendBufferError'
+	  mediaSourceFull: EVENTS.mseSourceBufferFull,
+	  mseSourceBufferError: EVENTS.mseSourceBufferError,
+	  mediaSourceAppendBufferError: 'mediaSourceAppendBufferError',
+	  mediaSourceBufferListLarge: 'mediaSourceBufferListLarge',
+	  mediaSourceAppendBufferEndTimeout: 'mediaSourceAppendBufferEndTimeout',
+	  wasmDecodeError: 'wasmDecodeError'
 	};
 	const WEBSOCKET_STATUS = {
 	  notConnect: 'notConnect',
@@ -266,11 +271,6 @@
 	  10: 'AAC',
 	  7: 'ALAW',
 	  8: 'MULAW'
-	};
-	const H265_NAL_TYPE = {
-	  vps: 32,
-	  sps: 33,
-	  pps: 34
 	};
 	const CONTROL_HEIGHT = 38;
 	const SCALE_MODE_TYPE = {
@@ -10221,7 +10221,7 @@
 	 * limitations under the License.
 	 */
 
-	class SPSParser$1 {
+	class SPSParser {
 	  static _ebsp2rbsp(uint8array) {
 	    let src = uint8array;
 	    let src_length = src.byteLength;
@@ -10246,7 +10246,7 @@
 
 
 	  static parseSPS(uint8array) {
-	    let rbsp = SPSParser$1._ebsp2rbsp(uint8array);
+	    let rbsp = SPSParser._ebsp2rbsp(uint8array);
 
 	    let gb = new ExpGolomb(rbsp);
 	    gb.readByte(); // 标识当前H.264码流的profile。
@@ -10262,8 +10262,8 @@
 
 	    gb.readUEG(); // seq_parameter_set_id
 
-	    let profile_string = SPSParser$1.getProfileString(profile_idc);
-	    let level_string = SPSParser$1.getLevelString(level_idc);
+	    let profile_string = SPSParser.getProfileString(profile_idc);
+	    let level_string = SPSParser.getLevelString(level_idc);
 	    let chroma_format_idc = 1;
 	    let chroma_format = 420;
 	    let chroma_format_table = [0, 420, 422, 444];
@@ -10295,9 +10295,9 @@
 	          if (gb.readBool()) {
 	            // seq_scaling_list_present_flag
 	            if (i < 6) {
-	              SPSParser$1._skipScalingList(gb, 16);
+	              SPSParser._skipScalingList(gb, 16);
 	            } else {
-	              SPSParser$1._skipScalingList(gb, 64);
+	              SPSParser._skipScalingList(gb, 64);
 	            }
 	          }
 	        }
@@ -10459,7 +10459,7 @@
 	      ref_frames: ref_frames,
 	      chroma_format: chroma_format,
 	      // 4:2:0, 4:2:2, ...
-	      chroma_format_string: SPSParser$1.getChromaFormatString(chroma_format),
+	      chroma_format_string: SPSParser.getChromaFormatString(chroma_format),
 	      frame_rate: {
 	        fixed: fps_fixed,
 	        fps: fps,
@@ -10601,7 +10601,7 @@
 	    // pps的信息没什么用，所以作者只实现了sps的分析器，说明作者下了很大功夫去学习264的标准，其中的Golomb解码还是挺复杂的，能解对不容易，我在PC和手机平台都是用ffmpeg去解析的。
 	    // SPS里面包括了视频分辨率，帧率，profile level等视频重要信息。
 
-	    let config = SPSParser$1.parseSPS(sps);
+	    let config = SPSParser.parseSPS(sps);
 
 	    if (i !== 0) {
 	      // ignore other sps's config
@@ -10671,156 +10671,6 @@
 	  return meta;
 	}
 
-	class SPSParser {
-	  static _ebsp2rbsp(uint8array) {
-	    let src = uint8array;
-	    let src_length = src.byteLength;
-	    let dst = new Uint8Array(src_length);
-	    let dst_idx = 0;
-
-	    for (let i = 0; i < src_length; i++) {
-	      if (i >= 2) {
-	        // Unescape: Skip 0x03 after 00 00
-	        if (src[i] === 0x03 && src[i - 1] === 0x00 && src[i - 2] === 0x00) {
-	          continue;
-	        }
-	      }
-
-	      dst[dst_idx] = src[i];
-	      dst_idx++;
-	    }
-
-	    return new Uint8Array(dst.buffer, 0, dst_idx);
-	  }
-
-	  static parseSPS(uint8array) {
-	    let rbsp = SPSParser._ebsp2rbsp(uint8array);
-
-	    new ExpGolomb(rbsp);
-	    let profile_string = '';
-	    let level_string = '';
-	    let bit_depth = '';
-	    let ref_frames = '';
-	    let chroma_format = '';
-	    let fps_fixed = '';
-	    let fps = '';
-	    let fps_den = '';
-	    let fps_num = '';
-	    let sar_width = '';
-	    let sar_height = '';
-	    let codec_width = '';
-	    let codec_height = '';
-	    let present_width = '';
-	    return {
-	      profile_string: profile_string,
-	      // baseline, high, high10, ...
-	      level_string: level_string,
-	      // 3, 3.1, 4, 4.1, 5, 5.1, ...
-	      bit_depth: bit_depth,
-	      // 8bit, 10bit, ...
-	      ref_frames: ref_frames,
-	      chroma_format: chroma_format,
-	      // 4:2:0, 4:2:2, ...
-	      chroma_format_string: '',
-	      frame_rate: {
-	        fixed: fps_fixed,
-	        fps: fps,
-	        fps_den: fps_den,
-	        fps_num: fps_num
-	      },
-	      sar_ratio: {
-	        width: sar_width,
-	        height: sar_height
-	      },
-	      codec_size: {
-	        width: codec_width,
-	        height: codec_height
-	      },
-	      present_size: {
-	        width: present_width,
-	        height: codec_height
-	      }
-	    };
-	  }
-
-	  static _skipScalingList(gb, count) {
-	    let last_scale = 8,
-	        next_scale = 8;
-	    let delta_scale = 0;
-
-	    for (let i = 0; i < count; i++) {
-	      if (next_scale !== 0) {
-	        delta_scale = gb.readSEG();
-	        next_scale = (last_scale + delta_scale + 256) % 256;
-	      }
-
-	      last_scale = next_scale === 0 ? last_scale : next_scale;
-	    }
-	  }
-
-	  static getLevelString(level_idc) {
-	    return (level_idc / 10).toFixed(1);
-	  }
-
-	}
-
-	function parseHEVCDecoderConfigurationRecord(arrayBuffer) {
-	  const meta = {};
-	  meta.videoType = 'hevc';
-	  let offset = 28 - 5; //
-
-	  const vpsTag = arrayBuffer[offset];
-
-	  if (vpsTag !== H265_NAL_TYPE.vps) {
-	    return meta;
-	  }
-
-	  offset += 2;
-	  offset += 1;
-	  const vpsLength = arrayBuffer[offset + 1] | arrayBuffer[offset] << 8;
-	  offset += 2;
-	  const vpsData = arrayBuffer.slice(offset, offset + vpsLength);
-	  console.log(Uint8Array.from(vpsData));
-	  offset += vpsLength;
-	  const spsTag = arrayBuffer[offset];
-
-	  if (spsTag !== H265_NAL_TYPE.sps) {
-	    return meta;
-	  }
-
-	  offset += 2;
-	  offset += 1;
-	  const spsLength = arrayBuffer[offset + 1] | arrayBuffer[offset] << 8;
-	  offset += 2;
-	  const spsData = arrayBuffer.slice(offset, offset + spsLength);
-	  console.log(Uint8Array.from(spsData));
-	  offset += spsLength;
-	  const ppsTag = arrayBuffer[offset];
-
-	  if (ppsTag !== H265_NAL_TYPE.pps) {
-	    return meta;
-	  }
-
-	  offset += 2;
-	  offset += 1;
-	  const ppsLength = arrayBuffer[offset + 1] | arrayBuffer[offset] << 8;
-	  offset += 2;
-	  const ppsData = arrayBuffer.slice(offset, offset + ppsLength);
-	  console.log(Uint8Array.from(ppsData));
-	  let sps = Uint8Array.from(spsData);
-	  let config = SPSParser.parseSPS(sps);
-	  meta.codecWidth = config.codec_size.width;
-	  meta.codecHeight = config.codec_size.height;
-	  meta.presentWidth = config.present_size.width;
-	  meta.presentHeight = config.present_size.height;
-	  meta.profile = config.profile_string;
-	  meta.level = config.level_string;
-	  meta.bitDepth = config.bit_depth;
-	  meta.chromaFormat = config.chroma_format;
-	  meta.sarRatio = config.sar_ratio;
-	  return meta;
-	}
-
 	class MseDecoder extends Emitter {
 	  constructor(player) {
 	    super();
@@ -10838,7 +10688,10 @@
 	    this.dropping = false;
 	    this.mediaSourceAppendBufferError = false;
 	    this.mediaSourceAppendBufferFull = false;
+	    this.mediaSourceBufferListLarge = false;
 	    this.mediaSourceLocked = false;
+	    this.mediaSourceAppendBufferEndTimeout = false;
+	    this.checkAppendBufferEndTimeout = null;
 	    this.mediaSourceObjectURL = window.URL.createObjectURL(this.mediaSource);
 	    this.player.video.$videoElement.src = this.mediaSourceObjectURL;
 	    const {
@@ -10870,7 +10723,10 @@
 	    this.timeInit = false;
 	    this.mediaSourceAppendBufferError = false;
 	    this.mediaSourceAppendBufferFull = false;
+	    this.mediaSourceBufferListLarge = false;
 	    this.mediaSourceLocked = false;
+	    this.mediaSourceAppendBufferEndTimeout = false;
+	    this.checkAppendBufferEndTimeout = null;
 
 	    if (this.mediaSourceObjectURL) {
 	      window.URL.revokeObjectURL(this.mediaSourceObjectURL);
@@ -10938,7 +10794,7 @@
 	    const bufferItem = this.bufferList.shift();
 
 	    if (bufferItem) {
-	      if (this.mediaSourceAppendBufferError || this.mediaSourceAppendBufferFull) {
+	      if (this.mediaSourceAppendBufferError || this.mediaSourceAppendBufferFull || this.mediaSourceBufferListLarge || this.mediaSourceAppendBufferEndTimeout) {
 	        return;
 	      }
 
@@ -10946,16 +10802,26 @@
 	    }
 	  }
 
+	  _doPendingBuffer(bufferItem) {
+	    this.bufferList.push(bufferItem);
+	    this.player.debug.log('MediaSource', '_doPendingBuffer buffer list is', this.bufferList.length);
+
+	    if (this.bufferList.length > 10) {
+	      this.player.debug.warn('MediaSource', '_doPendingBuffer buffer list is', this.bufferList.length);
+	    }
+
+	    if (this.bufferList.length > 500) {
+	      this.player.debug.error('MediaSource', '_doPendingBuffer buffer list is', this.bufferList.length);
+	      this.mediaSourceBufferListLarge = true;
+	      this.stop();
+	      this.emit(EVENTS_ERROR.mediaSourceBufferListLarge);
+	    }
+	  }
+
 	  _decodeConfigurationRecord(payload, ts, isIframe, videoCodec) {
 	    let data = payload.slice(5);
 	    let config = {};
-
-	    if (videoCodec === VIDEO_ENC_CODE.h264) {
-	      config = parseAVCDecoderConfigurationRecord(data);
-	    } else if (videoCodec === VIDEO_ENC_CODE.h265) {
-	      config = parseHEVCDecoderConfigurationRecord(data);
-	    }
-
+	    config = parseAVCDecoderConfigurationRecord(data);
 	    const metaData = {
 	      id: 1,
 	      // video tag data
@@ -11073,28 +10939,33 @@
 
 	    if (this.isStateClosed) {
 	      debug.warn('MediaSource', 'mediaSource is not attached to video or mediaSource is closed');
-	      this.player.emit(EVENTS.mseSourceBufferError, 'mediaSource is not attached to video or mediaSource is closed');
+	      this.player.emit(EVENTS_ERROR.mseSourceBufferError, 'mediaSource is not attached to video or mediaSource is closed');
 	      return;
 	    } else if (this.isStateEnded) {
 	      debug.warn('MediaSource', 'mediaSource is closed');
-	      this.player.emit(EVENTS.mseSourceBufferError, 'mediaSource is closed');
+	      this.player.emit(EVENTS_ERROR.mseSourceBufferError, 'mediaSource is closed');
 	      return;
 	    } else {
 	      if (this.sourceBuffer && this.sourceBuffer.updating === true) {
 	        this.player.emit(EVENTS.mseSourceBufferBusy);
-	        this.bufferList.push(buffer);
+
+	        this._doPendingBuffer(buffer);
+
 	        return;
 	      }
 	    }
 
 	    if (!this.isStateOpen) {
 	      debug.warn('MediaSource', 'appendBuffer this.state is not open ,is ', this.state);
-	      this.bufferList.push(buffer);
+
+	      this._doPendingBuffer(buffer);
+
 	      return;
 	    }
 
 	    if (this.mediaSourceLocked) {
-	      this.bufferList.push(buffer);
+	      this._doPendingBuffer(buffer);
+
 	      return;
 	    }
 
@@ -11104,22 +10975,39 @@
 	        this.player.emit(EVENTS.mseSourceBufferError, error);
 	      });
 	      proxy(this.sourceBuffer, 'updateend', () => {
-	        // debug.log('MediaSource', 'this.sourceBuffer updateend');
+	        debug.log('MediaSource', 'this.sourceBuffer updateend');
 	        this.mediaSourceLocked = false;
+
+	        this._startCheckAppendBufferEndTimeout();
 
 	        this._doAppendBuffer();
 	      });
 	    }
 
-	    if (this.mediaSourceAppendBufferError || this.mediaSourceAppendBufferFull) {
-	      debug.warn('MediaSource', `this.mediaSourceAppendBufferError is ${this.mediaSourceAppendBufferError}, this.mediaSourceAppendBufferFull is ${this.mediaSourceAppendBufferFull}`);
+	    if (this.mediaSourceAppendBufferError) {
+	      debug.error('MediaSource', `this.mediaSourceAppendBufferError is true`);
+	      return;
+	    }
+
+	    if (this.mediaSourceAppendBufferFull) {
+	      debug.error('MediaSource', `this.mediaSourceAppendBufferFull is true`);
+	      return;
+	    }
+
+	    if (this.mediaSourceBufferListLarge) {
+	      debug.error('MediaSource', `this.mediaSourceBufferListLarge is true`);
+	      return;
+	    }
+
+	    if (this.mediaSourceAppendBufferEndTimeout) {
+	      debug.error('MediaSource', `this.mediaSourceAppendBufferEndTimeout is true`);
 	      return;
 	    }
 
 	    if (this.sourceBuffer && this.sourceBuffer.updating === false) {
 	      if (this.sourceBuffer.appendBuffer) {
 	        try {
-	          this.mediaSourceFree = true;
+	          this.mediaSourceLocked = true;
 	          this.sourceBuffer.appendBuffer(buffer);
 	        } catch (e) {
 	          debug.warn('MediaSource', 'this.sourceBuffer.appendBuffer()', e.code, e);
@@ -11144,6 +11032,8 @@
 	      } else {
 	        debug.warn('MediaSource', 'this.sourceBuffer.appendBuffer function is undefined');
 	      }
+	    } else {
+	      debug.warn('MediaSource', 'this.sourceBuffer is null or this.sourceBuffer.updating is false');
 	    }
 	  }
 
@@ -11151,6 +11041,7 @@
 	    this.abortSourceBuffer();
 	    this.removeSourceBuffer();
 	    this.endOfStream();
+	    this.bufferList = [];
 	  }
 
 	  dropSourceBuffer(isDropping) {
@@ -11204,6 +11095,27 @@
 	          this.player.debug.warn('MediaSource', 'removeSourceBuffer() error', e);
 	        }
 	      }
+	    }
+	  }
+
+	  _startCheckAppendBufferEndTimeout() {
+	    this._stopCheckAppendBufferEndTimeout();
+
+	    const {
+	      debug
+	    } = this.player;
+	    this.checkAppendBufferEndTimeout = setTimeout(() => {
+	      debug.error('MediaSource', '_startCheckAppendBufferEndTimeout timeout');
+	      this.mediaSourceAppendBufferEndTimeout = true;
+	      this.stop();
+	      this.emit(EVENTS_ERROR.mediaSourceAppendBufferEndTimeout);
+	    }, MEDIA_SOURCE_UPDATE_END_TIMEOUT);
+	  }
+
+	  _stopCheckAppendBufferEndTimeout() {
+	    if (this.checkAppendBufferEndTimeout) {
+	      clearTimeout(this.checkAppendBufferEndTimeout);
+	      this.checkAppendBufferEndTimeout = null;
 	    }
 	  }
 
@@ -11789,6 +11701,12 @@
 	          });
 	          this.mseDecoder.once(EVENTS_ERROR.mediaSourceAppendBufferError, () => {
 	            this.emit(EVENTS_ERROR.mediaSourceAppendBufferError);
+	          });
+	          this.mseDecoder.once(EVENTS_ERROR.mediaSourceBufferListLarge, () => {
+	            this.emit(EVENTS_ERROR.mediaSourceBufferListLarge);
+	          });
+	          this.mseDecoder.once(EVENTS_ERROR.mediaSourceAppendBufferEndTimeout, () => {
+	            this.emit(EVENTS_ERROR.mediaSourceAppendBufferEndTimeout);
 	          });
 	        }
 
@@ -12493,6 +12411,61 @@
 	            // reject();
 	            this.player.debug.warn('Jessibuca', 'media source append buffer error and reset player and play error');
 	          });
+	        });
+	      });
+	      this.player.once(EVENTS_ERROR.mediaSourceBufferListLarge, () => {
+	        this.pause().then(() => {
+	          this.player.debug.log('Jessibuca', 'media source buffer list large');
+
+	          this._resetPlayer();
+
+	          this.play(url).then(() => {
+	            // resolve();
+	            this.player.debug.log('Jessibuca', 'media source buffer list large and reset player and play success');
+	          }).catch(() => {
+	            // reject();
+	            this.player.debug.warn('Jessibuca', 'media source buffer list large and reset player and play error');
+	          });
+	        });
+	      });
+	      this.player.once(EVENTS_ERROR.mediaSourceAppendBufferEndTimeout, () => {
+	        this.pause().then(() => {
+	          this.player.debug.log('Jessibuca', 'media source append buffer end timeout');
+
+	          this._resetPlayer();
+
+	          this.play(url).then(() => {
+	            // resolve();
+	            this.player.debug.log('Jessibuca', 'media source append buffer end timeout and reset player and play success');
+	          }).catch(() => {
+	            // reject();
+	            this.player.debug.warn('Jessibuca', 'media source append buffer end timeout and reset player and play error');
+	          });
+	        });
+	      });
+	      this.player.once(EVENTS_ERROR.mseSourceBufferError, () => {
+	        this.close().then(() => {
+	          this.player.debug.log('Jessibuca', 'mseSourceBufferError close success');
+	        });
+	      }); //
+
+	      this.player.once(EVENTS_ERROR.webcodecsH265NotSupport, () => {
+	        this.close().then(() => {
+	          if (this.player._opt.autoWasm) {
+	            this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play');
+
+	            this._resetPlayer({
+	              useWCS: false
+	            });
+
+	            this.play(url).then(() => {
+	              // resolve();
+	              this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play success');
+	            }).catch(() => {
+	              // reject();
+	              this.player.debug.warn('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play error');
+	            });
+	          }
 	        });
 	      }); // 解码报错。
 

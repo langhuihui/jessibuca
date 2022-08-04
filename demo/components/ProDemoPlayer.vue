@@ -455,6 +455,7 @@ export default {
             if (type === 'mse') {
                 this.useWCS = false;
                 this.useOffscreen = false;
+                this.useSIMD = false;
             } else if (type === 'wcs') {
                 this.useMSE = false
                 this.useSIMD = false;

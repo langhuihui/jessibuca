@@ -381,6 +381,14 @@ export default {
     },
 };
 </script>
+
+<style>
+.page {
+    background: url(/bg.jpg);
+    background-repeat: no-repeat;
+    background-position: top;
+}
+</style>
 <style scoped>
 .root {
     display: flex;
@@ -454,11 +462,7 @@ export default {
     color: white;
 }
 
-.page {
-    background: url(/bg.jpg);
-    background-repeat: no-repeat;
-    background-position: top;
-}
+
 
 @media (max-width: 720px) {
     #container {

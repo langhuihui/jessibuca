@@ -483,6 +483,14 @@ export default class Player extends Emitter {
                     this.mseDecoder.once(EVENTS_ERROR.mediaSourceAppendBufferError, () => {
                         this.emit(EVENTS_ERROR.mediaSourceAppendBufferError)
                     })
+
+                    this.mseDecoder.once(EVENTS_ERROR.mediaSourceBufferListLarge, () => {
+                        this.emit(EVENTS_ERROR.mediaSourceBufferListLarge);
+                    })
+
+                    this.mseDecoder.once(EVENTS_ERROR.mediaSourceAppendBufferEndTimeout, () => {
+                        this.emit(EVENTS_ERROR.mediaSourceAppendBufferEndTimeout);
+                    })
                 }
 
                 this.enableWakeLock();
