@@ -1,5 +1,5 @@
 import {EVENTS, EVENTS_ERROR, MEDIA_TYPE, WASM_ERROR, WORKER_CMD_TYPE, WORKER_SEND_TYPE} from "../constant";
-import {now} from "../utils";
+import {isWebglRenderSupport, now} from "../utils";
 
 export default class DecoderWorker {
     constructor(player) {
@@ -54,6 +54,11 @@ export default class DecoderWorker {
                         width: msg.w,
                         height: msg.h
                     })
+                    if (!this.player._opt.openWebglAlignment && !isWebglRenderSupport(msg.w)) {
+                        this.player.emit(EVENTS_ERROR.webglAlignmentError);
+                        return;
+                    }
+
                     this.player.video.initCanvasViewSize();
                     break;
                 case WORKER_CMD_TYPE.initAudio:
@@ -98,7 +103,7 @@ export default class DecoderWorker {
     _initWork() {
         const opt = {
             debug: this.player._opt.debug,
-            forceNoOffscreen: this.player._opt.forceNoOffscreen,
+            useOffscreen: this.player._opt.useOffscreen,
             useWCS: this.player._opt.useWCS,
             videoBuffer: this.player._opt.videoBuffer,
             videoBufferDelay: this.player._opt.videoBufferDelay,

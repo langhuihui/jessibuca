@@ -294,6 +294,21 @@ class Jessibuca extends Emitter {
                 demuxType
             })
 
+            this.player.once(EVENTS_ERROR.webglAlignmentError, () => {
+                this.pause().then(() => {
+                    this.player.debug.log('Jessibuca', 'webglAlignmentError')
+                    this._resetPlayer({openWebglAlignment: true})
+                    this.play(url).then(() => {
+                        // resolve();
+                        this.player.debug.log('Jessibuca', 'webglAlignmentError and play success')
+                    }).catch(() => {
+                        // reject();
+                        this.player.debug.log('Jessibuca', 'webglAlignmentError and play error')
+                    });
+                });
+            })
+
+
             this.player.once(EVENTS_ERROR.mediaSourceH265NotSupport, () => {
                 this.close().then(() => {
                     if (this.player._opt.autoWasm) {

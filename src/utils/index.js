@@ -510,3 +510,6 @@ export function getTarget(e) {
     const target = event.target || event.srcElement;
     return target;
 }
+export function isWebglRenderSupport(width) {
+    return (width / 2) % 4 === 0
+}

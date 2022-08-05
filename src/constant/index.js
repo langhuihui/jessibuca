@@ -191,6 +191,7 @@ export const EVENTS_ERROR = {
     mediaSourceBufferListLarge: 'mediaSourceBufferListLarge',
     mediaSourceAppendBufferEndTimeout: 'mediaSourceAppendBufferEndTimeout',
     wasmDecodeError: 'wasmDecodeError',
+    webglAlignmentError: 'webglAlignmentError'
 }
 
 

@@ -84,14 +84,14 @@ Module.postRun = function () {
     var decoder = {
         opt: {
             debug: DEFAULT_PLAYER_OPTIONS.debug,
-            forceNoOffscreen: DEFAULT_PLAYER_OPTIONS.forceNoOffscreen,
+            useOffscreen: DEFAULT_PLAYER_OPTIONS.useOffscreen,
             useWCS: DEFAULT_PLAYER_OPTIONS.useWCS,
             videoBuffer: DEFAULT_PLAYER_OPTIONS.videoBuffer,
             openWebglAlignment: DEFAULT_PLAYER_OPTIONS.openWebglAlignment,
             videoBufferDelay: DEFAULT_PLAYER_OPTIONS.videoBufferDelay
         },
         useOffscreen: function () {
-            return !decoder.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined';
+            return decoder.opt.useOffscreen && typeof OffscreenCanvas != 'undefined';
         },
         initAudioPlanar: function (channels, samplerate) {
             postMessage({cmd: WORKER_CMD_TYPE.initAudio, sampleRate: samplerate, channels: channels});

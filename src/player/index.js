@@ -509,6 +509,14 @@ export default class Player extends Emitter {
                     reject(error)
                 })
 
+                // stream end
+                this.stream.once(EVENTS.streamEnd, () => {
+                    reject();
+                })
+                // hls
+                this.stream.once(EVENTS_ERROR.hlsError, (error) => {
+                    reject(error)
+                })
                 // success
                 this.stream.once(EVENTS.streamSuccess, () => {
                     resolve();
