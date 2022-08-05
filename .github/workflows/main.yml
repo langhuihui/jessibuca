@@ -84,7 +84,7 @@ jobs:
 
       - name: zip3
         if: startsWith(github.ref, 'refs/tags/')
-        run: zip -r ./pro.zip dist/public/pro/*
+        run: zip -r ./pro.zip demo/public/pro/*
 
       - name: Release3
         uses: softprops/action-gh-release@v1
