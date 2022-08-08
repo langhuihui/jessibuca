@@ -52,26 +52,31 @@ export class TransmissionStatistics {
     return Date.now() - this.lastTime > 5000 ? 0 : this._bps;
   }
 }
+export const enum Protocol {
+  WS = "ws://",
+  WSS = "wss://",
+  HTTP = "http://",
+  HTTPS = "https://",
+  WebTransport = "wt://",
+  WebRTC = "webrtc://"
+}
 export class Connection extends FSM {
   oput?: Oput;
   netConn?: WebSocketFSM | WebTransportFSM | HttpFSM | WebRTCFSM;
   up = new TransmissionStatistics();
   down = new TransmissionStatistics();
   underlyingSink: UnderlyingSink<Uint8Array> = {
-    write: (chunk) => {
+    write: async (chunk) => {
       if (!this.down.lastTime) {
         console.timeEnd(this.url);
       }
       this.down.add(chunk.length);
-      return this.oput?.write(chunk);
+      await this.oput?.write(chunk);
     }
   };
   abortCtrl?: AbortController;
-  constructor(public url?: string, public options?: ConnectionOptions) {
+  constructor(public url?: string, public options: ConnectionOptions = {}) {
     super(url || 'conn', 'Connection');
-    if (!this.options) {
-      this.options = {};
-    }
     if (!this.options.reconnectTimeout) {
       this.options.reconnectTimeout = getReconnectionTimeout;
     }
@@ -94,33 +99,41 @@ export class Connection extends FSM {
     }
     console.log(`connect: ${this.url}`);
     console.time(this.url);
-    if (this.url.startsWith("ws://") || this.url.startsWith("wss://")) {
+    if (this.url.startsWith(Protocol.WS) || this.url.startsWith(Protocol.WSS)) {
       if (!(this.netConn instanceof WebSocketFSM))
         this.netConn = new WebSocketFSM(this);
-    } else if (this.url.startsWith("http://") || this.url.startsWith("https://")) {
+    } else if (this.url.startsWith(Protocol.HTTP) || this.url.startsWith(Protocol.HTTPS)) {
       if (!(this.netConn instanceof HttpFSM))
         this.netConn = new HttpFSM(this);
-    } else if (this.url.startsWith("wt://")) {
-      this.url = this.url.replace("wt://", "https://");
+    } else if (this.url.startsWith(Protocol.WebTransport)) {
+      this.url = this.url.replace(Protocol.WebTransport, Protocol.HTTPS);
       if (!(this.netConn instanceof WebTransportFSM))
         this.netConn = new WebTransportFSM(this);
-    } else if (this.url.startsWith("webrtc://")) {
-      this.url = this.url.replace("webrtc://", "https://");//TODO: http
+    } else if (this.url.startsWith(Protocol.WebRTC)) {
+      this.url = this.url.replace(Protocol.WebRTC, this.options.tls ? Protocol.HTTPS : Protocol.HTTP);
       if (!(this.netConn instanceof WebRTCFSM))
         this.netConn = new WebRTCFSM(this);
     } else {
       throw new Error("url is invalid");
     }
-    this.onConnected(await this.netConn!.connect(this.url));
+    return this._connect();
   }
   @ChangeState(ConnectionState.DISCONNECTED, ConnectionState.RECONNECTED)
   async reconnect() {
     console.log(`reconnect: ${this.url}`);
     console.time(this.url);
-    this.onConnected(await this.netConn!.connect(this.url!));
+    return this._connect();
+  }
+  async _connect() {
+    const result = await this.netConn!.connect(this.url!);
+    console.log(`connected: ${this.url}`);
+    if (result instanceof RTCPeerConnection) {
+      return result;
+    } else {
+      this.onConnected(result);
+    }
   }
   onConnected(readable: ReadableStream<Uint8Array>) {
-    console.log(`connected: ${this.url}`);
     this.oput = new Oput();
     this.abortCtrl = new AbortController();
     readable.pipeTo(new WritableStream(this.underlyingSink), this.abortCtrl).catch((err) => {
@@ -132,7 +145,7 @@ export class Connection extends FSM {
   @ChangeState(ConnectionState.CONNECTED, ConnectionState.DISCONNECTED)
   disconnect(reason: any) {
     console.warn(`disconnect: ${this.url}`, reason);
-    if (this.options?.reconnectCount) this.reconnectAfter();
+    if (this.options.reconnectCount) this.reconnectAfter();
   }
   reconnectAfter(delay: number = 1000, count: number = 0) {
     console.log(`reconnect after ${delay}ms`);
@@ -140,8 +153,8 @@ export class Connection extends FSM {
       this.reconnect().catch((err) => {
         console.log(`reconnect failed: ${this.url}`, err);
         //重连失败，再次重连
-        if (count < this.options!.reconnectCount!)
-          this.reconnectAfter(this.options!.reconnectTimeout!(count), count + 1);
+        if (count < this.options.reconnectCount!)
+          this.reconnectAfter(this.options.reconnectTimeout!(count), count + 1);
       });
     }, delay);
   }
