@@ -8,6 +8,7 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     Connection: typeof import('./src/components/Connection.vue')['default']
+    Demuxer: typeof import('./src/components/Demuxer.vue')['default']
     NButton: typeof import('naive-ui')['NButton']
     NCol: typeof import('naive-ui')['NCol']
     NIcon: typeof import('naive-ui')['NIcon']

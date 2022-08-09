@@ -169,7 +169,8 @@ export class Connection extends FSM {
     this.netConn?.send(data);
   }
   @Includes(ConnectionState.CONNECTED)
-  read(need: Parameters<typeof Oput.prototype.read>[0]) {
+  read<T extends number | ArrayBufferView>(need: T) {
+    console.log(`read: ${need}`);
     return this.oput!.read(need);
   }
   @Includes(ConnectionState.CONNECTED)

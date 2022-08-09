@@ -2,6 +2,7 @@
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 import Connection from './components/Connection.vue';
+import Demuxer from './components/Demuxer.vue';
 </script>
 
 <template>
@@ -11,6 +12,7 @@ import Connection from './components/Connection.vue';
         <Connection />
       </n-tab-pane>
       <n-tab-pane name="demuxer" tab="Demuxer">
+        <Demuxer />
       </n-tab-pane>
       <n-tab-pane name="decoder" tab="Decoder">
       </n-tab-pane>
