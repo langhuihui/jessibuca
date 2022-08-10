@@ -36,6 +36,23 @@ Extension: .wasm (dot wasm)
 MIMEType: application/wasm
 
 
+### wasm 格式返回错误
+
+> Uncaught (in promise) TypeError: Failed to execute 'compile' on 'WebAssembly': Incorrect response MIME type. Expected 'application/wasm'.
+
+
+因为 从远程服务器加载的Wasm模块文件只有在其HTTP相应结果中被标识为application/wasm类型，才可以被WebAssembly.instantiateStreaming方法正确的编译和处理
+
+查看 network 板块，就可以看到decoder.wasm 的返回格式化， 看下` Response Headers` 下面的`Content-Type` 是否是`application/wasm`
+
+#### 解决方案
+
+1. 用的springboot的tomcat，所以修改tomcat的mime类型，多添加一个wasm的类型
+2. 用的是ISS，配置下wasm类型的数据就行了。
+
+Extension: .wasm (dot wasm)
+MIMEType: application/wasm
+
 ### 优化加载速度
 
 1. 将js程序进行gzip压缩
