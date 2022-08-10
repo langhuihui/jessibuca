@@ -219,7 +219,7 @@ export default class MseDecoder extends Emitter {
             // appendBuffer
             this.appendBuffer(result.buffer)
             player.handleRender();
-            player.updateStats({fps: true, ts: ts, buf: player.demux.delay})
+            player.updateStats({fps: true, ts: ts, buf: (player.demux && player.demux.delay) || 0})
             if (!player._times.videoStart) {
                 player._times.videoStart = now();
                 player.handlePlayToRenderTimes()

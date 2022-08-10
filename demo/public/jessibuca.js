@@ -10893,7 +10893,7 @@
 	      player.updateStats({
 	        fps: true,
 	        ts: ts,
-	        buf: player.demux.delay
+	        buf: player.demux && player.demux.delay || 0
 	      });
 
 	      if (!player._times.videoStart) {
