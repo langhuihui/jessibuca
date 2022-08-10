@@ -245,5 +245,16 @@ https://github.com/langhuihui/jessibuca/issues/126
 
 #### 解决方案
 
-1. 可以通过设置`gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);` 的方式来解决，但是会损耗一部分性能。
-2. `openWebglAlignment` 设为 `true`
+1. ~~可以通过设置`gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);` 的方式来解决，但是会损耗一部分性能。~~
+2. ~~将`openWebglAlignment` 设为 `true`。~~
+3. 最新解决方案，程序会自动检查分辨率，如果不是标准的分辨率，会自动更新webgl 渲染规则
+
+### 关于如何集成到qiankun这类的微前端中去
+
+需要将jessibuca的`dist`目录下面的文件[`decocer.js`,`decoder.wasm`,`jessbuca.js`]放到`主应用`的`public`目录或者根目录下面。
+
+然后在`子应用`使用的时候，要在index.html 下面通过`script`标签引入主应用路径下面的`jessbuca.js`，在业务代码里面，通过配置`decoder`参数，也是主应用下面的decoder.js地址。
+
+> 注意：`decocer.js`,`decoder.wasm`两个文件必须放同一个目录下面。
+
+
