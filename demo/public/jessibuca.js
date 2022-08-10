@@ -244,7 +244,8 @@
 	  mediaSourceAppendBufferError: 'mediaSourceAppendBufferError',
 	  mediaSourceBufferListLarge: 'mediaSourceBufferListLarge',
 	  mediaSourceAppendBufferEndTimeout: 'mediaSourceAppendBufferEndTimeout',
-	  wasmDecodeError: 'wasmDecodeError'
+	  wasmDecodeError: 'wasmDecodeError',
+	  webglAlignmentError: 'webglAlignmentError'
 	};
 	const WEBSOCKET_STATUS = {
 	  notConnect: 'notConnect',
@@ -855,6 +856,9 @@
 	  const event = e || window.event;
 	  const target = event.target || event.srcElement;
 	  return target;
+	}
+	function isWebglRenderSupport(width) {
+	  return width / 2 % 4 === 0;
 	}
 
 	var events$1 = (player => {
@@ -8452,6 +8456,12 @@
 	            width: msg.w,
 	            height: msg.h
 	          });
+
+	          if (!this.player._opt.openWebglAlignment && !isWebglRenderSupport(msg.w)) {
+	            this.player.emit(EVENTS_ERROR.webglAlignmentError);
+	            return;
+	          }
+
 	          this.player.video.initCanvasViewSize();
 	          break;
 
@@ -8511,7 +8521,7 @@
 	  _initWork() {
 	    const opt = {
 	      debug: this.player._opt.debug,
-	      forceNoOffscreen: this.player._opt.forceNoOffscreen,
+	      useOffscreen: this.player._opt.useOffscreen,
 	      useWCS: this.player._opt.useWCS,
 	      videoBuffer: this.player._opt.videoBuffer,
 	      videoBufferDelay: this.player._opt.videoBufferDelay,
@@ -11721,6 +11731,14 @@
 
 	        this.stream.once(EVENTS_ERROR.websocketError, error => {
 	          reject(error);
+	        }); // stream end
+
+	        this.stream.once(EVENTS.streamEnd, () => {
+	          reject();
+	        }); // hls
+
+	        this.stream.once(EVENTS_ERROR.hlsError, error => {
+	          reject(error);
 	        }); // success
 
 	        this.stream.once(EVENTS.streamSuccess, () => {
@@ -12040,6 +12058,10 @@
 	    this.emit(EVENTS.playToRenderTimes, _times);
 	  }
 
+	  getOption() {
+	    return this._opt;
+	  }
+
 	}
 
 	class Jessibuca extends Emitter {
@@ -12112,6 +12134,7 @@
 
 	  _initPlayer($container, options) {
 	    this.player = new Player($container, options);
+	    this.player.debug.log('jessibuca', '_initPlayer', this.player.getOption());
 
 	    this._bindEvents();
 	  }
@@ -12120,10 +12143,10 @@
 	    let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 	    this.player.destroy();
 	    this.player = null;
+	    this._opt = Object.assign(this._opt, options);
+	    this._opt.url = ''; // reset url
 
-	    const _options = Object.assign(this._opt, options);
-
-	    this._initPlayer(this.$container, _options);
+	    this._initPlayer(this.$container, this._opt);
 	  }
 
 	  _bindEvents() {
@@ -12343,8 +12366,25 @@
 	        protocol,
 	        demuxType
 	      });
+	      this.player.once(EVENTS_ERROR.webglAlignmentError, () => {
+	        this.pause().then(() => {
+	          this.player.debug.log('Jessibuca', 'webglAlignmentError');
+
+	          this._resetPlayer({
+	            openWebglAlignment: true
+	          });
+
+	          this.play(url).then(() => {
+	            // resolve();
+	            this.player.debug.log('Jessibuca', 'webglAlignmentError and play success');
+	          }).catch(() => {
+	            // reject();
+	            this.player.debug.log('Jessibuca', 'webglAlignmentError and play error');
+	          });
+	        });
+	      });
 	      this.player.once(EVENTS_ERROR.mediaSourceH265NotSupport, () => {
-	        this.close().then(() => {
+	        this.pause().then(() => {
 	          if (this.player._opt.autoWasm) {
 	            this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play');
 
@@ -12363,7 +12403,7 @@
 	        });
 	      });
 	      this.player.once(EVENTS_ERROR.webcodecsH265NotSupport, () => {
-	        this.close().then(() => {
+	        this.pause().then(() => {
 	          if (this.player._opt.autoWasm) {
 	            this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play');
 
@@ -12444,13 +12484,13 @@
 	        });
 	      });
 	      this.player.once(EVENTS_ERROR.mseSourceBufferError, () => {
-	        this.close().then(() => {
+	        this.pause().then(() => {
 	          this.player.debug.log('Jessibuca', 'mseSourceBufferError close success');
 	        });
 	      }); //
 
 	      this.player.once(EVENTS_ERROR.webcodecsH265NotSupport, () => {
-	        this.close().then(() => {
+	        this.pause().then(() => {
 	          if (this.player._opt.autoWasm) {
 	            this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play');
 
@@ -12471,7 +12511,7 @@
 
 	      this.player.once(EVENTS_ERROR.wasmDecodeError, () => {
 	        if (this.player._opt.wasmDecodeErrorReplay) {
-	          this.close().then(() => {
+	          this.pause().then(() => {
 	            this.player.debug.log('Jessibuca', 'wasm decode error and reset player and play');
 
 	            this._resetPlayer({

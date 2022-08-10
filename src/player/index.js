@@ -372,7 +372,7 @@ export default class Player extends Emitter {
         return this._videoTimestamp;
     }
 
-    get isDebug(){
+    get isDebug() {
         return this._opt.debug === true;
     }
 
@@ -822,5 +822,9 @@ export default class Player extends Emitter {
         _times.videoTimestamp = _times.videoStart - _times.decodeStart;
         _times.allTimestamp = _times.videoStart - _times.playInitStart;
         this.emit(EVENTS.playToRenderTimes, _times);
+    }
+
+    getOption() {
+        return this._opt;
     }
 }

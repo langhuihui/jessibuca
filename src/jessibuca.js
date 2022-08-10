@@ -81,14 +81,16 @@ class Jessibuca extends Emitter {
 
     _initPlayer($container, options) {
         this.player = new Player($container, options);
+        this.player.debug.log('jessibuca', '_initPlayer', this.player.getOption())
         this._bindEvents();
     }
 
     _resetPlayer(options = {}) {
         this.player.destroy();
         this.player = null;
-        const _options = Object.assign(this._opt, options);
-        this._initPlayer(this.$container, _options);
+        this._opt = Object.assign(this._opt, options);
+        this._opt.url = '';// reset url
+        this._initPlayer(this.$container, this._opt);
     }
 
     _bindEvents() {
@@ -310,7 +312,7 @@ class Jessibuca extends Emitter {
 
 
             this.player.once(EVENTS_ERROR.mediaSourceH265NotSupport, () => {
-                this.close().then(() => {
+                this.pause().then(() => {
                     if (this.player._opt.autoWasm) {
                         this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play')
                         this._resetPlayer({useMSE: false})
@@ -326,7 +328,7 @@ class Jessibuca extends Emitter {
             })
 
             this.player.once(EVENTS_ERROR.webcodecsH265NotSupport, () => {
-                this.close().then(() => {
+                this.pause().then(() => {
                     if (this.player._opt.autoWasm) {
                         this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play')
                         this._resetPlayer({useWCS: false})
@@ -398,14 +400,14 @@ class Jessibuca extends Emitter {
             })
 
             this.player.once(EVENTS_ERROR.mseSourceBufferError, () => {
-                this.close().then(() => {
+                this.pause().then(() => {
                     this.player.debug.log('Jessibuca', 'mseSourceBufferError close success')
                 })
             })
 
             //
             this.player.once(EVENTS_ERROR.webcodecsH265NotSupport, () => {
-                this.close().then(() => {
+                this.pause().then(() => {
                     if (this.player._opt.autoWasm) {
                         this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play')
                         this._resetPlayer({useWCS: false})
@@ -422,7 +424,7 @@ class Jessibuca extends Emitter {
             // 解码报错。
             this.player.once(EVENTS_ERROR.wasmDecodeError, () => {
                 if (this.player._opt.wasmDecodeErrorReplay) {
-                    this.close().then(() => {
+                    this.pause().then(() => {
                         this.player.debug.log('Jessibuca', 'wasm decode error and reset player and play')
                         this._resetPlayer({useWCS: false})
                         this.play(url, options).then(() => {

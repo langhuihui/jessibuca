@@ -7676,14 +7676,14 @@
 	  var decoder$1 = {
 	    opt: {
 	      debug: DEFAULT_PLAYER_OPTIONS.debug,
-	      forceNoOffscreen: DEFAULT_PLAYER_OPTIONS.forceNoOffscreen,
+	      useOffscreen: DEFAULT_PLAYER_OPTIONS.useOffscreen,
 	      useWCS: DEFAULT_PLAYER_OPTIONS.useWCS,
 	      videoBuffer: DEFAULT_PLAYER_OPTIONS.videoBuffer,
 	      openWebglAlignment: DEFAULT_PLAYER_OPTIONS.openWebglAlignment,
 	      videoBufferDelay: DEFAULT_PLAYER_OPTIONS.videoBufferDelay
 	    },
 	    useOffscreen: function () {
-	      return !decoder$1.opt.forceNoOffscreen && typeof OffscreenCanvas != 'undefined';
+	      return decoder$1.opt.useOffscreen && typeof OffscreenCanvas != 'undefined';
 	    },
 	    initAudioPlanar: function (channels, samplerate) {
 	      postMessage({

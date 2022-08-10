@@ -184,7 +184,6 @@ export default {
                             play: this.showOperateBtns,
                             audio: this.showOperateBtns,
                         },
-                        vod: this.vod,
                         forceNoOffscreen: !this.useOffscreen,
                         isNotMute: true,
                         timeout: 10
