@@ -12,6 +12,16 @@ sidebar: false
 
 # 其他demo
 
+
+## h265 MSE
+
+#### https
+[https://jessibuca.com/pro/demo-mse.html](https://jessibuca.com/pro/demo-mse.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-mse.html](http://jessibuca.monibuca.com/pro/demo-mse.html)
+
+
 ## 2x2
 #### https
 [https://jessibuca.com/pro/2x2-demo.html](https://jessibuca.com/pro/2x2-demo.html)
