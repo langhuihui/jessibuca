@@ -112,6 +112,12 @@
             <div class="container" id="container8"></div>
             <div class="container" id="container9"></div>
         </div>
+        <div class="input">
+            <div>
+                当前浏览器：<span id="mseSupport" style="color: green;display: none">支持MSE H265解码</span>
+                <span id="mseNotSupport" style="color: red;display: none">不支持MSE H265解码,会自动切换成wasm解码</span>
+            </div>
+        </div>
         <div class="input" style="width: 1000px;flex-direction: column">
             <div>
                 js为单线程运行时, 无法通过多线程提升并发性能.
@@ -308,6 +314,18 @@
             $destroy.style.display = 'none';
         }, 100)
     })
+
+    function checkSupport() {
+        return window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="hev1.1.6.L123.b0"');
+    }
+
+    let support = document.getElementById('mseSupport');
+    let notSupport = document.getElementById('mseNotSupport');
+    if (checkSupport()) {
+        support.style.display = 'inline-block'
+    } else {
+        notSupport.style.display = 'inline-block'
+    }
 
 </script>
 
