@@ -41,7 +41,21 @@ sidebar: false
 #### http
 [http://jessibuca.monibuca.com/pro/3x3-simd-demo.html](http://jessibuca.monibuca.com/pro/3x3-simd-demo.html)
 
+## 2x2 h265 MSE
 
+[https://jessibuca.com/pro/2x2-mse-demo.html](https://jessibuca.com/pro/2x2-mse-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/2x2-mse-demo.html](http://jessibuca.monibuca.com/pro/2x2-mse-demo.html)
+
+
+## 3X3 h265 MSE
+
+#### https
+[https://jessibuca.com/pro/3x3-mse-demo.html](https://jessibuca.com/pro/3x3-mse-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/3x3-mse-demo.html](http://jessibuca.monibuca.com/pro/3x3-mse-demo.html)
 
 
 # MSE H265硬解码
