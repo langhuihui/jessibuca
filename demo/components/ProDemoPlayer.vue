@@ -40,6 +40,13 @@
             </div>
             <div id="container" ref="container"></div>
             <div class="input">
+                <div>
+                    当前浏览器：
+                    <span v-if="supportMSEHevc" style="color: green;">支持MSE H265解码</span>
+                    <span v-else style="color: red;">不支持MSE H265解码,会自动切换成wasm解码</span>
+                </div>
+            </div>
+            <div class="input">
                 <div>输入URL：</div>
                 <input
                     placeholder="支持 hls/ws-raw/ws-flv/http-flv协议"
@@ -142,6 +149,7 @@ export default {
             fps: '',
             volume: 1,
             rotate: 0,
+            supportMSEHevc:false,
             useWCS: false,
             useMSE: false,
             useSIMD: true,
@@ -156,6 +164,7 @@ export default {
     },
     mounted() {
         this.vConsole = new window.VConsole();
+        this.supportMSEHevc = window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="hev1.1.6.L123.b0"');
         this.create();
         window.onerror = (msg) => (this.err = msg);
     },
