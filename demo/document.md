@@ -133,7 +133,23 @@ https://github.com/langhuihui/jessibuca/issues/135
 
 ### 关于视频卡顿
 
-可以通过设置videoBuffer 变大些，一般1s，2s，3s都是可以的
+### 可能存在的问题
+1. 分辨率过高
+2. 带宽是否跟得上
+3. 是否是H265编码
+
+### 自查
+监听下`stats` 事件，查看 `fps` 是否达到了预期的值。
+
+#### 通用解决方案
+1. 可以通过设置videoBuffer 变大些，一般1s，2s，3s都是可以的
+
+#### H264
+1. 可以采用`useMSE` 或者`useWCS`（需要https）开启硬解码模式
+2. 可以试下jessibuca pro 版本 （simd解码） http://jessibuca.monibuca.com/player-pro.html
+
+#### H265
+1. 可以试下jessibuca pro 版本 （simd解码） http://jessibuca.monibuca.com/player-pro.html
 
 
 ### 关于黑屏
