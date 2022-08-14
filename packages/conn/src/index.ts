@@ -61,6 +61,7 @@ export const enum Protocol {
   WebRTC = "webrtc://"
 }
 export class Connection extends FSM {
+  type: 'flv' | 'hls' | 'mp4' | 'm7s' | 'unknown' = 'unknown';
   oput?: Oput;
   netConn?: WebSocketFSM | WebTransportFSM | HttpFSM | WebRTCFSM;
   up = new TransmissionStatistics();
@@ -84,21 +85,26 @@ export class Connection extends FSM {
 
   @ChangeState(FSM.INIT, ConnectionState.CONNECTED)
   async connect(url?: string | File) {
+    console.log(`connect: `, url);
     if (url) {
       if (typeof url === 'string')
         this.url = url;
       else {
         this.url = url.name;
-        console.time(this.url);
-        this.onConnected(url.stream());
-        return;
       }
     }
     if (!this.url) {
       throw new Error("url is required");
     }
-    console.log(`connect: ${this.url}`);
+    if (this.url.endsWith('.flv')) {
+      this.type = 'flv';
+    }
+    console.log("connect type: ", this.type);
     console.time(this.url);
+    if (url instanceof File) {
+      this.onConnected(url.stream());
+      return;
+    }
     if (this.url.startsWith(Protocol.WS) || this.url.startsWith(Protocol.WSS)) {
       if (!(this.netConn instanceof WebSocketFSM))
         this.netConn = new WebSocketFSM(this);

@@ -15,6 +15,7 @@
     "webrtc-internals": "^0.0.8"
   },
   "devDependencies": {
+    "@types/dom-webcodecs": "^0.1.4",
     "@vitejs/plugin-vue": "^3.0.1",
     "typescript": "^4.7.4",
     "unplugin-vue-components": "^0.21.2",

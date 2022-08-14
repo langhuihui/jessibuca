@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, reactive, ref, watchEffect } from 'vue';
 import { Connection } from '../../../packages/conn/src';
-import { FlvDemuxer, FlvTag } from '../../../packages/demuxer/src/flv';
+import { Demuxer } from '../../../packages/demuxer/src';
 import { MessageReactive, UploadCustomRequestOptions, UploadFileInfo, useMessage } from 'naive-ui';
 import { ConnectionState, ConnectionEvent } from '../../../packages/conn/src/types';
 import { TimelineDataSeries, TimelineGraphView } from 'webrtc-internals';
@@ -38,19 +38,45 @@ conn.on(ConnectionState.RECONNECTED, () => {
   removeMessage();
   message.success(ConnectionState.RECONNECTED);
 });
-const currentFlvTag = ref<FlvTag | null>(null);
-async function connect(file?: File) {
+const display = reactive({
+  audioTS: 0,
+  audioSize: 0,
+  videoTS: 0,
+  videoSize: 0,
+});
+function readDelay(t: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, t));
+}
+async function connect(file?: File, options?: UploadCustomRequestOptions) {
   try {
     await conn.connect(file || url.value);
-    if (conn.url!.endsWith('flv')) {
-      new FlvDemuxer(conn).pipeTo(new WritableStream({
-        write(tag: FlvTag) {
-          console.log(tag)
-          currentFlvTag.value = tag;
-        }
-      }));
-    }
+    const demuxer = new Demuxer(conn);
+    demuxer.on(Demuxer.AUDIO_ENCODER_CONFIG_CHANGED, (data: Uint8Array) => {
+      message.info(Demuxer.AUDIO_ENCODER_CONFIG_CHANGED);
+    });
+    demuxer.on(Demuxer.VIDEO_ENCODER_CONFIG_CHANGED, (data: Uint8Array) => {
+      message.info(Demuxer.VIDEO_ENCODER_CONFIG_CHANGED);
+    });
+    demuxer.audioReadable.pipeTo(new WritableStream({
+      write(chunk: EncodedAudioChunkInit) {
+        display.audioTS = chunk.timestamp;
+        display.audioSize = chunk.data.byteLength;
+        if (file && options)
+          options.onProgress({ percent: 100 * conn.down.total / file.size });
+        return readDelay(20);
+      }
+    }));
+    demuxer.videoReadable.pipeTo(new WritableStream({
+      write(chunk: EncodedVideoChunkInit) {
+        display.videoTS = chunk.timestamp;
+        display.videoSize = chunk.data.byteLength;
+        if (file && options)
+          options.onProgress({ percent: 100 * conn.down.total / file.size });
+        return readDelay(40);
+      }
+    }));
   } catch (e) {
+    if (options) options.onFinish();
     removeMessage();
     console.error(e);
     message.error(e.message);
@@ -82,26 +108,7 @@ async function onUpload(options: UploadCustomRequestOptions) {
   const totalSize = file?.size;
   let read = 0;
   if (file && totalSize) {
-    try {
-      await conn.connect(file);
-       if (conn.url!.endsWith('flv')) {
-        new FlvDemuxer(conn).pipeTo(new WritableStream({
-          write(tag: FlvTag) {
-            console.log(tag)
-            options.onProgress({ percent: 100 * conn.down.total / totalSize });
-            currentFlvTag.value = tag;
-            return new Promise((resolve) => {
-              setTimeout(resolve, 100);
-            });
-          }
-        }));
-      }
-    } catch (e) {
-      options.onFinish();
-      removeMessage();
-      console.error(e);
-      message.error(e.message);
-    }
+    connect(file, options);
   }
 }
 function onRemove(options: { file: UploadFileInfo, fileList: Array<UploadFileInfo>; }) {
@@ -145,18 +152,18 @@ function onRemove(options: { file: UploadFileInfo, fileList: Array<UploadFileInf
       </n-statistic>
     </n-col>
   </n-row>
-  <n-row v-if="currentFlvTag">
+  <n-row>
     <n-col :span="6">
-      <n-statistic label="当前tag类型" :value="currentFlvTag.type">
-      </n-statistic>
+      <n-statistic label="音频时间戳" :value="display.audioTS"></n-statistic>
     </n-col>
     <n-col :span="6">
-      <n-statistic label="当前tag时间戳" :value="currentFlvTag.timestamp">
-      </n-statistic>
+      <n-statistic label="音频tag大小" :value="display.audioSize"></n-statistic>
     </n-col>
-    <n-col :span="12">
-      <n-statistic label="当前tag大小" :value="currentFlvTag.data.length">
-      </n-statistic>
+    <n-col :span="6">
+      <n-statistic label="视频时间戳" :value="display.videoTS"></n-statistic>
+    </n-col>
+    <n-col :span="6">
+      <n-statistic label="视频tag大小" :value="display.videoSize"></n-statistic>
     </n-col>
   </n-row>
   <canvas id="bps"></canvas>

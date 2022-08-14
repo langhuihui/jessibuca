@@ -28,10 +28,14 @@ export class FlvDemuxer extends ReadableStream<FlvTag> {
         controller.enqueue({ type, data: data.slice(), timestamp });
       }).catch(err => controller.error(err));
     };
+    const readHead = reader.read(9);
     super({
       start: async controller => {
         console.time('flv');
-        this.header = await reader.read(9);//跳过flv头
+        const header = await readHead;//跳过flv头
+        if (header[0] != 'F'.charCodeAt(0) || header[1] != 'L'.charCodeAt(0) || header[2] != 'V'.charCodeAt(0)) {
+          return controller.error(new Error('not flv'));
+        }
         console.timeEnd('flv');
         return readTag(controller);
         // conn.once(FSM.INIT, () => controller.close());
@@ -46,5 +50,6 @@ export class FlvDemuxer extends ReadableStream<FlvTag> {
       },
       pull: readTag
     });
+    readHead.then(data => this.header = data);
   }
 }

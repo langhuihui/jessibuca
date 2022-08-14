@@ -3,10 +3,14 @@ lockfileVersion: 5.4
 importers:
 
   .:
-    specifiers: {}
+    specifiers:
+      '@types/dom-webcodecs': ^0.1.4
+    devDependencies:
+      '@types/dom-webcodecs': 0.1.4
 
   demo:
     specifiers:
+      '@types/dom-webcodecs': ^0.1.4
       '@vicons/ionicons5': ^0.12.0
       '@vitejs/plugin-vue': ^3.0.1
       naive-ui: ^2.31.0
@@ -22,6 +26,7 @@ importers:
       vue: 3.2.37
       webrtc-internals: 0.0.8
     devDependencies:
+      '@types/dom-webcodecs': 0.1.4
       '@vitejs/plugin-vue': 3.0.1_vite@3.0.4+vue@3.2.37
       typescript: 4.7.4
       unplugin-vue-components: 0.21.2_vite@3.0.4+vue@3.2.37
@@ -51,9 +56,11 @@ importers:
 
   packages/demuxer:
     specifiers:
-      afsm: ^2.2.2
+      afsm: ^2.2.3
+      eventemitter3: ^4.0.7
     dependencies:
-      afsm: 2.2.2
+      afsm: 2.2.3
+      eventemitter3: 4.0.7
 
   packages/renderer:
     specifiers: {}
@@ -150,6 +157,10 @@ packages:
     dependencies:
       estree-walker: 2.0.2
       picomatch: 2.3.1
+    dev: true
+
+  /@types/dom-webcodecs/0.1.4:
+    resolution: {integrity: sha512-dc+xSUnCaCdi/hExZArnLhiavS3E1Rdpp2+zCI6TcmJvz4qgDPBbpvCM7DsQhwRXIIpVMHO6c3s+t+JyCSqYBA==}
     dev: true
 
   /@types/emscripten/1.39.6:
@@ -313,6 +324,12 @@ packages:
 
   /afsm/2.2.2:
     resolution: {integrity: sha512-QbuT6njDS+LMfvoLm0wY5+BuxRVYnEzArdJyrzlVJK1r5nh20odq9ofIqDAnGKg6G5kJBbawTWNGqlTzeTFn1Q==}
+    dependencies:
+      eventemitter3: 4.0.7
+    dev: false
+
+  /afsm/2.2.3:
+    resolution: {integrity: sha512-81F1IOKgqn2sr+9bcDcPXAqpV+elrlk5lrCQTsn6uIJuUxCNgK6m02kdjsDYUfj32ExTwBecMQrnBr5r8cewlQ==}
     dependencies:
       eventemitter3: 4.0.7
     dev: false

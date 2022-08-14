@@ -29,5 +29,8 @@
   "bugs": {
     "url": "https://github.com/langhuihui/jessibuca/issues"
   },
-  "homepage": "https://github.com/langhuihui/jessibuca#readme"
+  "homepage": "https://github.com/langhuihui/jessibuca#readme",
+  "devDependencies": {
+    "@types/dom-webcodecs": "^0.1.4"
+  }
 }
