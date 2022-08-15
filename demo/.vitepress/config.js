@@ -19,7 +19,7 @@ module.exports = {
     },
     head: [
         ['script', {src: '/jessibuca.js'}],
-        ['script', {src: '/pro/jessibuca-demo.js'}],
+        ['script', {src: '/pro/jessibuca-pro-demo.js'}],
         ['script', {src: '/vconsole.js'}]
     ]
 }

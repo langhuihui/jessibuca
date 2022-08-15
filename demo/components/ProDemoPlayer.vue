@@ -38,7 +38,7 @@
                     @change="restartPlay('simd')"
                 /><span>SIMD</span>
             </div>
-            <div id="container" ref="container"></div>
+            <div id="container"></div>
             <div class="input">
                 <div>
                     当前浏览器：
@@ -98,7 +98,7 @@
                         v-model="showBandwidth"
                         @change="restartPlay"
                     /><span>网速</span>
-                    <span v-if="fps" style="margin-left: 10px">FPS：{{ fps }}</span>
+                    <span style="margin-left: 10px">FPS：{{ fps }}</span>
                 </div>
             </div>
             <div class="input" v-if="loaded">
@@ -180,8 +180,8 @@ export default {
             const jessibuca = new window.JessibucaPro(
                 Object.assign(
                     {
-                        container: this.$refs.container,
-                        decoder: '/pro/decoder.js',
+                        container: document.getElementById('container'),
+                        decoder: '/pro/decoder-pro.js',
                         videoBuffer: Number(this.$refs.buffer.value), // 缓存时长
                         isResize: false,
                         useWCS: this.useWCS,
