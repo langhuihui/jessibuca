@@ -3,14 +3,31 @@ sidebar: false
 ---
 <ProDemoPlayer/>
 
-> 注意：pro 试用开发包(10分钟断开, 刷新页面继续测试)
+> 注意：pro 试用开发包(60分钟断开, 刷新页面继续测试)
 >
-> 注意：pro 试用开发包(10分钟断开, 刷新页面继续测试)
+> 注意：pro 试用开发包(60分钟断开, 刷新页面继续测试)
 >
-> 注意：pro 试用开发包(10分钟断开, 刷新页面继续测试)
+> 注意：pro 试用开发包(60分钟断开, 刷新页面继续测试)
 
 
 # 其他demo
+
+## demo
+
+#### https
+[https://jessibuca.com/pro/demo.html](https://jessibuca.com/pro/demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo.html](http://jessibuca.monibuca.com/pro/demo.html)
+
+
+## simd demo
+#### https
+[https://jessibuca.com/pro/demo-simd.html](https://jessibuca.com/pro/demo-simd.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-simd.html](http://jessibuca.monibuca.com/pro/demo-simd.html)
+
 
 
 ## h265 MSE

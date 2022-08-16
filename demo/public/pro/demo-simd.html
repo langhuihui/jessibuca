@@ -73,7 +73,7 @@
         }
 
         .page {
-            background: url('./bg.jpg');
+            background: url('http://jessibuca.monibuca.com/bg.jpg');
             background-repeat: no-repeat;
             background-position: top;
         }
@@ -100,8 +100,9 @@
             <button id="play">播放</button>
             <button id="pause" style="display: none">停止</button>
         </div>
-        <div class="input" style="line-height: 30px">
+        <div class="input input-more" style="line-height: 30px">
             <button id="destroy">销毁</button>
+            <span class="fps-inner"></span>
         </div>
     </div>
 </div>
@@ -112,6 +113,7 @@
     var $playHref = document.getElementById('playUrl');
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
+    var $fps = document.querySelector('.fps-inner');
 
 
     var showOperateBtns = true; // 是否显示按钮
@@ -151,12 +153,17 @@
         },);
 
 
-        jessibuca.on('ptz', (arrow) => {
-            console.log('ptz', arrow);
-        })
+        // jessibuca.on('ptz', (arrow) => {
+        //     console.log('ptz', arrow);
+        // })
+        //
+        // jessibuca.on('streamQualityChange', (value) => {
+        //     console.log('streamQualityChange', value);
+        // })
 
-        jessibuca.on('streamQualityChange', (value) => {
-            console.log('streamQualityChange', value);
+        jessibuca.on('stats', (stats) => {
+            console.log('stats', stats);
+            $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
         })
 
 
@@ -182,12 +189,15 @@
     $pause.addEventListener('click', function () {
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
+        $fps.textContent = '';
         jessibuca.pause();
     })
 
     $destroy.addEventListener('click', function () {
         if (jessibuca) {
             jessibuca.destroy();
+            $fps.textContent = '';
+
         }
         create();
     })
