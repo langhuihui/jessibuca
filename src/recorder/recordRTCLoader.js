@@ -1,4 +1,5 @@
-import {downloadRecord} from "../utils";
+import {downloadRecord, now} from "../utils";
+import saveAs from "../utils/file-save";
 import RecordRTC from 'recordrtc';
 import {EVENTS, FILE_SUFFIX} from "../constant";
 import Emitter from "../utils/emitter";
@@ -86,7 +87,8 @@ export default class RecordRTCLoader extends Emitter {
         this.recorder.stopRecording(() => {
             this.player.debug.log('Recorder', 'stop recording');
             this.player.emit(EVENTS.recordEnd)
-            downloadRecord(this.recorder.getBlob(), this.fileName, this.fileType);
+            const fileName = (this.fileName || now()) + '.' + (this.fileType || FILE_SUFFIX.webm)
+            saveAs(this.recorder.getBlob(), fileName)
             this._reset();
             this.player.emit(EVENTS.recording, false);
         })

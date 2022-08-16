@@ -7531,7 +7531,7 @@
 	  // 解码失败重新播放。
 	  openWebglAlignment: false,
 	  //  https://github.com/langhuihui/jessibuca/issues/152
-	  wasmDecodeAudioSyncVideo: true // wasm 解码之后音视频同步
+	  wasmDecodeAudioSyncVideo: false // wasm 解码之后音视频同步
 
 	};
 	const WORKER_CMD_TYPE = {
