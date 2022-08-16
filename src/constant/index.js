@@ -61,7 +61,7 @@ export const DEFAULT_PLAYER_OPTIONS = {
     autoWasm: true, // 自动降级到 wasm 模式
     wasmDecodeErrorReplay: true, // 解码失败重新播放。
     openWebglAlignment: false,//  https://github.com/langhuihui/jessibuca/issues/152
-    wasmDecodeAudioSyncVideo: true,// wasm 解码之后音视频同步
+    wasmDecodeAudioSyncVideo: false,// wasm 解码之后音视频同步
 }
 
 
