@@ -111,6 +111,7 @@ export default class WebcodecsDecoder extends Emitter {
                     type: isIframe ? ENCODED_VIDEO_TYPE.key : ENCODED_VIDEO_TYPE.delta
                 })
                 this.decoder.decode(chunk);
+                this.player.emit(EVENTS.timeUpdate, ts)
             } else {
                 this.player.debug.warn('Webcodecs', 'VideoDecoder isDecodeFirstIIframe false')
             }

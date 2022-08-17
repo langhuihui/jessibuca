@@ -40,6 +40,8 @@ export default class VideoLoader extends CommonLoader {
 
         proxy(this.$videoElement, 'timeupdate', (event) => {
             // this.player.emit(EVENTS.videoTimeUpdate, event.timeStamp);
+            const timeStamp = parseInt(event.timeStamp, 10);
+            this.player.emit(EVENTS.timeUpdate, timeStamp)
         })
 
         this.player.debug.log('Video', 'init');
