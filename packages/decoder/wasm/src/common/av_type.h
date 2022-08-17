@@ -1,10 +1,6 @@
 #ifndef _AV_TYPE_H_
 #define _AV_TYPE_H_
 
-
-typedef unsigned char u8;
-typedef unsigned int u32;
-
 enum VideoType {
 
     Video_Unknow = 0,

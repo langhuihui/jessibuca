@@ -6,7 +6,7 @@ import os
 import sys
 import getopt
 from subprocess import Popen, PIPE, STDOUT
-args = {'-o': './out/decoderaudio'}
+args = {'-o': './types/audiodec'}
 
 sargs = {
     'WASM': 1,
@@ -20,20 +20,18 @@ sargs = {
     'EXPORT_ES6' : 1
 }
 emcc_args = [
-    # '-m32',
-     '-O3',
+    '-O3',
     '--memory-init-file', '0',
-    # '--closure', '1',
-    # '--llvm-lto','1',
-    '--bind',
-    '-I.', '-Ithirdparty/ffmpeg/include'
+    '-lembind',
+    '-flto',
+    '-Isrc/common', '-Ithirdparty/audio/ffmpeg/include'
 ]+["-s "+k+"="+str(v) for k, v in sargs.items()]
 
 print ('building...')
 
-emcc_args = ['thirdparty/ffmpeg/lib/libavcodec.a','thirdparty/ffmpeg/lib/libavutil.a','thirdparty/ffmpeg/lib/libswresample.a']+emcc_args
+emcc_args = ['thirdparty/audio/ffmpeg/lib/libavcodec.a','thirdparty/audio/ffmpeg/lib/libavutil.a','thirdparty/audio/ffmpeg/lib/libswresample.a']+emcc_args
 
-os.system('emcc ./src/decoderaudio/decoderaudio.cpp ' +
+os.system('emcc ./src/audio/dec.cpp ./src/common/dec_audio_base.cpp ./src/common/dec_audio_ffmpeg.cpp ./src/common/dec_base_ffmpeg.cpp ' +
           (' '.join(emcc_args)) + ' -o '+args['-o']+'.js')
 
 print ('done')

@@ -1,11 +1,11 @@
-#ifndef  __DECODER_AVC_H__
-#define  __DECODER_AVC_H__
+#ifndef  __DECODER_AVC_LIBAVC_H__
+#define  __DECODER_AVC_LIBAVC_H__
 
-#include "decodervideo.h"
+#include "dec_video_base.h"
 
 class AVCCodec;
 
-class Decoder_AVC_Android : public DecoderVideo
+class Decoder_AVC_LIBAVC : public DecoderVideoBase
 {
 
     public:
@@ -13,18 +13,17 @@ class Decoder_AVC_Android : public DecoderVideo
          void    *mCodecCtx;            // Codec context
          int      mVideoWith;          
          int      mVideoHeight;
-         unsigned char* mYUV;
        
         AVCCodec* mCodec;
 
 
     public:
 
-        Decoder_AVC_Android(DecoderVideoObserver* obs);
+        Decoder_AVC_LIBAVC(DecoderVideoBaseObserver* obs);
 
-        virtual void init();
+        virtual void init(int vtype,  unsigned char* extraData, unsigned int extraDataSize);
         virtual void decode(unsigned char *buf, unsigned int buflen, unsigned int timestamp);
-        virtual ~Decoder_AVC_Android();
+        virtual ~Decoder_AVC_LIBAVC();
 };
 
 

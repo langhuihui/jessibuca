@@ -7,7 +7,7 @@ class DecoderAudioBaseObserver
 
 public:
     virtual void audioInfo(unsigned int sampleRate, unsigned int channels) = 0;
-    virtual void pcmData(unsigned char* yuv, unsigned int timestamp) = 0;
+    virtual void pcmData(unsigned char** pcmList, unsigned int samples, unsigned int timestamp) = 0;
     
 };
 

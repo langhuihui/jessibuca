@@ -19,7 +19,7 @@ public:
 
     DecoderVideoBase(DecoderVideoBaseObserver* obs);
 
-    virtual void init(int vtype,  unsigned char* extraData, unsigned int extraDataSize) = 0;
+    virtual void init(int atype,  unsigned char* extraData, unsigned int extraDataSize) = 0;
 
     virtual void decode(unsigned char *buf, unsigned int buflen, unsigned int timestamp) = 0;
 

@@ -6,7 +6,7 @@ import os
 import sys
 import getopt
 from subprocess import Popen, PIPE, STDOUT
-args = {'-o': './out/decodervideo'}
+args = {'-o': './types/videodec'}
 
 sargs = {
     'WASM': 1,
@@ -20,20 +20,18 @@ sargs = {
     'EXPORT_ES6' : 1
 }
 emcc_args = [
-    # '-m32',
-     '-O3',
+    '-O3',
     '--memory-init-file', '0',
-    # '--closure', '1',
-    # '--llvm-lto','1',
-    '--bind',
-    '-I.', '-Ithirdparty/ffmpeg/include'
+    '-lembind',
+    '-flto',
+    '-Isrc/common', '-Ithirdparty/video/ffmpeg/include'
 ]+["-s "+k+"="+str(v) for k, v in sargs.items()]
 
 print ('building...')
 
-emcc_args = ['thirdparty/ffmpeg/lib/libavcodec.a','thirdparty/ffmpeg/lib/libavutil.a']+emcc_args
+emcc_args = ['thirdparty/video/ffmpeg/lib/libavcodec.a','thirdparty/video/ffmpeg/lib/libavutil.a']+emcc_args
 
-os.system('emcc ./src/decodervideo/decodervideo.cpp ' +
+os.system('emcc ./src/video/dec.cpp ./src/common/dec_video_base.cpp ./src/common/dec_base_ffmpeg.cpp ./src/common/dec_video_ffmpeg.cpp ' +
           (' '.join(emcc_args)) + ' -o '+args['-o']+'.js')
 
 print ('done')

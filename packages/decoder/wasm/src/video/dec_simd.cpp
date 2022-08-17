@@ -5,20 +5,19 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include "decoderavc.h"
-#include "decoderhevc.h"
+#include "dec_avc_libavc.h"
+#include "dec_hevc_libhevc.h"
+#include "dec_video_base.h"
+#include "av_type.h"
 
 using namespace emscripten;
 using namespace std;
-typedef unsigned char u8;
-typedef unsigned int u32;
 
 
 //视频类型，全局统一定义，JS层也使用该定义
 
 
-
-class VideoDecoder : public DecoderVideoObserver {
+class VideoDecoder : public DecoderVideoBaseObserver {
 
 public:
 
@@ -26,7 +25,7 @@ public:
     int mVideoHeight = 0;
     int mVType = 0;
     int mVFormat = 0;
-    DecoderVideo* mDecoderV;
+    DecoderVideoBase* mDecoderV;
 
 
     val mJsObject;
@@ -47,18 +46,18 @@ public:
 
     void setCodec(string vtype, string format, string extra);
 
-    void decode(string input, u32 isKeyFrame, u32 timestamp);
+    void decode(string input, unsigned int isKeyFrame, unsigned int timestamp);
 
     virtual void videoInfo(int width, int height);
     virtual void yuvData(unsigned char* yuv, unsigned int timestamp);
      
     void clear();
 
-    void parseAVCExtraData(u8* extradata, int extradatalen);
-    void parseHEVCExtraData(u8* extradata, int extradatalen);
-    bool convertAnnexB(u8* data, int datalen);
-    int addCodecInfo(u8* data, int datalen);
-    void copyCodecInfo(u8* data, int datalen);
+    void parseAVCExtraData(unsigned char* extradata, int extradatalen);
+    void parseHEVCExtraData(unsigned char* extradata, int extradatalen);
+    bool convertAnnexB(unsigned char* data, int datalen);
+    int addCodecInfo(unsigned char* data, int datalen);
+    void copyCodecInfo(unsigned char* data, int datalen);
 
     void reportError(const char* format, ...);
 
@@ -121,21 +120,21 @@ void VideoDecoder::reportError(const char* format, ...) {
     mJsObject.call<void>("errorInfo", string(buf));
 }
 
-void VideoDecoder::copyCodecInfo(u8* data, int datalen) {
+void VideoDecoder::copyCodecInfo(unsigned char* data, int datalen) {
 
     if (mCodecInfoLen + datalen > mCodecInfoMaxLen) {
 
         if (mCodecInfoMaxLen == 0) {
 
             mCodecInfoMaxLen =  (mCodecInfoLen + datalen) > 1024 ? (mCodecInfoLen + datalen) : 1024;
-            mCodecInfo = (u8*)malloc(mCodecInfoMaxLen);
+            mCodecInfo = (unsigned char*)malloc(mCodecInfoMaxLen);
 
 
         } else {
 
             mCodecInfoMaxLen = 2*(mCodecInfoLen + datalen);
 
-            u8* newBuffer = (u8*)malloc(mCodecInfoMaxLen);
+            unsigned char* newBuffer = (unsigned char*)malloc(mCodecInfoMaxLen);
             memcpy(newBuffer, mCodecInfo, mCodecInfoLen);
             free(mCodecInfo);
 
@@ -150,9 +149,9 @@ void VideoDecoder::copyCodecInfo(u8* data, int datalen) {
 }
 
 
-void VideoDecoder::parseAVCExtraData(u8* extradata, int extradatalen) {
+void VideoDecoder::parseAVCExtraData(unsigned char* extradata, int extradatalen) {
 
-    u8 startCode[4] = {0, 0, 0, 1};
+    unsigned char startCode[4] = {0, 0, 0, 1};
 
     
     int offset = 5;
@@ -167,8 +166,8 @@ void VideoDecoder::parseAVCExtraData(u8* extradata, int extradatalen) {
     int spsnum = extradata[offset]&0x1F;
     offset += 1;
 
-    u32 spslen = 0;
-    u8* spslenptr = (u8*)&spslen;
+    unsigned int spslen = 0;
+    unsigned char* spslenptr = (unsigned char*)&spslen;
     spslenptr[0] = extradata[offset+1];
     spslenptr[1] = extradata[offset];
     offset += 2;
@@ -184,8 +183,8 @@ void VideoDecoder::parseAVCExtraData(u8* extradata, int extradatalen) {
     int ppsnum = extradata[offset];
     offset += 1;
 
-    u32 ppslen = 0;
-    u8* ppslenptr = (u8*)&ppslen;
+    unsigned int ppslen = 0;
+    unsigned char* ppslenptr = (unsigned char*)&ppslen;
     ppslenptr[0] = extradata[offset+1];
     ppslenptr[1] = extradata[offset];
     offset += 2;
@@ -198,9 +197,9 @@ void VideoDecoder::parseAVCExtraData(u8* extradata, int extradatalen) {
 
 }
 
-void VideoDecoder::parseHEVCExtraData(u8* extradata, int extradatalen) {
+void VideoDecoder::parseHEVCExtraData(unsigned char* extradata, int extradatalen) {
 
-    u8 startCode[4] = {0, 0, 0, 1};
+    unsigned char startCode[4] = {0, 0, 0, 1};
 
     int offset = 22;
 
@@ -221,8 +220,8 @@ void VideoDecoder::parseHEVCExtraData(u8* extradata, int extradatalen) {
         int naltype = extradata[offset]&0x3F;
         offset++;
 
-        u32 onenalnum = 0;
-        u8* onenalnumptr = (u8*)&onenalnum;
+        unsigned int onenalnum = 0;
+        unsigned char* onenalnumptr = (unsigned char*)&onenalnum;
         onenalnumptr[0] = extradata[offset+1];
         onenalnumptr[1] = extradata[offset];
         offset+=2;
@@ -231,8 +230,8 @@ void VideoDecoder::parseHEVCExtraData(u8* extradata, int extradatalen) {
 
         for (int j = 0; j < onenalnum; j++) {
 
-            u32 onenallen = 0;
-            u8* onenallenptr = (u8*)&onenallen;
+            unsigned int onenallen = 0;
+            unsigned char* onenallenptr = (unsigned char*)&onenallen;
             onenallenptr[0] = extradata[offset+1];
             onenallenptr[1] = extradata[offset];
             offset+=2;
@@ -268,8 +267,8 @@ void VideoDecoder::setCodec(string vtype, string format, string extra)
 
         if (format.compare("avc") == 0) {
 
-            videoformat = Format_AVC;
-            parseAVCExtraData((u8*)extra.data(), extra.length());
+            videoformat = Format_AVCC;
+            parseAVCExtraData((unsigned char*)extra.data(), extra.length());
 
         } else if (format.compare("annexb") == 0) {
 
@@ -280,7 +279,7 @@ void VideoDecoder::setCodec(string vtype, string format, string extra)
             return;
         }
 
-        mDecoderV = new DecoderAVC(this);
+        mDecoderV = new Decoder_AVC_LIBAVC(this);
 
     } else if (vtype.compare("hevc") == 0) {
 
@@ -289,7 +288,7 @@ void VideoDecoder::setCodec(string vtype, string format, string extra)
         if (format.compare("hvcc") == 0) {
 
             videoformat = Format_HVCC;
-            parseHEVCExtraData((u8*)extra.data(), extra.length());
+            parseHEVCExtraData((unsigned char*)extra.data(), extra.length());
 
         } else if (format.compare("annexb") == 0) {
 
@@ -301,7 +300,7 @@ void VideoDecoder::setCodec(string vtype, string format, string extra)
              return;
         }
 
-         mDecoderV = new DecoderHEVC(this);
+         mDecoderV = new Decoder_HEVC_LIBHEVC(this);
 
     } else {
 
@@ -312,20 +311,19 @@ void VideoDecoder::setCodec(string vtype, string format, string extra)
     mVType = videotype;
     mVFormat = videoformat;
 
-    mDecoderV->init();
-    
+    mDecoderV->init(mVType, NULL, 0);
     mInit = true;
 }
 
-bool VideoDecoder::convertAnnexB(u8* data, int datalen) {
+bool VideoDecoder::convertAnnexB(unsigned char* data, int datalen) {
 
     int offset = 0;
     bool bf = false; //检测 帧里是否有codec 信息
 
     while(offset < datalen) {
 
-        u32 nallen = 0;
-        u8* nallenptr = (u8*)&nallen;
+        unsigned int nallen = 0;
+        unsigned char* nallenptr = (unsigned char*)&nallen;
         nallenptr[0] = data[offset+3];
         nallenptr[1] = data[offset+2];
         nallenptr[2] = data[offset+1];
@@ -379,7 +377,7 @@ bool VideoDecoder::convertAnnexB(u8* data, int datalen) {
     return bf;
 }
 
-int VideoDecoder::addCodecInfo(u8* data, int datalen) {
+int VideoDecoder::addCodecInfo(unsigned char* data, int datalen) {
 
     int buflen = datalen + mCodecInfoLen;
 
@@ -400,7 +398,7 @@ int VideoDecoder::addCodecInfo(u8* data, int datalen) {
 
 }
 
-void  VideoDecoder::decode(string input, u32 isKeyFrame, u32 timestamp)
+void  VideoDecoder::decode(string input, unsigned int isKeyFrame, unsigned int timestamp)
 {
     if (!mInit) {
 
@@ -408,8 +406,8 @@ void  VideoDecoder::decode(string input, u32 isKeyFrame, u32 timestamp)
         return;
     }
 
-    u32 bufferLen = input.length();
-    u8* buffer = (u8*)input.data();
+    unsigned int bufferLen = input.length();
+    unsigned char* buffer = (unsigned char*)input.data();
 
     if (mVFormat == Format_AVC_AnnexB || mVFormat == Format_HEVC_AnnexB) {
 
@@ -448,7 +446,7 @@ void VideoDecoder::yuvData(unsigned char* yuv, unsigned int timestamp) {
     unsigned char* yuvArray[3] = {yuv, yuv + size, yuv + size*5/4};
 
     // printf("yuv %d %d %d %d %d %d\n", yuv[0], yuv[1], yuv[2], yuv[mVideoWith*mVideoHeight/2], yuv[mVideoWith*mVideoHeight/2+1], yuv[mVideoWith*mVideoHeight/2+2]);
-    mJsObject.call<void>("yuvData", (u32)yuvArray, timestamp);
+    mJsObject.call<void>("yuvData", (unsigned int)yuvArray, timestamp);
 
 }
 

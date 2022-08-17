@@ -1,11 +1,11 @@
-#include "dec_video_base.h"
+#include "dec_audio_base.h"
 
-DecoderVideoBase::DecoderVideoBase(DecoderVideoBaseObserver* obs) : mObserver(obs)
+DecoderAudioBase::DecoderAudioBase(DecoderAudioBaseObserver* obs) : mObserver(obs)
 {
 
 }
 
-DecoderVideoBase::~DecoderVideoBase()
+DecoderAudioBase::~DecoderAudioBase()
 {
 
 }
