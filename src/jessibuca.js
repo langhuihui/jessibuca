@@ -421,7 +421,37 @@ class Jessibuca extends Emitter {
                     }
                 });
             })
-            // 解码报错。
+            // webcodecs
+            this.player.once(EVENTS_ERROR.webcodecsWidthOrHeightChange, () => {
+                this.pause().then(() => {
+                    this.player.debug.log('Jessibuca', 'webcodecs Width Or Height Change reset player and play')
+                    this._resetPlayer({useWCS: true})
+                    this.play(url).then(() => {
+                        // resolve();
+                        this.player.debug.log('Jessibuca', 'webcodecs Width Or Height Change reset player and play success')
+                    }).catch(() => {
+                        // reject();
+                        this.player.debug.warn('Jessibuca', 'webcodecs Width Or Height Change reset player and play error')
+                    });
+                });
+            })
+            // webcodecs
+            this.player.once(EVENTS_ERROR.webcodecsDecodeError, () => {
+                this.pause().then(() => {
+                    if (this.player._opt.autoWasm) {
+                        this.player.debug.log('Jessibuca', 'webcodecs decode error reset player and play')
+                        this._resetPlayer({useWCS: false})
+                        this.play(url).then(() => {
+                            // resolve();
+                            this.player.debug.log('Jessibuca', 'webcodecs decode error  reset player and play success')
+                        }).catch(() => {
+                            // reject();
+                            this.player.debug.warn('Jessibuca', 'webcodecs decode error reset player and play error')
+                        });
+                    }
+                });
+            })
+            // wasm。
             this.player.once(EVENTS_ERROR.wasmDecodeError, () => {
                 if (this.player._opt.wasmDecodeErrorReplay) {
                     this.pause().then(() => {
@@ -432,7 +462,7 @@ class Jessibuca extends Emitter {
                             this.player.debug.log('Jessibuca', 'wasm decode error and reset player and play success')
                         }).catch(() => {
                             // reject();
-                            this.player.debug.log('Jessibuca', 'wasm decode error and reset player and play error')
+                            this.player.debug.warn('Jessibuca', 'wasm decode error and reset player and play error')
                         });
                     })
                 }

@@ -85,7 +85,7 @@ export default (player, control) => {
         if (isMobile() && control.$controls) {
             setTimeout(() => {
                 if (player.fullscreen) {
-                    console.log(player.width, player.height);
+                    // console.log(player.width, player.height);
                     let translateX = player.height / 2 - player.width + CONTROL_HEIGHT / 2;
                     let translateY = player.height / 2 - CONTROL_HEIGHT / 2;
 

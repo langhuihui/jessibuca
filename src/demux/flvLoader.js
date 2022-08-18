@@ -66,7 +66,13 @@ export default class FlvLoader extends CommonLoader {
                         })
                         const isIFrame = payload[0] >> 4 === 1;
                         if (payload.byteLength > 0) {
-                            this._doDecode(payload, MEDIA_TYPE.video, ts, isIFrame);
+                            tmp32[0] = payload[4]
+                            tmp32[1] = payload[3]
+                            tmp32[2] = payload[2]
+                            tmp32[3] = 0
+                            let cts = tmp32[0]
+
+                            this._doDecode(payload, MEDIA_TYPE.video, ts, isIFrame, cts);
                         }
                     }
                     break

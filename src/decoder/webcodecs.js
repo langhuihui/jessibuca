@@ -1,6 +1,7 @@
 import {formatVideoDecoderConfigure, noop, now} from "../utils";
 import Emitter from "../utils/emitter";
-import {ENCODED_VIDEO_TYPE, EVENTS, EVENTS_ERROR, VIDEO_ENC_CODE} from "../constant";
+import {ENCODED_VIDEO_TYPE, EVENTS, EVENTS_ERROR, VIDEO_ENC_CODE, WCS_ERROR} from "../constant";
+import {parseAVCDecoderConfigurationRecord} from "../utils/h264";
 
 
 export default class WebcodecsDecoder extends Emitter {
@@ -99,6 +100,20 @@ export default class WebcodecsDecoder extends Emitter {
                 this.hasInit = true;
             }
         } else {
+
+            // check width or height change
+            if (isIframe && payload[1] === 0) {
+                let data = payload.slice(5);
+                const config = parseAVCDecoderConfigurationRecord(data)
+                const videoInfo = this.player.video.videoInfo;
+                if (config.codecWidth !== videoInfo.width || config.codecHeight !== videoInfo.height) {
+                    this.player.debug.log('Webcodecs', `width or height is update, width ${videoInfo.width}-> ${config.codecWidth}, height ${videoInfo.height}-> ${config.codecHeight}`)
+                    this.player.emit(EVENTS_ERROR.webcodecsWidthOrHeightChange)
+                    return;
+                }
+            }
+
+
             // fix : Uncaught DOMException: Failed to execute 'decode' on 'VideoDecoder': A key frame is required after configure() or flush().
             if (!this.isDecodeFirstIIframe && isIframe) {
                 this.isDecodeFirstIIframe = true;
@@ -110,8 +125,16 @@ export default class WebcodecsDecoder extends Emitter {
                     timestamp: ts,
                     type: isIframe ? ENCODED_VIDEO_TYPE.key : ENCODED_VIDEO_TYPE.delta
                 })
-                this.decoder.decode(chunk);
-                this.player.emit(EVENTS.timeUpdate, ts)
+                this.player.emit(EVENTS.timeUpdate, ts);
+                try {
+                    this.decoder.decode(chunk);
+                } catch (e) {
+                    this.player.debug.error('Webcodecs', 'VideoDecoder', e)
+                    if (e.toString().indexOf(WCS_ERROR.keyframeIsRequiredError) !== -1) {
+                        this.player.emit(EVENTS_ERROR.webcodecsDecodeError);
+
+                    }
+                }
             } else {
                 this.player.debug.warn('Webcodecs', 'VideoDecoder isDecodeFirstIIframe false')
             }
