@@ -61,7 +61,16 @@ function readDelay(t: number): Promise<void> {
 }
 async function connect(file?: File, options?: UploadCustomRequestOptions) {
   try {
-    await conn.connect(url.value);
+
+    if (url.value === '') {
+
+        await conn.connect(file);
+
+    } else {
+        
+        await conn.connect(url.value);
+    }
+    
 
     const videoDecoder = new VideoDecoder('soft-simd');
     await videoDecoder.initialize();
