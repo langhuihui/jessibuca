@@ -7592,6 +7592,19 @@
 	    description: avcC
 	  };
 	}
+	function isGreenYUV(arrayBuffer) {
+	  let zeroNum = 0;
+
+	  for (let i = 0; i < 10; i++) {
+	    let temp = arrayBuffer[i];
+
+	    if (temp === 0) {
+	      zeroNum += 1;
+	    }
+	  }
+
+	  return zeroNum === 10;
+	}
 
 	if (!Date.now) Date.now = function () {
 	  return new Date().getTime();
@@ -7783,7 +7796,16 @@
 	        this.webglObj = createWebGL(this.offscreenCanvasGL, decoder$1.opt.openWebglAlignment);
 
 	        this.draw = function (ts, y, u, v) {
-	          this.webglObj.render(w, h, decoder.HEAPU8.subarray(y, y + size), decoder.HEAPU8.subarray(u, u + qsize), decoder.HEAPU8.subarray(v, v + qsize));
+	          const yData = decoder.HEAPU8.subarray(y, y + size);
+	          const uData = decoder.HEAPU8.subarray(u, u + qsize);
+	          const vData = decoder.HEAPU8.subarray(v, v + qsize);
+
+	          if (isGreenYUV(Uint8Array.from(yData))) {
+	            decoder$1.opt.debug && console.log('Jessibuca: [worker]: draw offscreenCanvas is green yuv');
+	            return;
+	          }
+
+	          this.webglObj.render(w, h, yData, uData, vData);
 	          let image_bitmap = this.offscreenCanvas.transferToImageBitmap();
 	          postMessage({
 	            cmd: WORKER_CMD_TYPE.render,
@@ -7794,8 +7816,16 @@
 	        };
 	      } else {
 	        this.draw = function (ts, y, u, v) {
-	          var yuv = [decoder.HEAPU8.subarray(y, y + size), decoder.HEAPU8.subarray(u, u + qsize), decoder.HEAPU8.subarray(v, v + qsize)];
-	          var outputArray = yuv.map(buffer => Uint8Array.from(buffer));
+	          const yData = Uint8Array.from(decoder.HEAPU8.subarray(y, y + size));
+	          const uData = Uint8Array.from(decoder.HEAPU8.subarray(u, u + qsize));
+	          const vData = Uint8Array.from(decoder.HEAPU8.subarray(v, v + qsize));
+
+	          if (isGreenYUV(yData)) {
+	            decoder$1.opt.debug && console.log('Jessibuca: [worker]: draw is green yuv');
+	            return;
+	          }
+
+	          const outputArray = [yData, uData, vData];
 	          postMessage({
 	            cmd: WORKER_CMD_TYPE.render,
 	            output: outputArray,

@@ -743,7 +743,7 @@
 	  return document.isFullScreen || document.mozIsFullScreen || document.webkitIsFullScreen;
 	}
 	function bpsSize(value) {
-	  if (null == value || value === '') {
+	  if (null == value || value === '' || parseInt(value) === 0 || isNaN(parseInt(value))) {
 	    return "0kb/s";
 	  }
 

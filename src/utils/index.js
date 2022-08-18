@@ -296,7 +296,7 @@ export function isFullScreen() {
 }
 
 export function bpsSize(value) {
-    if (null == value || value === '') {
+    if (null == value || value === '' || parseInt(value) === 0 || isNaN(parseInt(value))) {
         return "0kb/s";
     }
     let size = parseFloat(value);
@@ -510,6 +510,18 @@ export function getTarget(e) {
     const target = event.target || event.srcElement;
     return target;
 }
+
 export function isWebglRenderSupport(width) {
     return (width / 2) % 4 === 0
+}
+
+export function isGreenYUV(arrayBuffer) {
+    let zeroNum = 0;
+    for (let i = 0; i < 10; i++) {
+        let temp = arrayBuffer[i];
+        if (temp === 0) {
+            zeroNum += 1
+        }
+    }
+    return zeroNum === 10;
 }

@@ -1,7 +1,7 @@
 import Module from './decoder/decoder';
 import createWebGL from './utils/webgl';
 import {WORKER_CMD_TYPE, MEDIA_TYPE, WORKER_SEND_TYPE, ENCODED_VIDEO_TYPE, DEFAULT_PLAYER_OPTIONS} from "./constant";
-import {formatVideoDecoderConfigure} from "./utils";
+import {formatVideoDecoderConfigure, isGreenYUV} from "./utils";
 
 if (!Date.now) Date.now = function () {
     return new Date().getTime();
@@ -162,7 +162,15 @@ Module.postRun = function () {
                 this.offscreenCanvasGL = this.offscreenCanvas.getContext("webgl");
                 this.webglObj = createWebGL(this.offscreenCanvasGL, decoder.opt.openWebglAlignment);
                 this.draw = function (ts, y, u, v) {
-                    this.webglObj.render(w, h, Module.HEAPU8.subarray(y, y + size), Module.HEAPU8.subarray(u, u + qsize), Module.HEAPU8.subarray(v, v + (qsize)));
+                    const yData = Module.HEAPU8.subarray(y, y + size);
+                    const uData = Module.HEAPU8.subarray(u, u + qsize);
+                    const vData = Module.HEAPU8.subarray(v, v + (qsize));
+                    if (isGreenYUV(Uint8Array.from(yData))) {
+                        decoder.opt.debug && console.log('Jessibuca: [worker]: draw offscreenCanvas is green yuv');
+                        return
+                    }
+
+                    this.webglObj.render(w, h, yData, uData, vData);
                     let image_bitmap = this.offscreenCanvas.transferToImageBitmap();
                     postMessage({
                         cmd: WORKER_CMD_TYPE.render,
@@ -173,8 +181,14 @@ Module.postRun = function () {
                 };
             } else {
                 this.draw = function (ts, y, u, v) {
-                    var yuv = [Module.HEAPU8.subarray(y, y + size), Module.HEAPU8.subarray(u, u + qsize), Module.HEAPU8.subarray(v, v + (qsize))];
-                    var outputArray = yuv.map(buffer => Uint8Array.from(buffer));
+                    const yData = Uint8Array.from(Module.HEAPU8.subarray(y, y + size));
+                    const uData = Uint8Array.from(Module.HEAPU8.subarray(u, u + qsize));
+                    const vData = Uint8Array.from(Module.HEAPU8.subarray(v, v + (qsize)));
+                    if (isGreenYUV(yData)) {
+                        decoder.opt.debug && console.log('Jessibuca: [worker]: draw is green yuv');
+                        return
+                    }
+                    const outputArray = [yData, uData, vData];
                     postMessage({
                         cmd: WORKER_CMD_TYPE.render,
                         output: outputArray,
