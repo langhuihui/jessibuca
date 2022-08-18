@@ -94,10 +94,14 @@ Windows系统下,win10商店购买hevc解码器后最新edge可硬件加速解�
 
 mac系统下，chrome最新的104.0.5112.79及以后的版本
 
+Windows系统下，chrome最新的104.x 版本以后的版本
+
 - 使用360浏览器测试
 - 使用win10商店购买hevc解码器
 - 使用 chrome canary 并开启 `--enable-features=PlatformHEVCDecoderSupport` 进行测试
 - 使用 chrome（mac平台） 并开启`--enable-features=PlatformHEVCDecoderSupport` 进行测试
+- 使用 chrome（windows） 并开启`--enable-features=PlatformHEVCDecoderSupport` 进行测试
+
 ## mac
 
 ### chrome canary
