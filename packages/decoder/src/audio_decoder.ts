@@ -1,22 +1,22 @@
 import EventEmitter from 'eventemitter3';
 import {DecoderState, AudioDecoderType, AudioDecoderConfig, AudioPacket, AudioDecoderEvent, AudioDecoderInterface, AudioCodecInfo, AudioFrame, ErrorInfo} from './types'
-import { AudioSoftDecoder } from './audiosoftdecoder';
+import { AudioDecoderSoft } from './audio_decoder_soft';
 
 export class AudioDecoder extends EventEmitter implements AudioDecoderInterface {
 
-    decoder: AudioSoftDecoder;
+    decoder: AudioDecoderSoft;
 
     constructor(adtype: AudioDecoderType) {
 
         super();
 
-        if (adtype === 'software-decoder') {
+        if (adtype === 'soft') {
 
-            this.decoder = new AudioSoftDecoder();
+            this.decoder = new AudioDecoderSoft();
 
         } else if (adtype === 'auto') {
 
-            this.decoder = new AudioSoftDecoder();
+            this.decoder = new AudioDecoderSoft();
 
         } else {
 

@@ -1,0 +1,14 @@
+prefix=../thirdparty/audio/ffmpeg
+exec_prefix=${prefix}
+libdir=../thirdparty/audio/ffmpeg/lib
+includedir=../thirdparty/audio/ffmpeg/include
+
+Name: libavformat
+Description: FFmpeg container format library
+Version: 58.76.100
+Requires: libavcodec >= 58.134.100, libswresample >= 3.9.100, libavutil >= 56.70.100
+Requires.private: 
+Conflicts:
+Libs: -L${libdir}  -lavformat -lm
+Libs.private: 
+Cflags: -I${includedir}

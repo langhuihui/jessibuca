@@ -6,6 +6,8 @@ import { MessageReactive, UploadCustomRequestOptions, UploadFileInfo, useMessage
 import { ConnectionState, ConnectionEvent } from '../../../packages/conn/src/types';
 import { TimelineDataSeries, TimelineGraphView } from 'webrtc-internals';
 import { ArchiveOutline as ArchiveIcon } from '@vicons/ionicons5';
+import {VideoDecoder, AudioDecoder } from '../../../packages/decoder/src'
+import { VideoDecoderConfig, AudioDecoderConfig, VideoDecoderEvent, AudioDecoderEvent, ErrorInfo, VideoCodecInfo, AudioCodecInfo, VideoFrame, AudioFrame, VideoPacket, AudioPacket } from '../../../packages/decoder/src/types'
 
 const message = useMessage();
 const url = ref("");
@@ -43,39 +45,141 @@ const display = reactive({
   audioSize: 0,
   videoTS: 0,
   videoSize: 0,
+  videoDecodedFrameRate:0,
+  videoDecodedFrames:0,
+  audioDecodedFrameRate:0,
+  audioDecodedFrames:0,
+
 });
+
+let vframs = 0;
+let aframs = 0;
+
+
 function readDelay(t: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, t));
 }
 async function connect(file?: File, options?: UploadCustomRequestOptions) {
   try {
-    console.log(`connect ${file} url ${url.value}`)
     await conn.connect(url.value);
+
+    const videoDecoder = new VideoDecoder('soft-simd');
+    await videoDecoder.initialize();
+
+    const audioDecoder = new AudioDecoder('soft');
+    await audioDecoder.initialize();
+
     const demuxer = new Demuxer(conn);
+
     demuxer.on(Demuxer.AUDIO_ENCODER_CONFIG_CHANGED, (data: Uint8Array) => {
       message.info(Demuxer.AUDIO_ENCODER_CONFIG_CHANGED);
+
+      let aconfig: AudioDecoderConfig = {
+            audioType: demuxer.audioEncoderConfig.codec,
+            extraData: data,
+            outSampleType: 'f32-planar',
+        }
+
+      audioDecoder.configure(aconfig);
+
     });
     demuxer.on(Demuxer.VIDEO_ENCODER_CONFIG_CHANGED, (data: Uint8Array) => {
       message.info(Demuxer.VIDEO_ENCODER_CONFIG_CHANGED);
+
+
+        let vconfig: VideoDecoderConfig = {
+            videoType: demuxer.videoEncoderConfig.codec === 'h264'? 'avc' : 'hevc',
+            extraData: data,
+            outPixelType: 'I420',
+        }
+
+       if (demuxer.videoEncoderConfig.codec === 'h264') {
+
+            vconfig.avc = {format: 'avcc'};
+       } else {
+            vconfig.hevc = {format: 'hvcc'};
+       }
+
+        videoDecoder.configure(vconfig);
     });
     demuxer.audioReadable.pipeTo(new WritableStream({
       write(chunk: EncodedAudioChunkInit) {
         display.audioTS = chunk.timestamp;
         display.audioSize = chunk.data.byteLength;
+
+        let packet: AudioPacket = {
+
+            data: chunk.data,
+            pts: chunk.timestamp
+        }
+
+        audioDecoder.decode(packet);
         if (file && options)
           options.onProgress({ percent: 100 * conn.down.total / file.size });
-        return readDelay(20);
+        return readDelay(0);
       }
     }));
     demuxer.videoReadable.pipeTo(new WritableStream({
       write(chunk: EncodedVideoChunkInit) {
         display.videoTS = chunk.timestamp;
         display.videoSize = chunk.data.byteLength;
+
+        // console.log(`JS Chunk ${chunk.data.byteLength}  ${chunk.data[5]} ${chunk.data[6]} ${chunk.data[7]} ${chunk.data[8]} ${chunk.data[9]}`)
+
+        let packet: VideoPacket = {
+
+            data: chunk.data,
+            keyFrame: chunk.type === 'key'? true : false,
+            pts: chunk.timestamp
+        }
+
+        videoDecoder.decode(packet);
+
         if (file && options)
           options.onProgress({ percent: 100 * conn.down.total / file.size });
-        return readDelay(40);
+
+        return readDelay(0);
       }
     }));
+
+
+    
+    videoDecoder.on(VideoDecoderEvent.VideoCodecInfo, (codecinfo: VideoCodecInfo) => {
+
+        message.info(`width: ${codecinfo.width} height: ${codecinfo.height}`);
+        
+    })
+
+    videoDecoder.on(VideoDecoderEvent.VideoFrame, (videoFrame: VideoFrame) => {
+
+        display.videoDecodedFrames++;
+        vframs++;
+
+    })
+
+    videoDecoder.on(VideoDecoderEvent.Error, (error: ErrorInfo) => {
+
+  
+    });
+
+    audioDecoder.on(AudioDecoderEvent.AudioCodecInfo, (codecinfo: AudioCodecInfo) => {
+
+
+    })
+
+    audioDecoder.on(AudioDecoderEvent.AudioFrame, (AudioFrame: AudioFrame) => {
+
+        display.audioDecodedFrames++;
+        aframs ++;
+    })
+
+    audioDecoder.on(AudioDecoderEvent.Error, (error: ErrorInfo) => {
+
+
+    })
+
+
+
   } catch (e) {
     if (options) options.onFinish();
     removeMessage();
@@ -83,7 +187,8 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
     message.error(e.message);
   }
 }
-function close() {
+function disconnect() {
+  message.info(`disconnetion`);
   conn.close();
 }
 const data = reactive({
@@ -94,11 +199,23 @@ onMounted(() => {
   const gv = new TimelineGraphView(document.getElementById('bps') as HTMLCanvasElement);
   const series = new TimelineDataSeries();
   gv.addDataSeries(series);
+  let lastsec = new Date().getTime();
   let id = setInterval(() => {
     data.totalDown = conn.down.total;
     data.bpsDown = conn.down.bps;
-    series.addPoint(Date.now(), conn.down.bps);
+
+    let now = new Date().getTime();
+
+    display.videoDecodedFrameRate = Math.floor(vframs*1000/(now - lastsec));
+    vframs = 0;
+    display.audioDecodedFrameRate = Math.floor(aframs*1000/(now - lastsec));
+    aframs = 0;
+
+    lastsec = now;
+
+    series.addPoint(Date.now(), display.videoDecodedFrameRate);
     gv.updateEndDate();
+
   }, 1000);
   onUnmounted(() => {
     clearInterval(id);
@@ -116,7 +233,6 @@ function onRemove(options: { file: UploadFileInfo, fileList: Array<UploadFileInf
   conn.close();
   return true;
 }
-
 
 </script>
 
@@ -141,7 +257,7 @@ function onRemove(options: { file: UploadFileInfo, fileList: Array<UploadFileInf
       <n-input v-model:value="url" :input-props="{ type: 'url' }" placeholder="URL" />
     </div>
     <n-button @click="connect">Connect</n-button>
-    <n-button @click="close">Close</n-button>
+    <n-button @click="disconnect">Close</n-button>
   </n-space>
   <n-row>
     <n-col :span="12">
@@ -166,6 +282,20 @@ function onRemove(options: { file: UploadFileInfo, fileList: Array<UploadFileInf
     </n-col>
     <n-col :span="6">
       <n-statistic label="视频tag大小" :value="display.videoSize"></n-statistic>
+    </n-col>
+  </n-row>
+    <n-row>
+    <n-col :span="6">
+      <n-statistic label="视频解码帧率" :value="display.videoDecodedFrameRate"></n-statistic>
+    </n-col>
+    <n-col :span="6">
+      <n-statistic label="视频解码帧数" :value="display.videoDecodedFrames"></n-statistic>
+    </n-col>
+    <n-col :span="6">
+      <n-statistic label="音频解码帧率" :value="display.audioDecodedFrameRate"></n-statistic>
+    </n-col>
+    <n-col :span="6">
+      <n-statistic label="音频解码帧数" :value="display.audioDecodedFrames"></n-statistic>
     </n-col>
   </n-row>
   <canvas id="bps"></canvas>

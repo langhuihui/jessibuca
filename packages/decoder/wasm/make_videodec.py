@@ -19,12 +19,12 @@ sargs = {
     'MODULARIZE' : 1,
     'EXPORT_ES6' : 1
 }
+
 emcc_args = [
     '-O3',
     '--memory-init-file', '0',
     '-lembind',
-    '-flto',
-    '-Isrc/common', '-Ithirdparty/video/ffmpeg/include'
+    '-Isrc/common', '-Ithirdparty/video/ffmpeg/include',
 ]+["-s "+k+"="+str(v) for k, v in sargs.items()]
 
 print ('building...')

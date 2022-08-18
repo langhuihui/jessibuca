@@ -10,7 +10,7 @@ args = {'-o': './types/audiodec'}
 
 sargs = {
     'WASM': 1,
-    'TOTAL_MEMORY': 8*1024*1024,
+    'TOTAL_MEMORY': 128*1024*1024,
     'ASSERTIONS': 0,
     'ERROR_ON_UNDEFINED_SYMBOLS': 0,
     'DISABLE_EXCEPTION_CATCHING': 1,
@@ -23,7 +23,6 @@ emcc_args = [
     '-O3',
     '--memory-init-file', '0',
     '-lembind',
-    '-flto',
     '-Isrc/common', '-Ithirdparty/audio/ffmpeg/include'
 ]+["-s "+k+"="+str(v) for k, v in sargs.items()]
 

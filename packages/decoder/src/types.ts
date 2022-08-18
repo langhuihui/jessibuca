@@ -2,7 +2,7 @@
 export type DecoderState = 'uninitialized' | 'initialized' | 'configured' | 'closed';
 
 //视频解码器类型
-export type VideoDecoderType = 'software-decoder' | 'software-simd-decoder' | 'hardware-decoder' | 'auto';
+export type VideoDecoderType = 'soft' | 'soft-simd' | 'hard' | 'auto';
 
 //视频压缩格式
 export type  VideoType = 'avc' | 'hevc' | 'unknow';
@@ -16,7 +16,7 @@ export type VideoDecoderConfig = {
     videoType: VideoType,
     extraData?: BufferSource,
     avc?:{
-        format: "avc" | "annexb";
+        format: "avcc" | "annexb";
     },
     hevc?:{
         format: "hvcc" | "annexb";
@@ -72,10 +72,10 @@ export interface VideoDecoderInterface  {
 };
 
 //audio 参数
-export type AudioDecoderType = 'software-decoder' | 'auto';
+export type AudioDecoderType = 'soft' | 'hard' | 'auto';
 
 //声音压缩格式
-export type AuidoType  =  'pcma' | 'pcmu' | 'aac' | 'unknow';
+export type AuidoType  =  'pcma' | 'pcmu' | 'aac' | 'opus' | 'unknow';
 
 export type SampleType = 'f32-planar';
 
@@ -83,8 +83,7 @@ export interface AudioDecoderConfig  {
 
     audioType: AuidoType,
     extraData?: BufferSource,
-    outSampleType?: SampleType,
-    outSampleNum?:number //按指定采样点个数输出，内部会做队列缓存
+    outSampleType?: SampleType
 }
 
 export interface AudioCodecInfo {

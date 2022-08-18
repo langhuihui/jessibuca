@@ -47,7 +47,7 @@ export class Demuxer extends EventEmitter {
                 }
                 return gotAudio({
                   type: 'key',
-                  data: value.data,
+                  data: this.audioEncoderConfig.codec == 'aac' ? value.data.subarray(2) : value.data.subarray(1),
                   timestamp: value.timestamp,
                   duration: 0
                 });
@@ -59,12 +59,12 @@ export class Demuxer extends EventEmitter {
                   //TODO: parse video config
                 }
                 if (value.data[1] == 0x00) {
-                  this.emit(Demuxer.VIDEO_ENCODER_CONFIG_CHANGED, value.data.subarray(2));
+                  this.emit(Demuxer.VIDEO_ENCODER_CONFIG_CHANGED, value.data.subarray(5));
                   return pull();
                 }
                 return gotVideo({
                   type: value.data[0] >> 4 == 1 ? 'key' : 'delta',
-                  data: value.data,
+                  data: value.data.subarray(5),
                   timestamp: value.timestamp,
                   duration: 0
                 });

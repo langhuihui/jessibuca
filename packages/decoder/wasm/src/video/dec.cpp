@@ -89,7 +89,7 @@ void VideoDecoder::reportError(const char* format, ...) {
 
 void VideoDecoder::setCodec(string vtype, string format, string extra)
 {
-     printf("Use Video SIMD Decoder, VideoDecoder::setCodec vtype %s, format %s, extra %d \n", vtype.c_str(), format.c_str(), extra.length());
+     printf("Use Video Decoder, VideoDecoder::setCodec vtype %s, format %s, extra %d \n", vtype.c_str(), format.c_str(), extra.length());
     
     clear();
 
@@ -100,7 +100,7 @@ void VideoDecoder::setCodec(string vtype, string format, string extra)
 
         videotype = Video_H264;
 
-        if (format.compare("avc") == 0) {
+        if (format.compare("avcc") == 0) {
 
             videoformat = Format_AVCC;
 
@@ -166,7 +166,8 @@ void VideoDecoder::videoInfo(int width, int height){
     mVideoWith = width;
     mVideoHeight = height;
 
-    mJsObject.call<void>("videoInfo", mVType, mVideoWith, mVideoHeight);
+    mJsObject.call<void>("videoInfo",  mVideoWith, mVideoHeight);
+
 }
 
 void VideoDecoder::yuvData(unsigned char* yuv, unsigned int timestamp) {
@@ -175,7 +176,9 @@ void VideoDecoder::yuvData(unsigned char* yuv, unsigned int timestamp) {
     unsigned char* yuvArray[3] = {yuv, yuv + size, yuv + size*5/4};
 
     // printf("yuv %d %d %d %d %d %d\n", yuv[0], yuv[1], yuv[2], yuv[mVideoWith*mVideoHeight/2], yuv[mVideoWith*mVideoHeight/2+1], yuv[mVideoWith*mVideoHeight/2+2]);
+
     mJsObject.call<void>("yuvData", (unsigned int)yuvArray, timestamp);
+
 
 }
 
@@ -188,3 +191,4 @@ EMSCRIPTEN_BINDINGS(my_module) {
     .function("decode", &VideoDecoder::decode)
     .function("clear", &VideoDecoder::clear);
 }
+

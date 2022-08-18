@@ -57,6 +57,8 @@ void Decorder_Video_FFMPEG::init(int vtype,  unsigned char* extraData, unsigned 
 
 
     Decorder_Base_FFMPEG::initCodec(codecID);
+
+    printf("FFmpeg Video Decoder, Init, VideoDecoder::setCodec vtype %d, extradatasize %d \n", vtype, extraDataSize);
     
 
     if (extraData && extraDataSize > 0) {
@@ -74,7 +76,7 @@ void Decorder_Video_FFMPEG::init(int vtype,  unsigned char* extraData, unsigned 
 void  Decorder_Video_FFMPEG::decode(unsigned char *buf, unsigned int buflen, unsigned int timestamp)
 {
 
-  //   printf("VideoDecoder::decode input %d, timestamp %d \n", input.length(), timestamp);
+   //  printf("FFmpeg Video Decoder, decode len:0x%x, 0x%x 0x%x 0x%x 0x%x 0x%x \n", buflen, buf[0], buf[1], buf[2], buf[3], buf[4]);
 
     if (!mInit) {
 

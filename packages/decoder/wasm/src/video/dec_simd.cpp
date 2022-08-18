@@ -265,7 +265,7 @@ void VideoDecoder::setCodec(string vtype, string format, string extra)
 
         videotype = Video_H264;
 
-        if (format.compare("avc") == 0) {
+        if (format.compare("avcc") == 0) {
 
             videoformat = Format_AVCC;
             parseAVCExtraData((unsigned char*)extra.data(), extra.length());
@@ -437,7 +437,7 @@ void VideoDecoder::videoInfo(int width, int height){
     mVideoWith = width;
     mVideoHeight = height;
 
-    mJsObject.call<void>("videoInfo", mVType, mVideoWith, mVideoHeight);
+    mJsObject.call<void>("videoInfo",  mVideoWith, mVideoHeight);
 }
 
 void VideoDecoder::yuvData(unsigned char* yuv, unsigned int timestamp) {

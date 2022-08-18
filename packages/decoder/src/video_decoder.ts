@@ -1,32 +1,32 @@
 import EventEmitter from 'eventemitter3';
 import {DecoderState, VideoDecoderType, VideoDecoderConfig, VideoPacket, VideoDecoderEvent, VideoDecoderInterface, VideoCodecInfo, VideoFrame, ErrorInfo} from './types'
-import { VideoSoftDecoder } from './videosoftdecoder';
-import { VideoHardDecoder } from './videoharddecoder';
-import { VideoSoftDecoderSIMD } from './videosoftdecodersimd';
+import { VideoDecoderSoft } from './video_decoder_soft';
+import { VideoDecoderSoftSIMD } from './video_decoder_soft_simd';
+import { VideoDecoderHard } from './video_decoder_hard';
 
 export class VideoDecoder extends EventEmitter implements VideoDecoderInterface {
 
-    decoder: VideoSoftDecoder | VideoSoftDecoderSIMD | VideoHardDecoder;
+    decoder: VideoDecoderSoft | VideoDecoderSoftSIMD | VideoDecoderHard;
 
     constructor(vdtype: VideoDecoderType) {
 
         super();
 
-        if (vdtype === 'software-decoder') {
+        if (vdtype === 'soft') {
 
-            this.decoder = new VideoSoftDecoder();
+            this.decoder = new VideoDecoderSoft();
 
-        } else if (vdtype === 'software-simd-decoder') {
+        } else if (vdtype === 'soft-simd') {
 
-            this.decoder = new VideoSoftDecoderSIMD();
+            this.decoder = new VideoDecoderSoftSIMD();
 
-        } else if (vdtype === 'hardware-decoder') {
+        } else if (vdtype === 'hard') {
 
-            this.decoder = new VideoHardDecoder();
+            this.decoder = new VideoDecoderHard();
 
         } else if (vdtype === 'auto') {
 
-            this.decoder = new VideoSoftDecoder();
+            this.decoder = new VideoDecoderSoft();
 
         } else {
 

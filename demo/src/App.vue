@@ -3,6 +3,7 @@
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 import Connection from './components/Connection.vue';
 import Demuxer from './components/Demuxer.vue';
+import Decoder from './components/Decoder.vue'
 </script>
 
 <template>
@@ -15,6 +16,7 @@ import Demuxer from './components/Demuxer.vue';
         <Demuxer />
       </n-tab-pane>
       <n-tab-pane name="decoder" tab="Decoder">
+        <Decoder />
       </n-tab-pane>
       <n-tab-pane name="renderer" tab="Renderer">
       </n-tab-pane>

@@ -5,8 +5,7 @@ import { MessageReactive, UploadCustomRequestOptions, UploadFileInfo, useMessage
 import { ConnectionState, ConnectionEvent } from '../../../packages/conn/src/types';
 import { TimelineDataSeries, TimelineGraphView } from 'webrtc-internals';
 import { ArchiveOutline as ArchiveIcon } from '@vicons/ionicons5';
-import {VideoDecoder, AudioDecoder } from '../../../packages/decoder/src'
-import { VideoDecoderConfig, AudioDecoderConfig, VideoDecoderEvent, ErrorInfo } from '../../../packages/decoder/src/types'
+
 
 const message = useMessage();
 const url = ref("");
@@ -41,7 +40,7 @@ conn.on(ConnectionState.RECONNECTED, () => {
 });
 async function connect(file?: File) {
   try {
-    await conn.connect(file || url.value);
+    await conn.connect( url.value);
     while (conn.oput) {
       if (conn.oput.buffer)
         await conn.read(conn.oput.buffer!.length);
@@ -58,6 +57,7 @@ async function connect(file?: File) {
   }
 }
 function close() {
+    console.log(` close btn clicked`);
   conn.close();
 }
 const data = reactive({
@@ -105,47 +105,6 @@ function onRemove(options: { file: UploadFileInfo, fileList: Array<UploadFileInf
   conn.close();
   return true;
 }
-
-
-//测试编解码模块
-let vextra = new Uint8Array([1, 2, 3, 4]);
-let vconfig: VideoDecoderConfig = {
-    videoType: 'avc',
-    extraData: vextra,
-    avc:{
-        format: "avc"
-    },
-    outPixelType: 'I420',
-}
-
-let videoSoftDecoder = new VideoDecoder('software-decoder');
-await videoSoftDecoder.initialize();
-videoSoftDecoder.configure(vconfig);
-
-let videoSoftSimdDecoder = new VideoDecoder('software-simd-decoder');
-videoSoftSimdDecoder.on(VideoDecoderEvent.Error, (err: ErrorInfo) => {
-
-    console.log(`recv decoder error ${err.errMsg}`);
-
-});
-await videoSoftSimdDecoder.initialize();
-videoSoftSimdDecoder.configure(vconfig);
-
-
-console.log(`videoSoftSimdDecoder reg event suc`)
-
-let aextra = new Uint8Array([1, 2, 3, 4]);
-let aconfig: AudioDecoderConfig = {
-    audioType: 'aac',
-    extraData: aextra,
-    outSampleType: 'f32-planar',
-    outSampleNum:1024 
-}
-
-let audioSoftDecoder = new AudioDecoder('software-decoder');
-await audioSoftDecoder.initialize();
-audioSoftDecoder.configure(aconfig);
-
 
 </script>
 

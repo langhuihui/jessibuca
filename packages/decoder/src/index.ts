@@ -1,7 +1,7 @@
 
 
-import { VideoDecoder } from "./videodecoder";
-import { AudioDecoder } from "./audiodecoder";
+import { VideoDecoder } from "./video_decoder";
+import { AudioDecoder } from "./audio_decoder";
 
 
 

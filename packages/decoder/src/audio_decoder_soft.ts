@@ -1,19 +1,17 @@
 import EventEmitter from 'eventemitter3';
 import { DecoderState, AudioDecoderConfig, AudioPacket, AudioDecoderInterface, AudioCodecInfo, AudioDecoderEvent, AudioFrame, ErrorInfo } from './types';
-import CreateModule, { WASMModule } from '../wasm/out/decoderaudio';
-import SpliteBuffer from './splitebuffer';
+import CreateModule from '../wasm/types/audiodec';
 
-export class AudioSoftDecoder extends EventEmitter implements AudioDecoderInterface {
+export class AudioDecoderSoft extends EventEmitter implements AudioDecoderInterface {
 
     decoderState: DecoderState;
     decoder: any;
     config?: AudioDecoderConfig;
-    module?: WASMModule;
+    module?: any;
 
     sampleRate: number;
     channels: number;
-    useSpliteBuffer: boolean;
-    spliteBuffer?: SpliteBuffer;
+
 
     constructor() {
 
@@ -21,7 +19,6 @@ export class AudioSoftDecoder extends EventEmitter implements AudioDecoderInterf
         this.decoderState = 'uninitialized';
         this.sampleRate = 0;
         this.channels = 0;
-        this.useSpliteBuffer = false;
 
     };
 
@@ -33,7 +30,7 @@ export class AudioSoftDecoder extends EventEmitter implements AudioDecoderInterf
             opts.print = ((text: string) => console.log(text));
             opts.printErr = ((text: string) => console.log(`[JS] ERROR: ${text}`));
             opts.onAbort = (() => console.log("[JS] FATAL: WASM ABORTED"));
-            opts.postRun = ((m: WASMModule) => {
+            opts.postRun = ((m: any) => {
 
                 this.module = m;
          
@@ -146,41 +143,14 @@ export class AudioSoftDecoder extends EventEmitter implements AudioDecoderInterf
              pcmDatas.push(Float32Array.of(...this.module.HEAPF32.subarray(fp, fp + samples)));
          }
 
+         let aFrame: AudioFrame = {
+            datas: pcmDatas,
+            sampleNum: samples,
+            channles: this.channels,
+            pts: pts,
+        }
 
-         if (!this.useSpliteBuffer) {
-
-             if(samples === this.config?.outSampleNum) {
-
-                let aFrame: AudioFrame = {
-                    datas: pcmDatas,
-                    sampleNum: samples,
-                    channles: this.channels,
-                    pts: pts,
-                }
-
-                this.emit(AudioDecoderEvent.AudioFrame, aFrame);
-
-                 return;
-             }
-
-             this.spliteBuffer = new SpliteBuffer(this.sampleRate, this.channels, this.config?.outSampleNum ?? 1024);
-             this.useSpliteBuffer = true;
-         } 
-
-         this.spliteBuffer?.addBuffer(pcmDatas, pts);
-
-         this.spliteBuffer?.splite((buffers, ts) => {
-
-             let aFrame: AudioFrame = {
-                datas: buffers,
-                sampleNum: this.config?.outSampleNum ?? 1024,
-                channles: this.channels,
-                pts: ts,
-            }
-
-            this.emit(AudioDecoderEvent.AudioFrame, aFrame);
-
-         });
+        this.emit(AudioDecoderEvent.AudioFrame, aFrame);
 
     }
 

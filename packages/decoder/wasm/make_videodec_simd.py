@@ -23,7 +23,6 @@ emcc_args = [
     '-O3',
     '--memory-init-file', '0',
     '-lembind',
-    '-flto',
     '-msimd128',
     '-Isrc/common', '-Ithirdparty/video'
 

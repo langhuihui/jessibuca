@@ -7,7 +7,7 @@ extern "C"
     #include <libavcodec/avcodec.h>
 }
 
-Decorder_Base_FFMPEG::Decorder_Base_FFMPEG(){
+Decorder_Base_FFMPEG::Decorder_Base_FFMPEG():mInit(false) {
   
 }
 
