@@ -291,3 +291,24 @@ https://github.com/langhuihui/jessibuca/issues/126
 > 注意：`decocer.js`,`decoder.wasm`两个文件必须放同一个目录下面。
 
 
+### H5 全屏的时候，视频区域并没有全屏的问题
+
+因为H5 全屏采用的是web端的全屏方案
+
+```css
+{
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: #000;
+}
+```
+所以要保证，jessibuca 的`container`绑定的dom对象，以及上层对象，是否某些属性导致了`position: fixed`失效。
+
+具体研究可看：https://github.com/chokcoco/iCSS/issues/24
+
