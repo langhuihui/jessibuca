@@ -11,6 +11,7 @@ module.exports = {
             {text: 'Document', link: '/document'},
             {text: 'PRO', link: '/pro'},
             {text: 'PRO-Player', link: '/player-pro'},
+            {text: 'PRO-DEMO', link: '/pro-demo' },
             {text: 'HTTP', link: 'http://jessibuca.monibuca.com/'},
             {text: 'HTTPS', link: 'https://j.m7s.live/'},
             {text: 'Monibuca', link: 'https://m7s.live/'},

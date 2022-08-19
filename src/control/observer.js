@@ -112,6 +112,7 @@ export default (player, control) => {
     player.on(EVENTS.webFullscreen, (value) => {
         screenfullChange(value);
         screenfullH5Control();
+
     })
 
 

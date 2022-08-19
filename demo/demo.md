@@ -176,3 +176,5 @@ https://github.com/bosscheng/jessibuca-MSE-3x3-demo
 [online MediaSource 硬解码h264 9画面](http://jessibuca.monibuca.com/MSE-3x3-demo.html)
 
 [online MediaSource 硬解码h264 9画面 https](http://jessibuca.com/MSE-3x3-demo.html)
+# 群
+<img src="/public/qrcode.jpeg">

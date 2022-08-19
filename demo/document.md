@@ -63,6 +63,8 @@ MIMEType: application/wasm
 - Windows系统下,360浏览器可播放使用MSE加速解码H265.
 - Windows系统下,win10商店购买hevc解码器后最新edge可硬件加速解码播放H265.
 
+> jessibuca pro 版本已经支持了。欢迎测试使用。http://jessibuca.monibuca.com/player-pro.html
+
 ### webcodecs
 
 #### Chrome86及之后
@@ -88,9 +90,10 @@ Desktop,Android,Webview中已默认开启!
 
 ### WebRTC
 
-webrtc目前只是本地实现了，还需要服务器端支持才行。
+> WebRTC标准是不支持h265的。
 
-WebRTC标准是不支持h265的。
+> jessibuca pro 版本已经支持了。欢迎测试使用。 http://jessibuca.monibuca.com/player-pro.html
+
 
 ### OffscreenCanvas这个特性需要特殊的环境和硬件支持吗
 
@@ -113,9 +116,6 @@ https://caniuse.com/?search=OffscreenCanvas
 
 m7s ui 里面 我也是setTimeout 0去渲染的。或者建议你用Promise.resolve的形式去播放。
 
-### MSE加速解码H265
-
-“Windows系统下,360浏览器可播放使用MSE加速解码H265, win10商店购买hevc解码器后最新edge可硬件加速解码播放H265"
 
 ### vue3 下面使用Typescript
 
@@ -211,7 +211,7 @@ https://github.com/langhuihui/jessibuca/issues/126
 2. 增大videoBuffer大小
 3. 设置hasAudio 为false，不demux和decode音频数据。
 4. ~~条件允许(支持OffscreenCanvas)也可以配合设置 forceNoOffscreen 为 false  开启离屏渲染模式，提升性能。~~
-5. pro版本支持360 或者edge浏览器 H265硬解码。
+5. pro版本支持360 或者edge浏览器 H265硬解码。 http://jessibuca.monibuca.com/player-pro.html
 > 某些显卡在支持OffscreenCanvas上面会存在问题，所以谨慎使用。
 > https://github.com/langhuihui/jessibuca/issues/227
 
@@ -224,6 +224,7 @@ https://github.com/langhuihui/jessibuca/issues/126
 5. 如果是https情况下 设置 useWCS 为 true。
 6. 如果是http情况下 设置 useMSE 为 true。
 
+
 > 某些显卡在支持OffscreenCanvas上面会存在问题，所以谨慎使用。
 > https://github.com/langhuihui/jessibuca/issues/227
 
@@ -233,11 +234,14 @@ https://github.com/langhuihui/jessibuca/issues/126
 
 不可以，jessibuca 定位是直播流播放器。
 
+### 可以播放MP4视频吗？
+
+不可以，jessibuca 定位是直播流播放器。
+
 
 ### 是否可支持倍速播放
 
-开源版不支持，可以支持定制开发。
-
+pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
 
 ###  对于延迟
 
@@ -254,6 +258,11 @@ https://github.com/langhuihui/jessibuca/issues/126
 - 视频帧率：过高的帧率会造成软解码跟不上，可以试着降低帧率，例如24fps
 - 视频码率：码率越高，视频富含的细节越多，也越清晰，但是会消耗更多的解码性能，可以试着降低码率
 - 视频分辨率：过高的视频会造成单帧传递的数量极大
+
+### 解决方案
+#### 对于 软解码的延迟 优化
+- 可以使用jessibuca pro 的 simd 解码，尤其正对于HEVC的1080p的解码能力提升很多。
+- jessibuca pro 还支持 mse 解码 HEVC(H265)
 
 ### 视频颜色变灰色（软解码）
 
@@ -312,3 +321,5 @@ https://github.com/langhuihui/jessibuca/issues/126
 
 具体研究可看：https://github.com/chokcoco/iCSS/issues/24
 
+# 群
+<img src="/public/qrcode.jpeg">

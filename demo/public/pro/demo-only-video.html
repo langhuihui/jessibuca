@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>jessibuca Pro MSE demo</title>
+    <title>jessibuca Pro demo</title>
     <script src="./jessibuca-pro-demo.js"></script>
     <style>
         .root {
@@ -23,7 +23,7 @@
         }
 
         .container-shell:before {
-            content: "jessibuca MSE demo player";
+            content: "jessibuca demo player";
             position: absolute;
             color: darkgray;
             top: 4px;
@@ -91,12 +91,6 @@
     <div class="container-shell">
         <div id="container"></div>
         <div class="input">
-            <div>
-                当前浏览器：<span id="mseSupport" style="color: green;display: none">支持MSE H265解码</span>
-                <span id="mseNotSupport" style="color: red;display: none">不支持MSE H265解码,会自动切换成wasm解码</span>
-            </div>
-        </div>
-        <div class="input">
             <div>输入URL：</div>
             <input
                 autocomplete="on"
@@ -126,11 +120,6 @@
     var forceNoOffscreen = true; //
     var jessibuca = null;
 
-    function checkSupport() {
-        return window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="hev1.1.6.L123.b0"');
-    }
-
-
     function create() {
         jessibuca = new JessibucaPro({
             container: $container,
@@ -140,6 +129,7 @@
             text: "",
             loadingText: "加载中",
             debug: true,
+            hasAudio:false,
             showBandwidth: showOperateBtns, // 显示网速
             operateBtns: {
                 fullscreen: showOperateBtns,
@@ -153,10 +143,9 @@
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
             heartTimeout: 10,
-            useMSE: true,
             watermarkConfig: {
-                text: {
-                    content: 'jessibuca-pro'
+                text:{
+                    content:'jessibuca-pro'
                 },
                 right: 10,
                 top: 10
@@ -212,13 +201,6 @@
         }
         create();
     })
-    let support = document.getElementById('mseSupport');
-    let notSupport = document.getElementById('mseNotSupport');
-    if (checkSupport()) {
-        support.style.display = 'inline-block'
-    } else {
-        notSupport.style.display = 'inline-block'
-    }
 
 </script>
 
