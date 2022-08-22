@@ -89,7 +89,7 @@ export default class CommonLoader extends Emitter {
                         // this.player.debug.log('common dumex', `delay is -1`);
                         this.bufferList.shift()
                         this._doDecoderDecode(data);
-                    } else if (this.delay > videoBufferDelay) {
+                    } else if (this.delay > (videoBuffer + videoBufferDelay)) {
                         // this.player.debug.log('common dumex', `delay is ${this.delay}, set dropping is true`);
                         this.resetDelay();
                         this.dropping = true
