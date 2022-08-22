@@ -39,11 +39,14 @@
                 /><span>SIMD</span>
             </div>
             <div id="container"></div>
-            <div class="input">
+            <div class="input input-wrap">
                 <div>
                     当前浏览器：
                     <span v-if="supportMSEHevc" style="color: green;">支持MSE H265解码</span>
                     <span v-else style="color: red;">不支持MSE H265解码,会自动切换成wasm解码</span>
+                </div>
+                <div v-if="playing && decodeType">
+                    当前解码：<span>{{ decodeType }}</span>
                 </div>
             </div>
             <div class="input">
@@ -98,7 +101,6 @@
                         v-model="showBandwidth"
                         @change="restartPlay"
                     /><span>网速</span>
-                    <span style="margin-left: 10px">FPS：{{ fps }}</span>
                 </div>
             </div>
             <div class="input" v-if="loaded">
@@ -123,7 +125,8 @@
                     <button v-if="!recording" @click="startRecord">录制</button>
                     <button v-if="!recording" @click="stopAndSaveRecord">暂停录制</button>
                 </template>
-
+                <span v-if="fps!==''" style="margin-left: 10px">Render FPS：{{ fps }}</span>
+                <span v-if="dfps!==''" style="margin-left: 10px">Decoder FPS：{{ dfps }}</span>
             </div>
         </div>
     </div>
@@ -147,23 +150,27 @@ export default {
             speed: 0,
             performance: "",
             fps: '',
+            dfps: '',
             volume: 1,
             rotate: 0,
             supportMSEHevc:false,
             useWCS: false,
-            useMSE: false,
-            useSIMD: true,
+            useMSE: true,
+            useSIMD: false,
             useOffscreen: false,
             recording: false,
-            isDebug: false,
+            isDebug: true,
             recordType: 'webm',
             scale: 0,
             vConsole: null,
-            playType: ''
+            playType: '',
+            decodeType: ''
         };
     },
     mounted() {
-        this.vConsole = new window.VConsole();
+        if (window.VConsole) {
+            this.vConsole = new window.VConsole();
+        }
         this.supportMSEHevc = window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="hev1.1.6.L123.b0"');
         this.create();
         window.onerror = (msg) => (this.err = msg);
@@ -190,7 +197,7 @@ export default {
                         wcsUseVideoRender: this.useWCS,
                         text: "",
                         // background: "bg.jpg",
-                        loadingText: "疯狂加载中...",
+                        loadingText: "Jessibuca pro 疯狂加载中...",
                         // hasAudio:false,
                         debug: this.isDebug,
                         hotKey: true,
@@ -230,42 +237,42 @@ export default {
 
             this.$options.jessibuca = jessibuca;
             var _this = this;
-            jessibuca.on("load", function () {
-                console.log("on load");
+            jessibuca.on("load", (msg) => {
+                !this.isDebug && console.log("on load");
             });
 
-            jessibuca.on("log", function (msg) {
-                console.log("on log", msg);
+            jessibuca.on("log", (msg) => {
+                !this.isDebug && console.log("on log", msg);
             });
-            jessibuca.on("record", function (msg) {
-                console.log("on record:", msg);
+            jessibuca.on("record", (msg) => {
+                !this.isDebug && console.log("on record:", msg);
             });
-            jessibuca.on("pause", function () {
-                console.log("on pause");
+            jessibuca.on("pause", (msg) => {
+                !this.isDebug && console.log("on pause");
                 _this.playing = false;
             });
-            jessibuca.on("play", function () {
-                console.log("on play");
+            jessibuca.on("play", (msg) => {
+                !this.isDebug && console.log("on play");
                 _this.playing = true;
             });
-            jessibuca.on("fullscreen", function (msg) {
-                console.log("on fullscreen", msg);
+            jessibuca.on("fullscreen", (msg) => {
+                !this.isDebug && console.log("on fullscreen", msg);
             });
 
-            jessibuca.on("mute", function (msg) {
-                console.log("on mute", msg);
+            jessibuca.on("mute", (msg) => {
+                !this.isDebug && console.log("on mute", msg);
                 _this.quieting = msg;
             });
 
-            jessibuca.on("mute", function (msg) {
-                console.log("on mute2", msg);
+            jessibuca.on("mute", (msg) => {
+                !this.isDebug && console.log("on mute2", msg);
             });
 
-            jessibuca.on("audioInfo", function (msg) {
-                console.log("audioInfo", msg);
+            jessibuca.on("audioInfo", (msg) => {
+                !this.isDebug && console.log("audioInfo", msg);
             });
 
-            jessibuca.on("bps", function (bps) {
+            jessibuca.on("bps", (msg) => {
                 // console.log('bps', bps);
             });
             // let _ts = 0;
@@ -274,20 +281,23 @@ export default {
             //     _ts = ts;
             // });
 
-            jessibuca.on("videoInfo", function (info) {
-                console.log("videoInfo", info);
+            jessibuca.on("videoInfo", (info) => {
+                !this.isDebug && console.log("videoInfo", info);
             });
 
-            jessibuca.on("error", function (error) {
-                console.log("error", error);
+            jessibuca.on("error", (error) => {
+                !this.isDebug && console.log("error", error);
             });
 
-            jessibuca.on("timeout", function () {
-                console.log("timeout");
+            jessibuca.on("timeout", () => {
+                !this.isDebug && console.log("timeout");
             });
 
-            jessibuca.on('start', function () {
-                console.log('frame start');
+            jessibuca.on('start', () => {
+                !this.isDebug && console.log('frame start');
+
+                const decodeType = jessibuca.getDecodeType();
+                this.decodeType = decodeType;
             })
 
             jessibuca.on("performance", function (performance) {
@@ -303,14 +313,15 @@ export default {
                 console.log('buffer', buffer);
             })
 
-            jessibuca.on('stats', function (stats) {
-                console.log('stats', stats);
+            jessibuca.on('stats', (stats) => {
+                !this.isDebug && console.log('stats', stats);
                 _this.fps = stats.fps;
+                _this.dfps = stats.dfps;
             })
 
-            jessibuca.on('kBps', function (kBps) {
-                console.log('kBps', kBps);
-            });
+            // jessibuca.on('kBps', function (kBps) {
+            //     console.log('kBps', kBps);
+            // });
 
             jessibuca.on("play", () => {
                 this.playing = true;
@@ -319,11 +330,15 @@ export default {
             });
 
             jessibuca.on('recordingTimestamp', (ts) => {
-                console.log('recordingTimestamp', ts);
+                !this.isDebug && console.log('recordingTimestamp', ts);
             })
 
             jessibuca.on('playToRenderTimes', (times) => {
-                console.log(times);
+                !this.isDebug && console.log(times);
+            })
+
+            jessibuca.on('performance', (performance) => {
+                !this.isDebug && console.log(performance);
             })
 
             // this.play();
@@ -539,6 +554,10 @@ export default {
     margin-top: 10px;
     color: white;
     place-content: stretch;
+}
+
+.input-wrap{
+    justify-content: space-between;
 }
 
 .input2 {

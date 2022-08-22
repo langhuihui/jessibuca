@@ -58,6 +58,13 @@
 #### http
 [http://jessibuca.monibuca.com/pro/2x2-simd-demo.html](http://jessibuca.monibuca.com/pro/2x2-simd-demo.html)
 
+## 2x2 h265 MSE
+
+#### https
+[https://jessibuca.com/pro/2x2-mse-demo.html](https://jessibuca.com/pro/2x2-mse-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/2x2-mse-demo.html](http://jessibuca.monibuca.com/pro/2x2-mse-demo.html)
 
 ## 3x3
 #### https
@@ -73,13 +80,6 @@
 #### http
 [http://jessibuca.monibuca.com/pro/3x3-simd-demo.html](http://jessibuca.monibuca.com/pro/3x3-simd-demo.html)
 
-## 2x2 h265 MSE
-
-#### https
-[https://jessibuca.com/pro/2x2-mse-demo.html](https://jessibuca.com/pro/2x2-mse-demo.html)
-
-#### http
-[http://jessibuca.monibuca.com/pro/2x2-mse-demo.html](http://jessibuca.monibuca.com/pro/2x2-mse-demo.html)
 
 
 ## 3X3 h265 MSE
@@ -89,6 +89,25 @@
 
 #### http
 [http://jessibuca.monibuca.com/pro/3x3-mse-demo.html](http://jessibuca.monibuca.com/pro/3x3-mse-demo.html)
+
+## 4X4 h265 MSE
+
+#### https
+[https://jessibuca.com/pro/4x4-mse-demo.html](https://jessibuca.com/pro/4x4-mse-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/4x4-mse-demo.html](http://jessibuca.monibuca.com/pro/4x4-mse-demo.html)
+
+
+## 4X4 h265 SIMD
+
+#### https
+[https://jessibuca.com/pro/4x4-simd-demo.html](https://jessibuca.com/pro/4x4-simd-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/4x4-simd-demo.html](http://jessibuca.monibuca.com/pro/4x4-simd-demo.html)
+
+
 
 # 群
 <img src="/public/qrcode.jpeg">
