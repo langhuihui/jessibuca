@@ -184,7 +184,7 @@ export const EVENTS_ERROR = {
     websocketError: 'websocketError',
     webcodecsH265NotSupport: 'webcodecsH265NotSupport',
     webcodecsDecodeError: 'webcodecsDecodeError',
-    webcodecsWidthOrHeightChange:'webcodecsWidthOrHeightChange',
+    webcodecsWidthOrHeightChange: 'webcodecsWidthOrHeightChange',
     mediaSourceH265NotSupport: 'mediaSourceH265NotSupport',
     mediaSourceFull: EVENTS.mseSourceBufferFull,
     mseSourceBufferError: EVENTS.mseSourceBufferError,
@@ -294,4 +294,9 @@ export const HOT_KEY = {
 }
 export const WCS_ERROR = {
     keyframeIsRequiredError: 'A key frame is required after configure() or flush()'
+}
+
+
+export const FETCH_ERROR = {
+    abortError: 'The user aborted a request'
 }

@@ -316,6 +316,9 @@
 	const WCS_ERROR = {
 	  keyframeIsRequiredError: 'A key frame is required after configure() or flush()'
 	};
+	const FETCH_ERROR = {
+	  abortError: 'The user aborted a request'
+	};
 
 	class Debug {
 	  constructor(master) {
@@ -1954,11 +1957,16 @@
 	            fetchNext();
 	          }
 	        }).catch(e => {
-	          demux.close(); // 这边会报用户 aborted a request 错误。
+	          demux.close();
+	          const errorString = e.toString();
+	          this.abort(); // aborted a request 。
+
+	          if (errorString.indexOf(FETCH_ERROR.abortError) !== -1) {
+	            return;
+	          }
 
 	          this.emit(EVENTS_ERROR.fetchError, e);
 	          this.player.emit(EVENTS.error, EVENTS_ERROR.fetchError);
-	          this.abort();
 	        });
 	      };
 
@@ -8857,7 +8865,7 @@
 	            this.bufferList.shift();
 
 	            this._doDecoderDecode(data);
-	          } else if (this.delay > videoBufferDelay) {
+	          } else if (this.delay > videoBuffer + videoBufferDelay) {
 	            // this.player.debug.log('common dumex', `delay is ${this.delay}, set dropping is true`);
 	            this.resetDelay();
 	            this.dropping = true;

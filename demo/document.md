@@ -321,5 +321,12 @@ pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
 
 具体研究可看：https://github.com/chokcoco/iCSS/issues/24
 
+
+### 有数据,但是没有画面出来
+
+可能的原因有
+
+
+
 # 群
 <img src="/public/qrcode.jpeg">
