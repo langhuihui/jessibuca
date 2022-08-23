@@ -176,7 +176,7 @@ worker地址
 ### loadingTimeoutReplay
 
 - **类型**：`boolean`
-- **默认值**：`false`
+- **默认值**：`true`
 - **用法**： 是否开启loading超时之后自动再播放
 
 > loadingTimeout 心跳超时之后自动再播放,不再抛出异常，而直接重新播放视频地址。

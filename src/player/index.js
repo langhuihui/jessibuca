@@ -615,7 +615,7 @@ export default class Player extends Emitter {
      * @param flag {boolean} 是否清除画面
      * @returns {Promise<unknown>}
      */
-    pause(flag) {
+    pause(flag = false) {
         if (flag) {
             return this.close();
         } else {
@@ -690,7 +690,7 @@ export default class Player extends Emitter {
     // 心跳检查，如果渲染间隔暂停了多少时间之后，就会抛出异常
     checkHeartTimeout() {
         this._checkHeartTimeout = setTimeout(() => {
-            this.pause(false).then(() => {
+            this.pause().then(() => {
                 this.emit(EVENTS.timeout, EVENTS.delayTimeout);
                 this.emit(EVENTS.delayTimeout);
             });
@@ -714,7 +714,7 @@ export default class Player extends Emitter {
     // loading 等待时间
     checkLoadingTimeout() {
         this._checkLoadingTimeout = setTimeout(() => {
-            this.pause(false).then(() => {
+            this.pause().then(() => {
                 this.emit(EVENTS.timeout, EVENTS.loadingTimeout);
                 this.emit(EVENTS.loadingTimeout);
             });
