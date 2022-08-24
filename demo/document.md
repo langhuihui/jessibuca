@@ -12,6 +12,29 @@
 -
 ## 常见问题
 
+### 推荐配置
+
+
+#### http
+
+```js
+{
+    useMSE:true,
+    autoWasm:true
+}
+```
+
+#### https
+
+```js
+{
+    useWCS:true,
+    autoWasm:true
+}
+```
+如果遇到硬解码失败的时候，会自动切换到wasm软解码
+
+
 ### 延迟时间
 
 实际测试 videoBuffer设置为100 毫秒，实测延迟300-400毫秒。低于1秒，达到毫秒级低延迟。
