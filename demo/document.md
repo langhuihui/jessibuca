@@ -677,7 +677,9 @@ pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
 通过设置` debug:true `，然后重新播放视频源，通过日志查看是否有报错信息。
 
 
+### g711系列的音频，听起来为啥都是杂音。
 
+确认下是否是服务器端推送音频数据的时候，把g711a 的推 成了g711u的格式，或者反过来了。导致播放器在解码格式的时候，听起来全是杂音。
 
 # 群
 <img src="/public/qrcode.jpeg">
