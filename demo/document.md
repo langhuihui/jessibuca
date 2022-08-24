@@ -322,6 +322,11 @@ pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
 具体研究可看：https://github.com/chokcoco/iCSS/issues/24
 
 
+### decoder.js 报 Unexpected token '<'错误
+
+查看network 面板下面的 decoder.wasm 有没有被正确引入。返回个格式是不是 `application/wasm`格式的
+
+
 ### 有数据,但是没有画面出来
 
 可能的原因有
