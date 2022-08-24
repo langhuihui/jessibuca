@@ -661,16 +661,18 @@ pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
 
 ### decoder.js 报 Unexpected token '<'错误
 
-查看network 面板下面的 decoder.wasm 有没有被正确引入。返回个格式是不是 `application/wasm`格式的
+1. 查看network 面板下面的 decoder.wasm 有没有被正确引入。返回个格式是不是 `application/wasm`格式的
+2. 查看decoder.js 和decoder.wasm是否放置在同一个目录下面。
 
 
 ### 有数据,但是没有画面出来
 
+可能的问题
 #### 时间戳导致的
 
 通过监听`stats` 事件，查看下面的`ts` 看是否都是相同的时间戳。
 
-#### debug:true
+#### 开启调试 debug:true
 
 通过设置` debug:true `，然后重新播放视频源，通过日志查看是否有报错信息。
 
