@@ -179,7 +179,7 @@ export default class MseDecoder extends Emitter {
         if (this.dropping && dts - this.cacheTrack.dts > videoBufferDelay) {
             this.dropping = false;
             this.cacheTrack = {};
-        } else if (this.cacheTrack && dts > this.cacheTrack.dts) {
+        } else if (this.cacheTrack && dts >= this.cacheTrack.dts) {
             // 需要额外加8个size
             let mdatBytes = 8 + this.cacheTrack.size;
             let mdatbox = new Uint8Array(mdatBytes);
