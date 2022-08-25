@@ -2,6 +2,7 @@ import Emitter from "../utils/emitter";
 import {CONTROL_HEIGHT, EVENTS, SCREENSHOT_TYPE, VIDEO_ENC_TYPE} from "../constant";
 import {dataURLToFile, downloadImg, isMobile, now} from "../utils";
 import CommonLoader from "./commonLoader";
+import saveAs from "../utils/file-save";
 
 export default class VideoLoader extends CommonLoader {
     constructor(player) {
@@ -127,7 +128,8 @@ export default class VideoLoader extends CommonLoader {
         } else if (type === SCREENSHOT_TYPE.blob) {
             return file;
         } else if (type === SCREENSHOT_TYPE.download) {
-            downloadImg(file, filename);
+            // downloadImg(file, filename);
+            saveAs(file,filename)
         }
     }
 

@@ -11,6 +11,7 @@ import {
 import createWebGL from "../utils/webgl";
 import {CANVAS_RENDER_TYPE, CONTROL_HEIGHT, EVENTS, SCREENSHOT_TYPE, VIDEO_ENC_TYPE} from "../constant";
 import CommonLoader from "./commonLoader";
+import saveAs from "../utils/file-save";
 
 export default class CanvasVideoLoader extends CommonLoader {
 
@@ -152,7 +153,8 @@ export default class CanvasVideoLoader extends CommonLoader {
         } else if (type === SCREENSHOT_TYPE.blob) {
             return file;
         } else if (type === SCREENSHOT_TYPE.download) {
-            downloadImg(file, filename);
+            // downloadImg(file, filename);
+            saveAs(file, filename);
         }
     }
 
