@@ -302,7 +302,7 @@ export default class MseDecoder extends Emitter {
         } else {
             if (this.sourceBuffer.updating === true) {
                 this.player.emit(EVENTS.mseSourceBufferBusy);
-                this.dropSourceBuffer(true);
+                // this.dropSourceBuffer(true);
             }
         }
     }
@@ -314,7 +314,7 @@ export default class MseDecoder extends Emitter {
     }
 
     dropSourceBuffer(isDropping) {
-        const $video = this.$videoElement;
+        const $video = this.player.video.$videoElement;
         this.dropping = isDropping;
         if ($video.buffered.length > 0) {
             if ($video.buffered.end(0) - $video.currentTime > 1) {
