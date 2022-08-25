@@ -162,6 +162,8 @@ worker地址
 
 > heartTimeoutReplay 重试失败之后，不再重新播放视频地址。
 
+> 如果想无限次重试，可以设置为-1
+
 ### loadingTimeout
 
 - **类型**：`number`
@@ -188,6 +190,8 @@ worker地址
 - **用法**： heartTimeoutReplay 重试次数
 
 > loadingTimeoutReplay 重试失败之后，不再重新播放视频地址。
+
+> 如果想无限次重试，可以设置为-1
 
 
 ### supportDblclickFullscreen

@@ -470,8 +470,9 @@ class Jessibuca extends Emitter {
 
 
             // 监听 delay timeout
-            this.player.once(EVENTS.delayTimeout, () => {
-                if (this.player._opt.heartTimeoutReplay && this._heartTimeoutReplayTimes < this.player._opt.heartTimeoutReplayTimes) {
+            this.player.on(EVENTS.delayTimeout, () => {
+                if (this.player._opt.heartTimeoutReplay && (this._heartTimeoutReplayTimes < this.player._opt.heartTimeoutReplayTimes || this.player._opt.heartTimeoutReplayTimes === -1)) {
+                    this.player.debug.log('Jessibuca', `delay timeout replay time is ${this._heartTimeoutReplayTimes}`)
                     this._heartTimeoutReplayTimes += 1;
                     this.play(url, options).then(() => {
                         // resolve();
@@ -483,8 +484,9 @@ class Jessibuca extends Emitter {
             })
 
             // 监听 loading timeout
-            this.player.once(EVENTS.loadingTimeout, () => {
-                if (this.player._opt.loadingTimeoutReplay && this._loadingTimeoutReplayTimes < this.player._opt.loadingTimeoutReplayTimes) {
+            this.player.on(EVENTS.loadingTimeout, () => {
+                if (this.player._opt.loadingTimeoutReplay && (this._loadingTimeoutReplayTimes < this.player._opt.loadingTimeoutReplayTimes || this.player._opt.loadingTimeoutReplayTimes === -1)) {
+                    this.player.debug.log('Jessibuca', `loading timeout replay time is ${this._loadingTimeoutReplayTimes}`)
                     this._loadingTimeoutReplayTimes += 1;
                     this.play(url, options).then(() => {
                         // resolve();
