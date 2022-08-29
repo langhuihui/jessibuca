@@ -37,6 +37,7 @@
                     ref="vod"
                     @change="restartPlay('simd')"
                 /><span>SIMD</span>
+
             </div>
             <div id="container"></div>
             <div class="input input-wrap">
@@ -53,6 +54,36 @@
                         当前渲染：<span>{{ renderType }}</span>
                     </div>
                 </div>
+            </div>
+            <div class="input">
+                <input
+                    type="checkbox"
+                    ref="offscreen"
+                    v-model="useOffscreen"
+                    @change="restartPlay('offscreen')"
+                /><span>离屏渲染(wasm+webcodecs)</span>
+            </div>
+            <div class="input">
+                <span>渲染标签：</span>
+                <select v-model="renderDom" @change="renderDomChange">
+                    <option value="video">video</option>
+                    <option value="canvas">canvas</option>
+                </select>
+                <div style="line-height: 30px">
+                    <input
+                        type="checkbox"
+                        ref="operateBtns"
+                        v-model="showOperateBtns"
+                        @change="restartPlay"
+                    /><span>操作按钮</span>
+                    <input
+                        type="checkbox"
+                        ref="operateBtns"
+                        v-model="showBandwidth"
+                        @change="restartPlay"
+                    /><span>网速</span>
+                </div>
+
             </div>
             <div class="input">
                 <div>输入URL：</div>
@@ -74,7 +105,7 @@
                 <button v-if="quieting" @click="cancelMute">取消静音</button>
                 <template v-else>
                     <button @click="mute">静音</button>
-                    音量
+                   <span>音量：</span>
                     <select v-model="volume" @change="volumeChange">
                         <option value="1">100</option>
                         <option value="0.75">75</option>
@@ -82,47 +113,25 @@
                         <option value="0.25">25</option>
                     </select>
                 </template>
-                <span>旋转</span>
+                <span>旋转：</span>
                 <select v-model="rotate" @change="rotateChange">
                     <option value="0">0</option>
                     <option value="90">90</option>
                     <option value="18">180</option>
                     <option value="270">270</option>
                 </select>
-                <span>镜像旋转</span>
+                <span>镜像旋转:</span>
                 <select v-model="mirrorRotate" @change="mirrorRotateChange">
                     <option value="none">无</option>
                     <option value="level">水平</option>
                     <option value="vertical">垂直</option>
                 </select>
-
                 <button @click="fullscreen">全屏</button>
                 <button @click="screenShot">截图</button>
                 <button @click="screenshotWatermark1">截图(水印文字)</button>
                 <button @click="screenshotWatermark2">截图(水印图片)</button>
-                <div style="line-height: 30px">
-                    <input
-                        type="checkbox"
-                        ref="operateBtns"
-                        v-model="showOperateBtns"
-                        @change="restartPlay"
-                    /><span>操作按钮</span>
-                    <input
-                        type="checkbox"
-                        ref="operateBtns"
-                        v-model="showBandwidth"
-                        @change="restartPlay"
-                    /><span>网速</span>
-                </div>
             </div>
             <div class="input" v-if="loaded">
-                <input
-                    type="checkbox"
-                    ref="offscreen"
-                    v-model="useOffscreen"
-                    @change="restartPlay('offscreen')"
-                /><span>离屏渲染</span>
-
                 <select v-model="scale" @change="scaleChange">
                     <option value="0">完全填充(拉伸)</option>
                     <option value="1">等比缩放</option>
@@ -165,8 +174,8 @@ export default {
             dfps: '',
             volume: 1,
             rotate: 0,
-            mirrorRotate:'none',
-            supportMSEHevc:false,
+            mirrorRotate: 'none',
+            supportMSEHevc: false,
             useWCS: false,
             useMSE: true,
             useSIMD: false,
@@ -178,7 +187,8 @@ export default {
             vConsole: null,
             playType: '',
             decodeType: '',
-            renderType: ''
+            renderType: '',
+            renderDom: 'video'
         };
     },
     mounted() {
@@ -231,6 +241,8 @@ export default {
                         forceNoOffscreen: !this.useOffscreen,
                         isNotMute: true,
                         timeout: 10,
+                        useVideoRender:this.renderDom === 'video',
+                        useCanvasRender:this.renderDom === 'canvas',
                         watermarkConfig: {
                             image: {
                                 // src: 'http://jessibuca.monibuca.com/jessibuca-logo.png',
@@ -436,7 +448,7 @@ export default {
             this.$options.jessibuca.setRotate(this.rotate);
         },
 
-        mirrorRotateChange(){
+        mirrorRotateChange() {
             this.$options.jessibuca.setMirrorRotate(this.mirrorRotate);
 
         },
@@ -512,6 +524,10 @@ export default {
                 this.useWCS = false;
             }
 
+            this.replay();
+        },
+
+        replay() {
             this.destroy();
             setTimeout(() => {
                 if (this.playType === 'play') {
@@ -531,6 +547,10 @@ export default {
         scaleChange() {
             this.$options.jessibuca.setScaleMode(this.scale);
         },
+
+        renderDomChange() {
+            this.replay();
+        }
     },
 };
 </script>
@@ -578,7 +598,7 @@ export default {
     place-content: stretch;
 }
 
-.input-wrap{
+.input-wrap {
     justify-content: space-between;
 }
 
