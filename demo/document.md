@@ -704,5 +704,15 @@ pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
 
 确认下是否是服务器端推送音频数据的时候，把g711a 的推 成了g711u的格式，或者反过来了。导致播放器在解码格式的时候，听起来全是杂音。
 
+
+### Failed to constructor 'Worker': Script at 'file://xxxxxxx'
+
+别用`file`协议启动项目，`file`协议暂不支持`worker`。
+
+使用`http`协议启动，可以配合`nginx`或者`node` 启动。
+
 # 群
 <img src="/public/qrcode.jpeg">
+
+
+

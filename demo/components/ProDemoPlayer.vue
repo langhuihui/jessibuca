@@ -45,8 +45,13 @@
                     <span v-if="supportMSEHevc" style="color: green;">支持MSE H265解码</span>
                     <span v-else style="color: red;">不支持MSE H265解码,会自动切换成wasm解码</span>
                 </div>
-                <div v-if="playing && decodeType">
-                    当前解码：<span>{{ decodeType }}</span>
+                <div>
+                    <div v-if="playing && decodeType">
+                        当前解码：<span>{{ decodeType }}</span>
+                    </div>
+                    <div v-if="playing && renderType">
+                        当前渲染：<span>{{ renderType }}</span>
+                    </div>
                 </div>
             </div>
             <div class="input">
@@ -164,7 +169,8 @@ export default {
             scale: 0,
             vConsole: null,
             playType: '',
-            decodeType: ''
+            decodeType: '',
+            renderType: ''
         };
     },
     mounted() {
@@ -298,6 +304,9 @@ export default {
 
                 const decodeType = jessibuca.getDecodeType();
                 this.decodeType = decodeType;
+
+                const renderType = jessibuca.getRenderType();
+                this.renderType = renderType;
             })
 
             jessibuca.on("performance", function (performance) {
