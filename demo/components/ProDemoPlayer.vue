@@ -86,7 +86,14 @@
                 <select v-model="rotate" @change="rotateChange">
                     <option value="0">0</option>
                     <option value="90">90</option>
+                    <option value="18">180</option>
                     <option value="270">270</option>
+                </select>
+                <span>镜像旋转</span>
+                <select v-model="mirrorRotate" @change="mirrorRotateChange">
+                    <option value="none">无</option>
+                    <option value="level">水平</option>
+                    <option value="vertical">垂直</option>
                 </select>
 
                 <button @click="fullscreen">全屏</button>
@@ -158,6 +165,7 @@ export default {
             dfps: '',
             volume: 1,
             rotate: 0,
+            mirrorRotate:'none',
             supportMSEHevc:false,
             useWCS: false,
             useMSE: true,
@@ -426,6 +434,11 @@ export default {
         },
         rotateChange() {
             this.$options.jessibuca.setRotate(this.rotate);
+        },
+
+        mirrorRotateChange(){
+            this.$options.jessibuca.setMirrorRotate(this.mirrorRotate);
+
         },
         destroy() {
             if (this.$options.jessibuca) {
