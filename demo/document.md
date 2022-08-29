@@ -711,6 +711,17 @@ pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
 
 使用`http`协议启动，可以配合`nginx`或者`node` 启动。
 
+#### node 启动
+通过 jessibuca-vue-demo 中的 preview 进行查看。
+
+https://github.com/bosscheng/jessibuca-vue-demo/blob/v3/preview/preview.js
+
+#### nginx 配置
+
+
+
+
+
 # 群
 <img src="/public/qrcode.jpeg">
 
