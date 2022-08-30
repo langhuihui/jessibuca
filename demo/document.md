@@ -442,10 +442,3 @@ https://github.com/bosscheng/jessibuca-vue-demo/blob/v3/preview/preview.js
 
 
 
-
-
-# 群
-<img src="/public/qrcode.jpeg">
-
-
-
