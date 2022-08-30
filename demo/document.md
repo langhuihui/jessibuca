@@ -186,12 +186,12 @@ https://github.com/langhuihui/jessibuca/issues/135
 
 ### 关于视频卡顿
 
-### 可能存在的问题
+#### 可能存在的问题
 1. 分辨率过高
 2. 带宽是否跟得上
 3. 是否是H265编码
 
-### 自查
+#### 自查
 监听下`stats` 事件，查看 `fps` 是否达到了预期的值。
 
 #### 通用解决方案
@@ -218,11 +218,27 @@ https://github.com/langhuihui/jessibuca/issues/135
 
 可以的，http://jessibuca.monibuca.com/api.html#stats 监听 stats ,一秒回调一次，
 
+```shell
 buf: 当前缓冲区时长，单位毫秒,
 fps: 当前视频帧率,
 abps: 当前音频码率，单位bit,
 vbps: 当前视频码率，单位bit，
 ts:当前视频帧pts，单位毫秒
+
+```
+
+#### 对于jessibuca pro 版本 支持
+
+```shell
+buf: 当前缓冲区时长，单位毫秒,
+fps: 当前视频帧率,
+abps: 当前音频码率，单位bit,
+vbps: 当前视频码率，单位bit，
+ts: 当前视频帧pts，单位毫秒
+pTs: 当前播放器的播放时间，从0开始，单位毫秒
+```
+
+
 
 ### 将录制的视频保存在安卓手机相册中，显示的时长为0，并且无法播放。
 
@@ -252,6 +268,11 @@ https://github.com/langhuihui/jessibuca/issues/126
 
 > 目前如果声音在静音或者没有音频数据的时候，一定要设置hasAudio，不然MediaRecorder会录制失败。
 
+### 如果只需要播放音频数据
+
+> jessibuca pro 版本已经支持
+
+可以测试看下 http://jessibuca.monibuca.com/pro-demo.html#only-audio
 
 
 ### 创建多个以上播放实例会非常卡顿，还会导致页面黑屏
@@ -265,6 +286,7 @@ https://github.com/langhuihui/jessibuca/issues/126
 3. 设置hasAudio 为false，不demux和decode音频数据。
 4. ~~条件允许(支持OffscreenCanvas)也可以配合设置 forceNoOffscreen 为 false  开启离屏渲染模式，提升性能。~~
 5. pro版本支持360 或者edge浏览器 H265硬解码。 http://jessibuca.monibuca.com/player-pro.html
+6. pro版本支持SIMD解码，尤其是1080p及以上的分辨率，会有很强的效果。http://jessibuca.monibuca.com/player-pro.html
 > 某些显卡在支持OffscreenCanvas上面会存在问题，所以谨慎使用。
 > https://github.com/langhuihui/jessibuca/issues/227
 
@@ -382,8 +404,7 @@ pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
 
 ### 有数据,但是没有画面出来
 
-可能的原因有
-
+待补充
 
 
 # 群
