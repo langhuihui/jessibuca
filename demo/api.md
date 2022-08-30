@@ -667,7 +667,7 @@ jessibuca.on("load", function () {
 
 ### timeUpdate
 
-视频播放持续时间，单位ms
+当前视频帧pts，单位毫秒ms
 
 ```js
 jessibuca.on('timeUpdate', function (ts) {

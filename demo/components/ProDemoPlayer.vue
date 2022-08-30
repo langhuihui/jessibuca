@@ -105,7 +105,7 @@
                 <button v-if="quieting" @click="cancelMute">取消静音</button>
                 <template v-else>
                     <button @click="mute">静音</button>
-                   <span>音量：</span>
+                    <span>音量：</span>
                     <select v-model="volume" @change="volumeChange">
                         <option value="1">100</option>
                         <option value="0.75">75</option>
@@ -146,13 +146,55 @@
                     <button v-if="!recording" @click="startRecord">录制</button>
                     <button v-if="!recording" @click="stopAndSaveRecord">暂停录制</button>
                 </template>
-                <span v-if="fps!==''" style="margin-left: 10px">Render FPS：{{ fps }}</span>
-                <span v-if="dfps!==''" style="margin-left: 10px">Decoder FPS：{{ dfps }}</span>
+            </div>
+            <div class="input" v-if="loaded && stats">
+                <span style="margin-left: 10px">Delay Buffer(ms)：{{ stats.buf }}</span>
+                <span style="margin-left: 10px">Audio bps(bit)：{{ stats.abps }}</span>
+                <span style="margin-left: 10px">Video bps(bit)：{{ stats.vbps }}</span>
+                <span style="margin-left: 10px">Render FPS：{{ stats.fps }}</span>
+                <span style="margin-left: 10px">Decoder FPS：{{ stats.dfps }}</span>
+            </div>
+            <div class="input" v-if="loaded && stats">
+                <span style="margin-left: 10px">是否触发丢帧：{{ stats.isDroping }}</span>
+                <span style="margin-left: 10px">视频帧pts(ms)：{{ stats.ts }}</span>
+                <span style="margin-left: 10px">播放时长：{{ stats.playingTimestamp }}</span>
             </div>
         </div>
     </div>
 </template>
 <script>
+
+function formatTimeTips(time) {
+    var result;
+
+    time = parseInt(time / 1000, 10);
+    //
+    if (time > -1) {
+        var hour = Math.floor(time / 3600);
+        var min = Math.floor(time / 60) % 60;
+        var sec = time % 60;
+
+        sec = Math.round(sec);
+
+        if (hour < 10) {
+            result = '0' + hour + ":";
+        } else {
+            result = hour + ":";
+        }
+
+        if (min < 10) {
+            result += "0";
+        }
+        result += min + ":";
+        if (sec < 10) {
+            result += "0";
+        }
+        result += sec.toFixed(0);
+    }
+
+    return result;
+}
+
 export default {
     name: "ProDemoPlayer",
     jessibuca: null,
@@ -188,7 +230,10 @@ export default {
             playType: '',
             decodeType: '',
             renderType: '',
-            renderDom: 'video'
+            renderDom: 'video',
+            playingTimestamp: '',
+            dts: '',
+            stats: {}
         };
     },
     mounted() {
@@ -241,8 +286,8 @@ export default {
                         forceNoOffscreen: !this.useOffscreen,
                         isNotMute: true,
                         timeout: 10,
-                        useVideoRender:this.renderDom === 'video',
-                        useCanvasRender:this.renderDom === 'canvas',
+                        useVideoRender: this.renderDom === 'video',
+                        useCanvasRender: this.renderDom === 'canvas',
                         watermarkConfig: {
                             image: {
                                 // src: 'http://jessibuca.monibuca.com/jessibuca-logo.png',
@@ -262,6 +307,7 @@ export default {
             );
 
             this.$options.jessibuca = jessibuca;
+            let configOptions = jessibuca.getOption();
             var _this = this;
             jessibuca.on("load", (msg) => {
                 !this.isDebug && console.log("on load");
@@ -344,8 +390,13 @@ export default {
 
             jessibuca.on('stats', (stats) => {
                 !this.isDebug && console.log('stats', stats);
-                _this.fps = stats.fps;
-                _this.dfps = stats.dfps;
+                // _this.fps = stats.fps;
+                // _this.dfps = stats.dfps;
+                // _this.dts = stats.ts;
+                // _this.playingTimestamp = formatTimeTips(stats.pTs);
+                _this.stats = Object.assign({}, stats);
+                _this.stats.playingTimestamp = formatTimeTips(stats.pTs);
+                _this.stats.isDroping = stats.buf > configOptions.videoBuffer + configOptions.videoBufferDelay
             })
 
             // jessibuca.on('kBps', function (kBps) {
