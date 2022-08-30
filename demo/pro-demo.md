@@ -119,5 +119,19 @@
 
 
 
+## 6X7 h265 MSE
+
+#### https
+[https://jessibuca.com/pro/6x7-mse-demo.html](https://jessibuca.com/pro/6x7-mse-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/6x7-mse-demo.html](http://jessibuca.monibuca.com/pro/6x7-mse-demo.html)
+
+
+
+
+
+
+
 # 群
 <img src="/public/qrcode.jpeg">
