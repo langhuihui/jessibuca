@@ -34,6 +34,23 @@
 ```
 如果遇到硬解码失败的时候，会自动切换到wasm软解码
 
+### 对于渲染元素
+
+#### wasm软解码
+默认是通过 `canvas` 进行渲染的
+
+> jessibuca pro 支持 `video` 标签渲染
+
+#### mse 硬解码
+默认是通过 `video` 标签进行渲染的
+
+> jessibuca pro 支持 `canvas` 标签渲染
+
+#### webcodecs 硬解码
+默认是通过 `canvas` 进行渲染的
+
+> jessibuca pro 支持 `video` 标签渲染
+
 
 ### 延迟时间
 
