@@ -334,8 +334,8 @@ pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
 - 视频码率：码率越高，视频富含的细节越多，也越清晰，但是会消耗更多的解码性能，可以试着降低码率
 - 视频分辨率：过高的视频会造成单帧传递的数量极大
 
-### 解决方案
-#### 对于 软解码的延迟 优化
+#### 解决方案
+
 - 可以使用jessibuca pro 的 simd 解码，尤其正对于HEVC的1080p的解码能力提升很多。
 - jessibuca pro 还支持 mse 解码 HEVC(H265)
 
@@ -346,6 +346,10 @@ pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
 - 视频流的格式 不是 yuv420p
 
 可能的视频格式是：yuvj422p 格式。
+
+可能是webgl 渲染的问题导致的。
+
+> jessibuca pro 支持video 标签渲染数据，不会出现视频颜色变灰色的情况
 
 
 ### 视频渲染发绿（软解码）
@@ -365,6 +369,7 @@ pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
 1. ~~可以通过设置`gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);` 的方式来解决，但是会损耗一部分性能。~~
 2. ~~将`openWebglAlignment` 设为 `true`。~~
 3. 最新解决方案，程序会自动检查分辨率，如果不是标准的分辨率，会自动更新webgl 渲染规则
+4. jessibuca pro 支持video 标签渲染数据，不会出现视频渲染发绿的情况
 
 ### 关于如何集成到qiankun这类的微前端中去
 
