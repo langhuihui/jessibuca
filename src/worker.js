@@ -165,10 +165,10 @@ Module.postRun = function () {
                     const yData = Module.HEAPU8.subarray(y, y + size);
                     const uData = Module.HEAPU8.subarray(u, u + qsize);
                     const vData = Module.HEAPU8.subarray(v, v + (qsize));
-                    if (isGreenYUV(Uint8Array.from(yData))) {
-                        decoder.opt.debug && console.log('Jessibuca: [worker]: draw offscreenCanvas is green yuv');
-                        return
-                    }
+                    // if (isGreenYUV(Uint8Array.from(yData))) {
+                    //     decoder.opt.debug && console.log('Jessibuca: [worker]: draw offscreenCanvas is green yuv');
+                    //     return
+                    // }
 
                     this.webglObj.render(w, h, yData, uData, vData);
                     let image_bitmap = this.offscreenCanvas.transferToImageBitmap();
@@ -184,10 +184,10 @@ Module.postRun = function () {
                     const yData = Uint8Array.from(Module.HEAPU8.subarray(y, y + size));
                     const uData = Uint8Array.from(Module.HEAPU8.subarray(u, u + qsize));
                     const vData = Uint8Array.from(Module.HEAPU8.subarray(v, v + (qsize)));
-                    if (isGreenYUV(yData)) {
-                        decoder.opt.debug && console.log('Jessibuca: [worker]: draw is green yuv');
-                        return
-                    }
+                    // if (isGreenYUV(yData)) {
+                    //     decoder.opt.debug && console.log('Jessibuca: [worker]: draw is green yuv');
+                    //     return
+                    // }
                     const outputArray = [yData, uData, vData];
                     postMessage({
                         cmd: WORKER_CMD_TYPE.render,
