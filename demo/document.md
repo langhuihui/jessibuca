@@ -89,7 +89,7 @@ Extension: .wasm (dot wasm)
 MIMEType: application/wasm
 
 
-### wasm 格式返回错误
+### wasm 格式返回错误  Incorrect response MIME type. Expected 'application/wasm'.
 
 > Uncaught (in promise) TypeError: Failed to execute 'compile' on 'WebAssembly': Incorrect response MIME type. Expected 'application/wasm'.
 
