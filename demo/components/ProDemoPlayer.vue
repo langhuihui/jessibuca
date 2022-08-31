@@ -98,7 +98,10 @@
                     <button v-if="playType === '' || playType === 'play'" @click="play">播放</button>
                     <button v-if="playType === '' || playType === 'playback'" @click="playback">播放录像流</button>
                 </template>
-                <button v-else @click="pause">停止</button>
+                <template v-else>
+                    <button v-if="playType === 'play'" @click="pause">停止</button>
+                    <button v-if="playType === 'playback'" @click="pause">停止录像流</button>
+                </template>
             </div>
             <div class="input" v-if="loaded" style="line-height: 30px">
                 <button @click="destroy">销毁</button>
@@ -130,6 +133,15 @@
                 <button @click="screenShot">截图</button>
                 <button @click="screenshotWatermark1">截图(水印文字)</button>
                 <button @click="screenshotWatermark2">截图(水印图片)</button>
+                <template v-if="playType === 'playback'">
+                    <span>切换播放倍率:</span>
+                    <select v-model="playbackRate" @change="playbackRateChange">
+                        <option value="1">1倍</option>
+                        <option value="2">2倍</option>
+                        <option value="3">3倍</option>
+                    </select>
+
+                </template>
             </div>
             <div class="input" v-if="loaded">
                 <select v-model="scale" @change="scaleChange">
@@ -233,7 +245,8 @@ export default {
             renderDom: 'video',
             playingTimestamp: '',
             dts: '',
-            stats: {}
+            stats: {},
+            playbackRate: 1
         };
     },
     mounted() {
@@ -299,7 +312,7 @@ export default {
                             //     content:'jessibuca-pro'
                             // },
                             right: 10,
-                            top: 10
+                            top: 30
                         },
                     },
                     options
@@ -601,6 +614,9 @@ export default {
 
         renderDomChange() {
             this.replay();
+        },
+        playbackRateChange() {
+            this.$options.jessibuca.forward(this.playbackRate)
         }
     },
 };
