@@ -39,10 +39,10 @@ export interface VideoPacket {
     pts: number
 };
 
-export interface VideoFrame {
+export interface JVideoFrame {
 
     pixelType: PixelType,
-    datas: BufferSource[],
+    data: Uint8Array,
     width: number,
     height: number,
     pts: number

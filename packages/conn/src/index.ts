@@ -1,6 +1,5 @@
 import { ChangeState, FSM, Includes } from "afsm";
 import { WebSocketFSM } from "./ws";
-import { range, tap, map, fromEvent, concatMap, takeUntil, timer } from 'streamrx';
 import { ConnectionOptions, ConnectionState } from "./types";
 import Oput from 'oput';
 import { WebTransportFSM } from "./wt";

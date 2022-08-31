@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3';
-import { DecoderState, VideoDecoderConfig, VideoPacket, VideoDecoderInterface, VideoCodecInfo, VideoDecoderEvent, VideoFrame, ErrorInfo } from './types';
+import { DecoderState, VideoDecoderConfig, VideoPacket, VideoDecoderInterface, VideoCodecInfo, VideoDecoderEvent,JVideoFrame, ErrorInfo } from './types';
 
 
 export class VideoDecoderSoftBase extends EventEmitter implements VideoDecoderInterface {
@@ -7,7 +7,7 @@ export class VideoDecoderSoftBase extends EventEmitter implements VideoDecoderIn
     decoderState: DecoderState;
     decoder: any;
     config?: VideoDecoderConfig;
-    module?: any;
+    module: Partial<EmscriptenModule & { VideoDecoder: any}> = {};
     createModule:any;
 
     width: number;
@@ -27,14 +27,12 @@ export class VideoDecoderSoftBase extends EventEmitter implements VideoDecoderIn
 
         return new Promise(resolve => {
 
-            const opts: any = {};
+            const opts: any = this.module;
             opts.print = ((text: string) => console.log(text));
             opts.printErr = ((text: string) => console.log(`[JS] ERROR: ${text}`));
             opts.onAbort = (() => console.log("[JS] FATAL: WASM ABORTED"));
             opts.postRun = ((m: any) => {
 
-                this.module = m;
-         
                 this.decoder = new this.module.VideoDecoder(this);
 
                 this.decoderState = 'initialized';
@@ -137,27 +135,30 @@ export class VideoDecoderSoftBase extends EventEmitter implements VideoDecoderIn
             return;
          }
 
-         let size = this.width*this.height;
-         let halfSize = size>>2;
+        const size = this.width*this.height;
+        const halfSize = size>>2;
 
-         let yPtr = this.module.HEAPU32[(yuvArray>>2)]; 
-         let uPtr = this.module.HEAPU32[(yuvArray>>2) + 1]; 
-         let vPtr = this.module.HEAPU32[(yuvArray>>2) + 2]; 
+         let yPtr = this.module.HEAPU32![(yuvArray>>2)]; 
+         let uPtr = this.module.HEAPU32![(yuvArray>>2) + 1]; 
+         let vPtr = this.module.HEAPU32![(yuvArray>>2) + 2]; 
 
-         let yBuf = this.module.HEAPU8.subarray(yPtr, yPtr + size);
-         let uBuf = this.module.HEAPU8.subarray(uPtr, uPtr + halfSize);
-         let vBuf = this.module.HEAPU8.subarray(vPtr, vPtr + halfSize);
+         let yBuf = this.module.HEAPU8!.subarray(yPtr, yPtr + size);
+         let uBuf = this.module.HEAPU8!.subarray(uPtr, uPtr + halfSize);
+         let vBuf = this.module.HEAPU8!.subarray(vPtr, vPtr + halfSize);
+         const data = new Uint8Array(size + halfSize + halfSize)
+         data.set(yBuf);
+         data.set(uBuf, size);
+         data.set(vBuf, size + halfSize);
+        //  let datas = [Uint8Array.from(yBuf), Uint8Array.from(uBuf), Uint8Array.from(vBuf)];
 
-         let datas = [Uint8Array.from(yBuf), Uint8Array.from(uBuf), Uint8Array.from(vBuf)];
-
-         let vFrame : VideoFrame = {
+         let vFrame : JVideoFrame = {
             pixelType:'I420',
-            datas: datas,
+            data,
             width: this.width,
             height: this.height,
             pts: pts
         };
-
+     
         this.emit(VideoDecoderEvent.VideoFrame, vFrame);
 
     }

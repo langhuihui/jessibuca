@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3';
-import {DecoderState, VideoDecoderType, VideoDecoderConfig, VideoPacket, VideoDecoderEvent, VideoDecoderInterface, VideoCodecInfo, VideoFrame, ErrorInfo} from './types'
+import {DecoderState, VideoDecoderType, VideoDecoderConfig, VideoPacket, VideoDecoderEvent, VideoDecoderInterface, VideoCodecInfo, JVideoFrame, ErrorInfo} from './types'
 import { VideoDecoderSoft } from './video_decoder_soft';
 import { VideoDecoderSoftSIMD } from './video_decoder_soft_simd';
 import { VideoDecoderHard } from './video_decoder_hard';
@@ -38,7 +38,7 @@ export class VideoDecoder extends EventEmitter implements VideoDecoderInterface 
             this.emit(VideoDecoderEvent.VideoCodecInfo, codecinfo);
         })
 
-        this.decoder.on(VideoDecoderEvent.VideoFrame, (videoFrame: VideoFrame) => {
+        this.decoder.on(VideoDecoderEvent.VideoFrame, (videoFrame: JVideoFrame) => {
 
             this.emit(VideoDecoderEvent.VideoFrame, videoFrame);
         })

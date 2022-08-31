@@ -13,6 +13,7 @@
     "eventemitter3": "^4.0.7"
   },
   "devDependencies": {
-    "@types/emscripten": "^1.39.6"
+    "@types/emscripten": "^1.39.6",
+    "@types/dom-webcodecs": "^0.1.2"
   }
 }

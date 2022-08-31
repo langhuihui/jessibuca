@@ -8,5 +8,13 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@types/dom-mediacapture-transform": "^0.1.1",
+    "@types/dom-webcodecs": "^0.1.2"
+  },
+  "dependencies": {
+    "afsm": "^2.2.4",
+    "eventemitter3": "^4.0.7"
+  }
 }

@@ -25,5 +25,6 @@ declare module '@vue/runtime-core' {
     NText: typeof import('naive-ui')['NText']
     NUpload: typeof import('naive-ui')['NUpload']
     NUploadDragger: typeof import('naive-ui')['NUploadDragger']
+    Renderer: typeof import('./src/components/Renderer.vue')['default']
   }
 }

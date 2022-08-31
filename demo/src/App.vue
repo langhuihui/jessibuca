@@ -4,6 +4,7 @@
 import Connection from './components/Connection.vue';
 import Demuxer from './components/Demuxer.vue';
 import Decoder from './components/Decoder.vue'
+import Renderer from './components/Renderer.vue'
 </script>
 
 <template>
@@ -19,6 +20,7 @@ import Decoder from './components/Decoder.vue'
         <Decoder />
       </n-tab-pane>
       <n-tab-pane name="renderer" tab="Renderer">
+        <Renderer/>
       </n-tab-pane>
       <n-tab-pane name="ui" tab="UI">
       </n-tab-pane>
