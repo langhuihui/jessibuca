@@ -297,7 +297,8 @@ export default {
                         container: document.getElementById('container'),
                         decoder: '/pro/decoder-pro.js',
                         videoBuffer: Number(this.videoBuffer), // 缓存时长
-                        videoBufferDelay: Number(this.videoBufferDelay), isResize: false,
+                        videoBufferDelay: Number(this.videoBufferDelay),
+                        isResize: false,
                         useWCS: this.useWCS,
                         useMSE: this.useMSE,
                         useSIMD: this.useSIMD,
