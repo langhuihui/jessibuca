@@ -34,6 +34,25 @@
 ```
 如果遇到硬解码失败的时候，会自动切换到wasm软解码
 
+### jessibuca.js decoder.js decoder.wasm文件想存放特定地址
+
+一般情况下，建议放置在 `public` 目录下面，如果需要放置在子目录，需要修改的地方有
+
+例如放在 `jessibuca`文件夹
+
+index.html文件
+```html
+    <script src="./jessibuca/jessibuca.js"></script>
+```
+对于 new Jessibuca()  的时候
+
+```shell
+{
+  decoder:'/jessibuca/decoder.js'
+}
+```
+
+
 ### 对于渲染元素
 
 #### wasm软解码
