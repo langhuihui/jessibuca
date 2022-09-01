@@ -5,14 +5,20 @@
                     version
                 }})</span></div>
             <div class="option">
-                <span>缓冲(秒):</span>
+                <span>最大延迟:</span>
                 <input
                     style="width: 50px"
                     type="number"
-                    ref="buffer"
-                    value="0.2"
+                    v-model="videoBufferDelay"
+                    @change="changeBufferDelay"
+                /><span style="margin-right: 5px">秒</span>
+                <span>缓冲:</span>
+                <input
+                    style="width: 50px"
+                    type="number"
+                    v-model="videoBuffer"
                     @change="changeBuffer"
-                />
+                /><span style="margin-right: 5px">秒</span>
                 <input
                     type="checkbox"
                     v-model="isDebug"
@@ -158,18 +164,31 @@
                     <button v-if="!recording" @click="startRecord">录制</button>
                     <button v-if="!recording" @click="stopAndSaveRecord">暂停录制</button>
                 </template>
+                <button @click="clearBufferDelay">手动消除延迟</button>
+
+            </div>
+            <div class="input" v-if="loaded && videoInfo.encType">
+                <span>视频数据：编码格式：{{ videoInfo.encType }} 宽度：{{ videoInfo.width }} 高度:{{ videoInfo.height }}</span>
+            </div>
+            <div class="input" v-if="loaded && audioInfo.encType">
+                <span>音频数据：编码格式：{{ audioInfo.encType }} 通道：{{ audioInfo.channels }} 采样率:{{
+                        audioInfo.sampleRate
+                    }}</span>
             </div>
             <div class="input" v-if="loaded && stats">
-                <span style="margin-left: 10px">Delay Buffer(ms)：{{ stats.buf }}</span>
-                <span style="margin-left: 10px">Audio bps(bit)：{{ stats.abps }}</span>
-                <span style="margin-left: 10px">Video bps(bit)：{{ stats.vbps }}</span>
-                <span style="margin-left: 10px">Render FPS：{{ stats.fps }}</span>
-                <span style="margin-left: 10px">Decoder FPS：{{ stats.dfps }}</span>
+                <span style="margin-right: 10px">Network Delay Buffer(ms)：{{ stats.netBuf }}</span>
+                <span style="margin-right: 10px">Delay Buffer(ms)：{{ stats.buf }}</span>
             </div>
             <div class="input" v-if="loaded && stats">
-                <span style="margin-left: 10px">是否触发丢帧：{{ stats.isDroping }}</span>
-                <span style="margin-left: 10px">视频帧pts(ms)：{{ stats.ts }}</span>
-                <span style="margin-left: 10px">播放时长：{{ stats.playingTimestamp }}</span>
+                <span style="margin-right: 10px">Audio bps(bit)：{{ stats.abps }}</span>
+                <span style="margin-right: 10px">Video bps(bit)：{{ stats.vbps }}</span>
+                <span style="margin-right: 10px">Render FPS：{{ stats.fps }}</span>
+                <span style="margin-right: 10px">Decoder FPS：{{ stats.dfps }}</span>
+            </div>
+            <div class="input" v-if="loaded && stats">
+                <span style="margin-right: 10px">是否触发丢帧：{{ stats.isDroping }}</span>
+                <span style="margin-right: 10px">视频帧pts(ms)：{{ stats.ts }}</span>
+                <span style="margin-right: 10px">播放时长：{{ stats.playingTimestamp }}</span>
             </div>
         </div>
     </div>
@@ -214,9 +233,12 @@ export default {
     data() {
         return {
             version: '',
+            videoBuffer: 0.2,
+            videoBufferDelay: 1,
             wasm: false,
             playing: false,
             quieting: true,
+            loading: false,
             loaded: false, // mute
             showOperateBtns: true,
             showBandwidth: true,
@@ -246,7 +268,10 @@ export default {
             playingTimestamp: '',
             dts: '',
             stats: {},
-            playbackRate: 1
+            videoInfo: {},
+            audioInfo: {},
+            playbackRate: 1,
+            playModel: 'video+audio'
         };
     },
     mounted() {
@@ -271,8 +296,8 @@ export default {
                     {
                         container: document.getElementById('container'),
                         decoder: '/pro/decoder-pro.js',
-                        videoBuffer: Number(this.$refs.buffer.value), // 缓存时长
-                        isResize: false,
+                        videoBuffer: Number(this.videoBuffer), // 缓存时长
+                        videoBufferDelay: Number(this.videoBufferDelay),                        isResize: false,
                         useWCS: this.useWCS,
                         useMSE: this.useMSE,
                         useSIMD: this.useSIMD,
@@ -294,7 +319,8 @@ export default {
                             play: this.showOperateBtns,
                             audio: this.showOperateBtns,
                             ptz: this.showOperateBtns,
-                            quality: this.showOperateBtns
+                            quality: this.showOperateBtns,
+                            close: this.showOperateBtns
                         },
                         forceNoOffscreen: !this.useOffscreen,
                         isNotMute: true,
@@ -355,6 +381,7 @@ export default {
 
             jessibuca.on("audioInfo", (msg) => {
                 !this.isDebug && console.log("audioInfo", msg);
+                this.audioInfo = msg
             });
 
             jessibuca.on("bps", (msg) => {
@@ -368,6 +395,7 @@ export default {
 
             jessibuca.on("videoInfo", (info) => {
                 !this.isDebug && console.log("videoInfo", info);
+                this.videoInfo = info;
             });
 
             jessibuca.on("error", (error) => {
@@ -419,6 +447,7 @@ export default {
             jessibuca.on("play", () => {
                 this.playing = true;
                 this.loaded = true;
+                this.loading = false;
                 this.quieting = jessibuca.isMute();
             });
 
@@ -434,6 +463,11 @@ export default {
                 !this.isDebug && console.log(performance);
             })
 
+            jessibuca.on('destroy', () => {
+                !this.isDebug && console.log('jessibuca destroy');
+                this.initPlayer();
+            })
+
             // this.play();
             // console.log(this.jessibuca);
         },
@@ -444,6 +478,7 @@ export default {
             if (this.$refs.playUrl.value) {
                 this.$options.jessibuca.play(this.$refs.playUrl.value)
                 this.playType = 'play'
+                this.loading = true;
             }
         },
         playback() {
@@ -520,6 +555,9 @@ export default {
             if (this.$options.jessibuca) {
                 this.$options.jessibuca.destroy();
             }
+            this.initPlayer();
+        },
+        initPlayer() {
             this.create();
             this.playType = '';
             this.playing = false;
@@ -543,7 +581,9 @@ export default {
         stopAndSaveRecord() {
             this.$options.jessibuca.stopRecordAndSave();
         },
-
+        clearBufferDelay() {
+            this.$options.jessibuca.clearBufferDelay();
+        },
 
         screenShot() {
             this.$options.jessibuca.screenshot();
@@ -605,7 +645,10 @@ export default {
         },
 
         changeBuffer() {
-            this.$options.jessibuca.setBufferTime(Number(this.$refs.buffer.value));
+            this.$options.jessibuca.setBufferTime(this.videoBuffer);
+        },
+        changeBufferDelay() {
+            this.$options.jessibuca.setBufferDelayTime(this.videoBufferDelay);
         },
 
         scaleChange() {
