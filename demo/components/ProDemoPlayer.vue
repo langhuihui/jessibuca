@@ -104,13 +104,13 @@
                     <button v-if="playType === '' || playType === 'play'" @click="play">播放</button>
                     <button v-if="playType === '' || playType === 'playback'" @click="playback">播放录像流</button>
                 </template>
-                <template v-else>
+                <template v-if="loading || playing">
                     <button v-if="playType === 'play'" @click="pause">停止</button>
                     <button v-if="playType === 'playback'" @click="pause">停止录像流</button>
                 </template>
             </div>
             <div class="input" v-if="loaded" style="line-height: 30px">
-                <button @click="destroy">销毁</button>
+                <button @click="destroyPlayer">销毁</button>
                 <button v-if="quieting" @click="cancelMute">取消静音</button>
                 <template v-else>
                     <button @click="mute">静音</button>
@@ -285,6 +285,7 @@ export default {
     unmounted() {
         if (this.$options && this.$options.jessibuca) {
             this.$options.jessibuca.destroy();
+            this.$options.jessibuca = null;
         }
         this.vConsole.destroy();
     },
@@ -453,20 +454,23 @@ export default {
             });
 
             jessibuca.on('recordingTimestamp', (ts) => {
-                !this.isDebug && console.log('recordingTimestamp', ts);
+                !this.isDebug && console.log('recordingTimestamp: ', ts);
             })
 
             jessibuca.on('playToRenderTimes', (times) => {
-                !this.isDebug && console.log(times);
+                !this.isDebug && console.log('playToRenderTimes: ', times);
             })
 
             jessibuca.on('performance', (performance) => {
-                !this.isDebug && console.log(performance);
+                !this.isDebug && console.log('performance: ', performance);
             })
+            jessibuca.on('close', () => {
+                !this.isDebug && console.log('jessibuca close');
+                setTimeout(() => {
+                    this.initPlayer();
+                }, 10)
 
-            jessibuca.on('destroy', () => {
-                !this.isDebug && console.log('jessibuca destroy');
-                this.initPlayer();
+
             })
 
             // this.play();
@@ -552,10 +556,16 @@ export default {
             this.$options.jessibuca.setMirrorRotate(this.mirrorRotate);
 
         },
-        destroy() {
-            if (this.$options.jessibuca) {
-                this.$options.jessibuca.destroy();
+        destroyPlayer() {
+            try {
+                if (this.$options.jessibuca) {
+                    this.$options.jessibuca.destroy();
+                    this.$options.jessibuca = null;
+                }
+            } catch (e) {
+                console.error(e);
             }
+
             this.initPlayer();
         },
         initPlayer() {
@@ -633,16 +643,14 @@ export default {
         },
 
         replay() {
-            this.destroy();
-            setTimeout(() => {
-                if (this.playType === 'play') {
-                    this.play();
-                } else if (this.playType === 'playback') {
-                    this.playback();
-                } else {
-                    this.play();
-                }
-            }, 100)
+            this.destroyPlayer();
+            if (this.playType === 'play') {
+                this.play();
+            } else if (this.playType === 'playback') {
+                this.playback();
+            } else {
+                this.play();
+            }
         },
 
         changeBuffer() {
