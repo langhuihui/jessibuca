@@ -460,6 +460,18 @@ https://github.com/bosscheng/jessibuca-vue-demo/blob/v3/preview/preview.js
 待补充
 
 
+### 对于出现渲染页面直接倒过来180度的解决方案
+
+#### 问题
+
+通过webgl渲染的时候，会出现部分机型画面倒挂，一般这种情况都是出现在 `wasm` 渲染模式上面的
+
+
+#### 解决方案
+
+1. 如果是h264的源，建议使用MSE 硬解码 通过设置`useMSE:true`,使得渲染元素是video标签。
+2. 如果是h265的源，推荐使用 `jessibuca pro` 目前pro 版本支持 `mse` `wasm`  `webcodecs`解码之后通过video标签渲染。
+
 # 群
 <img src="/public/qrcode.jpeg">
 
