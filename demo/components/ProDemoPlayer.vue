@@ -68,6 +68,42 @@
                     v-model="useOffscreen"
                     @change="restartPlay('offscreen')"
                 /><span>离屏渲染(wasm+webcodecs)</span>
+                <input
+                    type="checkbox"
+                    ref="offscreen"
+                    v-model="isFlv"
+                    @change="restartPlay()"
+                /><span>设置Flv格式</span>
+                <input
+                    type="checkbox"
+                    ref="offscreen"
+                    v-model="hiddenAutoPause"
+                    @change="restartPlay()"
+                /><span>最小化自动暂停</span>
+                <input
+                    type="checkbox"
+                    ref="offscreen"
+                    v-model="hasVideo"
+                    @change="restartPlay()"
+                /><span>解码视频</span>
+                <input
+                    type="checkbox"
+                    ref="offscreen"
+                    v-model="hasAudio"
+                    @change="restartPlay()"
+                /><span>解码音频</span>
+                <input
+                    type="checkbox"
+                    ref="offscreen"
+                    v-model="hotKey"
+                    @change="restartPlay()"
+                /><span>键盘快捷键</span>
+                <input
+                    type="checkbox"
+                    ref="offscreen"
+                    v-model="controlAutoHide"
+                    @change="restartPlay()"
+                /><span>控制栏自动隐藏</span>
             </div>
             <div class="input">
                 <span>渲染标签：</span>
@@ -242,7 +278,7 @@ export default {
             loaded: false, // mute
             showOperateBtns: true,
             showBandwidth: true,
-            hotKey: true,
+            hotKey: false,
             err: "",
             speed: 0,
             performance: "",
@@ -271,7 +307,12 @@ export default {
             videoInfo: {},
             audioInfo: {},
             playbackRate: 1,
-            playModel: 'video+audio'
+            playModel: 'video+audio',
+            isFlv: false,
+            hiddenAutoPause: false,
+            hasVideo: true,
+            hasAudio: true,
+            controlAutoHide: false
         };
     },
     mounted() {
@@ -309,7 +350,7 @@ export default {
                         loadingText: "Jessibuca pro 疯狂加载中...",
                         // hasAudio:false,
                         debug: this.isDebug,
-                        hotKey: true,
+                        hotKey: this.hotKey,
                         // hasAudio:false,
                         supportDblclickFullscreen: true,
                         showBandwidth: this.showBandwidth, // 显示网速
@@ -324,8 +365,13 @@ export default {
                             quality: this.showOperateBtns,
                             close: this.showOperateBtns
                         },
+                        isFlv: this.isFlv,
+                        hiddenAutoPause: this.hiddenAutoPause,
                         forceNoOffscreen: !this.useOffscreen,
                         isNotMute: true,
+                        hasAudio: this.hasAudio,
+                        hasVideo: this.hasVideo,
+                        controlAutoHide: this.controlAutoHide,
                         timeout: 10,
                         useVideoRender: this.renderDom === 'video',
                         useCanvasRender: this.renderDom === 'canvas',
@@ -418,7 +464,7 @@ export default {
                 this.renderType = renderType;
             })
 
-            jessibuca.on("performance", function (performance) {
+            jessibuca.on("performance", (performance) => {
                 var show = "卡顿";
                 if (performance === 2) {
                     show = "非常流畅";
@@ -427,7 +473,7 @@ export default {
                 }
                 _this.performance = show;
             });
-            jessibuca.on('buffer', function (buffer) {
+            jessibuca.on('buffer', (buffer) => {
                 console.log('buffer', buffer);
             })
 
