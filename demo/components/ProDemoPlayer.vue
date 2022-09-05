@@ -57,7 +57,7 @@
                         当前解码：<span>{{ decodeType }}</span>
                     </div>
                     <div v-if="playing && renderType">
-                        当前渲染：<span>{{ renderType }}</span>
+                        当前模式：<span>{{ playType }}</span> 当前渲染：<span>{{ renderType }}</span>
                     </div>
                 </div>
             </div>
@@ -408,11 +408,11 @@ export default {
             });
             jessibuca.on("pause", (msg) => {
                 !this.isDebug && console.log("on pause");
-                _this.playing = false;
+                this.playing = false;
             });
             jessibuca.on("play", (msg) => {
                 !this.isDebug && console.log("on play");
-                _this.playing = true;
+                this.playing = true;
             });
             jessibuca.on("fullscreen", (msg) => {
                 !this.isDebug && console.log("on fullscreen", msg);
@@ -420,7 +420,7 @@ export default {
 
             jessibuca.on("mute", (msg) => {
                 !this.isDebug && console.log("on mute", msg);
-                _this.quieting = msg;
+                this.quieting = msg;
             });
 
             jessibuca.on("mute", (msg) => {
@@ -471,7 +471,7 @@ export default {
                 } else if (performance === 1) {
                     show = "流畅";
                 }
-                _this.performance = show;
+                this.performance = show;
             });
             jessibuca.on('buffer', (buffer) => {
                 console.log('buffer', buffer);
@@ -479,13 +479,13 @@ export default {
 
             jessibuca.on('stats', (stats) => {
                 !this.isDebug && console.log('stats', stats);
-                // _this.fps = stats.fps;
-                // _this.dfps = stats.dfps;
-                // _this.dts = stats.ts;
-                // _this.playingTimestamp = formatTimeTips(stats.pTs);
-                _this.stats = Object.assign({}, stats);
-                _this.stats.playingTimestamp = formatTimeTips(stats.pTs);
-                _this.stats.isDroping = stats.buf > configOptions.videoBuffer + configOptions.videoBufferDelay
+                // this.fps = stats.fps;
+                // this.dfps = stats.dfps;
+                // this.dts = stats.ts;
+                // this.playingTimestamp = formatTimeTips(stats.pTs);
+                this.stats = Object.assign({}, stats);
+                this.stats.playingTimestamp = formatTimeTips(stats.pTs);
+                this.stats.isDroping = stats.buf > configOptions.videoBuffer + configOptions.videoBufferDelay
             })
 
             // jessibuca.on('kBps', function (kBps) {
@@ -514,6 +514,7 @@ export default {
                 !this.isDebug && console.log('jessibuca close');
                 setTimeout(() => {
                     this.initPlayer();
+                    this.playType = '';
                 }, 10)
 
 
@@ -613,10 +614,11 @@ export default {
             }
 
             this.initPlayer();
+            this.playType = '';
         },
         initPlayer() {
             this.create();
-            this.playType = '';
+            // this.playType = '';
             this.playing = false;
             this.loaded = false;
             this.performance = "";
