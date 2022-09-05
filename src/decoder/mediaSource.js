@@ -1,7 +1,7 @@
 import Emitter from "../utils/emitter";
 import {EVENTS, EVENTS_ERROR, FRAG_DURATION, MEDIA_SOURCE_STATE, MP4_CODECS, VIDEO_ENC_CODE} from "../constant";
 import MP4 from "../remux/fmp4-generator";
-import {parseAVCDecoderConfigurationRecord, } from "../utils/h264";
+import {parseAVCDecoderConfigurationRecord,} from "../utils/h264";
 import {now} from "../utils";
 
 export default class MseDecoder extends Emitter {
@@ -82,7 +82,7 @@ export default class MseDecoder extends Emitter {
         this.mediaSource.duration = duration
     }
 
-    decodeVideo(payload, ts, isIframe,cts) {
+    decodeVideo(payload, ts, isIframe, cts) {
         const player = this.player;
 
         if (!player) {
@@ -110,10 +110,7 @@ export default class MseDecoder extends Emitter {
             }
         } else {
             if (isIframe && payload[1] === 0) {
-                const videoCodec = (payload[0] & 0x0F);
-                let config = {};
-
-                config = parseAVCDecoderConfigurationRecord(payload)
+                let config = parseAVCDecoderConfigurationRecord(payload.slice(5))
                 const videoInfo = this.player.video.videoInfo;
                 if (config.codecWidth !== videoInfo.width || config.codecHeight !== videoInfo.height) {
                     this.player.debug.warn('MediaSource', `width or height is update, width ${videoInfo.width}-> ${config.codecWidth}, height ${videoInfo.height}-> ${config.codecHeight}`)
