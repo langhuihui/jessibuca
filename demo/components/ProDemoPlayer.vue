@@ -363,7 +363,8 @@ export default {
                             audio: this.showOperateBtns,
                             ptz: this.showOperateBtns,
                             quality: this.showOperateBtns,
-                            close: this.showOperateBtns
+                            close: this.showOperateBtns,
+                            zoom: this.showOperateBtns
                         },
                         isFlv: this.isFlv,
                         hiddenAutoPause: this.hiddenAutoPause,
