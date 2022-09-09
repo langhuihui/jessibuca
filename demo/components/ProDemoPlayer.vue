@@ -221,6 +221,14 @@
                 <span style="margin-right: 10px">Render FPS：{{ stats.fps }}</span>
                 <span style="margin-right: 10px">Decoder FPS：{{ stats.dfps }}</span>
             </div>
+
+            <div class="input" v-if="loaded && stats">
+                <span style="margin-right: 10px">Audio Buffer Size：{{ stats.audioBuffer }}</span>
+                <span style="margin-right: 10px">Demux Buffer Size：{{ stats.demuxBuffer }}</span>
+                <span style="margin-right: 10px" v-if="stats.flvBuffer > 0">flv Buffer Size：{{ stats.flvBuffer }}</span>
+                <span style="margin-right: 10px" v-if="stats.mseDelay > 0">MSE delay：{{ stats.mseDelay }}</span>
+
+            </div>
             <div class="input" v-if="loaded && stats">
                 <span style="margin-right: 10px">是否触发丢帧：{{ stats.isDroping }}</span>
                 <span style="margin-right: 10px">视频帧pts(ms)：{{ stats.ts }}</span>
