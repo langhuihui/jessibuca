@@ -181,6 +181,7 @@
                         <option value="1">1倍</option>
                         <option value="2">2倍</option>
                         <option value="3">3倍</option>
+                        <option value="4">4倍</option>
                     </select>
 
                 </template>
