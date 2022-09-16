@@ -132,7 +132,7 @@ export default class DecoderWorker {
     }
 
     decodeAudio(arrayBuffer, ts) {
-        if (this.player._opt.useWCS && !this.player._opt.useOffscreen) {
+        if (this.player._opt.useWCS) {
             this._decodeAudioNoDelay(arrayBuffer, ts);
         } else if (this.player._opt.useMSE) {
             this._decodeAudioNoDelay(arrayBuffer, ts);
