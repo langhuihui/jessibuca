@@ -1,5 +1,5 @@
 import {MP4_CODECS, FILE_SUFFIX} from "../constant";
-
+import screenfull from "screenfull";
 export function noop() {
 }
 
@@ -292,7 +292,7 @@ export function formatVideoDecoderConfigure(avcC) {
 }
 
 export function isFullScreen() {
-    return document.isFullScreen || document.mozIsFullScreen || document.webkitIsFullScreen;
+    return screenfull.isFullscreen
 }
 
 export function bpsSize(value) {

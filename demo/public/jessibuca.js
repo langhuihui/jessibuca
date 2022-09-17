@@ -729,7 +729,8 @@
 	  };
 	}
 	function isFullScreen() {
-	  return document.isFullScreen || document.mozIsFullScreen || document.webkitIsFullScreen;
+	  // return document.isFullScreen || document.mozIsFullScreen || document.webkitIsFullScreen;
+	  return screenfull.isFullscreen;
 	}
 	function bpsSize(value) {
 	  if (null == value || value === '' || parseInt(value) === 0 || isNaN(parseInt(value))) {
@@ -846,7 +847,7 @@
 	var events$1 = (player => {
 	  try {
 	    const screenfullChange = e => {
-	      if (e.target === player.$container) {
+	      if (getTarget(e) === player.$container) {
 	        player.emit(JESSIBUCA_EVENTS.fullscreen, player.fullscreen); // 如果不是fullscreen,则触发下 resize 方法
 
 	        if (!player.fullscreen) {
@@ -8711,7 +8712,7 @@
 	  }
 
 	  decodeAudio(arrayBuffer, ts) {
-	    if (this.player._opt.useWCS && !this.player._opt.useOffscreen) {
+	    if (this.player._opt.useWCS) {
 	      this._decodeAudioNoDelay(arrayBuffer, ts);
 	    } else if (this.player._opt.useMSE) {
 	      this._decodeAudioNoDelay(arrayBuffer, ts);
@@ -10975,9 +10976,7 @@
 	      }
 	    } else {
 	      if (isIframe && payload[1] === 0) {
-	        payload[0] & 0x0F;
-	        let config = {};
-	        config = parseAVCDecoderConfigurationRecord(payload);
+	        let config = parseAVCDecoderConfigurationRecord(payload.slice(5));
 	        const videoInfo = this.player.video.videoInfo;
 
 	        if (config.codecWidth !== videoInfo.width || config.codecHeight !== videoInfo.height) {
@@ -11175,8 +11174,7 @@
 	      this.player.emit(EVENTS_ERROR.mseSourceBufferError, 'mediaSource is closed');
 	    } else {
 	      if (this.sourceBuffer.updating === true) {
-	        this.player.emit(EVENTS.mseSourceBufferBusy);
-	        this.dropSourceBuffer(true);
+	        this.player.emit(EVENTS.mseSourceBufferBusy); // this.dropSourceBuffer(true);
 	      }
 	    }
 	  }
@@ -11188,7 +11186,7 @@
 	  }
 
 	  dropSourceBuffer(isDropping) {
-	    const $video = this.$videoElement;
+	    const $video = this.player.video.$videoElement;
 	    this.dropping = isDropping;
 
 	    if ($video.buffered.length > 0) {
@@ -12682,8 +12680,9 @@
 	        }
 	      }); // 监听 delay timeout
 
-	      this.player.once(EVENTS.delayTimeout, () => {
-	        if (this.player._opt.heartTimeoutReplay && this._heartTimeoutReplayTimes < this.player._opt.heartTimeoutReplayTimes) {
+	      this.player.on(EVENTS.delayTimeout, () => {
+	        if (this.player._opt.heartTimeoutReplay && (this._heartTimeoutReplayTimes < this.player._opt.heartTimeoutReplayTimes || this.player._opt.heartTimeoutReplayTimes === -1)) {
+	          this.player.debug.log('Jessibuca', `delay timeout replay time is ${this._heartTimeoutReplayTimes}`);
 	          this._heartTimeoutReplayTimes += 1;
 	          this.play(url, options).then(() => {
 	            // resolve();
@@ -12693,8 +12692,9 @@
 	        }
 	      }); // 监听 loading timeout
 
-	      this.player.once(EVENTS.loadingTimeout, () => {
-	        if (this.player._opt.loadingTimeoutReplay && this._loadingTimeoutReplayTimes < this.player._opt.loadingTimeoutReplayTimes) {
+	      this.player.on(EVENTS.loadingTimeout, () => {
+	        if (this.player._opt.loadingTimeoutReplay && (this._loadingTimeoutReplayTimes < this.player._opt.loadingTimeoutReplayTimes || this.player._opt.loadingTimeoutReplayTimes === -1)) {
+	          this.player.debug.log('Jessibuca', `loading timeout replay time is ${this._loadingTimeoutReplayTimes}`);
 	          this._loadingTimeoutReplayTimes += 1;
 	          this.play(url, options).then(() => {
 	            // resolve();

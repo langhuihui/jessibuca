@@ -1,13 +1,13 @@
 import {EVENTS, EVENTS_ERROR, JESSIBUCA_EVENTS} from "../constant";
 import screenfull from "screenfull";
-import {setStyle} from "../utils";
+import {getTarget, setStyle} from "../utils";
 
 export default (player) => {
 
 
     try {
         const screenfullChange = (e) => {
-            if (e.target === player.$container) {
+            if (getTarget(e) === player.$container) {
                 player.emit(JESSIBUCA_EVENTS.fullscreen, player.fullscreen)
 
                 // 如果不是fullscreen,则触发下 resize 方法
