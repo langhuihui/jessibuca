@@ -66,6 +66,7 @@ open /Applications/Google\ Chrome.app --args --enable-features=PlatformHEVCDecod
 - 支持自定义帧率(fps)
 - 支持音频变速不变调
 - 支持2/4/8/16/32/64倍数控制，支持设置多少倍之后只解码I帧播放
+- 支持不断连接(websocket连接情况下)的情况下实现 暂停/播放，并且支持配置UI上面的暂停和播放方法使用这个方法。
 
 > 如需要请联系作者定制开发
 

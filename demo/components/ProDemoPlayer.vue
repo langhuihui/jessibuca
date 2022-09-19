@@ -584,7 +584,8 @@ export default {
 
             if (this.$refs.playUrl.value) {
                 this.$options.jessibuca.playback(this.$refs.playUrl.value, {
-                    playList
+                    playList,
+                    showControl:this.showOperateBtns
                 })
                 this.playType = 'playback'
             }

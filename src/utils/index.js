@@ -297,11 +297,11 @@ export function isFullScreen() {
 
 export function bpsSize(value) {
     if (null == value || value === '' || parseInt(value) === 0 || isNaN(parseInt(value))) {
-        return "0kb/s";
+        return "0KB/s";
     }
     let size = parseFloat(value);
     size = size.toFixed(2);
-    return size + 'kb/s';
+    return size + 'KB/s';
 }
 
 
