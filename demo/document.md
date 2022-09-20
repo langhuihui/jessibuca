@@ -32,6 +32,25 @@
     autoWasm:true
 }
 ```
+
+
+### 关于硬解码和软解码
+
+#### 硬解码
+
+1. `useMSE`和`useWCS`都是硬解码
+2. `useMSE` 支持 H264，
+3. `useMSE` jessibuca Pro 支持 H265（需要手动开启参数），
+4. `useWCS` 只支持H265(浏览器不支持)
+5. `useMSE` 支持http 和https
+6. `useWCS` 只支持https
+
+#### 软解码
+
+1. 支持 H264(低分辨率) 和 H265(低分辨率)
+2. jessibuca Pro 支持 H264 和 H265 高分辨率高帧率解码
+
+
 如果遇到硬解码失败的时候，会自动切换到wasm软解码
 
 ### jessibuca.js decoder.js decoder.wasm文件想存放特定地址
