@@ -41,7 +41,7 @@
 1. `useMSE`和`useWCS`都是硬解码
 2. `useMSE` 支持 H264，
 3. `useMSE` jessibuca Pro 支持 H265（需要手动开启参数），
-4. `useWCS` 只支持H265(浏览器不支持)
+4. `useWCS` 只支持H264(浏览器不支持H265)
 5. `useMSE` 支持http 和https
 6. `useWCS` 只支持https
 
@@ -49,9 +49,16 @@
 
 1. 支持 H264(低分辨率) 和 H265(低分辨率)
 2. jessibuca Pro 支持 H264 和 H265 高分辨率高帧率解码
+5. 软解码支持http 和https
 
 
 如果遇到硬解码失败的时候，会自动切换到wasm软解码
+
+### 关于是否可以播放rtsp、rtmp协议
+
+#### 回答：浏览器不支持
+
+因为在js的环境中，无法直接使用tcp或者udp传数据（js没提供接口），而rtsp的流是基于tcp或者udp， 所以纯web的方式目前是没办法直接播放rtsp流的，rtmp也是类似
 
 ### jessibuca.js decoder.js decoder.wasm文件想存放特定地址
 
