@@ -5,6 +5,13 @@
                     version
                 }})</span></div>
             <div class="option">
+                <span>最大网络延迟:</span>
+                <input
+                    style="width: 50px"
+                    type="number"
+                    v-model="networkDelay"
+                    @change="changeNetworkDelay"
+                /><span style="margin-right: 5px">秒</span>
                 <span>最大延迟:</span>
                 <input
                     style="width: 50px"
@@ -71,6 +78,12 @@
                 <input
                     type="checkbox"
                     ref="offscreen"
+                    v-model="networkDelayTimeoutReplay"
+                    @change="restartPlay()"
+                /><span>网络延迟重新播放</span>
+                <input
+                    type="checkbox"
+                    ref="offscreen"
                     v-model="isFlv"
                     @change="restartPlay()"
                 /><span>设置Flv格式</span>
@@ -92,18 +105,8 @@
                     v-model="hasAudio"
                     @change="restartPlay()"
                 /><span>解码音频</span>
-                <input
-                    type="checkbox"
-                    ref="offscreen"
-                    v-model="hotKey"
-                    @change="restartPlay()"
-                /><span>键盘快捷键</span>
-                <input
-                    type="checkbox"
-                    ref="offscreen"
-                    v-model="controlAutoHide"
-                    @change="restartPlay()"
-                /><span>控制栏自动隐藏</span>
+
+
             </div>
             <div class="input">
                 <span>渲染标签：</span>
@@ -124,6 +127,18 @@
                         v-model="showBandwidth"
                         @change="restartPlay"
                     /><span>网速</span>
+                    <input
+                        type="checkbox"
+                        ref="offscreen"
+                        v-model="hotKey"
+                        @change="restartPlay()"
+                    /><span>键盘快捷键</span>
+                    <input
+                        type="checkbox"
+                        ref="offscreen"
+                        v-model="controlAutoHide"
+                        @change="restartPlay()"
+                    /><span>控制栏自动隐藏</span>
                 </div>
 
             </div>
@@ -133,8 +148,7 @@
                     placeholder="支持 hls/ws-raw/ws-flv/http-flv协议"
                     type="input"
                     autocomplete="on"
-                    ref="playUrl"
-                    value=""
+                    v-model="playUrl"
                 />
                 <template v-if="!playing">
                     <button v-if="playType === '' || playType === 'play'" @click="play">播放</button>
@@ -226,7 +240,7 @@
             <div class="input" v-if="loaded && stats">
                 <span style="margin-right: 10px">Audio Buffer Size：{{ stats.audioBuffer }}</span>
                 <span style="margin-right: 10px">Demux Buffer Size：{{ stats.demuxBuffer }}</span>
-                <span style="margin-right: 10px" v-if="stats.flvBuffer > 0">flv Buffer Size：{{ stats.flvBuffer }}</span>
+                <span style="margin-right: 10px" v-if="stats.flvBuffer > 0">flv Buffer byteLength：{{ stats.flvBuffer }}</span>
                 <span style="margin-right: 10px" v-if="stats.mseDelay > 0">MSE delay：{{ stats.mseDelay }}</span>
 
             </div>
@@ -277,9 +291,11 @@ export default {
     props: {},
     data() {
         return {
+            playUrl:'',
             version: '',
             videoBuffer: 0.2,
             videoBufferDelay: 1,
+            networkDelay: 10,
             wasm: false,
             playing: false,
             quieting: true,
@@ -301,6 +317,7 @@ export default {
             useMSE: true,
             useSIMD: false,
             useOffscreen: false,
+            networkDelayTimeoutReplay:false,
             recording: false,
             isDebug: true,
             recordType: 'webm',
@@ -385,6 +402,7 @@ export default {
                         timeout: 10,
                         useVideoRender: this.renderDom === 'video',
                         useCanvasRender: this.renderDom === 'canvas',
+                        networkDelayTimeoutReplay:false,
                         watermarkConfig: {
                             image: {
                                 // src: 'http://jessibuca.monibuca.com/jessibuca-logo.png',
@@ -406,43 +424,43 @@ export default {
             this.$options.jessibuca = jessibuca;
             let configOptions = jessibuca.getOption();
             var _this = this;
-            jessibuca.on("load", (msg) => {
+            jessibuca.on(JessibucaPro.EVENTS.load, (msg) => {
                 !this.isDebug && console.log("on load");
             });
 
-            jessibuca.on("log", (msg) => {
+            jessibuca.on(JessibucaPro.EVENTS.log, (msg) => {
                 !this.isDebug && console.log("on log", msg);
             });
-            jessibuca.on("record", (msg) => {
+            jessibuca.on(JessibucaPro.EVENTS.recordingTimestamp, (msg) => {
                 !this.isDebug && console.log("on record:", msg);
             });
-            jessibuca.on("pause", (msg) => {
+            jessibuca.on(JessibucaPro.EVENTS.recordingTimestamp.pause, (msg) => {
                 !this.isDebug && console.log("on pause");
                 this.playing = false;
             });
-            jessibuca.on("play", (msg) => {
+            jessibuca.on(JessibucaPro.EVENTS.play, (msg) => {
                 !this.isDebug && console.log("on play");
                 this.playing = true;
             });
-            jessibuca.on("fullscreen", (msg) => {
+            jessibuca.on(JessibucaPro.EVENTS.fullscreen, (msg) => {
                 !this.isDebug && console.log("on fullscreen", msg);
             });
 
-            jessibuca.on("mute", (msg) => {
+            jessibuca.on(JessibucaPro.EVENTS.mute, (msg) => {
                 !this.isDebug && console.log("on mute", msg);
                 this.quieting = msg;
             });
 
-            jessibuca.on("mute", (msg) => {
+            jessibuca.on(JessibucaPro.EVENTS.mute, (msg) => {
                 !this.isDebug && console.log("on mute2", msg);
             });
 
-            jessibuca.on("audioInfo", (msg) => {
+            jessibuca.on(JessibucaPro.EVENTS.audioInfo, (msg) => {
                 !this.isDebug && console.log("audioInfo", msg);
                 this.audioInfo = Object.assign({}, msg)
             });
 
-            jessibuca.on("bps", (msg) => {
+            jessibuca.on(JessibucaPro.EVENTS.kBps, (msg) => {
                 // console.log('bps', bps);
             });
             // let _ts = 0;
@@ -451,20 +469,20 @@ export default {
             //     _ts = ts;
             // });
 
-            jessibuca.on("videoInfo", (info) => {
+            jessibuca.on(JessibucaPro.EVENTS.videoInfo, (info) => {
                 !this.isDebug && console.log("videoInfo", info);
                 this.videoInfo = info;
             });
 
-            jessibuca.on("error", (error) => {
+            jessibuca.on(JessibucaPro.EVENTS.error, (error) => {
                 !this.isDebug && console.log("error", error);
             });
 
-            jessibuca.on("timeout", () => {
+            jessibuca.on(JessibucaPro.EVENTS.timeout, () => {
                 !this.isDebug && console.log("timeout");
             });
 
-            jessibuca.on('start', () => {
+            jessibuca.on(JessibucaPro.EVENTS.start, () => {
                 !this.isDebug && console.log('frame start');
 
                 const decodeType = jessibuca.getDecodeType();
@@ -474,7 +492,7 @@ export default {
                 this.renderType = renderType;
             })
 
-            jessibuca.on("performance", (performance) => {
+            jessibuca.on(JessibucaPro.EVENTS.performance, (performance) => {
                 var show = "卡顿";
                 if (performance === 2) {
                     show = "非常流畅";
@@ -487,7 +505,7 @@ export default {
                 console.log('buffer', buffer);
             })
 
-            jessibuca.on('stats', (stats) => {
+            jessibuca.on(JessibucaPro.EVENTS.stats, (stats) => {
                 !this.isDebug && console.log('stats', stats);
                 // this.fps = stats.fps;
                 // this.dfps = stats.dfps;
@@ -502,18 +520,18 @@ export default {
             //     console.log('kBps', kBps);
             // });
 
-            jessibuca.on("play", () => {
+            jessibuca.on(JessibucaPro.EVENTS.play, () => {
                 this.playing = true;
                 this.loaded = true;
                 this.loading = false;
                 this.quieting = jessibuca.isMute();
             });
 
-            jessibuca.on('recordingTimestamp', (ts) => {
+            jessibuca.on(JessibucaPro.EVENTS.recordingTimestamp, (ts) => {
                 !this.isDebug && console.log('recordingTimestamp: ', ts);
             })
 
-            jessibuca.on('playToRenderTimes', (times) => {
+            jessibuca.on(JessibucaPro.EVENTS.playToRenderTimes, (times) => {
                 !this.isDebug && console.log('playToRenderTimes: ', times);
             })
 
@@ -537,57 +555,63 @@ export default {
             // this.jessibuca.onPlay = () => (this.playing = true);
 
 
-            if (this.$refs.playUrl.value) {
-                this.$options.jessibuca.play(this.$refs.playUrl.value)
+            if (this.playUrl) {
+                this.$options.jessibuca.play(this.playUrl)
                 this.playType = 'play'
                 this.loading = true;
             }
         },
         playback() {
-            const playList = [{"start": 1653840000, "end": 1653841624}, {
-                "start": 1653841634,
-                "end": 1653843420
-            }, {"start": 1653843429, "end": 1653843958}, {"start": 1653843967, "end": 1653845688}, {
-                "start": 1653845698,
-                "end": 1653846480
-            }, {"start": 1653846490, "end": 1653847199}, {"start": 1653847208, "end": 1653848531}, {
-                "start": 1653848541,
-                "end": 1653850863
-            }, {"start": 1653850872, "end": 1653853371}, {"start": 1653853381, "end": 1653857885}, {
-                "start": 1653857894,
-                "end": 1653858352
-            }, {"start": 1653858362, "end": 1653860545}, {"start": 1653860554, "end": 1653861080}, {
-                "start": 1653861090,
-                "end": 1653862017
-            }, {"start": 1653862026, "end": 1653863812}, {"start": 1653863822, "end": 1653865325}, {
-                "start": 1653865335,
-                "end": 1653867374
-            }, {"start": 1653867383, "end": 1653867698}, {"start": 1653867707, "end": 1653868816}, {
-                "start": 1653868826,
-                "end": 1653872829
-            }, {"start": 1653872838, "end": 1653877527}, {"start": 1653877537, "end": 1653879799}, {
-                "start": 1653879809,
-                "end": 1653881953
-            }, {"start": 1653881963, "end": 1653885397}, {"start": 1653885407, "end": 1653886894}, {
-                "start": 1653886904,
-                "end": 1653890591
-            }, {"start": 1653890600, "end": 1653894360}, {"start": 1653894370, "end": 1653903276}, {
-                "start": 1653903286,
-                "end": 1653912848
-            }, {"start": 1653912858, "end": 1653914424}, {"start": 1653914433, "end": 1653915002}, {
-                "start": 1653915011,
-                "end": 1653918125
-            }, {"start": 1653918135, "end": 1653921622}, {"start": 1653921631, "end": 1653924609}, {
-                "start": 1653924618,
-                "end": 1653926399
-            }]
-
-            if (this.$refs.playUrl.value) {
-                this.$options.jessibuca.playback(this.$refs.playUrl.value, {
-                    playList,
-                    showControl:this.showOperateBtns
-                })
-                this.playType = 'playback'
+            const playList = [
+                {"start": 1653840000, "end": 1653841624}, {
+                    "start": 1653841634,
+                    "end": 1653843420
+                }, {"start": 1653843429, "end": 1653843958}, {"start": 1653843967, "end": 1653845688}, {
+                    "start": 1653845698,
+                    "end": 1653846480
+                }, {"start": 1653846490, "end": 1653847199}, {"start": 1653847208, "end": 1653848531}, {
+                    "start": 1653848541,
+                    "end": 1653850863
+                }, {"start": 1653850872, "end": 1653853371}, {"start": 1653853381, "end": 1653857885}, {
+                    "start": 1653857894,
+                    "end": 1653858352
+                }, {"start": 1653858362, "end": 1653860545}, {"start": 1653860554, "end": 1653861080}, {
+                    "start": 1653861090,
+                    "end": 1653862017
+                }, {"start": 1653862026, "end": 1653863812}, {"start": 1653863822, "end": 1653865325}, {
+                    "start": 1653865335,
+                    "end": 1653867374
+                }, {"start": 1653867383, "end": 1653867698}, {"start": 1653867707, "end": 1653868816}, {
+                    "start": 1653868826,
+                    "end": 1653872829
+                }, {"start": 1653872838, "end": 1653877527}, {"start": 1653877537, "end": 1653879799}, {
+                    "start": 1653879809,
+                    "end": 1653881953
+                }, {"start": 1653881963, "end": 1653885397}, {"start": 1653885407, "end": 1653886894}, {
+                    "start": 1653886904,
+                    "end": 1653890591
+                }, {"start": 1653890600, "end": 1653894360}, {"start": 1653894370, "end": 1653903276}, {
+                    "start": 1653903286,
+                    "end": 1653912848
+                }, {"start": 1653912858, "end": 1653914424}, {"start": 1653914433, "end": 1653915002}, {
+                    "start": 1653915011,
+                    "end": 1653918125
+                }, {"start": 1653918135, "end": 1653921622}, {"start": 1653921631, "end": 1653924609}, {
+                    "start": 1653924618,
+                    "end": 1653926399
+                }]
+            if (this.$options.jessibuca.isPlaybackPause()) {
+                this.$options.jessibuca.playbackResume()
+            } else {
+                if (this.playUrl) {
+                    this.$options.jessibuca.playback(this.playUrl, {
+                        playList,
+                        fps: 25,
+                        showControl: false,
+                        uiUsePlaybackPause: true
+                    })
+                    this.playType = 'playback'
+                }
             }
         },
         mute() {
@@ -598,7 +622,11 @@ export default {
         },
 
         pause() {
-            this.$options.jessibuca.pause();
+            if (this.playType === 'playback') {
+                this.$options.jessibuca.playbackPause();
+            } else {
+                this.$options.jessibuca.pause();
+            }
             this.playing = false;
             this.err = "";
             this.performance = "";
@@ -717,6 +745,10 @@ export default {
         },
         changeBufferDelay() {
             this.$options.jessibuca.setBufferDelayTime(this.videoBufferDelay);
+        },
+
+        changeNetworkDelay() {
+            this.$options.jessibuca.setNetworkDelayTime(this.networkDelay);
         },
 
         scaleChange() {
