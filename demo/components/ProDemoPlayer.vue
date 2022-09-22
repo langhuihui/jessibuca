@@ -69,6 +69,23 @@
                 </div>
             </div>
             <div class="input">
+                <div>输入URL：</div>
+                <input
+                    placeholder="支持 hls/ws-raw/ws-flv/http-flv协议"
+                    type="input"
+                    autocomplete="on"
+                    v-model="playUrl"
+                />
+                <template v-if="!playing">
+                    <button v-if="playType === '' || playType === 'play'" @click="play">播放</button>
+                    <button v-if="playType === '' || playType === 'playback'" @click="playback">播放录像流</button>
+                </template>
+                <template v-if="loading || playing">
+                    <button v-if="playType === 'play'" @click="pause">停止</button>
+                    <button v-if="playType === 'playback'" @click="pause">停止录像流</button>
+                </template>
+            </div>
+            <div class="input">
                 <input
                     type="checkbox"
                     ref="offscreen"
@@ -117,47 +134,30 @@
                 <div style="line-height: 30px">
                     <input
                         type="checkbox"
-                        ref="operateBtns"
                         v-model="showOperateBtns"
                         @change="restartPlay"
                     /><span>操作按钮</span>
                     <input
                         type="checkbox"
-                        ref="operateBtns"
                         v-model="showBandwidth"
                         @change="restartPlay"
                     /><span>网速</span>
                     <input
                         type="checkbox"
-                        ref="offscreen"
                         v-model="hotKey"
                         @change="restartPlay()"
                     /><span>键盘快捷键</span>
                     <input
                         type="checkbox"
-                        ref="offscreen"
                         v-model="controlAutoHide"
                         @change="restartPlay()"
                     /><span>控制栏自动隐藏</span>
+                    <input
+                        type="checkbox"
+                        v-model="showInfo"
+                    /><span style="color: red">显示码流信息</span>
                 </div>
 
-            </div>
-            <div class="input">
-                <div>输入URL：</div>
-                <input
-                    placeholder="支持 hls/ws-raw/ws-flv/http-flv协议"
-                    type="input"
-                    autocomplete="on"
-                    v-model="playUrl"
-                />
-                <template v-if="!playing">
-                    <button v-if="playType === '' || playType === 'play'" @click="play">播放</button>
-                    <button v-if="playType === '' || playType === 'playback'" @click="playback">播放录像流</button>
-                </template>
-                <template v-if="loading || playing">
-                    <button v-if="playType === 'play'" @click="pause">停止</button>
-                    <button v-if="playType === 'playback'" @click="pause">停止录像流</button>
-                </template>
             </div>
             <div class="input" v-if="loaded" style="line-height: 30px">
                 <button @click="destroyPlayer">销毁</button>
@@ -185,6 +185,7 @@
                     <option value="level">水平</option>
                     <option value="vertical">垂直</option>
                 </select>
+
                 <button @click="fullscreen">全屏</button>
                 <button @click="screenShot">截图</button>
                 <button @click="screenshotWatermark1">截图(水印文字)</button>
@@ -218,36 +219,68 @@
                 <button @click="clearBufferDelay">手动消除延迟</button>
 
             </div>
-            <div class="input" v-if="loaded && videoInfo.encType">
-                <span>视频数据：编码格式：{{ videoInfo.encType }} 宽度：{{ videoInfo.width }} 高度:{{ videoInfo.height }}</span>
-            </div>
-            <div class="input" v-if="loaded && audioInfo.encType">
-                <span>音频数据：编码格式：{{ audioInfo.encType }} 通道：{{ audioInfo.channels }} 采样率:{{
-                        audioInfo.sampleRate
-                    }}</span>
-            </div>
-            <div class="input" v-if="loaded && stats">
-                <span style="margin-right: 10px">Network Delay Buffer(ms)：{{ stats.netBuf }}</span>
-                <span style="margin-right: 10px">Delay Buffer(ms)：{{ stats.buf }}</span>
-            </div>
-            <div class="input" v-if="loaded && stats">
-                <span style="margin-right: 10px">Audio bps(bit)：{{ stats.abps }}</span>
-                <span style="margin-right: 10px">Video bps(bit)：{{ stats.vbps }}</span>
-                <span style="margin-right: 10px">Render FPS：{{ stats.fps }}</span>
-                <span style="margin-right: 10px">Decoder FPS：{{ stats.dfps }}</span>
-            </div>
 
-            <div class="input" v-if="loaded && stats">
-                <span style="margin-right: 10px">Audio Buffer Size：{{ stats.audioBuffer }}</span>
-                <span style="margin-right: 10px">Demux Buffer Size：{{ stats.demuxBuffer }}</span>
-                <span style="margin-right: 10px" v-if="stats.flvBuffer > 0">flv Buffer byteLength：{{ stats.flvBuffer }}</span>
-                <span style="margin-right: 10px" v-if="stats.mseDelay > 0">MSE delay：{{ stats.mseDelay }}</span>
-
-            </div>
-            <div class="input" v-if="loaded && stats">
-                <span style="margin-right: 10px">是否触发丢帧：{{ stats.isDroping }}</span>
-                <span style="margin-right: 10px">视频帧pts(ms)：{{ stats.ts }}</span>
-                <span style="margin-right: 10px">播放时长：{{ stats.playingTimestamp }}</span>
+            <div class="show-message" v-if="loaded && showInfo">
+                <div class="input" v-if="videoInfo.encType">
+                    <span>视频数据：编码格式：{{ videoInfo.encType }} </span>
+                </div>
+                <div class="input">
+                    <span>视频数据(宽x高): {{ videoInfo.width }} x {{ videoInfo.height }}</span>
+                </div>
+                <div class="input" v-if="audioInfo.encType">
+                    <span>音频数据：编码格式：{{ audioInfo.encType }} </span>
+                </div>
+                <div class="input" v-if="audioInfo.channels">
+                    <span>音频数据：通道：{{ audioInfo.channels }} </span>
+                </div>
+                <div class="input" v-if="audioInfo.sampleRate">
+                    <span>音频数据：采样率:{{ audioInfo.sampleRate }}</span>
+                </div>
+                <div class="input" v-if="stats">
+                    <span style="margin-right: 10px">Network Delay Buffer(ms)：{{ stats.netBuf }}</span>
+                </div>
+                <div class="input" v-if="stats">
+                    <span style="margin-right: 10px">Delay Buffer(ms)：{{ stats.buf }}</span>
+                </div>
+                <div class="input" v-if="stats">
+                    <span style="margin-right: 10px">Audio bps(bit)：{{ stats.abps }}</span>
+                </div>
+                <div class="input" v-if="stats">
+                    <span style="margin-right: 10px">Video bps(bit)：{{ stats.vbps }}</span>
+                </div>
+                <div class="input" v-if="stats">
+                    <span style="margin-right: 10px">Render FPS：{{ stats.fps }}</span>
+                </div>
+                <div class="input" v-if="stats">
+                    <span style="margin-right: 10px">Decoder FPS：{{ stats.dfps }}</span>
+                </div>
+                <div class="input" v-if="stats">
+                    <span style="margin-right: 10px">Audio Buffer Size：{{ stats.audioBuffer }}</span>
+                </div>
+                <div class="input" v-if="stats">
+                    <span style="margin-right: 10px">Demux Buffer Size：{{ stats.demuxBuffer }}</span>
+                </div>
+                <div class="input" v-if="stats && stats.flvBuffer > 0">
+                    <span style="margin-right: 10px">flv Buffer byteLength：{{ stats.flvBuffer }}</span>
+                </div>
+                <div class="input" v-if="stats">
+                    <span style="margin-right: 10px" v-if="stats.mseDelay > 0">MSE delay(ms)：{{ stats.mseDelay }}</span>
+                </div>
+                <div class="input" v-if="stats">
+                    <span style="margin-right: 10px">视频帧pts[解码后](ms)：{{ stats.ts }}</span>
+                </div>
+                <div class="input" v-if="stats">
+                    <span style="margin-right: 10px">视频帧dts[解码前](ms)：{{ stats.dts }}</span>
+                </div>
+                <div class="input" v-if="stats">
+                    <span style="margin-right: 10px">解码前-解码后延迟(ms)：{{ stats.delayTs }}</span>
+                </div>
+                <div class="input" v-if="stats">
+                    <span style="margin-right: 10px">是否触发丢帧：{{ stats.isDroping }}</span>
+                </div>
+                <div class="input" v-if="stats">
+                    <span style="margin-right: 10px">播放时长(s)：{{ stats.playingTimestamp }}</span>
+                </div>
             </div>
         </div>
     </div>
@@ -314,8 +347,8 @@ export default {
             mirrorRotate: 'none',
             supportMSEHevc: false,
             useWCS: false,
-            useMSE: true,
-            useSIMD: false,
+            useMSE: false,
+            useSIMD: true,
             useOffscreen: false,
             networkDelayTimeoutReplay:false,
             recording: false,
@@ -338,7 +371,9 @@ export default {
             hiddenAutoPause: false,
             hasVideo: true,
             hasAudio: true,
-            controlAutoHide: false
+            controlAutoHide: false,
+            showInfo: true,
+            showMsg: true
         };
     },
     mounted() {
@@ -395,14 +430,14 @@ export default {
                         isFlv: this.isFlv,
                         hiddenAutoPause: this.hiddenAutoPause,
                         forceNoOffscreen: !this.useOffscreen,
-                        isNotMute: true,
+                        // isNotMute: true,
                         hasAudio: this.hasAudio,
                         hasVideo: this.hasVideo,
                         controlAutoHide: this.controlAutoHide,
                         timeout: 10,
                         useVideoRender: this.renderDom === 'video',
                         useCanvasRender: this.renderDom === 'canvas',
-                        networkDelayTimeoutReplay:false,
+                        networkDelayTimeoutReplay: false,
                         watermarkConfig: {
                             image: {
                                 // src: 'http://jessibuca.monibuca.com/jessibuca-logo.png',
@@ -538,6 +573,11 @@ export default {
             jessibuca.on('performance', (performance) => {
                 !this.isDebug && console.log('performance: ', performance);
             })
+
+            jessibuca.on('playbackPauseOrResume', (value) => {
+                !this.isDebug && console.log('playbackPauseOrResume: ', value);
+            })
+
             jessibuca.on('close', () => {
                 !this.isDebug && console.log('jessibuca close');
                 setTimeout(() => {
@@ -769,6 +809,7 @@ export default {
     display: flex;
     place-content: center;
     margin-top: 3rem;
+    position: relative;
 }
 
 .container-shell {
@@ -803,7 +844,7 @@ export default {
 .input {
     display: flex;
     align-items: center;
-    margin-top: 10px;
+    margin-top: 3px;
     color: white;
     place-content: stretch;
 }
@@ -845,6 +886,17 @@ export default {
     background: url(/bg.jpg);
     background-repeat: no-repeat;
     background-position: top;
+}
+
+.show-message {
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 31px;
+    padding: 5px;
+    font-size: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    color: #fff;
 }
 
 @media (max-width: 720px) {
