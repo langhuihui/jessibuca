@@ -364,7 +364,8 @@ export default {
                             ptz: this.showOperateBtns,
                             quality: this.showOperateBtns,
                             close: this.showOperateBtns,
-                            zoom: this.showOperateBtns
+                            zoom: this.showOperateBtns,
+                            performance:this.showOperateBtns
                         },
                         isFlv: this.isFlv,
                         hiddenAutoPause: this.hiddenAutoPause,
