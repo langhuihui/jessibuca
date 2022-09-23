@@ -10,6 +10,11 @@ export const DEMUX_TYPE = {
     m7s: 'm7s'
 }
 
+export const FILE_SUFFIX = {
+    mp4: 'mp4',
+    webm: 'webm'
+};
+
 export const MEDIA_SOURCE_UPDATE_END_TIMEOUT = 10 * 1000
 
 
@@ -62,6 +67,7 @@ export const DEFAULT_PLAYER_OPTIONS = {
     wasmDecodeErrorReplay: true, // 解码失败重新播放。
     openWebglAlignment: false,//  https://github.com/langhuihui/jessibuca/issues/152
     wasmDecodeAudioSyncVideo: false,// wasm 解码之后音视频同步
+    recordType: FILE_SUFFIX.webm
 }
 
 
@@ -249,10 +255,7 @@ export const SCALE_MODE_TYPE = {
 }
 
 
-export const FILE_SUFFIX = {
-    mp4: 'mp4',
-    webm: 'webm'
-};
+
 
 
 export const CANVAS_RENDER_TYPE = {

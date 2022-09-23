@@ -9,7 +9,7 @@ export default class RecordRTCLoader extends Emitter {
         super();
         this.player = player;
         this.fileName = '';
-        this.fileType = FILE_SUFFIX.webm;
+        this.fileType = player._opt.recordType || FILE_SUFFIX.webm;
         this.isRecording = false;
         this.recordingTimestamp = 0;
         this.recordingInterval = null;

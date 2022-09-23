@@ -45,6 +45,10 @@
 	  flv: 'flv',
 	  m7s: 'm7s'
 	};
+	const FILE_SUFFIX = {
+	  mp4: 'mp4',
+	  webm: 'webm'
+	};
 
 	const DEFAULT_PLAYER_OPTIONS = {
 	  videoBuffer: 1000,
@@ -124,8 +128,9 @@
 	  // 解码失败重新播放。
 	  openWebglAlignment: false,
 	  //  https://github.com/langhuihui/jessibuca/issues/152
-	  wasmDecodeAudioSyncVideo: false // wasm 解码之后音视频同步
-
+	  wasmDecodeAudioSyncVideo: false,
+	  // wasm 解码之后音视频同步
+	  recordType: FILE_SUFFIX.webm
 	};
 	const WORKER_CMD_TYPE = {
 	  init: 'init',
@@ -281,10 +286,6 @@
 	  // 视频画面做等比缩放后,高或宽对齐canvas区域,画面不被拉伸,但有黑边
 	  fullAuto: 2 // 视频画面做等比缩放后,完全填充canvas区域,画面不被拉伸,没有黑边,但画面显示不全
 
-	};
-	const FILE_SUFFIX = {
-	  mp4: 'mp4',
-	  webm: 'webm'
 	};
 	const CANVAS_RENDER_TYPE = {
 	  webcodecs: 'webcodecs',
@@ -729,17 +730,16 @@
 	  };
 	}
 	function isFullScreen() {
-	  // return document.isFullScreen || document.mozIsFullScreen || document.webkitIsFullScreen;
 	  return screenfull.isFullscreen;
 	}
 	function bpsSize(value) {
 	  if (null == value || value === '' || parseInt(value) === 0 || isNaN(parseInt(value))) {
-	    return "0kb/s";
+	    return "0KB/s";
 	  }
 
 	  let size = parseFloat(value);
 	  size = size.toFixed(2);
-	  return size + 'kb/s';
+	  return size + 'KB/s';
 	}
 	function fpsStatus(fps) {
 	  let result = 0;
@@ -8427,7 +8427,7 @@
 	    super();
 	    this.player = player;
 	    this.fileName = '';
-	    this.fileType = FILE_SUFFIX.webm;
+	    this.fileType = player._opt.recordType || FILE_SUFFIX.webm;
 	    this.isRecording = false;
 	    this.recordingTimestamp = 0;
 	    this.recordingInterval = null;

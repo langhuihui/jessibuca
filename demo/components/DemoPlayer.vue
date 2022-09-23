@@ -186,7 +186,8 @@ export default {
                         },
                         forceNoOffscreen: !this.useOffscreen,
                         isNotMute: true,
-                        timeout: 10
+                        timeout: 10,
+                        recordType:'mp4'
                     },
                     options
                 )

@@ -7452,6 +7452,10 @@
 	  flv: 'flv',
 	  m7s: 'm7s'
 	};
+	const FILE_SUFFIX = {
+	  mp4: 'mp4',
+	  webm: 'webm'
+	};
 
 	const DEFAULT_PLAYER_OPTIONS = {
 	  videoBuffer: 1000,
@@ -7531,8 +7535,9 @@
 	  // 解码失败重新播放。
 	  openWebglAlignment: false,
 	  //  https://github.com/langhuihui/jessibuca/issues/152
-	  wasmDecodeAudioSyncVideo: false // wasm 解码之后音视频同步
-
+	  wasmDecodeAudioSyncVideo: false,
+	  // wasm 解码之后音视频同步
+	  recordType: FILE_SUFFIX.webm
 	};
 	const WORKER_CMD_TYPE = {
 	  init: 'init',

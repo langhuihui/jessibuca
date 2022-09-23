@@ -154,8 +154,9 @@
                     /><span>控制栏自动隐藏</span>
                     <input
                         type="checkbox"
-                        v-model="showInfo"
-                    /><span style="color: red">显示码流信息</span>
+                        v-model="showPerformance"
+                        @change="togglePerformance"
+                    /><span style="color: red">显示性能面板</span>
                 </div>
 
             </div>
@@ -220,68 +221,6 @@
 
             </div>
 
-            <div class="show-message" v-if="loaded && showInfo">
-                <div class="input" v-if="videoInfo.encType">
-                    <span>视频数据：编码格式：{{ videoInfo.encType }} </span>
-                </div>
-                <div class="input">
-                    <span>视频数据(宽x高): {{ videoInfo.width }} x {{ videoInfo.height }}</span>
-                </div>
-                <div class="input" v-if="audioInfo.encType">
-                    <span>音频数据：编码格式：{{ audioInfo.encType }} </span>
-                </div>
-                <div class="input" v-if="audioInfo.channels">
-                    <span>音频数据：通道：{{ audioInfo.channels }} </span>
-                </div>
-                <div class="input" v-if="audioInfo.sampleRate">
-                    <span>音频数据：采样率:{{ audioInfo.sampleRate }}</span>
-                </div>
-                <div class="input" v-if="stats">
-                    <span style="margin-right: 10px">Network Delay Buffer(ms)：{{ stats.netBuf }}</span>
-                </div>
-                <div class="input" v-if="stats">
-                    <span style="margin-right: 10px">Delay Buffer(ms)：{{ stats.buf }}</span>
-                </div>
-                <div class="input" v-if="stats">
-                    <span style="margin-right: 10px">Audio bps(bit)：{{ stats.abps }}</span>
-                </div>
-                <div class="input" v-if="stats">
-                    <span style="margin-right: 10px">Video bps(bit)：{{ stats.vbps }}</span>
-                </div>
-                <div class="input" v-if="stats">
-                    <span style="margin-right: 10px">Render FPS：{{ stats.fps }}</span>
-                </div>
-                <div class="input" v-if="stats">
-                    <span style="margin-right: 10px">Decoder FPS：{{ stats.dfps }}</span>
-                </div>
-                <div class="input" v-if="stats">
-                    <span style="margin-right: 10px">Audio Buffer Size：{{ stats.audioBuffer }}</span>
-                </div>
-                <div class="input" v-if="stats">
-                    <span style="margin-right: 10px">Demux Buffer Size：{{ stats.demuxBuffer }}</span>
-                </div>
-                <div class="input" v-if="stats && stats.flvBuffer > 0">
-                    <span style="margin-right: 10px">flv Buffer byteLength：{{ stats.flvBuffer }}</span>
-                </div>
-                <div class="input" v-if="stats">
-                    <span style="margin-right: 10px" v-if="stats.mseDelay > 0">MSE delay(ms)：{{ stats.mseDelay }}</span>
-                </div>
-                <div class="input" v-if="stats">
-                    <span style="margin-right: 10px">视频帧pts[解码后](ms)：{{ stats.ts }}</span>
-                </div>
-                <div class="input" v-if="stats">
-                    <span style="margin-right: 10px">视频帧dts[解码前](ms)：{{ stats.dts }}</span>
-                </div>
-                <div class="input" v-if="stats">
-                    <span style="margin-right: 10px">解码前-解码后延迟(ms)：{{ stats.delayTs }}</span>
-                </div>
-                <div class="input" v-if="stats">
-                    <span style="margin-right: 10px">是否触发丢帧：{{ stats.isDroping }}</span>
-                </div>
-                <div class="input" v-if="stats">
-                    <span style="margin-right: 10px">播放时长(s)：{{ stats.playingTimestamp }}</span>
-                </div>
-            </div>
         </div>
     </div>
 </template>
@@ -372,8 +311,8 @@ export default {
             hasVideo: true,
             hasAudio: true,
             controlAutoHide: false,
-            showInfo: true,
-            showMsg: true
+            showMsg: true,
+            showPerformance: true
         };
     },
     mounted() {
@@ -451,6 +390,7 @@ export default {
                             right: 10,
                             top: 30
                         },
+                        showPerformance: this.showPerformance
                     },
                     options
                 )
@@ -800,6 +740,9 @@ export default {
         },
         playbackRateChange() {
             this.$options.jessibuca.forward(this.playbackRate)
+        },
+        togglePerformance() {
+            this.$options.jessibuca.togglePerformancePanel(this.showPerformance);
         }
     },
 };
