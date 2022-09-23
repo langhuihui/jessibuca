@@ -57,7 +57,7 @@ open /Applications/Google\ Chrome.app --args --enable-features=PlatformHEVCDecod
 通过配置启动项
 
 ```shell
---enable-features=PlatformHEVCDecoderSupport
+-enable-features=PlatformHEVCDecoderSupport
 ```
 
 # 支持音视频流（TF卡流）的倍数播放
