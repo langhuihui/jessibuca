@@ -588,7 +588,7 @@ export default {
                     this.$options.jessibuca.playback(this.playUrl, {
                         playList,
                         fps: 25,
-                        showControl: false,
+                        showControl: true,
                         uiUsePlaybackPause: true
                     })
                     this.playType = 'playback'
