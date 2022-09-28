@@ -499,6 +499,13 @@ https://github.com/bosscheng/jessibuca-vue-demo/blob/v3/preview/preview.js
 1. 如果是h264的源，建议使用MSE 硬解码 通过设置`useMSE:true`,使得渲染元素是video标签。
 2. 如果是h265的源，推荐使用 `jessibuca pro` 目前pro 版本支持 `mse` `wasm`  `webcodecs`解码之后通过video标签渲染。
 
+
+### 是否支持本地文件播放
+
+Jessibuca是一款开源的纯H5直播流播放器
+
+> 所以 暂不支持 本地文件打开。
+
 # 群
 <img src="/public/qrcode.jpeg">
 
