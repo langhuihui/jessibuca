@@ -58,6 +58,8 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 支持crypto解密播放。
 - 支持webrtc标准流播放。
 - 支持WebTransport协议播放。
+- 支持H264裸流播放。
+- 支持H265裸流播放。
 - 支持MSE硬解码之后通过canvas渲染播放。
 - 支持WASM解码之后通过video渲染播放。
 - 支持播放器自定义水印,支持播放器播放过程中，显示水印，例如公司名称，公司logo等。

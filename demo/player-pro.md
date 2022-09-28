@@ -60,7 +60,15 @@ open /Applications/Google\ Chrome.app --args --enable-features=PlatformHEVCDecod
 -enable-features=PlatformHEVCDecoderSupport
 ```
 
-# 支持音视频流（TF卡流）的倍数播放
+# 支持H264(AVC)/H265(HEVC)裸流播放。
+
+支持websocket协议的的H264(AVC)/H265(HEVC)裸流播放
+
+> 如需要请联系作者定制开发
+
+
+
+# 支持音视频流（TF卡流）的倍数播放。
 
 - 支持TF卡流的倍数播放
 - 支持自定义帧率(fps)
@@ -95,7 +103,8 @@ open /Applications/Google\ Chrome.app --args --enable-features=PlatformHEVCDecod
 > 如：wt://${hostName}${wtPort}/play/${streamPath}
 
 
-# 联系作者
+
+# 赞助作者
 
 <img src="/public/wx.jpg"><img src="/public/alipay.jpg">
 
