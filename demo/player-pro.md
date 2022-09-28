@@ -38,7 +38,7 @@ Windows系统下，chrome最新的104.x 版本以后的版本
 - 使用win10商店购买hevc解码器后最新edge可硬件加速解码播放H265。
 - 使用 chrome canary 并开启 `--enable-features=PlatformHEVCDecoderSupport` 进行测试
 - 使用 chrome（mac平台） 并开启`--enable-features=PlatformHEVCDecoderSupport` 进行测试
-- 使用 chrome（windows） 并开启`--enable-features=PlatformHEVCDecoderSupport` 进行测试
+- 使用 chrome（windows） 并开启`-enable-features=PlatformHEVCDecoderSupport` 进行测试
 
 ## mac
 
