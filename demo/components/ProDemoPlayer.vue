@@ -203,11 +203,6 @@
                 </template>
             </div>
             <div class="input" v-if="loaded">
-                <select v-model="scale" @change="scaleChange">
-                    <option value="0">完全填充(拉伸)</option>
-                    <option value="1">等比缩放</option>
-                    <option value="2">完全填充(未拉伸)</option>
-                </select>
                 <button v-if="!playing" @click="clearView">清屏</button>
                 <template v-if="playing">
                     <select v-model="recordType">
@@ -365,7 +360,8 @@ export default {
                             quality: this.showOperateBtns,
                             close: this.showOperateBtns,
                             zoom: this.showOperateBtns,
-                            performance:this.showOperateBtns
+                            performance:this.showOperateBtns,
+                            scale: this.showOperateBtns
                         },
                         isFlv: this.isFlv,
                         hiddenAutoPause: this.hiddenAutoPause,
