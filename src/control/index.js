@@ -29,6 +29,10 @@ export default class Control {
             this.player.$container.removeChild(this.$controls);
         }
 
+        if(this.$recording){
+            this.player.$container.removeChild(this.$recording);
+        }
+
         if(this.$playBig){
             this.player.$container.removeChild(this.$playBig);
         }
