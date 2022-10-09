@@ -11,7 +11,40 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 -
 -
 -
-## PRO 版本支持的特性
+## 基础版本
+- 支持解码H.264视频(Baseline, Main, High Profile全支持，支持解码B帧视频)
+- 支持解码H.265视频（flv id == 12）
+- 支持解码AAC音频(LC,HE,HEv2 Profile全支持)
+- 支持解码PCMA音频以及PCMU音频格式
+- 可设置播放缓冲区时长，可设置0缓冲极限低延迟（网络抖动会造成卡顿现象）
+- 支持WASM智能不花屏丢帧，长时间播放绝不累积延迟。
+- 可创建多个播放实例
+- 程序精简，经CDN加速，GZIP压缩（实际下载500k），加载速度更快
+- 同时支持http-flv和websocket-flv协议以及websocket-raw私有协议（裸数据，传输量更小，需要搭配Monibuca服务器）
+  注：以http-flv请求时，存在跨域请求的问题，需要设置access-control-allow-origin, websocket-flv默认不存在此问题
+- 支持HTTPS/WSS加密视频传输，保证视频内容传输安全
+- 手机浏览器内打开视频不会变成全屏播放
+- 手机浏览器内打开长时间不会息屏
+- 支持解码8kHz PCM_ALAW, PCM_MULAW的G.711音频
+- 支持填充，等比，等比缩放 3中视频缩放模式
+- 支持0，90，180，270度画面旋转
+- 自带底部UI,支持原子化配置是否显示(播放/暂停、音量调节、截屏、录制/暂停录制、全屏/取消全屏、流量显示)
+- 自带底部UI适配H5移动端，并支持web端全屏(操作栏适配横屏)
+- 自带底部UI支持设置成自动隐藏，只有鼠标聚焦到播放器内部才会显示，移除之后，会消失。
+- 支持键盘快捷键
+- 支持OffscreenCanvas，提升Webgl渲染性能
+- 支持WebWorker多核解码，提升多画面播放性能
+- 支持WebCodecs硬件解码API
+- 支持WebCodecs硬件解码配置通过video标签渲染或者canvas标签渲染画面
+- 支持MediaSourceExtensions 硬件解码
+- 支持WebCodecs和MediaSourceExtensions硬解码失败的情况下自动切换到wasm软解码
+- 支持同一个播放地址视频分辨率发生变化的时候视频不花屏(仅软解码)
+- 支持同一个播放地址音频采样和编码发生改变的时候音频自动切换
+- 支持视频录制(WebM、MP4格式)，(MP4格式支持在IOS VLC播放器显示时长播放，Android VLC播放器无法显示时长播放,PC VLC播放器可以播放)
+
+
+
+## PRO 额外支持的
 - 支持开源版几乎所有的方法和事件，支持无缝升级到PRO版本。
 - wasm解码模式下默认work线程中发起Http-Flv、WS请求，减少主线程往worker线程传递数据，提升性能。
 - Windows系统下,360浏览器可播放使用MSE加速解码H265。
