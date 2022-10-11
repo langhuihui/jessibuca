@@ -53,6 +53,9 @@
 
             </div>
             <div id="container"></div>
+            <div class="input input-annnie">
+                <div style="color: red" class="input-tips">Tips:MediaSource模式下支持录制MP4(MPEG-4)格式的视频(仅录制视频)</div>
+            </div>
             <div class="input input-wrap">
                 <div>
                     当前浏览器：
@@ -744,6 +747,16 @@ export default {
     },
 };
 </script>
+<style>
+@keyframes ani {
+    0% {
+        transform: translatex(0);
+    }
+    100% {
+        transform: translatex(-100%);
+    }
+}
+</style>
 <style scoped>
 .root {
     display: flex;
@@ -799,6 +812,21 @@ export default {
 
 .input input[type='input'] {
     flex: auto;
+}
+
+.input-annnie{
+    position: relative;
+    height: 20px;
+    overflow: hidden;
+}
+
+.input-tips{
+    position: absolute;
+    width: 100%;
+    text-align: right;
+    top: 0;
+    left: 0;
+    animation: ani 20s linear infinite;
 }
 
 .err {

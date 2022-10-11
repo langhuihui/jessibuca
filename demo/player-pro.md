@@ -28,7 +28,8 @@ sidebar: false
 
 Windows系统下,360浏览器可播放使用MSE加速解码H265。
 
-Windows系统下,win10商店购买hevc解码器后最新edge可硬件加速解码播放H265。
+~~Windows系统下,win10商店购买hevc解码器后最新edge可硬件加速解码播放H265。~~
+最新版本edge 已经支持。
 
 mac系统下，chrome最新的104.0.5112.79及以后的版本
 
@@ -37,10 +38,10 @@ Windows系统下，chrome最新的104.x 版本以后的版本
 > 注意要打开chrome的硬件加速功能才能生效。
 
 - 使用360浏览器测试
-- 使用win10商店购买hevc解码器后最新edge可硬件加速解码播放H265。
-- 使用 chrome canary 并开启 `--enable-features=PlatformHEVCDecoderSupport` 进行测试
-- 使用 chrome（mac平台） 并开启`--enable-features=PlatformHEVCDecoderSupport` 进行测试
-- 使用 chrome（windows） 并开启`-enable-features=PlatformHEVCDecoderSupport` 进行测试
+- ~~使用win10商店购买hevc解码器后最新edge可硬件加速解码播放H265。~~ 最新版本edge 已经支持
+- 使用 chrome canary ~~并开启 `--enable-features=PlatformHEVCDecoderSupport` 进行测试~~ 最新版本已经默认开启
+- 使用 chrome（mac平台） ~~并开启`--enable-features=PlatformHEVCDecoderSupport` 进行测试~~ 最新版本已经默认开启
+- 使用 chrome（windows） ~~并开启`-enable-features=PlatformHEVCDecoderSupport` 进行测试~~ 最新版本已经默认开启
 
 
 ## mac
