@@ -219,7 +219,7 @@ class Jessibuca extends Emitter {
         return new Promise((resolve, reject) => {
             if (!url && !this._opt.url) {
                 this.emit(EVENTS.error, EVENTS_ERROR.playError)
-                reject();
+                reject('play url is empty')
                 return;
             }
 
@@ -239,6 +239,7 @@ class Jessibuca extends Emitter {
                                 // 恢复下之前的音量
                                 this.player.resumeAudioAfterPause();
                             }).catch((e) => {
+                                this.player.debug.warn('jessibuca', 'pause ->  play and play error', e)
                                 this.player.pause().then(() => {
                                     reject(e);
                                 })
@@ -251,6 +252,7 @@ class Jessibuca extends Emitter {
                             this.clearView();
                             return this._play(url, options);
                         }).catch((e) => {
+                            this.player.debug.warn('jessibuca', 'this._opt.url is null and pause error', e)
                             reject(e);
                         })
                     }
@@ -265,6 +267,7 @@ class Jessibuca extends Emitter {
                     // 恢复下之前的音量
                     this.player.resumeAudioAfterPause();
                 }).catch((e) => {
+                    this.player.debug.warn('jessibuca', 'url is null and play error', e)
                     this.player.pause().then(() => {
                         reject(e);
                     })
@@ -502,6 +505,7 @@ class Jessibuca extends Emitter {
                 this.player.play(url, options).then(() => {
                     resolve();
                 }).catch((e) => {
+                    this.player.debug.warn('Jessibuca', 'hasLoaded and play error', e)
                     this.player.pause().then(() => {
                         reject(e);
                     })
@@ -511,6 +515,7 @@ class Jessibuca extends Emitter {
                     this.player.play(url, options).then(() => {
                         resolve();
                     }).catch((e) => {
+                        this.player.debug.warn('Jessibuca', 'decoderWorkerInit and play error', e)
                         this.player.pause().then(() => {
                             reject(e);
                         })
