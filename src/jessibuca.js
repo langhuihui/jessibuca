@@ -238,9 +238,9 @@ class Jessibuca extends Emitter {
                                 resolve();
                                 // 恢复下之前的音量
                                 this.player.resumeAudioAfterPause();
-                            }).catch(() => {
+                            }).catch((e) => {
                                 this.player.pause().then(() => {
-                                    reject();
+                                    reject(e);
                                 })
                             })
                         }
@@ -250,8 +250,8 @@ class Jessibuca extends Emitter {
                             // 清除 画面
                             this.clearView();
                             return this._play(url, options);
-                        }).catch(() => {
-                            reject();
+                        }).catch((e) => {
+                            reject(e);
                         })
                     }
                 } else {
@@ -264,9 +264,9 @@ class Jessibuca extends Emitter {
                     resolve();
                     // 恢复下之前的音量
                     this.player.resumeAudioAfterPause();
-                }).catch(() => {
+                }).catch((e) => {
                     this.player.pause().then(() => {
-                        reject();
+                        reject(e);
                     })
                 })
             }
@@ -501,18 +501,18 @@ class Jessibuca extends Emitter {
             if (this.hasLoaded()) {
                 this.player.play(url, options).then(() => {
                     resolve();
-                }).catch(() => {
+                }).catch((e) => {
                     this.player.pause().then(() => {
-                        reject();
+                        reject(e);
                     })
                 })
             } else {
                 this.player.once(EVENTS.decoderWorkerInit, () => {
                     this.player.play(url, options).then(() => {
                         resolve();
-                    }).catch(() => {
+                    }).catch((e) => {
                         this.player.pause().then(() => {
-                            reject();
+                            reject(e);
                         })
                     })
                 })
