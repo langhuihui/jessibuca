@@ -10138,7 +10138,10 @@
 	    setStyle(control.$pause, 'display', flag ? 'flex' : 'none');
 	    setStyle(control.$screenshot, 'display', flag ? 'flex' : 'none');
 	    setStyle(control.$record, 'display', flag ? 'flex' : 'none');
-	    setStyle(control.$fullscreen, 'display', flag ? 'flex' : 'none'); // 不在播放
+	    setStyle(control.$qualityMenu, 'display', flag ? 'flex' : 'none');
+	    setStyle(control.$volume, 'display', flag ? 'flex' : 'none'); // setStyle(control.$fullscreen, 'display', flag ? 'flex' : 'none');
+
+	    screenfullChange(); // 不在播放
 
 	    if (!flag) {
 	      control.$speed && (control.$speed.innerHTML = bpsSize(''));
@@ -10391,6 +10394,10 @@
 
 	    if (this.$controls) {
 	      this.player.$container.removeChild(this.$controls);
+	    }
+
+	    if (this.$recording) {
+	      this.player.$container.removeChild(this.$recording);
 	    }
 
 	    if (this.$playBig) {
@@ -12402,7 +12409,7 @@
 	    return new Promise((resolve, reject) => {
 	      if (!url && !this._opt.url) {
 	        this.emit(EVENTS.error, EVENTS_ERROR.playError);
-	        reject();
+	        reject('play url is empty');
 	        return;
 	      }
 
@@ -12421,9 +12428,10 @@
 	                resolve(); // 恢复下之前的音量
 
 	                this.player.resumeAudioAfterPause();
-	              }).catch(() => {
+	              }).catch(e => {
+	                this.player.debug.warn('jessibuca', 'pause ->  play and play error', e);
 	                this.player.pause().then(() => {
-	                  reject();
+	                  reject(e);
 	                });
 	              });
 	            }
@@ -12433,8 +12441,9 @@
 	              // 清除 画面
 	              this.clearView();
 	              return this._play(url, options);
-	            }).catch(() => {
-	              reject();
+	            }).catch(e => {
+	              this.player.debug.warn('jessibuca', 'this._opt.url is null and pause error', e);
+	              reject(e);
 	            });
 	          }
 	        } else {
@@ -12447,9 +12456,10 @@
 	          resolve(); // 恢复下之前的音量
 
 	          this.player.resumeAudioAfterPause();
-	        }).catch(() => {
+	        }).catch(e => {
+	          this.player.debug.warn('jessibuca', 'url is null and play error', e);
 	          this.player.pause().then(() => {
-	            reject();
+	            reject(e);
 	          });
 	        });
 	      }
@@ -12707,18 +12717,20 @@
 	      if (this.hasLoaded()) {
 	        this.player.play(url, options).then(() => {
 	          resolve();
-	        }).catch(() => {
+	        }).catch(e => {
+	          this.player.debug.warn('Jessibuca', 'hasLoaded and play error', e);
 	          this.player.pause().then(() => {
-	            reject();
+	            reject(e);
 	          });
 	        });
 	      } else {
 	        this.player.once(EVENTS.decoderWorkerInit, () => {
 	          this.player.play(url, options).then(() => {
 	            resolve();
-	          }).catch(() => {
+	          }).catch(e => {
+	            this.player.debug.warn('Jessibuca', 'decoderWorkerInit and play error', e);
 	            this.player.pause().then(() => {
-	              reject();
+	              reject(e);
 	            });
 	          });
 	        });

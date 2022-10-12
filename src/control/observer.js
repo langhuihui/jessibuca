@@ -134,6 +134,8 @@ export default (player, control) => {
         setStyle(control.$pause, 'display', flag ? 'flex' : 'none');
         setStyle(control.$screenshot, 'display', flag ? 'flex' : 'none');
         setStyle(control.$record, 'display', flag ? 'flex' : 'none');
+        setStyle(control.$qualityMenu, 'display', flag ? 'flex' : 'none');
+        setStyle(control.$volume, 'display', flag ? 'flex' : 'none');
         // setStyle(control.$fullscreen, 'display', flag ? 'flex' : 'none');
         screenfullChange();
         // 不在播放
