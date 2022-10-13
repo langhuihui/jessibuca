@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="./jessibuca-pro-demo.js"></script>
+    <style>
+        .root {
+            display: flex;
+            place-content: center;
+            margin-top: 3rem;
+        }
+
+        .container-shell {
+            backdrop-filter: blur(5px);
+            background: hsla(0, 0%, 50%, 0.5);
+            padding: 30px 4px 10px 4px;
+            /* border: 2px solid black; */
+            width: auto;
+            position: relative;
+            border-radius: 5px;
+            box-shadow: 0 10px 20px;
+        }
+
+        .container-shell:before {
+            content: "jessibuca demo player";
+            position: absolute;
+            color: darkgray;
+            top: 4px;
+            left: 10px;
+            text-shadow: 1px 1px black;
+        }
+
+        #container {
+            background: rgba(13, 14, 27, 0.7);
+            width: 900px;
+            height: 568px;
+        }
+
+        .input {
+            display: flex;
+            margin-top: 10px;
+            color: white;
+            place-content: stretch;
+        }
+
+        .input2 {
+            bottom: 0px;
+        }
+
+        .input input {
+            flex: auto;
+        }
+
+        .err {
+            position: absolute;
+            top: 40px;
+            left: 10px;
+            color: red;
+        }
+
+        .option {
+            position: absolute;
+            top: 4px;
+            right: 10px;
+            display: flex;
+            place-content: center;
+            font-size: 12px;
+        }
+
+        .option span {
+            color: white;
+        }
+
+        .page {
+            background: url('./bg.jpg');
+            background-repeat: no-repeat;
+            background-position: top;
+        }
+
+        @media (max-width: 720px) {
+            #container {
+                width: 90vw;
+                height: 52.7vw;
+            }
+        }
+    </style>
+</head>
+<body class="page">
+<div class="root">
+    <div class="container-shell">
+        <div id="container"></div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl"
+                value="http://flv.bdplay.nodemedia.cn/live/bbb_264.flv"
+            />
+            <button id="play">播放</button>
+            <button id="pause" style="display: none">停止</button>
+        </div>
+        <div class="input">
+             <textarea name="" id="playbackTimes" style="width: 100%" rows="10">
+                [{"start":1653840000,"end":1653841624},{"start":1653841634,"end":1653843420},{"start":1653843429,"end":1653843958},{"start":1653843967,"end":1653845688},{"start":1653845698,"end":1653846480},{"start":1653846490,"end":1653847199},{"start":1653847208,"end":1653848531},{"start":1653848541,"end":1653850863},{"start":1653850872,"end":1653853371},{"start":1653853381,"end":1653857885},{"start":1653857894,"end":1653858352},{"start":1653858362,"end":1653860545},{"start":1653860554,"end":1653861080},{"start":1653861090,"end":1653862017},{"start":1653862026,"end":1653863812},{"start":1653863822,"end":1653865325},{"start":1653865335,"end":1653867374},{"start":1653867383,"end":1653867698},{"start":1653867707,"end":1653868816},{"start":1653868826,"end":1653872829},{"start":1653872838,"end":1653877527},{"start":1653877537,"end":1653879799},{"start":1653879809,"end":1653881953},{"start":1653881963,"end":1653885397},{"start":1653885407,"end":1653886894},{"start":1653886904,"end":1653890591},{"start":1653890600,"end":1653894360},{"start":1653894370,"end":1653903276},{"start":1653903286,"end":1653912848},{"start":1653912858,"end":1653914424},{"start":1653914433,"end":1653915002},{"start":1653915011,"end":1653918125},{"start":1653918135,"end":1653921622},{"start":1653921631,"end":1653924609},{"start":1653924618,"end":1653926399}]
+            </textarea>
+        </div>
+        <div class="input" style="line-height: 30px">
+            <button id="destroy">销毁</button>
+
+            <div class="playbackForward">
+                <select id="playbackRate" style="width: 100px">
+                    <option value="1" selected>1倍</option>
+                    <option value="2">2倍</option>
+                    <option value="4">4倍</option>
+                    <option value="8">8倍</option>
+                </select>
+                <button id="playbackForward">快进</button>
+            </div>
+            <div class="playback-fps" style="margin-left: 10px">
+                <span>FPS</span><input type="text" id="playbackFps" value="25">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var $player = document.getElementById('play');
+    var $pause = document.getElementById('pause');
+    var $playHref = document.getElementById('playUrl');
+    var $container = document.getElementById('container');
+    var $destroy = document.getElementById('destroy');
+    var $playbackTime = document.getElementById('playbackTimes');
+    var $playbackForward = document.getElementById('playbackForward');
+    var $playbackFps = document.getElementById('playbackFps');
+    var showOperateBtns = true; // 是否显示按钮
+    var forceNoOffscreen = true; //
+    var jessibuca = null;
+
+    function create() {
+        jessibuca = new Jessibuca({
+            container: $container,
+            videoBuffer: 0.2, // 缓存时长
+            isResize: false,
+            text: "",
+            loadingText: "加载中",
+            debug: true,
+            showBandwidth: showOperateBtns, // 显示网速
+            showPlaybackOperate: showOperateBtns,
+            operateBtns: {
+                fullscreen: showOperateBtns,
+                screenshot: showOperateBtns,
+                play: showOperateBtns,
+                audio: showOperateBtns,
+            },
+            forceNoOffscreen: forceNoOffscreen,
+            isNotMute: false,
+        },);
+
+        jessibuca.onLog = msg => console.error(msg);
+        jessibuca.onRecord = (status) => console.log('onRecord', status);
+        jessibuca.onPause = () => console.log('onPause');
+        jessibuca.onPlay = () => console.log('onPlay');
+        jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
+        jessibuca.onMute = msg => console.log('onMute', msg);
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+        $destroy.style.display = 'none';
+    }
+
+
+    create();
+
+    $player.addEventListener('click', function () {
+        var href = $playHref.value;
+        var playTimes = $playbackTime.value;
+        var playFps = $playbackFps.value || 20;
+        var playTimesArray = JSON.parse(playTimes);
+        if (href) {
+            jessibuca.playback(href, {
+                playList: playTimesArray,
+                fps: playFps
+            });
+            $player.style.display = 'none';
+            $pause.style.display = 'inline-block';
+            $destroy.style.display = 'inline-block';
+        }
+    }, false)
+
+
+    $pause.addEventListener('click', function () {
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+        jessibuca.pause();
+    })
+
+    $destroy.addEventListener('click', function () {
+        if (jessibuca) {
+            jessibuca.destroy();
+        }
+        create();
+    })
+
+
+    $playbackForward.addEventListener('click', function () {
+        const playbackRate = document.querySelector('#playbackRate').value;
+
+        if (jessibuca) {
+            jessibuca.forward(playbackRate);
+        }
+    })
+
+</script>
+
+</body>
+</html>
