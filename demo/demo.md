@@ -54,7 +54,7 @@ https://github.com/bosscheng/jessibuca-umi-app-hBuilderX-demo/tree/v3
 https://github.com/bosscheng/jessibuca-uni-app-demo/tree/v3
 
 
-## Uni-app 插件
+## Uni-app 插件(网友集成的，非官网)
 
 https://ext.dcloud.net.cn/plugin?id=8296
 
