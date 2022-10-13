@@ -491,7 +491,7 @@ https://github.com/bosscheng/jessibuca-vue-demo/blob/v3/preview/preview.js
 
 #### 问题
 
-通过webgl渲染的时候，会出现部分机型画面倒挂，一般这种情况都是出现在 `wasm` 渲染模式上面的
+通过webgl渲染(canvas)的时候，会出现部分机型画面倒挂，一般这种情况都是出现在 `wasm` 渲染模式上面的
 
 
 #### 解决方案

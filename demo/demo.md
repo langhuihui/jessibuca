@@ -54,6 +54,10 @@ https://github.com/bosscheng/jessibuca-umi-app-hBuilderX-demo/tree/v3
 https://github.com/bosscheng/jessibuca-uni-app-demo/tree/v3
 
 
+## Uni-app 插件
+
+https://ext.dcloud.net.cn/plugin?id=8296
+
 ## React
 
 
