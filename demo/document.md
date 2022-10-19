@@ -500,6 +500,20 @@ https://github.com/bosscheng/jessibuca-vue-demo/blob/v3/preview/preview.js
 2. 如果是h265的源，推荐使用 `jessibuca pro` 目前pro 版本支持 `mse` `wasm`  `webcodecs`解码之后通过video标签渲染。
 
 
+### 关于延迟
+
+#### 对于开源版
+
+- wasm解码做了丢帧逻辑
+- mse解码没有做丢帧逻辑
+- wcs解码没有做丢帧逻辑
+
+#### 对于pro版
+
+- wasm解码做了丢帧逻辑
+- mse解码做了丢帧逻辑
+- wcs解码做了丢帧逻辑
+
 ### 是否支持本地文件播放
 
 Jessibuca是一款开源的纯H5直播流播放器
