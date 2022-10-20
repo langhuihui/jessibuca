@@ -140,6 +140,13 @@ MIMEType: application/wasm
 > Uncaught (in promise) TypeError: Failed to execute 'compile' on 'WebAssembly': Incorrect response MIME type. Expected 'application/wasm'.
 
 
+类似
+
+```shell
+[ERROR] wasm streaming compile failed: TypeError: Failed to execute 'compile' on 'WebAssembly': Incorrect response MIME type. Expected 'application/wasm'.
+[ERROR] falling back to ArrayBuffer instantiation
+```
+
 因为 从远程服务器加载的Wasm模块文件只有在其HTTP相应结果中被标识为application/wasm类型，才可以被WebAssembly.instantiateStreaming方法正确的编译和处理
 
 查看 network 板块，就可以看到decoder.wasm 的返回格式化， 看下` Response Headers` 下面的`Content-Type` 是否是`application/wasm`
@@ -151,6 +158,22 @@ MIMEType: application/wasm
 
 Extension: .wasm (dot wasm)
 MIMEType: application/wasm
+
+##### apache修改 mime.types，添加
+
+```shell
+application/wasm            wasm
+
+```
+
+##### nginx修改mime.types，添加
+
+```shell
+application/wasm            wasm;
+
+
+```
+
 
 ### 优化加载速度
 
@@ -450,7 +473,9 @@ pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
 
 ### decoder.js 报 Unexpected token '<'错误
 
-查看network 面板下面的 decoder.wasm 有没有被正确引入。返回个格式是不是 `application/wasm`格式的
+1.查看network 面板下面的 decoder.wasm 有没有被正确引入。返回个格式是不是 `application/wasm`格式的。
+
+2.查看下decoder.js 返回的内容是否正确，是不是js内容。（会存在vue 或者react 项目 直接被返回了index.html 内容了）
 
 
 ### 有数据,但是没有画面出来
@@ -498,6 +523,23 @@ https://github.com/bosscheng/jessibuca-vue-demo/blob/v3/preview/preview.js
 
 1. 如果是h264的源，建议使用MSE 硬解码 通过设置`useMSE:true`,使得渲染元素是video标签。
 2. 如果是h265的源，推荐使用 `jessibuca pro` 目前pro 版本支持 `mse` `wasm`  `webcodecs`解码之后通过video标签渲染。
+
+
+### chrome无法访问更私有的地址
+
+升级chrome 91后，默认无法从开放的地址往更私有的地址访问。
+
+比如从公网访问web，播放内网的流媒体地址。
+
+```shell
+
+Access to fetch at 'http://192.168.0.2:8000/live/test.flv' from origin 'http://jessibuca.monibuca.com/' has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `private`.
+```
+打开浏览器的
+
+> chrome://flags/#block-insecure-private-network-requests
+
+将这项设置为关闭
 
 
 ### 关于延迟
