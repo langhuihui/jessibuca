@@ -8,6 +8,8 @@ sidebar: false
 > 注意：pro 试用开发包(1小时断开, 刷新页面继续测试)
 >
 > 注意：pro 试用开发包(1小时断开, 刷新页面继续测试)
+>
+> 如需要购买PRO版本可以联系添加作者微信：bosswancheng
 
 
 - 支持6种格式：(live/test为streamPath)
