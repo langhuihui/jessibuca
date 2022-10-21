@@ -277,11 +277,11 @@ export default {
                 console.log('kBps', kBps);
             });
 
-            jessibuca.on("play", () => {
-                this.playing = true;
-                this.loaded = true;
-                this.quieting = jessibuca.isMute();
-            });
+            // jessibuca.on("play", () => {
+            //     this.playing = true;
+            //     this.loaded = true;
+            //     this.quieting = jessibuca.isMute();
+            // });
 
             jessibuca.on('recordingTimestamp', (ts) => {
                 console.log('recordingTimestamp', ts);
@@ -299,7 +299,14 @@ export default {
 
 
             if (this.$refs.playUrl.value) {
-                this.$options.jessibuca.play(this.$refs.playUrl.value);
+                this.$options.jessibuca.play(this.$refs.playUrl.value).then(() => {
+                    console.log('play success');
+                    this.playing = true;
+                    this.loaded = true;
+                    this.quieting = jessibuca.isMute();
+                }).catch((err) => {
+                    console.log('play error', err);
+                });
             }
         },
         mute() {
@@ -310,10 +317,15 @@ export default {
         },
 
         pause() {
-            this.$options.jessibuca.pause();
-            this.playing = false;
-            this.err = "";
-            this.performance = "";
+            this.$options.jessibuca.pause().then(()=>{
+                console.log('pause success');
+                this.playing = false;
+                this.err = "";
+                this.performance = "";
+            }).catch((err)=>{
+                console.log('pause error', err);
+            });
+
         },
         volumeChange() {
             this.$options.jessibuca.setVolume(this.volume);

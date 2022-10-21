@@ -250,14 +250,24 @@ class Jessibuca extends Emitter {
                         this.player.pause().then(() => {
                             // 清除 画面
                             this.clearView();
-                            return this._play(url, options);
+                            this._play(url, options).then(() => {
+                                resolve()
+                            }).catch((e) => {
+                                this.player.debug.warn('jessibuca', 'this._play error', e)
+                                reject(e)
+                            });
                         }).catch((e) => {
                             this.player.debug.warn('jessibuca', 'this._opt.url is null and pause error', e)
                             reject(e);
                         })
                     }
                 } else {
-                    return this._play(url, options);
+                    this._play(url, options).then(() => {
+                        resolve()
+                    }).catch((e) => {
+                        this.player.debug.warn('jessibuca', 'this._play error', e)
+                        reject(e)
+                    });
                 }
             } else {
                 //  url 不存在的时候
