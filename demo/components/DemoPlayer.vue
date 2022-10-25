@@ -35,6 +35,13 @@
             </div>
             <div id="container" ref="container"></div>
             <div class="input">
+                <input
+                    type="checkbox"
+                    v-model="controlAutoHide"
+                    @change="restartPlay()"
+                /><span>控制栏自动隐藏</span>
+            </div>
+            <div class="input">
                 <div>输入URL：</div>
                 <input
                     placeholder="支持ws-raw/ws-flv/http-flv协议"
@@ -141,7 +148,9 @@ export default {
             isDebug:false,
             recordType: 'webm',
             scale: 0,
-            vConsole: null
+            vConsole: null,
+            controlAutoHide: true,
+
         };
     },
     mounted() {
@@ -175,6 +184,7 @@ export default {
                         debug: this.isDebug,
                         hotKey: true,
                         // hasAudio:false,
+                        controlAutoHide: this.controlAutoHide,
                         supportDblclickFullscreen: true,
                         showBandwidth: this.showBandwidth, // 显示网速
                         operateBtns: {

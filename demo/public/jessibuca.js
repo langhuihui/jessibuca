@@ -10282,11 +10282,43 @@
 	    proxy(player.$container, 'mouseover', () => {
 	      if (!player.fullscreen) {
 	        setStyle(control.$controls, 'display', 'block');
+	        startDelayControlHidden();
+	      }
+	    });
+	    proxy(player.$container, 'mousemove', () => {
+	      if (player.$container && control.$controls) {
+	        if (!player.fullscreen) {
+	          if (control.$controls.style.display === 'none') {
+	            setStyle(control.$controls, 'display', 'block');
+	            startDelayControlHidden();
+	          }
+	        } else {
+	          if (control.$controls.style.display === 'none') {
+	            setStyle(control.$controls, 'display', 'block');
+	            startDelayControlHidden();
+	          }
+	        }
 	      }
 	    });
 	    proxy(player.$container, 'mouseout', () => {
+	      stopDelayControlHidden();
 	      setStyle(control.$controls, 'display', 'none');
 	    });
+	    let delayHiddenTimeout = null;
+
+	    const startDelayControlHidden = () => {
+	      stopDelayControlHidden();
+	      delayHiddenTimeout = setTimeout(() => {
+	        setStyle(control.$controls, 'display', 'none');
+	      }, 5 * 1000);
+	    };
+
+	    const stopDelayControlHidden = () => {
+	      if (delayHiddenTimeout) {
+	        clearTimeout(delayHiddenTimeout);
+	        delayHiddenTimeout = null;
+	      }
+	    };
 	  }
 	});
 
