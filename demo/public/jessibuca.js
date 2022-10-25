@@ -1608,7 +1608,7 @@
 	  play() {
 	    // this.$videoElement.autoplay = true;
 	    setTimeout(() => {
-	      this.$videoElement.play().then(() => {
+	      this.$videoElement && this.$videoElement.play().then(() => {
 	        this.player.debug.log('Video', 'play');
 	      }).catch(e => {
 	        this.player.debug.warn('Video', 'play', e);
