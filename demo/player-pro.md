@@ -24,6 +24,9 @@ sidebar: false
 - 同时支持H264和H265编码格式
 - 支持webcodecs(H264格式)和MSE硬解码(H264+H265)
 
+# Webcodecs H265硬解码
+
+chrome 最新的107版本，支持Webcodecs加速解码H265。
 
 
 # MSE H265硬解码
