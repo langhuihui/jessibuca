@@ -59,8 +59,8 @@
             <div class="input input-wrap">
                 <div>
                     当前浏览器：
-                    <span v-if="supportMSEHevc" style="color: green;">支持MSE H265解码</span>
-                    <span v-else style="color: red;">不支持MSE H265解码,会自动切换成wasm解码</span>
+                    <span v-if="supportMSEHevc" style="color: green;margin-right: 10px">支持MSE H265解码</span>
+                    <span v-else style="color: red;margin-right: 10px;">不支持MSE H265解码,会自动切换成wasm解码</span>
                 </div>
                 <div>
                     <div v-if="playing && decodeType">
@@ -70,6 +70,11 @@
                         当前模式：<span>{{ playType }}</span> 当前渲染：<span>{{ renderType }}</span>
                     </div>
                 </div>
+            </div>
+            <div class="input">
+                当前浏览器：
+                <span v-if="supportWCSHevc" style="color: green;">支持Webcodec H265解码</span>
+                <span v-else style="color: red;">不支持Webcodec H265解码(需要https/localhost),会自动切换成wasm解码</span>
             </div>
             <div class="input">
                 <div>输入URL：</div>
@@ -224,6 +229,51 @@
 </template>
 <script>
 
+function getBrowser() {
+    const UserAgent = navigator.userAgent.toLowerCase();
+    const browserInfo = {};
+    const browserArray = {
+        IE: window.ActiveXObject || "ActiveXObject" in window, // IE
+        Chrome: UserAgent.indexOf('chrome') > -1 && UserAgent.indexOf('safari') > -1, // Chrome浏览器
+        Firefox: UserAgent.indexOf('firefox') > -1, // 火狐浏览器
+        Opera: UserAgent.indexOf('opera') > -1, // Opera浏览器
+        Safari: UserAgent.indexOf('safari') > -1 && UserAgent.indexOf('chrome') == -1, // safari浏览器
+        Edge: UserAgent.indexOf('edge') > -1, // Edge浏览器
+        QQBrowser: /qqbrowser/.test(UserAgent), // qq浏览器
+        WeixinBrowser: /MicroMessenger/i.test(UserAgent) // 微信浏览器
+    };
+    // console.log(browserArray)
+    for (let i in browserArray) {
+        if (browserArray[i]) {
+            let versions = '';
+            if (i === 'IE') {
+                versions = UserAgent.match(/(msie\s|trident.*rv:)([\w.]+)/)[2];
+            } else if (i === 'Chrome') {
+                for (let mt in navigator.mimeTypes) {
+                    //检测是否是360浏览器(测试只有pc端的360才起作用)
+                    if (navigator.mimeTypes[mt]['type'] === 'application/360softmgrplugin') {
+                        i = '360';
+                    }
+                }
+                versions = UserAgent.match(/chrome\/([\d.]+)/)[1];
+            } else if (i === 'Firefox') {
+                versions = UserAgent.match(/firefox\/([\d.]+)/)[1];
+            } else if (i === 'Opera') {
+                versions = UserAgent.match(/opera\/([\d.]+)/)[1];
+            } else if (i === 'Safari') {
+                versions = UserAgent.match(/version\/([\d.]+)/)[1];
+            } else if (i === 'Edge') {
+                versions = UserAgent.match(/edge\/([\d.]+)/)[1];
+            } else if (i === 'QQBrowser') {
+                versions = UserAgent.match(/qqbrowser\/([\d.]+)/)[1];
+            }
+            browserInfo.type = i;
+            browserInfo.version = parseInt(versions);
+        }
+    }
+    return browserInfo;
+}
+
 function formatTimeTips(time) {
     var result;
 
@@ -261,7 +311,7 @@ export default {
     props: {},
     data() {
         return {
-            playUrl:'',
+            playUrl: '',
             version: '',
             videoBuffer: 0.2,
             videoBufferDelay: 1,
@@ -283,11 +333,12 @@ export default {
             rotate: 0,
             mirrorRotate: 'none',
             supportMSEHevc: false,
+            supportWCSHevc: false,
             useWCS: false,
             useMSE: false,
             useSIMD: true,
             useOffscreen: false,
-            networkDelayTimeoutReplay:false,
+            networkDelayTimeoutReplay: false,
             recording: false,
             isDebug: true,
             recordType: 'webm',
@@ -318,6 +369,8 @@ export default {
             this.vConsole = new window.VConsole();
         }
         this.supportMSEHevc = window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="hev1.1.6.L123.b0"');
+        const browserInfo = getBrowser();
+        this.supportWCSHevc = browserInfo.type.toLowerCase() === 'chrome' && browserInfo.version >= 107 && (location.protocol === 'https:' || location.hostname === 'localhost');
         this.create();
         window.onerror = (msg) => (this.err = msg);
     },
@@ -363,7 +416,7 @@ export default {
                             quality: this.showOperateBtns,
                             close: this.showOperateBtns,
                             zoom: this.showOperateBtns,
-                            performance:this.showOperateBtns,
+                            performance: this.showOperateBtns,
                             scale: this.showOperateBtns
                         },
                         isFlv: this.isFlv,
@@ -814,13 +867,13 @@ export default {
     flex: auto;
 }
 
-.input-annnie{
+.input-annnie {
     position: relative;
     height: 20px;
     overflow: hidden;
 }
 
-.input-tips{
+.input-tips {
     position: absolute;
     width: 100%;
     text-align: right;
