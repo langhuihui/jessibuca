@@ -28,6 +28,7 @@ sidebar: false
 
 chrome 最新的107版本，支持Webcodecs加速解码H265。
 
+> 需要https协议 ，请访问 https://jessibuca.com/player-pro.html 进行测试
 
 # MSE H265硬解码
 
