@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jessibuca Pro MSE 5x5 demo</title>
+    <title>Jessibuca Pro WCS 4x4 demo</title>
     <script src="./jessibuca-pro-demo.js"></script>
     <style>
         .root {
@@ -23,7 +23,7 @@
         }
 
         .container-shell:before {
-            content: "jessibuca Pro MSE demo player";
+            content: "jessibuca Pro WCS demo player";
             position: absolute;
             color: darkgray;
             top: 4px;
@@ -102,40 +102,29 @@
             <div class="container" id="container2"></div>
             <div class="container" id="container3"></div>
             <div class="container" id="container4"></div>
-            <div class="container" id="container5"></div>
         </div>
         <div>
+            <div class="container" id="container5"></div>
             <div class="container" id="container6"></div>
             <div class="container" id="container7"></div>
             <div class="container" id="container8"></div>
-            <div class="container" id="container9"></div>
-            <div class="container" id="container10"></div>
         </div>
         <div>
+            <div class="container" id="container9"></div>
+            <div class="container" id="container10"></div>
             <div class="container" id="container11"></div>
             <div class="container" id="container12"></div>
+        </div>
+        <div>
             <div class="container" id="container13"></div>
             <div class="container" id="container14"></div>
             <div class="container" id="container15"></div>
-        </div>
-        <div>
             <div class="container" id="container16"></div>
-            <div class="container" id="container17"></div>
-            <div class="container" id="container18"></div>
-            <div class="container" id="container19"></div>
-            <div class="container" id="container20"></div>
-        </div>
-        <div>
-            <div class="container" id="container21"></div>
-            <div class="container" id="container22"></div>
-            <div class="container" id="container23"></div>
-            <div class="container" id="container24"></div>
-            <div class="container" id="container25"></div>
         </div>
         <div class="input">
             <div>
-                当前浏览器：<span id="mseSupport" style="color: green;display: none">支持MSE H265解码</span>
-                <span id="mseNotSupport" style="color: red;display: none">不支持MSE H265解码,会自动切换成wasm解码</span>
+                当前浏览器：<span id="mseSupport" style="color: green;display: none">支持Webcodecs H265解码</span>
+                <span id="mseNotSupport" style="color: red;display: none">不支持Webcodecs H265解码(https/localhost),会自动切换成wasm解码</span>
             </div>
         </div>
         <div class="input" style="width: 1000px;flex-direction: column">
@@ -277,79 +266,6 @@
             />
         </div>
         <div class="input">
-            <div>输入URL：</div>
-            <input
-                autocomplete="on"
-                id="playUrl17"
-                value=""
-            />
-        </div>
-        <div class="input">
-            <div>输入URL：</div>
-            <input
-                autocomplete="on"
-                id="playUrl18"
-                value=""
-            />
-        </div>
-        <div class="input">
-            <div>输入URL：</div>
-            <input
-                autocomplete="on"
-                id="playUrl19"
-                value=""
-            />
-        </div>
-        <div class="input">
-            <div>输入URL：</div>
-            <input
-                autocomplete="on"
-                id="playUrl20"
-                value=""
-            />
-        </div>
-        <div class="input">
-            <div>输入URL：</div>
-            <input
-                autocomplete="on"
-                id="playUrl21"
-                value=""
-            />
-        </div>
-        <div class="input">
-            <div>输入URL：</div>
-            <input
-                autocomplete="on"
-                id="playUrl22"
-                value=""
-            />
-        </div>
-        <div class="input">
-            <div>输入URL：</div>
-            <input
-                autocomplete="on"
-                id="playUrl23"
-                value=""
-            />
-        </div>
-        <div class="input">
-            <div>输入URL：</div>
-            <input
-                autocomplete="on"
-                id="playUrl24"
-                value=""
-            />
-        </div>
-        <div class="input">
-            <div>输入URL：</div>
-            <input
-                autocomplete="on"
-                id="playUrl25"
-                value=""
-            />
-        </div>
-
-        <div class="input">
             <button id="play">播放</button>
             <button id="pause" style="display: none">停止</button>
         </div>
@@ -368,7 +284,7 @@
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var playList = [];
-    var num = 25;
+    var num = 16;
 
     function create(id) {
         var $container = document.getElementById('container' + id);
@@ -382,8 +298,10 @@
             loadingText: "加载中",
             debug: false,
             showBandwidth: showOperateBtns, // 显示网速
-            useMSE: true,
+            useWCS: true,
             controlAutoHide:true,
+            hasAudio:false,
+            useVideoRender:true,
             operateBtns: {
                 fullscreen: showOperateBtns,
                 screenshot: showOperateBtns,
@@ -466,8 +384,55 @@
         }, 100)
     })
 
+    function getBrowser() {
+        const UserAgent = navigator.userAgent.toLowerCase();
+        const browserInfo = {};
+        const browserArray = {
+            IE: window.ActiveXObject || "ActiveXObject" in window, // IE
+            Chrome: UserAgent.indexOf('chrome') > -1 && UserAgent.indexOf('safari') > -1, // Chrome浏览器
+            Firefox: UserAgent.indexOf('firefox') > -1, // 火狐浏览器
+            Opera: UserAgent.indexOf('opera') > -1, // Opera浏览器
+            Safari: UserAgent.indexOf('safari') > -1 && UserAgent.indexOf('chrome') == -1, // safari浏览器
+            Edge: UserAgent.indexOf('edge') > -1, // Edge浏览器
+            QQBrowser: /qqbrowser/.test(UserAgent), // qq浏览器
+            WeixinBrowser: /MicroMessenger/i.test(UserAgent) // 微信浏览器
+        };
+        // console.log(browserArray)
+        for (let i in browserArray) {
+            if (browserArray[i]) {
+                let versions = '';
+                if (i === 'IE') {
+                    versions = UserAgent.match(/(msie\s|trident.*rv:)([\w.]+)/)[2];
+                } else if (i === 'Chrome') {
+                    for (let mt in navigator.mimeTypes) {
+                        //检测是否是360浏览器(测试只有pc端的360才起作用)
+                        if (navigator.mimeTypes[mt]['type'] === 'application/360softmgrplugin') {
+                            i = '360';
+                        }
+                    }
+                    versions = UserAgent.match(/chrome\/([\d.]+)/)[1];
+                } else if (i === 'Firefox') {
+                    versions = UserAgent.match(/firefox\/([\d.]+)/)[1];
+                } else if (i === 'Opera') {
+                    versions = UserAgent.match(/opera\/([\d.]+)/)[1];
+                } else if (i === 'Safari') {
+                    versions = UserAgent.match(/version\/([\d.]+)/)[1];
+                } else if (i === 'Edge') {
+                    versions = UserAgent.match(/edge\/([\d.]+)/)[1];
+                } else if (i === 'QQBrowser') {
+                    versions = UserAgent.match(/qqbrowser\/([\d.]+)/)[1];
+                }
+                browserInfo.type = i;
+                browserInfo.version = parseInt(versions);
+            }
+        }
+        return browserInfo;
+    }
+
+
     function checkSupport() {
-        return window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="hev1.1.6.L123.b0"');
+        const browserInfo = getBrowser();
+        return browserInfo.type.toLowerCase() === 'chrome' && browserInfo.version >= 107 && (location.protocol === 'https:' || location.hostname === 'localhost');
     }
 
     let support = document.getElementById('mseSupport');
