@@ -158,6 +158,20 @@
 [http://jessibuca.monibuca.com/pro/4x4-simd-demo.html](http://jessibuca.monibuca.com/pro/4x4-simd-demo.html)
 
 
+## 5X5 h265 WCS
+#### https
+[https://jessibuca.com/pro/5x5-wcs-demo.html](https://jessibuca.com/pro/5x5-wcs-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/5x5-wcs-demo.html](http://jessibuca.monibuca.com/pro/5x5-wcs-demo.html)
+
+
+## 5X5 h265 MSE
+#### https
+[https://jessibuca.com/pro/5x5-mse-demo.html](https://jessibuca.com/pro/5x5-mse-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/5x5-mse-demo.html](http://jessibuca.monibuca.com/pro/5x5-mse-demo.html)
 
 ## 6X7 h265 MSE
 
