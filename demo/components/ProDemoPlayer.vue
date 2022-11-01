@@ -54,7 +54,7 @@
             </div>
             <div id="container"></div>
             <div class="input input-annnie">
-                <div style="color: red" class="input-tips">Tips:MediaSource模式下支持录制MP4(MPEG-4)格式的视频(仅录制视频)</div>
+                <div style="color: red" class="input-tips">Tips:支持录制MP4(MPEG-4)格式的视频(仅录制视频，不包含音频)</div>
             </div>
             <div class="input input-wrap">
                 <div>
@@ -99,7 +99,7 @@
                     ref="offscreen"
                     v-model="useOffscreen"
                     @change="restartPlay('offscreen')"
-                /><span>离屏渲染(wasm+webcodecs)</span>
+                /><span>离屏渲染(wasm+wcs)</span>
                 <input
                     type="checkbox"
                     ref="offscreen"
@@ -130,8 +130,13 @@
                     v-model="hasAudio"
                     @change="restartPlay()"
                 /><span>解码音频</span>
-
-
+                <span class="span-row" style="margin-left: 10px">
+                    <span style="color:red;">录制格式</span>
+                    <select v-model="recordType" @change="restartPlay()">
+                        <option value="webm">webm</option>
+                        <option value="mp4">mp4</option>
+                    </select>
+                </span>
             </div>
             <div class="input">
                 <span>渲染标签：</span>
@@ -164,16 +169,11 @@
                         type="checkbox"
                         v-model="showPerformance"
                         @change="togglePerformance"
-                    /><span style="color: red">显示性能面板</span>
-                    <input
-                        type="checkbox"
-                        v-model="toggleZoom"
-                        @change="toggleZoomOperate"
-                    /><span style="color: red">切换电子放大</span>
+                    /><span>显示性能面板</span>
                 </div>
 
             </div>
-            <div class="input">
+            <div class="input" style="margin-top: 5px;padding-top:8px;border-top: 1px solid #eee">
                 <input type="text" v-model="talkUrl" style="width: 300px">
                 <span class="span-row">
                     编码格式
@@ -287,7 +287,11 @@
                     <button v-if="!recording" @click="stopAndSaveRecord2">暂停录制(blob)</button>
                 </template>
                 <button @click="clearBufferDelay">手动消除延迟</button>
-
+                <input
+                    type="checkbox"
+                    v-model="toggleZoom"
+                    @change="toggleZoomOperate"
+                /><span>切换电子放大</span>
             </div>
 
         </div>
@@ -407,7 +411,7 @@ export default {
             networkDelayTimeoutReplay: false,
             recording: false,
             isDebug: true,
-            recordType: 'webm',
+            recordType: 'mp4',
             scale: 0,
             vConsole: null,
             playType: '',
@@ -469,6 +473,7 @@ export default {
                         useMSE: this.useMSE,
                         useSIMD: this.useSIMD,
                         wcsUseVideoRender: this.useWCS,
+                        loadingIcon: true,
                         text: "",
                         // background: "bg.jpg",
                         loadingText: "Jessibuca pro 疯狂加载中...",
@@ -503,6 +508,7 @@ export default {
                         useVideoRender: this.renderDom === 'video',
                         useCanvasRender: this.renderDom === 'canvas',
                         networkDelayTimeoutReplay: false,
+                        playbackForwardMaxRateDecodeIFrame: 8,
                         watermarkConfig: {
                             image: {
                                 // src: 'http://jessibuca.monibuca.com/jessibuca-logo.png',
@@ -516,7 +522,8 @@ export default {
                             right: 10,
                             top: 30
                         },
-                        showPerformance: this.showPerformance
+                        showPerformance: this.showPerformance,
+                        recordType: this.recordType
                     },
                     options
                 )
@@ -591,7 +598,7 @@ export default {
 
                 const renderType = jessibuca.getRenderType();
                 this.renderType = renderType;
-                this.screenshotWatermark1Blob();
+                //this.screenshotWatermark1Blob();
             })
 
             jessibuca.on(JessibucaPro.EVENTS.performance, (performance) => {
@@ -851,6 +858,8 @@ export default {
                 type: 'blob'
             }).then((file) => {
                 console.log('screenshotWatermark1Blob', file);
+            }).catch((e) => {
+                console.log('screenshotWatermark1Blob error', e);
             });
         },
         screenshotWatermark2() {
@@ -862,7 +871,10 @@ export default {
                 },
                 right: 20,
                 top: 20
+            }).catch((e) => {
+                console.log('screenshotWatermark2 error', e);
             });
+            ;
         },
         screenshotWatermark2Blob() {
             this.$options.jessibuca.screenshotWatermark({
@@ -876,6 +888,8 @@ export default {
                 type: 'blob'
             }).then((file) => {
                 console.log('screenshotWatermark2Blob', file);
+            }).catch((e) => {
+                console.log('screenshotWatermark2Blob error', e);
             });
         },
 
