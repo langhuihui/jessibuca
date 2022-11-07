@@ -278,10 +278,10 @@
                 </select>
                 <button v-if="!playing" @click="clearView">清屏</button>
                 <template v-if="playing">
-                    <select v-model="recordType">
-                        <option value="webm">webm</option>
-                        <option value="mp4">mp4</option>
-                    </select>
+<!--                    <select v-model="recordType">-->
+<!--                        <option value="webm">webm</option>-->
+<!--                        <option value="mp4">mp4</option>-->
+<!--                    </select>-->
                     <button v-if="!recording" @click="startRecord">录制</button>
                     <button v-if="!recording" @click="stopAndSaveRecord">暂停录制(下载)</button>
                     <button v-if="!recording" @click="stopAndSaveRecord2">暂停录制(blob)</button>

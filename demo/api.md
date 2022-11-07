@@ -259,6 +259,8 @@ worker地址
 
 > 不支持 forceNoOffscreen 为 false (开启离屏渲染)
 
+> 优先级高于useWCS:true
+
 ### useWCS
 
 - **类型**：`boolean`
@@ -268,6 +270,8 @@ worker地址
 > 视频编码只支持H.264视频 (需在chrome 94版本以上，需要https或者localhost环境)
 
 > 支持 forceNoOffscreen 为 false （开启离屏渲染）
+
+> 如果同时设置了useMSE:true, 则优先使用useMSE
 
 
 ### wcsUseVideoRender
