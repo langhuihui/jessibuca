@@ -1,52 +1,38 @@
-import EventEmitter from 'eventemitter3';
-import {DecoderState, VideoDecoderConfig, VideoPacket, VideoDecoderInterface} from './types'
-
-
-export class VideoDecoderHard extends EventEmitter implements VideoDecoderInterface {
-
-    decoderState: DecoderState;
-
-    constructor() {
-
-        super();
-        this.decoderState = 'configured';
-
-    };
-
-    initialize(): Promise<void>{
-    
-        return new Promise(resolve => {
-
-            resolve();
-        });
-
-    }
-
-    state(): DecoderState {
-
-        return this.decoderState;
-
-    }
-
-
-    configure(config: VideoDecoderConfig): void {
-
-
-    }
-    decode(packet: VideoPacket): void {
-
-    }
-
-    flush(): void {
-
-    }
-
-    reset(): void {
-
-    }
-
-    close(): void {
-
-    }
-
-};
+import {
+  VideoDecoderConfig,
+  VideoDecoderInterface,
+  VideoDecoderEvent,
+} from "./types";
+import { ChangeState, FSM } from "afsm";
+export class VideoDecoderHard extends FSM implements VideoDecoderInterface {
+  decoder!: VideoDecoder;
+  @ChangeState("uninitialized", "initialized")
+  async initialize() {
+    this.decoder = new VideoDecoder({
+      output: (frame) => {
+        this.emit(VideoDecoderEvent.VideoFrame, frame);
+      },
+      error: (err) => this.emit(VideoDecoderEvent.Error, err),
+    });
+  }
+  @ChangeState("initialized", "configured")
+  configure(config: VideoDecoderConfig): void {
+    this.decoder.configure({
+      codec: config.codec,
+      description: config.extraData,
+    });
+  }
+  decode(packet: EncodedVideoChunkInit): void {
+    this.decoder.decode(new EncodedVideoChunk(packet));
+  }
+  flush(): void {
+    this.decoder.flush();
+  }
+  reset(): void {
+    this.decoder.reset();
+  }
+  @ChangeState([], "closed")
+  close(): void {
+    this.decoder.close();
+  }
+}

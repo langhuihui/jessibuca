@@ -1,8 +1,9 @@
 {
-  "name": "decoder",
+  "name": "jv4-decoder",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "type": "module",
+  "main": "src/index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,10 +11,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "afsm": "^2.2.5",
     "eventemitter3": "^4.0.7"
   },
   "devDependencies": {
-    "@types/emscripten": "^1.39.6",
-    "@types/dom-webcodecs": "^0.1.2"
+    "@types/dom-webcodecs": "^0.1.2",
+    "@types/emscripten": "^1.39.6"
   }
 }

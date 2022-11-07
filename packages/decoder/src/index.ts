@@ -1,8 +1,6 @@
-
-
-import { VideoDecoder } from "./video_decoder";
-import { AudioDecoder } from "./audio_decoder";
-
-
-
-export { VideoDecoder, AudioDecoder };
+export {
+  VideoDecoderSoftSIMD,
+  VideoDecoderHard,
+  VideoDecoderSoft,
+} from "./video_decoder";
+export { AudioDecoderSoft, AudioDecoderHard } from "./audio_decoder";

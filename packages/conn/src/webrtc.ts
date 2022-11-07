@@ -1,39 +1,51 @@
-import { ChangeState, FSM, Includes } from "afsm";
-import { Connection } from ".";
-import { ConnectionState } from "./types";
-
-export class WebRTCFSM extends FSM {
-  webrtc?: RTCPeerConnection;
-  dc?: RTCDataChannel;
-  constructor(public conn: Connection) {
-    super(conn.name, "WebRTC");
+import { Connection } from "./base";
+export class DataChannelConnection extends Connection {
+  constructor(public dc: RTCDataChannel) {
+    super(dc.label);
   }
-  @ChangeState([ConnectionState.DISCONNECTED, FSM.INIT], ConnectionState.CONNECTED)
-  connect(url: string) {
-    const peer = this.webrtc = new RTCPeerConnection(this.conn.options.rtcConfig);
-    return new Promise<ReadableStream<Uint8Array> | RTCPeerConnection>((resolve, reject) => {
-      peer.onconnectionstatechange = (evt: Event) => {
-        switch (peer.connectionState) {
+  async _connect(): Promise<void | ReadableStream<Uint8Array>> {
+    return new ReadableStream({
+      start: (controller) => {
+        this.dc.onclose = () => {
+          controller.close();
+        };
+        this.dc.onerror = (e) => {
+          controller.error(e);
+        };
+        this.dc.onmessage = (evt) => {
+          controller.enqueue(evt.data);
+        };
+      },
+    });
+  }
+  _close() {
+    this.dc.close();
+  }
+  _send(data: ArrayBufferLike | ArrayBufferView | string | Blob) {
+    //@ts-ignore
+    this.dc.send(data);
+  }
+}
+export class WebRTCConnection extends Connection {
+  webrtc = new RTCPeerConnection(this.options.rtcConfig);
+  async _connect() {
+    const offer = await this.webrtc.createOffer();
+    await this.webrtc.setLocalDescription(offer);
+    const res = await fetch(this.url, {
+      method: "POST",
+      body: offer.sdp,
+      ...(this.options.requestInit || {}),
+    });
+    const answer = await res.text();
+    await this.webrtc.setRemoteDescription({ type: "answer", sdp: answer });
+    return new Promise<void>((resolve, reject) => {
+      this.webrtc.onconnectionstatechange = (evt: Event) => {
+        switch (this.webrtc.connectionState) {
           case "disconnected":
             this.disconnect(evt);
             break;
           case "connected":
-            if (this.conn.options.dataChannel) {
-              peer.ondatachannel = evt => {
-                const dc = this.dc = evt.channel;
-                dc.onerror = reject;
-                dc.onopen = () => {
-                  resolve(new ReadableStream<Uint8Array>({
-                    start: controller => {
-                      dc.onclose = e => controller.error(e);
-                      dc.onmessage = evt => controller.enqueue(evt.data);
-                    }
-                  }));
-                };
-              };
-            } else {
-              resolve(peer);
-            }
+            resolve();
             break;
           case "failed":
             reject(evt);
@@ -41,16 +53,7 @@ export class WebRTCFSM extends FSM {
       };
     });
   }
-  @ChangeState(ConnectionState.CONNECTED, ConnectionState.DISCONNECTED)
-  disconnect(err: any) {
-  }
-  @ChangeState([], FSM.INIT)
-  close() {
+  _close() {
     this.webrtc?.close();
-  }
-  @Includes(ConnectionState.CONNECTED)
-  send(data: ArrayBufferLike | ArrayBufferView) {
-    //@ts-ignore
-    this.dc?.send(data);
   }
 }

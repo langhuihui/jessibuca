@@ -1,83 +1,79 @@
-import EventEmitter from 'eventemitter3';
-import {DecoderState, AudioDecoderType, AudioDecoderConfig, AudioPacket, AudioDecoderEvent, AudioDecoderInterface, AudioCodecInfo, AudioFrame, ErrorInfo} from './types'
-import { AudioDecoderSoft } from './audio_decoder_soft';
+export { AudioDecoderSoft } from "./audio_decoder_soft";
+export { AudioDecoderHard } from "./audio_decoder_hard";
+// export class AudioDecoder extends EventEmitter implements AudioDecoderInterface {
 
-export class AudioDecoder extends EventEmitter implements AudioDecoderInterface {
+//     decoder: AudioDecoderSoft;
 
-    decoder: AudioDecoderSoft;
+//     constructor(adtype: AudioDecoderType) {
 
-    constructor(adtype: AudioDecoderType) {
+//         super();
 
-        super();
+//         if (adtype === 'soft') {
 
-        if (adtype === 'soft') {
+//             this.decoder = new AudioDecoderSoft();
 
-            this.decoder = new AudioDecoderSoft();
+//         } else if (adtype === 'auto') {
 
-        } else if (adtype === 'auto') {
+//             this.decoder = new AudioDecoderSoft();
 
-            this.decoder = new AudioDecoderSoft();
+//         } else {
 
-        } else {
+//             throw new Error(`Audio type [${adtype}] not support`);
+//         }
 
-            throw new Error(`Audio type [${adtype}] not support`);
-        }
+//         this.decoder.on(AudioDecoderEvent.AudioCodecInfo, (codecinfo: AudioCodecInfo) => {
 
-        this.decoder.on(AudioDecoderEvent.AudioCodecInfo, (codecinfo: AudioCodecInfo) => {
+//             this.emit(AudioDecoderEvent.AudioCodecInfo, codecinfo);
+//         })
 
-            this.emit(AudioDecoderEvent.AudioCodecInfo, codecinfo);
-        })
+//         this.decoder.on(AudioDecoderEvent.AudioFrame, (AudioFrame: AudioFrame) => {
 
-        this.decoder.on(AudioDecoderEvent.AudioFrame, (AudioFrame: AudioFrame) => {
+//             this.emit(AudioDecoderEvent.AudioFrame, AudioFrame);
+//         })
 
-            this.emit(AudioDecoderEvent.AudioFrame, AudioFrame);
-        })
+//         this.decoder.on(AudioDecoderEvent.Error, (error: ErrorInfo) => {
 
-        this.decoder.on(AudioDecoderEvent.Error, (error: ErrorInfo) => {
+//             this.emit(AudioDecoderEvent.Error, error);
+//         })
 
-            this.emit(AudioDecoderEvent.Error, error);
-        })
+//     };
 
-    };
+//     initialize(): Promise<void>{
 
-    
-    initialize(): Promise<void>{ 
+//         return this.decoder.initialize();
+//     }
 
-        return this.decoder.initialize();
-    }
+//     state(): DecoderState {
 
+//         return this.decoder.state();
+//     }
 
-    state(): DecoderState {
+//     configure(config: AudioDecoderConfig): void {
 
-        return this.decoder.state();
-    }
+//         this.decoder.configure(config);
+//     }
 
-    configure(config: AudioDecoderConfig): void {
+//     decode(packet: AudioPacket): void {
 
-        this.decoder.configure(config);
-    }
+//         this.decoder.decode(packet);
 
-    decode(packet: AudioPacket): void {
+//     }
 
-        this.decoder.decode(packet);
+//     flush(): void {
 
-    }
+//         this.decoder.flush();
 
-    flush(): void {
+//     }
 
-        this.decoder.flush();
+//     reset(): void {
 
-    }
+//         this.decoder.reset();
+//     }
 
-    reset(): void {
+//     close(): void {
 
-        this.decoder.reset();
-    }
+//         this.decoder.close();
+//         this.removeAllListeners();
+//     }
 
-    close(): void {
-
-        this.decoder.close();
-        this.removeAllListeners();
-    }
-
-};
+// };

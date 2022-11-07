@@ -1,11 +1,20 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, reactive, ref, watchEffect } from 'vue';
-import { Connection } from '../../../packages/conn/src';
-import { Demuxer } from '../../../packages/demuxer/src';
-import { MessageReactive, UploadCustomRequestOptions, UploadFileInfo, useMessage } from 'naive-ui';
-import { ConnectionState, ConnectionEvent } from '../../../packages/conn/src/types';
-import { TimelineDataSeries, TimelineGraphView } from 'webrtc-internals';
-import { ArchiveOutline as ArchiveIcon } from '@vicons/ionicons5';
+import { onMounted, onUnmounted, reactive, ref, watchEffect } from "vue";
+import {
+  FileConnection,
+  getURLType,
+  HttpConnection,
+  WebSocketConnection,
+} from "../../../packages/conn/src";
+import { DemuxEvent, FlvDemuxer } from "../../../packages/demuxer/src";
+import { TimelineDataSeries, TimelineGraphView } from "webrtc-internals";
+import { ArchiveOutline as ArchiveIcon } from "@vicons/ionicons5";
+import { Connection } from "../../../packages/conn/src/base";
+import {
+  MessageReactive,
+  UploadCustomRequestOptions,
+  useMessage,
+} from "naive-ui";
 
 const message = useMessage();
 const url = ref("");
@@ -17,27 +26,27 @@ const removeMessage = () => {
   }
 };
 
-const conn = new Connection();
-conn.on(ConnectionEvent.Connecting, () => {
-  messageReactive = message.loading(ConnectionEvent.Connecting);
-});
-conn.on(ConnectionEvent.Reconnecting, () => {
-  messageReactive = message.loading(ConnectionEvent.Reconnecting);
-});
-conn.on(ConnectionState.CONNECTED, () => {
-  removeMessage();
-  message.success(ConnectionState.CONNECTED);
-});
+// const conn = new Connection();
+// conn.on(ConnectionEvent.Connecting, () => {
+//   messageReactive = message.loading(ConnectionEvent.Connecting);
+// });
+// conn.on(ConnectionEvent.Reconnecting, () => {
+//   messageReactive = message.loading(ConnectionEvent.Reconnecting);
+// });
+// conn.on(ConnectionState.CONNECTED, () => {
+//   removeMessage();
+//   message.success(ConnectionState.CONNECTED);
+// });
 
-conn.on(ConnectionState.DISCONNECTED, () => {
-  removeMessage();
-  message.error(ConnectionState.DISCONNECTED);
-});
+// conn.on(ConnectionState.DISCONNECTED, () => {
+//   removeMessage();
+//   message.error(ConnectionState.DISCONNECTED);
+// });
 
-conn.on(ConnectionState.RECONNECTED, () => {
-  removeMessage();
-  message.success(ConnectionState.RECONNECTED);
-});
+// conn.on(ConnectionState.RECONNECTED, () => {
+//   removeMessage();
+//   message.success(ConnectionState.RECONNECTED);
+// });
 const display = reactive({
   audioTS: 0,
   audioSize: 0,
@@ -47,35 +56,57 @@ const display = reactive({
 function readDelay(t: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, t));
 }
+let conn: Connection;
 async function connect(file?: File, options?: UploadCustomRequestOptions) {
   try {
-    console.log(`connect ${file} url ${url.value}`)
-    await conn.connect(url.value);
-    const demuxer = new Demuxer(conn);
-    demuxer.on(Demuxer.AUDIO_ENCODER_CONFIG_CHANGED, (data: Uint8Array) => {
-      message.info(Demuxer.AUDIO_ENCODER_CONFIG_CHANGED);
-    });
-    demuxer.on(Demuxer.VIDEO_ENCODER_CONFIG_CHANGED, (data: Uint8Array) => {
-      message.info(Demuxer.VIDEO_ENCODER_CONFIG_CHANGED);
-    });
-    demuxer.audioReadable.pipeTo(new WritableStream({
-      write(chunk: EncodedAudioChunkInit) {
-        display.audioTS = chunk.timestamp;
-        display.audioSize = chunk.data.byteLength;
-        if (file && options)
-          options.onProgress({ percent: 100 * conn.down.total / file.size });
-        return readDelay(20);
+    console.log(`connect ${file} url ${url.value}`);
+    if (file) {
+      conn = new FileConnection(file);
+      await conn.connect();
+    } else {
+      switch (getURLType(url.value)) {
+        case "ws":
+          conn = new WebSocketConnection(url.value);
+          break;
+        case "http":
+          conn = new HttpConnection(url.value);
+          break;
       }
-    }));
-    demuxer.videoReadable.pipeTo(new WritableStream({
-      write(chunk: EncodedVideoChunkInit) {
-        display.videoTS = chunk.timestamp;
-        display.videoSize = chunk.data.byteLength;
-        if (file && options)
-          options.onProgress({ percent: 100 * conn.down.total / file.size });
-        return readDelay(40);
-      }
-    }));
+      await conn.connect();
+    }
+    const demuxer = new FlvDemuxer(conn);
+    demuxer.on(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED, (data: Uint8Array) => {
+      message.info(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED);
+    });
+    demuxer.on(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED, (data: Uint8Array) => {
+      message.info(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED);
+    });
+    demuxer.audioReadable.pipeTo(
+      new WritableStream({
+        write(chunk: EncodedAudioChunkInit) {
+          display.audioTS = chunk.timestamp;
+          display.audioSize = chunk.data.byteLength;
+          if (file && options)
+            options.onProgress({
+              percent: (100 * conn.down.total) / file.size,
+            });
+          return readDelay(20);
+        },
+      })
+    );
+    demuxer.videoReadable.pipeTo(
+      new WritableStream({
+        write(chunk: EncodedVideoChunkInit) {
+          display.videoTS = chunk.timestamp;
+          display.videoSize = chunk.data.byteLength;
+          if (file && options)
+            options.onProgress({
+              percent: (100 * conn.down.total) / file.size,
+            });
+          return readDelay(40);
+        },
+      })
+    );
   } catch (e) {
     if (options) options.onFinish();
     removeMessage();
@@ -88,10 +119,12 @@ function close() {
 }
 const data = reactive({
   totalDown: 0,
-  bpsDown: 0
+  bpsDown: 0,
 });
 onMounted(() => {
-  const gv = new TimelineGraphView(document.getElementById('bps') as HTMLCanvasElement);
+  const gv = new TimelineGraphView(
+    document.getElementById("bps") as HTMLCanvasElement
+  );
   const series = new TimelineDataSeries();
   gv.addDataSeries(series);
   let id = setInterval(() => {
@@ -112,12 +145,13 @@ async function onUpload(options: UploadCustomRequestOptions) {
     connect(file, options);
   }
 }
-function onRemove(options: { file: UploadFileInfo, fileList: Array<UploadFileInfo>; }) {
+function onRemove(options: {
+  file: UploadFileInfo;
+  fileList: Array<UploadFileInfo>;
+}) {
   conn.close();
   return true;
 }
-
-
 </script>
 
 <template>
@@ -128,9 +162,7 @@ function onRemove(options: { file: UploadFileInfo, fileList: Array<UploadFileInf
           <archive-icon />
         </n-icon>
       </div>
-      <n-text style="font-size: 16px">
-        点击或者拖动文件到该区域来上传
-      </n-text>
+      <n-text style="font-size: 16px"> 点击或者拖动文件到该区域来上传 </n-text>
       <n-p depth="3" style="margin: 8px 0 0 0">
         支持上传的文件类型：<n-text>mp4,flv,ts,h264,h265</n-text>
       </n-p>
@@ -138,15 +170,18 @@ function onRemove(options: { file: UploadFileInfo, fileList: Array<UploadFileInf
   </n-upload>
   <n-space justify="end" :wrap-item="false">
     <div style="flex-grow: 1">
-      <n-input v-model:value="url" :input-props="{ type: 'url' }" placeholder="URL" />
+      <n-input
+        v-model:value="url"
+        :input-props="{ type: 'url' }"
+        placeholder="URL"
+      />
     </div>
     <n-button @click="connect">Connect</n-button>
     <n-button @click="close">Close</n-button>
   </n-space>
   <n-row>
     <n-col :span="12">
-      <n-statistic label="下行总量" :value="data.totalDown">
-      </n-statistic>
+      <n-statistic label="下行总量" :value="data.totalDown"> </n-statistic>
     </n-col>
     <n-col :span="12">
       <n-statistic label="下行bps">

@@ -14,6 +14,6 @@ npm i conn
 ## 使用
 
 ```ts
-import { Connection } from 'conn'
+import { WebSocketConnection } from 'jb-connection'
 
 ```

@@ -51,8 +51,10 @@ importers:
     specifiers:
       '@types/dom-webcodecs': ^0.1.2
       '@types/emscripten': ^1.39.6
+      afsm: ^2.2.5
       eventemitter3: ^4.0.7
     dependencies:
+      afsm: 2.2.5
       eventemitter3: 4.0.7
     devDependencies:
       '@types/dom-webcodecs': 0.1.4
@@ -350,6 +352,12 @@ packages:
 
   /afsm/2.2.4:
     resolution: {integrity: sha512-OwfYOevG2DIxf4BTl1pyvcDUgWUUBSKTFh4IuGudeN172xtu9u3fPPjewqgoSyb4Uozy+QDF1lrI23LMnIes2w==}
+    dependencies:
+      eventemitter3: 4.0.7
+    dev: false
+
+  /afsm/2.2.5:
+    resolution: {integrity: sha512-e/wqEXql36mf5AN1v9zDbhCHcjxm3hdtbFO0inMNxYol/hZbLQOszABan8N9IjNBFHCI4JWRo/oQZWxpGvuphg==}
     dependencies:
       eventemitter3: 4.0.7
     dev: false

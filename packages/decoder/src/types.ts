@@ -12,7 +12,7 @@ export type PixelType = 'I420';
 
 //视频解码器配置
 export type VideoDecoderConfig = {
-
+    codec: string; 
     videoType: VideoType,
     extraData?: BufferSource,
     avc?:{
@@ -62,9 +62,8 @@ export const enum VideoDecoderEvent {
 export interface VideoDecoderInterface  {
 
     initialize():Promise<void>;
-    state(): DecoderState;
     configure(config: VideoDecoderConfig): void;
-    decode(packet: VideoPacket): void;
+    decode(packet: EncodedVideoChunkInit): void;
     flush(): void;
     reset(): void;
     close(): void;
