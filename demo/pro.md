@@ -81,6 +81,10 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 - 支持定制化服务开发。
 
 
+## 电脑型号以及码率
+<img src="/public/configuration.png">
+
+
 ## wasm解码模式下默认work线程中发起Http-Flv、WS请求，减少主线程往worker线程传递数据，提升性能
 wasm解码模式下默认work线程中发起Http-Flv、WS请求，减少主线程往worker线程传递数据，提升性能
 
