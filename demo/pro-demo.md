@@ -43,6 +43,19 @@
 #### http
 [http://jessibuca.monibuca.com/pro/naked-flow-demo.html](http://jessibuca.monibuca.com/pro/naked-flow-demo.html)
 
+## TF卡流（录像流）
+#### https
+[https://jessibuca.com/pro/playback-demo.html](https://jessibuca.com/pro/playback-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/playback-demo.html](http://jessibuca.monibuca.com/pro/playback-demo.html)
+
+
+## 语音通讯
+#### https
+[https://jessibuca.com/pro/talk-demo.html](https://jessibuca.com/pro/talk-demo.html)
+#### http
+[http://jessibuca.monibuca.com/pro/talk-demo.html](http://jessibuca.monibuca.com/pro/talk-demo.html)
 
 
 ## simd demo
