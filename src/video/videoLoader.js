@@ -26,7 +26,7 @@ export default class VideoLoader extends CommonLoader {
             this.vwriter = this.trackGenerator.writable.getWriter();
         }
         this.$videoElement = $videoElement;
-
+        this.fixChromeVideoFlashBug();
         this.resize();
 
         const {proxy} = this.player.events;
@@ -62,6 +62,16 @@ export default class VideoLoader extends CommonLoader {
             this.vwriter = null;
         }
         this.player.debug.log('Video', 'destroy');
+    }
+
+    fixChromeVideoFlashBug(){
+        const browser = getBrowser();
+        const type = browser.type.toLowerCase();
+        if (type === 'chrome' || type === 'edge') {
+            const $container = this.player.$container;
+            $container.style.backdropFilter = 'blur(0px)';
+            $container.style.translateZ = '0';
+        }
     }
 
     play() {
