@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jessica talk demo</title>
+    <title>Jessica demo</title>
     <script src="./jessibuca-pro-demo.js"></script>
     <style>
         .root {
@@ -23,7 +23,7 @@
         }
 
         .container-shell:before {
-            content: "jessibuca talk demo player";
+            content: "jessibuca demo player";
             position: absolute;
             color: darkgray;
             top: 4px;
@@ -78,6 +78,11 @@
             background-position: top;
         }
 
+        .span-row {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
         @media (max-width: 720px) {
             #container {
                 width: 90vw;
@@ -108,6 +113,12 @@
                     </select>
                 </span>
             <span class="span-row">
+                    rtpSsrc
+                    <input style="width: 80px" type="text" value="0" id="talkRtpSsrc">
+                </span>
+        </div>
+        <div class="input">
+             <span class="span-row">
                     采样率
                     <select id="talkSampleRate">
                         <option value="16000" selected>16000</option>
@@ -123,6 +134,13 @@
                         <option value="8">8</option>
                     </select>
                     位
+                </span>
+           <span class="span-row">
+                    engine
+                    <select id="talkEngine">
+                        <option value="worklet" selected>worklet</option>
+                        <option value="script">script</option>
+                    </select>
                 </span>
         </div>
         <div class="input">
@@ -218,13 +236,15 @@
         const talkPacketType = document.getElementById('talkPacketType').value;
         const talkSampleRate = document.getElementById('talkSampleRate').value;
         const talkSampleBitsWidth = document.getElementById('talkSampleBitsWidth').value;
+        const talkRtpSsrc = document.getElementById('talkRtpSsrc').value;
         if (jessibuca && talkUrl) {
             jessibuca.startTalk(talkUrl, {
                 encType: talkEncType,
                 packetType: talkPacketType,
                 sampleBitsWidth: talkSampleBitsWidth,
                 sampleRate: talkSampleRate,
-                debug: true
+                debug: true,
+                rtpSsrc: talkRtpSsrc
             }).then(() => {
 
             }).catch((e) => {
@@ -247,8 +267,7 @@
             }).catch((e) => {
                 console.error('stop talk error', e);
             });
-        }
-        else {
+        } else {
             console.log('jessibuca is not ready');
         }
     }
@@ -262,8 +281,7 @@
             }).catch((e) => {
                 console.error('set talk volume error', e);
             });
-        }
-        else {
+        } else {
             console.log('jessibuca is not ready');
         }
     }
@@ -275,8 +293,7 @@
             }).catch((e) => {
                 console.error('get talk volume error', e);
             });
-        }
-        else {
+        } else {
             console.log('jessibuca is not ready');
         }
     }
