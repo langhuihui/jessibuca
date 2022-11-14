@@ -79,6 +79,43 @@ index.html文件
 ```
 
 
+### jessibuca.js decoder.js decoder.wasm文件想通过CDN加载
+
+因为默认情况下 decoder.js 是通过相对路径引入 decoder.wam 文件的。
+
+如果想引用CDN的地址，需要修改成CDN的绝对地址。
+
+所以如果想通过CDN加载，需要修改decoder.js文件
+
+需要配置`decoder` 参数为CDN绝对地址文件。
+
+```js
+{
+  decoder:'https://your-cdn.com/decoder.js'
+}
+```
+
+```js
+// 修改前 src/worker/index.js
+
+this.decoderWorker = new Worker(player._opt.decoder)
+
+// 修改后 src/worker/index.js
+const blob = new Blob([`importScripts("${player._opt.decoder}")`], {"type": 'application/javascript'});
+const blobUrl = window.URL.createObjectURL(blob);
+this.decoderWorker = new Worker(blobUrl);
+```
+
+```js
+// 修改前 src/decoder/decoder.js
+wasmBinaryFile = 'decoder.wasm';
+// 修改后 src/decoder/decoder.js
+wasmBinaryFile = 'https://cdn.com/decoder.wasm';
+```
+
+然后需要重新执行下 `npm run build` 命令 就可以了。
+
+
 ### 对于渲染元素
 
 #### wasm软解码
