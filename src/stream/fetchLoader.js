@@ -52,11 +52,21 @@ export default class FetchLoader extends Emitter {
                 ).catch((e) => {
                     demux.close();
                     const errorString = e.toString();
-                    this.abort();
                     // aborted a request 。
-                    if (errorString.indexOf(FETCH_ERROR.abortError) !== -1) {
+                    if (errorString.indexOf(FETCH_ERROR.abortError1) !== -1) {
                         return
                     }
+
+                    if (errorString.indexOf(FETCH_ERROR.abortError2) !== -1) {
+                        return;
+                    }
+
+                    if (e.name === FETCH_ERROR.abort) {
+                        return;
+                    }
+
+
+                    this.abort();
 
                     this.emit(EVENTS_ERROR.fetchError, e);
                     this.player.emit(EVENTS.error, EVENTS_ERROR.fetchError);
@@ -64,6 +74,10 @@ export default class FetchLoader extends Emitter {
             }
             fetchNext();
         }).catch((e) => {
+            if (e.name === 'AbortError') {
+                return;
+            }
+            demux.close();
             this.abort();
             this.emit(EVENTS_ERROR.fetchError, e)
             this.player.emit(EVENTS.error, EVENTS_ERROR.fetchError);

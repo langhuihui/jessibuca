@@ -318,7 +318,9 @@
 	  keyframeIsRequiredError: 'A key frame is required after configure() or flush()'
 	};
 	const FETCH_ERROR = {
-	  abortError: 'The user aborted a request'
+	  abortError1: 'The user aborted a request',
+	  abortError2: 'AbortError',
+	  abort: 'AbortError'
 	};
 
 	class Debug {
@@ -1567,6 +1569,7 @@
 	    }
 
 	    this.$videoElement = $videoElement;
+	    this.fixChromeVideoFlashBug();
 	    this.resize();
 	    const {
 	      proxy
@@ -1603,6 +1606,17 @@
 	    }
 
 	    this.player.debug.log('Video', 'destroy');
+	  }
+
+	  fixChromeVideoFlashBug() {
+	    const browser = getBrowser();
+	    const type = browser.type.toLowerCase();
+
+	    if (type === 'chrome' || type === 'edge') {
+	      const $container = this.player.$container;
+	      $container.style.backdropFilter = 'blur(0px)';
+	      $container.style.translateZ = '0';
+	    }
 	  }
 
 	  play() {
@@ -2116,13 +2130,21 @@
 	          }
 	        }).catch(e => {
 	          demux.close();
-	          const errorString = e.toString();
-	          this.abort(); // aborted a request 。
+	          const errorString = e.toString(); // aborted a request 。
 
-	          if (errorString.indexOf(FETCH_ERROR.abortError) !== -1) {
+	          if (errorString.indexOf(FETCH_ERROR.abortError1) !== -1) {
 	            return;
 	          }
 
+	          if (errorString.indexOf(FETCH_ERROR.abortError2) !== -1) {
+	            return;
+	          }
+
+	          if (e.name === FETCH_ERROR.abort) {
+	            return;
+	          }
+
+	          this.abort();
 	          this.emit(EVENTS_ERROR.fetchError, e);
 	          this.player.emit(EVENTS.error, EVENTS_ERROR.fetchError);
 	        });
@@ -2130,6 +2152,11 @@
 
 	      fetchNext();
 	    }).catch(e => {
+	      if (e.name === 'AbortError') {
+	        return;
+	      }
+
+	      demux.close();
 	      this.abort();
 	      this.emit(EVENTS_ERROR.fetchError, e);
 	      this.player.emit(EVENTS.error, EVENTS_ERROR.fetchError);

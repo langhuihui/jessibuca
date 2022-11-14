@@ -255,9 +255,6 @@ export const SCALE_MODE_TYPE = {
 }
 
 
-
-
-
 export const CANVAS_RENDER_TYPE = {
     webcodecs: 'webcodecs',
     webgl: 'webgl',
@@ -301,5 +298,7 @@ export const WCS_ERROR = {
 
 
 export const FETCH_ERROR = {
-    abortError: 'The user aborted a request'
+    abortError1: 'The user aborted a request',
+    abortError2: 'AbortError',
+    abort: 'AbortError'
 }
