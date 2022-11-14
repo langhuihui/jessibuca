@@ -96,7 +96,7 @@
     <div class="container-shell">
         <div id="container"></div>
         <div class="input">
-            <input type="text" value="" id="talkUrl">
+            <input type="text" value="ws://localhost:8080/" id="talkUrl">
         </div>
         <div class="input">
             <span class="span-row">
@@ -116,6 +116,12 @@
                     rtpSsrc
                     <input style="width: 80px" type="text" value="0" id="talkRtpSsrc">
                 </span>
+            <span class="span-row">
+                 <input
+                     id="testMicrphone"
+                     type="checkbox"
+                 /><span>测试麦克风(不会触发ws连接)</span>
+            </span>
         </div>
         <div class="input">
              <span class="span-row">
@@ -237,6 +243,7 @@
         const talkSampleRate = document.getElementById('talkSampleRate').value;
         const talkSampleBitsWidth = document.getElementById('talkSampleBitsWidth').value;
         const talkRtpSsrc = document.getElementById('talkRtpSsrc').value;
+        const talkTestMicrphone = document.getElementById('testMicrphone').checked;
         if (jessibuca && talkUrl) {
             jessibuca.startTalk(talkUrl, {
                 encType: talkEncType,
@@ -244,7 +251,8 @@
                 sampleBitsWidth: talkSampleBitsWidth,
                 sampleRate: talkSampleRate,
                 debug: true,
-                rtpSsrc: talkRtpSsrc
+                rtpSsrc: talkRtpSsrc,
+                testMicrophone: talkTestMicrphone === true || talkTestMicrphone === 'true',
             }).then(() => {
 
             }).catch((e) => {
