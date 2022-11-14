@@ -772,10 +772,18 @@ jessibuca.on("kBps", function (data) {
 
 渲染开始
 
+> 如果需要在start 之后调用截图方法，需要写一个延迟方法去执行。因为代码中无法感应到画面被渲染出来了。
+
 ```js
 
 jessibuca.on("start", function () {
     console.log('start render')
+
+    // 如果有截图需求。需要延迟一下，因为代码中无法感应到画面被渲染出来了。
+    // 1s 之后截图
+    setTimeout(function () {
+        jessibuca.screenshot('xxx')
+    }, 1 * 1000)
 })
 ```
 

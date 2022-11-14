@@ -133,6 +133,16 @@ wasmBinaryFile = 'https://cdn.com/decoder.wasm';
 
 > jessibuca pro 支持 `video` 标签渲染
 
+
+##### 如果网页中存在大量消耗webgl性能的，会导致播放器不够webgl资源，导致canvas渲染挂掉，出现一个`哭脸表情`的表情。
+
+消耗webgl性能的，比如说，3d背景，地图啥的。
+
+解决方案：
+1. 使用video标签渲染。
+2. 网页中移除掉些消耗webgl性能的东西。
+
+
 ### 关于延迟丢帧
 
 #### 开源版本
