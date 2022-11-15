@@ -574,9 +574,18 @@ https://github.com/bosscheng/jessibuca-vue-demo/blob/v3/preview/preview.js
 
 ### chrome无法访问更私有的地址
 
+触发了 Chrome 安全策略 - 私有网络控制（CORS-RFC1918）
+
 升级chrome 91后，默认无法从开放的地址往更私有的地址访问。
 
 比如从公网访问web，播放内网的流媒体地址。
+
+|外网访问内网| http | https |
+| --- | --- | --- |
+|http| Chorme 94禁止| Chorme 94禁止|
+|https| 安全内容加载不安全内容，禁止| 取跨域策略|
+
+
 
 ```shell
 
@@ -587,6 +596,10 @@ Access to fetch at 'http://192.168.0.2:8000/live/test.flv' from origin 'http://j
 > chrome://flags/#block-insecure-private-network-requests
 
 将这项设置为关闭
+
+> 将Block insecure private network requests配置禁用掉（Disable）。但是一定要注意，修改了配置后必须点击Chrome此时在右下角出现的“重启”（Restart）按钮才能生效。自己主动关闭浏览器全部页面再打开是不会触发Chrome更新配置的。
+
+
 
 
 ### 关于延迟
