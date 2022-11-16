@@ -1,6 +1,6 @@
 import Emitter from "../utils/emitter";
 import {CONTROL_HEIGHT, EVENTS, SCREENSHOT_TYPE, VIDEO_ENC_TYPE} from "../constant";
-import {dataURLToFile, downloadImg, isMobile, now} from "../utils";
+import {dataURLToFile, downloadImg, getBrowser, isMobile, now} from "../utils";
 import CommonLoader from "./commonLoader";
 import saveAs from "../utils/file-save";
 
