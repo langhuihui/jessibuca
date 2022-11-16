@@ -3,10 +3,10 @@ import {
   VideoDecoderInterface,
   VideoDecoderEvent,
 } from "./types";
-import { ChangeState, FSM } from "afsm";
+import { ChangeState, FSM, Includes } from "afsm";
 export class VideoDecoderHard extends FSM implements VideoDecoderInterface {
   decoder!: VideoDecoder;
-  @ChangeState("uninitialized", "initialized")
+  @ChangeState(FSM.INIT, "initialized")
   async initialize() {
     this.decoder = new VideoDecoder({
       output: (frame) => {
@@ -22,6 +22,7 @@ export class VideoDecoderHard extends FSM implements VideoDecoderInterface {
       description: config.extraData,
     });
   }
+  @Includes("configured")
   decode(packet: EncodedVideoChunkInit): void {
     this.decoder.decode(new EncodedVideoChunk(packet));
   }

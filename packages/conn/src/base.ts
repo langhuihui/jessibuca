@@ -55,7 +55,7 @@ export abstract class Connection extends FSM {
   underlyingSink: UnderlyingSink<Uint8Array> = {
     write: async (chunk) => {
       this.down.add(chunk.length);
-      await this.oput?.write(chunk);
+      return this.oput?.write(chunk);
     },
   };
   abortCtrl?: AbortController;

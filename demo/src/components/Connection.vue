@@ -1,16 +1,36 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, onUnmounted, reactive, ref } from "vue";
 import {
   FileConnection,
   getURLType,
   HttpConnection,
   WebSocketConnection,
 } from "../../../packages/conn/src";
-import { MessageReactive, UploadFileInfo, useMessage } from "naive-ui";
+import {
+  MessageReactive,
+  NButton,
+  NCol,
+  NIcon,
+  NInput,
+  NP,
+  NRow,
+  NSpace,
+  NStatistic,
+  NText,
+  NUpload,
+  NUploadDragger,
+  UploadCustomRequestOptions,
+  UploadFileInfo,
+  useMessage,
+} from "naive-ui";
 
 import { TimelineDataSeries, TimelineGraphView } from "webrtc-internals";
 import { ArchiveOutline as ArchiveIcon } from "@vicons/ionicons5";
 import { Connection } from "../../../packages/conn/src/base";
+import {
+  ConnectionEvent,
+  ConnectionState,
+} from "../../../packages/conn/src/types";
 
 const message = useMessage();
 const url = ref("");
@@ -22,44 +42,46 @@ const removeMessage = () => {
   }
 };
 let conn: Connection;
-// const conn = new Connection();
-// conn.on(ConnectionEvent.Connecting, () => {
-//   messageReactive = message.loading(ConnectionEvent.Connecting);
-// });
-// conn.on(ConnectionEvent.Reconnecting, () => {
-//   messageReactive = message.loading(ConnectionEvent.Reconnecting);
-// });
-// conn.on(ConnectionState.CONNECTED, () => {
-//   removeMessage();
-//   message.success(ConnectionState.CONNECTED);
-// });
 
-// conn.on(ConnectionState.DISCONNECTED, () => {
-//   removeMessage();
-//   message.error(ConnectionState.DISCONNECTED);
-// });
-
-// conn.on(ConnectionState.RECONNECTED, () => {
-//   removeMessage();
-//   message.success(ConnectionState.RECONNECTED);
-// });
 async function connect(file?: File) {
   try {
-    switch (getURLType(url.value)) {
-      case "ws":
-        conn = new WebSocketConnection(url.value);
-        break;
-      case "http":
-        conn = new HttpConnection(url.value);
-        break;
-    }
+    if (file) conn = new FileConnection(file);
+    else
+      switch (getURLType(url.value)) {
+        case "ws":
+          conn = new WebSocketConnection(url.value);
+          break;
+        case "http":
+          conn = new HttpConnection(url.value);
+          break;
+      }
+    conn.on(ConnectionEvent.Connecting, () => {
+      messageReactive = message.loading(ConnectionEvent.Connecting);
+    });
+    conn.on(ConnectionEvent.Reconnecting, () => {
+      messageReactive = message.loading(ConnectionEvent.Reconnecting);
+    });
+    conn.on(ConnectionState.CONNECTED, () => {
+      removeMessage();
+      message.success(ConnectionState.CONNECTED);
+    });
+    conn.on(ConnectionState.DISCONNECTED, () => {
+      removeMessage();
+      message.error(ConnectionState.DISCONNECTED);
+    });
+    conn.on(ConnectionState.RECONNECTED, () => {
+      removeMessage();
+      message.success(ConnectionState.RECONNECTED);
+    });
     await conn.connect();
-    while (conn.oput) {
-      if (conn.oput.buffer) await conn.read(conn.oput.buffer!.length);
-      else {
-        await new Promise((resolve) => {
-          setTimeout(resolve, 1000);
-        });
+    if (!file) {
+      while (conn.oput) {
+        if (conn.oput.buffer) await conn.read(conn.oput.buffer!.length);
+        else {
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+        }
       }
     }
   } catch (e) {
@@ -100,8 +122,7 @@ async function onUpload(options: UploadCustomRequestOptions) {
   let read = 0;
   if (file && totalSize) {
     try {
-      conn = new FileConnection(file);
-      await conn.connect();
+      await connect(file);
       while (conn.oput) {
         read += 100;
         await conn.read(100);
@@ -149,7 +170,7 @@ function onRemove(options: {
         placeholder="URL"
       />
     </div>
-    <n-button @click="connect">Connect</n-button>
+    <n-button @click="connect()">Connect</n-button>
     <n-button @click="close">Close</n-button>
   </n-space>
   <n-row>

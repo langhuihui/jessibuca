@@ -12,9 +12,25 @@ import { ArchiveOutline as ArchiveIcon } from "@vicons/ionicons5";
 import { Connection } from "../../../packages/conn/src/base";
 import {
   MessageReactive,
+  NButton,
+  NCol,
+  NIcon,
+  NInput,
+  NP,
+  NRow,
+  NSpace,
+  NStatistic,
+  NText,
+  NUpload,
+  NUploadDragger,
   UploadCustomRequestOptions,
+  UploadFileInfo,
   useMessage,
 } from "naive-ui";
+import {
+  ConnectionEvent,
+  ConnectionState,
+} from "../../../packages/conn/src/types";
 
 const message = useMessage();
 const url = ref("");
@@ -26,27 +42,6 @@ const removeMessage = () => {
   }
 };
 
-// const conn = new Connection();
-// conn.on(ConnectionEvent.Connecting, () => {
-//   messageReactive = message.loading(ConnectionEvent.Connecting);
-// });
-// conn.on(ConnectionEvent.Reconnecting, () => {
-//   messageReactive = message.loading(ConnectionEvent.Reconnecting);
-// });
-// conn.on(ConnectionState.CONNECTED, () => {
-//   removeMessage();
-//   message.success(ConnectionState.CONNECTED);
-// });
-
-// conn.on(ConnectionState.DISCONNECTED, () => {
-//   removeMessage();
-//   message.error(ConnectionState.DISCONNECTED);
-// });
-
-// conn.on(ConnectionState.RECONNECTED, () => {
-//   removeMessage();
-//   message.success(ConnectionState.RECONNECTED);
-// });
 const display = reactive({
   audioTS: 0,
   audioSize: 0,
@@ -62,7 +57,6 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
     console.log(`connect ${file} url ${url.value}`);
     if (file) {
       conn = new FileConnection(file);
-      await conn.connect();
     } else {
       switch (getURLType(url.value)) {
         case "ws":
@@ -72,8 +66,28 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
           conn = new HttpConnection(url.value);
           break;
       }
-      await conn.connect();
     }
+    conn.on(ConnectionEvent.Connecting, () => {
+      messageReactive = message.loading(ConnectionEvent.Connecting);
+    });
+    conn.on(ConnectionEvent.Reconnecting, () => {
+      messageReactive = message.loading(ConnectionEvent.Reconnecting);
+    });
+    conn.on(ConnectionState.CONNECTED, () => {
+      removeMessage();
+      message.success(ConnectionState.CONNECTED);
+    });
+
+    conn.on(ConnectionState.DISCONNECTED, () => {
+      removeMessage();
+      message.error(ConnectionState.DISCONNECTED);
+    });
+
+    conn.on(ConnectionState.RECONNECTED, () => {
+      removeMessage();
+      message.success(ConnectionState.RECONNECTED);
+    });
+    await conn.connect();
     const demuxer = new FlvDemuxer(conn);
     demuxer.on(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED, (data: Uint8Array) => {
       message.info(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED);
@@ -128,6 +142,7 @@ onMounted(() => {
   const series = new TimelineDataSeries();
   gv.addDataSeries(series);
   let id = setInterval(() => {
+    if (!conn) return;
     data.totalDown = conn.down.total;
     data.bpsDown = conn.down.bps;
     series.addPoint(Date.now(), conn.down.bps);
@@ -140,7 +155,6 @@ onMounted(() => {
 async function onUpload(options: UploadCustomRequestOptions) {
   const file = options.file.file;
   const totalSize = file?.size;
-  let read = 0;
   if (file && totalSize) {
     connect(file, options);
   }
@@ -176,7 +190,7 @@ function onRemove(options: {
         placeholder="URL"
       />
     </div>
-    <n-button @click="connect">Connect</n-button>
+    <n-button @click="connect()">Connect</n-button>
     <n-button @click="close">Close</n-button>
   </n-space>
   <n-row>

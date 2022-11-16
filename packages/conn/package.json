@@ -1,6 +1,6 @@
 {
   "name": "jv4-connection",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "type": "module",
   "main": "src/index.ts",
@@ -13,7 +13,7 @@
   "dependencies": {
     "afsm": "^2.2.4",
     "eventemitter3": "^4.0.7",
-    "oput": "^1.2.0",
+    "oput": "^1.2.2",
     "streamrx": "^0.0.3"
   }
 }

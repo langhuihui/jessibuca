@@ -1,167 +1,108 @@
-import EventEmitter from 'eventemitter3';
-import { DecoderState, AudioDecoderConfig, AudioPacket, AudioDecoderInterface, AudioCodecInfo, AudioDecoderEvent, AudioFrame, ErrorInfo } from './types';
-import CreateModule from '../wasm/types/audiodec';
+import {
+  AudioDecoderConfig,
+  AudioDecoderInterface,
+  AudioCodecInfo,
+  AudioDecoderEvent,
+  AudioFrame,
+  ErrorInfo,
+} from "./types";
+import CreateModule from "../wasm/types/audiodec";
+import { ChangeState, FSM, Includes } from "afsm";
 
-export class AudioDecoderSoft extends EventEmitter implements AudioDecoderInterface {
+export class AudioDecoderSoft extends FSM implements AudioDecoderInterface {
+  decoder: any;
+  config?: AudioDecoderConfig;
+  module?: any;
 
-    decoderState: DecoderState;
-    decoder: any;
-    config?: AudioDecoderConfig;
-    module?: any;
+  sampleRate = 0;
+  channels = 0;
 
-    sampleRate: number;
-    channels: number;
+  @ChangeState(FSM.INIT, "initialized")
+  initialize(): Promise<void> {
+    return new Promise((resolve) => {
+      const opts: any = {};
+      opts.print = (text: string) => console.log(text);
+      opts.printErr = (text: string) => console.log(`[JS] ERROR: ${text}`);
+      opts.onAbort = () => console.log("[JS] FATAL: WASM ABORTED");
+      opts.postRun = (m: any) => {
+        this.module = m;
+        this.decoder = new this.module.AudioDecoder(this);
+        resolve();
+      };
+      console.log(`audio soft decoder initialize call`);
+      CreateModule(opts);
+    });
+  }
+  @ChangeState("initialized", "configured")
+  configure(config: AudioDecoderConfig): void {
+    this.config = config;
+    this.decoder.setCodec(this.config.codec, this.config.extraData);
+  }
+  @Includes("configured")
+  decode(packet: EncodedAudioChunkInit): void {
+    this.decoder.decode(packet.data, packet.timestamp);
+  }
 
+  flush(): void {}
+  @ChangeState("configured", "initialized")
+  reset(): void {
+    this.config = undefined;
+    if (this.decoder) {
+      this.decoder.clear();
+    }
+  }
+  @ChangeState([], "closed")
+  close(): void {
+    this.removeAllListeners();
+    if (this.decoder) {
+      this.decoder.clear();
+      this.decoder.delete();
+    }
+  }
 
-    constructor() {
+  // wasm callback function
+  audioInfo(sampleRate: number, channels: number): void {
+    this.sampleRate = sampleRate;
+    this.channels = channels;
 
-        super();
-        this.decoderState = 'uninitialized';
-        this.sampleRate = 0;
-        this.channels = 0;
-
+    let audioCodeInfo: AudioCodecInfo = {
+      sampleRate,
+      channels,
+      depth: 16,
     };
 
-    initialize(): Promise<void>{
+    this.emit(AudioDecoderEvent.AudioCodecInfo, audioCodeInfo);
+  }
 
-        return new Promise(resolve => {
-
-            const opts: any = {};
-            opts.print = ((text: string) => console.log(text));
-            opts.printErr = ((text: string) => console.log(`[JS] ERROR: ${text}`));
-            opts.onAbort = (() => console.log("[JS] FATAL: WASM ABORTED"));
-            opts.postRun = ((m: any) => {
-
-                this.module = m;
-         
-                this.decoder = new this.module.AudioDecoder(this);
-                this.decoderState = 'initialized';
-
-                resolve();
-
-            })
-
-            console.log(`audio soft decoder initialize call`);
-    
-            CreateModule(opts);
-
-        })
-
+  pcmData(pcmDataArray: number, samples: number, pts: number): void {
+    if (!this.module) {
+      return;
     }
 
-    state(): DecoderState {
+    let pcmDatas: Float32Array[] = [];
 
-        return this.decoderState;
-
+    for (let i = 0; i < this.channels; i++) {
+      let fp = this.module.HEAPU32[(pcmDataArray >> 2) + i] >> 2;
+      pcmDatas.push(
+        Float32Array.of(...this.module.HEAPF32.subarray(fp, fp + samples))
+      );
     }
 
-    configure(config: AudioDecoderConfig): void {
+    let aFrame: AudioFrame = {
+      datas: pcmDatas,
+      sampleNum: samples,
+      channles: this.channels,
+      pts: pts,
+    };
 
-        if (this.decoderState !== 'initialized') {
+    this.emit(AudioDecoderEvent.AudioFrame, aFrame);
+  }
 
-            console.warn(`the decoder not initialized`);
-            return;
-        }
+  errorInfo(errormsg: string): void {
+    let err: ErrorInfo = {
+      errMsg: errormsg,
+    };
 
-        this.config = config;
-
-        this.decoder.setCodec(this.config.audioType, this.config.extraData);
-        this.decoderState = 'configured';
-
-    }
-    decode(packet: AudioPacket): void {
-
-        if (this.decoderState !== 'configured') {
-
-            console.warn(`the decoder not configured`);
-            return;
-        }
-
-        this.decoder.decode(packet.data,  packet.pts);
-
-    }
-
-    flush(): void {
-
-    }
-
-    reset(): void {
-
-        if (this.decoderState === 'uninitialized' || this.decoderState === 'closed') {
-
-            return;
-        }
-
-        this.config = undefined;
-        if (this.decoder) {
-            this.decoder.clear();
-        }
-        this.decoderState = 'initialized';
-
-    }
-
-    close(): void {
-
-        this.removeAllListeners();
-
-        if (this.decoder) {
-            this.decoder.clear();
-            this.decoder.delete();
-        }
-
-        this.decoderState = 'closed';
-    }
-
-    // wasm callback function
-    audioInfo(sampleRate: number, channels: number): void {
-
-        this.sampleRate = sampleRate;
-        this.channels = channels;
-
-        let audioCodeInfo : AudioCodecInfo = {
-            sampleRate,
-            channels,
-            depth:16
-        };
-
-        this.emit(AudioDecoderEvent.AudioCodecInfo, audioCodeInfo);
-        
-    }
-
-
-    pcmData(pcmDataArray: number, samples: number, pts: number): void {
-
-         if (!this.module) {
-
-            return;
-         }
-
-         let pcmDatas: Float32Array[] = [];
-
-         for (let i = 0; i < this.channels; i++) {
-             let fp = this.module.HEAPU32[(pcmDataArray >> 2) + i] >> 2;
-             pcmDatas.push(Float32Array.of(...this.module.HEAPF32.subarray(fp, fp + samples)));
-         }
-
-         let aFrame: AudioFrame = {
-            datas: pcmDatas,
-            sampleNum: samples,
-            channles: this.channels,
-            pts: pts,
-        }
-
-        this.emit(AudioDecoderEvent.AudioFrame, aFrame);
-
-    }
-
-    errorInfo(errormsg: string): void {
-
-        let err : ErrorInfo = {
-            errMsg: errormsg
-        };
-
-        this.emit(AudioDecoderEvent.Error, err);
-    }
-
-
-};
+    this.emit(AudioDecoderEvent.Error, err);
+  }
+}

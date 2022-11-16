@@ -39,12 +39,12 @@ importers:
     specifiers:
       afsm: ^2.2.4
       eventemitter3: ^4.0.7
-      oput: ^1.2.0
+      oput: ^1.2.2
       streamrx: ^0.0.3
     dependencies:
       afsm: 2.2.4
       eventemitter3: 4.0.7
-      oput: 1.2.0
+      oput: 1.2.2
       streamrx: 0.0.3
 
   packages/decoder:
@@ -848,8 +848,8 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
-  /oput/1.2.0:
-    resolution: {integrity: sha512-4iw1VNxjguXPNcY0xJRJFXLWaykF7jTxS2mkLZGMyNISP9EXbreWmYY30oIZg/JnTjDhauFoYa57eL7itqydiw==}
+  /oput/1.2.2:
+    resolution: {integrity: sha512-iuKvdOvLizX0hRXeJmhvhxL09U6TJ81XbHBYh/wNJhrTyhNfUX/G+pQPfX6BqVJMDbuppMeXILK2cAt+s4m5HA==}
     dev: false
 
   /path-parse/1.0.7:

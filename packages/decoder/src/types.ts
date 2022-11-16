@@ -7,9 +7,6 @@ export type VideoDecoderType = 'soft' | 'soft-simd' | 'hard' | 'auto';
 //视频压缩格式
 export type  VideoType = 'avc' | 'hevc' | 'unknow';
 
-//像素格式
-export type PixelType = 'I420';
-
 //视频解码器配置
 export type VideoDecoderConfig = {
     codec: string; 
@@ -21,8 +18,7 @@ export type VideoDecoderConfig = {
     hevc?:{
         format: "hvcc" | "annexb";
     }
-    outPixelType?: PixelType,
-
+    outPixelType?: VideoPixelFormat,
 };
 
 export interface VideoCodecInfo {
@@ -41,7 +37,7 @@ export interface VideoPacket {
 
 export interface JVideoFrame {
 
-    pixelType: PixelType,
+    pixelType: VideoPixelFormat,
     data: Uint8Array,
     width: number,
     height: number,
@@ -70,19 +66,14 @@ export interface VideoDecoderInterface  {
 
 };
 
-//audio 参数
-export type AudioDecoderType = 'soft' | 'hard' | 'auto';
-
 //声音压缩格式
-export type AuidoType  =  'pcma' | 'pcmu' | 'aac' | 'opus' | 'unknow';
+export type AudioCodec  =  'pcma' | 'pcmu' | 'aac' | 'opus' | 'unknow' | string;
 
-export type SampleType = 'f32-planar';
 
 export interface AudioDecoderConfig  {
-
-    audioType: AuidoType,
+    codec: AudioCodec,
     extraData?: BufferSource,
-    outSampleType?: SampleType
+    outSampleType?: AudioSampleFormat
 }
 
 export interface AudioCodecInfo {
@@ -96,12 +87,6 @@ export interface AudioCodecInfo {
 
 }
 
-export interface AudioPacket {
-
-    data: BufferSource,
-    pts: number
-
-}
 
 export interface AudioFrame {
 
@@ -119,13 +104,10 @@ export const enum AudioDecoderEvent {
 }
 
 export interface AudioDecoderInterface {
-
-    state(): DecoderState;
     initialize():Promise<void>;
     configure(config: AudioDecoderConfig): void;
-    decode(packet: AudioPacket): void;
+    decode(packet: EncodedAudioChunkInit): void;
     flush(): void;
     reset(): void;
     close(): void;
-
 };

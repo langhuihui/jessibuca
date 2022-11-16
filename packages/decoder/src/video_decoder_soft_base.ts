@@ -69,7 +69,7 @@ export class VideoDecoderSoftBase extends EventEmitter implements VideoDecoderIn
         this.decoderState = 'configured';
 
     }
-    decode(packet: VideoPacket): void {
+    decode(packet: EncodedVideoChunkInit): void {
 
         if (this.decoderState !== 'configured') {
 
@@ -77,7 +77,7 @@ export class VideoDecoderSoftBase extends EventEmitter implements VideoDecoderIn
             return;
         }
 
-        this.decoder.decode(packet.data, packet.keyFrame, packet.pts);
+        this.decoder.decode(packet.data, packet.type == 'key', packet.timestamp);
 
     }
 

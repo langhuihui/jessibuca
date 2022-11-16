@@ -3,6 +3,17 @@ import { onMounted, onUnmounted, reactive, ref, watchEffect } from "vue";
 import { DemuxEvent, FlvDemuxer } from "../../../packages/demuxer/src";
 import {
   MessageReactive,
+  NButton,
+  NCol,
+  NIcon,
+  NInput,
+  NP,
+  NRow,
+  NSpace,
+  NStatistic,
+  NText,
+  NUpload,
+  NUploadDragger,
   UploadCustomRequestOptions,
   UploadFileInfo,
   useMessage,
@@ -13,20 +24,28 @@ import {
 } from "../../../packages/conn/src/types";
 import { TimelineDataSeries, TimelineGraphView } from "webrtc-internals";
 import { ArchiveOutline as ArchiveIcon } from "@vicons/ionicons5";
-import { VideoDecoder, AudioDecoder } from "../../../packages/decoder/src";
 import {
-  VideoDecoderConfig,
   AudioDecoderConfig,
   VideoDecoderEvent,
   AudioDecoderEvent,
   ErrorInfo,
   VideoCodecInfo,
   AudioCodecInfo,
-  VideoFrame,
   AudioFrame,
-  VideoPacket,
   AudioPacket,
 } from "../../../packages/decoder/src/types";
+import {
+  FileConnection,
+  getURLType,
+  WebSocketConnection,
+  HttpConnection,
+} from "../../../packages/conn/src";
+import {
+  VideoDecoderHard,
+  AudioDecoderHard,
+  AudioDecoderSoft,
+} from "../../../packages/decoder/src";
+import { Connection } from "../../../packages/conn/src/base";
 
 const message = useMessage();
 const url = ref("");
@@ -38,27 +57,8 @@ const removeMessage = () => {
   }
 };
 
-const conn: Connecting;
-// conn.on(ConnectionEvent.Connecting, () => {
-//   messageReactive = message.loading(ConnectionEvent.Connecting);
-// });
-// conn.on(ConnectionEvent.Reconnecting, () => {
-//   messageReactive = message.loading(ConnectionEvent.Reconnecting);
-// });
-// conn.on(ConnectionState.CONNECTED, () => {
-//   removeMessage();
-//   message.success(ConnectionState.CONNECTED);
-// });
+let conn: Connection;
 
-// conn.on(ConnectionState.DISCONNECTED, () => {
-//   removeMessage();
-//   message.error(ConnectionState.DISCONNECTED);
-// });
-
-// conn.on(ConnectionState.RECONNECTED, () => {
-//   removeMessage();
-//   message.success(ConnectionState.RECONNECTED);
-// });
 const display = reactive({
   audioTS: 0,
   audioSize: 0,
@@ -78,47 +78,76 @@ function readDelay(t: number): Promise<void> {
 }
 async function connect(file?: File, options?: UploadCustomRequestOptions) {
   try {
-    if (url.value === "") {
-      await conn.connect(file);
+    console.log(`connect ${file} url ${url.value}`);
+    if (file) {
+      conn = new FileConnection(file);
     } else {
-      await conn.connect(url.value);
+      switch (getURLType(url.value)) {
+        case "ws":
+          conn = new WebSocketConnection(url.value);
+          break;
+        case "http":
+          conn = new HttpConnection(url.value);
+          break;
+      }
     }
+    conn.on(ConnectionEvent.Connecting, () => {
+      messageReactive = message.loading(ConnectionEvent.Connecting);
+    });
+    conn.on(ConnectionEvent.Reconnecting, () => {
+      messageReactive = message.loading(ConnectionEvent.Reconnecting);
+    });
+    conn.on(ConnectionState.CONNECTED, () => {
+      removeMessage();
+      message.success(ConnectionState.CONNECTED);
+    });
 
-    const videoDecoder = new VideoDecoder("soft-simd");
+    conn.on(ConnectionState.DISCONNECTED, () => {
+      removeMessage();
+      message.error(ConnectionState.DISCONNECTED);
+    });
+
+    conn.on(ConnectionState.RECONNECTED, () => {
+      removeMessage();
+      message.success(ConnectionState.RECONNECTED);
+    });
+    await conn.connect();
+    const videoDecoder = new VideoDecoderHard();
     await videoDecoder.initialize();
 
-    const audioDecoder = new AudioDecoder("soft");
+    const audioDecoder = new AudioDecoderSoft();
     await audioDecoder.initialize();
 
     const demuxer = new FlvDemuxer(conn);
 
     demuxer.on(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED, (data: Uint8Array) => {
       message.info(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED);
-
-      let aconfig: AudioDecoderConfig = {
-        audioType: demuxer.audioEncoderConfig.codec,
+      const aconfig: AudioDecoderConfig = {
+        codec: demuxer.audioEncoderConfig!.codec,
         extraData: data,
         outSampleType: "f32-planar",
       };
-
       audioDecoder.configure(aconfig);
     });
     demuxer.on(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED, (data: Uint8Array) => {
       message.info(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED);
-
-      let vconfig: VideoDecoderConfig = {
-        videoType: demuxer.videoEncoderConfig.codec === "h264" ? "avc" : "hevc",
-        extraData: data,
-        outPixelType: "I420",
-      };
-
-      if (demuxer.videoEncoderConfig.codec === "h264") {
-        vconfig.avc = { format: "avcc" };
-      } else {
-        vconfig.hevc = { format: "hvcc" };
+      switch (demuxer.videoEncoderConfig!.codec) {
+        case "avc":
+          videoDecoder.configure({
+            codec: "avc1.42001f",
+            extraData: data,
+            videoType: "avc",
+            avc: { format: "avcc" },
+          });
+          break;
+        case "hevc":
+          videoDecoder.configure({
+            codec: "hvc1.1.6.L0.12.34.56.78.9A.BC",
+            extraData: data,
+            videoType: "hevc",
+            hevc: { format: "hvcc" },
+          });
       }
-
-      videoDecoder.configure(vconfig);
     });
     demuxer.audioReadable.pipeTo(
       new WritableStream({
@@ -148,13 +177,7 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
 
           // console.log(`JS Chunk ${chunk.data.byteLength}  ${chunk.data[5]} ${chunk.data[6]} ${chunk.data[7]} ${chunk.data[8]} ${chunk.data[9]}`)
 
-          let packet: VideoPacket = {
-            data: chunk.data,
-            keyFrame: chunk.type === "key" ? true : false,
-            pts: chunk.timestamp,
-          };
-
-          videoDecoder.decode(packet);
+          videoDecoder.decode(chunk);
 
           if (file && options)
             options.onProgress({

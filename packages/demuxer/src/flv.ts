@@ -10,14 +10,15 @@ export interface FlvReader {
 }
 export class FlvDemuxer extends BaseDemuxer {
   header?: Uint8Array;
-  reader?: ReadableStreamDefaultReader<FlvTag>;
-  demux() {
+  async readTag(): Promise<{
+    type: number;
+    data: Uint8Array;
+    timestamp: number;
+  }> {
     const t = new Uint8Array(15); //复用15个字节,前面4个字节是上一个tag的长度，跳过
     const tmp8 = new Uint8Array(4);
     const dv = new DataView(tmp8.buffer);
-    const readTag = async (
-      controller: ReadableStreamDefaultController<FlvTag>
-    ) => {
+    this.readTag = async () => {
       await this.source.read(t);
       const type = t[4]; //tag类型，8是音频，9是视频，18是script
       tmp8[0] = 0; //首位置空，上一次读取可能会有残留数据
@@ -30,16 +31,13 @@ export class FlvDemuxer extends BaseDemuxer {
         tmp8[0] = t[11]; //最高位
         timestamp = dv.getUint32(0);
       }
-      return this.source
-        .read(length)
-        .then((data) => {
-          controller.enqueue({ type, data: data.slice(), timestamp });
-        })
-        .catch((err) => controller.error(err));
+      const data = await this.source.read(length);
+      return { type, data: data.slice(), timestamp };
     };
     console.time("flv");
-    this.source.read(9).then((data) => {
+    await this.source.read(9).then((data) => {
       this.header = data;
+      console.log(data)
       if (
         data[0] != "F".charCodeAt(0) ||
         data[1] != "L".charCodeAt(0) ||
@@ -48,16 +46,11 @@ export class FlvDemuxer extends BaseDemuxer {
         throw new Error("not flv");
       }
       console.timeEnd("flv");
-      this.reader = new ReadableStream<FlvTag>({
-        start: async (controller) => {
-          return readTag(controller);
-        },
-        pull: readTag,
-      }).getReader();
     });
+    return this.readTag();
   }
   async pull(): Promise<void> {
-    const { value, done } = await this.reader!.read();
+    const value = await this.readTag();
     if (value) {
       switch (value.type) {
         case 8:
@@ -95,7 +88,7 @@ export class FlvDemuxer extends BaseDemuxer {
           if (!this.videoEncoderConfig) {
             this.videoEncoderConfig = {
               codec:
-                { 7: "h264", 12: "h265" }[value.data[0] & 0xf] || "unknown",
+                { 7: "avc", 12: "hevc" }[value.data[0] & 0xf] || "unknown",
               width: 0,
               height: 0,
             };

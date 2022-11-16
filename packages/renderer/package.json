@@ -1,8 +1,9 @@
 {
-  "name": "renderer",
+  "name": "jv4-renderer",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "type": "module",
+  "main": "src/index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
