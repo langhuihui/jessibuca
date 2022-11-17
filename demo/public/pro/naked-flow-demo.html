@@ -91,6 +91,23 @@
     <div class="container-shell">
         <div id="container"></div>
         <div class="input">
+            <div><input
+                type="checkbox"
+                checked
+                id="useMSE"
+            /><span>MediaSource</span>
+                <input
+                    type="checkbox"
+                    id="useWCS"
+                /><span>Webcodec</span>
+                <input
+                    type="checkbox"
+                    id="useSIMD"
+                /><span>SIMD</span>
+            </div>
+
+        </div>
+        <div class="input">
             <div>输入URL：</div>
             <input
                 autocomplete="on"
@@ -102,7 +119,7 @@
         </div>
         <div class="input" style="line-height: 30px">
             <button id="destroy">销毁</button>
-<!--            <button id="downloadNakedFlow">下载H265</button>-->
+            <!--            <button id="downloadNakedFlow">下载H265</button>-->
         </div>
     </div>
 </div>
@@ -114,6 +131,9 @@
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
     var $downloadNakedFlow = document.getElementById('downloadNakedFlow');
+    var $useMSE = document.getElementById('useMSE');
+    var $useSIMD = document.getElementById('useSIMD');
+    var $useWCS = document.getElementById('useWCS');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -127,10 +147,11 @@
             text: "",
             loadingText: "加载中",
             debug: true,
-            // useMSE: true,
-            useSIMD: true,
+            useMSE: $useMSE.checked === true,
+            useSIMD: $useSIMD.checked === true,
+            useWCS: $useWCS.checked === true,
             isNakedFlow: true,
-            checkFirstIFrame:false,
+            checkFirstIFrame: false,
             showBandwidth: showOperateBtns, // 显示网速
             operateBtns: {
                 fullscreen: showOperateBtns,
@@ -169,10 +190,15 @@
         $destroy.style.display = 'none';
     }
 
+    function replay() {
+        if (jessibuca) {
+            jessibuca.destroy();
+        }
+        create();
+        play();
+    }
 
-    create();
-
-    $player.addEventListener('click', function () {
+    function play() {
         var href = $playHref.value;
         if (href) {
             jessibuca.play(href);
@@ -180,6 +206,12 @@
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
         }
+    }
+
+    create();
+
+    $player.addEventListener('click', function () {
+        play();
     }, false)
 
 
@@ -201,6 +233,34 @@
     //         jessibuca.downloadTempNakedFlowFile();
     //     }
     // })
+
+    $useMSE.addEventListener('click', function () {
+        const checked = $useMSE.checked;
+        if (checked) {
+            $useSIMD.checked = false
+            $useWCS.checked = false
+        }
+        replay();
+    })
+
+    $useSIMD.addEventListener('click', function () {
+        const checked = $useSIMD.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useWCS.checked = false
+        }
+        replay();
+    })
+
+    $useWCS.addEventListener('click', function () {
+        const checked = $useWCS.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useSIMD.checked = false
+        }
+        replay();
+    })
+
 
 </script>
 
