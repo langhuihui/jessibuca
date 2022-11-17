@@ -179,6 +179,15 @@
 #### http
 [http://jessibuca.monibuca.com/pro/4x4-simd-demo.html](http://jessibuca.monibuca.com/pro/4x4-simd-demo.html)
 
+## 4X4 裸流 MSE
+
+#### https
+[https://jessibuca.com/pro/4x4-mse-naked-flow-demo.html](https://jessibuca.com/pro/4x4-mse-naked-flow-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/4x4-mse-naked-flow-demo.html](http://jessibuca.monibuca.com/pro/4x4-mse-naked-flow-demo.html)
+
+
 
 ## 5X5 h265 WCS
 #### https
