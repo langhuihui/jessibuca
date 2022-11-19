@@ -3,6 +3,7 @@ import saveAs from "../utils/file-save";
 import RecordRTC from 'recordrtc';
 import {EVENTS, FILE_SUFFIX} from "../constant";
 import Emitter from "../utils/emitter";
+import {getSeekableBlob} from "./ebml.util"
 
 export default class RecordRTCLoader extends Emitter {
     constructor(player) {
@@ -88,7 +89,10 @@ export default class RecordRTCLoader extends Emitter {
             this.player.debug.log('Recorder', 'stop recording');
             this.player.emit(EVENTS.recordEnd)
             const fileName = (this.fileName || now()) + '.' + (this.fileType || FILE_SUFFIX.webm)
-            saveAs(this.recorder.getBlob(), fileName)
+            getSeekableBlob(this.recorder.getBlob(), function(seekableBlob) {
+                saveAs(seekableBlob, fileName)
+                // downloadRecord(seekableBlob, this.fileName, this.fileType);
+            });
             this._reset();
             this.player.emit(EVENTS.recording, false);
         })
