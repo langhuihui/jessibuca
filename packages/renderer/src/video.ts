@@ -27,6 +27,8 @@ export class MSEVideoRenderer {
   writeVideo(frame: Uint8Array, init: VideoFrameBufferInit) {
 
   }
+  writeAudio(data: AudioData) {
+  }
   close() {
 
   }
