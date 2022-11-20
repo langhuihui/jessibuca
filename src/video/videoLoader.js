@@ -56,9 +56,11 @@ export default class VideoLoader extends CommonLoader {
             this.$videoElement = null;
         }
         if (this.trackGenerator) {
+            this.trackGenerator.stop();
             this.trackGenerator = null;
         }
         if (this.vwriter) {
+            this.vwriter.close();
             this.vwriter = null;
         }
         this.player.debug.log('Video', 'destroy');
