@@ -40,6 +40,7 @@
         .input {
             display: flex;
             margin-top: 10px;
+            align-items: center;
             color: white;
             place-content: stretch;
         }
@@ -105,6 +106,9 @@
                     id="useSIMD"
                 /><span>SIMD</span>
             </div>
+            <div style="margin-left: 10px">
+                | FPS:<input type="number" id="fps" value="25" min="1" max="60"/>
+            </div>
 
         </div>
         <div class="input">
@@ -134,6 +138,7 @@
     var $useMSE = document.getElementById('useMSE');
     var $useSIMD = document.getElementById('useSIMD');
     var $useWCS = document.getElementById('useWCS');
+    var $fps = document.getElementById('fps');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -151,6 +156,7 @@
             useSIMD: $useSIMD.checked === true,
             useWCS: $useWCS.checked === true,
             isNakedFlow: true,
+            nakedFlowFps: Number($fps.value),
             checkFirstIFrame: false,
             showBandwidth: showOperateBtns, // 显示网速
             operateBtns: {
@@ -167,7 +173,6 @@
             isNotMute: false,
             heartTimeout: 10,
             // checkFirstIFrame:false,
-
             // isFlv: true
         },);
 
@@ -259,6 +264,12 @@
             $useSIMD.checked = false
         }
         replay();
+    })
+
+    $fps.addEventListener('change', function () {
+       if(jessibuca){
+           jessibuca.setNakedFlowFps(Number($fps.value));
+       }
     })
 
 

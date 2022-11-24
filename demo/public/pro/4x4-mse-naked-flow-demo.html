@@ -23,7 +23,7 @@
         }
 
         .container-shell:before {
-            content: "jessibuca Pro MSE demo player";
+            content: "jessibuca Pro MSE naked flow demo player";
             position: absolute;
             color: darkgray;
             top: 4px;
@@ -121,6 +121,27 @@
             <div class="container" id="container15"></div>
             <div class="container" id="container16"></div>
         </div>
+        <div class="input">
+            <div><input
+                type="checkbox"
+                checked
+                id="useMSE"
+            /><span>MediaSource</span>
+                <input
+                    type="checkbox"
+                    id="useWCS"
+                /><span>Webcodec</span>
+                <input
+                    type="checkbox"
+                    id="useSIMD"
+                /><span>SIMD</span>
+            </div>
+            <div style="margin-left: 10px">
+                | FPS:<input type="number" id="fps" value="25" min="1" max="60"/>
+            </div>
+
+        </div>
+
         <div class="input">
             <div>
                 当前浏览器：<span id="mseSupport" style="color: green;display: none">支持MSE H265解码</span>
@@ -279,12 +300,24 @@
     var $player = document.getElementById('play');
     var $pause = document.getElementById('pause');
     var $destroy = document.getElementById('destroy');
-
+    var $useMSE = document.getElementById('useMSE');
+    var $useSIMD = document.getElementById('useSIMD');
+    var $useWCS = document.getElementById('useWCS');
+    var $fps = document.getElementById('fps');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var playList = [];
     var num = 16;
+
+    function replay() {
+        destroy();
+        setTimeout(() => {
+            doCreate();
+            _play();
+        }, 100)
+
+    }
 
     function create(id) {
         var $container = document.getElementById('container' + id);
@@ -298,17 +331,21 @@
             loadingText: "加载中",
             debug: false,
             showBandwidth: showOperateBtns, // 显示网速
-            showPerformance:showOperateBtns,
-            useMSE: true,
+            showPerformance: showOperateBtns,
+            useMSE: $useMSE.checked === true,
+            useSIMD: $useSIMD.checked === true,
+            useWCS: $useWCS.checked === true,
             isNakedFlow: true,
-            controlAutoHide:true,
-            hasAudio:false,
-            useVideoRender:true,
+            nakedFlowFps: Number($fps.value),
+            controlAutoHide: true,
+            hasAudio: false,
+            useVideoRender: true,
             operateBtns: {
                 fullscreen: showOperateBtns,
                 screenshot: showOperateBtns,
                 play: showOperateBtns,
                 audio: showOperateBtns,
+                performance: showOperateBtns,
             },
             watermarkConfig: {
                 text: {
@@ -329,15 +366,26 @@
     }
 
 
-    for (let i = 0; i < num; i++) {
-        create(i + 1);
+    function doCreate() {
+        for (let i = 0; i < num; i++) {
+            create(i + 1);
+        }
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
         $destroy.style.display = 'none';
     }
 
+    doCreate();
 
-    $player.addEventListener('click', function () {
+    function destroy() {
+        for (let i = 0; i < num; i++) {
+            let player = playList[i];
+            player && player.destroy()
+        }
+        playList = [];
+    }
+
+    function _play() {
         for (let i = 0; i < num; i++) {
             var id = i + 1;
             var $playHref = document.getElementById('playUrl' + id);
@@ -358,6 +406,10 @@
         $player.style.display = 'none';
         $pause.style.display = 'inline-block';
         $destroy.style.display = 'inline-block';
+    }
+
+    $player.addEventListener('click', function () {
+        _play();
     }, false)
 
 
@@ -371,18 +423,9 @@
     })
 
     $destroy.addEventListener('click', function () {
-        for (let i = 0; i < num; i++) {
-            let player = playList[i];
-            player && player.destroy()
-        }
-        playList = [];
+        destroy();
         setTimeout(() => {
-            for (let i = 0; i < num; i++) {
-                create(i + 1);
-            }
-            $player.style.display = 'inline-block';
-            $pause.style.display = 'none';
-            $destroy.style.display = 'none';
+            doCreate();
         }, 100)
     })
 
@@ -397,6 +440,17 @@
     } else {
         notSupport.style.display = 'inline-block'
     }
+
+    $fps.addEventListener('change', function () {
+        for (let i = 0; i < num; i++) {
+            var id = i + 1;
+            let player = playList[i];
+            if (player) {
+                player.setNakedFlowFps(Number($fps.value));
+            }
+        }
+    })
+
 
 </script>
 
