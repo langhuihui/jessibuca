@@ -1,5 +1,6 @@
 import Emitter from "../utils/emitter";
 import {
+    closeVideoFrame,
     createContextGL,
     createEmptyImageBitmap,
     dataURLToFile,
@@ -118,6 +119,7 @@ export default class CanvasVideoLoader extends CommonLoader {
             case CANVAS_RENDER_TYPE.webcodecs:
                 // can use  createImageBitmap in wexin
                 this.context2D.drawImage(msg.videoFrame, 0, 0, this.$videoElement.width, this.$videoElement.height);
+                closeVideoFrame(msg.videoFrame);
                 break;
         }
     }

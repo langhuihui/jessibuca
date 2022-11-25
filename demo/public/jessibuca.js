@@ -901,6 +901,13 @@
 
 	  return browserInfo;
 	}
+	function closeVideoFrame(videoFrame) {
+	  if (videoFrame.close) {
+	    videoFrame.close();
+	  } else if (videoFrame.destroy) {
+	    videoFrame.destroy();
+	  }
+	}
 
 	var events$1 = (player => {
 	  try {
@@ -1485,6 +1492,7 @@
 	      case CANVAS_RENDER_TYPE.webcodecs:
 	        // can use  createImageBitmap in wexin
 	        this.context2D.drawImage(msg.videoFrame, 0, 0, this.$videoElement.width, this.$videoElement.height);
+	        closeVideoFrame(msg.videoFrame);
 	        break;
 	    }
 	  }
@@ -1648,16 +1656,20 @@
 	    super.destroy();
 
 	    if (this.$videoElement) {
+	      this.$videoElement.pause();
+	      this.$videoElement.currentTime = 0;
 	      this.$videoElement.src = '';
 	      this.$videoElement.removeAttribute('src');
 	      this.$videoElement = null;
 	    }
 
 	    if (this.trackGenerator) {
+	      this.trackGenerator.stop();
 	      this.trackGenerator = null;
 	    }
 
 	    if (this.vwriter) {
+	      this.vwriter.close();
 	      this.vwriter = null;
 	    }
 
@@ -9825,7 +9837,10 @@
 
 	  destroy() {
 	    if (this.decoder) {
-	      this.decoder.close();
+	      if (this.decoder.state !== 'closed') {
+	        this.decoder.close();
+	      }
+
 	      this.decoder = null;
 	    }
 
@@ -9874,15 +9889,7 @@
 	      fps: true,
 	      ts: 0,
 	      buf: this.player.demux.delay
-	    }); // release resource
-
-	    setTimeout(function () {
-	      if (videoFrame.close) {
-	        videoFrame.close();
-	      } else {
-	        videoFrame.destroy();
-	      }
-	    }, 100);
+	    });
 	  }
 
 	  handleError(error) {

@@ -570,3 +570,12 @@ export function getBrowser() {
     }
     return browserInfo;
 }
+
+
+export function closeVideoFrame(videoFrame) {
+    if (videoFrame.close) {
+        videoFrame.close()
+    } else if (videoFrame.destroy) {
+        videoFrame.destroy()
+    }
+}

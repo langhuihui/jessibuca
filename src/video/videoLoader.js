@@ -51,6 +51,8 @@ export default class VideoLoader extends CommonLoader {
     destroy() {
         super.destroy();
         if (this.$videoElement) {
+            this.$videoElement.pause();
+            this.$videoElement.currentTime = 0;
             this.$videoElement.src = ''
             this.$videoElement.removeAttribute('src');
             this.$videoElement = null;

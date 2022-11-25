@@ -18,7 +18,9 @@ export default class WebcodecsDecoder extends Emitter {
 
     destroy() {
         if (this.decoder) {
-            this.decoder.close();
+            if (this.decoder.state !== 'closed') {
+                this.decoder.close();
+            }
             this.decoder = null;
         }
 
@@ -62,15 +64,6 @@ export default class WebcodecsDecoder extends Emitter {
         })
 
         this.player.updateStats({fps: true, ts: 0, buf: this.player.demux.delay})
-
-        // release resource
-        setTimeout(function () {
-            if (videoFrame.close) {
-                videoFrame.close()
-            } else {
-                videoFrame.destroy()
-            }
-        }, 100)
     }
 
     handleError(error) {
