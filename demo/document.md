@@ -34,6 +34,27 @@
 ```
 
 
+### vue、react 推荐
+
+#### vue
+
+#### 关于new Jessibuca 之后的实例绑定
+
+1. 推荐绑定在 `this` 上面，不推荐绑定在`data` 对象上面，不然会触发无效的事件监听。
+2. 或者在实例的时候，绑定在`data`上面的时候，命名的时候以 `_` 或者`$` 开头，这样也不会触发无效的事件监听。
+在 `vue` 中
+> 以 _ 或 $ 开头的属性将不会被组件实例代理，因为它们可能和 Vue 的内置属性、API 方法冲突。你必须以 this.$data._property 的方式访问它们。
+
+见： https://cn.vuejs.org/api/options-state.html#data
+
+
+
+
+#### react
+#### 关于new Jessibuca 之后的实例绑定
+
+推荐绑定在 `this` 上面，不推荐绑定在`state` 对象上面。
+
 ### 关于硬解码和软解码
 
 #### 硬解码
