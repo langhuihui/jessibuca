@@ -252,6 +252,8 @@ Windows系统下,win10商店购买hevc解码器后最新edge可硬件加速解�
 
 ## 支持webrtc标准流播放
 
+遵循的协议是：https://datatracker.ietf.org/doc/html/draft-ietf-wish-whip-03
+
 ### 目前存在的弊端
 目前不管是http-flv 或者 websocket-flv协议 以及websocket-raw私有协议 都存在了部分延迟。
 
