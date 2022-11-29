@@ -147,9 +147,9 @@
                 <span>音频引擎：</span>
                 <select v-model="audioEngine" @change="replay">
                     <option value="">自动</option>
-                    <option value="worklet">worklet</option>
-                    <option value="script">script</option>
-                    <option value="active">active</option>
+                    <option value="worklet">worklet(https)</option>
+                    <option value="script">script(默认)</option>
+                    <option value="active">active(兼容手机浏览器)</option>
                 </select>
                 <div style="line-height: 30px">
                     <input
