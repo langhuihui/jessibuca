@@ -144,6 +144,13 @@
                     <option value="video">video</option>
                     <option value="canvas">canvas</option>
                 </select>
+                <span>音频引擎：</span>
+                <select v-model="audioEngine" @change="replay">
+                    <option value="">自动</option>
+                    <option value="worklet">worklet</option>
+                    <option value="script">script</option>
+                    <option value="active">active</option>
+                </select>
                 <div style="line-height: 30px">
                     <input
                         type="checkbox"
@@ -165,6 +172,11 @@
                         v-model="controlAutoHide"
                         @change="restartPlay()"
                     /><span>控制栏自动隐藏</span>
+                    <input
+                        type="checkbox"
+                        v-model="syncAudioAndVideo"
+                        @change="restartPlay()"
+                    /><span>音视频同步</span>
                     <input
                         type="checkbox"
                         v-model="showPerformance"
@@ -418,6 +430,7 @@ export default {
             decodeType: '',
             renderType: '',
             renderDom: 'video',
+            audioEngine:'',
             playingTimestamp: '',
             dts: '',
             stats: {},
@@ -430,6 +443,7 @@ export default {
             hasVideo: true,
             hasAudio: true,
             controlAutoHide: true,
+            syncAudioAndVideo: true,
             showMsg: true,
             showPerformance: true,
             toggleZoom: false,
@@ -474,6 +488,7 @@ export default {
                         useSIMD: this.useSIMD,
                         wcsUseVideoRender: this.useWCS,
                         loadingIcon: true,
+                        syncAudioAndVideo: this.syncAudioAndVideo,
                         text: "",
                         // background: "bg.jpg",
                         loadingText: "Jessibuca pro 疯狂加载中...",
