@@ -186,7 +186,7 @@
 
             </div>
             <div class="input" style="margin-top: 5px;padding-top:8px;border-top: 1px solid #eee">
-                <input type="text" v-model="talkUrl" style="width: 300px">
+                <input type="text" placeholder="请输入ws通讯地址" v-model="talkUrl" style="width: 300px">
                 <span class="span-row">
                     编码格式
                 <select v-model="talkEncType">
