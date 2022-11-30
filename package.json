@@ -11,7 +11,8 @@
     },
     "dependencies": {
         "screenfull": "5.1.0",
-        "recordrtc": "5.6.2"
+        "recordrtc": "5.6.2",
+        "element-plus": "2.2.25"
     },
     "devDependencies": {
         "vitepress": "0.16.1",

@@ -310,6 +310,7 @@
     </div>
 </template>
 <script>
+import { ElNotification,ElMessage } from 'element-plus'
 
 function getBrowser() {
     const UserAgent = navigator.userAgent.toLowerCase();
@@ -385,6 +386,37 @@ function formatTimeTips(time) {
     }
 
     return result;
+}
+
+function toString(value) {
+    const nativeToString = Object.prototype.toString;
+
+    function isErrorLike(error) {
+        switch (nativeToString.call(error)) {
+            case '[object Error]':
+                return true;
+            case '[object Exception]':
+                return true;
+            case '[object DOMException]':
+                return true;
+            default:
+                try {
+                    return error instanceof Error;
+                } catch (e) {
+                    return false;
+                }
+        }
+    }
+
+    if (isErrorLike(value)) {
+        return value.toString();
+    }
+
+    return value == null
+        ? '' :
+        typeof value === 'object'
+            ? JSON.stringify(value, null, 2)
+            : String(value)
 }
 
 export default {
@@ -586,11 +618,6 @@ export default {
             jessibuca.on(JessibucaPro.EVENTS.kBps, (msg) => {
                 // console.log('bps', bps);
             });
-            // let _ts = 0;
-            // this.jessibuca.on("timeUpdate", function (ts) {
-            //     console.log('timeUpdate,old,new,timestamp', _ts, ts, ts - _ts);
-            //     _ts = ts;
-            // });
 
             jessibuca.on(JessibucaPro.EVENTS.videoInfo, (info) => {
                 !this.isDebug && console.log("videoInfo", info);
@@ -631,18 +658,7 @@ export default {
 
             jessibuca.on(JessibucaPro.EVENTS.stats, (stats) => {
                 !this.isDebug && console.log('stats', stats);
-                // this.fps = stats.fps;
-                // this.dfps = stats.dfps;
-                // this.dts = stats.ts;
-                // this.playingTimestamp = formatTimeTips(stats.pTs);
-                this.stats = Object.assign({}, stats);
-                this.stats.playingTimestamp = formatTimeTips(stats.pTs);
-                this.stats.isDroping = stats.buf > configOptions.videoBuffer + configOptions.videoBufferDelay
             })
-
-            // jessibuca.on('kBps', function (kBps) {
-            //     console.log('kBps', kBps);
-            // });
 
             jessibuca.on(JessibucaPro.EVENTS.play, () => {
                 this.playing = true;
@@ -667,6 +683,14 @@ export default {
                 !this.isDebug && console.log('playbackPauseOrResume: ', value);
             })
 
+            jessibuca.on('error', (error) => {
+                !this.isDebug && console.log('error: ', error);
+                ElNotification.error({
+                    title: '错误',
+                    message: toString(error)
+                });
+            })
+
             jessibuca.on('close', () => {
                 !this.isDebug && console.log('jessibuca close');
                 setTimeout(() => {
@@ -686,12 +710,15 @@ export default {
 
             if (this.playUrl) {
                 this.$options.jessibuca.play(this.playUrl).then(() => {
-                    console.log('play success');
+                    ElMessage.success('play success');
                 }).catch((err) => {
-                    console.log('play error', err);
+                    ElMessage.error('播放失败');
                 });
                 this.playType = 'play'
                 this.loading = true;
+            }
+            else {
+                ElMessage.error('play url is empty')
             }
         },
         playback() {
@@ -744,8 +771,15 @@ export default {
                         showControl: true,
                         uiUsePlaybackPause: true,
                         isUseLocalCalculateTime: true
+                    }).then(()=>{
+                        ElMessage.success('playback success');
+                    }).catch((e)=>{
+                        ElMessage.error(`playback error : ${toString(e)}`);
                     })
                     this.playType = 'playback'
+                }
+                else {
+                    ElMessage.error('play url is empty')
                 }
             }
         },
@@ -875,6 +909,7 @@ export default {
                 console.log('screenshotWatermark1Blob', file);
             }).catch((e) => {
                 console.log('screenshotWatermark1Blob error', e);
+                ElMessage.error(`截图失败：${toString(e)}`);
             });
         },
         screenshotWatermark2() {
@@ -889,7 +924,6 @@ export default {
             }).catch((e) => {
                 console.log('screenshotWatermark2 error', e);
             });
-            ;
         },
         screenshotWatermark2Blob() {
             this.$options.jessibuca.screenshotWatermark({
