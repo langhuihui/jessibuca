@@ -1,6 +1,6 @@
 import {EVENTS, EVENTS_ERROR, JESSIBUCA_EVENTS} from "../constant";
 import screenfull from "screenfull";
-import {getTarget, setStyle} from "../utils";
+import {getTarget, isMobile, setStyle} from "../utils";
 
 export default (player) => {
 
@@ -64,15 +64,18 @@ export default (player) => {
         }
     })
 
-    player.on(EVENTS.webFullscreen, (value) => {
-        if (value) {
-            player.$container.classList.add('jessibuca-fullscreen-web')
-        } else {
-            player.$container.classList.remove('jessibuca-fullscreen-web')
-        }
-        //
-        player.emit(JESSIBUCA_EVENTS.fullscreen, player.fullscreen)
-    })
+    if (isMobile()) {
+        player.on(EVENTS.webFullscreen, (value) => {
+            if (value) {
+                player.$container.classList.add('jessibuca-fullscreen-web')
+            } else {
+                player.$container.classList.remove('jessibuca-fullscreen-web')
+            }
+            //
+            player.emit(JESSIBUCA_EVENTS.fullscreen, player.fullscreen)
+        })
+    }
+
 
     //
     player.on(EVENTS.resize, () => {
