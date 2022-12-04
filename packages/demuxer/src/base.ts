@@ -1,25 +1,47 @@
 import { EventEmitter } from "eventemitter3";
+import Oput from "oput";
 export const enum DemuxEvent {
   AUDIO_ENCODER_CONFIG_CHANGED = "audio-encoder-config-changed",
   VIDEO_ENCODER_CONFIG_CHANGED = "video-encoder-config-changed",
 }
+export const enum DemuxMode {
+  PULL,
+  PUSH
+}
+export interface Source {
+  oput?: Oput;
+  read<T extends number | Uint8Array>(need: T): Promise<Uint8Array>;
+}
 export abstract class BaseDemuxer extends EventEmitter {
   constructor(
-    public source: {
-      read<T extends number | Uint8Array>(need: T): Promise<Uint8Array>;
-    }
+    public mode: DemuxMode = DemuxMode.PULL,
+    public source?: Source
   ) {
     super();
+    if (source) {
+      if (mode == DemuxMode.PULL) {
+        this.startPull(source);
+      } else {
+        source.oput = new Oput(this.demux());
+      }
+    }
   }
-  audioReadable: ReadableStream<EncodedAudioChunkInit> = new ReadableStream({
-    pull: async (controller) => controller.enqueue(await this.pullAudio()),
-  });
-  videoReadable: ReadableStream<EncodedVideoChunkInit> = new ReadableStream({
-    pull: async (controller) => controller.enqueue(await this.pullVideo()),
-  });
+  audioReadable?: ReadableStream<EncodedAudioChunkInit>;
+  videoReadable?: ReadableStream<EncodedVideoChunkInit>;
   audioEncoderConfig?: AudioEncoderConfig;
   videoEncoderConfig?: VideoEncoderConfig;
   abstract pull(): Promise<void>;
+  startPull(source: Source) {
+    this.mode = DemuxMode.PULL;
+    this.source = source;
+    this.audioReadable = new ReadableStream({
+      pull: async (controller) => controller.enqueue(await this.pullAudio()),
+    });
+    this.videoReadable = new ReadableStream({
+      pull: async (controller) => controller.enqueue(await this.pullVideo()),
+    });
+  }
+  abstract demux(): Generator<number, void, Uint8Array>;
   gotAudio?: (data: EncodedAudioChunkInit) => void;
   gotVideo?: (data: EncodedVideoChunkInit) => void;
   pullAudio(): Promise<EncodedAudioChunkInit> {

@@ -1,6 +1,6 @@
 {
   "name": "jv4-demuxer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "type": "module",
   "main": "src/index.ts",
@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "afsm": "^2.2.3",
-    "eventemitter3": "^4.0.7"
+    "eventemitter3": "^4.0.7",
+    "oput": "^1.2.2"
   }
 }

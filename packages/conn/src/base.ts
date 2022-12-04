@@ -80,8 +80,8 @@ export abstract class Connection extends FSM {
   }
   // 真正实现连接的函数
   abstract _connect(): Promise<ReadableStream<Uint8Array> | void>;
-  _close() {}
-  _send(data: ArrayBufferLike | ArrayBufferView) {}
+  _close() { }
+  _send(data: ArrayBufferLike | ArrayBufferView) { }
   @ChangeState(ConnectionState.DISCONNECTED, ConnectionState.RECONNECTED)
   async reconnect() {
     console.log(`reconnect: ${this.url}`);
@@ -92,7 +92,8 @@ export abstract class Connection extends FSM {
   onConnected(readable: ReadableStream<Uint8Array> | void) {
     console.timeEnd(this.url);
     if (!readable) return;
-    this.oput = new Oput();
+    if (!this.oput)
+      this.oput = new Oput();
     // @ts-ignore
     this.read = this.oput.read.bind(this.oput);
     return readable
