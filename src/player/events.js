@@ -54,6 +54,9 @@ export default (player) => {
         } else {
             try {
                 screenfull.exit().then(() => {
+                    if(player.webFullscreen){
+                        player.webFullscreen = false;
+                    }
                 }).catch(() => {
                     player.webFullscreen = false;
 
