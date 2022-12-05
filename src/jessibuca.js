@@ -30,6 +30,11 @@ class Jessibuca extends Emitter {
             return;
         }
 
+        if (_opt.videoBuffer >= _opt.heartTimeout) {
+            throw new Error(`Jessibuca videoBuffer ${_opt.videoBuffer}s must be less than heartTimeout ${_opt.heartTimeout}s`);
+            return;
+        }
+
 
         $container.classList.add('jessibuca-container');
 
