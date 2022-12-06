@@ -690,10 +690,17 @@ export default class Player extends Emitter {
     // 心跳检查，如果渲染间隔暂停了多少时间之后，就会抛出异常
     checkHeartTimeout() {
         this._checkHeartTimeout = setTimeout(() => {
-            this.pause().then(() => {
-                this.emit(EVENTS.timeout, EVENTS.delayTimeout);
-                this.emit(EVENTS.delayTimeout);
-            });
+            if (this.playing) {
+                // check again
+                if (this._stats.fps !== 0) {
+                    return;
+                }
+                this.pause().then(() => {
+                    this.emit(EVENTS.timeout, EVENTS.delayTimeout);
+                    this.emit(EVENTS.delayTimeout);
+                });
+            }
+
         }, this._opt.heartTimeout * 1000)
     }
 
@@ -714,6 +721,10 @@ export default class Player extends Emitter {
     // loading 等待时间
     checkLoadingTimeout() {
         this._checkLoadingTimeout = setTimeout(() => {
+            // check again
+            if (this.playing) {
+                return;
+            }
             this.pause().then(() => {
                 this.emit(EVENTS.timeout, EVENTS.loadingTimeout);
                 this.emit(EVENTS.loadingTimeout);
