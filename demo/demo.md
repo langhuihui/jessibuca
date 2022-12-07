@@ -12,6 +12,10 @@
 -
 -
 -
+## 最新（jessibuca.js、 decoder.js、decoder.wasm）
+[最新源码](https://jessibuca.com/dist.zip)
+
+
 ## Html
 
 
