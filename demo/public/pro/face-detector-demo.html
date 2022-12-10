@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jessica demo</title>
+    <title>Jessica ai face detector demo</title>
     <script src="./jessibuca-pro-face-detector-demo.js"></script>
     <script src="./jessibuca-pro-demo.js"></script>
     <style>
@@ -24,7 +24,7 @@
         }
 
         .container-shell:before {
-            content: "jessibuca demo player";
+            content: "jessibuca 人脸识别 demo player";
             position: absolute;
             color: darkgray;
             top: 4px;
@@ -92,6 +92,13 @@
     <div class="container-shell">
         <div id="container"></div>
         <div class="input">
+            <div>
+                <div>Tips: AI 人脸识别只适用于软解码(wasm/wasm-simd)模式生效</div>
+                <div>Tips: 支持canvas渲染或者video渲染</div>
+                <div>Tips: 支持播放过程打开和关闭</div>
+            </div>
+        </div>
+        <div class="input">
             <div>输入URL：</div>
             <input
                 autocomplete="on"
@@ -101,6 +108,7 @@
             <button id="play">播放</button>
             <button id="pause" style="display: none">停止</button>
         </div>
+
         <div class="input" style="line-height: 30px">
             <button id="destroy">销毁</button>
         </div>

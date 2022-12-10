@@ -20,6 +20,9 @@ ai 模块都是独立于jessibuca pro 存在的，每个模块的引用都是单
 
 主要是利用openvc的人脸识别功能，识别出人脸后，打上框子。
 
+> 只支持软解码生效（wasm/wasm-simd）
+> 支持canvas渲染或者video渲染
+
 ### demo（十分钟）
 
 > 体验demo 只能人脸识别十分钟。
