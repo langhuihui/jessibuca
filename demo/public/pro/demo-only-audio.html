@@ -91,6 +91,15 @@
     <div class="container-shell">
         <div id="container"></div>
         <div class="input">
+            <span>音频引擎：</span>
+            <select id="audioEngine">
+                <option value="">自动</option>
+                <option value="worklet">worklet(https)</option>
+                <option value="script">script(默认)</option>
+                <option value="active">active(兼容手机浏览器)</option>
+            </select>
+        </div>
+        <div class="input">
             <div>输入URL：</div>
             <input
                 autocomplete="on"
@@ -114,6 +123,7 @@
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
     var $fps = document.querySelector('.fps-inner');
+    var $audioEngine = document.getElementById('audioEngine');
 
 
     var showOperateBtns = true; // 是否显示按钮
@@ -141,7 +151,7 @@
             },
             qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
             forceNoOffscreen: forceNoOffscreen,
-            isNotMute: false,
+            isNotMute: true,
             heartTimeout: 10,
             watermarkConfig: {
                 text:{
@@ -150,6 +160,7 @@
                 right: 10,
                 top: 10
             },
+            audioEngine: $audioEngine.value,
         },);
 
 

@@ -82,7 +82,7 @@ export default (player) => {
 
     //
     player.on(EVENTS.resize, () => {
-        player.video.resize();
+        player.video && player.video.resize();
     })
 
 
