@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>jessibuca Pro demo</title>
+    <script src="./vconsole.js"></script>
     <script src="./jessibuca-pro-demo.js"></script>
     <style>
         .root {
@@ -104,7 +105,7 @@
             <input
                 autocomplete="on"
                 id="playUrl"
-                value="http://flv.bdplay.nodemedia.cn/live/bbb_264.flv"
+                value=""
             />
             <button id="play">播放</button>
             <button id="pause" style="display: none">停止</button>
@@ -115,7 +116,14 @@
         </div>
     </div>
 </div>
-
+<script>
+    function isMobile() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+    if(isMobile()){
+        new VConsole();
+    }
+</script>
 <script>
     var $player = document.getElementById('play');
     var $pause = document.getElementById('pause');
@@ -133,7 +141,7 @@
     function create() {
         jessibuca = new JessibucaPro({
             container: $container,
-            videoBuffer: 0.2, // 缓存时长
+            videoBuffer: 0.3, // 缓存时长
             decoder: './decoder-pro.js',
             isResize: false,
             text: "",
@@ -148,6 +156,7 @@
                 audio: showOperateBtns,
                 ptz: showOperateBtns,
                 quality: showOperateBtns,
+                performance: showOperateBtns,
             },
             qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
             forceNoOffscreen: forceNoOffscreen,
