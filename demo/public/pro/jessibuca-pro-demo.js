@@ -539,7 +539,7 @@
       open: 'open',
       closed: 'closed'
     }; // frag duration
-    const AUDIO_SYNC_VIDEO_DIFF = 300; // ms
+    const AUDIO_SYNC_VIDEO_DIFF = 1000; // ms
     // renderTimeDay once length
 
     const PLAYBACK_RENDER_ONCE_LENGTH = 2000;
@@ -5116,6 +5116,10 @@
           this.audioBufferSize = 4800;
         }
 
+        if (this.engineType === AUDIO_ENGINE_TYPE.script) {
+          this.audioBufferSize = 4096;
+        }
+
         this.scriptStartTime = 0;
         this.player.debug.log('AudioContext', 'init', {
           audioBufferSize: this.audioBufferSize
@@ -5403,7 +5407,7 @@
         if (this.bufferList.length && this.playing) {
           const opt = this.player._opt;
 
-          if (opt.syncAudioAndVideo && opt.hasVideo && !this.isActiveEngineType) {
+          if (opt.syncAudioAndVideo && opt.hasVideo) {
             this.calcPlaybackRateBySync(); // audio > video
             // wait
 
@@ -5513,7 +5517,7 @@
           ts
         }); //
 
-        if (!this.player._opt.syncAudioAndVideo && !this.isActiveEngineType) {
+        if (!this.player._opt.syncAudioAndVideo) {
           this.calcPlaybackRateByBuffer();
         }
       }
