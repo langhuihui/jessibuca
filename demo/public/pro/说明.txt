@@ -1,0 +1,32 @@
+jessibuca-pro-demo.js ---体验版主文件(需要通过script标签引入)
+jessibuca-pro-talk.js ---体验版语音通讯主文件(需要通过script标签引入)
+
+decoder-pro.js --- worker解码器(这个库无需引入)
+decoder-pro.wasm ---worker解码器胶水文件(这个库无需引入)
+
+decoder-pro-simd.js ---worker-simd解码器(这个库无需引入)
+decoder-pro-simd.wasm ---worker-simd解码器胶水文件(这个库无需引入)
+
+jessibuca-pro-face-detector-demo.js --- 体验版AI 人脸识别主文件(需要通过script标签引入)
+face-detector.wasm --- 人脸识别胶水文件(这个库无需引入)
+
+
+本试用开发包10分钟自动断开连接，其它与正式版功能完全一样，正式使用需商用授权。
+
+支持6种格式：(live/test为streamPath)
+ws-raw 即ws://host-name:port/jessica/live/test (该协议只对接了monibuca服务器，其他服务器需要额外对接)
+ws-flv 即ws://host-name:port/jessica/live/test.flv
+http-flv 即http://host-name:port/hdl/live/test.flv
+Hls 即http://host-name:port/hls/live/test.m3u8
+WebTransport 即wt://host-name:port/play/live/test (该协议只对接了monibuca服务器，其他服务器需要额外对接)
+Webrtc 即webrtc://host-name:port/webrtc/play/live/test (该协议只对接了monibuca服务器，其他服务器需要额外对接)
+
+
+由于wasm程序不能由本地路径加载，因此双击打开index.html文件无法使用，需要配合http服务来加载
+
+文档地址：https://jessibuca.com/pro.html
+
+商务技术咨询:
+QQ : 25022549
+wechat: bosswancheng
+email: 25022549@qq.com
