@@ -222,6 +222,14 @@
         create();
     })
 
+    $audioEngine.addEventListener('change', function () {
+        if (jessibuca) {
+            jessibuca.destroy();
+            $fps.textContent = '';
+        }
+        create();
+    })
+
 </script>
 
 </body>
