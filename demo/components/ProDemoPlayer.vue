@@ -26,12 +26,7 @@
                     v-model="videoBuffer"
                     @change="changeBuffer"
                 /><span style="margin-right: 5px">秒</span>
-                <input
-                    type="checkbox"
-                    v-model="isDebug"
-                    ref="isDebug"
-                    @change="restartPlay"
-                /><span>日志</span>
+
                 <input
                     type="checkbox"
                     v-model="useMSE"
@@ -96,47 +91,34 @@
             <div class="input">
                 <input
                     type="checkbox"
-                    ref="offscreen"
-                    v-model="useOffscreen"
-                    @change="restartPlay('offscreen')"
-                /><span>离屏渲染(wasm+wcs)</span>
-                <input
-                    type="checkbox"
-                    ref="offscreen"
                     v-model="networkDelayTimeoutReplay"
                     @change="restartPlay()"
                 /><span>网络延迟重新播放</span>
                 <input
                     type="checkbox"
-                    ref="offscreen"
                     v-model="isFlv"
                     @change="restartPlay()"
                 /><span>设置Flv格式</span>
                 <input
                     type="checkbox"
-                    ref="offscreen"
                     v-model="hiddenAutoPause"
                     @change="restartPlay()"
                 /><span>最小化自动暂停</span>
                 <input
                     type="checkbox"
-                    ref="offscreen"
                     v-model="hasVideo"
                     @change="restartPlay()"
                 /><span>解码视频</span>
                 <input
                     type="checkbox"
-                    ref="offscreen"
                     v-model="hasAudio"
                     @change="restartPlay()"
                 /><span>解码音频</span>
-                <span class="span-row" style="margin-left: 10px">
-                    <span style="color:red;">录制格式</span>
-                    <select v-model="recordType" @change="restartPlay()">
-                        <option value="webm">webm</option>
-                        <option value="mp4">mp4</option>
-                    </select>
-                </span>
+                <input
+                    type="checkbox"
+                    v-model="checkFirstIFrame"
+                    @change="restartPlay()"
+                /><span>检查首帧是否I帧</span>
             </div>
             <div class="input">
                 <span>渲染标签：</span>
@@ -149,8 +131,31 @@
                     <option value="">自动</option>
                     <option value="worklet">worklet(https)</option>
                     <option value="script">script(默认)</option>
-                    <option value="active">active(兼容手机浏览器)</option>
+                    <option value="active">active(安卓)</option>
                 </select>
+                <span class="span-row" style="margin-left: 10px">
+                    <span style="color:red;">录制格式</span>
+                    <select v-model="recordType" @change="restartPlay()">
+                        <option value="webm">webm</option>
+                        <option value="mp4">mp4</option>
+                    </select>
+                </span>
+                <input
+                    type="checkbox"
+                    v-model="isDebug"
+                    ref="isDebug"
+                    @change="restartPlay"
+                /><span>控制台日志</span>
+                <span class="span-row" v-if="isDebug" style="margin-left: 10px">
+                    <span style="color:red;">日志等级</span>
+                    <select v-model="debugLevel" @change="restartPlay()">
+                        <option value="debug">debug</option>
+                        <option value="warn">warn</option>
+                    </select>
+                </span>
+            </div>
+            <div class="input">
+
                 <div style="line-height: 30px">
                     <input
                         type="checkbox"
@@ -183,7 +188,6 @@
                         @change="togglePerformance"
                     /><span>显示性能面板</span>
                 </div>
-
             </div>
             <div class="input" style="margin-top: 5px;padding-top:8px;border-top: 1px solid #eee">
                 <input type="text" placeholder="请输入ws通讯地址" v-model="talkUrl" style="width: 300px">
@@ -456,6 +460,7 @@ export default {
             recording: false,
             isDebug: true,
             recordType: 'mp4',
+            debugLevel:'warn',
             scale: 0,
             vConsole: null,
             playType: '',
@@ -470,7 +475,7 @@ export default {
             audioInfo: {},
             playbackRate: 1,
             playModel: 'video+audio',
-            isFlv: false,
+            isFlv: true,
             hiddenAutoPause: false,
             hasVideo: true,
             hasAudio: true,
@@ -484,7 +489,8 @@ export default {
             talkPacketType: 'rtp',
             talkSampleRate: 16000,
             talkSampleBitsWidth: 16,
-            talkUrl: ''
+            talkUrl: '',
+            checkFirstIFrame:true
         };
     },
     mounted() {
@@ -526,6 +532,7 @@ export default {
                         loadingText: "Jessibuca pro 疯狂加载中...",
                         // hasAudio:false,
                         debug: this.isDebug,
+                        debugLevel: this.debugLevel,
                         hotKey: this.hotKey,
                         // hasAudio:false,
                         supportDblclickFullscreen: true,
@@ -556,6 +563,7 @@ export default {
                         useCanvasRender: this.renderDom === 'canvas',
                         networkDelayTimeoutReplay: false,
                         playbackForwardMaxRateDecodeIFrame: 8,
+                        checkFirstIFrame:this.checkFirstIFrame,
                         watermarkConfig: {
                             image: {
                                 // src: 'http://jessibuca.monibuca.com/jessibuca-logo.png',
