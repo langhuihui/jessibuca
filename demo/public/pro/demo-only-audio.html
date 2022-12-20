@@ -92,13 +92,18 @@
     <div class="container-shell">
         <div id="container"></div>
         <div class="input">
-            <span>音频引擎：</span>
-            <select id="audioEngine">
-                <option value="">自动</option>
-                <option value="worklet">worklet(https)</option>
-                <option value="script">script(默认)</option>
-                <option value="active">active(兼容手机浏览器)</option>
-            </select>
+            <div>
+                <span>音频引擎：</span>
+                <select id="audioEngine">
+                    <option value="">自动</option>
+                    <option value="worklet">worklet(https)</option>
+                    <option value="script">script(默认)</option>
+                    <option value="active">active(兼容手机浏览器)</option>
+                </select>
+                <span>缓存时长(s)</span>
+                <input style="display:inline-block;width: 50px" type="number" id="videoBuffer" value="0.3" step="0.1">
+            </div>
+
         </div>
         <div class="input">
             <div>输入URL：</div>
@@ -120,7 +125,8 @@
     function isMobile() {
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
-    if(isMobile()){
+
+    if (isMobile()) {
         // new VConsole();
     }
 </script>
@@ -132,7 +138,7 @@
     var $destroy = document.getElementById('destroy');
     var $fps = document.querySelector('.fps-inner');
     var $audioEngine = document.getElementById('audioEngine');
-
+    var $videoBuffer = document.getElementById('videoBuffer');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -141,13 +147,13 @@
     function create() {
         jessibuca = new JessibucaPro({
             container: $container,
-            videoBuffer: 0.3, // 缓存时长
+            videoBuffer: Number($videoBuffer.value), // 缓存时长
             decoder: './decoder-pro.js',
             isResize: false,
             text: "",
             loadingText: "加载中",
             debug: true,
-            hasVideo:false,//
+            hasVideo: false,//
             keepScreenOn: true,
             showBandwidth: showOperateBtns, // 显示网速
             operateBtns: {
@@ -164,8 +170,8 @@
             isNotMute: true,
             heartTimeout: 10,
             watermarkConfig: {
-                text:{
-                    content:'jessibuca-pro'
+                text: {
+                    content: 'jessibuca-pro'
                 },
                 right: 10,
                 top: 10
@@ -199,6 +205,10 @@
     $player.addEventListener('click', function () {
         var href = $playHref.value;
         if (href) {
+            var videoBuffer = Number($videoBuffer.value);
+            if (videoBuffer >= 0) {
+                jessibuca.setVideoBuffer(videoBuffer);
+            }
             jessibuca.play(href);
             $player.style.display = 'none';
             $pause.style.display = 'inline-block';
