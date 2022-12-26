@@ -207,7 +207,7 @@
         if (href) {
             var videoBuffer = Number($videoBuffer.value);
             if (videoBuffer >= 0) {
-                jessibuca.setVideoBuffer(videoBuffer);
+                jessibuca.setBufferTime(videoBuffer);
             }
             jessibuca.play(href);
             $player.style.display = 'none';
