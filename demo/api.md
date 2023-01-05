@@ -675,6 +675,9 @@ jessibuca.on("load", function () {
 
 > 仅为兼容老的2.x语法，3.x版本不需要这个事件。
 
+> 这个事件需要结合loaded属性一起使用。
+
+> 3.x版本不需要这个事件。可以直接写play()方法。
 
 ```js
 
@@ -682,6 +685,23 @@ jessibuca.on("load", function () {
     console.log('load')
 })
 ```
+
+推荐写法
+
+```js
+
+if(jessibuca.loaded){
+    console.log('load')
+}
+else {
+    jessibuca.on("load", function () {
+        console.log('load')
+    })
+}
+
+```
+
+
 
 ### timeUpdate
 
