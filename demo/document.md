@@ -695,6 +695,19 @@ Jessibuca是一款开源的纯H5直播流播放器
 
 > 所以 暂不支持 本地文件打开。
 
+
+### 是否支持npm（yarn） install 安装
+
+> 暂不支持
+
+因为 项目中用到了`wasm`， node_modules  对于`wasm` 支持度不友好。所以暂不支持。
+
+### 其他解决方案
+可以考虑下把wasm文件编译成base64，然后通过打包合并到js文件中，这样就可以通过npm安装了。
+
+> 但是会增加js的文件大小，所以酌情考虑
+
+
 # 群
 <img src="/public/qrcode.jpeg">
 
