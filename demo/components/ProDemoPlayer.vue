@@ -84,7 +84,10 @@
                     <button v-if="playType === '' || playType === 'playback'" @click="playback">播放录像流</button>
                 </template>
                 <template v-if="loading || playing">
-                    <button v-if="playType === 'play'" @click="pause">停止</button>
+                    <template v-if="playType === 'play'">
+                        <button @click="()=> pause()">停止</button>
+                        <button @click="()=> pause(true)">停止(清屏)</button>
+                    </template>
                     <button v-if="playType === 'playback'" @click="pause">停止录像流</button>
                 </template>
             </div>
@@ -460,7 +463,7 @@ export default {
             recording: false,
             isDebug: true,
             recordType: 'mp4',
-            debugLevel:'warn',
+            debugLevel: 'debug',
             scale: 0,
             vConsole: null,
             playType: '',
@@ -551,6 +554,24 @@ export default {
                             performance: this.showOperateBtns,
                             scale: this.showOperateBtns
                         },
+                        extendOperateBtns: [
+                            {
+                                name: 'testBtn',
+                                index: 2,
+                                icon: '/expand.png',
+                                iconHover: '/expand-hover.png',
+                                iconTitle: '测试hover',
+                                activeIcon: '/zoom-stop.png',
+                                activeIconHover: '/zoom-stop-hover.png',
+                                activeIconTitle: '测试active-hover',
+                                click: () => {
+                                    ElMessage.success('点击了test按钮');
+                                },
+                                activeClick: () => {
+                                    ElMessage.success('点击了test按钮 active状态')
+                                },
+                            },
+                        ],
                         isFlv: this.isFlv,
                         hiddenAutoPause: this.hiddenAutoPause,
                         forceNoOffscreen: !this.useOffscreen,
@@ -577,6 +598,28 @@ export default {
                             right: 10,
                             top: 30
                         },
+                        contextmenuBtns: [
+                            {
+                                content: '切换性能面板',
+                                index:1,
+                                click: () => {
+                                    const playStatus = this.$options.jessibuca.getStatus()
+                                    if(playStatus === 'playing'){
+                                        this.$options.jessibuca.togglePerformancePanel();
+                                    }
+                                    else {
+                                        ElMessage.warning('请先播放视频');
+                                    }
+                                }
+                            },
+                            {
+                                content: '关于PRO',
+                                index:2,
+                                click: () => {
+                                    ElMessage.success('如需要购买PRO版本可以联系添加作者微信：bosswancheng');
+                                }
+                            }
+                        ],
                         showPerformance: this.showPerformance,
                         recordType: this.recordType
                     },
@@ -648,7 +691,9 @@ export default {
 
                 const renderType = jessibuca.getRenderType();
                 this.renderType = renderType;
-                //this.screenshotWatermark1Blob();
+                // setTimeout(() => {
+                //     this.screenshotWatermark1Blob();
+                // }, 100);
             })
 
             jessibuca.on(JessibucaPro.EVENTS.performance, (performance) => {
@@ -683,6 +728,10 @@ export default {
                 !this.isDebug && console.log('playToRenderTimes: ', times);
             })
 
+            jessibuca.on(JessibucaPro.EVENTS.ptz, (arrow) => {
+                console.log('ptz arrow', arrow);
+            })
+
             jessibuca.on('performance', (performance) => {
                 !this.isDebug && console.log('performance: ', performance);
             })
@@ -691,11 +740,12 @@ export default {
                 !this.isDebug && console.log('playbackPauseOrResume: ', value);
             })
 
-            jessibuca.on('error', (error) => {
-                !this.isDebug && console.log('error: ', error);
+            //
+            jessibuca.on('crashLog', (value) => {
+                console.error('crashLog: ', value);
                 ElNotification.error({
                     title: '错误',
-                    message: toString(error)
+                    message: JSON.stringify(value)
                 });
             })
 
@@ -798,9 +848,9 @@ export default {
             this.$options.jessibuca.cancelMute();
         },
 
-        pause() {
+        pause(isClear) {
             if (this.playType === 'playback') {
-                this.$options.jessibuca.playbackPause().then(() => {
+                this.$options.jessibuca.playbackPause(isClear).then(() => {
                     console.log('playbackPause success');
                     this.playing = false;
                     this.err = "";
@@ -809,7 +859,7 @@ export default {
                     console.log('playbackPause error', err);
                 })
             } else {
-                this.$options.jessibuca.pause().then(() => {
+                this.$options.jessibuca.pause(isClear).then(() => {
                     console.log('pause success');
                     this.playing = false;
                     this.err = "";
@@ -964,6 +1014,10 @@ export default {
             } else if (type === 'simd') {
                 this.useMSE = false;
                 this.useWCS = false;
+            } else if (type === 'isNakedFlow') {
+                this.isFlv = false;
+            } else if (type === 'isFlv') {
+                this.isNakedFlow = false;
             }
 
             this.replay();
@@ -1053,6 +1107,16 @@ export default {
             }).catch((e) => {
                 console.error('set talk volume error', e);
             });
+        },
+        openZoom() {
+            const jessibuca = this.$options.jessibuca;
+            jessibuca.openZoom();
+
+        },
+
+        closeZoom() {
+            const jessibuca = this.$options.jessibuca;
+            jessibuca.closeZoom();
         }
     },
 };
