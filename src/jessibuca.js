@@ -40,6 +40,9 @@ class Jessibuca extends Emitter {
 
         delete _opt.container;
 
+        // 禁用离屏渲染
+        _opt.forceNoOffscreen = true;
+
         // s -> ms
         if (isNotEmpty(_opt.videoBuffer)) {
             _opt.videoBuffer = Number(_opt.videoBuffer) * 1000
