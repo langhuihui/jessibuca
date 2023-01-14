@@ -47,6 +47,20 @@
 
 见： https://cn.vuejs.org/api/options-state.html#data
 
+```vue
+// 可以挂载在Vue上面
+Vue.prototype.$player = new Jessibuca({
+
+})
+```
+
+```vue
+// 也可以挂载在 $options 上面
+this.$options.jessibuca = new Jessibuca({
+
+})
+```
+
 
 
 
