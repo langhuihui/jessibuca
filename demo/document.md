@@ -598,13 +598,17 @@ https://github.com/bosscheng/jessibuca-vue-demo/blob/v3/preview/preview.js
 
 #### 问题
 
-通过webgl渲染(canvas)的时候，会出现部分机型画面倒挂，一般这种情况都是出现在 `wasm` 渲染模式上面的
+通过webgl渲染(canvas)的时候，会出现部分机型画面倒挂，一般这种情况都是出现在 `wasm` 渲染模式上面的。
+
+#### 原因
+这是由于在部分A卡上面，webgl渲染会存在兼容性bug，导致了画面180度倒挂。
 
 
 #### 解决方案
 
 1. 如果是h264的源，建议使用MSE 硬解码 通过设置`useMSE:true`,使得渲染元素是video标签。
 2. 如果是h265的源，推荐使用 `jessibuca pro` 目前pro 版本支持 `mse` `wasm`  `webcodecs`解码之后通过video标签渲染。
+3. 提供一个操作按钮，让用户可以手动的旋转画面，播放器提供了`setRotate`方法，可以通过`setRotate`方法旋转画面。
 
 
 ### chrome无法访问更私有的地址
