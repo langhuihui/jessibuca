@@ -12,14 +12,14 @@ export function parseAVCDecoderConfigurationRecord(arrayBuffer) {
     if (version !== 1 || avcProfile === 0) {
         // this._onError(DemuxErrors.FORMAT_ERROR, 'Flv: Invalid AVCDecoderConfigurationRecord');
 
-        return;
+        return meta;
     }
 
     const _naluLengthSize = (v.getUint8(4) & 3) + 1;  // lengthSizeMinusOne
 
     if (_naluLengthSize !== 3 && _naluLengthSize !== 4) {  // holy shit!!!
         // this._onError(DemuxErrors.FORMAT_ERROR, `Flv: Strange NaluLengthSizeMinusOne: ${_naluLengthSize - 1}`);
-        return;
+        return meta;
     }
     let spsCount = v.getUint8(5) & 31;  // numOfSequenceParameterSets
 
@@ -92,7 +92,7 @@ export function parseAVCDecoderConfigurationRecord(arrayBuffer) {
     let ppsCount = v.getUint8(offset);  // numOfPictureParameterSets
     if (ppsCount === 0) {
         // this._onError(DemuxErrors.FORMAT_ERROR, 'Flv: Invalid AVCDecoderConfigurationRecord: No PPS');
-        return;
+        return meta;
     } else if (ppsCount > 1) {
         // Log.w(this.TAG, `Flv: Strange AVCDecoderConfigurationRecord: PPS Count = ${ppsCount}`);
     }

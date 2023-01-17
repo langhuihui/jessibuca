@@ -112,7 +112,7 @@ export default class MseDecoder extends Emitter {
             if (isIframe && payload[1] === 0) {
                 let config = parseAVCDecoderConfigurationRecord(payload.slice(5))
                 const videoInfo = this.player.video.videoInfo;
-                if (config.codecWidth !== videoInfo.width || config.codecHeight !== videoInfo.height) {
+                if ((videoInfo && videoInfo.width && videoInfo.height) && (config && config.codecWidth && config.codecHeight) && (config.codecWidth !== videoInfo.width || config.codecHeight !== videoInfo.height)) {
                     this.player.debug.warn('MediaSource', `width or height is update, width ${videoInfo.width}-> ${config.codecWidth}, height ${videoInfo.height}-> ${config.codecHeight}`)
                     this.isInitInfo = false;
                     this.player.video.init = false;
