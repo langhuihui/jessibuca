@@ -320,7 +320,7 @@
 import { ElNotification,ElMessage } from 'element-plus'
 
 function getBrowser() {
-    const UserAgent = navigator.userAgent.toLowerCase();
+    const UserAgent = window.navigator.userAgent.toLowerCase() || '';
     const browserInfo = {};
     const browserArray = {
         IE: window.ActiveXObject || "ActiveXObject" in window, // IE
