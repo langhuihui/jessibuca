@@ -337,7 +337,7 @@ export default class MseDecoder extends Emitter {
 
     endOfStream() {
         // fix: MediaSource endOfStream before demuxer initialization completes (before HAVE_METADATA) is treated as an error
-        const $videoElement = this.player.video.$videoElement;
+        const $videoElement = this.player.video && this.player.video.$videoElement;
         if (this.isStateOpen && $videoElement && $videoElement.readyState >= 1) {
             try {
                 this.mediaSource.endOfStream();

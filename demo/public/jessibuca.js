@@ -953,7 +953,11 @@
 	      }
 	    } else {
 	      try {
-	        screenfull.exit().then(() => {}).catch(() => {
+	        screenfull.exit().then(() => {
+	          if (player.webFullscreen) {
+	            player.webFullscreen = false;
+	          }
+	        }).catch(() => {
 	          player.webFullscreen = false;
 	        });
 	      } catch (e) {
@@ -961,19 +965,23 @@
 	      }
 	    }
 	  });
-	  player.on(EVENTS.webFullscreen, value => {
-	    if (value) {
-	      player.$container.classList.add('jessibuca-fullscreen-web');
-	    } else {
-	      player.$container.classList.remove('jessibuca-fullscreen-web');
-	    } //
+
+	  if (isMobile()) {
+	    player.on(EVENTS.webFullscreen, value => {
+	      if (value) {
+	        player.$container.classList.add('jessibuca-fullscreen-web');
+	      } else {
+	        player.$container.classList.remove('jessibuca-fullscreen-web');
+	      } //
 
 
-	    player.emit(JESSIBUCA_EVENTS.fullscreen, player.fullscreen);
-	  }); //
+	      player.emit(JESSIBUCA_EVENTS.fullscreen, player.fullscreen);
+	    });
+	  } //
+
 
 	  player.on(EVENTS.resize, () => {
-	    player.video.resize();
+	    player.video && player.video.resize();
 	  });
 
 	  if (player._opt.debug) {
@@ -1523,15 +1531,18 @@
 	    }
 
 	    const dataURL = this.$videoElement.toDataURL(formatType[format] || formatType.png, encoderOptions);
-	    const file = dataURLToFile(dataURL);
 
 	    if (type === SCREENSHOT_TYPE.base64) {
 	      return dataURL;
-	    } else if (type === SCREENSHOT_TYPE.blob) {
-	      return file;
-	    } else if (type === SCREENSHOT_TYPE.download) {
-	      // downloadImg(file, filename);
-	      saveAs(file, filename);
+	    } else {
+	      const file = dataURLToFile(dataURL);
+
+	      if (type === SCREENSHOT_TYPE.blob) {
+	        return file;
+	      } else if (type === SCREENSHOT_TYPE.download) {
+	        // downloadImg(file, filename);
+	        saveAs(file, filename);
+	      }
 	    }
 	  } //
 
@@ -1612,10 +1623,12 @@
 	    super();
 	    this.player = player;
 	    const $videoElement = document.createElement('video');
+	    const $canvasElement = document.createElement('canvas');
 	    $videoElement.muted = true;
 	    $videoElement.style.position = "absolute";
 	    $videoElement.style.top = 0;
 	    $videoElement.style.left = 0;
+	    this._delayPlay = false;
 	    player.$container.appendChild($videoElement);
 	    this.videoInfo = {
 	      width: '',
@@ -1633,6 +1646,8 @@
 	    }
 
 	    this.$videoElement = $videoElement;
+	    this.$canvasElement = $canvasElement;
+	    this.canvasContext = $canvasElement.getContext('2d');
 	    this.fixChromeVideoFlashBug();
 	    this.resize();
 	    const {
@@ -1640,6 +1655,10 @@
 	    } = this.player.events;
 	    proxy(this.$videoElement, 'canplay', () => {
 	      this.player.debug.log('Video', 'canplay');
+
+	      if (this._delayPlay) {
+	        this._play();
+	      }
 	    });
 	    proxy(this.$videoElement, 'waiting', () => {
 	      this.player.emit(EVENTS.videoWaiting);
@@ -1647,13 +1666,19 @@
 	    proxy(this.$videoElement, 'timeupdate', event => {
 	      // this.player.emit(EVENTS.videoTimeUpdate, event.timeStamp);
 	      const timeStamp = parseInt(event.timeStamp, 10);
-	      this.player.emit(EVENTS.timeUpdate, timeStamp);
+	      this.player.emit(EVENTS.timeUpdate, timeStamp); // check is pause;
+
+	      if (!this.isPlaying()) {
+	        this.$videoElement.play();
+	      }
 	    });
 	    this.player.debug.log('Video', 'init');
 	  }
 
 	  destroy() {
 	    super.destroy();
+	    this.$canvasElement = null;
+	    this.canvasContext = null;
 
 	    if (this.$videoElement) {
 	      this.$videoElement.pause();
@@ -1688,14 +1713,45 @@
 	  }
 
 	  play() {
-	    // this.$videoElement.autoplay = true;
-	    setTimeout(() => {
-	      this.$videoElement && this.$videoElement.play().then(() => {
-	        this.player.debug.log('Video', 'play');
-	      }).catch(e => {
-	        this.player.debug.warn('Video', 'play', e);
-	      });
-	    }, 100);
+	    if (this.$videoElement) {
+	      const readyState = this._getVideoReadyState();
+
+	      this.player.debug.log('Video', `play and readyState: ${readyState}`);
+
+	      if (readyState === 0) {
+	        this.player.debug.warn('Video', 'readyState is 0 and set _delayPlay to true');
+	        this._delayPlay = true;
+	        return;
+	      }
+
+	      this._play();
+	    }
+	  }
+
+	  _getVideoReadyState() {
+	    let result = 0;
+
+	    if (this.$videoElement) {
+	      result = this.$videoElement.readyState;
+	    }
+
+	    return result;
+	  }
+
+	  _play() {
+	    this.$videoElement && this.$videoElement.play().then(() => {
+	      this._delayPlay = false;
+	      this.player.debug.log('Video', '_play success');
+	      setTimeout(() => {
+	        if (!this.isPlaying()) {
+	          this.player.debug.warn('Video', `play failed and retry play`);
+
+	          this._play();
+	        }
+	      }, 100);
+	    }).catch(e => {
+	      this.player.debug.error('Video', '_play error', e);
+	    });
 	  }
 
 	  pause(isNow) {
@@ -1739,21 +1795,27 @@
 	    }
 
 	    const $video = this.$videoElement;
-	    let canvas = document.createElement('canvas');
+	    let canvas = this.$canvasElement;
 	    canvas.width = $video.videoWidth;
 	    canvas.height = $video.videoHeight;
-	    const context = canvas.getContext('2d');
-	    context.drawImage($video, 0, 0, canvas.width, canvas.height);
-	    const dataURL = canvas.toDataURL(SCREENSHOT_TYPE[format] || SCREENSHOT_TYPE.png, encoderOptions);
-	    const file = dataURLToFile(dataURL);
+	    this.canvasContext.drawImage($video, 0, 0, canvas.width, canvas.height);
+	    const dataURL = canvas.toDataURL(formatType[format] || formatType.png, encoderOptions); // release memory
+
+	    this.canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+	    canvas.width = 0;
+	    canvas.height = 0;
 
 	    if (type === SCREENSHOT_TYPE.base64) {
 	      return dataURL;
-	    } else if (type === SCREENSHOT_TYPE.blob) {
-	      return file;
-	    } else if (type === SCREENSHOT_TYPE.download) {
-	      // downloadImg(file, filename);
-	      saveAs(file, filename);
+	    } else {
+	      const file = dataURLToFile(dataURL);
+
+	      if (type === SCREENSHOT_TYPE.blob) {
+	        return file;
+	      } else if (type === SCREENSHOT_TYPE.download) {
+	        // downloadImg(file, filename);
+	        saveAs(file, filename);
+	      }
 	    }
 	  }
 
@@ -1811,6 +1873,10 @@
 	    this.$videoElement.style.transform = 'rotate(' + rotate + 'deg)';
 	    this.$videoElement.style.left = left + "px";
 	    this.$videoElement.style.top = top + "px";
+	  }
+
+	  isPlaying() {
+	    return this.$videoElement && !this.$videoElement.paused;
 	  }
 
 	}
@@ -9716,7 +9782,7 @@
 
 	  if (version !== 1 || avcProfile === 0) {
 	    // this._onError(DemuxErrors.FORMAT_ERROR, 'Flv: Invalid AVCDecoderConfigurationRecord');
-	    return;
+	    return meta;
 	  }
 
 	  const _naluLengthSize = (v.getUint8(4) & 3) + 1; // lengthSizeMinusOne
@@ -9725,7 +9791,7 @@
 	  if (_naluLengthSize !== 3 && _naluLengthSize !== 4) {
 	    // holy shit!!!
 	    // this._onError(DemuxErrors.FORMAT_ERROR, `Flv: Strange NaluLengthSizeMinusOne: ${_naluLengthSize - 1}`);
-	    return;
+	    return meta;
 	  }
 
 	  let spsCount = v.getUint8(5) & 31; // numOfSequenceParameterSets
@@ -9799,7 +9865,7 @@
 
 	  if (ppsCount === 0) {
 	    // this._onError(DemuxErrors.FORMAT_ERROR, 'Flv: Invalid AVCDecoderConfigurationRecord: No PPS');
-	    return;
+	    return meta;
 	  }
 
 	  offset++;
@@ -11108,7 +11174,7 @@
 	        let config = parseAVCDecoderConfigurationRecord(payload.slice(5));
 	        const videoInfo = this.player.video.videoInfo;
 
-	        if (config.codecWidth !== videoInfo.width || config.codecHeight !== videoInfo.height) {
+	        if (videoInfo && videoInfo.width && videoInfo.height && config && config.codecWidth && config.codecHeight && (config.codecWidth !== videoInfo.width || config.codecHeight !== videoInfo.height)) {
 	          this.player.debug.warn('MediaSource', `width or height is update, width ${videoInfo.width}-> ${config.codecWidth}, height ${videoInfo.height}-> ${config.codecHeight}`);
 	          this.isInitInfo = false;
 	          this.player.video.init = false;
@@ -11339,7 +11405,10 @@
 	  }
 
 	  endOfStream() {
-	    if (this.isStateOpen) {
+	    // fix: MediaSource endOfStream before demuxer initialization completes (before HAVE_METADATA) is treated as an error
+	    const $videoElement = this.player.video && this.player.video.$videoElement;
+
+	    if (this.isStateOpen && $videoElement && $videoElement.readyState >= 1) {
 	      try {
 	        this.mediaSource.endOfStream();
 	      } catch (e) {
@@ -12161,10 +12230,17 @@
 
 	  checkHeartTimeout() {
 	    this._checkHeartTimeout = setTimeout(() => {
-	      this.pause().then(() => {
-	        this.emit(EVENTS.timeout, EVENTS.delayTimeout);
-	        this.emit(EVENTS.delayTimeout);
-	      });
+	      if (this.playing) {
+	        // check again
+	        if (this._stats.fps !== 0) {
+	          return;
+	        }
+
+	        this.pause().then(() => {
+	          this.emit(EVENTS.timeout, EVENTS.delayTimeout);
+	          this.emit(EVENTS.delayTimeout);
+	        });
+	      }
 	    }, this._opt.heartTimeout * 1000);
 	  }
 
@@ -12185,6 +12261,11 @@
 
 	  checkLoadingTimeout() {
 	    this._checkLoadingTimeout = setTimeout(() => {
+	      // check again
+	      if (this.playing) {
+	        return;
+	      }
+
 	      this.pause().then(() => {
 	        this.emit(EVENTS.timeout, EVENTS.loadingTimeout);
 	        this.emit(EVENTS.loadingTimeout);
@@ -12325,8 +12406,19 @@
 	      throw new Error(`Jessibuca container type can not be ${$container.nodeName} type`);
 	    }
 
+	    if (_opt.videoBuffer >= _opt.heartTimeout) {
+	      throw new Error(`Jessibuca videoBuffer ${_opt.videoBuffer}s must be less than heartTimeout ${_opt.heartTimeout}s`);
+	    }
+
 	    $container.classList.add('jessibuca-container');
-	    delete _opt.container; // s -> ms
+	    delete _opt.container; // 禁用离屏渲染
+
+	    _opt.forceNoOffscreen = true; // 移动端不支持自动关闭控制栏
+
+	    if (isMobile()) {
+	      _opt.controlAutoHide = false;
+	    } // s -> ms
+
 
 	    if (isNotEmpty(_opt.videoBuffer)) {
 	      _opt.videoBuffer = Number(_opt.videoBuffer) * 1000;
@@ -12957,6 +13049,10 @@
 
 
 	  screenshot(filename, format, quality, type) {
+	    if (!this.player.video) {
+	      return '';
+	    }
+
 	    return this.player.video.screenshot(filename, format, quality, type);
 	  }
 	  /**

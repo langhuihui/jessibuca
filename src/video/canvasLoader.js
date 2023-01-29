@@ -149,15 +149,18 @@ export default class CanvasVideoLoader extends CommonLoader {
         }
         const dataURL = this.$videoElement.toDataURL(formatType[format] || formatType.png, encoderOptions);
 
-        const file = dataURLToFile(dataURL)
         if (type === SCREENSHOT_TYPE.base64) {
             return dataURL;
-        } else if (type === SCREENSHOT_TYPE.blob) {
-            return file;
-        } else if (type === SCREENSHOT_TYPE.download) {
-            // downloadImg(file, filename);
-            saveAs(file, filename);
+        } else {
+            const file = dataURLToFile(dataURL)
+            if (type === SCREENSHOT_TYPE.blob) {
+                return file;
+            } else if (type === SCREENSHOT_TYPE.download) {
+                // downloadImg(file, filename);
+                saveAs(file, filename);
+            }
         }
+
     }
 
     //

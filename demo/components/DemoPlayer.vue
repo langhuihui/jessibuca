@@ -39,7 +39,7 @@
                     type="checkbox"
                     v-model="controlAutoHide"
                     @change="restartPlay()"
-                /><span>控制栏自动隐藏</span>
+                /><span>控制栏自动隐藏(移动端不支持)</span>
             </div>
             <div class="input">
                 <div>输入URL：</div>

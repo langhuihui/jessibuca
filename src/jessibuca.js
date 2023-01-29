@@ -1,7 +1,7 @@
 import Player from './player';
 import Events from "./utils/events";
 import {DEMUX_TYPE, EVENTS, EVENTS_ERROR, JESSIBUCA_EVENTS, PLAYER_PLAY_PROTOCOL, SCALE_MODE_TYPE} from "./constant";
-import {isEmpty, isNotEmpty, supportWCS, uuid16} from "./utils";
+import {isEmpty, isMobile, isNotEmpty, supportWCS, uuid16} from "./utils";
 import Emitter from "./utils/emitter";
 
 
@@ -42,6 +42,11 @@ class Jessibuca extends Emitter {
 
         // 禁用离屏渲染
         _opt.forceNoOffscreen = true;
+
+        // 移动端不支持自动关闭控制栏
+        if (isMobile()) {
+            _opt.controlAutoHide = false;
+        }
 
         // s -> ms
         if (isNotEmpty(_opt.videoBuffer)) {
@@ -620,6 +625,11 @@ class Jessibuca extends Emitter {
      * @param type {string} download,base64,blob
      */
     screenshot(filename, format, quality, type) {
+
+        if (!this.player.video) {
+            return ''
+        }
+
         return this.player.video.screenshot(filename, format, quality, type)
     }
 

@@ -9,10 +9,12 @@ export default class VideoLoader extends CommonLoader {
         super();
         this.player = player;
         const $videoElement = document.createElement('video');
+        const $canvasElement = document.createElement('canvas');
         $videoElement.muted = true;
         $videoElement.style.position = "absolute";
         $videoElement.style.top = 0;
         $videoElement.style.left = 0;
+        this._delayPlay = false;
         player.$container.appendChild($videoElement);
         this.videoInfo = {
             width: '',
@@ -26,6 +28,8 @@ export default class VideoLoader extends CommonLoader {
             this.vwriter = this.trackGenerator.writable.getWriter();
         }
         this.$videoElement = $videoElement;
+        this.$canvasElement = $canvasElement;
+        this.canvasContext = $canvasElement.getContext('2d');
         this.fixChromeVideoFlashBug();
         this.resize();
 
@@ -33,6 +37,9 @@ export default class VideoLoader extends CommonLoader {
 
         proxy(this.$videoElement, 'canplay', () => {
             this.player.debug.log('Video', 'canplay');
+            if (this._delayPlay) {
+                this._play();
+            }
         })
 
         proxy(this.$videoElement, 'waiting', () => {
@@ -43,6 +50,10 @@ export default class VideoLoader extends CommonLoader {
             // this.player.emit(EVENTS.videoTimeUpdate, event.timeStamp);
             const timeStamp = parseInt(event.timeStamp, 10);
             this.player.emit(EVENTS.timeUpdate, timeStamp)
+            // check is pause;
+            if (!this.isPlaying()) {
+                this.$videoElement.play();
+            }
         })
 
         this.player.debug.log('Video', 'init');
@@ -50,6 +61,8 @@ export default class VideoLoader extends CommonLoader {
 
     destroy() {
         super.destroy();
+        this.$canvasElement = null;
+        this.canvasContext = null;
         if (this.$videoElement) {
             this.$videoElement.pause();
             this.$videoElement.currentTime = 0;
@@ -68,7 +81,7 @@ export default class VideoLoader extends CommonLoader {
         this.player.debug.log('Video', 'destroy');
     }
 
-    fixChromeVideoFlashBug(){
+    fixChromeVideoFlashBug() {
         const browser = getBrowser();
         const type = browser.type.toLowerCase();
         if (type === 'chrome' || type === 'edge') {
@@ -79,15 +92,40 @@ export default class VideoLoader extends CommonLoader {
     }
 
     play() {
-        // this.$videoElement.autoplay = true;
-        setTimeout(() => {
-            this.$videoElement && this.$videoElement.play().then(() => {
-                this.player.debug.log('Video', 'play');
-            }).catch((e) => {
-                this.player.debug.warn('Video', 'play', e);
-            })
-        }, 100)
+        if (this.$videoElement) {
+            const readyState = this._getVideoReadyState();
+            this.player.debug.log('Video', `play and readyState: ${readyState}`);
+            if (readyState === 0) {
+                this.player.debug.warn('Video', 'readyState is 0 and set _delayPlay to true');
+                this._delayPlay = true;
+                return;
+            }
+            this._play();
+        }
+    }
 
+    _getVideoReadyState() {
+        let result = 0;
+        if (this.$videoElement) {
+            result = this.$videoElement.readyState;
+        }
+        return result;
+    }
+
+    _play() {
+        this.$videoElement && this.$videoElement.play().then(() => {
+            this._delayPlay = false;
+            this.player.debug.log('Video', '_play success');
+            setTimeout(() => {
+                if (!this.isPlaying()) {
+                    this.player.debug.warn('Video', `play failed and retry play`)
+                    this._play();
+                }
+            }, 100)
+
+        }).catch((e) => {
+            this.player.debug.error('Video', '_play error', e);
+        })
     }
 
     pause(isNow) {
@@ -130,21 +168,27 @@ export default class VideoLoader extends CommonLoader {
             encoderOptions = Number(quality);
         }
         const $video = this.$videoElement;
-        let canvas = document.createElement('canvas');
+        let canvas = this.$canvasElement;
         canvas.width = $video.videoWidth;
         canvas.height = $video.videoHeight;
-        const context = canvas.getContext('2d');
-        context.drawImage($video, 0, 0, canvas.width, canvas.height);
-        const dataURL = canvas.toDataURL(SCREENSHOT_TYPE[format] || SCREENSHOT_TYPE.png, encoderOptions);
-        const file = dataURLToFile(dataURL)
+        this.canvasContext.drawImage($video, 0, 0, canvas.width, canvas.height);
+        const dataURL = canvas.toDataURL(formatType[format] || formatType.png, encoderOptions);
+        // release memory
+        this.canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.width = 0;
+        canvas.height = 0;
         if (type === SCREENSHOT_TYPE.base64) {
             return dataURL;
-        } else if (type === SCREENSHOT_TYPE.blob) {
-            return file;
-        } else if (type === SCREENSHOT_TYPE.download) {
-            // downloadImg(file, filename);
-            saveAs(file,filename)
+        } else {
+            const file = dataURLToFile(dataURL);
+            if (type === SCREENSHOT_TYPE.blob) {
+                return file;
+            } else if (type === SCREENSHOT_TYPE.download) {
+                // downloadImg(file, filename);
+                saveAs(file, filename)
+            }
         }
+
     }
 
     initCanvasViewSize() {
@@ -200,5 +244,9 @@ export default class VideoLoader extends CommonLoader {
         this.$videoElement.style.transform = 'rotate(' + rotate + 'deg)';
         this.$videoElement.style.left = left + "px"
         this.$videoElement.style.top = top + "px"
+    }
+
+    isPlaying() {
+        return this.$videoElement && !this.$videoElement.paused;
     }
 }
