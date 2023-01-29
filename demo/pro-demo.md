@@ -71,7 +71,7 @@
 #### http
 [http://jessibuca.monibuca.com/pro/talk-demo.html](http://jessibuca.monibuca.com/pro/talk-demo.html)
 
-## 语音通讯(单独)
+## 语音通讯(独立js文件)
 #### https
 [https://jessibuca.com/pro/talk-demo2.html](https://jessibuca.com/pro/talk-demo2.html)
 #### http

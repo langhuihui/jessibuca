@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Jessica ai face detector demo</title>
+    <script src="./vconsole.js"></script>
     <script src="./jessibuca-pro-face-detector-demo.js"></script>
     <script src="./jessibuca-pro-demo.js"></script>
     <style>
@@ -122,7 +123,19 @@
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
 
+    function isMobile() {
+        return (/iphone|ipad|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));
+    }
 
+    function isPad() {
+        return (/ipad|android(?!.*mobile)|tablet|kindle|silk/i.test(window.navigator.userAgent.toLowerCase()));
+    }
+
+    const useVconsole = isMobile() || isPad()
+
+    if (useVconsole && window.VConsole) {
+        new window.VConsole();
+    }
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var jessibuca = null;
@@ -135,6 +148,7 @@
             text: "",
             loadingText: "加载中",
             debug: true,
+            debugLevel:'debug',
             useSIMD: true,
             showBandwidth: showOperateBtns, // 显示网速
             showPerformance: showOperateBtns, // 显示性能

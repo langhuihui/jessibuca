@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Jessica Pro simd demo</title>
+    <script src="./vconsole.js"></script>
     <script src="./jessibuca-pro-demo.js"></script>
     <style>
         .root {
@@ -115,6 +116,20 @@
     var $destroy = document.getElementById('destroy');
     var $fps = document.querySelector('.fps-inner');
 
+    function isMobile() {
+        return (/iphone|ipad|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));
+    }
+
+    function isPad() {
+        return (/ipad|android(?!.*mobile)|tablet|kindle|silk/i.test(window.navigator.userAgent.toLowerCase()));
+    }
+
+    const useVconsole = isMobile() || isPad()
+
+    if (useVconsole && window.VConsole) {
+        new window.VConsole();
+    }
+
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -128,9 +143,10 @@
             isResize: false,
             text: "",
             loadingText: "加载中",
-            debug: debug,
+            debug: true,
+            debugLevel:'debug',
             showBandwidth: showOperateBtns, // 显示网速
-            showPerformance:showOperateBtns,
+            showPerformance: showOperateBtns,
             operateBtns: {
                 fullscreen: showOperateBtns,
                 screenshot: showOperateBtns,
@@ -138,14 +154,15 @@
                 audio: showOperateBtns,
                 ptz: showOperateBtns,
                 quality: showOperateBtns,
+                performance: showOperateBtns,
             },
             qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
             heartTimeout: 10,
             watermarkConfig: {
-                text:{
-                    content:'jessibuca-pro'
+                text: {
+                    content: 'jessibuca-pro'
                 },
                 right: 10,
                 top: 10

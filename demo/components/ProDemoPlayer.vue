@@ -337,7 +337,10 @@ function getBrowser() {
         if (browserArray[i]) {
             let versions = '';
             if (i === 'IE') {
-                versions = UserAgent.match(/(msie\s|trident.*rv:)([\w.]+)/)[2];
+                const versionArray = UserAgent.match(/(msie\s|trident.*rv:)([\w.]+)/)
+                if (versionArray && versionArray.length > 2) {
+                    versions = UserAgent.match(/(msie\s|trident.*rv:)([\w.]+)/)[2];
+                }
             } else if (i === 'Chrome') {
                 for (let mt in navigator.mimeTypes) {
                     //检测是否是360浏览器(测试只有pc端的360才起作用)
@@ -345,17 +348,35 @@ function getBrowser() {
                         i = '360';
                     }
                 }
-                versions = UserAgent.match(/chrome\/([\d.]+)/)[1];
+                const versionArray = UserAgent.match(/chrome\/([\d.]+)/);
+                if (versionArray && versionArray.length > 1) {
+                    versions = versionArray[1];
+                }
             } else if (i === 'Firefox') {
-                versions = UserAgent.match(/firefox\/([\d.]+)/)[1];
+                const versionArray = UserAgent.match(/firefox\/([\d.]+)/);
+                if (versionArray && versionArray.length > 1) {
+                    versions = versionArray[1];
+                }
             } else if (i === 'Opera') {
-                versions = UserAgent.match(/opera\/([\d.]+)/)[1];
+                const versionArray = UserAgent.match(/opera\/([\d.]+)/);
+                if (versionArray && versionArray.length > 1) {
+                    versions = versionArray[1];
+                }
             } else if (i === 'Safari') {
-                versions = UserAgent.match(/version\/([\d.]+)/)[1];
+                const versionArray = UserAgent.match(/version\/([\d.]+)/);
+                if (versionArray && versionArray.length > 1) {
+                    versions = versionArray[1];
+                }
             } else if (i === 'Edge') {
-                versions = UserAgent.match(/edge\/([\d.]+)/)[1];
+                const versionArray = UserAgent.match(/edge\/([\d.]+)/);
+                if (versionArray && versionArray.length > 1) {
+                    versions = versionArray[1];
+                }
             } else if (i === 'QQBrowser') {
-                versions = UserAgent.match(/qqbrowser\/([\d.]+)/)[1];
+                const versionArray = UserAgent.match(/qqbrowser\/([\d.]+)/);
+                if (versionArray && versionArray.length > 1) {
+                    versions = versionArray[1];
+                }
             }
             browserInfo.type = i;
             browserInfo.version = parseInt(versions);
@@ -363,7 +384,6 @@ function getBrowser() {
     }
     return browserInfo;
 }
-
 function formatTimeTips(time) {
     var result;
 

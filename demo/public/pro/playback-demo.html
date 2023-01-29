@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script src="./vconsole.js"></script>
     <script src="./jessibuca-pro-demo.js"></script>
     <style>
         .root {
@@ -191,6 +192,20 @@
     var jessibuca = null;
     var isPlaybackPause = false;
 
+    function isMobile() {
+        return (/iphone|ipad|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));
+    }
+
+    function isPad() {
+        return (/ipad|android(?!.*mobile)|tablet|kindle|silk/i.test(window.navigator.userAgent.toLowerCase()));
+    }
+
+    const useVconsole = isMobile() || isPad()
+
+    if (useVconsole && window.VConsole) {
+        new window.VConsole();
+    }
+
     function create() {
         const showOperateBtns = $isShowControl.value === 'true';
         const onlyDecoderIFrame = Number($onlyDecoderIFrame.value);
@@ -201,6 +216,7 @@
             text: "",
             loadingText: "加载中",
             debug: true,
+            debugLevel: 'debug',
             showBandwidth: showOperateBtns, // 显示网速
             showPlaybackOperate: showOperateBtns,
             operateBtns: {
@@ -250,7 +266,7 @@
             jessibuca.playback(href, {
                 playList: playTimesArray,
                 fps: playFps,
-                showControl:isShow24H,
+                showControl: isShow24H,
                 isUseFpsRender: isUseFpsRender === 'true',
             });
         }
