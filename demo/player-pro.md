@@ -12,6 +12,12 @@ sidebar: false
 > 如需要购买PRO版本可以联系添加作者微信：bosswancheng
 
 
+> 如需要更好的体验录像流(TF卡流)，可以通过单独的测试页面，
+> [http地址](http://jessibuca.monibuca.com/pro/playback-demo.html),
+> [https地址](https://jessibuca.com/pro/playback-demo.html)
+
+> 如果需要更好的体验语音通讯，可以通过单独的测试页面， [http地址](http://jessibuca.monibuca.com/pro/talk-demo2.html),[https地址](https://jessibuca.com/pro/talk-demo2.html)
+
 - 支持6种格式：(live/test为streamPath)
 1. ws-raw 即ws://host-name:port/jessica/live/test (该协议只对接了[monibuca服务器](https://monibuca.com),其他服务器需要额外对接)
 2. ws-flv 即ws://host-name:port/jessica/live/test.flv

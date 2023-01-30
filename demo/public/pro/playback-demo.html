@@ -106,11 +106,22 @@
             </div>
         </div>
         <div class="input">
+            <div style="width: 900px">
+                <span><span style="color: red">TPS:解码前缓冲数据:</span>对于存在有些流会一下子以2倍甚至4倍的速率推送的情况，如果设置为true，则会根据计算出来的fps，只根据fps和倍率来解码数据，其他数据还是被缓存在队列中，等待解码。
+            </span>
+            </div>
+        </div>
+        <div class="input">
             <div class="playbackForward">
                 <span>FPS设置：</span>
                 <select id="isUseFpsRender" style="width: 140px">
                     <option value="false" selected>动态(根据流)</option>
                     <option value="true">定频（本地设置）</option>
+                </select>
+                <span>是否解码前缓冲数据</span>
+                <select id="isCacheBeforeDecodeForFpsRender" style="width: 50px">
+                    <option value="true">是</option>
+                    <option value="false" selected>否</option>
                 </select>
                 <span>是否显示操作按钮</span>
                 <select id="isShowControl" style="width: 50px">
@@ -188,6 +199,7 @@
     var $isShowControl = document.getElementById('isShowControl'); // 是否显示按钮
     var $isShow24H = document.getElementById('isShow24H'); // 是否显示24H操作栏
     var $onlyDecoderIFrame = document.getElementById('onlyDecoderIFrame'); // 是否显示24H操作栏
+    var $isCacheBeforeDecodeForFpsRender = document.getElementById('isCacheBeforeDecodeForFpsRender');
     var forceNoOffscreen = true; //
     var jessibuca = null;
     var isPlaybackPause = false;
@@ -255,6 +267,7 @@
         var isUseFpsRender = $isUseFpsRender.value;
         var playTimesArray = JSON.parse(playTimes);
         const isShow24H = $isShow24H.value === 'true';
+        const isCacheBeforeDecodeForFpsRender = $isCacheBeforeDecodeForFpsRender.value === 'true';
 
         if (!href) {
             return
@@ -268,6 +281,7 @@
                 fps: playFps,
                 showControl: isShow24H,
                 isUseFpsRender: isUseFpsRender === 'true',
+                isCacheBeforeDecodeForFpsRender: isCacheBeforeDecodeForFpsRender
             });
         }
         isPlaybackPause = false;
