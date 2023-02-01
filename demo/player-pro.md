@@ -12,6 +12,10 @@ sidebar: false
 > 如需要购买PRO版本可以联系添加作者微信：bosswancheng
 
 
+> 完整离线包下载地址：[下载地址](https://jessibuca.com/pro.zip)
+>
+> 需要本地挂载在Nginx（或者自己搭建一个web-server服务）上面才能跑起来。
+
 > 如需要更好的体验录像流(TF卡流)，可以通过单独的测试页面，
 > [http地址](http://jessibuca.monibuca.com/pro/playback-demo.html),
 > [https地址](https://jessibuca.com/pro/playback-demo.html)
