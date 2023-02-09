@@ -728,15 +728,27 @@ pro 由于使用了解码性能更强的simd解码，所以推荐使用simd 解�
 ```
 {
     videoBuffer:0,
-    decoder:"simd"
-}
-```
-{
-    videoBuffer:0,
     videoBufferDelay:0.3
     useSIMD:true
 }
 ```
+
+
+### 关于PRO提示MSE不支持265解码可能得原因
+
+#### 检查下chrome（edge）的版本号
+
+确保是较新版本。
+
+#### 检查操作系统
+
+##### window
+可能window10 1809 以前的版本不支持，建议升级到最新版本。
+
+或者安装360浏览器（最新版本）
+
+#### mac
+版本号大于10.15.4
 
 
 ### 是否支持本地文件播放
