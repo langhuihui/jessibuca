@@ -62,8 +62,6 @@ this.$options.jessibuca = new Jessibuca({
 ```
 
 
-
-
 #### react
 #### 关于new Jessibuca 之后的实例绑定
 
@@ -88,6 +86,12 @@ this.$options.jessibuca = new Jessibuca({
 
 
 如果遇到硬解码失败的时候，会自动切换到wasm软解码
+
+### 关于解码（useMSE、useWCS、wasm）优先级
+
+如果同时配置了`useMSE`和`useWCS`，则优先使用`useMSE`，如果`useMSE`不支持，则使用`useWCS`，如果 `useWCS` 不支持，则降级到`wasm`解码。
+
+> useMSE > useWCS > wasm
 
 ### 关于是否可以播放rtsp、rtmp协议
 
