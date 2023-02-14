@@ -116,6 +116,26 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 | Edge | 支持 |
 | Safari | 支持 |
 
+#### pc端
+
+优先使用mse硬解码，如果不支持mse，会降级到wasm simd解码，如果不支持wasm simd，会降级到wasm解码。
+
+#### 移动端
+
+#### 安卓
+
+> 安卓的浏览器基本都支持mse，优先使用mse硬解码。
+
+优先使用mse硬解码(h264+h265)，如果不支持mse，会降级到wasm simd解码，如果不支持wasm simd，会降级到wasm解码。
+
+#### 苹果
+
+> 苹果自带的浏览器不支持mse，所以只能使用wasm（simd）解码。
+
+> 通过测试发现，苹果的Safari 是支持wasm simd 解码的。
+
+优先使用wasm simd解码，如果不支持wasm simd，会降级到wasm解码。
+
 
 ## 操作系统
 
