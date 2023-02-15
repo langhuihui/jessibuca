@@ -854,6 +854,14 @@ Jessibuca是一款开源的纯H5直播流播放器
 > 确保视频流的时间戳也得增加。
 
 
+### 关于浏览器崩溃(sbox_fatal_memory_exceeded)
+
+- 看下本身电脑的内存是否足够，分配给浏览器的内存是否足够。
+
+可以看下 http://jessibuca.monibuca.com/pro.html#%E7%94%B5%E8%84%91%E5%9E%8B%E5%8F%B7%E4%BB%A5%E5%8F%8A%E7%A0%81%E7%8E%87
+
+每路所需的内存情况。
+
 # 群
 <img src="/public/qrcode.jpeg">
 
