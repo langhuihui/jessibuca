@@ -82,7 +82,7 @@ export default (player, control) => {
         // control.autoSize();
     };
     const screenfullH5Control = () => {
-        if (isMobile() && control.$controls) {
+        if (isMobile() && control.$controls && player._opt.useWebFullScreen) {
             setTimeout(() => {
                 if (player.fullscreen) {
                     // console.log(player.width, player.height);

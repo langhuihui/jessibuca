@@ -45,16 +45,20 @@ export default (player) => {
                 screenfull.request(player.$container).then(() => {
 
                 }).catch((e) => {
-                    player.webFullscreen = true;
+                    if (isMobile() && player._opt.useWebFullScreen) {
+                        player.webFullscreen = true;
+                    }
                 });
 
             } catch (e) {
-                player.webFullscreen = true;
+                if (isMobile() && player._opt.useWebFullScreen) {
+                    player.webFullscreen = true;
+                }
             }
         } else {
             try {
                 screenfull.exit().then(() => {
-                    if(player.webFullscreen){
+                    if (player.webFullscreen) {
                         player.webFullscreen = false;
                     }
                 }).catch(() => {

@@ -170,6 +170,15 @@
     <div class="container-shell">
         <div id="container"></div>
         <div class="input">
+            <div>
+                <input
+                    type="checkbox"
+                    id="useWebFullScreen"
+                /><span>使用web全屏</span>
+            </div>
+
+        </div>
+        <div class="input">
             <div>输入URL：</div>
             <input
                 autocomplete="on"
@@ -194,6 +203,7 @@
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
     var $fullscreen = document.getElementById('fullscreen');
+    var $useWebFullScreen = document.getElementById('useWebFullScreen');
 
 
     var showOperateBtns = true; // 是否显示按钮
@@ -216,6 +226,7 @@
                 audio: showOperateBtns,
             },
             forceNoOffscreen: forceNoOffscreen,
+            useWebFullScreen: $useWebFullScreen.checked,
             isNotMute: false,
         },);
 
@@ -237,7 +248,15 @@
 
     create();
 
-    $player.addEventListener('click', function () {
+    function replay() {
+        if (jessibuca) {
+            jessibuca.destroy();
+        }
+        create();
+        play();
+    }
+
+    function play() {
         var href = $playHref.value;
         if (href) {
             jessibuca.play(href);
@@ -247,6 +266,10 @@
             $fullscreen.style.display = 'inline-block';
 
         }
+    }
+
+    $player.addEventListener('click', function () {
+        play()
     }, false)
 
 
@@ -267,6 +290,10 @@
         if(jessibuca){
             jessibuca.setFullscreen(true)
         }
+    })
+
+    $useWebFullScreen.addEventListener('click', function () {
+        replay()
     })
 
 </script>

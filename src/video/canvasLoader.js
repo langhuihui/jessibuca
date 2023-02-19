@@ -186,7 +186,7 @@ export default class CanvasVideoLoader extends CommonLoader {
         let width = this.player.width;
         let height = this.player.height;
         if (option.hasControl && !option.controlAutoHide) {
-            if (isMobile() && this.player.fullscreen) {
+            if (isMobile() && this.player.fullscreen && option.useWebFullScreen) {
                 width -= CONTROL_HEIGHT;
             } else {
                 height -= CONTROL_HEIGHT;

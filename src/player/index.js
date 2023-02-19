@@ -239,7 +239,7 @@ export default class Player extends Emitter {
     }
 
     set fullscreen(value) {
-        if (isMobile()) {
+        if (isMobile() && this._opt.useWebFullScreen) {
             this.emit(EVENTS.webFullscreen, value);
             setTimeout(() => {
                 this.updateOption({

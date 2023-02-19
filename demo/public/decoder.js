@@ -7537,7 +7537,9 @@
 	  //  https://github.com/langhuihui/jessibuca/issues/152
 	  wasmDecodeAudioSyncVideo: false,
 	  // wasm 解码之后音视频同步
-	  recordType: FILE_SUFFIX.webm
+	  recordType: FILE_SUFFIX.webm,
+	  useWebFullScreen: false // use web full screen
+
 	};
 	const WORKER_CMD_TYPE = {
 	  init: 'init',

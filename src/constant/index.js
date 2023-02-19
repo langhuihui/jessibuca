@@ -67,7 +67,8 @@ export const DEFAULT_PLAYER_OPTIONS = {
     wasmDecodeErrorReplay: true, // 解码失败重新播放。
     openWebglAlignment: false,//  https://github.com/langhuihui/jessibuca/issues/152
     wasmDecodeAudioSyncVideo: false,// wasm 解码之后音视频同步
-    recordType: FILE_SUFFIX.webm
+    recordType: FILE_SUFFIX.webm,
+    useWebFullScreen: false, // use web full screen
 }
 
 

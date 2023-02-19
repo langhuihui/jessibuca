@@ -130,7 +130,9 @@
 	  //  https://github.com/langhuihui/jessibuca/issues/152
 	  wasmDecodeAudioSyncVideo: false,
 	  // wasm 解码之后音视频同步
-	  recordType: FILE_SUFFIX.webm
+	  recordType: FILE_SUFFIX.webm,
+	  useWebFullScreen: false // use web full screen
+
 	};
 	const WORKER_CMD_TYPE = {
 	  init: 'init',
@@ -946,10 +948,14 @@
 	    if (value) {
 	      try {
 	        screenfull.request(player.$container).then(() => {}).catch(e => {
-	          player.webFullscreen = true;
+	          if (isMobile() && player._opt.useWebFullScreen) {
+	            player.webFullscreen = true;
+	          }
 	        });
 	      } catch (e) {
-	        player.webFullscreen = true;
+	        if (isMobile() && player._opt.useWebFullScreen) {
+	          player.webFullscreen = true;
+	        }
 	      }
 	    } else {
 	      try {
@@ -1572,7 +1578,7 @@
 	    let height = this.player.height;
 
 	    if (option.hasControl && !option.controlAutoHide) {
-	      if (isMobile() && this.player.fullscreen) {
+	      if (isMobile() && this.player.fullscreen && option.useWebFullScreen) {
 	        width -= CONTROL_HEIGHT;
 	      } else {
 	        height -= CONTROL_HEIGHT;
@@ -1837,7 +1843,7 @@
 	    const rotate = option.rotate;
 
 	    if (option.hasControl && !option.controlAutoHide) {
-	      if (isMobile() && this.player.fullscreen) {
+	      if (isMobile() && this.player.fullscreen && option.useWebFullScreen) {
 	        width -= CONTROL_HEIGHT;
 	      } else {
 	        height -= CONTROL_HEIGHT;
@@ -10251,7 +10257,7 @@
 	  };
 
 	  const screenfullH5Control = () => {
-	    if (isMobile() && control.$controls) {
+	    if (isMobile() && control.$controls && player._opt.useWebFullScreen) {
 	      setTimeout(() => {
 	        if (player.fullscreen) {
 	          // console.log(player.width, player.height);
@@ -11777,7 +11783,7 @@
 	  }
 
 	  set fullscreen(value) {
-	    if (isMobile()) {
+	    if (isMobile() && this._opt.useWebFullScreen) {
 	      this.emit(EVENTS.webFullscreen, value);
 	      setTimeout(() => {
 	        this.updateOption({
