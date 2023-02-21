@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Jessica demo</title>
+    <script src="./vconsole.js"></script>
     <script src="./jessibuca-pro-demo.js"></script>
     <style>
         .root {
@@ -147,6 +148,21 @@
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var jessibuca = null;
+
+    function isMobile() {
+        return (/iphone|ipad|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));
+    }
+
+    function isPad() {
+        return (/ipad|android(?!.*mobile)|tablet|kindle|silk/i.test(window.navigator.userAgent.toLowerCase()));
+    }
+
+    const useVconsole = isMobile() || isPad()
+
+    if (useVconsole && window.VConsole) {
+        new window.VConsole();
+    }
+
 
     function create() {
         jessibuca = new JessibucaPro({
