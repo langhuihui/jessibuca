@@ -869,6 +869,10 @@ Jessibuca是一款开源的纯H5直播流播放器
 - 流媒体服务器的线路质量不好，导致分发不稳定。
 
 
+### 就是在webview中使用写好的网页，ios工程会找不到Jessibuca这个对象
+
+> 用的cdn方式就可以了。
+
 # 群
 <img src="/public/qrcode.jpeg">
 
