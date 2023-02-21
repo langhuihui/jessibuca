@@ -191,11 +191,8 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 
 #### 苹果
 
-> 苹果自带的浏览器不支持mse，所以只能使用wasm（simd）解码。
+> 苹果自带的浏览器不支持mse，所以只能使用wasm解码。
 
-> 通过测试发现，苹果的Safari 是支持wasm simd 解码的。
-
-根据推荐配置，优先使用wasm simd解码，如果不支持wasm simd，会降级到wasm解码。
 
 | 浏览器    | wasm | wasm simd | mse 解码H264| mse 解码H265 | webcodecs 解码H264 | webcodecs 解码H265|
 |:-------| :--- | :--- |:-----------| :--- |:-----------| :--- |
