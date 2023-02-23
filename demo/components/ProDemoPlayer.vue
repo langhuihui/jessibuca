@@ -55,7 +55,7 @@
                 <div>
                     当前浏览器：
                     <span v-if="supportMSEHevc" style="color: green;margin-right: 10px">支持MSE H265解码</span>
-                    <span v-else style="color: red;margin-right: 10px;">不支持MSE H265解码,会自动切换成wasm解码</span>
+                    <span v-else style="color: red;margin-right: 10px;">不支持MSE H265解码,会自动切换成wasm(simd)解码</span>
                 </div>
                 <div>
                     <div v-if="playing && decodeType">
@@ -69,7 +69,12 @@
             <div class="input">
                 当前浏览器：
                 <span v-if="supportWCSHevc" style="color: green;">支持Webcodec H265解码</span>
-                <span v-else style="color: red;">不支持Webcodec H265解码(需要https/localhost),会自动切换成wasm解码</span>
+                <span v-else style="color: red;">不支持Webcodec H265解码(需要https/localhost),会自动切换成wasm(simd)解码</span>
+            </div>
+            <div class="input">
+                当前浏览器：
+                <span v-if="supportSIMDHevc" style="color: green;">支持SIMD解码</span>
+                <span v-else style="color: red;">不支持SIMD解码,会自动切换成wasm解码</span>
             </div>
             <div class="input">
                 <div>输入URL：</div>
@@ -475,6 +480,7 @@ export default {
             mirrorRotate: 'none',
             supportMSEHevc: false,
             supportWCSHevc: false,
+            supportSIMDHevc:false,
             useWCS: false,
             useMSE: false,
             useSIMD: true,
@@ -523,6 +529,7 @@ export default {
         this.supportMSEHevc = window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="hev1.1.6.L123.b0"');
         const browserInfo = getBrowser();
         this.supportWCSHevc = browserInfo.type.toLowerCase() === 'chrome' && browserInfo.version >= 107 && (location.protocol === 'https:' || location.hostname === 'localhost');
+        this.supportSIMDHevc = WebAssembly && WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 98, 11]));
         this.create();
         window.onerror = (msg) => (this.err = msg);
     },
