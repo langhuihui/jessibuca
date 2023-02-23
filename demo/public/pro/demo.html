@@ -154,8 +154,11 @@
 <script>
     function getBrowser() {
         const UserAgent = window.navigator.userAgent.toLowerCase() || '';
-        const browserInfo = {};
-        const browserArray = {
+        let browserInfo = {
+            type: '',
+            version: ''
+        };
+        var browserArray = {
             IE: window.ActiveXObject || "ActiveXObject" in window, // IE
             Chrome: UserAgent.indexOf('chrome') > -1 && UserAgent.indexOf('safari') > -1, // Chrome浏览器
             Firefox: UserAgent.indexOf('firefox') > -1, // 火狐浏览器
