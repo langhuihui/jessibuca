@@ -16,6 +16,15 @@ sidebar: false
 >
 > 需要本地挂载在Nginx（或者自己搭建一个web-server服务）上面才能跑起来。
 
+> 多屏测试
+> [2x2 http地址](http://jessibuca.monibuca.com/pro/2x2-demo.html),
+> [2x2 https地址](http://jessibuca.com/pro/2x2-demo.html),
+> [3x3 http地址](http://jessibuca.monibuca.com/pro/3x3-demo.html),
+> [3x3 http地址](http://jessibuca.com/pro/3x3-demo.html),
+> [4x4 http地址](http://jessibuca.monibuca.com/pro/4x4-demo.html),
+> [4x4 http地址](http://jessibuca.com/pro/4x4-demo.html),
+
+
 > 如需要更好的体验录像流(TF卡流)，可以通过单独的测试页面，
 > [http地址](http://jessibuca.monibuca.com/pro/playback-demo.html),
 > [https地址](https://jessibuca.com/pro/playback-demo.html)

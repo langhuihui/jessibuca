@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jessibuca Pro 2x2 demo</title>
+    <title>Jessibuca Pro MSE 4x4 demo</title>
     <script src="./jessibuca-pro-demo.js"></script>
     <style>
         .root {
@@ -23,7 +23,7 @@
         }
 
         .container-shell:before {
-            content: "jessibuca pro demo player";
+            content: "jessibuca Pro MSE demo player";
             position: absolute;
             color: darkgray;
             top: 4px;
@@ -95,14 +95,31 @@
 </head>
 <body class="page">
 <div class="root">
+
     <div class="container-shell">
         <div>
             <div class="container" id="container1"></div>
             <div class="container" id="container2"></div>
-        </div>
-        <div>
             <div class="container" id="container3"></div>
             <div class="container" id="container4"></div>
+        </div>
+        <div>
+            <div class="container" id="container5"></div>
+            <div class="container" id="container6"></div>
+            <div class="container" id="container7"></div>
+            <div class="container" id="container8"></div>
+        </div>
+        <div>
+            <div class="container" id="container9"></div>
+            <div class="container" id="container10"></div>
+            <div class="container" id="container11"></div>
+            <div class="container" id="container12"></div>
+        </div>
+        <div>
+            <div class="container" id="container13"></div>
+            <div class="container" id="container14"></div>
+            <div class="container" id="container15"></div>
+            <div class="container" id="container16"></div>
         </div>
         <div class="input">
             <div>
@@ -121,6 +138,17 @@
                 当前浏览器：<span id="simdSupport" style="color: green;display: none">支持SIMD解码</span>
                 <span id="simdNotSupport" style="color: red;display: none">不支持SIMD解码,会自动切换成wasm解码</span>
             </div>
+        </div>
+
+        <div class="input" style="width: 1000px;flex-direction: column">
+            <div>
+                js为单线程运行时, 无法通过多线程提升并发性能.
+            </div>
+            <div>将音视频解码在worker中进行, 能有效利用多核处理器提升多画面播放的流畅度.</div>
+            <div>
+                chrome限制同源http请求最多6个并发, 因此超过6个并发请求我们采用websocket-flv来播放
+            </div>
+            <div>请准备M7S服务端来测试. worker js不能跨域调用,</div>
         </div>
         <div class="input">
             <div><input
@@ -147,7 +175,6 @@
                 <button id="replay">重播</button>
             </div>
         </div>
-
         <div class="input">
             <div>输入URL：</div>
             <input
@@ -177,6 +204,102 @@
             <input
                 autocomplete="on"
                 id="playUrl4"
+                value=""
+            />
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl5"
+                value=""
+            />
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl6"
+                value=""
+            />
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl7"
+                value=""
+            />
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl8"
+                value=""
+            />
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl9"
+                value=""
+            />
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl10"
+                value=""
+            />
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl11"
+                value=""
+            />
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl12"
+                value=""
+            />
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl13"
+                value=""
+            />
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl14"
+                value=""
+            />
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl15"
+                value=""
+            />
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl16"
                 value=""
             />
         </div>
@@ -300,6 +423,8 @@
     }
 
 </script>
+
+
 <script>
     var $player = document.getElementById('play');
     var $pause = document.getElementById('pause');
@@ -314,7 +439,7 @@
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var playList = [];
-    let size = 4
+    let size = 16
 
     function _create(id) {
         var $container = document.getElementById('container' + id);
@@ -326,8 +451,7 @@
             isResize: false,
             text: "",
             loadingText: "加载中",
-            debug: true,
-            isMulti: true,
+            debug: false,
             useMSE: $useMSE.checked === true,
             useSIMD: $useSIMD.checked === true,
             useWCS: $useWCS.checked === true,
@@ -466,6 +590,19 @@
         }
         replay();
     })
+
+    function checkSupport() {
+        return window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="hev1.1.6.L123.b0"');
+    }
+
+    let support = document.getElementById('mseSupport');
+    let notSupport = document.getElementById('mseNotSupport');
+    if (checkSupport()) {
+        support.style.display = 'inline-block'
+    } else {
+        notSupport.style.display = 'inline-block'
+    }
+
 
 </script>
 
