@@ -116,7 +116,7 @@ export default (gl, openWebglAlignment) => {
 
                 gl.deleteTexture(yTextureRef);
                 gl.deleteTexture(uTextureRef);
-                gl.deleteBuffer(vTextureRef);
+                gl.deleteTexture(vTextureRef);
             } catch (e) {
                 // console.error(e);
             }
