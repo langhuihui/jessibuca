@@ -253,6 +253,8 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 ### 对于显卡的支持情况：
 
 
+[硬件支持情况](https://github.com/StaZhu/enable-chromium-hevc-hardware-decoding/blob/main/README.zh_CN.md)
+
 #### 独显
 NVIDIA GTX950 及以上
 
