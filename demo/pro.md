@@ -174,6 +174,11 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 | Edge | 支持 | 支持 | 支持         | 支持 | 支持         | 支持 |
 | Safari | 支持 | 不支持 | 支持        | 支持 | 不支持         | 不支持 |
 
+> mse 解码H265 需要window系统在10及以上，chrome的版本得108及以上才能够支持
+> webcodecs 解码H265 需要https环境，同样需要window系统在10及以上，chrome的版本得107及以上才能够支持
+
+
+
 ### 移动端
 
 #### 安卓
@@ -228,6 +233,30 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 > 对于硬解码，如果只是集成显卡的情况，对于1080P的H265视频，4路基本不卡（推荐，gpu的占比基本30%以下），5路，6路都是轻微（gpu的占比基本50%左右），7路卡顿增多（gpu的占比基本60%左右），8路，9路（gpu的占比基本60%-80%）就是整个画面一直在卡了。
 
 > 所以如果想要上4路以上的多屏，就得上独立显卡了。
+>
+
+### 对于显卡的支持情况：
+
+
+#### 独显
+NVIDIA GTX950 及以上
+
+AMD RX460 及以上
+
+#### 集显
+Intel HD4400, HD515 及以上
+
+AMD Radeon R7, Vega M 及以上
+
+Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
+
+
+#### 详细支持列表
+[Intel](https://bluesky-soft.com/en/dxvac/deviceInfo/decoder/intel.html)
+
+[AMD](https://bluesky-soft.com/en/dxvac/deviceInfo/decoder/amd.html)
+
+[NVIDIA](https://bluesky-soft.com/en/dxvac/deviceInfo/decoder/nvidia.html)
 
 ## 关于延迟
 
