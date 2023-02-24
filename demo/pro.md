@@ -162,6 +162,13 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 
 > 默认指的都是较新版本的浏览器，如果是较老版本的浏览器，可能会有部分功能不支持。
 
+### 对于hevc(265)支持情况
+
+<img src="/public/hevc-support.png">
+
+[caniuse详情](https://caniuse.com/?search=hevc)
+
+
 ### PC端
 
 根据推荐配置，优先使用mse硬解码，如果不支持mse，会降级到wasm simd解码，如果不支持wasm simd，会降级到wasm解码。
