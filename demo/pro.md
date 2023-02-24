@@ -169,6 +169,14 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 [caniuse详情](https://caniuse.com/?search=hevc)
 
 
+
+### 对于Webassembly支持情况
+
+<img src="/public/webassembly-support.png">
+
+[caniuse详情](https://caniuse.com/?search=webassembly)
+
+
 ### PC端
 
 根据推荐配置，优先使用mse硬解码，如果不支持mse，会降级到wasm simd解码，如果不支持wasm simd，会降级到wasm解码。
