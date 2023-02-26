@@ -32,7 +32,7 @@ export class WebRTCStream {
   audioTransceiver!: RTCRtpTransceiver;
   videoTransceiver!: RTCRtpTransceiver;
   private _videoTrack?: MediaStreamVideoTrack;
-  constructor(public id: string) {
+  constructor(public id: string, public direction: RTCRtpTransceiverDirection = "recvonly") {
 
   }
   get audioTrack() {
@@ -67,7 +67,7 @@ export class WebRTCConnection extends Connection {
       console.log(track, streams, transceiver);
       if (streams.length) {
         const info = this.streams.get(streams[0].id);
-        if (info) {
+        if (info && info.direction === "recvonly") {
           info.mediaStream = streams[0];
         }
       }
@@ -90,18 +90,18 @@ export class WebRTCConnection extends Connection {
   addStream(stream: WebRTCStream) {
     if (this.audioTransceiver.length) {
       stream.audioTransceiver = this.audioTransceiver.pop()!;
-      stream.audioTransceiver.direction = "recvonly";
+      stream.audioTransceiver.direction = stream.direction;
     } else {
-      stream.audioTransceiver = this.webrtc.addTransceiver('audio', {
-        direction: 'recvonly'
+      stream.audioTransceiver = this.webrtc.addTransceiver(stream.audioTrack || 'audio', {
+        direction: stream.direction
       });
     }
     if (this.videoTransceiver.length) {
       stream.videoTransceiver = this.videoTransceiver.pop()!;
-      stream.videoTransceiver.direction = "recvonly";
+      stream.videoTransceiver.direction = stream.direction;
     } else {
-      stream.videoTransceiver = this.webrtc.addTransceiver('video', {
-        direction: 'recvonly'
+      stream.videoTransceiver = this.webrtc.addTransceiver(stream.videoTrack || 'video', {
+        direction: stream.direction
       });
     }
     this.streams.set(stream.id, stream);
