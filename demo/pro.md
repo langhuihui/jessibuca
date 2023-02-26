@@ -190,7 +190,9 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 | Safari | 支持 | 不支持 | 支持        | 支持 | 不支持         | 不支持 |
 
 > mse 解码H265 需要window系统在10及以上，chrome的版本得108及以上才能够支持
+>
 > webcodecs 解码H265 需要https环境，同样需要window系统在10及以上，chrome的版本得107及以上才能够支持
+
 
 
 
