@@ -174,6 +174,7 @@ export const JESSIBUCA_EVENTS = {
     loadingTimeout: EVENTS.loadingTimeout,
     delayTimeout: EVENTS.delayTimeout,
     fullscreen: 'fullscreen',
+    webFullscreen: EVENTS.webFullscreen,
     play: EVENTS.play,
     pause: EVENTS.pause,
     mute: EVENTS.mute,
