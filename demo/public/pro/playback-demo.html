@@ -94,14 +94,14 @@
         <div class="input">
             <div style="width: 900px">
                 <span><span style="color: red">TPS:动态(根据流):</span>播放器的倍率播放完全是根据服务器端推流的速率，如果服务器端推的是一倍率且动态码率的流，
-                播放器就按照一倍率动态码率渲染。
+                播放器就按照一倍率动态码率渲染。<span style="color: green">例如 fps会15到30之间跳动。</span>
             </span>
             </div>
         </div>
         <div class="input">
             <div style="width: 900px">
                 <span><span style="color: red">TPS:定频（本地设置）:</span>则支持播放器端控制播放速率(设置FPS+播放倍率)，播放器端设置的播放速率是固定的，不会随着流的速率变化而变化。
-                支持设置播放器的播放倍率（提高渲染倍率）。
+                支持设置播放器的播放倍率（提高渲染倍率）。<span style="color: green">在推流码率足够的情况下，播放器会按照固定倍率播放</span>
             </span>
             </div>
         </div>
@@ -111,6 +111,13 @@
             </span>
             </div>
         </div>
+        <div class="input">
+            <div style="width: 900px">
+                <span><span style="color: red">TPS:服务器端倍率推流:</span> 如果服务器端按照倍率推流，播放器端也需要同步的以倍率播放【调用forward(rate)】接口
+            </span>
+            </div>
+        </div>
+
         <div class="input">
             <div class="playbackForward">
                 <span>FPS设置：</span>
@@ -144,7 +151,10 @@
                 <option value="4" selected>4倍</option>
                 <option value="8">8倍</option>
             </select>
-            (定频（本地设置）模式下生效)
+
+            <div class="playback-fps" style="margin-left: 10px">
+                <span>FPS（定频(本地设置)生效）：</span><input style="width: 50px" type="text" id="playbackFps" value="25">帧
+            </div>
         </div>
         <div class="input">
             <div>输入URL：</div>
@@ -164,21 +174,19 @@
         </div>
         <div class="input" style="line-height: 30px">
             <button id="destroy">销毁</button>
-            <div id="playbackDom" style="width: 400px">
-                <div class="playbackForward">
-                    <span>播放倍率：</span>
-                    <select id="playbackRate" style="width: 50px">
-                        <option value="1" selected>1倍</option>
-                        <option value="2">2倍</option>
-                        <option value="4">4倍</option>
-                        <option value="8">8倍</option>
-                    </select>
-                    <button id="playbackForward">快进</button>
-                </div>
-                <div class="playback-fps" style="margin-left: 10px">
-                    <span>FPS</span><input type="text" id="playbackFps" value="25">
-                </div>
-            </div>
+<!--            <div id="playbackDom" style="width: 400px">-->
+<!--                <div class="playbackForward">-->
+<!--                    <span>播放倍率：</span>-->
+<!--                    <select id="playbackRate" style="width: 50px">-->
+<!--                        <option value="1" selected>1倍</option>-->
+<!--                        <option value="2">2倍</option>-->
+<!--                        <option value="4">4倍</option>-->
+<!--                        <option value="8">8倍</option>-->
+<!--                    </select>-->
+<!--                    <button id="playbackForward">快进</button>-->
+<!--                </div>-->
+
+<!--            </div>-->
 
         </div>
     </div>
@@ -254,7 +262,13 @@
         $pause.style.display = 'none';
         $playbackPause.style.display = 'none';
         $destroy.style.display = 'none';
-        $playbackDom.style.display = 'none';
+        // $playbackDom.style.display = 'none';
+
+
+        jessibuca.on('playbackPreRateChange', (rate) => {
+            jessibuca.forward(rate);
+        })
+
     }
 
 
@@ -281,7 +295,14 @@
                 fps: playFps,
                 showControl: isShow24H,
                 isUseFpsRender: isUseFpsRender === 'true',
-                isCacheBeforeDecodeForFpsRender: isCacheBeforeDecodeForFpsRender
+                isCacheBeforeDecodeForFpsRender: isCacheBeforeDecodeForFpsRender,
+                showRateBtn: true,
+                rateConfig: [
+                    {label: '正常', value: 1},
+                    {label: '2倍', value: 2},
+                    {label: '4倍', value: 4},
+                    {label: '8倍', value: 8},
+                ]
             });
         }
         isPlaybackPause = false;
@@ -289,7 +310,7 @@
         $pause.style.display = 'inline-block';
         $playbackPause.style.display = 'inline-block';
         $destroy.style.display = 'inline-block';
-        $playbackDom.style.display = 'block';
+        // $playbackDom.style.display = 'block';
     }, false)
 
 
@@ -316,13 +337,13 @@
     })
 
 
-    $playbackForward.addEventListener('click', function () {
-        const playbackRate = document.querySelector('#playbackRate').value;
-
-        if (jessibuca) {
-            jessibuca.forward(playbackRate);
-        }
-    })
+    // $playbackForward.addEventListener('click', function () {
+    //     const playbackRate = document.querySelector('#playbackRate').value;
+    //
+    //     if (jessibuca) {
+    //         jessibuca.forward(playbackRate);
+    //     }
+    // })
 
 </script>
 
