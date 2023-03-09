@@ -860,6 +860,17 @@ jessibuca.on("fullscreen", function (flag) {
 })
 ```
 
+### webFullscreen
+
+当前是否web全屏
+
+```js
+jessibuca.on("webFullscreen", function (flag) {
+    console.log('is webFullscreen', flag)
+})
+```
+
+
 ### play
 
 触发播放事件
