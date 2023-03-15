@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .root {
+            display: flex;
+            place-content: center;
+            margin-top: 3rem;
+        }
+
+        .container-shell {
+            backdrop-filter: blur(5px);
+            background: hsla(0, 0%, 50%, 0.5);
+            padding: 30px 4px 10px 4px;
+            /* border: 2px solid black; */
+            width: auto;
+            position: relative;
+            border-radius: 5px;
+            box-shadow: 0 10px 20px;
+        }
+
+        .container-shell:before {
+            content: "jessibuca demo player";
+            position: absolute;
+            color: darkgray;
+            top: 4px;
+            left: 10px;
+            text-shadow: 1px 1px black;
+        }
+
+        #container {
+            background: rgba(13, 14, 27, 0.7);
+            width: 1040px;
+            height: 698px;
+        }
+
+        .input {
+            display: flex;
+            margin-top: 10px;
+            color: white;
+            place-content: stretch;
+        }
+
+        .input2 {
+            bottom: 0px;
+        }
+
+        .input input {
+            flex: auto;
+        }
+
+        .err {
+            position: absolute;
+            top: 40px;
+            left: 10px;
+            color: red;
+        }
+
+        .option {
+            position: absolute;
+            top: 4px;
+            right: 10px;
+            display: flex;
+            place-content: center;
+            font-size: 12px;
+        }
+
+        .option span {
+            color: white;
+        }
+
+        .page {
+            background: url('./bg.jpg');
+            background-repeat: no-repeat;
+            background-position: top;
+        }
+
+        @media (max-width: 720px) {
+            #container {
+                width: 90vw;
+                height: 52.7vw;
+            }
+        }
+    </style>
+
+    <script src="./jessibuca-pro-multi-demo.js"></script>
+</head>
+<body class="page">
+<div class="root">
+    <div class="container-shell">
+        <div id="container"></div>
+        <div class="input">
+            <button onclick="updateSplit(1)">1*1</button>
+            <button onclick="updateSplit(2)">2*2</button>
+            <button onclick="updateSplit(3)">3*3</button>
+            <button onclick="updateSplit(4)">4*4</button>
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl"
+                value=""
+            />
+            <button id="play">播放</button>
+            <button id="pause">停止</button>
+        </div>
+        <div class="input" style="line-height: 30px">
+            <button id="destroy">销毁(ALL)</button>
+            <button id="destroySingle">销毁(选中)</button>
+            <button id="fullscreenMulti">全屏(ALL)</button>
+        </div>
+    </div>
+</div>
+<script>
+    var $container = document.getElementById('container');
+    var $player = document.getElementById('play');
+    var $pause = document.getElementById('pause');
+    var $playHref = document.getElementById('playUrl');
+    var $destroy = document.getElementById('destroy');
+    var $destroySingle = document.getElementById('destroySingle');
+    var $fullscreenMulti = document.getElementById('fullscreenMulti');
+
+    let jessibucaMulti = null;
+    var showOperateBtns = true; // 是否显示按钮
+
+    function create() {
+        jessibucaMulti = new JessibucaProMulti({
+            container: $container,
+            split: 2,
+            isResize: false,
+            isFlv: true,
+            debug: true,
+            useMSE: true,
+            useSIMD: true,
+            debugLevel: "debug",
+            hasAudio: false,
+            showBandwidth: showOperateBtns, // 显示网速
+            showPerformance: showOperateBtns, // 显示性能
+            operateBtns: {
+                fullscreen: showOperateBtns,
+                screenshot: showOperateBtns,
+                play: showOperateBtns,
+                audio: showOperateBtns,
+                record: showOperateBtns,
+                ptz: showOperateBtns,
+                quality: showOperateBtns,
+                performance: showOperateBtns,
+            },
+        })
+
+        jessibucaMulti.on(JessibucaProMulti.MULTI_EVENTS.selected, (selectedIndex) => {
+            console.log('selected', selectedIndex);
+        })
+
+        jessibucaMulti.on(JessibucaProMulti.MULTI_EVENTS.dblSelected, (selectedIndex) => {
+            console.log('dblSelected', selectedIndex);
+        })
+
+        jessibucaMulti.on(JessibucaProMulti.MULTI_EVENTS.mouseOver, (selectedIndex) => {
+            console.log('mouseOver', selectedIndex);
+        })
+
+        jessibucaMulti.on(JessibucaProMulti.MULTI_EVENTS.mouseOut, (selectedIndex) => {
+            console.log('mouseOut', selectedIndex);
+        })
+
+        jessibucaMulti.on(JessibucaProMulti.MULTI_EVENTS.mouseUp, (selectedIndex) => {
+            console.log('mouseUp', selectedIndex);
+        })
+
+        jessibucaMulti.on(JessibucaProMulti.EVENTS.stats, (index, stats) => {
+            console.log(`stats-${index}`, stats);
+        })
+    }
+
+    create();
+
+    function play() {
+        var href = $playHref.value;
+        if (href) {
+            jessibucaMulti.play(href);
+        }
+    }
+
+    function replay() {
+        if (jessibucaMulti) {
+            jessibucaMulti.destroy();
+        }
+        create();
+        play();
+    }
+
+    $player.addEventListener('click', function () {
+        play();
+    }, false)
+
+
+    $pause.addEventListener('click', function () {
+        if (jessibucaMulti) {
+            jessibucaMulti.pause();
+        }
+    })
+
+    $destroy.addEventListener('click', function () {
+        if (jessibucaMulti) {
+            jessibucaMulti.destroy();
+            jessibucaMulti = null;
+        }
+        create();
+    })
+
+    $destroySingle.addEventListener('click', function () {
+        if (jessibucaMulti) {
+            jessibucaMulti.destroySingle();
+        }
+    })
+
+    // multi 全屏
+    $fullscreenMulti.addEventListener('click', function () {
+        if (jessibucaMulti) {
+            jessibucaMulti.setFullscreenMulti(true);
+        }
+    })
+
+
+    function updateSplit(split) {
+        if (jessibucaMulti) {
+            split = Number(split);
+            jessibucaMulti.arrangeWindow(split);
+        }
+    }
+</script>
+</body>
+</html>

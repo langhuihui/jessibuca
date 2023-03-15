@@ -33,6 +33,15 @@
 [http://jessibuca.monibuca.com/pro/demo-low-delay.html](http://jessibuca.monibuca.com/pro/demo-low-delay.html)
 
 
+## demo(多屏X*X)
+
+#### https
+[https://jessibuca.com/pro/demo-multi.html](https://jessibuca.com/pro/demo-multi.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-multi.html](http://jessibuca.monibuca.com/pro/demo-multi.html)
+
+
 
 ## mobile demo
 #### https
