@@ -155,6 +155,20 @@
             <div class="playback-fps" style="margin-left: 10px">
                 <span>FPS（定频(本地设置)生效）：</span><input style="width: 50px" type="text" id="playbackFps" value="25">帧
             </div>
+            <div class="playback-fps" style="margin-left: 10px">
+                <span>不断流暂停是否清除缓存数据</span>
+                <select id="isPlaybackPauseClearCache" style="width: 50px">
+                    <option value="true" selected>是</option>
+                    <option value="false">否</option>
+                </select>
+            </div>
+        </div>
+        <div class="input">
+            <span>ui是否使用playbackPause</span>
+            <select id="uiUsePlaybackPause" style="width: 50px">
+                <option value="true">是</option>
+                <option value="false" selected>否</option>
+            </select>
         </div>
         <div class="input">
             <div>输入URL：</div>
@@ -208,6 +222,8 @@
     var $isShow24H = document.getElementById('isShow24H'); // 是否显示24H操作栏
     var $onlyDecoderIFrame = document.getElementById('onlyDecoderIFrame'); // 是否显示24H操作栏
     var $isCacheBeforeDecodeForFpsRender = document.getElementById('isCacheBeforeDecodeForFpsRender');
+    var $isPlaybackPauseClearCache = document.getElementById('isPlaybackPauseClearCache');
+    var $uiUsePlaybackPause = document.getElementById('uiUsePlaybackPause');
     var forceNoOffscreen = true; //
     var jessibuca = null;
     var isPlaybackPause = false;
@@ -237,6 +253,7 @@
             loadingText: "加载中",
             debug: true,
             debugLevel: 'debug',
+            showPerformance: true,
             showBandwidth: showOperateBtns, // 显示网速
             showPlaybackOperate: showOperateBtns,
             operateBtns: {
@@ -244,11 +261,11 @@
                 screenshot: showOperateBtns,
                 play: showOperateBtns,
                 audio: showOperateBtns,
+                zoom:showOperateBtns,
                 performance: showOperateBtns,
             },
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
-            showPerformance: true,
             playbackForwardMaxRateDecodeIFrame: onlyDecoderIFrame,
         },);
 
@@ -297,6 +314,9 @@
                 isUseFpsRender: isUseFpsRender === 'true',
                 isCacheBeforeDecodeForFpsRender: isCacheBeforeDecodeForFpsRender,
                 showRateBtn: true,
+                supportWheel:true,
+                uiUsePlaybackPause: $uiUsePlaybackPause.value === 'true',
+                isPlaybackPauseClearCache: $isPlaybackPauseClearCache.value === 'true',
                 rateConfig: [
                     {label: '正常', value: 1},
                     {label: '2倍', value: 2},
