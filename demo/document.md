@@ -873,6 +873,40 @@ Jessibuca是一款开源的纯H5直播流播放器
 
 > 用的cdn方式就可以了。
 
+
+### gzip压缩jessibuca.js 和decoder.js 和decoder.wasm 文件
+
+linux(mac)
+#### jessibuca.js
+```
+gzip jessibuca.js
+mv jessibuca.js.gz jessibuca.js
+```
+
+#### decoder.js
+
+```
+gzip 和decoder.js
+mv 和decoder.js.gz 和decoder.js
+```
+
+#### decoder.wasm
+
+```
+gzip 和decoder.wasm
+mv 和decoder.wasm.gz 和decoder.wasm
+```
+
+windows 系统压缩方法
+
+下载 gzip.exe
+
+[http://gnuwin32.sourceforge.net/downlinks/gzip-bin-zip.php](http://gnuwin32.sourceforge.net/downlinks/gzip-bin-zip.php)
+
+解压后，将 `jessibuca.js` 和 `decoder.js`和 `decoder.wasm` 文件拖到 gzip.exe上，文件就压缩好了，也需要去掉.gz后缀
+
+
+
 # 群
 <img src="/public/qrcode.jpeg">
 
