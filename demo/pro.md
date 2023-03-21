@@ -255,7 +255,9 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 > 所以如果想要上4路以上的多屏，就得上独立显卡了。
 >
 
-### 对于显卡的支持情况：
+### 对于H265硬解码显卡的支持情况：
+
+<img src="/public/hevc-1.png">
 
 
 [硬件支持情况](https://github.com/StaZhu/enable-chromium-hevc-hardware-decoding/blob/main/README.zh_CN.md)
