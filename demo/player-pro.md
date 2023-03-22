@@ -1,6 +1,8 @@
 ---
 sidebar: false
 ---
+<Rice/>
+
 <ProDemoPlayer/>
 
 > 注意：pro 试用开发包(1小时断开, 刷新页面继续测试)

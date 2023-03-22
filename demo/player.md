@@ -1,6 +1,7 @@
 ---
 sidebar: false
 ---
+<Rice/>
 
 <DemoPlayer/>
 

@@ -1,3 +1,4 @@
+<Rice/>
 # API
 jessibuca API 文档
 -
@@ -10,7 +11,7 @@ jessibuca API 文档
 -
 -
 -
--
+
 ## Jessibuca(options)
 
 options 支持的参数有：
@@ -992,7 +993,4 @@ jessibuca.on("playToRenderTimes", function (times) {
 }
 
 ```
-
-
-
 
