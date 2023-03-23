@@ -31,7 +31,7 @@ export const DEFAULT_PLAYER_OPTIONS = {
     heartTimeout: 5,  // heart timeout
     timeout: 10, // second
     loadingTimeoutReplay: true, // loading timeout replay. default is true
-    heartTimeoutReplay: false,// heart timeout replay.
+    heartTimeoutReplay: true,// heart timeout replay.
     loadingTimeoutReplayTimes: 3, // loading timeout replay fail times
     heartTimeoutReplayTimes: 3, // heart timeout replay fail times
     supportDblclickFullscreen: false, // support double click toggle fullscreen
