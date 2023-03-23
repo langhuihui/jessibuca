@@ -120,7 +120,13 @@
 </template>
 <script>
 import {VERSION} from "./version";
+function isMobile() {
+    return (/iphone|ipad|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));
+}
 
+function isPad() {
+    return (/ipad|android(?!.*mobile)|tablet|kindle|silk/i.test(window.navigator.userAgent.toLowerCase()));
+}
 export default {
     name: "DemoPlayer",
     jessibuca: null,
@@ -154,7 +160,9 @@ export default {
         };
     },
     mounted() {
-        this.vConsole = new window.VConsole();
+        if((isMobile() || isPad()) && window.VConsole){
+            this.vConsole = new window.VConsole();
+        }
         this.version = VERSION === '#VERSION#' ? '' : VERSION;
         this.create();
         window.onerror = (msg) => (this.err = msg);
