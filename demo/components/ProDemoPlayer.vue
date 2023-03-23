@@ -451,6 +451,14 @@ function toString(value) {
             : String(value)
 }
 
+function isMobile() {
+    return (/iphone|ipad|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));
+}
+
+function isPad() {
+    return (/ipad|android(?!.*mobile)|tablet|kindle|silk/i.test(window.navigator.userAgent.toLowerCase()));
+}
+
 export default {
     name: "ProDemoPlayer",
     jessibuca: null,
@@ -523,7 +531,7 @@ export default {
         };
     },
     mounted() {
-        if (window.VConsole) {
+        if (window.VConsole && (isMobile() || isPad())) {
             this.vConsole = new window.VConsole();
         }
         this.supportMSEHevc = window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="hev1.1.6.L123.b0"');
