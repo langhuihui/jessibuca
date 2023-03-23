@@ -12,12 +12,11 @@ export default {
 
 <style scoped>
     .rice{
-        position: fixed;
+        position: absolute;
         right: 30px;
         top: 100px;
         padding: 10px;
         border-radius: 3px;
         font-size: 13px;
-
     }
 </style>
