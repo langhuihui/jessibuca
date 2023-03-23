@@ -1,4 +1,4 @@
-<Rice/>
+
 # API
 jessibuca API 文档
 -
@@ -11,7 +11,7 @@ jessibuca API 文档
 -
 -
 -
-
+<Rice/>
 ## Jessibuca(options)
 
 options 支持的参数有：

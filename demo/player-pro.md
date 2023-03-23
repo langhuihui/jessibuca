@@ -1,7 +1,6 @@
 ---
 sidebar: false
 ---
-<Rice/>
 
 <ProDemoPlayer/>
 
@@ -52,6 +51,9 @@ sidebar: false
 - 协议同时支持https、wss
 - 同时支持H264和H265编码格式
 - 支持webcodecs(H264+H265)和MSE硬解码(H264+H265)
+
+<Rice/>
+
 
 # Webcodecs H265硬解码
 

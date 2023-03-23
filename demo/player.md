@@ -1,7 +1,6 @@
 ---
 sidebar: false
 ---
-<Rice/>
 
 <DemoPlayer/>
 
@@ -14,3 +13,4 @@ sidebar: false
 - 同时支持H264和H265编码格式
 - 支持webcodecs和MSE硬解码(H264格式)
 
+<Rice/>

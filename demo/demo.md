@@ -1,6 +1,3 @@
-
-<Rice/>
-
 # DEMO
 
 ## 提醒: github demo 上面的jessibuca.js、 decoder.js、decoder.wasm 可能存在版本的延迟。如有问题，请更新到最新的文件使用
@@ -14,7 +11,7 @@
 -
 -
 -
--
+<Rice/>
 ## 最新（jessibuca.js、 decoder.js、decoder.wasm）
 [最新源码](https://jessibuca.com/dist.zip)
 
