@@ -106,6 +106,14 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 2. 体验版会强制在右上角有 jessibuca-pro 水印。
 3. 体验版会强制全屏水印（JessibucaPro 体验）。
 
+包含的文件有：
+
+- jessibuca-pro-demo.js(script标签引入)
+- decoder-pro.js (初始化参数decoder参数配置)
+- decoder-pro.wasm(胶水文件)
+- decoder-pro-simd.js (初始化参数decoder参数配置)
+- decoder-pro-simd.wasm(胶水文件)
+
 
 ## 直播协议支持
 
