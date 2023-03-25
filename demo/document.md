@@ -909,6 +909,33 @@ windows 系统压缩方法
 
 
 
+### falling back to arraybuffer instantiation 错误
+
+> Expected 'application/wasm'., falling back to ArrayBuffer instantiation.
+> These warnings refers to incorrect response MIME type of the wasm file.
+> In order to fix it, please try to set the MIME filetype to application/wasm
+> for the actual wasm file in your server config
+
+
+> 这个错误通常是由WebAssembly模块加载时失败而导致的。当WebAssembly模块不能成功编译时，JavaScript代码会回退到使用ArrayBuffer实例化来代替。
+
+- 检查浏览器版本是否过旧，尝试更新下浏览器版本。
+- 修复下wasm文件的MIME类型，设置为application/wasm
+
+<img src="/public/wasm.png">
+
+
+### aborted(rangeError:webassembly.instance():out of memory: cannot allocate wasm memory for new instance) 错误
+
+> 这个错误是由于WebAssembly实例内存不足而导致的。WebAssembly是一种虚拟机技术，它可以在浏览器中运行高性能的本地代码，但是WebAssembly实例的内存大小是有限制的。
+
+> 通常情况下，WebAssembly实例的内存分配是由JavaScript主线程控制的。当WebAssembly实例需要更多的内存时，JavaScript代码会向操作系统申请更多的内存。然而，在某些情况下，如高密度的计算、大型数据集等场景下，WebAssembly实例会超出内存限制，导致无法继续分配内存，最终抛出"out of memory"错误。
+
+> 要解决这个问题，可以考虑优化WebAssembly代码，减少内存使用量；或者增加JavaScript主线程控制的WebAssembly实例内存限制，具体方法可以根据应用程序需求和实际情况进行调整。
+
+- 检查下系统级别的`内存`和`cpu`和`gup`使用情况
+- 检查下是不是播放的码流过大，导致内存不足（开源版单实例能够支持分辨率最大720p，pro版本单实例可以支持到2k级别）
+
 # 群
 <img src="/public/qrcode.jpeg">
 
