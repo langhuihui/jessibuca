@@ -936,7 +936,36 @@ windows 系统压缩方法
 - 检查下系统级别的`内存`和`cpu`和`gup`使用情况
 - 检查下是不是播放的码流过大，导致内存不足（开源版单实例能够支持分辨率最大720p，pro版本单实例可以支持到2k级别）
 
-# 群
+
+### 关于切换 url 播放地址
+
+为了降低内存溢出的风险，如果要切换播放地址，需要先销毁当前的实例，再创建新的实例。
+
+```js
+let jessibuca = new Jessibuca({
+// 参数
+})
+
+jessibuca.play('url1')
+
+// 切换播放源
+
+jessibuca.destroy();
+jessibuca = null;
+
+// 从新new一个出来
+let jessibuca = new Jessibuca({
+// 参数
+})
+
+
+// 播放新的地址
+jessibuca.play('url2')
+
+```
+
+
+### 群
 <img src="/public/qrcode.jpeg">
 
 
