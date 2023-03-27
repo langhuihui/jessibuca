@@ -36,7 +36,7 @@ export default class VideoLoader extends CommonLoader {
         const {proxy} = this.player.events;
 
         proxy(this.$videoElement, 'canplay', () => {
-            this.player.debug.log('Video', 'canplay');
+            this.player.debug.log('Video', `canplay and _delayPlay is ${this._delayPlay}`);
             if (this._delayPlay) {
                 this._play();
             }
@@ -51,7 +51,8 @@ export default class VideoLoader extends CommonLoader {
             const timeStamp = parseInt(event.timeStamp, 10);
             this.player.emit(EVENTS.timeUpdate, timeStamp)
             // check is pause;
-            if (!this.isPlaying()) {
+            if (!this.isPlaying() && this.init) {
+                this.player.debug.log('Video', `timeupdate and this.isPlaying is false and retry play`);
                 this.$videoElement.play();
             }
         })

@@ -70,7 +70,7 @@
 	  // second
 	  loadingTimeoutReplay: true,
 	  // loading timeout replay. default is true
-	  heartTimeoutReplay: false,
+	  heartTimeoutReplay: true,
 	  // heart timeout replay.
 	  loadingTimeoutReplayTimes: 3,
 	  // loading timeout replay fail times
@@ -228,6 +228,7 @@
 	  loadingTimeout: EVENTS.loadingTimeout,
 	  delayTimeout: EVENTS.delayTimeout,
 	  fullscreen: 'fullscreen',
+	  webFullscreen: EVENTS.webFullscreen,
 	  play: EVENTS.play,
 	  pause: EVENTS.pause,
 	  mute: EVENTS.mute,
@@ -1168,7 +1169,7 @@
 	        gl.deleteBuffer(texturePosBuffer);
 	        gl.deleteTexture(yTextureRef);
 	        gl.deleteTexture(uTextureRef);
-	        gl.deleteBuffer(vTextureRef);
+	        gl.deleteTexture(vTextureRef);
 	      } catch (e) {// console.error(e);
 	      }
 	    }
@@ -1660,7 +1661,7 @@
 	      proxy
 	    } = this.player.events;
 	    proxy(this.$videoElement, 'canplay', () => {
-	      this.player.debug.log('Video', 'canplay');
+	      this.player.debug.log('Video', `canplay and _delayPlay is ${this._delayPlay}`);
 
 	      if (this._delayPlay) {
 	        this._play();
@@ -1674,7 +1675,8 @@
 	      const timeStamp = parseInt(event.timeStamp, 10);
 	      this.player.emit(EVENTS.timeUpdate, timeStamp); // check is pause;
 
-	      if (!this.isPlaying()) {
+	      if (!this.isPlaying() && this.init) {
+	        this.player.debug.log('Video', `timeupdate and this.isPlaying is false and retry play`);
 	        this.$videoElement.play();
 	      }
 	    });

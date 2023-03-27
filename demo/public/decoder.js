@@ -7435,7 +7435,7 @@
 	        gl.deleteBuffer(texturePosBuffer);
 	        gl.deleteTexture(yTextureRef);
 	        gl.deleteTexture(uTextureRef);
-	        gl.deleteBuffer(vTextureRef);
+	        gl.deleteTexture(vTextureRef);
 	      } catch (e) {// console.error(e);
 	      }
 	    }
@@ -7477,7 +7477,7 @@
 	  // second
 	  loadingTimeoutReplay: true,
 	  // loading timeout replay. default is true
-	  heartTimeoutReplay: false,
+	  heartTimeoutReplay: true,
 	  // heart timeout replay.
 	  loadingTimeoutReplayTimes: 3,
 	  // loading timeout replay fail times
