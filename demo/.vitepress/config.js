@@ -16,6 +16,7 @@ module.exports = {
             {text: 'HTTP', link: 'http://jessibuca.monibuca.com/'},
             {text: 'HTTPS', link: 'https://j.m7s.live/'},
             {text: 'Monibuca', link: 'https://m7s.live/'},
+            {text:'Rebebuca',linl:'https://rebebuca.com/'}
         ],
         logo: 'logo.png',
     },
