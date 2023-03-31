@@ -985,6 +985,32 @@ WebGL的CONTEXT_LOST_WEBGL错误通常表示WebGL上下文（context）已经丢
 WebGL是一种在Web浏览器中渲染3D图形的技术，需要高帧率和持续更新来保持流畅的体验。如果WebGL上下文被暂停或挂起，它就无法满足要求的性能需求，因此浏览器会释放WebGL上下文，以回收资源和内存。
 
 
+#### 播放的时候直接就有声音
+
+> 播放器默认的情况下，是静音播放的（浏览器规范）。
+
+不过可以尝试通过配置`isNotMute:true` 参数尝试取消静音播放。
+
+> 如果是程序触发的自动播放播放器，是不会有声音的，需要用户手动触发才会有声音。
+
+程序里面可以检查下播放器的状态，如果是静音状态，就需要需要出一个ui交互，让用户手动恢复声音播放。
+
+```js
+var result = jessibuca.isMute()
+console.log(result) // true
+if(result){
+
+    // 这里可以出一个ui交互，让用户手动恢复声音播放
+}
+```
+
+通过调用方法：`audioResume()`来恢复播放器的声音。
+
+```js
+jessibuca.audioResume()
+```
+
+
 ### 群
 <img src="/public/qrcode.jpeg">
 

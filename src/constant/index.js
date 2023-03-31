@@ -179,6 +179,7 @@ export const JESSIBUCA_EVENTS = {
     pause: EVENTS.pause,
     mute: EVENTS.mute,
     stats: EVENTS.stats,
+    volumechange: EVENTS.volumechange,
     performance: EVENTS.performance,
     recordingTimestamp: EVENTS.recordingTimestamp,
     recordStart: EVENTS.recordStart,
