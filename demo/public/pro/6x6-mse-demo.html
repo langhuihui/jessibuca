@@ -366,20 +366,37 @@
         }
     })
 
-    $destroy.addEventListener('click', function () {
-        for (let i = 0; i < num; i++) {
-            let player = playList[i];
-            player && player.destroy()
-        }
-        playList = [];
-        setTimeout(() => {
+    function destroy() {
+        return new Promise((resolve, reject) => {
+            const destroyList = [];
             for (let i = 0; i < num; i++) {
-                create(i + 1);
+                let player = playList[i];
+                if (player) {
+                    destroyList.push(player.destroy());
+                }
             }
-            $player.style.display = 'inline-block';
-            $pause.style.display = 'none';
-            $destroy.style.display = 'none';
-        }, 100)
+            Promise.all(destroyList).then(() => {
+                playList = [];
+                setTimeout(() => {
+                    for (let i = 0; i < num; i++) {
+                        create(i + 1);
+                    }
+                    $player.style.display = 'inline-block';
+                    $pause.style.display = 'none';
+                    $destroy.style.display = 'none';
+                    resolve();
+                }, 100)
+            }).catch((e) => {
+                console.error(e);
+            })
+        })
+
+    }
+
+    $destroy.addEventListener('click', function () {
+        destroy().then(()=>{
+
+        })
     })
 
     function checkSupport() {

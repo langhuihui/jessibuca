@@ -147,6 +147,7 @@
         </div>
         <div class="input" style="line-height: 30px">
             <button id="destroy">销毁</button>
+            <span class="fps-inner"></span>
         </div>
     </div>
 </div>
@@ -277,6 +278,7 @@
     var $videoBuffer = document.getElementById('videoBuffer');
     var $videoBufferDelay = document.getElementById('videoBufferDelay');
     var $replay = document.getElementById('replay');
+    var $fps = document.querySelector('.fps-inner');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -345,10 +347,16 @@
             // console.log('timeUpdate', value);
         })
 
+        jessibuca.on('stats', (stats) => {
+            // console.log('stats', stats);
+            $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
+        })
+
 
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
         $destroy.style.display = 'none';
+        $fps.textContent = '';
     }
 
 
@@ -367,10 +375,14 @@
 
     function replay() {
         if (jessibuca) {
-            jessibuca.destroy();
+            jessibuca.destroy().then(() => {
+                create();
+                play();
+            });
+        } else {
+            create();
+            play();
         }
-        create();
-        play();
     }
 
     $replay.addEventListener('click', function () {
@@ -385,14 +397,19 @@
     $pause.addEventListener('click', function () {
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
+        $fps.textContent = '';
         jessibuca.pause();
     })
 
     $destroy.addEventListener('click', function () {
         if (jessibuca) {
-            jessibuca.destroy();
+            jessibuca.destroy().then(() => {
+                create();
+            });
+        } else {
+            create();
         }
-        create();
+
     })
 
     $useMSE.addEventListener('click', function () {

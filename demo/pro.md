@@ -164,7 +164,11 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 
 > 会存在部分功能只支持部分浏览器。
 
-> MSE和WebCodecs硬解码H265需要Chrome 107及以上
+> MSE和WebCodecs硬解码H265需要Chrome 107及以上。
+
+> Chrome/Edge 91, Firefox89及之后正式提供的SIMD指令集加速解码。
+
+> Safari暂不支持SIMD指令集加速解码。
 
 | 浏览器 | 支持情况 |
 | :--- | :--- |

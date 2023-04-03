@@ -248,10 +248,16 @@
 
     function replay() {
         if (jessibuca) {
-            jessibuca.destroy();
+            jessibuca.destroy().then(()=>{
+                create();
+                play();
+            });
         }
-        create();
-        play();
+        else {
+            create();
+            play();
+        }
+
     }
 
     function play() {
@@ -277,9 +283,14 @@
 
     $destroy.addEventListener('click', function () {
         if (jessibuca) {
-            jessibuca.destroy();
+            jessibuca.destroy().then(()=>{
+                create();
+            });
         }
-        create();
+        else{
+            create();
+        }
+
     })
 
     $fullscreen.addEventListener('click',function () {

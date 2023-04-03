@@ -101,7 +101,8 @@
         <div class="input">
             <div style="width: 900px">
                 <span><span style="color: red">TPS:定频（本地设置）:</span>则支持播放器端控制播放速率(设置FPS+播放倍率)，播放器端设置的播放速率是固定的，不会随着流的速率变化而变化。
-                支持设置播放器的播放倍率（提高渲染倍率）。<span style="color: green">在推流码率足够的情况下，播放器会按照固定倍率播放</span>
+                支持设置播放器的播放倍率（提高渲染倍率）。<span
+                        style="color: green">在推流码率足够的情况下，播放器会按照固定倍率播放</span>
             </span>
             </div>
         </div>
@@ -188,19 +189,19 @@
         </div>
         <div class="input" style="line-height: 30px">
             <button id="destroy">销毁</button>
-<!--            <div id="playbackDom" style="width: 400px">-->
-<!--                <div class="playbackForward">-->
-<!--                    <span>播放倍率：</span>-->
-<!--                    <select id="playbackRate" style="width: 50px">-->
-<!--                        <option value="1" selected>1倍</option>-->
-<!--                        <option value="2">2倍</option>-->
-<!--                        <option value="4">4倍</option>-->
-<!--                        <option value="8">8倍</option>-->
-<!--                    </select>-->
-<!--                    <button id="playbackForward">快进</button>-->
-<!--                </div>-->
+            <!--            <div id="playbackDom" style="width: 400px">-->
+            <!--                <div class="playbackForward">-->
+            <!--                    <span>播放倍率：</span>-->
+            <!--                    <select id="playbackRate" style="width: 50px">-->
+            <!--                        <option value="1" selected>1倍</option>-->
+            <!--                        <option value="2">2倍</option>-->
+            <!--                        <option value="4">4倍</option>-->
+            <!--                        <option value="8">8倍</option>-->
+            <!--                    </select>-->
+            <!--                    <button id="playbackForward">快进</button>-->
+            <!--                </div>-->
 
-<!--            </div>-->
+            <!--            </div>-->
 
         </div>
     </div>
@@ -261,7 +262,7 @@
                 screenshot: showOperateBtns,
                 play: showOperateBtns,
                 audio: showOperateBtns,
-                zoom:showOperateBtns,
+                zoom: showOperateBtns,
                 performance: showOperateBtns,
             },
             forceNoOffscreen: forceNoOffscreen,
@@ -314,7 +315,7 @@
                 isUseFpsRender: isUseFpsRender === 'true',
                 isCacheBeforeDecodeForFpsRender: isCacheBeforeDecodeForFpsRender,
                 showRateBtn: true,
-                supportWheel:true,
+                supportWheel: true,
                 uiUsePlaybackPause: $uiUsePlaybackPause.value === 'true',
                 isPlaybackPauseClearCache: $isPlaybackPauseClearCache.value === 'true',
                 rateConfig: [
@@ -351,9 +352,12 @@
 
     $destroy.addEventListener('click', function () {
         if (jessibuca) {
-            jessibuca.destroy();
+            jessibuca.destroy().then(() => {
+                create();
+            });
+        } else {
+            create();
         }
-        create();
     })
 
 

@@ -341,26 +341,39 @@
         $destroy.style.display = 'inline-block';
     }
     function destroy() {
-        for (let i = 0; i < size; i++) {
-            let player = playList[i];
-            player && player.destroy()
-        }
-        playList = [];
-        setTimeout(() => {
+        return new Promise((resolve, reject) => {
+            const destroyList = [];
             for (let i = 0; i < size; i++) {
-                create(i + 1);
+                let player = playList[i];
+                if (player) {
+                    destroyList.push(player.destroy());
+                }
             }
-            $player.style.display = 'inline-block';
-            $pause.style.display = 'none';
-            $destroy.style.display = 'none';
-        }, 100)
+            Promise.all(destroyList).then(() => {
+                playList = [];
+                setTimeout(() => {
+                    for (let i = 0; i < size; i++) {
+                        create(i + 1);
+                    }
+                    $player.style.display = 'inline-block';
+                    $pause.style.display = 'none';
+                    $destroy.style.display = 'none';
+                    resolve();
+                }, 100)
+            }).catch((e) => {
+                console.error(e);
+            })
+        })
+
     }
 
     function replay() {
-        destroy();
-        create();
-        play();
+        destroy().then(() => {
+            create();
+            play();
+        });
     }
+
 
     function pause() {
         $player.style.display = 'inline-block';
@@ -381,7 +394,9 @@
     })
 
     $destroy.addEventListener('click', function () {
-        destroy();
+        destroy().then(() => {
+
+        });
     })
 
     $replay.addEventListener('click', function () {

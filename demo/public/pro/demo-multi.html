@@ -187,10 +187,15 @@
 
     function replay() {
         if (jessibucaMulti) {
-            jessibucaMulti.destroy();
+            jessibucaMulti.destroy().then(() => {
+                create();
+                play();
+            });
+        } else {
+            create();
+            play();
         }
-        create();
-        play();
+
     }
 
     $player.addEventListener('click', function () {
@@ -206,8 +211,9 @@
 
     $destroy.addEventListener('click', function () {
         if (jessibucaMulti) {
-            jessibucaMulti.destroy();
-            jessibucaMulti = null;
+            jessibucaMulti.destroy().then(() => {
+                jessibucaMulti = null;
+            });
         }
         create();
     })

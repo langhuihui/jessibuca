@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jessibuca Pro WCS 3x3 demo</title>
+    <title>Jessibuca Pro 3x3 demo</title>
     <script src="./jessibuca-pro-demo.js"></script>
     <style>
         .root {
@@ -23,7 +23,7 @@
         }
 
         .container-shell:before {
-            content: "jessibuca Pro wcs demo player";
+            content: "jessibuca Pro demo player";
             position: absolute;
             color: darkgray;
             top: 4px;
@@ -114,8 +114,20 @@
         </div>
         <div class="input">
             <div>
-                当前浏览器：<span id="mseSupport" style="color: green;display: none">支持Webcodecs H265解码</span>
-                <span id="mseNotSupport" style="color: red;display: none">不支持Webcodecs H265解码(https/localhost),会自动切换成wasm解码</span>
+                当前浏览器：<span id="mseSupport" style="color: green;display: none">支持MSE H265解码</span>
+                <span id="mseNotSupport" style="color: red;display: none">不支持MSE H265解码,会自动切换成wasm解码</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                当前浏览器：<span id="wcsSupport" style="color: green;display: none">支持Webcodecs H265解码</span>
+                <span id="wcsNotSupport" style="color: red;display: none">不支持Webcodecs H265解码(https/localhost),会自动切换成wasm解码</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                当前浏览器：<span id="simdSupport" style="color: green;display: none">支持SIMD解码</span>
+                <span id="simdNotSupport" style="color: red;display: none">不支持SIMD解码,会自动切换成wasm解码</span>
             </div>
         </div>
         <div class="input" style="width: 1000px;flex-direction: column">
@@ -127,6 +139,31 @@
                 chrome限制同源http请求最多6个并发, 因此超过6个并发请求我们采用websocket-flv来播放
             </div>
             <div>请准备M7S服务端来测试. worker js不能跨域调用,</div>
+        </div>
+        <div class="input">
+            <div><input
+                type="checkbox"
+                id="useMSE"
+            /><span>MediaSource</span>
+                <input
+                    type="checkbox"
+                    checked
+                    id="useWCS"
+                /><span>Webcodec</span>
+                <input
+                    type="checkbox"
+                    id="useSIMD"
+                /><span>SIMD</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <span>缓存时长：</span>
+                <input placeholder="单位：秒" type="text" id="videoBuffer" style="width: 50px" value="0.2">秒
+                <span>缓存延迟(延迟超过会触发丢帧)：</span>
+                <input placeholder="单位：秒" type="text" id="videoBufferDelay" style="width: 50px" value="2">秒
+                <button id="replay">重播</button>
+            </div>
         </div>
         <div class="input">
             <div>输入URL：</div>
@@ -210,17 +247,24 @@
     </div>
 </div>
 
+
 <script>
     var $player = document.getElementById('play');
     var $pause = document.getElementById('pause');
     var $destroy = document.getElementById('destroy');
-
+    var $useMSE = document.getElementById('useMSE');
+    var $useSIMD = document.getElementById('useSIMD');
+    var $useWCS = document.getElementById('useWCS');
+    var $videoBuffer = document.getElementById('videoBuffer');
+    var $videoBufferDelay = document.getElementById('videoBufferDelay');
+    var $replay = document.getElementById('replay');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var playList = [];
+    let size = 9
 
-    function create(id) {
+    function _create(id) {
         var $container = document.getElementById('container' + id);
 
         var jessibuca = new JessibucaPro({
@@ -230,13 +274,16 @@
             isResize: false,
             text: "",
             loadingText: "加载中",
-            debug: false,
-            controlAutoHide: true,
+            debug: true,
+            isMulti: true,
+            useMSE: $useMSE.checked === true,
+            useSIMD: $useSIMD.checked === true,
+            useWCS: $useWCS.checked === true,
             hasAudio: false,
             useVideoRender: true,
+            controlAutoHide: true,
             showBandwidth: showOperateBtns, // 显示网速
-            showPerformance:showOperateBtns,
-            useWCS: true,
+            showPerformance: showOperateBtns,
             operateBtns: {
                 fullscreen: showOperateBtns,
                 screenshot: showOperateBtns,
@@ -252,26 +299,28 @@
             },
         },);
 
-        jessibuca.onLog = msg => console.error(msg);
-        jessibuca.onRecord = (status) => console.log('onRecord', status);
-        jessibuca.onPause = () => console.log('onPause');
-        jessibuca.onPlay = () => console.log('onPlay');
-        jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
-        jessibuca.onMute = msg => console.log('onMute', msg);
+        // jessibuca.onLog = msg => console.error(msg);
+        // jessibuca.onRecord = (status) => console.log('onRecord', status);
+        // jessibuca.onPause = () => console.log('onPause');
+        // jessibuca.onPlay = () => console.log('onPlay');
+        // jessibuca.onMute = msg => console.log('onMute', msg);
+        jessibuca.on("fullscreen", function (flag) {
+            console.log('is fullscreen', id, flag)
+        })
         playList.push(jessibuca);
     }
 
-
-    for (let i = 0; i < 9; i++) {
-        create(i + 1);
-        $player.style.display = 'inline-block';
-        $pause.style.display = 'none';
-        $destroy.style.display = 'none';
+    function create() {
+        for (let i = 0; i < size; i++) {
+            _create(i + 1);
+            $player.style.display = 'inline-block';
+            $pause.style.display = 'none';
+            $destroy.style.display = 'none';
+        }
     }
-
-
-    $player.addEventListener('click', function () {
-        for (let i = 0; i < 9; i++) {
+    create();
+    function play() {
+        for (let i = 0; i < size; i++) {
             var id = i + 1;
             var $playHref = document.getElementById('playUrl' + id);
             let player = playList[i];
@@ -287,40 +336,102 @@
             }
         }
 
-
         $player.style.display = 'none';
         $pause.style.display = 'inline-block';
         $destroy.style.display = 'inline-block';
+    }
+    function destroy() {
+        return new Promise((resolve, reject) => {
+            const destroyList = [];
+            for (let i = 0; i < size; i++) {
+                let player = playList[i];
+                if (player) {
+                    destroyList.push(player.destroy());
+                }
+            }
+            Promise.all(destroyList).then(() => {
+                playList = [];
+                setTimeout(() => {
+                    for (let i = 0; i < size; i++) {
+                        create(i + 1);
+                    }
+                    $player.style.display = 'inline-block';
+                    $pause.style.display = 'none';
+                    $destroy.style.display = 'none';
+                    resolve();
+                }, 100)
+            }).catch((e) => {
+                console.error(e);
+            })
+        })
+
+    }
+
+    function replay() {
+        destroy().then(() => {
+            create();
+            play();
+        });
+    }
+
+
+    function pause() {
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+        for (let i = 0; i < size; i++) {
+            let player = playList[i];
+            player && player.pause()
+        }
+    }
+
+    $player.addEventListener('click', function () {
+        play();
     }, false)
 
 
     $pause.addEventListener('click', function () {
-        $player.style.display = 'inline-block';
-        $pause.style.display = 'none';
-        for (let i = 0; i < 9; i++) {
-            let player = playList[i];
-            player && player.pause()
-        }
+        pause();
     })
 
     $destroy.addEventListener('click', function () {
-        for (let i = 0; i < 9; i++) {
-            let player = playList[i];
-            player && player.destroy()
+        destroy().then(() => {
+
+        });
+    })
+
+    $replay.addEventListener('click', function () {
+        replay();
+    })
+
+    $useMSE.addEventListener('click', function () {
+        const checked = $useMSE.checked;
+        if (checked) {
+            $useSIMD.checked = false
+            $useWCS.checked = false
         }
-        playList = [];
-        setTimeout(() => {
-            for (let i = 0; i < 9; i++) {
-                create(i + 1);
-            }
-            $player.style.display = 'inline-block';
-            $pause.style.display = 'none';
-            $destroy.style.display = 'none';
-        }, 100)
+        replay();
+    })
+
+    $useSIMD.addEventListener('click', function () {
+        const checked = $useSIMD.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useWCS.checked = false
+        }
+        replay();
+    })
+
+    $useWCS.addEventListener('click', function () {
+        const checked = $useWCS.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useSIMD.checked = false
+        }
+        replay();
     })
 
     function getBrowser() {
-        const UserAgent = navigator.userAgent.toLowerCase();
+        const UserAgent = window.navigator.userAgent.toLowerCase() || '';
         const browserInfo = {};
         const browserArray = {
             IE: window.ActiveXObject || "ActiveXObject" in window, // IE
@@ -337,7 +448,10 @@
             if (browserArray[i]) {
                 let versions = '';
                 if (i === 'IE') {
-                    versions = UserAgent.match(/(msie\s|trident.*rv:)([\w.]+)/)[2];
+                    const versionArray = UserAgent.match(/(msie\s|trident.*rv:)([\w.]+)/)
+                    if (versionArray && versionArray.length > 2) {
+                        versions = UserAgent.match(/(msie\s|trident.*rv:)([\w.]+)/)[2];
+                    }
                 } else if (i === 'Chrome') {
                     for (let mt in navigator.mimeTypes) {
                         //检测是否是360浏览器(测试只有pc端的360才起作用)
@@ -345,17 +459,35 @@
                             i = '360';
                         }
                     }
-                    versions = UserAgent.match(/chrome\/([\d.]+)/)[1];
+                    const versionArray = UserAgent.match(/chrome\/([\d.]+)/);
+                    if (versionArray && versionArray.length > 1) {
+                        versions = versionArray[1];
+                    }
                 } else if (i === 'Firefox') {
-                    versions = UserAgent.match(/firefox\/([\d.]+)/)[1];
+                    const versionArray = UserAgent.match(/firefox\/([\d.]+)/);
+                    if (versionArray && versionArray.length > 1) {
+                        versions = versionArray[1];
+                    }
                 } else if (i === 'Opera') {
-                    versions = UserAgent.match(/opera\/([\d.]+)/)[1];
+                    const versionArray = UserAgent.match(/opera\/([\d.]+)/);
+                    if (versionArray && versionArray.length > 1) {
+                        versions = versionArray[1];
+                    }
                 } else if (i === 'Safari') {
-                    versions = UserAgent.match(/version\/([\d.]+)/)[1];
+                    const versionArray = UserAgent.match(/version\/([\d.]+)/);
+                    if (versionArray && versionArray.length > 1) {
+                        versions = versionArray[1];
+                    }
                 } else if (i === 'Edge') {
-                    versions = UserAgent.match(/edge\/([\d.]+)/)[1];
+                    const versionArray = UserAgent.match(/edge\/([\d.]+)/);
+                    if (versionArray && versionArray.length > 1) {
+                        versions = versionArray[1];
+                    }
                 } else if (i === 'QQBrowser') {
-                    versions = UserAgent.match(/qqbrowser\/([\d.]+)/)[1];
+                    const versionArray = UserAgent.match(/qqbrowser\/([\d.]+)/);
+                    if (versionArray && versionArray.length > 1) {
+                        versions = versionArray[1];
+                    }
                 }
                 browserInfo.type = i;
                 browserInfo.version = parseInt(versions);
@@ -365,18 +497,47 @@
     }
 
 
-    function checkSupport() {
+    function checkSupportMSEHevc() {
+        return window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="hev1.1.6.L123.b0"');
+    }
+
+    function checkSupportWCSHevc() {
         const browserInfo = getBrowser();
+
         return browserInfo.type.toLowerCase() === 'chrome' && browserInfo.version >= 107 && (location.protocol === 'https:' || location.hostname === 'localhost');
+    }
+
+    function checkSupportSIMD() {
+        return WebAssembly && WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 98, 11]));
     }
 
     let support = document.getElementById('mseSupport');
     let notSupport = document.getElementById('mseNotSupport');
-    if (checkSupport()) {
+    if (checkSupportMSEHevc()) {
         support.style.display = 'inline-block'
     } else {
         notSupport.style.display = 'inline-block'
     }
+
+    let supportWcsHevc = document.getElementById('wcsSupport');
+    let notSupportWcsHevc = document.getElementById('wcsNotSupport');
+
+    if (checkSupportWCSHevc()) {
+        supportWcsHevc.style.display = 'inline-block';
+    } else {
+        notSupportWcsHevc.style.display = 'inline-block'
+    }
+
+
+    let supportSimd = document.getElementById('simdSupport');
+    let notSupportSimd = document.getElementById('simdNotSupport');
+
+    if (checkSupportSIMD()) {
+        supportSimd.style.display = 'inline-block';
+    } else {
+        notSupportSimd.style.display = 'inline-block'
+    }
+
 
 </script>
 
