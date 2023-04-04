@@ -925,6 +925,25 @@ windows 系统压缩方法
 <img src="/public/wasm.png">
 
 
+#### 通过springBoot 部署的静态资源遇到 `falling back to arraybuffer instantiation` 错误问题
+
+> decoder-pro-simd.js:1 wasm streaming compile failed: CompileError: WebAssembly.instantiateStreaming(): section (code 1, "Type") extends past end of the module (length 11493359, remaining bytes 2877270) @+8
+
+> decoder-pro-simd.js:1 falling back to ArrayBuffer instantiation
+
+检查下是不是通过`maven`方式进行打包的。
+
+> maven 进行打包的时候，使用maven进行资源过滤的时候，会把二进制文件破坏掉。导致内容变大。
+
+https://www.mianshigee.com/note/detail/72131ooi/
+
+##### 解决方案
+
+使用maven进行资源过滤的时候，只要过滤需要过滤的文件，一些二进制文件，比如https证书等，就不要参与资源过滤，否则打包后会破坏文件内容。
+
+<img src="/public/img/maven-wasm.png">
+
+
 ### aborted(rangeError:webassembly.instance():out of memory: cannot allocate wasm memory for new instance) 错误
 
 > 这个错误是由于WebAssembly实例内存不足而导致的。WebAssembly是一种虚拟机技术，它可以在浏览器中运行高性能的本地代码，但是WebAssembly实例的内存大小是有限制的。
