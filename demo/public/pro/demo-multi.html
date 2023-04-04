@@ -213,9 +213,11 @@
         if (jessibucaMulti) {
             jessibucaMulti.destroy().then(() => {
                 jessibucaMulti = null;
+                create();
             });
+        } else {
+            create();
         }
-        create();
     })
 
     $destroySingle.addEventListener('click', function () {
