@@ -334,8 +334,10 @@ worker地址
 - **用法**：是否使用web全屏(旋转90度)（只会在移动端生效）。
 
 > 如果手机设置了自动选择，建议不要开启。
+
 > web全屏使用的是css方式实现的伪全屏，实现的是横屏播放的。如果手机设置了自动旋转，建议不要使用这个功能。
 
+> ios上面不支持系统级别的全屏方法，推荐使用这个参数。
 
 ## 方法
 
@@ -573,12 +575,17 @@ jessibuca.setKeepScreenOn()
 
 - **用法**： 全屏(取消全屏)播放视频
 
+> iOS不支持，iPadOS13后支持
+
+> 推荐iOS端配置上 useWebFullScreen 这个参数。
+
 ```js
 
 jessibuca.setFullscreen(true)
 //
 jessibuca.setFullscreen(false)
 ```
+
 
 ### screenshot(filename, format, quality,type)
 
