@@ -1044,6 +1044,22 @@ PIPELINE_ERROR_DECODE 是指视频解码器在解码视频流时发生了错误�
 - 如果系统资源不足以支持同时解码多个视频流，则可以尝试降低同时播放的视频数量，或者升级硬件设备。
 
 
+### 浏览器报：Uncaught RangeError: Array buffer allocation failed
+
+> Uncaught RangeError: Array buffer allocation failed 错误通常是因为尝试分配一个大于 JavaScript 引擎所允许的内存限制的 ArrayBuffer。这个限制因浏览器而异，但通常是几百 MB 到几 GB 不等。
+
+
+一般这个报错出现在软解码的时候且是多屏的情况下。
+
+本身软解码的性能就不是很好，如果是多屏的情况下，那么内存的消耗就会更大。
+
+解决方法：
+- 使用硬解码（pro 支持H264/H265硬解码）
+- 降低分辨率
+- 降低帧率
+- 降低码率
+- 降低多屏数量
+
 ### 群
 <img src="/public/qrcode.jpeg">
 
