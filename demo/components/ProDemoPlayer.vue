@@ -543,8 +543,9 @@ export default {
     },
     unmounted() {
         if (this.$options && this.$options.jessibuca) {
-            this.$options.jessibuca.destroy();
-            this.$options.jessibuca = null;
+            this.$options.jessibuca.destroy().then(() => {
+                this.$options.jessibuca = null;
+            });
         }
         this.vConsole.destroy();
     },
@@ -917,17 +918,21 @@ export default {
 
         },
         destroyPlayer() {
-            try {
-                if (this.$options.jessibuca) {
-                    this.$options.jessibuca.destroy();
-                    this.$options.jessibuca = null;
+            return new Promise((resolve, reject) => {
+                try {
+                    if (this.$options.jessibuca) {
+                        this.$options.jessibuca.destroy().then(() => {
+                            this.$options.jessibuca = null;
+                            this.initPlayer();
+                            this.playType = '';
+                            resolve();
+                        });
+                    }
+                } catch (e) {
+                    console.error(e);
+                    reject(e);
                 }
-            } catch (e) {
-                console.error(e);
-            }
-
-            this.initPlayer();
-            this.playType = '';
+            })
         },
         initPlayer() {
             this.create();
@@ -1059,14 +1064,15 @@ export default {
         },
 
         replay() {
-            this.destroyPlayer();
-            if (this.playType === 'play') {
-                this.play();
-            } else if (this.playType === 'playback') {
-                this.playback();
-            } else {
-                this.play();
-            }
+            this.destroyPlayer().then(()=>{
+                if (this.playType === 'play') {
+                    this.play();
+                } else if (this.playType === 'playback') {
+                    this.playback();
+                } else {
+                    this.play();
+                }
+            });
         },
 
         changeBuffer() {
