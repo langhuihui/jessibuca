@@ -109,22 +109,26 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 包含的文件有：
 
 - jessibuca-pro-demo.js(script标签引入)
+- jessibuca-pro-multi-demo.js(script标签引入)
 - decoder-pro.js (初始化参数decoder参数配置)
 - decoder-pro.wasm(胶水文件)
 - decoder-pro-simd.js (初始化参数decoder参数配置)
 - decoder-pro-simd.wasm(胶水文件)
 
+> `jessibuca-pro-demo.js`与`jessibuca-pro-multi-demo.js`的区别是，前者是单路播放，后者是支持多路播放。 两者只需要引入一个就行了，不需要同时引入。
 
 ## 直播协议支持
 
-| 协议                          | 支持情况 |
-|:----------------------------| :--- |
-| ws-raw(M7S私有协议)             | 支持 |
-| ws-flv                      | 支持 |
-| http-flv                    | 支持 |
-| HLS                         | 支持 |
-| WebTransport(M7S服务器)   | 支持 |
-| Webrtc (M7S服务器)        | 支持 |
+| 协议                   | 支持情况 |
+|:---------------------| :--- |
+| ws-raw(M7S私有协议)      | 支持 |
+| ws-flv               | 支持 |
+| http-flv             | 支持 |
+| HLS                  | 支持 |
+| WebTransport(M7S服务器) | 支持 |
+| Webrtc (M7S服务器)      | 支持 |
+| 加密私有协议 (M7S服务器)      | 支持 |
+
 
 
 > HLS协议目前只支持H264编码格式，其他协议都支持H264和H265编码格式。
@@ -307,8 +311,6 @@ Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
 
 
 
-
-
 ## 基础版本
 - 支持解码H.264视频(Baseline, Main, High Profile全支持，支持解码B帧视频)
 - 支持解码H.265视频（flv id == 12）
@@ -391,7 +393,6 @@ Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
 
 >
 > 需要单独购买人脸识别的授权，授权后才能使用。
-
 
 
 ## wasm解码模式下默认work线程中发起Http-Flv、WS请求，减少主线程往worker线程传递数据，提升性能
