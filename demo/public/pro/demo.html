@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jessica demo</title>
+    <title>Jessica 4*4 demo</title>
     <script src="./vconsole.js"></script>
     <script src="./jessibuca-pro-demo.js"></script>
     <style>
@@ -24,7 +24,7 @@
         }
 
         .container-shell:before {
-            content: "jessibuca demo player";
+            content: "jessibuca 4*4 demo player";
             position: absolute;
             color: darkgray;
             top: 4px;
@@ -93,20 +93,28 @@
         <div id="container"></div>
         <div class="input">
             <div>
-                当前浏览器：<span id="mseSupport" style="color: green;display: none">支持MSE H265解码</span>
-                <span id="mseNotSupport" style="color: red;display: none">不支持MSE H265解码,会自动切换成wasm解码</span>
+                当前浏览器：
+                <span id="mseSupport264" style="color: green;display: none">支持MSE H264解码；</span>
+                <span id="mseSupport" style="color: green;display: none">支持MSE H265解码；</span>
+                <span id="mseNotSupport" style="color: red;display: none">不支持MSE H264解码；</span>
+                <span id="mseNotSupport264"
+                      style="color: red;display: none">不支持MSE H265解码,会自动切换成wasm解码；</span>
             </div>
         </div>
         <div class="input">
             <div>
-                当前浏览器：<span id="wcsSupport" style="color: green;display: none">支持Webcodecs H265解码</span>
+                当前浏览器：
+                <span id="wcsSupport264" style="color: green;display: none">支持Webcodecs H264解码；</span>
+                <span id="wcsSupport" style="color: green;display: none">支持Webcodecs H265解码；</span>
+                <span id="wcsNotSupport264" style="color: red;display: none">不支持Webcodecs H264解码(https/localhost)；</span>
                 <span id="wcsNotSupport" style="color: red;display: none">不支持Webcodecs H265解码(https/localhost),会自动切换成wasm解码</span>
             </div>
         </div>
         <div class="input">
             <div>
-                当前浏览器：<span id="simdSupport" style="color: green;display: none">支持SIMD解码</span>
-                <span id="simdNotSupport" style="color: red;display: none">不支持SIMD解码,会自动切换成wasm解码</span>
+                当前浏览器：
+                <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码</span>
+                <span id="simdNotSupport" style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
             </div>
         </div>
         <div class="input">
@@ -227,11 +235,20 @@
         return window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="hev1.1.6.L123.b0"');
     }
 
+    function checkSupportMSEH264() {
+        return window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="avc1.64002A"');
+    }
+
     function checkSupportWCSHevc() {
         const browserInfo = getBrowser();
 
         return browserInfo.type.toLowerCase() === 'chrome' && browserInfo.version >= 107 && (location.protocol === 'https:' || location.hostname === 'localhost');
     }
+
+    function checkSupportWCS() {
+        return "VideoEncoder" in window;
+    }
+
 
     function checkSupportSIMD() {
         return WebAssembly && WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 98, 11]));
@@ -245,6 +262,15 @@
         notSupport.style.display = 'inline-block'
     }
 
+    let supportH264 = document.getElementById('mseSupport264');
+    let notSupportH264 = document.getElementById('mseNotSupport264');
+    if (checkSupportMSEH264()) {
+        supportH264.style.display = 'inline-block'
+    } else {
+        notSupportH264.style.display = 'inline-block'
+    }
+
+
     let supportWcsHevc = document.getElementById('wcsSupport');
     let notSupportWcsHevc = document.getElementById('wcsNotSupport');
 
@@ -252,6 +278,13 @@
         supportWcsHevc.style.display = 'inline-block';
     } else {
         notSupportWcsHevc.style.display = 'inline-block'
+    }
+    let supportWcs = document.getElementById('wcsSupport264');
+    let notSupportWcs = document.getElementById('wcsNotSupport264');
+    if(checkSupportWCS()){
+        supportWcs.style.display = 'inline-block';
+    }else{
+        notSupportWcs.style.display = 'inline-block'
     }
 
 

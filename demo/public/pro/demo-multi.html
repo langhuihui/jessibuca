@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Jessica Pro NxN demo</title>
     <style>
         .root {
             display: flex;
@@ -22,7 +22,7 @@
         }
 
         .container-shell:before {
-            content: "jessibuca demo player";
+            content: "jessibuca Pro NxN demo player";
             position: absolute;
             color: darkgray;
             top: 4px;
@@ -92,9 +92,69 @@
     <div class="container-shell">
         <div id="container"></div>
         <div class="input">
-            <button onclick="updateSplit(1)">1*1</button>
-            <button onclick="updateSplit(2)">2*2</button>
-            <button onclick="updateSplit(3)">3*3</button>
+            <div>
+                当前浏览器：
+                <span id="mseSupport264" style="color: green;display: none">支持MSE H264解码；</span>
+                <span id="mseSupport" style="color: green;display: none">支持MSE H265解码；</span>
+                <span id="mseNotSupport" style="color: red;display: none">不支持MSE H264解码；</span>
+                <span id="mseNotSupport264"
+                      style="color: red;display: none">不支持MSE H265解码,会自动切换成wasm解码；</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                当前浏览器：
+                <span id="wcsSupport264" style="color: green;display: none">支持Webcodecs H264解码；</span>
+                <span id="wcsSupport" style="color: green;display: none">支持Webcodecs H265解码；</span>
+                <span id="wcsNotSupport264" style="color: red;display: none">不支持Webcodecs H264解码(https/localhost)；</span>
+                <span id="wcsNotSupport" style="color: red;display: none">不支持Webcodecs H265解码(https/localhost),会自动切换成wasm解码</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                当前浏览器：
+                <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码</span>
+                <span id="simdNotSupport" style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
+            </div>
+        </div>
+
+        <div class="input">
+            <div style="width: 900px">
+                <span><span style="color: red">TPS:</span> NxN 屏幕实现 需要将jessibuca-pro-demo.js 替换成 jessibuca-pro-multi-demo.js 文件
+            </span>
+            </div>
+        </div>
+
+        <div class="input">
+            <div><input
+                type="checkbox"
+                checked
+                id="useMSE"
+            /><span>MediaSource</span>
+                <input
+                    type="checkbox"
+                    id="useWCS"
+                /><span>Webcodec</span>
+                <input
+                    type="checkbox"
+                    id="useSIMD"
+                /><span>SIMD</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <span>缓存时长：</span>
+                <input placeholder="单位：秒" type="text" id="videoBuffer" style="width: 50px" value="0.2">秒
+                <span>缓存延迟(延迟超过会触发丢帧)：</span>
+                <input placeholder="单位：秒" type="text" id="videoBufferDelay" style="width: 50px" value="1">秒
+                <button id="replay">重播</button>
+            </div>
+        </div>
+        <div class="input">
+            切换分屏：
+            <button onclick="updateSplit(1)">1*1</button>&nbsp;&nbsp;&nbsp;
+            <button onclick="updateSplit(2)">2*2</button>&nbsp;&nbsp;&nbsp;
+            <button onclick="updateSplit(3)">3*3</button>&nbsp;&nbsp;&nbsp;
             <button onclick="updateSplit(4)">4*4</button>
         </div>
         <div class="input">
@@ -115,6 +175,146 @@
     </div>
 </div>
 <script>
+    function getBrowser() {
+        const UserAgent = window.navigator.userAgent.toLowerCase() || '';
+        let browserInfo = {
+            type: '',
+            version: ''
+        };
+        var browserArray = {
+            IE: window.ActiveXObject || "ActiveXObject" in window, // IE
+            Chrome: UserAgent.indexOf('chrome') > -1 && UserAgent.indexOf('safari') > -1, // Chrome浏览器
+            Firefox: UserAgent.indexOf('firefox') > -1, // 火狐浏览器
+            Opera: UserAgent.indexOf('opera') > -1, // Opera浏览器
+            Safari: UserAgent.indexOf('safari') > -1 && UserAgent.indexOf('chrome') == -1, // safari浏览器
+            Edge: UserAgent.indexOf('edge') > -1, // Edge浏览器
+            QQBrowser: /qqbrowser/.test(UserAgent), // qq浏览器
+            WeixinBrowser: /MicroMessenger/i.test(UserAgent) // 微信浏览器
+        };
+        // console.log(browserArray)
+        for (let i in browserArray) {
+            if (browserArray[i]) {
+                let versions = '';
+                if (i === 'IE') {
+                    const versionArray = UserAgent.match(/(msie\s|trident.*rv:)([\w.]+)/)
+                    if (versionArray && versionArray.length > 2) {
+                        versions = UserAgent.match(/(msie\s|trident.*rv:)([\w.]+)/)[2];
+                    }
+                } else if (i === 'Chrome') {
+                    for (let mt in navigator.mimeTypes) {
+                        //检测是否是360浏览器(测试只有pc端的360才起作用)
+                        if (navigator.mimeTypes[mt]['type'] === 'application/360softmgrplugin') {
+                            i = '360';
+                        }
+                    }
+                    const versionArray = UserAgent.match(/chrome\/([\d.]+)/);
+                    if (versionArray && versionArray.length > 1) {
+                        versions = versionArray[1];
+                    }
+                } else if (i === 'Firefox') {
+                    const versionArray = UserAgent.match(/firefox\/([\d.]+)/);
+                    if (versionArray && versionArray.length > 1) {
+                        versions = versionArray[1];
+                    }
+                } else if (i === 'Opera') {
+                    const versionArray = UserAgent.match(/opera\/([\d.]+)/);
+                    if (versionArray && versionArray.length > 1) {
+                        versions = versionArray[1];
+                    }
+                } else if (i === 'Safari') {
+                    const versionArray = UserAgent.match(/version\/([\d.]+)/);
+                    if (versionArray && versionArray.length > 1) {
+                        versions = versionArray[1];
+                    }
+                } else if (i === 'Edge') {
+                    const versionArray = UserAgent.match(/edge\/([\d.]+)/);
+                    if (versionArray && versionArray.length > 1) {
+                        versions = versionArray[1];
+                    }
+                } else if (i === 'QQBrowser') {
+                    const versionArray = UserAgent.match(/qqbrowser\/([\d.]+)/);
+                    if (versionArray && versionArray.length > 1) {
+                        versions = versionArray[1];
+                    }
+                }
+                browserInfo.type = i;
+                browserInfo.version = parseInt(versions);
+            }
+        }
+        return browserInfo;
+    }
+
+
+    function checkSupportMSEHevc() {
+        return window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="hev1.1.6.L123.b0"');
+    }
+
+    function checkSupportMSEH264() {
+        return window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="avc1.64002A"');
+    }
+
+    function checkSupportWCSHevc() {
+        const browserInfo = getBrowser();
+
+        return browserInfo.type.toLowerCase() === 'chrome' && browserInfo.version >= 107 && (location.protocol === 'https:' || location.hostname === 'localhost');
+    }
+
+    function checkSupportWCS() {
+        return "VideoEncoder" in window;
+    }
+
+
+    function checkSupportSIMD() {
+        return WebAssembly && WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 98, 11]));
+    }
+
+    let support = document.getElementById('mseSupport');
+    let notSupport = document.getElementById('mseNotSupport');
+    if (checkSupportMSEHevc()) {
+        support.style.display = 'inline-block'
+    } else {
+        notSupport.style.display = 'inline-block'
+    }
+
+    let supportH264 = document.getElementById('mseSupport264');
+    let notSupportH264 = document.getElementById('mseNotSupport264');
+    if (checkSupportMSEH264()) {
+        supportH264.style.display = 'inline-block'
+    } else {
+        notSupportH264.style.display = 'inline-block'
+    }
+
+
+    let supportWcsHevc = document.getElementById('wcsSupport');
+    let notSupportWcsHevc = document.getElementById('wcsNotSupport');
+
+    if (checkSupportWCSHevc()) {
+        supportWcsHevc.style.display = 'inline-block';
+    } else {
+        notSupportWcsHevc.style.display = 'inline-block'
+    }
+    let supportWcs = document.getElementById('wcsSupport264');
+    let notSupportWcs = document.getElementById('wcsNotSupport264');
+    if(checkSupportWCS()){
+        supportWcs.style.display = 'inline-block';
+    }else{
+        notSupportWcs.style.display = 'inline-block'
+    }
+
+
+    let supportSimd = document.getElementById('simdSupport');
+    let notSupportSimd = document.getElementById('simdNotSupport');
+
+    if (checkSupportSIMD()) {
+        supportSimd.style.display = 'inline-block';
+    } else {
+        notSupportSimd.style.display = 'inline-block'
+    }
+
+</script>
+
+
+<script>
     var $container = document.getElementById('container');
     var $player = document.getElementById('play');
     var $pause = document.getElementById('pause');
@@ -122,7 +322,9 @@
     var $destroy = document.getElementById('destroy');
     var $destroySingle = document.getElementById('destroySingle');
     var $fullscreenMulti = document.getElementById('fullscreenMulti');
-
+    var $useMSE = document.getElementById('useMSE');
+    var $useSIMD = document.getElementById('useSIMD');
+    var $useWCS = document.getElementById('useWCS');
     let jessibucaMulti = null;
     var showOperateBtns = true; // 是否显示按钮
 
@@ -133,8 +335,9 @@
             isResize: false,
             isFlv: true,
             debug: true,
-            useMSE: true,
-            useSIMD: true,
+            useMSE: $useMSE.checked === true,
+            useSIMD: $useSIMD.checked === true,
+            useWCS: $useWCS.checked === true,
             debugLevel: "debug",
             hasAudio: false,
             showBandwidth: showOperateBtns, // 显示网速
@@ -240,6 +443,34 @@
             jessibucaMulti.arrangeWindow(split);
         }
     }
+
+    $useMSE.addEventListener('click', function () {
+        const checked = $useMSE.checked;
+        if (checked) {
+            $useSIMD.checked = false
+            $useWCS.checked = false
+        }
+        replay();
+    })
+
+    $useSIMD.addEventListener('click', function () {
+        const checked = $useSIMD.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useWCS.checked = false
+        }
+        replay();
+    })
+
+    $useWCS.addEventListener('click', function () {
+        const checked = $useWCS.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useSIMD.checked = false
+        }
+        replay();
+    })
+
 </script>
 </body>
 </html>
