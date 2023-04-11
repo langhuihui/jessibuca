@@ -49,13 +49,16 @@
             </div>
             <div id="container"></div>
             <div class="input input-annnie">
-                <div style="color: red" class="input-tips">Tips:支持录制MP4(MPEG-4)格式的视频(仅录制视频，不包含音频)</div>
+                <div style="color: red" class="input-tips">Tips:支持录制MP4(MPEG-4)格式的视频(仅录制视频，不包含音频)
+                </div>
             </div>
             <div class="input input-wrap">
                 <div>
                     当前浏览器：
-                    <span v-if="supportMSEHevc" style="color: green;margin-right: 10px">支持MSE H265解码</span>
-                    <span v-else style="color: red;margin-right: 10px;">不支持MSE H265解码,会自动切换成wasm(simd)解码</span>
+                    <span v-if="supportMSE" style="color: green;margin-right: 10px">支持MSE H264解码；</span>
+                    <span v-if="!supportMSE" style="color: red;">不支持MSE H264解码；</span>
+                    <span v-if="supportMSEHevc" style="color: green;margin-right: 10px">支持MSE H265解码;</span>
+                    <span v-if="!supportMSEHevc" style="color: red;margin-right: 10px;">不支持MSE H265解码,会自动切换成wasm(simd)解码</span>
                 </div>
                 <div>
                     <div v-if="playing && decodeType">
@@ -68,8 +71,10 @@
             </div>
             <div class="input">
                 当前浏览器：
-                <span v-if="supportWCSHevc" style="color: green;">支持Webcodec H265解码</span>
-                <span v-else style="color: red;">不支持Webcodec H265解码(需要https/localhost),会自动切换成wasm(simd)解码</span>
+                <span v-if="supportWCS" style="color: green;">支持Webcodec H264解码；</span>
+                <span v-if="!supportWCS" style="color: red;">不支持Webcodec H265解码(需要https/localhost),</span>
+                <span v-if="supportWCSHevc" style="color: green;">支持Webcodec H265解码；</span>
+                <span v-if="!supportWCSHevc" style="color: red;">不支持Webcodec H265解码(需要https/localhost),会自动切换成wasm(simd)解码</span>
             </div>
             <div class="input">
                 当前浏览器：
@@ -302,10 +307,10 @@
                 </select>
                 <button v-if="!playing" @click="clearView">清屏</button>
                 <template v-if="playing">
-<!--                    <select v-model="recordType">-->
-<!--                        <option value="webm">webm</option>-->
-<!--                        <option value="mp4">mp4</option>-->
-<!--                    </select>-->
+                    <!--                    <select v-model="recordType">-->
+                    <!--                        <option value="webm">webm</option>-->
+                    <!--                        <option value="mp4">mp4</option>-->
+                    <!--                    </select>-->
                     <button v-if="!recording" @click="startRecord">录制</button>
                     <button v-if="!recording" @click="stopAndSaveRecord">暂停录制(下载)</button>
                     <button v-if="!recording" @click="stopAndSaveRecord2">暂停录制(blob)</button>
@@ -317,12 +322,18 @@
                     @change="toggleZoomOperate"
                 /><span>切换电子放大</span>
             </div>
-
+            <div class="input" v-if="loaded">
+                <span style="color: red">画框（文字）（随机坐标）</span>：
+                <button @click="handleAddCanvas('text')">文本</button>
+                <button @click="handleAddCanvas('rect')">框子</button>
+                <button @click="handleAddCanvas('rect+text')">文本+框子</button>
+                <button @click="handleAddCanvasClean()">清空</button>
+            </div>
         </div>
     </div>
 </template>
 <script>
-import { ElNotification,ElMessage } from 'element-plus'
+import {ElNotification, ElMessage} from 'element-plus'
 
 function getBrowser() {
     const UserAgent = window.navigator.userAgent.toLowerCase() || '';
@@ -389,6 +400,7 @@ function getBrowser() {
     }
     return browserInfo;
 }
+
 function formatTimeTips(time) {
     var result;
 
@@ -487,8 +499,10 @@ export default {
             rotate: 0,
             mirrorRotate: 'none',
             supportMSEHevc: false,
+            supportMSE: false,
+            supportWCS: false,
             supportWCSHevc: false,
-            supportSIMDHevc:false,
+            supportSIMDHevc: false,
             useWCS: false,
             useMSE: false,
             useSIMD: true,
@@ -504,7 +518,7 @@ export default {
             decodeType: '',
             renderType: '',
             renderDom: 'video',
-            audioEngine:'',
+            audioEngine: '',
             playingTimestamp: '',
             dts: '',
             stats: {},
@@ -527,7 +541,7 @@ export default {
             talkSampleRate: 16000,
             talkSampleBitsWidth: 16,
             talkUrl: '',
-            checkFirstIFrame:true
+            checkFirstIFrame: true
         };
     },
     mounted() {
@@ -535,6 +549,8 @@ export default {
             this.vConsole = new window.VConsole();
         }
         this.supportMSEHevc = window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="hev1.1.6.L123.b0"');
+        this.supportMSE = window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="avc1.64002A"');
+        this.supportWCS = "VideoEncoder" in window;
         const browserInfo = getBrowser();
         this.supportWCSHevc = browserInfo.type.toLowerCase() === 'chrome' && browserInfo.version >= 107 && (location.protocol === 'https:' || location.hostname === 'localhost');
         this.supportSIMDHevc = WebAssembly && WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 98, 11]));
@@ -620,7 +636,7 @@ export default {
                         useCanvasRender: this.renderDom === 'canvas',
                         networkDelayTimeoutReplay: false,
                         playbackForwardMaxRateDecodeIFrame: 8,
-                        checkFirstIFrame:this.checkFirstIFrame,
+                        checkFirstIFrame: this.checkFirstIFrame,
                         watermarkConfig: {
                             image: {
                                 // src: 'http://jessibuca.monibuca.com/jessibuca-logo.png',
@@ -637,20 +653,19 @@ export default {
                         contextmenuBtns: [
                             {
                                 content: '切换性能面板',
-                                index:1,
+                                index: 1,
                                 click: () => {
                                     const playStatus = this.$options.jessibuca.getStatus()
-                                    if(playStatus === 'playing'){
+                                    if (playStatus === 'playing') {
                                         this.$options.jessibuca.togglePerformancePanel();
-                                    }
-                                    else {
+                                    } else {
                                         ElMessage.warning('请先播放视频');
                                     }
                                 }
                             },
                             {
                                 content: '关于PRO',
-                                index:2,
+                                index: 2,
                                 click: () => {
                                     ElMessage.success('如需要购买PRO版本可以联系添加作者微信：bosswancheng');
                                 }
@@ -810,8 +825,7 @@ export default {
                 });
                 this.playType = 'play'
                 this.loading = true;
-            }
-            else {
+            } else {
                 ElMessage.error('play url is empty')
             }
         },
@@ -865,14 +879,13 @@ export default {
                         showControl: true,
                         uiUsePlaybackPause: true,
                         isUseLocalCalculateTime: true
-                    }).then(()=>{
+                    }).then(() => {
                         ElMessage.success('playback success');
-                    }).catch((e)=>{
+                    }).catch((e) => {
                         ElMessage.error(`playback error : ${toString(e)}`);
                     })
                     this.playType = 'playback'
-                }
-                else {
+                } else {
                     ElMessage.error('play url is empty')
                 }
             }
@@ -1064,7 +1077,7 @@ export default {
         },
 
         replay() {
-            this.destroyPlayer().then(()=>{
+            this.destroyPlayer().then(() => {
                 if (this.playType === 'play') {
                     this.play();
                 } else if (this.playType === 'playback') {
@@ -1158,6 +1171,118 @@ export default {
         closeZoom() {
             const jessibuca = this.$options.jessibuca;
             jessibuca.closeZoom();
+        },
+
+        handleAddCanvas(type) {
+            const jessibuca = this.$options.jessibuca;
+
+            if (!jessibuca) {
+                return
+            }
+
+
+            if (jessibuca.getRenderType() !== 'canvas') {
+                ElMessage.success('请先切换到canvas渲染模式');
+                return
+            }
+
+
+            const x = Math.floor(Math.random() * 501) + 100; // 100-600
+            const y = Math.floor(Math.random() * 101) + 100; // 100-200
+            const x2 = Math.floor(Math.random() * 501) + 100; // 100-600
+            const y2 = Math.floor(Math.random() * 101) + 100; // 100-200
+            const width = Math.floor(Math.random() * 301) + 100; // 100-400
+            const height = Math.floor(Math.random() * 201) + 100; // 100-300
+            const width2 = Math.floor(Math.random() * 301) + 100; // 100-400
+            const height2 = Math.floor(Math.random() * 201) + 100; // 100-300
+
+            let contentList = [];
+            if (type === 'text') {
+                contentList.push({
+                    type: 'text',
+                    text: 'hello world 你好',
+                    x,
+                    y,
+                    color: '#FF0000',
+                    fontSize: 20
+                })
+                contentList.push({
+                    type: 'text',
+                    text: 'hello world2 你好2',
+                    x: x2,
+                    y: y2,
+                    color: '#0000FF',
+                    fontSize: 20
+                })
+            } else if (type === 'rect') {
+                contentList.push({
+                    type: 'rect',
+                    x,
+                    y,
+                    width,
+                    height,
+                    color: '#FF0000',
+                })
+                contentList.push({
+                    type: 'rect',
+                    x: x2,
+                    y: y2,
+                    width: width2,
+                    height: height2,
+                    color: '#0000FF'
+                })
+            } else if (type === 'rect+text') {
+                contentList.push({
+                    type: 'rect',
+                    x,
+                    y,
+                    width,
+                    height,
+                    color: '#FF0000',
+                })
+                contentList.push({
+                    type: 'text',
+                    text: 'hello world 你好',
+                    x,
+                    y,
+                    color: '#FF0000',
+                    fontSize: 20
+                })
+                contentList.push({
+                    type: 'rect',
+                    x: x2,
+                    y: y2,
+                    width,
+                    height,
+                    color: '#0000FF',
+                    opacity: 0.5
+                })
+                contentList.push({
+                    type: 'text',
+                    text: 'hello world2 你好2',
+                    x: x2,
+                    y: y2,
+                    color: '#0000FF',
+                    fontSize: 20
+                })
+            }
+
+            jessibuca.addContentToCanvas(contentList)
+        },
+        handleAddCanvasClean() {
+            const jessibuca = this.$options.jessibuca;
+
+            if (!jessibuca) {
+                return
+            }
+
+
+            if (jessibuca.getRenderType() !== 'canvas') {
+                ElMessage.success('请先切换到canvas渲染模式');
+                return
+            }
+
+            jessibuca.clearContentToCanvas();
         }
     },
 };
