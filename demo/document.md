@@ -218,7 +218,7 @@ wasmBinaryFile = 'https://cdn.com/decoder.wasm';
 
 ### 多分屏超过 6 路不能播放
 
-chrome限制同源http请求最多6个并发
+chrome限制同源http（协议+域名+端口）请求最多6个并发
 > 浏览器对同源 HTTP/1.x 连接的并发个数有限制, 几种方式规避这个问题：
 
 1. 通过 WebSocket 协议(chrome下ip会报安全错误，建议域名形式访问)访问直播流，如：播放 WS-FLV 直播流
