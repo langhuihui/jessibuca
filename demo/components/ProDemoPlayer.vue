@@ -672,7 +672,8 @@ export default {
                             }
                         ],
                         showPerformance: this.showPerformance,
-                        recordType: this.recordType
+                        recordType: this.recordType,
+                        ptzZoomShow: true,
                     },
                     options
                 )

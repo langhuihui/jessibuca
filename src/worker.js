@@ -283,6 +283,8 @@ Module.postRun = function () {
                         }
                     }
                 }
+                else {
+                }
             };
             this.stopId = setInterval(loop, 10);
         },
