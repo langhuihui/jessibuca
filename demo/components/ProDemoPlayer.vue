@@ -674,6 +674,7 @@ export default {
                         showPerformance: this.showPerformance,
                         recordType: this.recordType,
                         ptzZoomShow: true,
+                        controlHtml:'<div style="color: red">这个是自定义HTML</div>'
                     },
                     options
                 )
