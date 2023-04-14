@@ -91,6 +91,37 @@ this.$options.jessibuca = new Jessibuca({
 
 ### 关于解码（useMSE、useWCS、wasm）优先级
 
+### useMSE
+
+使用的是浏览器提供的`MediaSource`接口，来进行解码。
+
+- 硬解码
+- 兼容性好
+- ios safari不支持
+- 支持H264和H265解码
+- 支持http和https
+
+### useWCS
+
+使用的是`WebCodec`接口，来进行解码。
+
+- 硬解码
+- 支持H264和H265解码
+- 支持https
+- ios safari不支持
+- 兼容性不如mse
+
+### wasm(simd)
+
+使用的是`webassembly`来进行解码。
+
+- 软解码
+- 兼容性好
+- 支持H264和H265解码
+- 支持http和https
+
+### 优先级
+
 如果同时配置了`useMSE`和`useWCS`，则优先使用`useMSE`，如果`useMSE`不支持，则使用`useWCS`，如果 `useWCS` 不支持，则降级到`wasm`解码。
 
 > useMSE > useWCS > wasm
