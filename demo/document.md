@@ -1117,6 +1117,18 @@ PIPELINE_ERROR_DECODE 是指视频解码器在解码视频流时发生了错误�
 - 检查视频流本身是否存在问题，可以使用其他工具对视频流进行分析或修复。
 - 检查网络连接，确保网络连接稳定，且视频流传输过程中没有出现问题。可以尝试使用其他网络或更改网络配置来解决问题。
 
+## 关于 play() failed because the user didn't interact with the document first. 错误
+
+背景：用户希望打开页面的时候就直接自动播放视频（单屏或者多屏），但是浏览器的自动播放策略是，必须是用户手动触发了事件之后，才能自动播放。
+
+会抛出`DOMException: play() failed because the user didn't interact with the document first. https://goo.gl/xX8pDD` 错误。
+
+### 解决方案
+
+1. 添加一个交互事件，让用户手动触发下，再去播放视频。
+2. 使用`wcs`解码(在https环境下)，然后使用`canvas`标签渲染。
+3. 使用wasm(simd) 软解码，然后使用`canvas`标签渲染。
+
 
 
 ### 群
