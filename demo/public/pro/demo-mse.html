@@ -223,11 +223,14 @@
 
     $destroy.addEventListener('click', function () {
         if (jessibuca) {
-            jessibuca.destroy();
-            $fps.textContent = '';
-
+            jessibuca.destroy().then(()=>{
+                $fps.textContent = '';
+                create();
+            });
         }
-        create();
+        else {
+            create();
+        }
     })
     let support = document.getElementById('mseSupport');
     let notSupport = document.getElementById('mseNotSupport');
