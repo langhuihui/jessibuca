@@ -100,6 +100,16 @@
             </div>
         </div>
         <div class="input">
+            识别度：
+            <select id="detectWidth">
+                <option value="400">极高</option>
+                <option value="362">高</option>
+                <option value="192" selected>中等</option>
+                <option value="128">低</option>
+            </select>
+            <span style="color: red;margin-left: 10px">识别度越高，越吃CUP</span>
+        </div>
+        <div class="input">
             <div>输入URL：</div>
             <input
                 autocomplete="on"
@@ -122,6 +132,7 @@
     var $playHref = document.getElementById('playUrl');
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
+    var $detectWidth = document.getElementById('detectWidth');
 
     function isMobile() {
         return (/iphone|ipad|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));
@@ -160,14 +171,16 @@
                 ptz: showOperateBtns,
                 quality: showOperateBtns,
                 performance: showOperateBtns,
-                face: showOperateBtns,
+                aiFace: showOperateBtns,
             },
             audioEngine: "worklet",
             qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
             heartTimeout: 10,
-            useFaceDetector:true
+            useFaceDetector:true,
+            aiFaceDetectWidth:Number($detectWidth.value)
+
             // audioEngine:"worklet",
             // isFlv: true
         },);
