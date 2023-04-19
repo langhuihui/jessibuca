@@ -1162,6 +1162,11 @@ memory_limit = 8 * GB;
 
 第三种：很有可能存在内存泄漏，一般一段时间后，出现崩溃，应该是某些资源一直在创建，建议从代码逻辑中查找下原因。
 
+#### 更深入的讨论：
+
+https://www.likecs.com/ask-306316.html；
+
+https://help.thingjs.com/hc/kb/article/1555089/
 
 ### 群
 <img src="/public/qrcode.jpeg">
