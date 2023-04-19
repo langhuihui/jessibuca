@@ -1,5 +1,5 @@
 
-# Document
+# Document (常见问题)
 -
 -
 -
@@ -10,8 +10,8 @@
 -
 -
 -
-
 <Rice/>
+
 ## 常见问题
 
 ### 推荐配置
@@ -1117,18 +1117,50 @@ PIPELINE_ERROR_DECODE 是指视频解码器在解码视频流时发生了错误�
 - 检查视频流本身是否存在问题，可以使用其他工具对视频流进行分析或修复。
 - 检查网络连接，确保网络连接稳定，且视频流传输过程中没有出现问题。可以尝试使用其他网络或更改网络配置来解决问题。
 
-## 关于 play() failed because the user didn't interact with the document first. 错误
+### 关于 play() failed because the user didn't interact with the document first. 错误
 
 背景：用户希望打开页面的时候就直接自动播放视频（单屏或者多屏），但是浏览器的自动播放策略是，必须是用户手动触发了事件之后，才能自动播放。
 
 会抛出`DOMException: play() failed because the user didn't interact with the document first. https://goo.gl/xX8pDD` 错误。
 
-### 解决方案
+#### 解决方案
 
 1. 添加一个交互事件，让用户手动触发下，再去播放视频。
 2. 使用`wcs`解码(在https环境下)，然后使用`canvas`标签渲染。
 3. 使用wasm(simd) 软解码，然后使用`canvas`标签渲染。
 
+### 浏览器报：SBOX FATAL MEMORY EXCEEDED 错误
+
+#### 原因：
+
+触及 Chrome 沙箱内存上限，主动崩溃。
+
+#### 上限：
+
+chrome 源码
+
+```
+int64_t physical_memory = base::SysInfo::AmountOfPhysicalMemory();if (sandbox_type == SandboxType::kGpu && physical_memory > 64 * GB) {
+memory_limit = 64 * GB;
+} else if (sandbox_type == SandboxType::kGpu && physical_memory > 32 * GB) {
+memory_limit = 32 * GB;
+} else if (physical_memory > 16 * GB) {
+memory_limit = 16 * GB;
+} else if (physical_memory > 8 * GB) {
+memory_limit = 8 * GB;
+}
+```
+一般来说，16G 内存电脑，沙箱上限为 8G。
+
+注意： 多个标签页，同一个域名，一般情况下会使用同一个进程，也就是 8G 内存多个标签页共用。
+
+#### 解决方案：
+
+第一种: 增加内存到 24G 或者 32G，能使沙箱上限增加到 16G。
+
+第二种：增加命令行：--no-sandbox 禁用沙箱，不足之处在于浏览器会给出提示，说关闭了沙箱不稳定，不安全。
+
+第三种：很有可能存在内存泄漏，一般一段时间后，出现崩溃，应该是某些资源一直在创建，建议从代码逻辑中查找下原因。
 
 
 ### 群
