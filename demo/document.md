@@ -1168,6 +1168,70 @@ https://www.likecs.com/ask-306316.html；
 
 https://help.thingjs.com/hc/kb/article/1555089/
 
+
+### 监听请求流的失效(404)或者500报错
+
+可以监听`play`方法的`catch`
+
+```js
+jessibuca.play(url).catch((err) => {
+    // err 就是错误信息
+})
+```
+
+### 理解loadingTimeout 和 delayTimeout
+
+#### loadingTimeout
+loadingTimeout 是指在`播放器在请求url的时候`，接口是返回200状态码了，但是数据还迟迟没有推送给web端 ，如果在`loadingTimeout`时间内，没有收到流数据，则会抛出`loadingTimeout`错误。
+
+#### delayTimeout
+delayTimeout 是指在`播放器播放过程中`，如果在`delayTimeout`时间内，没有收到流数据，则会抛出`delayTimeout`错误。
+
+
+### 关于移动端（H5）切换网络的时候，播放器会触发什么事件。
+
+### http请求
+会触发`fetchError`事件
+
+```js
+
+jessibuca.on("fetchError", function (msg) {
+    console.log('fetchError:', msg)
+})
+```
+
+
+### websocket请求
+
+会触发`websocketError`事件
+
+
+```js
+jessibuca.on("websocketError", function (msg) {
+console.log('websocketError:', msg)
+})
+```
+
+### 小结
+
+或者可以通过监听`error`错误事件，来监听所有的错误事件。
+
+```js
+jessibuca.on("error", function (error) {
+    console.log('error:', error)
+
+    if (error === jessibuca.ERROR.fetchError || error === jessibuca.ERROR.websocketError) {
+        // 这里统一的做重连。
+
+        jessibuca.destroy();
+        jessibuca = null;
+        jessibuca = new Jessibuca();
+        jessibuca.play(url);
+    }
+})
+
+```
+
 ### 群
 <img src="/public/qrcode.jpeg">
 
