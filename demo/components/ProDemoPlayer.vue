@@ -1182,13 +1182,6 @@ export default {
                 return
             }
 
-
-            if (jessibuca.getRenderType() !== 'canvas') {
-                ElMessage.success('请先切换到canvas渲染模式');
-                return
-            }
-
-
             const x = Math.floor(Math.random() * 501) + 100; // 100-600
             const y = Math.floor(Math.random() * 101) + 100; // 100-200
             const x2 = Math.floor(Math.random() * 501) + 100; // 100-600
@@ -1275,12 +1268,6 @@ export default {
             const jessibuca = this.$options.jessibuca;
 
             if (!jessibuca) {
-                return
-            }
-
-
-            if (jessibuca.getRenderType() !== 'canvas') {
-                ElMessage.success('请先切换到canvas渲染模式');
                 return
             }
 

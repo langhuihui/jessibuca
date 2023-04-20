@@ -277,12 +277,14 @@ worker地址
 
 ### wcsUseVideoRender
 - **类型**：`boolean`
-- **默认值**：`false`
+- **默认值**：`true`
 - **用法**： webcodecs硬解码是否通过video标签渲染
 
 > forceNoOffscreen 设置为false之后（通过OffscreenCanvas渲染之），wcsUseVideoRender不会生效。
 
-> webcodecs硬解码之后，默认是通过canvas 渲染出来的，可以通过配置通过video标签渲染，提升渲染性能。
+> ~~webcodecs硬解码之后，默认是通过canvas 渲染出来的，可以通过配置通过video标签渲染，提升渲染性能。~~
+
+> 现在默认 video标签渲染，提升渲染性能。
 
 
 ### autoWasm
