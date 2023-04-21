@@ -1190,7 +1190,7 @@ delayTimeout 是指在`播放器播放过程中`，如果在`delayTimeout`时间
 
 ### 关于移动端（H5）切换网络的时候，播放器会触发什么事件。
 
-### http请求
+#### http请求
 会触发`fetchError`事件
 
 ```js
@@ -1201,7 +1201,7 @@ jessibuca.on("fetchError", function (msg) {
 ```
 
 
-### websocket请求
+#### websocket请求
 
 会触发`websocketError`事件
 
@@ -1212,7 +1212,7 @@ console.log('websocketError:', msg)
 })
 ```
 
-### 小结
+#### 小结
 
 或者可以通过监听`error`错误事件，来监听所有的错误事件。
 
@@ -1231,6 +1231,34 @@ jessibuca.on("error", function (error) {
 })
 
 ```
+
+### 浏览器报：Uncaught RuntimeError: memory access out of bounds
+
+“Uncaught RuntimeError: memory access out of bounds” 错误通常表示您在 WebAssembly 中访问了越界的内存地址。
+这个错误通常发生在您尝试访问超出 WebAssembly 内存大小的地址时。
+
+
+WebAssembly 通过线性内存来存储和处理数据。线性内存是 WebAssembly 虚拟机中的一个连续的字节数组，通过指针来进行访问。
+如果您的 WebAssembly 模块试图读取或写入超出线性内存的末尾或开头的地址，就会触发 “memory access out of bounds” 错误。
+
+#### 可能得原因
+
+##### 系统资源限制：
+
+如果您的系统资源（例如内存或 CPU）不足，也可能会导致 WebAssembly 运行时错误。
+
+##### 解码视频需要的内存过大：
+
+如果申请的内存不够大的情况下，播放的视频流过大，就会出现这个错误。
+
+
+#### 解决方案
+
+如果是`解码视频需要的内存过大`问题导致的，可以尝试初始化wasm的时候，分配更大的内存。
+
+如果是`系统资源限制`导致的，可以尝试增加系统资源，或者降低视频的分辨率。
+
+
 
 ### 群
 <img src="/public/qrcode.jpeg">
