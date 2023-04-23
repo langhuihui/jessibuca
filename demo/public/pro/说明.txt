@@ -22,7 +22,6 @@ Hls 即http://host-name:port/hls/live/test.m3u8
 WebTransport 即wt://host-name:port/play/live/test (该协议只对接了monibuca服务器，其他服务器需要额外对接)
 Webrtc 即webrtc://host-name:port/webrtc/play/live/test (该协议只对接了monibuca服务器，其他服务器需要额外对接)
 
-
 由于wasm程序不能由本地路径加载，因此双击打开index.html文件无法使用，需要配合http服务来加载
 
 文档地址：https://jessibuca.com/pro.html
