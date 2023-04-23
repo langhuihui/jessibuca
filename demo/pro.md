@@ -25,13 +25,16 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 | WASM 离屏渲染                                   | 支持    | 支持 |
 | H.264 MSE解码视频                               | 支持    | 支持 |
 | H.265 MSE解码视频                               | 不支持   | 支持 |
-| MSE支持webgl canvas渲染                         | 不支持   | 支持 |
-| MSE支持video渲染                                | 支持   | 支持 |
 | MSE智能不花屏丢帧，长时间播放绝不累积延迟                      | 不支持   | 支持 |
 | MSE解码失败自动切换到WASM解码                          | 支持    | 支持 |
 | H.264 WCS解码视频                               | 支持    | 支持 |
 | H.265 WCS解码视频                               | 不支持   | 支持 |
-| WCS支持webgl canvas渲染                         | 支持   | 支持 |
+| wasm支持webgl canvas渲染                        | 支持   | 支持 |
+| wasm支持webgpu canvas渲染                       | 不支持   | 支持 |
+| wasm支持video渲染                               | 不支持   | 支持 |
+| MSE支持canvas渲染                               | 不支持   | 支持 |
+| MSE支持video渲染                                | 支持   | 支持 |
+| WCS支持canvas渲染                         | 支持   | 支持 |
 | WCS支持video渲染                                | 不支持   | 支持 |
 | WCS智能不花屏丢帧，长时间播放绝不累积延迟                      | 不支持   | 支持 |
 | WCS解码失败自动切换到WASM解码                          | 支持    | 支持 |
