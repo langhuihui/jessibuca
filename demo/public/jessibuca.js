@@ -233,6 +233,7 @@
 	  pause: EVENTS.pause,
 	  mute: EVENTS.mute,
 	  stats: EVENTS.stats,
+	  volumechange: EVENTS.volumechange,
 	  performance: EVENTS.performance,
 	  recordingTimestamp: EVENTS.recordingTimestamp,
 	  recordStart: EVENTS.recordStart,
@@ -318,7 +319,8 @@
 
 	};
 	const WCS_ERROR = {
-	  keyframeIsRequiredError: 'A key frame is required after configure() or flush()'
+	  keyframeIsRequiredError: 'A key frame is required after configure() or flush()',
+	  canNotDecodeClosedCodec: "Cannot call 'decode' on a closed codec"
 	};
 	const FETCH_ERROR = {
 	  abortError1: 'The user aborted a request',
@@ -10020,11 +10022,18 @@
 	        this.player.emit(EVENTS.timeUpdate, ts);
 
 	        try {
+	          if (this.isDecodeStateClosed()) {
+	            this.player.debug.warn('Webcodecs', 'VideoDecoder isDecodeStateClosed true');
+	            return;
+	          }
+
 	          this.decoder.decode(chunk);
 	        } catch (e) {
 	          this.player.debug.error('Webcodecs', 'VideoDecoder', e);
 
 	          if (e.toString().indexOf(WCS_ERROR.keyframeIsRequiredError) !== -1) {
+	            this.player.emit(EVENTS_ERROR.webcodecsDecodeError);
+	          } else if (e.toString().indexOf(WCS_ERROR.canNotDecodeClosedCodec) !== -1) {
 	            this.player.emit(EVENTS_ERROR.webcodecsDecodeError);
 	          }
 	        }
@@ -10032,6 +10041,10 @@
 	        this.player.debug.warn('Webcodecs', 'VideoDecoder isDecodeFirstIIframe false');
 	      }
 	    }
+	  }
+
+	  isDecodeStateClosed() {
+	    return this.decoder.state === 'closed';
 	  }
 
 	}

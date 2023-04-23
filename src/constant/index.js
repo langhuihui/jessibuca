@@ -296,7 +296,8 @@ export const HOT_KEY = {
     arrowDown: 40, //
 }
 export const WCS_ERROR = {
-    keyframeIsRequiredError: 'A key frame is required after configure() or flush()'
+    keyframeIsRequiredError: 'A key frame is required after configure() or flush()',
+    canNotDecodeClosedCodec:"Cannot call 'decode' on a closed codec"
 }
 
 
