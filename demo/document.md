@@ -304,7 +304,20 @@ application/wasm            wasm
 ```shell
 application/wasm            wasm;
 
+```
+##### nginx修改nginx.conf，添加
 
+```shell
+{
+    # 配置 MIME 类型
+    types {
+        application/wasm wasm;
+    }
+
+    # 开启 gzip 压缩
+    gzip on;
+
+}
 ```
 
 
@@ -439,7 +452,6 @@ vbps: 当前视频码率，单位bit，
 ts: 当前视频帧pts，单位毫秒
 pTs: 当前播放器的播放时间，从0开始，单位毫秒
 ```
-
 
 
 ### 将录制的视频保存在安卓手机相册中，显示的时长为0，并且无法播放。
