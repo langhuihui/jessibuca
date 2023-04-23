@@ -120,7 +120,7 @@
         </div>
         <div class="input">
             <div style="width: 900px">
-                <span style="color: red">TPS:</span> 录像流暂只支持wasm解码,canvas渲染。
+                <span style="color: red">TPS:</span> 录像流暂只支持wasm（simd）解码,canvas渲染。<span id="supportWebgpu"></span>
             </div>
         </div>
 
@@ -230,9 +230,22 @@
     var $isCacheBeforeDecodeForFpsRender = document.getElementById('isCacheBeforeDecodeForFpsRender');
     var $isPlaybackPauseClearCache = document.getElementById('isPlaybackPauseClearCache');
     var $uiUsePlaybackPause = document.getElementById('uiUsePlaybackPause');
+    var $supportWebgpu = document.getElementById('supportWebgpu');
     var forceNoOffscreen = true; //
     var jessibuca = null;
     var isPlaybackPause = false;
+
+    var isSupportWebgpu = 'gpu' in navigator;
+
+    if (isSupportWebgpu) {
+        $supportWebgpu.style.color = 'green';
+        $supportWebgpu.innerHTML = '支持webgpu';
+    }
+    else {
+        $supportWebgpu.style.color = 'red';
+        $supportWebgpu.innerHTML = '暂不支持webgpu，降级到webgl渲染';
+    }
+
 
     function isMobile() {
         return (/iphone|ipad|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));

@@ -1179,6 +1179,13 @@ jessibuca.play(url).catch((err) => {
 })
 ```
 
+> 注意：这个是初次请求的时候，如果流失效，会触发`catch`，如果流有效，但是后面流失效了，不会触发`catch`。
+
+> 播放过程中流发生500报错，会触发`error`事件。
+
+> 播放过程中由于网络切换（网络动荡），导致流失效，会触发`error`事件。
+
+
 ### 理解loadingTimeout 和 delayTimeout
 
 #### loadingTimeout

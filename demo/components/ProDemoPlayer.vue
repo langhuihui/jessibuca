@@ -82,6 +82,11 @@
                 <span v-else style="color: red;">不支持SIMD解码,会自动切换成wasm解码</span>
             </div>
             <div class="input">
+                当前浏览器：
+                <span v-if="supportWebgpu" style="color: green;">支持webgpu渲染</span>
+                <span v-else style="color: red;">不支持webgpu渲染,会自动切换成webgl渲染</span>（适用于wasm解码+canvas渲染）
+            </div>
+            <div class="input">
                 <div>输入URL：</div>
                 <input
                     placeholder="支持 hls/ws-raw/ws-flv/http-flv协议"
@@ -139,6 +144,13 @@
                     <option value="video">video</option>
                     <option value="canvas">canvas</option>
                 </select>
+                <template v-if="renderDom === 'canvas'">
+                    <span>渲染引擎：</span>
+                    <select v-model="canvasRenderType" @change="renderDomChange">
+                        <option value="webgl">webgl</option>
+                        <option value="webgpu">webgpu</option>
+                    </select>
+                </template>
                 <span>音频引擎：</span>
                 <select v-model="audioEngine" @change="replay">
                     <option value="">自动</option>
@@ -503,6 +515,7 @@ export default {
             supportWCS: false,
             supportWCSHevc: false,
             supportSIMDHevc: false,
+            supportWebgpu: false,
             useWCS: false,
             useMSE: false,
             useSIMD: true,
@@ -518,6 +531,7 @@ export default {
             decodeType: '',
             renderType: '',
             renderDom: 'video',
+            canvasRenderType: 'webgl',
             audioEngine: '',
             playingTimestamp: '',
             dts: '',
@@ -551,6 +565,7 @@ export default {
         this.supportMSEHevc = window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="hev1.1.6.L123.b0"');
         this.supportMSE = window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="avc1.64002A"');
         this.supportWCS = "VideoEncoder" in window;
+        this.supportWebgpu = 'gpu' in navigator;
         const browserInfo = getBrowser();
         this.supportWCSHevc = browserInfo.type.toLowerCase() === 'chrome' && browserInfo.version >= 107 && (location.protocol === 'https:' || location.hostname === 'localhost');
         this.supportSIMDHevc = WebAssembly && WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 98, 11]));
@@ -674,7 +689,8 @@ export default {
                         showPerformance: this.showPerformance,
                         recordType: this.recordType,
                         ptzZoomShow: true,
-                        controlHtml:'<div style="color: red">这个是自定义HTML</div>'
+                        controlHtml: '<div style="color: red">这个是自定义HTML</div>',
+                        useWebGPU: this.canvasRenderType === 'webgpu',
                     },
                     options
                 )
