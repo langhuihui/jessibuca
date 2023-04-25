@@ -155,7 +155,10 @@
             <button onclick="updateSplit(1)">1*1</button>&nbsp;&nbsp;&nbsp;
             <button onclick="updateSplit(2)">2*2</button>&nbsp;&nbsp;&nbsp;
             <button onclick="updateSplit(3)">3*3</button>&nbsp;&nbsp;&nbsp;
-            <button onclick="updateSplit(4)">4*4</button>
+            <button onclick="updateSplit(4)">4*4</button>&nbsp;&nbsp;&nbsp;
+            <button onclick="updateSplitSpecial('3-1')">不规则(3-1)</button>&nbsp;&nbsp;&nbsp;
+            <button onclick="updateSplitSpecial('4-1')">不规则(4-1)</button>
+
         </div>
         <div class="input">
             <div>输入URL：</div>
@@ -440,6 +443,13 @@
     function updateSplit(split) {
         if (jessibucaMulti) {
             split = Number(split);
+            jessibucaMulti.arrangeWindow(split);
+        }
+    }
+
+
+    function updateSplitSpecial(split){
+        if (jessibucaMulti) {
             jessibucaMulti.arrangeWindow(split);
         }
     }
