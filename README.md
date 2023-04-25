@@ -68,6 +68,8 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 支持播放器自定义水印,支持播放器播放过程中，显示水印，例如公司名称，公司logo等。
 - 支持截图加自定义水印,支持调用截图接口的时候，添加自定义水印，例如公司名称，公司logo等。
 - 支持SIMD软解码加速(使用Chrome/Edge 91, Firefox89及之后正式提供的SIMD指令集加速解码, 在1080P以上分辨率带来100%-300%的性能提升)。
+- 支持播放过程中动态切换分辨率。
+- 支持webgpu渲染canvas（需要chrome canary 版本，然后设置chrome://flags/#enable-unsafe-webgpu 打开）。
 - 支持定制化服务开发。
 
 
