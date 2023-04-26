@@ -41,7 +41,7 @@ export abstract class BaseDemuxer extends EventEmitter {
       pull: async (controller) => controller.enqueue(await this.pullVideo()),
     });
   }
-  abstract demux(): Generator<number, void, Uint8Array>;
+  abstract demux(): Generator<number | Uint8Array, void, Uint8Array>;
   gotAudio?: (data: EncodedAudioChunkInit) => void;
   gotVideo?: (data: EncodedVideoChunkInit) => void;
   pullAudio(): Promise<EncodedAudioChunkInit> {

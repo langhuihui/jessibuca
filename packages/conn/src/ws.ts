@@ -1,6 +1,4 @@
-import { ChangeState, FSM, Includes } from "afsm";
 import { Connection } from "./base";
-import { ConnectionState } from "./types";
 
 export class WebSocketConnection extends Connection {
   ws?: WebSocket;
