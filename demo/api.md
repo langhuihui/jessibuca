@@ -163,6 +163,8 @@ worker地址
 
 > heartTimeoutReplay 重试失败之后，不再重新播放视频地址。
 
+> 是整个生命周期中重试的次数。
+
 > 如果想无限次重试，可以设置为-1
 
 ### loadingTimeout
