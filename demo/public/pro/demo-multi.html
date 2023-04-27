@@ -106,7 +106,8 @@
                 当前浏览器：
                 <span id="wcsSupport264" style="color: green;display: none">支持Webcodecs H264解码；</span>
                 <span id="wcsSupport" style="color: green;display: none">支持Webcodecs H265解码；</span>
-                <span id="wcsNotSupport264" style="color: red;display: none">不支持Webcodecs H264解码(https/localhost)；</span>
+                <span id="wcsNotSupport264"
+                      style="color: red;display: none">不支持Webcodecs H264解码(https/localhost)；</span>
                 <span id="wcsNotSupport" style="color: red;display: none">不支持Webcodecs H265解码(https/localhost),会自动切换成wasm解码</span>
             </div>
         </div>
@@ -114,7 +115,8 @@
             <div>
                 当前浏览器：
                 <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码</span>
-                <span id="simdNotSupport" style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
+                <span id="simdNotSupport"
+                      style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
             </div>
         </div>
 
@@ -147,7 +149,7 @@
                 <input placeholder="单位：秒" type="text" id="videoBuffer" style="width: 50px" value="0.2">秒
                 <span>缓存延迟(延迟超过会触发丢帧)：</span>
                 <input placeholder="单位：秒" type="text" id="videoBufferDelay" style="width: 50px" value="1">秒
-                <button id="replay">重播</button>
+                <button onclick="replay()">重播</button>
             </div>
         </div>
         <div class="input">
@@ -158,6 +160,22 @@
             <button onclick="updateSplit(4)">4*4</button>&nbsp;&nbsp;&nbsp;
             <button onclick="updateSplitSpecial('3-1')">不规则(3-1)</button>&nbsp;&nbsp;&nbsp;
             <button onclick="updateSplitSpecial('4-1')">不规则(4-1)</button>
+        </div>
+        <div class="input">
+            <div>
+                <input
+                    onclick="replay()"
+                    type="checkbox"
+                    checked
+                    id="isFlv"
+                /><span>是否Flv格式</span>
+                <input
+                    onclick="replay()"
+                    type="checkbox"
+                    checked
+                    id="supportDblContainerFullscreen"
+                /><span>支持双击局部放大</span>
+            </div>
 
         </div>
         <div class="input">
@@ -298,9 +316,9 @@
     }
     let supportWcs = document.getElementById('wcsSupport264');
     let notSupportWcs = document.getElementById('wcsNotSupport264');
-    if(checkSupportWCS()){
+    if (checkSupportWCS()) {
         supportWcs.style.display = 'inline-block';
-    }else{
+    } else {
         notSupportWcs.style.display = 'inline-block'
     }
 
@@ -328,6 +346,8 @@
     var $useMSE = document.getElementById('useMSE');
     var $useSIMD = document.getElementById('useSIMD');
     var $useWCS = document.getElementById('useWCS');
+    var $supportDblContainerFullscreen = document.getElementById('supportDblContainerFullscreen');
+    var $isFlv = document.getElementById('isFlv');
     let jessibucaMulti = null;
     var showOperateBtns = true; // 是否显示按钮
 
@@ -336,7 +356,8 @@
             container: $container,
             split: 2,
             isResize: false,
-            isFlv: true,
+            supportDblclickContainerFullscreen: $supportDblContainerFullscreen.checked === true,
+            isFlv: $isFlv.checked === true,
             debug: true,
             useMSE: $useMSE.checked === true,
             useSIMD: $useSIMD.checked === true,
@@ -448,7 +469,7 @@
     }
 
 
-    function updateSplitSpecial(split){
+    function updateSplitSpecial(split) {
         if (jessibucaMulti) {
             jessibucaMulti.arrangeWindow(split);
         }
