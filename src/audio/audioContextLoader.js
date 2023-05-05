@@ -119,7 +119,7 @@ export default class AudioContextLoader extends Emitter {
     }
 
     get isMute() {
-        return this.gainNode.gain.value === 0 || this.isStateSuspended();
+        return this.gainNode.gain.value === 0;
     }
 
     get volume() {
@@ -207,14 +207,12 @@ export default class AudioContextLoader extends Emitter {
                 this.player.emit(EVENTS.mute, flag);
             }
             this.setVolume(0);
-            this.audioEnabled(false);
             this.clear();
         } else {
             if (this.isMute) {
                 this.player.emit(EVENTS.mute, flag);
             }
             this.setVolume(0.5);
-            this.audioEnabled(true);
         }
     }
 
