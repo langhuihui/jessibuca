@@ -690,6 +690,8 @@ export default {
                         recordType: this.recordType,
                         ptzZoomShow: true,
                         ptzMoreArrow: true,
+                        ptzApertureShow:true,
+                        ptzFocusShow:true,
                         controlHtml: '<div style="color: red">这个是自定义HTML</div>',
                         useWebGPU: this.canvasRenderType === 'webgpu',
                     },
