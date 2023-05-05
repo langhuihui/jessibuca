@@ -1279,6 +1279,13 @@ WebAssembly 通过线性内存来存储和处理数据。线性内存是 WebAsse
 
 
 
+### 多屏需求
+
+#### 如果不需要播放音频
+
+可以设置`hasAudio`为`false`，这样就不会解码音频数据了，可以提升性能。
+
+
 ### 群
 <img src="/public/qrcode.jpeg">
 
