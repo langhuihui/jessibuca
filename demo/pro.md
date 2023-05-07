@@ -285,6 +285,9 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 
 <img src="/public/hevc-1.png">
 
+如果出现chrome（版本大于104）但是暂未开启硬解码的情况，可以参考下面的链接开启硬解码。
+[chrome 开启HEVC硬件解码](https://blog.csdn.net/water1209/article/details/126959579)
+
 
 [硬件支持情况](https://github.com/StaZhu/enable-chromium-hevc-hardware-decoding/blob/main/README.zh_CN.md)
 
