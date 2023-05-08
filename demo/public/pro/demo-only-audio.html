@@ -93,6 +93,11 @@
         <div id="container"></div>
         <div class="input">
             <div>
+                <span style="color: red">tips:支持移动端（ipad）浏览器最小化后台播放。设备息屏播放。</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
                 <span>音频引擎：</span>
                 <select id="audioEngine">
                     <option value="">自动</option>
@@ -103,7 +108,16 @@
                 <span>缓存时长(s)</span>
                 <input style="display:inline-block;width: 50px" type="number" id="videoBuffer" value="0.3" step="0.1">
             </div>
+        </div>
+        <div class="input">
+            <div><input
+                type="checkbox"
+                checked
+                id="supportBackground"
+                onchange="replay()"
+            /><span>支持后台、息屏播放声音</span>
 
+            </div>
         </div>
         <div class="input">
             <div>输入URL：</div>
@@ -139,6 +153,7 @@
     var $fps = document.querySelector('.fps-inner');
     var $audioEngine = document.getElementById('audioEngine');
     var $videoBuffer = document.getElementById('videoBuffer');
+    var $supportBackground = document.getElementById('supportBackground');
     function isMobile() {
         return (/iphone|ipad|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));
     }
@@ -189,6 +204,7 @@
                 top: 10
             },
             audioEngine: $audioEngine.value,
+            supportLockScreenPlayAudio: $supportBackground.checked,
         },);
 
 
@@ -214,7 +230,7 @@
 
     create();
 
-    $player.addEventListener('click', function () {
+    function play() {
         var href = $playHref.value;
         if (href) {
             var videoBuffer = Number($videoBuffer.value);
@@ -226,6 +242,22 @@
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
         }
+    }
+    function replay() {
+        if (jessibuca) {
+            jessibuca.destroy().then(() => {
+                create();
+                play();
+            });
+        } else {
+            create();
+            play();
+        }
+    }
+
+
+    $player.addEventListener('click', function () {
+        play();
     }, false)
 
 
@@ -252,11 +284,11 @@
         if (jessibuca) {
             jessibuca.destroy().then(()=>{
                 $fps.textContent = '';
-                create();
+                replay()
             });
         }
         else {
-            create();
+            replay();
         }
     })
 
