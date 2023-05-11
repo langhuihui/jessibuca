@@ -19,7 +19,7 @@ export default class WebsocketLoader extends Emitter {
 
     destroy() {
         if (this.socket) {
-            this.socket.close();
+            this.socket.close(1000, 'Client disconnecting');
             this.socket = null;
         }
         this.socketStatus = WEBSOCKET_STATUS.notConnect;

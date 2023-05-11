@@ -113,7 +113,7 @@
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var jessibuca = null;
-    var playUrl = 'http://flv.bdplay.nodemedia.cn/live/bbb.flv';
+    var playUrl = 'https://live.nodemedia.cn:8443/live/b480_264.flv';
 
     function create() {
         jessibuca = new Jessibuca({
@@ -123,6 +123,7 @@
             text: "",
             loadingText: "加载中",
             debug: true,
+            useMSE:true,
             showBandwidth: showOperateBtns, // 显示网速
             operateBtns: {
                 fullscreen: showOperateBtns,

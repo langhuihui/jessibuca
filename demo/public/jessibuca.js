@@ -2020,7 +2020,7 @@
 	  }
 
 	  get isMute() {
-	    return this.gainNode.gain.value === 0 || this.isStateSuspended();
+	    return this.gainNode.gain.value === 0;
 	  }
 
 	  get volume() {
@@ -2106,7 +2106,6 @@
 	      }
 
 	      this.setVolume(0);
-	      this.audioEnabled(false);
 	      this.clear();
 	    } else {
 	      if (this.isMute) {
@@ -2114,7 +2113,6 @@
 	      }
 
 	      this.setVolume(0.5);
-	      this.audioEnabled(true);
 	    }
 	  }
 
@@ -8839,8 +8837,7 @@
 	        case WORKER_CMD_TYPE.wasmError:
 	          if (msg.message) {
 	            if (msg.message.indexOf(WASM_ERROR.invalidNalUnitSize) !== -1) {
-	              this.player.emit(EVENTS.error, EVENTS_ERROR.wasmDecodeError);
-	              this.player.emit(EVENTS_ERROR.wasmDecodeError);
+	              this.player.emitError(EVENTS_ERROR.wasmDecodeError);
 	            }
 	          }
 
@@ -10032,9 +10029,9 @@
 	          this.player.debug.error('Webcodecs', 'VideoDecoder', e);
 
 	          if (e.toString().indexOf(WCS_ERROR.keyframeIsRequiredError) !== -1) {
-	            this.player.emit(EVENTS_ERROR.webcodecsDecodeError);
+	            this.player.emitError(EVENTS_ERROR.webcodecsDecodeError);
 	          } else if (e.toString().indexOf(WCS_ERROR.canNotDecodeClosedCodec) !== -1) {
-	            this.player.emit(EVENTS_ERROR.webcodecsDecodeError);
+	            this.player.emitError(EVENTS_ERROR.webcodecsDecodeError);
 	          }
 	        }
 	      } else {
@@ -11385,9 +11382,9 @@
 	    }
 
 	    if (this.isStateClosed) {
-	      this.player.emit(EVENTS_ERROR.mseSourceBufferError, 'mediaSource is not attached to video or mediaSource is closed');
+	      this.player.emitError(EVENTS_ERROR.mseSourceBufferError, 'mediaSource is not attached to video or mediaSource is closed');
 	    } else if (this.isStateEnded) {
-	      this.player.emit(EVENTS_ERROR.mseSourceBufferError, 'mediaSource is closed');
+	      this.player.emitError(EVENTS_ERROR.mseSourceBufferError, 'mediaSource is closed');
 	    } else {
 	      if (this.sourceBuffer.updating === true) {
 	        this.player.emit(EVENTS.mseSourceBufferBusy); // this.dropSourceBuffer(true);
@@ -12037,16 +12034,16 @@
 	            }
 	          });
 	          this.mseDecoder.once(EVENTS_ERROR.mediaSourceFull, () => {
-	            this.emit(EVENTS_ERROR.mediaSourceFull);
+	            this.emitError(EVENTS_ERROR.mediaSourceFull);
 	          });
 	          this.mseDecoder.once(EVENTS_ERROR.mediaSourceAppendBufferError, () => {
-	            this.emit(EVENTS_ERROR.mediaSourceAppendBufferError);
+	            this.emitError(EVENTS_ERROR.mediaSourceAppendBufferError);
 	          });
 	          this.mseDecoder.once(EVENTS_ERROR.mediaSourceBufferListLarge, () => {
-	            this.emit(EVENTS_ERROR.mediaSourceBufferListLarge);
+	            this.emitError(EVENTS_ERROR.mediaSourceBufferListLarge);
 	          });
 	          this.mseDecoder.once(EVENTS_ERROR.mediaSourceAppendBufferEndTimeout, () => {
-	            this.emit(EVENTS_ERROR.mediaSourceAppendBufferEndTimeout);
+	            this.emitError(EVENTS_ERROR.mediaSourceAppendBufferEndTimeout);
 	          });
 	        }
 
@@ -12065,10 +12062,6 @@
 
 	        this.stream.once(EVENTS.streamEnd, () => {
 	          reject();
-	        }); // hls
-
-	        this.stream.once(EVENTS_ERROR.hlsError, error => {
-	          reject(error);
 	        }); // success
 
 	        this.stream.once(EVENTS.streamSuccess, () => {
@@ -12404,6 +12397,12 @@
 
 	  getOption() {
 	    return this._opt;
+	  }
+
+	  emitError(errorType) {
+	    let message = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+	    this.emit(EVENTS.error, errorType, message);
+	    this.emit(errorType, message);
 	  }
 
 	}
@@ -12767,25 +12766,6 @@
 	            }).catch(() => {
 	              // reject();
 	              this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play error');
-	            });
-	          }
-	        });
-	      });
-	      this.player.once(EVENTS_ERROR.webcodecsH265NotSupport, () => {
-	        this.pause().then(() => {
-	          if (this.player._opt.autoWasm) {
-	            this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play');
-
-	            this._resetPlayer({
-	              useWCS: false
-	            });
-
-	            this.play(url, options).then(() => {
-	              // resolve();
-	              this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play success');
-	            }).catch(() => {
-	              // reject();
-	              this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play error');
 	            });
 	          }
 	        });
