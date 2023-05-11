@@ -293,9 +293,9 @@ export default class MseDecoder extends Emitter {
         }
 
         if (this.isStateClosed) {
-            this.player.emit(EVENTS_ERROR.mseSourceBufferError, 'mediaSource is not attached to video or mediaSource is closed')
+            this.player.emitError(EVENTS_ERROR.mseSourceBufferError, 'mediaSource is not attached to video or mediaSource is closed')
         } else if (this.isStateEnded) {
-            this.player.emit(EVENTS_ERROR.mseSourceBufferError, 'mediaSource is closed')
+            this.player.emitError(EVENTS_ERROR.mseSourceBufferError, 'mediaSource is closed')
         } else {
             if (this.sourceBuffer.updating === true) {
                 this.player.emit(EVENTS.mseSourceBufferBusy);

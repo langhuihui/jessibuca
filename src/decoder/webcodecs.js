@@ -128,10 +128,10 @@ export default class WebcodecsDecoder extends Emitter {
                 } catch (e) {
                     this.player.debug.error('Webcodecs', 'VideoDecoder', e)
                     if (e.toString().indexOf(WCS_ERROR.keyframeIsRequiredError) !== -1) {
-                        this.player.emit(EVENTS_ERROR.webcodecsDecodeError);
+                        this.player.emitError(EVENTS_ERROR.webcodecsDecodeError);
                     }
                     else if (e.toString().indexOf(WCS_ERROR.canNotDecodeClosedCodec) !== -1) {
-                        this.player.emit(EVENTS_ERROR.webcodecsDecodeError);
+                        this.player.emitError(EVENTS_ERROR.webcodecsDecodeError);
                     }
                 }
             } else {

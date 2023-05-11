@@ -353,21 +353,6 @@ class Jessibuca extends Emitter {
                 });
             })
 
-            this.player.once(EVENTS_ERROR.webcodecsH265NotSupport, () => {
-                this.pause().then(() => {
-                    if (this.player._opt.autoWasm) {
-                        this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play')
-                        this._resetPlayer({useWCS: false})
-                        this.play(url, options).then(() => {
-                            // resolve();
-                            this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play success')
-                        }).catch(() => {
-                            // reject();
-                            this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play error')
-                        });
-                    }
-                });
-            })
             //  media source full error
             this.player.once(EVENTS_ERROR.mediaSourceFull, () => {
                 this.pause().then(() => {

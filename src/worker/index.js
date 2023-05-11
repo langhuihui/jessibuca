@@ -89,8 +89,7 @@ export default class DecoderWorker {
                 case WORKER_CMD_TYPE.wasmError:
                     if (msg.message) {
                         if (msg.message.indexOf(WASM_ERROR.invalidNalUnitSize) !== -1) {
-                            this.player.emit(EVENTS.error, EVENTS_ERROR.wasmDecodeError);
-                            this.player.emit(EVENTS_ERROR.wasmDecodeError);
+                            this.player.emitError(EVENTS_ERROR.wasmDecodeError);
                         }
                     }
                     break;

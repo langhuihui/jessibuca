@@ -477,19 +477,19 @@ export default class Player extends Emitter {
                     })
 
                     this.mseDecoder.once(EVENTS_ERROR.mediaSourceFull, () => {
-                        this.emit(EVENTS_ERROR.mediaSourceFull)
+                        this.emitError(EVENTS_ERROR.mediaSourceFull)
                     })
 
                     this.mseDecoder.once(EVENTS_ERROR.mediaSourceAppendBufferError, () => {
-                        this.emit(EVENTS_ERROR.mediaSourceAppendBufferError)
+                        this.emitError(EVENTS_ERROR.mediaSourceAppendBufferError)
                     })
 
                     this.mseDecoder.once(EVENTS_ERROR.mediaSourceBufferListLarge, () => {
-                        this.emit(EVENTS_ERROR.mediaSourceBufferListLarge);
+                        this.emitError(EVENTS_ERROR.mediaSourceBufferListLarge);
                     })
 
                     this.mseDecoder.once(EVENTS_ERROR.mediaSourceAppendBufferEndTimeout, () => {
-                        this.emit(EVENTS_ERROR.mediaSourceAppendBufferEndTimeout);
+                        this.emitError(EVENTS_ERROR.mediaSourceAppendBufferEndTimeout);
                     })
                 }
 
@@ -513,10 +513,7 @@ export default class Player extends Emitter {
                 this.stream.once(EVENTS.streamEnd, () => {
                     reject();
                 })
-                // hls
-                this.stream.once(EVENTS_ERROR.hlsError, (error) => {
-                    reject(error)
-                })
+
                 // success
                 this.stream.once(EVENTS.streamSuccess, () => {
                     resolve();
@@ -837,5 +834,10 @@ export default class Player extends Emitter {
 
     getOption() {
         return this._opt;
+    }
+
+    emitError(errorType, message = '') {
+        this.emit(EVENTS.error, errorType, message);
+        this.emit(errorType, message);
     }
 }
