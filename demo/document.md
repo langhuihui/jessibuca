@@ -1334,6 +1334,11 @@ WebAssembly 通过线性内存来存储和处理数据。线性内存是 WebAsse
 
 
 
+### 关于如何保持完整的日志内容
+
+在`f12` 控制台，`console tab` 栏目，右键 `save as` 即可。
+
+
 
 ### 群
 <img src="/public/qrcode.jpeg">
