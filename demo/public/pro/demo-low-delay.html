@@ -183,7 +183,9 @@
             console.log('stats', stats);
             $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
         })
-
+        jessibuca.on(jessibuca.EVENTS.crashLog, (log) => {
+            console.log('crashLog', log)
+        })
 
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';

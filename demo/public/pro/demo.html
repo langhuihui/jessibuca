@@ -106,7 +106,8 @@
                 当前浏览器：
                 <span id="wcsSupport264" style="color: green;display: none">支持Webcodecs H264解码；</span>
                 <span id="wcsSupport" style="color: green;display: none">支持Webcodecs H265解码；</span>
-                <span id="wcsNotSupport264" style="color: red;display: none">不支持Webcodecs H264解码(https/localhost)；</span>
+                <span id="wcsNotSupport264"
+                      style="color: red;display: none">不支持Webcodecs H264解码(https/localhost)；</span>
                 <span id="wcsNotSupport" style="color: red;display: none">不支持Webcodecs H265解码(https/localhost),会自动切换成wasm解码</span>
             </div>
         </div>
@@ -114,7 +115,8 @@
             <div>
                 当前浏览器：
                 <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码</span>
-                <span id="simdNotSupport" style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
+                <span id="simdNotSupport"
+                      style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
             </div>
         </div>
         <div class="input">
@@ -281,9 +283,9 @@
     }
     let supportWcs = document.getElementById('wcsSupport264');
     let notSupportWcs = document.getElementById('wcsNotSupport264');
-    if(checkSupportWCS()){
+    if (checkSupportWCS()) {
         supportWcs.style.display = 'inline-block';
-    }else{
+    } else {
         notSupportWcs.style.display = 'inline-block'
     }
 
@@ -382,6 +384,10 @@
         jessibuca.on('stats', (stats) => {
             // console.log('stats', stats);
             $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
+        })
+
+        jessibuca.on(jessibuca.EVENTS.crashLog, (log) => {
+            console.log('crashLog', log)
         })
 
 
