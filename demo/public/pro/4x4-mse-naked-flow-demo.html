@@ -311,11 +311,8 @@
     var num = 16;
 
     function replay() {
-        destroy().then(()=>{
-            setTimeout(() => {
-                doCreate();
-                _play();
-            }, 100)
+        destroyAndCreate().then(()=>{
+            _play();
         });
     }
 
@@ -379,7 +376,7 @@
 
     doCreate();
 
-    function destroy() {
+    function destroyAndCreate() {
         return new Promise((resolve, reject) => {
             const destroyList = [];
             for (let i = 0; i < num; i++) {
@@ -435,10 +432,8 @@
     })
 
     $destroy.addEventListener('click', function () {
-        destroy().then(() => {
-            setTimeout(() => {
-                doCreate();
-            }, 100)
+        destroyAndCreate().then(() => {
+
         });
     })
 

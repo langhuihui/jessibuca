@@ -431,7 +431,7 @@
         $destroy.style.display = 'inline-block';
     }
 
-    function destroy() {
+    function destroyAndCreate() {
         return new Promise((resolve, reject) => {
             const destroyList = [];
             for (let i = 0; i < size; i++) {
@@ -459,8 +459,7 @@
     }
 
     function replay() {
-        destroy().then(() => {
-            create();
+        destroyAndCreate().then(() => {
             play();
         });
     }
@@ -484,7 +483,7 @@
     })
 
     $destroy.addEventListener('click', function () {
-        destroy().then(() => {
+        destroyAndCreate().then(() => {
 
         });
     })

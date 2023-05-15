@@ -452,7 +452,7 @@
         }
     })
 
-    function destroy() {
+    function destroyAndCreate() {
         return new Promise((resolve, reject) => {
             const destroyList = [];
             for (let i = 0; i < size; i++) {
@@ -482,7 +482,7 @@
 
 
     $destroy.addEventListener('click', function () {
-        destroy().then(()=>{
+        destroyAndCreate().then(()=>{
 
         })
     })
