@@ -387,6 +387,7 @@
             }
             Promise.all(destroyList).then(() => {
                 playList = [];
+                doCreate();
                 resolve();
             }).catch((e) => {
                 console.error(e);

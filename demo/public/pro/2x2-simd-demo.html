@@ -298,12 +298,7 @@
             Promise.all(destroyList).then(() => {
                 playList = [];
                 setTimeout(() => {
-                    for (let i = 0; i < size; i++) {
-                        create(i + 1);
-                    }
-                    $player.style.display = 'inline-block';
-                    $pause.style.display = 'none';
-                    $destroy.style.display = 'none';
+                    create();
                     resolve();
                 }, 100)
             }).catch((e) => {
