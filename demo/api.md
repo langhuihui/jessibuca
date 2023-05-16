@@ -55,6 +55,11 @@ worker地址
 
 > 默认引用的是根目录下面的decoder.js文件 ，decoder.js 与 decoder.wasm文件必须是放在同一个目录下面。
 
+例如vue项目中，`jessibuca.js` 文件在`public/jessibuca/jessibuca.js ` （decoder.js也在同级目录下）。
+
+需要配置的 `decoder` 参数是： `decoder: '/jessibuca/decoder.js'`
+
+
 ### forceNoOffscreen
 
 - **类型**：`boolean`

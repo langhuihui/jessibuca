@@ -175,6 +175,11 @@
                 <option value="true">是</option>
                 <option value="false" selected>否</option>
             </select>
+            <span>canvas渲染技术：</span>
+            <select id="isUseWebGPU">
+                <option value="webgl">webgl</option>
+                <option value="webgpu" selected>webgpu</option>
+            </select>
         </div>
         <div class="input">
             <div>输入URL：</div>
@@ -234,6 +239,7 @@
     var forceNoOffscreen = true; //
     var jessibuca = null;
     var isPlaybackPause = false;
+    var $isUseWebGPU = document.getElementById('isUseWebGPU');
 
     var isSupportWebgpu = 'gpu' in navigator;
 
@@ -286,6 +292,7 @@
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
             playbackForwardMaxRateDecodeIFrame: onlyDecoderIFrame,
+            useWebGPU: $isUseWebGPU.value === 'webgpu',
         },);
 
         jessibuca.onLog = msg => console.error(msg);
