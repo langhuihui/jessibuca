@@ -1,8 +1,13 @@
-# 简介
+<h1 align="center"> Jessibuca </h1>
 
-Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视频解码库编译成Js（wasm)运行于浏览器之中。兼容几乎所有浏览器，可以运行在PC、手机、微信中，无需额外安装插件。
+<p align="center"> 
+<a href="https://github.com/langhuihui/m7s-website/blob/main/README.en.md"> English </a> | <b> 简体中文 </b>
+</p>
+
+Jessibuca 是一款开源的纯H5直播流播放器，通过Emscripten将音视频解码库编译成Js（wasm)运行于浏览器之中。兼容几乎所有浏览器，可以运行在PC、手机、微信中，无需额外安装插件。
 
 ## 功能
+
 - 支持解码H.264视频(Baseline, Main, High Profile全支持，支持解码B帧视频)
 - 支持解码H.265视频（flv id == 12）
 - 支持解码AAC音频(LC,HE,HEv2 Profile全支持)
@@ -33,8 +38,8 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 支持同一个播放地址音频采样和编码发生改变的时候音频自动切换
 - 支持视频录制(WebM、MP4格式[video/webm;codecs=h264])，(MP4格式支持在IOS VLC播放器显示时长播放，Android VLC播放器无法显示时长播放,PC VLC播放器可以播放)
 
-
 ## PRO版本
+
 - 支持开源版几乎所有的方法和事件，支持无缝升级到PRO版本。
 - wasm解码模式下默认work线程中发起Http-Flv、WS请求，减少主线程往worker线程传递数据，提升性能。
 - 360浏览器可播放使用MSE加速解码H265。
@@ -72,8 +77,8 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 支持webgpu渲染canvas（需要chrome canary 版本，然后设置chrome://flags/#enable-unsafe-webgpu 打开）。
 - 支持定制化服务开发。
 
-
 ### PRO和开源版对比
+
 [http://jessibuca.monibuca.com/pro.html#%E5%BC%80%E6%BA%90%E7%89%88%E4%B8%8Epro-%E5%B7%AE%E5%BC%82%E6%80%A7](http://jessibuca.monibuca.com/pro.html#%E5%BC%80%E6%BA%90%E7%89%88%E4%B8%8Epro-%E5%B7%AE%E5%BC%82%E6%80%A7)
 
 ## PRO AI 能力
@@ -82,21 +87,15 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 
 ## 体验地址
 
-### Jessibuca
-#### https
-[https://jessibuca.com/player.html](https://jessibuca.com/player.html)
+### Jessibuca 开源版
 
-#### http
-[http://jessibuca.monibuca.com/player.html](http://jessibuca.monibuca.com/player.html)
+- https Link: [https://jessibuca.com/player.html](https://jessibuca.com/player.html)
+- http Link: [http://jessibuca.monibuca.com/player.html](http://jessibuca.monibuca.com/player.html)
 
 ### Jessibuca Pro
 
-#### https
-[https://jessibuca.com/player-pro.html](https://jessibuca.com/player-pro.html)
-
-##### http
-[http://jessibuca.monibuca.com/player-pro.html](http://jessibuca.monibuca.com/player-pro.html)
-
+- https Link: [https://jessibuca.com/player-pro.html](https://jessibuca.com/player-pro.html)
+- http Link: [http://jessibuca.monibuca.com/player-pro.html](http://jessibuca.monibuca.com/player-pro.html)
 
 ## 性能测试情况
 
@@ -104,16 +103,14 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 
 [https://blog.csdn.net/huapeng_guo/article/details/124385345](https://blog.csdn.net/huapeng_guo/article/details/124385345)
 
-
-
 ## 本地测试
 
-- 执行yarn 或者npm i
-- 执行yarn dev 或者 npm run dev
+- 执行 `yarn` 或者 `npm i`
+- 执行 `yarn dev` 或者 `npm run dev`
 
 ## API
-[API](/demo/api.md)
 
+[API](/demo/api.md)
 
 ## HTTP 地址
 
@@ -127,27 +124,23 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 
 [Demo](/demo/demo.md)
 
-
-
 ## 源码目录结构
 
-- wasm/obj 存放emscripten编译好的ffmpeg解码库的字节码库
-- dist 存放编译输出的js和wasm文件
-- src 存放js源码
+- wasm/obj 存放 emscripten 编译好的 ffmpeg 解码库的字节码库
+- dist 存放编译输出的 js 和 wasm 文件
+- src 存放 js 源码
 
-## 打包js
+## 打包 js
 
-执行yarn build 或者 npm run build
+执行 `yarn build` 或者 `npm run build`
 
 ## 引用关系
 
-- jessibuca.js 是业务js代码
-- decoder.js 是worker进程跑的负责音视频解码的js代码
-- decoder.wasm 是decoder.js的胶水代码
+- jessibuca.js 是业务 js 代码
+- decoder.js 是 worker 进程跑的负责音视频解码的 js 代码
+- decoder.wasm 是 decoder.js 的胶水代码
 
-
-
-## 编译C++代码
+## 编译 C++ 代码
 
 执行yarn build:wasm 或者 npm run build:wasm
 
@@ -156,11 +149,15 @@ Jessibuca是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 <img src="/demo/public/tech.png">
 
 ## star
+
 [![Star History Chart](https://api.star-history.com/svg?repos=langhuihui/jessibuca&type=Date)](https://star-history.com/#langhuihui/jessibuca&Date)
 
-
 ## 支持
-<img src="/demo/public/wx.jpg"><img src="/demo/public/alipay.jpg">
+
+<img src="/demo/public/wx.jpg">
+
+<img src="/demo/public/alipay.jpg">
 
 ## 群
+
 <img src="/demo/public/qrcode.jpeg">
