@@ -1,7 +1,7 @@
 <h1 align="center"> Jessibuca </h1>
 
 <p align="center"> 
-<b> English </b> | <a href="https://github.com/langhuihui/m7s-website/blob/main/README.md"> 简体中文 </a>
+<b> English </b> | <a href="https://github.com/langhuihui/jessibuca/blob/v3/README.md"> 简体中文 </a>
 </p>
 
 Jessibuca is an open-source pure H5 live streaming player. 
