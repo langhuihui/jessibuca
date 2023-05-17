@@ -123,7 +123,7 @@
             text: "",
             loadingText: "加载中",
             debug: true,
-            useMSE:true,
+            useMSE: true,
             showBandwidth: showOperateBtns, // 显示网速
             operateBtns: {
                 fullscreen: showOperateBtns,
@@ -142,22 +142,22 @@
         jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
         jessibuca.onMute = msg => console.log('onMute', msg);
 
-        jessibuca.play(playUrl).then(()=>{
-            console.log('play success')
-        }).catch((e)=>{
-            console.error(e);
-        });
+
+        setTimeout(() => {
+            jessibuca.play(playUrl).then(() => {
+                console.log('play success')
+            }).catch((e) => {
+                console.error(e);
+            });
+        }, 150)
     }
 
     create();
 
 
-
-
-    $container.addEventListener('click',function (){
+    $container.addEventListener('click', function () {
         jessibuca.cancelMute()
-    },false)
-
+    }, false)
 
 
 </script>
