@@ -7,9 +7,14 @@ decoder-pro.wasm ---worker解码器胶水文件(这个库无需引入)
 decoder-pro-simd.js ---worker-simd解码器(这个库无需引入)
 decoder-pro-simd.wasm ---worker-simd解码器胶水文件(这个库无需引入)
 
-jessibuca-pro-face-detector-demo.js --- 体验版AI 人脸识别主文件(需要通过script标签引入)
-face-detector.wasm --- 人脸识别胶水文件(这个库无需引入)
+decoder-pro-audio.js ----- worker音频解码器(这个库无需引入)
+decoder-pro-audio.wasm ---- worker音频解码器胶水文件(这个库无需引入)
 
+jessibuca-pro-face-detector-demo.js --- 体验版AI 人脸识别主文件(需要通过script标签引入)
+jessibuca-pro-face-detector-decoder.wasm --- 人脸识别胶水文件(这个库无需引入)
+
+jessibuca-pro-object-detector-demo.js --- 体验版AI 人脸识别主文件(需要通过script标签引入)
+jessibuca-pro-object-detector-decoder.wasm --- 人脸识别胶水文件(这个库无需引入)
 
 本试用体验包一个小时自动断开连接，会增加全屏水印和右上角logo水印，其它与正式版功能完全一样，正式使用需商用授权。
 
