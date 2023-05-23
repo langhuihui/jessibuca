@@ -386,7 +386,7 @@
             $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
         })
 
-        jessibuca.on(jessibuca.EVENTS.crashLog, (log) => {
+        jessibuca.on(JessibucaPro.EVENTS.crashLog, (log) => {
             console.log('crashLog', log)
         })
 
