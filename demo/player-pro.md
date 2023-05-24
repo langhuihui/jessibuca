@@ -151,3 +151,7 @@ open /Applications/Google\ Chrome.app --args --enable-features=PlatformHEVCDecod
 
 # 群
 <img src="/public/qrcode.jpeg">
+
+
+# 群
+<img src="/public/qrcode-qw.jpeg">

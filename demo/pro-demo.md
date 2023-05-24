@@ -296,8 +296,8 @@
 
 
 
-# 群
+## 群
 <img src="/public/qrcode.jpeg">
 
-# 群
-<img src="/public/qrcode-qx.jpeg">
+## 群
+<img src="/public/qrcode-qw.jpeg">
