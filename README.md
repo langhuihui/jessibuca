@@ -1,6 +1,6 @@
 <h1 align="center"> Jessibuca </h1>
 
-<p align="center"> 
+<p align="center">
 <a href="https://github.com/langhuihui/jessibuca/blob/v3/README.en.md"> English </a> | <b> 简体中文 </b>
 </p>
 
@@ -161,3 +161,6 @@ Jessibuca 是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 ## 群
 
 <img src="/demo/public/qrcode.jpeg">
+
+## 群
+<img src="/demo/public/qrcode-qw.jpeg">

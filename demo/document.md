@@ -1364,6 +1364,8 @@ useWCS:false
 ### 群
 <img src="/public/qrcode.jpeg">
 
+# 群
+<img src="/public/qrcode-qx.jpeg">
 
 
 

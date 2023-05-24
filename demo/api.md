@@ -1010,3 +1010,9 @@ jessibuca.on("playToRenderTimes", function (times) {
 
 ```
 
+## 群
+
+<img src="/demo/public/qrcode.jpeg">
+
+## 群
+<img src="/demo/public/qrcode-qw.jpeg">

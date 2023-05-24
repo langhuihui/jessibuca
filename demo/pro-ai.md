@@ -145,6 +145,12 @@ toothbrush - 牙刷
 
 
 
+## 群
+
+<img src="/demo/public/qrcode.jpeg">
+
+## 群
+<img src="/demo/public/qrcode-qw.jpeg">
 
 
 
