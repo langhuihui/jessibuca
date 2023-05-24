@@ -147,10 +147,10 @@ toothbrush - 牙刷
 
 ## 群
 
-<img src="/demo/public/qrcode.jpeg">
+<img src="/public/qrcode.jpeg">
 
 ## 群
-<img src="/demo/public/qrcode-qw.jpeg">
+<img src="/public/qrcode-qw.jpeg">
 
 
 
