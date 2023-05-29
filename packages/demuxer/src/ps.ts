@@ -14,10 +14,6 @@ const STREAM_TYPE_AAC = 0x0F;
 const STREAM_TYPE_G711A = 0x90;
 const STREAM_TYPE_G711U = 0x91;
 export class PSDemuxer extends BaseDemuxer {
-  tmp8 = new Uint8Array(4);
-  dv = new DataView(this.tmp8.buffer);
-  audio = new OPut();
-  video = new OPut();
   videoStreamType = 0;
   audioStreamType = 0;
   pts = 0;
@@ -26,74 +22,90 @@ export class PSDemuxer extends BaseDemuxer {
     throw new Error("Method not implemented.");
   }
   *demux(): Generator<number | Uint8Array, void, Uint8Array> {
-    let audiots = 0;
-    let videots = 0;
+    let keySent = false;
+    let startTime = 0;
+    const tmp8 = new Uint8Array(4);
+    const dv = new DataView(tmp8.buffer);
+    const videoBuffer = new OPut();
+    let currentPTS = 0;
     while (true) {
-      yield this.tmp8;
-      const code = this.dv.getUint32(0);
+      yield tmp8;
+      const code = dv.getUint32(0);
       switch (code) {
         case StartCodePS:
-          if (this.audio.buffer?.length) {
-            if (this.audioEncoderConfig?.codec == "aac" && this.audioEncoderConfig.numberOfChannels == 0) {
-              const asc = adtsToAsc(this.audio.buffer.subarray(7));
-              this.audioEncoderConfig = {
-                codec: "aac",
-                sampleRate: asc.sampleRate,
-                numberOfChannels: asc.channel,
-              };
-              this.emit(
-                DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED,
-                asc.audioSpecificConfig
-              );
-            }
-            this.gotAudio?.({
-              type: "key",
-              data:
-                this.audioEncoderConfig?.codec == "aac"
-                  ? this.audio.buffer.subarray(7)
-                  : this.audio.buffer,
-              timestamp: audiots,
-              duration: 0,
-            });
-          }
-          if (this.video.buffer?.length) {
-            this.gotVideo?.({
-              type: "key",
-              data: this.video.buffer,
-              timestamp: videots,
-              duration: 0,
-            });
-          }
           yield 9;
-          yield this.tmp8.subarray(0, 1);
-          const psl = this.dv.getUint8(0) & 0x07;
+          yield tmp8.subarray(0, 1);
+          const psl = dv.getUint8(0) & 0x07;
           yield psl;
           break;
         case StartCodeSYS:
         case PrivateStreamCode:
-          yield this.tmp8.subarray(0, 2);
-          const sl = this.dv.getUint16(0);
+          yield tmp8.subarray(0, 2);
+          const sl = dv.getUint16(0);
           yield sl;
           break;
         case StartCodeMAP:
-          yield this.tmp8.subarray(0, 2);
-          const msl = this.dv.getUint16(0);
+          yield tmp8.subarray(0, 2);
+          const msl = dv.getUint16(0);
           const psm = yield msl;
           this.decProgramStreamMap(psm);
           break;
         case StartCodeVideo:
-          yield this.tmp8.subarray(0, 2);
-          const vpesl = this.dv.getUint16(0);
+          yield tmp8.subarray(0, 2);
+          const vpesl = dv.getUint16(0);
           const vpes = yield vpesl;
-          this.video.write(this.parsePESPacket(vpes));
-          videots = this.dts;
+          const annexb = this.parsePESPacket(vpes);
+          if (!startTime) {
+            if ((annexb[4] & 0x0f) == 7) {
+              startTime = Date.now();
+              currentPTS = this.pts;
+              videoBuffer.write(annexb);
+            }
+            break;
+          }
+          if (currentPTS == this.pts) {
+            videoBuffer.write(annexb);
+            break;
+          }
+          if (videoBuffer.buffer?.length) {
+            this.gotVideo?.({
+              type: "key",
+              data: videoBuffer.buffer!,
+              timestamp: (Date.now() - startTime) * 1000,
+            });
+            videoBuffer.buffer = undefined;
+            keySent = true;
+          }
+          videoBuffer.write(annexb);
+          currentPTS = this.pts;
+          console.log(annexb[4] & 0x0f);
           break;
         case StartCodeAudio:
-          yield this.tmp8.subarray(0, 2);
-          const apesl = this.dv.getUint16(0);
+          yield tmp8.subarray(0, 2);
+          const apesl = dv.getUint16(0);
           const apes = yield apesl;
-          this.audio.write(this.parsePESPacket(apes));
-          audiots = this.dts;
+          const audio = this.parsePESPacket(apes);
+          if (this.audioEncoderConfig?.codec == "aac" && this.audioEncoderConfig.numberOfChannels == 0) {
+            const asc = adtsToAsc(audio.subarray(7));
+            this.audioEncoderConfig = {
+              codec: "aac",
+              sampleRate: asc.sampleRate,
+              numberOfChannels: asc.channel,
+            };
+            this.emit(
+              DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED,
+              asc.audioSpecificConfig
+            );
+          }
+          this.gotAudio?.({
+            type: "key",
+            data:
+              this.audioEncoderConfig?.codec == "aac"
+                ? audio.subarray(7)
+                : audio,
+            timestamp: this.dts,
+            duration: 0,
+          });
           break;
         case MEPGProgramEndCode:
           return;
@@ -135,6 +147,7 @@ export class PSDemuxer extends BaseDemuxer {
         this.dts = this.pts;
       }
     }
+    // console.log(this.pts, this.dts);
     return payload.subarray(3 + pesHeaderDataLen);
   }
   decProgramStreamMap(psm: Uint8Array) {
@@ -162,6 +175,7 @@ export class PSDemuxer extends BaseDemuxer {
           width: 0,
           height: 0,
         };
+        this.emit(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED);
       } else if (elementaryStreamID >= 0xc0 && elementaryStreamID <= 0xdf) {
         this.audioStreamType = streamType;
         this.audioEncoderConfig = {
@@ -171,6 +185,7 @@ export class PSDemuxer extends BaseDemuxer {
           numberOfChannels: 0,
           sampleRate: 0,
         };
+        this.emit(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED);
       }
       if (l <= index + 1) {
         break;

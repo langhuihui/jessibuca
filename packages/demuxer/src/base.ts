@@ -14,10 +14,11 @@ export interface Source {
 }
 export abstract class BaseDemuxer extends EventEmitter {
   constructor(
-    public mode: DemuxMode = DemuxMode.PULL,
-    public source?: Source
+    public source?: Source,
+    public mode: DemuxMode = DemuxMode.PULL
   ) {
     super();
+    console.log("Demuxer Created:",Object.getPrototypeOf(this).constructor.name)
     if (source) {
       if (mode == DemuxMode.PULL) {
         this.startPull(source);

@@ -20,7 +20,7 @@ import {
 import {
   ConnectionState,
   ConnectionEvent,
-} from "../../../packages/conn/src/types";
+} from "jv4-connection/src/types";
 import { TimelineDataSeries, TimelineGraphView } from "webrtc-internals";
 import { ArchiveOutline as ArchiveIcon } from "@vicons/ionicons5";
 import {
@@ -31,22 +31,23 @@ import {
   VideoCodecInfo,
   AudioCodecInfo,
   AudioFrame,
-} from "../../../packages/decoder/src/types";
+} from "jv4-decoder/src/types";
 import {
   FileConnection,
   getURLType,
   WebSocketConnection,
   HttpConnection,
-} from "../../../packages/conn/src";
-import { Connection } from "../../../packages/conn/src/base";
+} from "jv4-connection/src";
+import { Connection } from "jv4-connection/src/base";
 import {
   VideoDecoderHard,
   AudioDecoderSoft,
-} from "../../../packages/decoder/src";
-import { FlvDemuxer, DemuxEvent } from "../../../packages/demuxer/src";
-import { Renderer } from "../../../packages/renderer/src";
+} from "jv4-decoder/src";
+import { FlvDemuxer, DemuxEvent, PSDemuxer } from "jv4-demuxer/src";
+import { WebCodecsVideoRenderer } from "jv4-renderer/src";
+import { DemuxMode } from "jv4-demuxer/src/base";
 const message = useMessage();
-const url = ref("");
+const url = ref("ws://localhost:8080/ps/live/test");
 let messageReactive: MessageReactive | null = null;
 const removeMessage = () => {
   if (messageReactive) {
@@ -54,7 +55,7 @@ const removeMessage = () => {
     messageReactive = null;
   }
 };
-
+const muxType = ref('ps');
 let conn: Connection;
 const display = reactive({
   audioTS: 0,
@@ -108,80 +109,98 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
       removeMessage();
       message.success(ConnectionState.RECONNECTED);
     });
-    await conn.connect();
+
     const videoDecoder = new VideoDecoderHard();
     await videoDecoder.initialize();
 
-    const audioDecoder = new AudioDecoderSoft();
-    await audioDecoder.initialize();
+    // const audioDecoder = new AudioDecoderSoft();
+    // await audioDecoder.initialize();
 
-    const demuxer = new FlvDemuxer(conn);
-    const renderer = new Renderer(
+    const demuxer = muxType.value == 'flv' ? new FlvDemuxer(conn, DemuxMode.PUSH) : new PSDemuxer(conn, DemuxMode.PUSH);
+    const renderer = new WebCodecsVideoRenderer(
       document.getElementById("video") as HTMLVideoElement
     );
     demuxer.on(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED, (data: Uint8Array) => {
       message.info(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED);
-      const aconfig: AudioDecoderConfig = {
-        codec: demuxer.audioEncoderConfig!.codec,
-        extraData: data,
-        outSampleType: "f32-planar",
-      };
-      audioDecoder.configure(aconfig);
+      // const aconfig: AudioDecoderConfig = {
+      //   codec: demuxer.audioEncoderConfig!.codec,
+      //   extraData: data,
+      //   outSampleType: "f32-planar",
+      // };
+      // audioDecoder.configure(aconfig);
     });
-    demuxer.on(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED, (data: Uint8Array) => {
+    demuxer.on(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED, (extraData: Uint8Array) => {
       message.info(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED);
       switch (demuxer.videoEncoderConfig!.codec) {
         case "avc":
           videoDecoder.configure({
-            codec: "avc1.42001f",
-            extraData: data,
+            codec: "avc1.420028",
+            extraData,
             videoType: "avc",
-            avc: { format: "avcc" },
+            avc: { format: extraData ? "avcc" : "annexb" },
           });
           break;
         case "hevc":
           videoDecoder.configure({
             codec: "hvc1.1.6.L0.12.34.56.78.9A.BC",
-            extraData: data,
+            extraData,
             videoType: "hevc",
-            hevc: { format: "hvcc" },
+            hevc: { format: extraData ? "hvcc" : "annexb" },
           });
       }
     });
-    demuxer.audioReadable.pipeTo(
-      new WritableStream({
-        write(chunk: EncodedAudioChunkInit) {
-          display.audioTS = chunk.timestamp;
-          display.audioSize = chunk.data.byteLength;
+    demuxer.gotAudio = (data: EncodedAudioChunkInit) => {
+      // display.audioTS = data.timestamp;
+      // display.audioSize = data.data.byteLength;
+      // audioDecoder.decode(data);
+      aframs++;
+    };
+    demuxer.gotVideo = (data: EncodedVideoChunkInit) => {
+      display.videoTS = data.timestamp;
+      display.videoSize = data.data.byteLength;
+      if (videoDecoder.config) {
+        try {
+          videoDecoder.decode(data);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+      
+    };
+    // demuxer.audioReadable.pipeTo(
+    //   new WritableStream({
+    //     write(chunk: EncodedAudioChunkInit) {
+    //       display.audioTS = chunk.timestamp;
+    //       display.audioSize = chunk.data.byteLength;
 
-          audioDecoder.decode(chunk);
-          if (file && options)
-            options.onProgress({
-              percent: (100 * conn.down.total) / file.size,
-            });
-          return readDelay(0);
-        },
-      })
-    );
-    demuxer.videoReadable.pipeTo(
-      new WritableStream({
-        write(chunk: EncodedVideoChunkInit) {
-          display.videoTS = chunk.timestamp;
-          display.videoSize = chunk.data.byteLength;
+    //       audioDecoder.decode(chunk);
+    //       if (file && options)
+    //         options.onProgress({
+    //           percent: (100 * conn.down.total) / file.size,
+    //         });
+    //       return readDelay(0);
+    //     },
+    //   })
+    // );
+    // demuxer.videoReadable.pipeTo(
+    //   new WritableStream({
+    //     write(chunk: EncodedVideoChunkInit) {
+    //       display.videoTS = chunk.timestamp;
+    //       display.videoSize = chunk.data.byteLength;
 
-          // console.log(`JS Chunk ${chunk.data.byteLength}  ${chunk.data[5]} ${chunk.data[6]} ${chunk.data[7]} ${chunk.data[8]} ${chunk.data[9]}`)
+    //       // console.log(`JS Chunk ${chunk.data.byteLength}  ${chunk.data[5]} ${chunk.data[6]} ${chunk.data[7]} ${chunk.data[8]} ${chunk.data[9]}`)
 
-          videoDecoder.decode(chunk);
+    //       videoDecoder.decode(chunk);
 
-          if (file && options)
-            options.onProgress({
-              percent: (100 * conn.down.total) / file.size,
-            });
+    //       if (file && options)
+    //         options.onProgress({
+    //           percent: (100 * conn.down.total) / file.size,
+    //         });
 
-          return readDelay(0);
-        },
-      })
-    );
+    //       return readDelay(0);
+    //     },
+    //   })
+    // );
 
     videoDecoder.on(
       VideoDecoderEvent.VideoCodecInfo,
@@ -191,6 +210,7 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
     );
     videoDecoder.on(VideoDecoderEvent.VideoFrame, (videoFrame: VideoFrame) => {
       display.videoDecodedFrames++;
+      vframs++;
       renderer.writeVideo(videoFrame);
     });
     // videoDecoder.on(VideoDecoderEvent.VideoFrame, (videoFrame: JVideoFrame) => {
@@ -204,19 +224,24 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
     //   });
     // });
 
-    videoDecoder.on(VideoDecoderEvent.Error, (error: ErrorInfo) => {});
-
-    audioDecoder.on(
-      AudioDecoderEvent.AudioCodecInfo,
-      (codecinfo: AudioCodecInfo) => {}
-    );
-
-    audioDecoder.on(AudioDecoderEvent.AudioFrame, (audioFrame: AudioFrame) => {
-      display.audioDecodedFrames++;
-      aframs++;
+    videoDecoder.on(VideoDecoderEvent.Error, (error: Error) => { 
+      console.error(error); 
     });
 
-    audioDecoder.on(AudioDecoderEvent.Error, (error: ErrorInfo) => {});
+    // audioDecoder.on(
+    //   AudioDecoderEvent.AudioCodecInfo,
+    //   (codecinfo: AudioCodecInfo) => { }
+    // );
+
+    // audioDecoder.on(AudioDecoderEvent.AudioFrame, (audioFrame: AudioFrame) => {
+    //   display.audioDecodedFrames++;
+    //   // renderer.writeAudio(new AudioData({
+    //   //   data: audioFrame.data[0],
+    //   // }));
+    // });
+
+    // audioDecoder.on(AudioDecoderEvent.Error, (error: ErrorInfo) => { });
+    await conn.connect();
   } catch (e) {
     if (options) options.onFinish();
     removeMessage();
@@ -282,6 +307,7 @@ function onRemove(options: {
 </script>
 
 <template>
+  <n-select v-model:value="muxType" :options='[{ label: "flv", value: "flv" }, { label: "ps", value: "ps" }]'></n-select>
   <n-upload :custom-request="onUpload" :max="1" @remove="onRemove">
     <n-upload-dragger>
       <div style="margin-bottom: 12px">
@@ -297,11 +323,7 @@ function onRemove(options: {
   </n-upload>
   <n-space justify="end" :wrap-item="false">
     <div style="flex-grow: 1">
-      <n-input
-        v-model:value="url"
-        :input-props="{ type: 'url' }"
-        placeholder="URL"
-      />
+      <n-input v-model:value="url" :input-props="{ type: 'url' }" placeholder="URL" />
     </div>
     <n-button @click="connect()">Connect</n-button>
     <n-button @click="disconnect">Close</n-button>
@@ -333,28 +355,16 @@ function onRemove(options: {
   </n-row>
   <n-row>
     <n-col :span="6">
-      <n-statistic
-        label="视频解码帧率"
-        :value="display.videoDecodedFrameRate"
-      ></n-statistic>
+      <n-statistic label="视频解码帧率" :value="display.videoDecodedFrameRate"></n-statistic>
     </n-col>
     <n-col :span="6">
-      <n-statistic
-        label="视频解码帧数"
-        :value="display.videoDecodedFrames"
-      ></n-statistic>
+      <n-statistic label="视频解码帧数" :value="display.videoDecodedFrames"></n-statistic>
     </n-col>
     <n-col :span="6">
-      <n-statistic
-        label="音频解码帧率"
-        :value="display.audioDecodedFrameRate"
-      ></n-statistic>
+      <n-statistic label="音频解码帧率" :value="display.audioDecodedFrameRate"></n-statistic>
     </n-col>
     <n-col :span="6">
-      <n-statistic
-        label="音频解码帧数"
-        :value="display.audioDecodedFrames"
-      ></n-statistic>
+      <n-statistic label="音频解码帧数" :value="display.audioDecodedFrames"></n-statistic>
     </n-col>
   </n-row>
   <canvas id="bps"></canvas>

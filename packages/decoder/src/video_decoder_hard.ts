@@ -14,18 +14,16 @@ export class VideoDecoderHard extends FSM implements VideoDecoderInterface {
         this.emit(VideoDecoderEvent.VideoFrame, frame);
       },
       error: (err) => {
-        this.close();
         this.emit(VideoDecoderEvent.Error, err);
+        this.close();
       },
     });
   }
   @ChangeState("initialized", "configured")
   configure(config: VideoDecoderConfig): void {
     this.config = config;
-    this.decoder.configure({
-      codec: config.codec,
-      description: config.extraData,
-    });
+    console.log("configure", config);
+    this.decoder.configure(config);
   }
   @Includes("configured")
   decode(packet: EncodedVideoChunkInit): void {

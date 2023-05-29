@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, reactive, ref, watchEffect } from "vue";
-import { DemuxEvent, FlvDemuxer } from "../../../packages/demuxer/src";
+import { DemuxEvent, FlvDemuxer } from "jv4-demuxer/src";
 import {
   MessageReactive,
   NButton,
@@ -21,7 +21,7 @@ import {
 import {
   ConnectionState,
   ConnectionEvent,
-} from "../../../packages/conn/src/types";
+} from "jv4-connection/src/types";
 import { TimelineDataSeries, TimelineGraphView } from "webrtc-internals";
 import { ArchiveOutline as ArchiveIcon } from "@vicons/ionicons5";
 import {
@@ -33,19 +33,19 @@ import {
   AudioCodecInfo,
   AudioFrame,
   AudioPacket,
-} from "../../../packages/decoder/src/types";
+} from "jv4-decoder/src/types";
 import {
   FileConnection,
   getURLType,
   WebSocketConnection,
   HttpConnection,
-} from "../../../packages/conn/src";
+} from "jv4-connection/src";
 import {
   VideoDecoderHard,
   AudioDecoderHard,
   AudioDecoderSoft,
-} from "../../../packages/decoder/src";
-import { Connection } from "../../../packages/conn/src/base";
+} from "jv4-decoder/src";
+import { Connection } from "jv4-connection/src/base";
 
 const message = useMessage();
 const url = ref("");
@@ -201,11 +201,11 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
       vframs++;
     });
 
-    videoDecoder.on(VideoDecoderEvent.Error, (error: ErrorInfo) => {});
+    videoDecoder.on(VideoDecoderEvent.Error, (error: ErrorInfo) => { });
 
     audioDecoder.on(
       AudioDecoderEvent.AudioCodecInfo,
-      (codecinfo: AudioCodecInfo) => {}
+      (codecinfo: AudioCodecInfo) => { }
     );
 
     audioDecoder.on(AudioDecoderEvent.AudioFrame, (AudioFrame: AudioFrame) => {
@@ -213,7 +213,7 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
       aframs++;
     });
 
-    audioDecoder.on(AudioDecoderEvent.Error, (error: ErrorInfo) => {});
+    audioDecoder.on(AudioDecoderEvent.Error, (error: ErrorInfo) => { });
   } catch (e) {
     if (options) options.onFinish();
     removeMessage();
@@ -293,11 +293,7 @@ function onRemove(options: {
   </n-upload>
   <n-space justify="end" :wrap-item="false">
     <div style="flex-grow: 1">
-      <n-input
-        v-model:value="url"
-        :input-props="{ type: 'url' }"
-        placeholder="URL"
-      />
+      <n-input v-model:value="url" :input-props="{ type: 'url' }" placeholder="URL" />
     </div>
     <n-button @click="connect">Connect</n-button>
     <n-button @click="disconnect">Close</n-button>
@@ -328,28 +324,16 @@ function onRemove(options: {
   </n-row>
   <n-row>
     <n-col :span="6">
-      <n-statistic
-        label="视频解码帧率"
-        :value="display.videoDecodedFrameRate"
-      ></n-statistic>
+      <n-statistic label="视频解码帧率" :value="display.videoDecodedFrameRate"></n-statistic>
     </n-col>
     <n-col :span="6">
-      <n-statistic
-        label="视频解码帧数"
-        :value="display.videoDecodedFrames"
-      ></n-statistic>
+      <n-statistic label="视频解码帧数" :value="display.videoDecodedFrames"></n-statistic>
     </n-col>
     <n-col :span="6">
-      <n-statistic
-        label="音频解码帧率"
-        :value="display.audioDecodedFrameRate"
-      ></n-statistic>
+      <n-statistic label="音频解码帧率" :value="display.audioDecodedFrameRate"></n-statistic>
     </n-col>
     <n-col :span="6">
-      <n-statistic
-        label="音频解码帧数"
-        :value="display.audioDecodedFrames"
-      ></n-statistic>
+      <n-statistic label="音频解码帧数" :value="display.audioDecodedFrames"></n-statistic>
     </n-col>
   </n-row>
   <canvas id="bps"></canvas>

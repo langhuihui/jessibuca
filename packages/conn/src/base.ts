@@ -54,7 +54,7 @@ export abstract class Connection extends FSM {
   down = new TransmissionStatistics();
   underlyingSink: UnderlyingSink<Uint8Array> = {
     write: async (chunk) => {
-      this.down.add(chunk.length);
+      this.down.add(chunk.length || chunk.byteLength);
       return this.oput?.write(chunk);
     },
   };
@@ -76,6 +76,7 @@ export abstract class Connection extends FSM {
   async connect() {
     this.abortCtrl = new AbortController();
     console.log(`connected: ${this.url}`);
+    console.time(this.url);
     this.onConnected(await this._connect());
   }
   // 真正实现连接的函数

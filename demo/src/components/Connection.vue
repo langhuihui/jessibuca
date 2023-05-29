@@ -5,7 +5,7 @@ import {
   getURLType,
   HttpConnection,
   WebSocketConnection,
-} from "../../../packages/conn/src";
+} from "jv4-connection/src";
 import {
   MessageReactive,
   NButton,
@@ -26,11 +26,11 @@ import {
 
 import { TimelineDataSeries, TimelineGraphView } from "webrtc-internals";
 import { ArchiveOutline as ArchiveIcon } from "@vicons/ionicons5";
-import { Connection } from "../../../packages/conn/src/base";
+import { Connection } from "jv4-connection/src/base";
 import {
   ConnectionEvent,
   ConnectionState,
-} from "../../../packages/conn/src/types";
+} from "jv4-connection/src/types";
 
 const message = useMessage();
 const url = ref("");
@@ -164,11 +164,7 @@ function onRemove(options: {
   </n-upload>
   <n-space justify="end" :wrap-item="false">
     <div style="flex-grow: 1">
-      <n-input
-        v-model:value="url"
-        :input-props="{ type: 'url' }"
-        placeholder="URL"
-      />
+      <n-input v-model:value="url" :input-props="{ type: 'url' }" placeholder="URL" />
     </div>
     <n-button @click="connect()">Connect</n-button>
     <n-button @click="close">Close</n-button>

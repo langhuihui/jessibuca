@@ -12,7 +12,11 @@
     "@vicons/ionicons5": "^0.12.0",
     "naive-ui": "^2.31.0",
     "vue": "^3.2.37",
-    "webrtc-internals": "^0.0.8"
+    "webrtc-internals": "^0.0.8",
+    "jv4-connection" :"workspace:*",
+    "jv4-decoder":"workspace:*",
+    "jv4-demuxer":"workspace:*",
+    "jv4-renderer":"workspace:*"
   },
   "devDependencies": {
     "@types/dom-webcodecs": "^0.1.4",
