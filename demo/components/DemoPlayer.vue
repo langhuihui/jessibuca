@@ -120,6 +120,7 @@
 </template>
 <script>
 import {VERSION} from "./version";
+
 function isMobile() {
     return (/iphone|ipad|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));
 }
@@ -127,6 +128,7 @@ function isMobile() {
 function isPad() {
     return (/ipad|android(?!.*mobile)|tablet|kindle|silk/i.test(window.navigator.userAgent.toLowerCase()));
 }
+
 export default {
     name: "DemoPlayer",
     jessibuca: null,
@@ -151,16 +153,15 @@ export default {
             useMSE: false,
             useOffscreen: false,
             recording: false,
-            isDebug:false,
+            isDebug: false,
             recordType: 'webm',
             scale: 0,
             vConsole: null,
             controlAutoHide: true,
-
         };
     },
     mounted() {
-        if((isMobile() || isPad()) && window.VConsole){
+        if ((isMobile() || isPad()) && window.VConsole) {
             this.vConsole = new window.VConsole();
         }
         this.version = VERSION === '#VERSION#' ? '' : VERSION;
@@ -205,7 +206,7 @@ export default {
                         forceNoOffscreen: !this.useOffscreen,
                         isNotMute: true,
                         timeout: 10,
-                        recordType:'mp4'
+                        recordType: 'mp4'
                     },
                     options
                 )
@@ -335,12 +336,12 @@ export default {
         },
 
         pause() {
-            this.$options.jessibuca.pause().then(()=>{
+            this.$options.jessibuca.pause().then(() => {
                 console.log('pause success');
                 this.playing = false;
                 this.err = "";
                 this.performance = "";
-            }).catch((err)=>{
+            }).catch((err) => {
                 console.log('pause error', err);
             });
 
@@ -491,7 +492,6 @@ export default {
 .option span {
     color: white;
 }
-
 
 
 @media (max-width: 720px) {

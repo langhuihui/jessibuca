@@ -52,13 +52,13 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 | 支持移动端设备息屏播放音频                               | 不支持    | 支持 |
 | 设置播放缓冲区时长                                   | 支持    | 支持 |
 | 创建多个播放实例                                    | 支持    | 支持 |
-| http-flv协议流                                 | 支持    | 支持 |
-| websocket-flv协议流                            | 支持    | 支持 |
-| websocket-raw(M7S)协议流                       | 支持    | 支持 |
-| Hls协议流(H264)                                | 不支持    | 支持 |
-| WebTransport协议流                             | 不支持    | 支持 |
-| WebRTC协议流                                   | 不支持    | 支持 |
-| 加密流（M7S）                                    | 不支持    | 支持 |
+| http-flv协议流(H264/H265)                               | 支持    | 支持 |
+| websocket-flv协议流(H264/H265)                        | 支持    | 支持 |
+| websocket-raw(M7S)协议流(H264/H265)                        | 支持    | 支持 |
+| Hls协议流(H264/H265)                           | 不支持    | 支持 |
+| WebTransport协议流(H264/H265)                              | 不支持    | 支持 |
+| WebRTC协议流(H264)                                     | 不支持    | 支持 |
+| 加密流（M7S）(H264/H265)                                      | 不支持    | 支持 |
 | 动态分辨率                                       | 不支持    | 支持 |
 | 显示模式（填充，等比，等比缩放）                            | 支持    | 支持 |
 | 画面镜像（水平，垂直）                                 | 不支持    | 支持 |
@@ -121,14 +121,22 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 
 包含的文件有：
 
+### 音视频播放器
 - jessibuca-pro-demo.js(script标签引入)
 - jessibuca-pro-multi-demo.js(script标签引入)
 - decoder-pro.js (初始化参数decoder参数配置)
 - decoder-pro.wasm(胶水文件)
 - decoder-pro-simd.js (初始化参数decoder参数配置)
 - decoder-pro-simd.wasm(胶水文件)
+- decoder-pro-audio.js(初始化参数decoder参数配置)（硬解码的时候用到的）
+- decoder-pro-audio.wasm(胶水文件)
 
 > `jessibuca-pro-demo.js`与`jessibuca-pro-multi-demo.js`的区别是，前者是单路播放，后者是支持多路播放。 两者只需要引入一个就行了，不需要同时引入。
+
+### 音频播放器
+- jessibuca-pro-audio-payer-demo.js(script标签引入)
+- decoder-pro-audio-player.js(初始化参数decoder参数配置)
+- decoder-pro-audio.wasm(胶水文件)
 
 ## 直播协议支持
 
@@ -144,7 +152,7 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 
 
 
-> HLS协议目前只支持H264编码格式，其他协议都支持H264和H265编码格式。
+> 协议都支持H264和H265编码格式。
 
 
 ## 视频编码格式支持
