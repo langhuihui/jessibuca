@@ -40,7 +40,7 @@ sidebar: false
 
 > 如果需要超低延迟(300ms以内)，可以通过单独的测试页面， [http地址](http://jessibuca.monibuca.com/pro/demo-low-delay.html),[https地址](https://jessibuca.com/pro/demo-low-delay.html)
 
-- 支持6种格式：(live/test为streamPath)
+- 支持7种格式：(live/test为streamPath)
 1. ws-raw 即ws://host-name:port/jessica/live/test (该协议只对接了[monibuca服务器](https://monibuca.com),其他服务器需要额外对接)
 2. ws-flv 即ws://host-name:port/jessica/live/test.flv（chrome下ip会报安全错误，建议域名形式访问，检查下端口范围chrome浏览器是否允许，chrome会默认禁用很多端口）
 3. http-flv 即http://host-name:port/hdl/live/test.flv
