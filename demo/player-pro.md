@@ -47,6 +47,7 @@ sidebar: false
 4. Hls 即http://host-name:port/hls/live/test.m3u8
 5. WebTransport 即wt://host-name:port/play/live/test (该协议只对接了[monibuca服务器](https://monibuca.com),其他服务器需要额外对接)
 6. Webrtc 即webrtc://host-name:port/webrtc/play/live/test (该协议只对接了[monibuca服务器](https://monibuca.com),其他服务器需要额外对接，仅支持https://或者http://localhost环境)
+7. fmp4 即http://host-name:port/your-path/live/test.fmp4
 - 注意http协议会有跨域问题，需要设置cors头
 - 协议同时支持https、wss
 - 同时支持H264和H265编码格式
