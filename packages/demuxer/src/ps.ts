@@ -1,4 +1,3 @@
-import OPut from "oput";
 import { BaseDemuxer, DemuxEvent, DemuxMode } from "./base";
 import { adtsToAsc } from './util';
 const StartCodePS = 0x000001ba;
@@ -22,15 +21,16 @@ export class PSDemuxer extends BaseDemuxer {
     throw new Error("Method not implemented.");
   }
   *demux(): Generator<number | Uint8Array, void, Uint8Array> {
-    let keySent = false;
     let startTime = 0;
     const tmp8 = new Uint8Array(4);
     const dv = new DataView(tmp8.buffer);
-    const videoBuffer = new OPut();
+    const videoBuffer = [];
+    let videoBufferSize = 0;
     let currentPTS = 0;
     while (true) {
       yield tmp8;
       const code = dv.getUint32(0);
+      console.log(code.toString(16));
       switch (code) {
         case StartCodePS:
           yield 9;
@@ -55,30 +55,49 @@ export class PSDemuxer extends BaseDemuxer {
           const vpesl = dv.getUint16(0);
           const vpes = yield vpesl;
           const annexb = this.parsePESPacket(vpes);
+          console.log(vpesl, annexb.length);
+          // console.log("StartCodeVideo", annexb[4] & 0x0f);
           if (!startTime) {
             if ((annexb[4] & 0x0f) == 7) {
               startTime = Date.now();
               currentPTS = this.pts;
-              videoBuffer.write(annexb);
+            } else {
+              break;
             }
-            break;
           }
           if (currentPTS == this.pts) {
-            videoBuffer.write(annexb);
+            // console.log("append", annexb[4] & 0x0f);
+            videoBufferSize += annexb.length;
+            videoBuffer.push(annexb.slice());
+            // videoBuffer.write(annexb);
             break;
           }
-          if (videoBuffer.buffer?.length) {
+          // if (videoBuffer.buffer?.length) {
+          //   this.gotVideo?.({
+          //     type: (videoBuffer.buffer[4] & 0x0f) == 1 ? "delta" : "key",
+          //     data: videoBuffer.buffer!,
+          //     timestamp: (Date.now() - startTime) * 1000,
+          //   });
+          //   videoBuffer.buffer = undefined;
+          // }
+          if (videoBuffer.length && currentPTS != this.pts) {
+            let offset = 0;
             this.gotVideo?.({
-              type: "key",
-              data: videoBuffer.buffer!,
+              type: (videoBuffer[0][4] & 0x0f) == 1 ? "delta" : "key",
+              data: videoBuffer.length == 1 ? videoBuffer[0] : videoBuffer.reduce((a, b) => {
+                a.subarray(offset).set(b);
+                offset += b.length;
+                return a;
+              }, new Uint8Array(videoBufferSize)),
               timestamp: (Date.now() - startTime) * 1000,
             });
-            videoBuffer.buffer = undefined;
-            keySent = true;
+            videoBuffer.length = 0;
           }
-          videoBuffer.write(annexb);
+          // console.log("append", annexb[4] & 0x0f);
+          videoBufferSize += annexb.length;
+          videoBuffer.push(annexb.slice());
+          // videoBuffer.write(annexb);
           currentPTS = this.pts;
-          console.log(annexb[4] & 0x0f);
           break;
         case StartCodeAudio:
           yield tmp8.subarray(0, 2);
@@ -109,6 +128,8 @@ export class PSDemuxer extends BaseDemuxer {
           break;
         case MEPGProgramEndCode:
           return;
+        default:
+          debugger;
       }
     }
   }
@@ -127,27 +148,25 @@ export class PSDemuxer extends BaseDemuxer {
     }
 
     const extraData = payload.subarray(3, 3 + pesHeaderDataLen);
-
     if (ptsFlag && extraData.length > 4) {
       this.pts =
-        ((extraData[0] & 0b0000_1110) << 29) +
-        (extraData[1] << 22) +
-        ((extraData[2] & 0b1111_1110) << 14) +
-        (extraData[3] << 7) +
+        ((extraData[0] & 0b0000_1110) << 29) |
+        (extraData[1] << 22) |
+        ((extraData[2] & 0b1111_1110) << 14) |
+        (extraData[3] << 7) |
         (extraData[4] >> 1);
 
       if (dtsFlag && extraData.length > 9) {
         this.dts =
-          ((extraData[5] & 0b0000_1110) << 29) +
-          (extraData[6] << 22) +
-          ((extraData[7] & 0b1111_1110) << 14) +
-          (extraData[8] << 7) +
+          ((extraData[5] & 0b0000_1110) << 29) |
+          (extraData[6] << 22) |
+          ((extraData[7] & 0b1111_1110) << 14) |
+          (extraData[8] << 7) |
           (extraData[9] >> 1);
       } else {
         this.dts = this.pts;
       }
     }
-    // console.log(this.pts, this.dts);
     return payload.subarray(3 + pesHeaderDataLen);
   }
   decProgramStreamMap(psm: Uint8Array) {

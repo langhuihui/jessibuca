@@ -10,13 +10,14 @@
   },
   "dependencies": {
     "@vicons/ionicons5": "^0.12.0",
+    "browser-fs-access": "^0.34.1",
+    "jv4-connection": "workspace:*",
+    "jv4-decoder": "workspace:*",
+    "jv4-demuxer": "workspace:*",
+    "jv4-renderer": "workspace:*",
     "naive-ui": "^2.31.0",
     "vue": "^3.2.37",
-    "webrtc-internals": "^0.0.8",
-    "jv4-connection" :"workspace:*",
-    "jv4-decoder":"workspace:*",
-    "jv4-demuxer":"workspace:*",
-    "jv4-renderer":"workspace:*"
+    "webrtc-internals": "^0.0.8"
   },
   "devDependencies": {
     "@types/dom-webcodecs": "^0.1.4",

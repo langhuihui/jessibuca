@@ -16,6 +16,9 @@ importers:
       '@vicons/ionicons5':
         specifier: ^0.12.0
         version: 0.12.0
+      browser-fs-access:
+        specifier: ^0.34.1
+        version: 0.34.1
       jv4-connection:
         specifier: workspace:*
         version: link:../packages/conn
@@ -96,9 +99,6 @@ importers:
       eventemitter3:
         specifier: ^4.0.7
         version: 4.0.7
-      h264-interp-utils:
-        specifier: ^1.1.1
-        version: 1.1.1
       oput:
         specifier: ^1.2.2
         version: 1.2.2
@@ -430,6 +430,10 @@ packages:
       fill-range: 7.0.1
     dev: true
 
+  /browser-fs-access@0.34.1:
+    resolution: {integrity: sha512-HPaRf2yimp8kWSuWJXc8Mi78dPbDzfduA+Gyq14H4jlMvd6XNfIRm36Y2yRLaa4x0gwcGuepj4zf14oiTlxrxQ==}
+    dev: false
+
   /chokidar@3.5.3:
     resolution: {integrity: sha512-Dr3sfKRP6oTcjf2JmUmFJfeVMvXBdegxB0iVQ5eb2V10uFJUCAS8OByZdVAyVb8xXNz3GjjTgj9kLWsZTqE6kw==}
     engines: {node: '>= 8.10.0'}
@@ -747,10 +751,6 @@ packages:
     dependencies:
       is-glob: 4.0.3
     dev: true
-
-  /h264-interp-utils@1.1.1:
-    resolution: {integrity: sha512-f+iHDb2T3b3boECiAvp0+5ilCWa1QqQG+kvfw8Anf0QL35h3CXkcolwSsYoYiQFWUD8xm7Lk4zZQ+M2/F6+HEA==}
-    dev: false
 
   /has@1.0.3:
     resolution: {integrity: sha512-f2dvO0VU6Oej7RkWJGrehjbzMAjFp5/VKPp5tTpWIV4JHHZK1/BxbFRtf/siA2SWTe09caDmVtYYzWEIbBS4zw==}

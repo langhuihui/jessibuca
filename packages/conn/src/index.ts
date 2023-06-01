@@ -15,9 +15,6 @@ export function getURLType(url: string | File) {
   if (url instanceof File) {
     return "file";
   }
-  if (url.endsWith(".flv")) {
-    return "flv";
-  }
   if (url.startsWith(Protocol.WS) || url.startsWith(Protocol.WSS)) {
     return 'ws';
   } else if (url.startsWith(Protocol.HTTP) || url.startsWith(Protocol.HTTPS)) {

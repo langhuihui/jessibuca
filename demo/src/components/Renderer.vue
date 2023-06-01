@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, reactive, ref } from "vue";
+import { onMounted, onUnmounted, reactive, ref, watchEffect } from "vue";
 import {
   MessageReactive,
   NButton,
@@ -41,11 +41,14 @@ import {
 import { Connection } from "jv4-connection/src/base";
 import {
   VideoDecoderHard,
+  VideoDecoderSoft,
+  VideoDecoderSoftSIMD,
   AudioDecoderSoft,
 } from "jv4-decoder/src";
 import { FlvDemuxer, DemuxEvent, PSDemuxer } from "jv4-demuxer/src";
 import { WebCodecsVideoRenderer } from "jv4-renderer/src";
 import { DemuxMode } from "jv4-demuxer/src/base";
+import { fileSave, fileOpen } from 'browser-fs-access';
 const message = useMessage();
 const url = ref("ws://localhost:8080/ps/live/test");
 let messageReactive: MessageReactive | null = null;
@@ -56,6 +59,8 @@ const removeMessage = () => {
   }
 };
 const muxType = ref('ps');
+const dump = ref(false);
+const stopDump = ref(() => { });
 let conn: Connection;
 const display = reactive({
   audioTS: 0,
@@ -70,16 +75,40 @@ const display = reactive({
 
 let vframs = 0;
 let aframs = 0;
-
+watchEffect(() => {
+  if (!dump.value) {
+    stopDump.value();
+    return;
+  }
+});
 function readDelay(t: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, t));
 }
 async function connect(file?: File, options?: UploadCustomRequestOptions) {
   try {
+    const cache: Uint8Array[] = [];
+    const p = new Promise<Blob>((resolve) => {
+      stopDump.value = () => {
+        resolve(new Blob(cache));
+      };
+    });
+    const dumpFile = dump.value ? fileSave(p) : null;
     console.log(`connect ${file} url ${url.value}`);
     if (file) {
       conn = new FileConnection(file);
+      console.log(file.name, file.type);
+      switch (file.type) {
+        case "video/mp4":
+          muxType.value = 'mp4';
+          break;
+        case "video/x-flv":
+          muxType.value = 'flv';
+          break;
+      }
     } else {
+      if (url.value.endsWith(".flv")) {
+        muxType.value = "flv";
+      }
       switch (getURLType(url.value)) {
         case "ws":
           conn = new WebSocketConnection(url.value);
@@ -110,7 +139,8 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
       message.success(ConnectionState.RECONNECTED);
     });
 
-    const videoDecoder = new VideoDecoderHard();
+    // const videoDecoder = new VideoDecoderHard();
+    const videoDecoder = new VideoDecoderSoftSIMD();
     await videoDecoder.initialize();
 
     // const audioDecoder = new AudioDecoderSoft();
@@ -160,12 +190,15 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
       display.videoSize = data.data.byteLength;
       if (videoDecoder.config) {
         try {
+          if (dumpFile) {
+            cache.push(data.data as Uint8Array);
+          }
           videoDecoder.decode(data);
         } catch (err) {
           console.error(err);
         }
       }
-      
+
     };
     // demuxer.audioReadable.pipeTo(
     //   new WritableStream({
@@ -224,8 +257,8 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
     //   });
     // });
 
-    videoDecoder.on(VideoDecoderEvent.Error, (error: Error) => { 
-      console.error(error); 
+    videoDecoder.on(VideoDecoderEvent.Error, (error: Error) => {
+      console.error(error);
     });
 
     // audioDecoder.on(
@@ -308,6 +341,7 @@ function onRemove(options: {
 
 <template>
   <n-select v-model:value="muxType" :options='[{ label: "flv", value: "flv" }, { label: "ps", value: "ps" }]'></n-select>
+  <n-switch v-model:value="dump">dump</n-switch>
   <n-upload :custom-request="onUpload" :max="1" @remove="onRemove">
     <n-upload-dragger>
       <div style="margin-bottom: 12px">
