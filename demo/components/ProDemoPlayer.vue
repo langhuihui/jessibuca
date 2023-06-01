@@ -89,7 +89,7 @@
             <div class="input">
                 <div>输入URL：</div>
                 <input
-                    placeholder="支持 hls/ws-raw/ws-flv/http-flv协议"
+                    placeholder="支持 hls/ws-raw/ws-flv/http-flv/fmp4协议"
                     type="input"
                     autocomplete="on"
                     v-model="playUrl"
@@ -117,6 +117,11 @@
                     v-model="isFlv"
                     @change="restartPlay()"
                 /><span>设置Flv格式</span>
+                <input
+                    type="checkbox"
+                    v-model="isFmp4"
+                    @change="restartPlay()"
+                /><span>设置Fmp4格式</span>
                 <input
                     type="checkbox"
                     v-model="hiddenAutoPause"
@@ -541,6 +546,7 @@ export default {
             playbackRate: 1,
             playModel: 'video+audio',
             isFlv: true,
+            isFmp4: false,
             hiddenAutoPause: false,
             hasVideo: true,
             hasAudio: true,
@@ -640,6 +646,7 @@ export default {
                             },
                         ],
                         isFlv: this.isFlv,
+                        isFmp4: this.isFmp4,
                         hiddenAutoPause: this.hiddenAutoPause,
                         forceNoOffscreen: !this.useOffscreen,
                         // isNotMute: true,
@@ -690,8 +697,8 @@ export default {
                         recordType: this.recordType,
                         ptzZoomShow: true,
                         ptzMoreArrow: true,
-                        ptzApertureShow:true,
-                        ptzFocusShow:true,
+                        ptzApertureShow: true,
+                        ptzFocusShow: true,
                         controlHtml: '<div style="color: red">这个是自定义HTML</div>',
                         useWebGPU: this.canvasRenderType === 'webgpu',
                     },
@@ -1090,8 +1097,13 @@ export default {
                 this.useWCS = false;
             } else if (type === 'isNakedFlow') {
                 this.isFlv = false;
+                this.isFmp4 = false;
             } else if (type === 'isFlv') {
                 this.isNakedFlow = false;
+                this.isFmp4 = false;
+            } else if (type === 'isFmp4') {
+                this.isNakedFlow = false;
+                this.isFlv = false;
             }
 
             this.replay();
