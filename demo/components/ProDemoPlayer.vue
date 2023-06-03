@@ -84,7 +84,7 @@
             <div class="input">
                 当前浏览器：
                 <span v-if="supportWebgpu" style="color: green;">支持webgpu渲染</span>
-                <span v-else style="color: red;">不支持webgpu渲染,会自动切换成webgl渲染</span>（适用于wasm解码+canvas渲染）
+                <span v-else style="color: red;">不支持webgpu渲染,会自动切换成webgl渲染</span>（适用于wasm(simd)解码+canvas渲染）
             </div>
             <div class="input">
                 <div>输入URL：</div>
