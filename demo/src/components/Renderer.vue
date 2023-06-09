@@ -59,7 +59,9 @@ const removeMessage = () => {
   }
 };
 const muxType = ref('ps');
+const decoderv = ref('soft');
 const dump = ref(false);
+const mode = ref(DemuxMode.PUSH);
 const stopDump = ref(() => { });
 let conn: Connection;
 const display = reactive({
@@ -95,6 +97,7 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
     const dumpFile = dump.value ? fileSave(p) : null;
     console.log(`connect ${file} url ${url.value}`);
     if (file) {
+      mode.value = DemuxMode.PULL;
       conn = new FileConnection(file);
       console.log(file.name, file.type);
       switch (file.type) {
@@ -139,14 +142,15 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
       message.success(ConnectionState.RECONNECTED);
     });
 
-    // const videoDecoder = new VideoDecoderHard();
-    const videoDecoder = new VideoDecoderSoftSIMD();
+    const videoDecoder = new { soft: VideoDecoderSoft, simd: VideoDecoderSoftSIMD, webcodecs: VideoDecoderHard }[decoderv.value]();
     await videoDecoder.initialize();
 
-    // const audioDecoder = new AudioDecoderSoft();
-    // await audioDecoder.initialize();
-
-    const demuxer = muxType.value == 'flv' ? new FlvDemuxer(conn, DemuxMode.PUSH) : new PSDemuxer(conn, DemuxMode.PUSH);
+    const audioDecoder = new AudioDecoderSoft();
+    await audioDecoder.initialize();
+    if (mode.value === DemuxMode.PULL) {
+      await conn.connect();
+    }
+    const demuxer = muxType.value == 'flv' ? new FlvDemuxer(conn, mode.value) : new PSDemuxer(conn, mode.value);
     const renderer = new WebCodecsVideoRenderer(
       document.getElementById("video") as HTMLVideoElement
     );
@@ -198,42 +202,7 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
           console.error(err);
         }
       }
-
     };
-    // demuxer.audioReadable.pipeTo(
-    //   new WritableStream({
-    //     write(chunk: EncodedAudioChunkInit) {
-    //       display.audioTS = chunk.timestamp;
-    //       display.audioSize = chunk.data.byteLength;
-
-    //       audioDecoder.decode(chunk);
-    //       if (file && options)
-    //         options.onProgress({
-    //           percent: (100 * conn.down.total) / file.size,
-    //         });
-    //       return readDelay(0);
-    //     },
-    //   })
-    // );
-    // demuxer.videoReadable.pipeTo(
-    //   new WritableStream({
-    //     write(chunk: EncodedVideoChunkInit) {
-    //       display.videoTS = chunk.timestamp;
-    //       display.videoSize = chunk.data.byteLength;
-
-    //       // console.log(`JS Chunk ${chunk.data.byteLength}  ${chunk.data[5]} ${chunk.data[6]} ${chunk.data[7]} ${chunk.data[8]} ${chunk.data[9]}`)
-
-    //       videoDecoder.decode(chunk);
-
-    //       if (file && options)
-    //         options.onProgress({
-    //           percent: (100 * conn.down.total) / file.size,
-    //         });
-
-    //       return readDelay(0);
-    //     },
-    //   })
-    // );
 
     videoDecoder.on(
       VideoDecoderEvent.VideoCodecInfo,
@@ -274,7 +243,45 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
     // });
 
     // audioDecoder.on(AudioDecoderEvent.Error, (error: ErrorInfo) => { });
-    await conn.connect();
+
+    if (mode.value == DemuxMode.PULL) {
+      demuxer.audioReadable.pipeTo(
+        new WritableStream({
+          write(chunk: EncodedAudioChunkInit) {
+            display.audioTS = chunk.timestamp;
+            display.audioSize = chunk.data.byteLength;
+
+            audioDecoder.decode(chunk);
+            if (file && options)
+              options.onProgress({
+                percent: (100 * conn.down.total) / file.size,
+              });
+            return readDelay(0);
+          },
+        })
+      );
+      demuxer.videoReadable.pipeTo(
+        new WritableStream({
+          write(chunk: EncodedVideoChunkInit) {
+            display.videoTS = chunk.timestamp;
+            display.videoSize = chunk.data.byteLength;
+
+            // console.log(`JS Chunk ${chunk.data.byteLength}  ${chunk.data[5]} ${chunk.data[6]} ${chunk.data[7]} ${chunk.data[8]} ${chunk.data[9]}`)
+
+            videoDecoder.decode(chunk);
+
+            if (file && options)
+              options.onProgress({
+                percent: (100 * conn.down.total) / file.size,
+              });
+
+            return readDelay(0);
+          },
+        })
+      );
+    } else {
+      await conn.connect();
+    }
   } catch (e) {
     if (options) options.onFinish();
     removeMessage();
@@ -340,8 +347,13 @@ function onRemove(options: {
 </script>
 
 <template>
-  <n-select v-model:value="muxType" :options='[{ label: "flv", value: "flv" }, { label: "ps", value: "ps" }]'></n-select>
-  <n-switch v-model:value="dump">dump</n-switch>
+  <n-space>
+    默认格式<n-select v-model:value="muxType"
+      :options='[{ label: "flv", value: "flv" }, { label: "ps", value: "ps" }]'></n-select>
+    dump<n-switch v-model:value="dump"></n-switch>
+    视频解码器<n-select v-model:value="decoderv"
+      :options='[{ label: "soft", value: "soft" }, { label: "simd", value: "simd" }, { label: "webcodecs", value: "webcodecs" }]'></n-select>
+  </n-space>
   <n-upload :custom-request="onUpload" :max="1" @remove="onRemove">
     <n-upload-dragger>
       <div style="margin-bottom: 12px">
