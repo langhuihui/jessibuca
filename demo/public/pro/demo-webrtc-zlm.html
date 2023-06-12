@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Jessica webrtc for zlm demo</title>
+    <script src="./vconsole.js"></script>
+    <script src="./jessibuca-pro-demo.js"></script>
+    <style>
+        .root {
+            display: flex;
+            place-content: center;
+            margin-top: 3rem;
+        }
+
+        .container-shell {
+            backdrop-filter: blur(5px);
+            background: hsla(0, 0%, 50%, 0.5);
+            padding: 30px 4px 10px 4px;
+            /* border: 2px solid black; */
+            width: auto;
+            position: relative;
+            border-radius: 5px;
+            box-shadow: 0 10px 20px;
+        }
+
+        .container-shell:before {
+            content: "jessibuca webrtc for zlm ";
+            position: absolute;
+            color: darkgray;
+            top: 4px;
+            left: 10px;
+            text-shadow: 1px 1px black;
+        }
+
+        #container {
+            background: rgba(13, 14, 27, 0.7);
+            width: 960px;
+            height: 597px;
+        }
+
+        .input {
+            display: flex;
+            margin-top: 10px;
+            color: white;
+            place-content: stretch;
+        }
+
+        .input2 {
+            bottom: 0px;
+        }
+
+        .input input {
+            flex: auto;
+        }
+
+        .err {
+            position: absolute;
+            top: 40px;
+            left: 10px;
+            color: red;
+        }
+
+        .option {
+            position: absolute;
+            top: 4px;
+            right: 10px;
+            display: flex;
+            place-content: center;
+            font-size: 12px;
+        }
+
+        .option span {
+            color: white;
+        }
+
+        .page {
+            background: url('./bg.jpg');
+            background-repeat: no-repeat;
+            background-position: top;
+        }
+
+        @media (max-width: 720px) {
+            #container {
+                width: 90vw;
+                height: 52.7vw;
+            }
+        }
+    </style>
+</head>
+<body class="page">
+<div class="root">
+    <div class="container-shell">
+        <div id="container"></div>
+
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl"
+                placeholder="将zlm的webrtc播放地址，https:// 修改为 webrtc:// 就可以了"
+                value=""
+            />
+            <button id="play">播放</button>
+            <button id="pause" style="display: none">停止</button>
+        </div>
+        <div class="input" style="line-height: 30px">
+            <button id="destroy">销毁</button>
+            <span class="fps-inner"></span>
+        </div>
+    </div>
+</div>
+
+<script>
+    var $player = document.getElementById('play');
+    var $pause = document.getElementById('pause');
+    var $playHref = document.getElementById('playUrl');
+    var $container = document.getElementById('container');
+    var $destroy = document.getElementById('destroy');
+
+    var showOperateBtns = true; // 是否显示按钮
+    var forceNoOffscreen = true; //
+    var jessibuca = null;
+
+    function isMobile() {
+        return (/iphone|ipad|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));
+    }
+
+    function isPad() {
+        return (/ipad|android(?!.*mobile)|tablet|kindle|silk/i.test(window.navigator.userAgent.toLowerCase()));
+    }
+
+    const useVconsole = isMobile() || isPad()
+
+    if (useVconsole && window.VConsole) {
+        new window.VConsole();
+    }
+
+
+    function create() {
+        jessibuca = new JessibucaPro({
+            container: $container,
+            videoBuffer: Number($videoBuffer.value), // 缓存时长
+            videoBufferDelay: Number($videoBufferDelay.value), // 1000s
+            isResize: false,
+            text: "",
+            loadingText: "加载中",
+            debug: true,
+            debugLevel: "debug",
+            showBandwidth: showOperateBtns, // 显示网速
+            showPerformance: showOperateBtns, // 显示性能
+            operateBtns: {
+                fullscreen: showOperateBtns,
+                screenshot: showOperateBtns,
+                play: showOperateBtns,
+                audio: showOperateBtns,
+                ptz: showOperateBtns,
+                quality: showOperateBtns,
+                performance: showOperateBtns,
+            },
+            heartTimeoutReplayUseLastFrameShow: true,
+            audioEngine: "worklet",
+            isNotMute: false,
+            heartTimeout: 10,
+            isWebrtcForZLM:true
+        },);
+
+
+        jessibuca.on('streamQualityChange', (value) => {
+            console.log('streamQualityChange', value);
+        })
+
+        jessibuca.on('timeUpdate', (value) => {
+            // console.log('timeUpdate', value);
+        })
+
+        jessibuca.on('stats', (stats) => {
+            // console.log('stats', stats);
+            $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
+        })
+
+        jessibuca.on(JessibucaPro.EVENTS.crashLog, (log) => {
+            console.log('crashLog', log)
+        })
+
+
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+        $destroy.style.display = 'none';
+        $fps.textContent = '';
+    }
+
+
+    create();
+
+    function play() {
+        var href = $playHref.value;
+        if (href) {
+            jessibuca.play(href);
+            $player.style.display = 'none';
+            $pause.style.display = 'inline-block';
+            $destroy.style.display = 'inline-block';
+        }
+    }
+
+
+    function replay() {
+        if (jessibuca) {
+            jessibuca.destroy().then(() => {
+                create();
+                play();
+            });
+        } else {
+            create();
+            play();
+        }
+    }
+
+    $replay.addEventListener('click', function () {
+        replay();
+    })
+
+    $player.addEventListener('click', function () {
+        play();
+    }, false)
+
+
+    $pause.addEventListener('click', function () {
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+        $fps.textContent = '';
+        jessibuca.pause();
+    })
+
+    $destroy.addEventListener('click', function () {
+        if (jessibuca) {
+            jessibuca.destroy().then(() => {
+                create();
+            });
+        } else {
+            create();
+        }
+
+    })
+</script>
+
+</body>
+</html>
