@@ -59,6 +59,13 @@ worker地址
 
 需要配置的 `decoder` 参数是： `decoder: '/jessibuca/decoder.js'`
 
+> 如果配置的参数是相对地址，是针对于http地址上面的相对地址。
+
+例如当前页面的是 http://test.com/a/b/c.html
+
+如果new 播放器的时候配置的 `decoder`的参数是相对地址'./decoder.js'，则会去请求 http://test.com/a/b/decoder.js
+
+
 
 ### forceNoOffscreen
 
