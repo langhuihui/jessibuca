@@ -46,19 +46,20 @@ sidebar: false
 3. http(s)-flv 即http://host-name:port/hdl/live/test.flv
 4. Hls 即http://host-name:port/hls/live/test.m3u8 (支持H254/H265)
 5. WebTransport 即wt://host-name:port/play/live/test (该协议只对接了[monibuca服务器](https://monibuca.com),其他服务器需要额外对接)
-6. Webrtc 即webrtc://host-name:port/webrtc/play/live/test (该协议只对接了[monibuca服务器](https://monibuca.com),其他服务器需要额外对接，仅支持https://或者http://localhost环境)
+6. Webrtc 即webrtc://host-name:port/webrtc/play/live/test (支持H254/H265, 仅支持https://或者http://localhost环境)
 7. http(s)-fmp4 即http://host-name:port/your-path/live/test.(f)mp4
 8. ws(s)-fmp4 即ws://host-name:port/your-path/live/test.(f)mp4
-9. http(s)-h264 即http://host-name:port/your-path/live/test.h264
-10. ws(s)-h264 即ws://host-name:port/your-path/live/test.h264
-11. http(s)-h265 即http://host-name:port/your-path/live/test.h265
-12. ws(s)-h265 即ws://host-name:port/your-path/live/test.h265
+9. http(s)-h264 即http://host-name:port/jessica/live/test.h264
+10. ws(s)-h264 即ws://host-name:port/jessica/live/test.h264
+11. http(s)-h265 即http://host-name:port/jessica/live/test.h265
+12. ws(s)-h265 即ws://host-name:port/jessica/live/test.h265
 13. ws(s)-mpeg4 即ws://host-name:port/your-path/live/test.mpeg4
 - 注意http协议会有跨域问题，需要设置cors头
 - 协议同时支持https、wss
 - 同时支持H264和H265编码格式
 - 支持webcodecs硬解码(H264+H265)和MSE硬解码(H264+H265)
 - 支持HLS(H264+H265)软解码、硬解码
+- 支持webrtc(H264+H265(软解码、硬解码))
 
 <Rice/>
 
