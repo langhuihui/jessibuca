@@ -182,6 +182,13 @@
             </select>
         </div>
         <div class="input">
+            <span>是否使用硬解码(https支持)</span>
+            <select id="playbackUseWCS" style="width: 50px">
+                <option value="true">是</option>
+                <option value="false" selected>否</option>
+            </select>
+        </div>
+        <div class="input">
             <div>输入URL：</div>
             <input
                 autocomplete="on"
@@ -236,6 +243,7 @@
     var $isPlaybackPauseClearCache = document.getElementById('isPlaybackPauseClearCache');
     var $uiUsePlaybackPause = document.getElementById('uiUsePlaybackPause');
     var $supportWebgpu = document.getElementById('supportWebgpu');
+    var $playbackUseWCS = document.getElementById('playbackUseWCS');
     var forceNoOffscreen = true; //
     var jessibuca = null;
     var isPlaybackPause = false;
@@ -348,7 +356,8 @@
                     {label: '2倍', value: 2},
                     {label: '4倍', value: 4},
                     {label: '8倍', value: 8},
-                ]
+                ],
+                useWCS: $playbackUseWCS.value === 'true',
             });
         }
         isPlaybackPause = false;
