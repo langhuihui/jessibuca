@@ -347,6 +347,11 @@ Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
 > 可以支持超低延迟300ms以内。
 
 
+测试报告：
+
+[单路](https://jessibuca.com/pro-doc/single.pdf)
+
+[多路](https://jessibuca.com/pro-doc/multi.pdf)
 
 
 
