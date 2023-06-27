@@ -83,12 +83,20 @@
 #### http
 [http://jessibuca.monibuca.com/pro/naked-flow-demo.html](http://jessibuca.monibuca.com/pro/naked-flow-demo.html)
 
-## 加密流(H264/H265)
+## M7S加密流(H264/H265)
 #### https
 [https://jessibuca.com/pro/crypto-demo.html](https://jessibuca.com/pro/crypto-demo.html)
 
 #### http
 [http://jessibuca.monibuca.com/pro/crypto-demo.html](http://jessibuca.monibuca.com/pro/crypto-demo.html)
+
+## SM4加密流(H264/H265)
+#### https
+[https://jessibuca.com/pro/demo-crypto-sm4.html](https://jessibuca.com/pro/demo-crypto-sm4.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-crypto-sm4.html](http://jessibuca.monibuca.com/pro/demo-crypto-sm4.html)
+
 
 
 
