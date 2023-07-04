@@ -91,13 +91,19 @@
 <div class="root">
     <div class="container-shell">
         <div id="container"></div>
-
+        <div class="input">
+            <div>
+                zlm的webrtc 是 http://127.0.0.1/index/api/webrtc?app=live&stream=test&type=play  其中 <span style="color: red">stream=test  'test' </span>就是需要替换的id
+                <br>
+                <span style="color: red">注意：zlm的webrtc播放地址，https:// 修改为 webrtc:// 就可以了</span>
+            </div>
+        </div>
         <div class="input">
             <div>输入URL：</div>
             <input
                 autocomplete="on"
                 id="playUrl"
-                placeholder="将zlm的webrtc播放地址，https:// 修改为 webrtc:// 就可以了"
+                placeholder="将zlm的webrtc播放地址，https:// 修改为 webrtc:// 就可以了 例如：webrtc://127.0.0.1/index/api/webrtc?app=live&stream=test&type=play"
                 value=""
             />
             <button id="play">播放</button>
@@ -139,8 +145,6 @@
     function create() {
         jessibuca = new JessibucaPro({
             container: $container,
-            videoBuffer: Number($videoBuffer.value), // 缓存时长
-            videoBufferDelay: Number($videoBufferDelay.value), // 1000s
             isResize: false,
             text: "",
             loadingText: "加载中",
@@ -175,7 +179,6 @@
 
         jessibuca.on('stats', (stats) => {
             // console.log('stats', stats);
-            $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
         })
 
         jessibuca.on(JessibucaPro.EVENTS.crashLog, (log) => {
@@ -186,7 +189,6 @@
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
         $destroy.style.display = 'none';
-        $fps.textContent = '';
     }
 
 
@@ -215,9 +217,6 @@
         }
     }
 
-    $replay.addEventListener('click', function () {
-        replay();
-    })
 
     $player.addEventListener('click', function () {
         play();
@@ -227,7 +226,6 @@
     $pause.addEventListener('click', function () {
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
-        $fps.textContent = '';
         jessibuca.pause();
     })
 
