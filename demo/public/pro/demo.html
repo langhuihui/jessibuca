@@ -96,8 +96,8 @@
                 当前浏览器：
                 <span id="mseSupport264" style="color: green;display: none">支持MSE H264解码；</span>
                 <span id="mseSupport" style="color: green;display: none">支持MSE H265解码；</span>
-                <span id="mseNotSupport" style="color: red;display: none">不支持MSE H264解码；</span>
-                <span id="mseNotSupport264"
+                <span id="mseNotSupport264" style="color: red;display: none">不支持MSE H264解码；</span>
+                <span id="mseNotSupport"
                       style="color: red;display: none">不支持MSE H265解码,会自动切换成wasm解码；</span>
             </div>
         </div>
@@ -141,6 +141,11 @@
                 <input placeholder="单位：秒" type="text" id="videoBuffer" style="width: 50px" value="0.2">秒
                 <span>缓存延迟(延迟超过会触发丢帧)：</span>
                 <input placeholder="单位：秒" type="text" id="videoBufferDelay" style="width: 50px" value="1">秒
+                <span>渲染组件</span>
+                <select id="renderDom">
+                    <option value="canvas">canvas</option>
+                    <option value="video" selected>video</option>
+                </select>
                 <button id="replay">重播</button>
             </div>
         </div>
@@ -314,6 +319,7 @@
     var $videoBufferDelay = document.getElementById('videoBufferDelay');
     var $replay = document.getElementById('replay');
     var $fps = document.querySelector('.fps-inner');
+    var $renderDom = document.getElementById('renderDom')
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -347,6 +353,8 @@
             useMSE: $useMSE.checked === true,
             useSIMD: $useSIMD.checked === true,
             useWCS: $useWCS.checked === true,
+            useVideoRender: $renderDom.value === 'video',
+            useCanvasRender: $renderDom.value === 'canvas',
             showBandwidth: showOperateBtns, // 显示网速
             showPerformance: showOperateBtns, // 显示性能
             operateBtns: {
