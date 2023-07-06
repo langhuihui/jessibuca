@@ -1,34 +1,48 @@
 import EventEmitter from "eventemitter3";
 import {
-  AudioDecoderConfig,
   AudioDecoderInterface,
-  AudioPacket,
-  DecoderState,
+  AudioDecoderEvent,
 } from "./types";
+import { ChangeState, FSM, Includes } from "afsm";
 
 export class AudioDecoderHard
   extends EventEmitter
   implements AudioDecoderInterface
 {
-  state(): DecoderState {
-    throw new Error("Method not implemented.");
+  decoder!: AudioDecoder;
+  config?: AudioDecoderConfig;
+  @ChangeState([FSM.INIT, "closed"], "initialized")
+  async initialize() {
+    this.decoder = new AudioDecoder({
+      output: (frame) => {
+        this.emit(AudioDecoderEvent.AudioFrame, frame);
+      },
+      error: (err) => {
+        this.emit(AudioDecoderEvent.Error, err);
+        this.close();
+      },
+    });
   }
-  initialize(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
+  @ChangeState("initialized", "configured")
   configure(config: AudioDecoderConfig): void {
-    throw new Error("Method not implemented.");
+    this.config = config;
+    console.log("configure", config);
+    this.decoder.configure(config);
   }
-  decode(packet: AudioPacket): void {
-    throw new Error("Method not implemented.");
+  @Includes("configured")
+  decode(packet: EncodedAudioChunkInit): void {
+    if (this.decoder.state === "configured")
+      this.decoder.decode(new EncodedAudioChunk(packet));
   }
   flush(): void {
-    throw new Error("Method not implemented.");
+    this.decoder.flush();
   }
+  @ChangeState([], FSM.INIT)
   reset(): void {
-    throw new Error("Method not implemented.");
+    this.decoder.reset();
   }
+  @ChangeState([], "closed", { ignoreError: true })
   close(): void {
-    throw new Error("Method not implemented.");
+    this.decoder.close();
   }
 }

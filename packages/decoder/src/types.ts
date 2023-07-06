@@ -70,11 +70,6 @@ export interface VideoDecoderInterface  {
 export type AudioCodec  =  'pcma' | 'pcmu' | 'aac' | 'opus' | 'unknow' | string;
 
 
-export interface AudioDecoderConfig  {
-    codec: AudioCodec,
-    extraData?: BufferSource,
-    outSampleType?: AudioSampleFormat
-}
 
 export interface AudioCodecInfo {
 

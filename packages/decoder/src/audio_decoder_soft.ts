@@ -1,5 +1,4 @@
 import {
-  AudioDecoderConfig,
   AudioDecoderInterface,
   AudioCodecInfo,
   AudioDecoderEvent,
@@ -36,7 +35,7 @@ export class AudioDecoderSoft extends FSM implements AudioDecoderInterface {
   @ChangeState("initialized", "configured")
   configure(config: AudioDecoderConfig): void {
     this.config = config;
-    this.decoder.setCodec(this.config.codec, this.config.extraData);
+    this.decoder.setCodec(this.config.codec, this.config.description);
   }
   @Includes("configured")
   decode(packet: EncodedAudioChunkInit): void {
