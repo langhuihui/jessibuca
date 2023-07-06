@@ -32,11 +32,15 @@ export class WebRTCStream {
   audioTransceiver!: RTCRtpTransceiver;
   videoTransceiver!: RTCRtpTransceiver;
   private _videoTrack?: MediaStreamVideoTrack;
+  private _audioTrack?: MediaStreamAudioTrack;
   constructor(public id: string, public direction: RTCRtpTransceiverDirection = "recvonly") {
 
   }
+  set audioTrack(track: MediaStreamAudioTrack | undefined) {
+    this._audioTrack = track;
+  }
   get audioTrack() {
-    return this.mediaStream?.getAudioTracks()[0];
+    return this._audioTrack || this.mediaStream?.getAudioTracks()[0];
   }
   set videoTrack(track: MediaStreamVideoTrack | undefined) {
     this._videoTrack = track;

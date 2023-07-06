@@ -23,7 +23,10 @@ export class VideoDecoderHard extends FSM implements VideoDecoderInterface {
   configure(config: VideoDecoderConfig): void {
     this.config = config;
     console.log("configure", config);
-    this.decoder.configure(config);
+    this.decoder.configure({
+      ...config,
+      codec: config.codec == "hevc" ? 'hvc1.1.6.L0.12.34.56.78.9A.BC' : 'avc1.420028'
+    });
   }
   @Includes("configured")
   decode(packet: EncodedVideoChunkInit): void {

@@ -4,6 +4,7 @@ import {
   AudioDecoderEvent,
   AudioFrame,
   ErrorInfo,
+  AudioDecoderConfig,
 } from "./types";
 import CreateModule from "../wasm/types/audiodec";
 import { ChangeState, FSM, Includes } from "afsm";
@@ -35,14 +36,14 @@ export class AudioDecoderSoft extends FSM implements AudioDecoderInterface {
   @ChangeState("initialized", "configured")
   configure(config: AudioDecoderConfig): void {
     this.config = config;
-    this.decoder.setCodec(this.config.codec, this.config.description);
+    this.decoder.setCodec(this.config.codec, this.config.extraData);
   }
   @Includes("configured")
   decode(packet: EncodedAudioChunkInit): void {
     this.decoder.decode(packet.data, packet.timestamp);
   }
 
-  flush(): void {}
+  flush(): void { }
   @ChangeState("configured", "initialized")
   reset(): void {
     this.config = undefined;

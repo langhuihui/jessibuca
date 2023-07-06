@@ -1,4 +1,5 @@
 import { BaseDemuxer, DemuxEvent, DemuxMode } from "./base";
+import { samplingFrequencyIndexMap } from "./util";
 
 export interface FlvTag {
   type: number;
@@ -56,16 +57,18 @@ export class FlvDemuxer extends BaseDemuxer {
               { 10: "aac", 7: "pcma", 8: "pcmu" }[data[0] >> 4] ||
               "unknown",
             numberOfChannels: 1,
-            sampleRate: 44100,
+            sampleRate: 8000,
           };
-          //TODO: parse audio config
           if (this.audioEncoderConfig.codec == "aac") {
+            this.audioEncoderConfig.numberOfChannels = ((data[3] >> 3) & 0x0F) //声道
+            this.audioEncoderConfig.sampleRate = samplingFrequencyIndexMap[((data[2]&0x7)<<1)|(data[3]>>7)]
           }
         }
         if (this.audioEncoderConfig.codec == "aac" && data[1] == 0x00) {
+          this.audioEncoderConfig.extraData = data.subarray(2);
           this.emit(
             DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED,
-            data.subarray(2)
+            this.audioEncoderConfig
           );
           if (this.mode == DemuxMode.PULL)
             return this.pull();
