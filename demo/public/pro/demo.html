@@ -149,6 +149,15 @@
                 <button id="replay">重播</button>
             </div>
         </div>
+        <div class="input">
+            <div>
+                <input
+                    type="checkbox"
+                    checked
+                    id="isEmitSEI"
+                /><span>抛出SEI数据</span>
+            </div>
+        </div>
 
         <div class="input">
             <div>输入URL：</div>
@@ -320,6 +329,7 @@
     var $replay = document.getElementById('replay');
     var $fps = document.querySelector('.fps-inner');
     var $renderDom = document.getElementById('renderDom')
+    var $isEmitSEI = document.getElementById('isEmitSEI');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -372,6 +382,7 @@
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
             heartTimeout: 10,
+            isEmitSEI: $isEmitSEI.checked === true,
             // audioEngine:"worklet",
             // isFlv: true
         },);
@@ -398,6 +409,9 @@
             console.log('crashLog', log)
         })
 
+        jessibuca.on(JessibucaPro.EVENTS.videoSEI, (sei) => {
+            console.log('video sei', sei.ts, sei.data);
+        })
 
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
@@ -483,6 +497,11 @@
             $useSIMD.checked = false
         }
         replay();
+    })
+
+    $isEmitSEI.addEventListener('click', function () {
+        const checked = $isEmitSEI.checked === true;
+        jessibuca.updateIsEmitSEI(checked);
     })
 
 
