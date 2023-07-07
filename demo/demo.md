@@ -71,6 +71,13 @@ https://github.com/bosscheng/jessibuca-react-demo/tree/v3
 
 https://github.com/bosscheng/jessibuca-ant-design-pro-demo
 
+
+## Angular（由网友[echeverra](https://echeverra.cn/jessibuca)提供，非官方）
+
+
+https://github.com/echeverra/Jessibuca-angular-demo
+
+
 ## 弹幕
 
 pc:https://github.com/bosscheng/jessibuca-danmu-demo
