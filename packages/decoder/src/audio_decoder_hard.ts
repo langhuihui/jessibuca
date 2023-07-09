@@ -1,14 +1,10 @@
-import EventEmitter from "eventemitter3";
 import {
   AudioDecoderInterface,
   AudioDecoderEvent,
-  AudioDecoderConfig
 } from "./types";
 import { ChangeState, FSM, Includes } from "afsm";
 
-export class AudioDecoderHard
-  extends EventEmitter
-  implements AudioDecoderInterface {
+export class AudioDecoderHard extends FSM implements AudioDecoderInterface {
   decoder!: AudioDecoder;
   config?: AudioDecoderConfig;
   @ChangeState([FSM.INIT, "closed"], "initialized")
@@ -28,8 +24,8 @@ export class AudioDecoderHard
     this.config = config;
     console.log("configure", config);
     this.decoder.configure({
-      codec: { aac: 'mp4a.40.2', pcma: 'alaw', pcmu: 'ulaw' }[config.codec],
-      description: config.extraData,
+      codec: { aac: 'mp4a.40.2', pcma: 'alaw', pcmu: 'ulaw' }[config.codec]!,
+      description: config.description,
       sampleRate: config.sampleRate,
       numberOfChannels: config.numberOfChannels,
     });

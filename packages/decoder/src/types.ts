@@ -5,30 +5,6 @@ export type DecoderState = 'uninitialized' | 'initialized' | 'configured' | 'clo
 //视频解码器类型
 export type VideoDecoderType = 'soft' | 'soft-simd' | 'hard' | 'auto';
 
-//视频压缩格式
-export type VideoType = 'avc' | 'hevc' | 'unknow';
-
-//视频解码器配置
-export type VideoDecoderConfig = {
-  codec: string;
-  videoType: VideoType,
-  extraData?: BufferSource,
-  avc?: {
-    format: "avcc" | "annexb";
-  },
-  hevc?: {
-    format: "hvcc" | "annexb";
-  };
-  outPixelType?: VideoPixelFormat,
-};
-
-export interface AudioDecoderConfig  {
-  codec: AudioCodec,
-  extraData?: BufferSource,
-  outSampleType?: AudioSampleFormat,
-  sampleRate: number,
-  numberOfChannels: number,
-}
 
 export interface VideoCodecInfo {
 

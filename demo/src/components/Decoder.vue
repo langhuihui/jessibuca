@@ -25,7 +25,6 @@ import {
 import { TimelineDataSeries, TimelineGraphView } from "webrtc-internals";
 import { ArchiveOutline as ArchiveIcon } from "@vicons/ionicons5";
 import {
-  AudioDecoderConfig,
   VideoDecoderEvent,
   AudioDecoderEvent,
   ErrorInfo,
@@ -120,34 +119,13 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
 
     const demuxer = new FlvDemuxer(conn);
 
-    demuxer.on(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED, (data: Uint8Array) => {
+    demuxer.on(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED, (config: AudioDecoderConfig) => {
       message.info(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED);
-      const aconfig: AudioDecoderConfig = {
-        codec: demuxer.audioEncoderConfig!.codec,
-        extraData: data,
-        outSampleType: "f32-planar",
-      };
-      audioDecoder.configure(aconfig);
+      audioDecoder.configure(config);
     });
-    demuxer.on(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED, (data: Uint8Array) => {
+    demuxer.on(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED, (config: VideoDecoderConfig) => {
       message.info(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED);
-      switch (demuxer.videoEncoderConfig!.codec) {
-        case "avc":
-          videoDecoder.configure({
-            codec: "avc1.42001f",
-            extraData: data,
-            videoType: "avc",
-            avc: { format: "avcc" },
-          });
-          break;
-        case "hevc":
-          videoDecoder.configure({
-            codec: "hvc1.1.6.L0.12.34.56.78.9A.BC",
-            extraData: data,
-            videoType: "hevc",
-            hevc: { format: "hvcc" },
-          });
-      }
+      videoDecoder.configure(config);
     });
     demuxer.audioReadable.pipeTo(
       new WritableStream({

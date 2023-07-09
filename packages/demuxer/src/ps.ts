@@ -104,23 +104,23 @@ export class PSDemuxer extends BaseDemuxer {
           const apesl = dv.getUint16(0);
           const apes = yield apesl;
           const audio = this.parsePESPacket(apes);
-          if (this.audioEncoderConfig?.codec == "aac" && !this.audioEncoderConfig?.extraData) {
+          if (this.audioDecoderConfig?.codec == "aac" && !this.audioDecoderConfig?.description) {
             const asc = adtsToAsc(audio.subarray(7));
-            this.audioEncoderConfig = {
+            this.audioDecoderConfig = {
               codec: "aac",
-              extraData: asc.audioSpecificConfig,
+              description: asc.audioSpecificConfig,
               sampleRate: asc.sampleRate,
               numberOfChannels: asc.channel,
             };
             this.emit(
               DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED,
-              this.audioEncoderConfig
+              this.audioDecoderConfig
             );
           }
           this.gotAudio?.({
             type: "key",
             data:
-              this.audioEncoderConfig?.codec == "aac"
+              this.audioDecoderConfig?.codec == "aac"
                 ? audio.subarray(7)
                 : audio,
             timestamp: this.dts,
@@ -189,24 +189,22 @@ export class PSDemuxer extends BaseDemuxer {
       index++;
       if (elementaryStreamID >= 0xe0 && elementaryStreamID <= 0xef) {
         this.videoStreamType = streamType;
-        this.videoEncoderConfig = {
+        this.videoDecoderConfig = {
           codec:
             { [STREAM_TYPE_H264]: "avc", [STREAM_TYPE_H265]: "hevc" }[streamType] || "unknown",
-          width: 0,
-          height: 0,
         };
-        this.emit(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED, this.videoEncoderConfig);
+        this.emit(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED, this.videoDecoderConfig);
       } else if (elementaryStreamID >= 0xc0 && elementaryStreamID <= 0xdf) {
         this.audioStreamType = streamType;
-        this.audioEncoderConfig = {
+        this.audioDecoderConfig = {
           codec:
             { [STREAM_TYPE_AAC]: "aac", [STREAM_TYPE_G711A]: "pcma", [STREAM_TYPE_G711U]: "pcmu" }[streamType] ||
             "unknown",
           numberOfChannels: 1,
           sampleRate: 8000,
         };
-        if (this.audioEncoderConfig.codec != "aac") {
-          this.emit(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED);
+        if (this.audioDecoderConfig.codec != "aac") {
+          this.emit(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED, this.audioDecoderConfig);
         }
       }
       if (l <= index + 1) {

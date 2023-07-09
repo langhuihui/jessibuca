@@ -12,13 +12,16 @@ export interface Source {
   oput?: Oput;
   read<T extends number | Uint8Array>(need: T): Promise<Uint8Array>;
 }
-export abstract class BaseDemuxer extends EventEmitter {
+export abstract class BaseDemuxer extends EventEmitter<{
+  [DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED]: [AudioDecoderConfig];
+  [DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED]: [VideoDecoderConfig];
+}> {
   constructor(
     public source?: Source,
     public mode: DemuxMode = DemuxMode.PULL
   ) {
     super();
-    console.log("Demuxer Created:",Object.getPrototypeOf(this).constructor.name)
+    console.log("Demuxer Created:", Object.getPrototypeOf(this).constructor.name);
     if (source) {
       if (mode == DemuxMode.PULL) {
         this.startPull(source);
@@ -29,8 +32,8 @@ export abstract class BaseDemuxer extends EventEmitter {
   }
   audioReadable?: ReadableStream<EncodedAudioChunkInit>;
   videoReadable?: ReadableStream<EncodedVideoChunkInit>;
-  audioEncoderConfig?: AudioEncoderConfig;
-  videoEncoderConfig?: VideoEncoderConfig;
+  audioDecoderConfig?: AudioDecoderConfig;
+  videoDecoderConfig?: VideoDecoderConfig;
   abstract pull(): Promise<void>;
   startPull(source: Source) {
     this.mode = DemuxMode.PULL;

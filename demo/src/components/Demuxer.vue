@@ -89,10 +89,10 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
     });
     await conn.connect();
     const demuxer = new FlvDemuxer(conn);
-    demuxer.on(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED, (data: Uint8Array) => {
+    demuxer.on(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED, (config:AudioDecoderConfig) => {
       message.info(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED);
     });
-    demuxer.on(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED, (data: Uint8Array) => {
+    demuxer.on(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED, (config:VideoDecoderConfig) => {
       message.info(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED);
     });
     demuxer.audioReadable.pipeTo(

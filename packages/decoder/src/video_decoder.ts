@@ -1,15 +1,3 @@
-import EventEmitter from "eventemitter3";
-import {
-  DecoderState,
-  VideoDecoderType,
-  VideoDecoderConfig,
-  VideoPacket,
-  VideoDecoderEvent,
-  VideoDecoderInterface,
-  VideoCodecInfo,
-  JVideoFrame,
-  ErrorInfo,
-} from "./types";
 export { VideoDecoderSoft } from "./video_decoder_soft";
 export { VideoDecoderSoftSIMD } from "./video_decoder_soft_simd";
 export { VideoDecoderHard } from "./video_decoder_hard";

@@ -51,24 +51,24 @@ export class FlvDemuxer extends BaseDemuxer {
   gotTag(type: number, data: Uint8Array, timestamp: number) {
     switch (type) {
       case 8:
-        if (!this.audioEncoderConfig) {
-          this.audioEncoderConfig = {
+        if (!this.audioDecoderConfig) {
+          this.audioDecoderConfig = {
             codec:
               { 10: "aac", 7: "pcma", 8: "pcmu" }[data[0] >> 4] ||
               "unknown",
             numberOfChannels: 1,
             sampleRate: 8000,
           };
-          if (this.audioEncoderConfig.codec == "aac") {
-            this.audioEncoderConfig.numberOfChannels = ((data[3] >> 3) & 0x0F) //声道
-            this.audioEncoderConfig.sampleRate = samplingFrequencyIndexMap[((data[2]&0x7)<<1)|(data[3]>>7)]
+          if (this.audioDecoderConfig.codec == "aac") {
+            this.audioDecoderConfig.numberOfChannels = ((data[3] >> 3) & 0x0F); //声道
+            this.audioDecoderConfig.sampleRate = samplingFrequencyIndexMap[((data[2] & 0x7) << 1) | (data[3] >> 7)];
           }
         }
-        if (this.audioEncoderConfig.codec == "aac" && data[1] == 0x00) {
-          this.audioEncoderConfig.extraData = data.subarray(2);
+        if (this.audioDecoderConfig.codec == "aac" && data[1] == 0x00) {
+          this.audioDecoderConfig.description = data.subarray(2);
           this.emit(
             DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED,
-            this.audioEncoderConfig
+            this.audioDecoderConfig
           );
           if (this.mode == DemuxMode.PULL)
             return this.pull();
@@ -77,26 +77,25 @@ export class FlvDemuxer extends BaseDemuxer {
         return this.gotAudio?.({
           type: "key",
           data:
-            this.audioEncoderConfig.codec == "aac"
+            this.audioDecoderConfig.codec == "aac"
               ? data.subarray(2)
               : data.subarray(1),
           timestamp: timestamp,
           duration: 0,
         });
       case 9:
-        if (!this.videoEncoderConfig) {
-          this.videoEncoderConfig = {
+        if (!this.videoDecoderConfig) {
+          this.videoDecoderConfig = {
             codec:
               { 7: "avc", 12: "hevc" }[data[0] & 0xf] || "unknown",
-            width: 0,
-            height: 0,
+            description: data.subarray(5),
           };
           //TODO: parse video config
         }
         if (data[1] == 0x00) {
           this.emit(
             DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED,
-            data.subarray(5)
+            this.videoDecoderConfig!
           );
           if (this.mode == DemuxMode.PULL)
             return this.pull();

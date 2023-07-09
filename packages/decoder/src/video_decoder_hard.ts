@@ -1,5 +1,4 @@
 import {
-  VideoDecoderConfig,
   VideoDecoderInterface,
   VideoDecoderEvent,
 } from "./types";

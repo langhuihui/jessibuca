@@ -31,7 +31,9 @@
   },
   "homepage": "https://github.com/langhuihui/jessibuca#readme",
   "devDependencies": {
-    "@types/dom-mediacapture-transform": "^0.1.1",
-    "@types/dom-webcodecs": "^0.1.4"
+    "@types/dom-mediacapture-transform": "^0.1.1"
+  },
+  "dependencies": {
+    "@types/dom-webcodecs": "^0.1.8"
   }
 }

@@ -1,5 +1,4 @@
-import EventEmitter from 'eventemitter3';
-import { DecoderState, VideoDecoderConfig, VideoPacket, VideoDecoderInterface, VideoCodecInfo, VideoDecoderEvent, JVideoFrame, ErrorInfo } from './types';
+import { VideoDecoderInterface, VideoCodecInfo, VideoDecoderEvent, JVideoFrame, ErrorInfo } from './types';
 import { FSM, ChangeState, Includes } from 'afsm';
 
 
@@ -40,7 +39,7 @@ export class VideoDecoderSoftBase extends FSM implements VideoDecoderInterface {
   @ChangeState("initialized", "configured")
   configure(config: VideoDecoderConfig): void {
     this.config = config;
-    this.decoder.setCodec(this.config.videoType, this.config?.avc?.format ?? this.config?.hevc?.format ?? '', this.config.extraData ?? '');
+    this.decoder.setCodec(this.config.codec, this.config.description ? 'avcc' : 'annexb', this.config.description ?? '');
   }
   @Includes("configured")
   decode(packet: EncodedVideoChunkInit): void {
