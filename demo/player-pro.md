@@ -62,6 +62,7 @@ sidebar: false
 - 支持HLS(H264+H265)软解码、硬解码
 - 支持webrtc(H264+H265(软解码、硬解码))，
 - 支持`zlmediakit`webrtc(H264)
+- 支持加密流(国标SM4、m7s加密流)
 
 <Rice/>
 
