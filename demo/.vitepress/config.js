@@ -13,9 +13,10 @@ module.exports = {
             {
                 text: "Pro",
                 items: [
+                    {text: 'Demo', link: '/pro-demo'},
                     {text: '文档', link: '/pro'},
                     {text: 'AI', link: '/pro-ai'},
-                    {text: 'Demo', link: '/pro-demo'},
+                    {text: '定制化服务', link: '/pro-more'},
                 ]
             },
             {
