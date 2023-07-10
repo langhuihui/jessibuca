@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Jessica Pro simd demo</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <script src="./vconsole.js"></script>
     <script src="./jessibuca-pro-demo.js"></script>
     <style>
@@ -138,8 +140,8 @@
     function create() {
         jessibuca = new JessibucaPro({
             container: $container,
-            videoBuffer: 0, // 缓存时长
-            videoBufferDelay: 0.3, //
+            videoBuffer: 0.1, // 缓存时长
+            videoBufferDelay: 0.2, //
             decoder: './decoder-pro-simd.js',
             isResize: false,
             text: "",

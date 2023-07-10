@@ -70,10 +70,10 @@
 
 ## 音频播放器
 #### https
-[https://jessibuca.com/pro/audio-demo.html](https://jessibuca.com/pro/audio-demo.html)
+[https://jessibuca.com/pro/audio-player-demo.html](https://jessibuca.com/pro/audio-player-demo.html)
 
 #### http
-[http://jessibuca.monibuca.com/pro/audio-demo.html](http://jessibuca.monibuca.com/pro/audio-demo.html)
+[http://jessibuca.monibuca.com/pro/audio-player-demo.html](http://jessibuca.monibuca.com/pro/audio-player-demo.html)
 
 
 ## 裸流(H264/H265)

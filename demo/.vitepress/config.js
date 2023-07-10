@@ -7,16 +7,31 @@ module.exports = {
         sidebar: "auto",
         nav: [
             {text: 'API', link: '/api'},
-            {text: 'DEMO', link: '/demo' },
-            {text: 'Document', link: '/document'},
-            {text: 'PRO', link: '/pro'},
-            {text: 'PRO-Player', link: '/player-pro'},
-            {text: 'PRO-AI', link: '/pro-ai' },
-            {text: 'PRO-DEMO', link: '/pro-demo' },
-            {text: 'HTTP', link: 'http://jessibuca.monibuca.com/'},
-            {text: 'HTTPS', link: 'https://j.m7s.live/'},
-            {text: 'Monibuca', link: 'https://m7s.live/'},
-            {text:'Rebebuca',link:'https://rebebuca.com/'}
+            {text: 'Demo', link: '/demo'},
+            {text: '文档', link: '/document'},
+            {text: 'Pro-播放器', link: '/player-pro'},
+            {
+                text: "Pro",
+                items: [
+                    {text: '文档', link: '/pro'},
+                    {text: 'AI', link: '/pro-ai'},
+                    {text: 'Demo', link: '/pro-demo'},
+                ]
+            },
+            {
+                text: 'http/https',
+                items: [
+                    {text: 'HTTP', link: 'http://jessibuca.monibuca.com/'},
+                    {text: 'HTTPS', link: 'https://j.m7s.live/'},
+                ]
+            },
+            {
+                text: '不卡系列',
+                items: [
+                    {text: 'Monibuca', link: 'https://m7s.live/'},
+                    {text: 'Rebebuca', link: 'https://rebebuca.com/'}
+                ]
+            },
         ],
         logo: 'logo.png',
     },
