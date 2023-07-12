@@ -12,7 +12,7 @@
         }
     </style>
     <script src="./vconsole.js"></script>
-    <script src="./jessibuca-pro-multi.js"></script>
+    <script src="./jessibuca-pro-multi-demo.js"></script>
 </head>
 <body class="page">
 <div class="root">
@@ -51,6 +51,8 @@
             <button onclick="updateSplit(2)">2*2</button>
             <button onclick="updateSplit(3)">3*3</button>
             <button onclick="updateSplit(4)">4*4</button>
+            <button onclick="updateSplitSpecial('3-1')">不规则(3-1)</button>
+            <button onclick="updateSplitSpecial('4-1')">不规则(4-1)</button>
         </div>
         <div class="input">
             <div>输入URL：</div>
@@ -194,6 +196,12 @@
         if (jessibucaMulti) {
             split = Number(split);
             jessibucaMulti.arrangeWindow(split);
+        }
+    }
+
+    function updateSplitSpecial(type) {
+        if (jessibucaMulti) {
+            jessibucaMulti.arrangeWindow(type);
         }
     }
 </script>

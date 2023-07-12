@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jessica webrtc for zlm demo</title>
+    <title>Jessica webrtc demo</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <script src="./vconsole.js"></script>
@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="./demo.css">
     <style>
         .container-shell:before {
-            content: "jessibuca pro webrtc for zlm demo";
+            content: "jessibuca pro webrtc demo";
         }
     </style>
 </head>
@@ -64,8 +64,6 @@
     function create() {
         jessibuca = new JessibucaPro({
             container: $container,
-            videoBuffer: Number($videoBuffer.value), // 缓存时长
-            videoBufferDelay: Number($videoBufferDelay.value), // 1000s
             isResize: false,
             text: "",
             loadingText: "加载中",
@@ -97,11 +95,6 @@
             // console.log('timeUpdate', value);
         })
 
-        jessibuca.on('stats', (stats) => {
-            // console.log('stats', stats);
-            $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
-        })
-
         jessibuca.on(JessibucaPro.EVENTS.crashLog, (log) => {
             console.log('crashLog', log)
         })
@@ -110,7 +103,6 @@
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
         $destroy.style.display = 'none';
-        $fps.textContent = '';
     }
 
 
@@ -139,10 +131,6 @@
         }
     }
 
-    $replay.addEventListener('click', function () {
-        replay();
-    })
-
     $player.addEventListener('click', function () {
         play();
     }, false)
@@ -151,7 +139,6 @@
     $pause.addEventListener('click', function () {
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
-        $fps.textContent = '';
         jessibuca.pause();
     })
 
