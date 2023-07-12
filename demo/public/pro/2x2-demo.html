@@ -2,107 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jessibuca Pro 2x2 demo</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Jessibuca Pro 2x2 demo</title>
+    <script src="./vconsole.js"></script>
     <script src="./jessibuca-pro-demo.js"></script>
+    <link rel="stylesheet" href="./demo.css">
     <style>
-        .root {
-            display: flex;
-            place-content: center;
-            margin-top: 3rem;
-        }
-
-        .container-shell {
-            backdrop-filter: blur(5px);
-            background: hsla(0, 0%, 50%, 0.5);
-            padding: 30px 4px 10px 4px;
-            /* border: 2px solid black; */
-            width: auto;
-            position: relative;
-            border-radius: 5px;
-            box-shadow: 0 10px 20px;
-        }
-
         .container-shell:before {
-            content: "jessibuca pro 2X2 demo player";
-            position: absolute;
-            color: darkgray;
-            top: 4px;
-            left: 10px;
-            text-shadow: 1px 1px black;
-        }
-
-        .container {
-            background: rgba(13, 14, 27, 0.7);
-            width: 320px;
-            height: 199px;
-            display: inline-block;
-            margin-right: 10px;
-            margin-bottom: 10px;
-        }
-
-        #container {
-
-        }
-
-        .input {
-            display: flex;
-            margin-top: 10px;
-            color: white;
-            place-content: stretch;
-        }
-
-        .input2 {
-            bottom: 0px;
-        }
-
-        .input input {
-            flex: auto;
-        }
-
-        .err {
-            position: absolute;
-            top: 40px;
-            left: 10px;
-            color: red;
-        }
-
-        .option {
-            position: absolute;
-            top: 4px;
-            right: 10px;
-            display: flex;
-            place-content: center;
-            font-size: 12px;
-        }
-
-        .option span {
-            color: white;
-        }
-
-        .page {
-            background: url('http://jessibuca.monibuca.com/bg.jpg');
-            background-repeat: no-repeat;
-            background-position: top;
-        }
-
-        @media (max-width: 720px) {
-            .container {
-                width: 90vw;
-                height: 52.7vw;
-            }
+            content: "jessibuca pro 2x2 demo player";
         }
     </style>
 </head>
 <body class="page">
 <div class="root">
     <div class="container-shell">
-        <div>
+        <div class="container-multi">
             <div class="container" id="container1"></div>
             <div class="container" id="container2"></div>
         </div>
-        <div>
+        <div class="container-multi">
             <div class="container" id="container3"></div>
             <div class="container" id="container4"></div>
         </div>
@@ -111,8 +30,8 @@
                 当前浏览器：
                 <span id="mseSupport264" style="color: green;display: none">支持MSE H264解码；</span>
                 <span id="mseSupport" style="color: green;display: none">支持MSE H265解码；</span>
-                <span id="mseNotSupport" style="color: red;display: none">不支持MSE H264解码；</span>
-                <span id="mseNotSupport264"
+                <span id="mseNotSupport264" style="color: red;display: none">不支持MSE H264解码；</span>
+                <span id="mseNotSupport"
                       style="color: red;display: none">不支持MSE H265解码,会自动切换成wasm解码；</span>
             </div>
         </div>
@@ -121,14 +40,17 @@
                 当前浏览器：
                 <span id="wcsSupport264" style="color: green;display: none">支持Webcodecs H264解码；</span>
                 <span id="wcsSupport" style="color: green;display: none">支持Webcodecs H265解码；</span>
-                <span id="wcsNotSupport264" style="color: red;display: none">不支持Webcodecs H264解码(https/localhost)；</span>
+                <span id="wcsNotSupport264"
+                      style="color: red;display: none">不支持Webcodecs H264解码(https/localhost)；</span>
                 <span id="wcsNotSupport" style="color: red;display: none">不支持Webcodecs H265解码(https/localhost),会自动切换成wasm解码</span>
             </div>
         </div>
         <div class="input">
             <div>
-                当前浏览器：<span id="simdSupport" style="color: green;display: none">支持SIMD解码</span>
-                <span id="simdNotSupport" style="color: red;display: none">不支持SIMD解码,会自动切换成wasm解码</span>
+                当前浏览器：
+                <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码</span>
+                <span id="simdNotSupport"
+                      style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
             </div>
         </div>
         <div class="input">
@@ -198,145 +120,7 @@
         </div>
     </div>
 </div>
-<script>
-    function getBrowser() {
-        const UserAgent = window.navigator.userAgent.toLowerCase() || '';
-        let browserInfo = {
-            type: '',
-            version: ''
-        };
-        var browserArray = {
-            IE: window.ActiveXObject || "ActiveXObject" in window, // IE
-            Chrome: UserAgent.indexOf('chrome') > -1 && UserAgent.indexOf('safari') > -1, // Chrome浏览器
-            Firefox: UserAgent.indexOf('firefox') > -1, // 火狐浏览器
-            Opera: UserAgent.indexOf('opera') > -1, // Opera浏览器
-            Safari: UserAgent.indexOf('safari') > -1 && UserAgent.indexOf('chrome') == -1, // safari浏览器
-            Edge: UserAgent.indexOf('edge') > -1, // Edge浏览器
-            QQBrowser: /qqbrowser/.test(UserAgent), // qq浏览器
-            WeixinBrowser: /MicroMessenger/i.test(UserAgent) // 微信浏览器
-        };
-        // console.log(browserArray)
-        for (let i in browserArray) {
-            if (browserArray[i]) {
-                let versions = '';
-                if (i === 'IE') {
-                    const versionArray = UserAgent.match(/(msie\s|trident.*rv:)([\w.]+)/)
-                    if (versionArray && versionArray.length > 2) {
-                        versions = UserAgent.match(/(msie\s|trident.*rv:)([\w.]+)/)[2];
-                    }
-                } else if (i === 'Chrome') {
-                    for (let mt in navigator.mimeTypes) {
-                        //检测是否是360浏览器(测试只有pc端的360才起作用)
-                        if (navigator.mimeTypes[mt]['type'] === 'application/360softmgrplugin') {
-                            i = '360';
-                        }
-                    }
-                    const versionArray = UserAgent.match(/chrome\/([\d.]+)/);
-                    if (versionArray && versionArray.length > 1) {
-                        versions = versionArray[1];
-                    }
-                } else if (i === 'Firefox') {
-                    const versionArray = UserAgent.match(/firefox\/([\d.]+)/);
-                    if (versionArray && versionArray.length > 1) {
-                        versions = versionArray[1];
-                    }
-                } else if (i === 'Opera') {
-                    const versionArray = UserAgent.match(/opera\/([\d.]+)/);
-                    if (versionArray && versionArray.length > 1) {
-                        versions = versionArray[1];
-                    }
-                } else if (i === 'Safari') {
-                    const versionArray = UserAgent.match(/version\/([\d.]+)/);
-                    if (versionArray && versionArray.length > 1) {
-                        versions = versionArray[1];
-                    }
-                } else if (i === 'Edge') {
-                    const versionArray = UserAgent.match(/edge\/([\d.]+)/);
-                    if (versionArray && versionArray.length > 1) {
-                        versions = versionArray[1];
-                    }
-                } else if (i === 'QQBrowser') {
-                    const versionArray = UserAgent.match(/qqbrowser\/([\d.]+)/);
-                    if (versionArray && versionArray.length > 1) {
-                        versions = versionArray[1];
-                    }
-                }
-                browserInfo.type = i;
-                browserInfo.version = parseInt(versions);
-            }
-        }
-        return browserInfo;
-    }
-
-
-    function checkSupportMSEHevc() {
-        return window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="hev1.1.6.L123.b0"');
-    }
-
-    function checkSupportMSEH264() {
-        return window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="avc1.64002A"');
-    }
-
-    function checkSupportWCSHevc() {
-        const browserInfo = getBrowser();
-
-        return browserInfo.type.toLowerCase() === 'chrome' && browserInfo.version >= 107 && (location.protocol === 'https:' || location.hostname === 'localhost');
-    }
-
-    function checkSupportWCS() {
-        return "VideoEncoder" in window;
-    }
-
-
-    function checkSupportSIMD() {
-        return WebAssembly && WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 98, 11]));
-    }
-
-    let support = document.getElementById('mseSupport');
-    let notSupport = document.getElementById('mseNotSupport');
-    if (checkSupportMSEHevc()) {
-        support.style.display = 'inline-block'
-    } else {
-        notSupport.style.display = 'inline-block'
-    }
-
-    let supportH264 = document.getElementById('mseSupport264');
-    let notSupportH264 = document.getElementById('mseNotSupport264');
-    if (checkSupportMSEH264()) {
-        supportH264.style.display = 'inline-block'
-    } else {
-        notSupportH264.style.display = 'inline-block'
-    }
-
-
-    let supportWcsHevc = document.getElementById('wcsSupport');
-    let notSupportWcsHevc = document.getElementById('wcsNotSupport');
-
-    if (checkSupportWCSHevc()) {
-        supportWcsHevc.style.display = 'inline-block';
-    } else {
-        notSupportWcsHevc.style.display = 'inline-block'
-    }
-    let supportWcs = document.getElementById('wcsSupport264');
-    let notSupportWcs = document.getElementById('wcsNotSupport264');
-    if(checkSupportWCS()){
-        supportWcs.style.display = 'inline-block';
-    }else{
-        notSupportWcs.style.display = 'inline-block'
-    }
-
-
-    let supportSimd = document.getElementById('simdSupport');
-    let notSupportSimd = document.getElementById('simdNotSupport');
-
-    if (checkSupportSIMD()) {
-        supportSimd.style.display = 'inline-block';
-    } else {
-        notSupportSimd.style.display = 'inline-block'
-    }
-
-</script>
-
+<script src="./demo.js"></script>
 <script>
     var $player = document.getElementById('play');
     var $pause = document.getElementById('pause');
@@ -364,7 +148,6 @@
             text: "",
             loadingText: "加载中",
             debug: true,
-            debugLevel: "debug",
             isMulti: true,
             useMSE: $useMSE.checked === true,
             useSIMD: $useSIMD.checked === true,
@@ -445,7 +228,7 @@
             Promise.all(destroyList).then(() => {
                 playList = [];
                 setTimeout(() => {
-                    create();
+                    create()
                     resolve();
                 }, 100)
             }).catch((e) => {

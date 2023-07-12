@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Jessica sm4 crypto demo</title>
+    <script src="./vconsole.js"></script>
+    <script src="./jessibuca-pro-demo.js"></script>
+    <link rel="stylesheet" href="./demo.css">
+    <style>
+        .container-shell:before {
+            content: "jessibuca pro sm4 crypto demo player";
+        }
+    </style>
+</head>
+<body class="page">
+<div class="root">
+    <div class="container-shell">
+        <div id="container"></div>
+        <div class="input">
+            <div>
+                当前浏览器：
+                <span id="mseSupport264" style="color: green;display: none">支持MSE H264解码；</span>
+                <span id="mseSupport" style="color: green;display: none">支持MSE H265解码；</span>
+                <span id="mseNotSupport" style="color: red;display: none">不支持MSE H264解码；</span>
+                <span id="mseNotSupport264"
+                      style="color: red;display: none">不支持MSE H265解码,会自动切换成wasm解码；</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                当前浏览器：
+                <span id="wcsSupport264" style="color: green;display: none">支持Webcodecs H264解码；</span>
+                <span id="wcsSupport" style="color: green;display: none">支持Webcodecs H265解码；</span>
+                <span id="wcsNotSupport264"
+                      style="color: red;display: none">不支持Webcodecs H264解码(https/localhost)；</span>
+                <span id="wcsNotSupport" style="color: red;display: none">不支持Webcodecs H265解码(https/localhost),会自动切换成wasm解码</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                当前浏览器：
+                <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码</span>
+                <span id="simdNotSupport"
+                      style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
+            </div>
+        </div>
+        <div class="input">
+            <div><input
+                type="checkbox"
+                checked
+                id="useMSE"
+            /><span>MediaSource</span>
+                <input
+                    type="checkbox"
+                    id="useWCS"
+                /><span>Webcodec</span>
+                <input
+                    type="checkbox"
+                    id="useSIMD"
+                /><span>SIMD</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <span>缓存时长：</span>
+                <input placeholder="单位：秒" type="text" id="videoBuffer" style="width: 50px" value="0.2">秒
+                <span>缓存延迟(延迟超过会触发丢帧)：</span>
+                <input placeholder="单位：秒" type="text" id="videoBufferDelay" style="width: 50px" value="1">秒
+                <span>秘钥：</span>
+                <input type="text" id="sm4Key" style="width: 200px" placeholder="请输入32位的sm4秘钥">
+                <button id="replay">重播</button>
+            </div>
+        </div>
+
+
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl"
+                value=""
+            />
+            <button id="play">播放</button>
+            <button id="pause" style="display: none">停止</button>
+        </div>
+        <div class="input" style="line-height: 30px">
+            <button id="destroy">销毁</button>
+            <span class="fps-inner"></span>
+        </div>
+    </div>
+</div>
+
+<script src="./demo.js"></script>
+
+<script>
+    var $player = document.getElementById('play');
+    var $pause = document.getElementById('pause');
+    var $playHref = document.getElementById('playUrl');
+    var $container = document.getElementById('container');
+    var $destroy = document.getElementById('destroy');
+    var $useMSE = document.getElementById('useMSE');
+    var $useSIMD = document.getElementById('useSIMD');
+    var $useWCS = document.getElementById('useWCS');
+    var $videoBuffer = document.getElementById('videoBuffer');
+    var $videoBufferDelay = document.getElementById('videoBufferDelay');
+    var $replay = document.getElementById('replay');
+    var $fps = document.querySelector('.fps-inner');
+    var $sm4Key = document.getElementById('sm4Key');
+
+    var showOperateBtns = true; // 是否显示按钮
+    var forceNoOffscreen = true; //
+    var jessibuca = null;
+
+    function isMobile() {
+        return (/iphone|ipad|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));
+    }
+
+    function isPad() {
+        return (/ipad|android(?!.*mobile)|tablet|kindle|silk/i.test(window.navigator.userAgent.toLowerCase()));
+    }
+
+    const useVconsole = isMobile() || isPad()
+
+    if (useVconsole && window.VConsole) {
+        new window.VConsole();
+    }
+
+
+    function create() {
+        jessibuca = new JessibucaPro({
+            container: $container,
+            videoBuffer: Number($videoBuffer.value), // 缓存时长
+            videoBufferDelay: Number($videoBufferDelay.value), // 1000s
+            isResize: false,
+            text: "",
+            loadingText: "加载中",
+            debug: true,
+            debugLevel: "debug",
+            useMSE: $useMSE.checked === true,
+            useSIMD: $useSIMD.checked === true,
+            useWCS: $useWCS.checked === true,
+            showBandwidth: showOperateBtns, // 显示网速
+            showPerformance: showOperateBtns, // 显示性能
+            operateBtns: {
+                fullscreen: showOperateBtns,
+                screenshot: showOperateBtns,
+                play: showOperateBtns,
+                audio: showOperateBtns,
+                ptz: showOperateBtns,
+                quality: showOperateBtns,
+                performance: showOperateBtns,
+            },
+            heartTimeoutReplayUseLastFrameShow: true,
+            audioEngine: "worklet",
+            qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
+            forceNoOffscreen: forceNoOffscreen,
+            isNotMute: false,
+            heartTimeout: 10,
+            // audioEngine:"worklet",
+            // isFlv: true
+            isSm4Crypto: true,
+            sm4CryptoKey: $sm4Key.value
+        },);
+
+
+        jessibuca.on('ptz', (arrow) => {
+            console.log('ptz', arrow);
+        })
+
+        jessibuca.on('streamQualityChange', (value) => {
+            console.log('streamQualityChange', value);
+        })
+
+        jessibuca.on('timeUpdate', (value) => {
+            // console.log('timeUpdate', value);
+        })
+
+        jessibuca.on('stats', (stats) => {
+            // console.log('stats', stats);
+            $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
+        })
+
+        jessibuca.on(JessibucaPro.EVENTS.crashLog, (log) => {
+            console.log('crashLog', log)
+        })
+
+
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+        $destroy.style.display = 'none';
+        $fps.textContent = '';
+    }
+
+
+    create();
+
+    function play() {
+        var href = $playHref.value;
+        if (href) {
+
+            if ($sm4Key.value !== '') {
+                jessibuca.setSm4CryptoKey($sm4Key.value);
+            }
+            jessibuca.play(href);
+            $player.style.display = 'none';
+            $pause.style.display = 'inline-block';
+            $destroy.style.display = 'inline-block';
+        }
+    }
+
+
+    function replay() {
+        if (jessibuca) {
+            jessibuca.destroy().then(() => {
+                create();
+                play();
+            });
+        } else {
+            create();
+            play();
+        }
+    }
+
+    $replay.addEventListener('click', function () {
+        replay();
+    })
+
+    $player.addEventListener('click', function () {
+        play();
+    }, false)
+
+
+    $pause.addEventListener('click', function () {
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+        $fps.textContent = '';
+        jessibuca.pause();
+    })
+
+    $destroy.addEventListener('click', function () {
+        if (jessibuca) {
+            jessibuca.destroy().then(() => {
+                create();
+            });
+        } else {
+            create();
+        }
+
+    })
+
+    $useMSE.addEventListener('click', function () {
+        const checked = $useMSE.checked;
+        if (checked) {
+            $useSIMD.checked = false
+            $useWCS.checked = false
+        }
+        replay();
+    })
+
+    $useSIMD.addEventListener('click', function () {
+        const checked = $useSIMD.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useWCS.checked = false
+        }
+        replay();
+    })
+
+    $useWCS.addEventListener('click', function () {
+        const checked = $useWCS.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useSIMD.checked = false
+        }
+        replay();
+    })
+
+
+</script>
+
+</body>
+</html>

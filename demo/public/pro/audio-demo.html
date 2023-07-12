@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Jessibuca Pro audio player demo</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="../vconsole.js"></script>
+    <script src="./jessibuca-pro-audio-player-demo.js"></script>
+    <link rel="stylesheet" href="./demo.css">
+    <style>
+
+        .container-shell:before {
+            content: "jessibuca pro audio player demo";
+        }
+    </style>
+</head>
+<body class="page">
+<div class="root">
+    <div class="container-shell audio-container">
+        <div class="input">
+            <span>音频引擎：</span>
+            <select id="audioEngine">
+                <option value="">自动</option>
+                <option value="worklet">worklet(https)</option>
+                <option value="script">script(默认)</option>
+                <option value="active">active(兼容手机浏览器)</option>
+            </select>
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl"
+                value=""
+            />
+            <button id="play">播放</button>
+            <button id="pause" style="display: none">停止</button>
+        </div>
+        <div class="input input-more" style="line-height: 30px">
+            <button id="destroy">销毁</button>
+        </div>
+    </div>
+</div>
+<script src="./demo.js"></script>
+<script>
+    var $player = document.getElementById('play');
+    var $pause = document.getElementById('pause');
+    var $playHref = document.getElementById('playUrl');
+    var $container = document.getElementById('container');
+    var $destroy = document.getElementById('destroy');
+    var $audioEngine = document.getElementById('audioEngine');
+
+
+    var showOperateBtns = true; // 是否显示按钮
+    var forceNoOffscreen = true; //
+    var jessibuca = null;
+
+    function create() {
+        jessibuca = new JessibucaProAudio({
+            videoBuffer: 0.3, // 缓存时长
+            videoBufferDelay: 1,
+            decoder: './decoder-pro-audio-player.js',
+            debug: true,
+            debugLevel: 'debug',
+            isNotMute: true,
+            isFlv: false,
+            loadingTimeout: 10,
+            heartTimeout: 10,
+            loadingTimeoutReplay: true, // loading timeout replay
+            heartTimeoutReplay: true,// heart timeout replay。
+            loadingTimeoutReplayTimes: 3, // loading timeout replay fail times
+            heartTimeoutReplayTimes: 3, // heart timeout replay fail times
+            audioEngine: $audioEngine.value,
+            supportLockScreenPlayAudio: true,
+        },);
+
+
+        // jessibuca.on('ptz', (arrow) => {
+        //     console.log('ptz', arrow);
+        // })
+        //
+        // jessibuca.on('streamQualityChange', (value) => {
+        //     console.log('streamQualityChange', value);
+        // })
+
+        jessibuca.on('stats', (stats) => {
+            console.log('stats', stats);
+        })
+
+        jessibuca.on('audioResumeState', (result) => {
+            console.log('audioResumeState', result);
+        })
+
+
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+        $destroy.style.display = 'none';
+    }
+
+
+    create();
+
+    $player.addEventListener('click', function () {
+        var href = $playHref.value;
+        if (href) {
+            jessibuca.play(href).then(() => {
+                jessibuca.setVolume(1);
+            });
+
+            $player.style.display = 'none';
+            $pause.style.display = 'inline-block';
+            $destroy.style.display = 'inline-block';
+        }
+    }, false)
+
+
+    $pause.addEventListener('click', function () {
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+        jessibuca.pause();
+    })
+
+    $destroy.addEventListener('click', function () {
+        if (jessibuca) {
+            jessibuca.destroy().then(() => {
+                create();
+            });
+
+        } else {
+            create();
+        }
+
+    })
+
+    $audioEngine.addEventListener('change', function () {
+        if (jessibuca) {
+            jessibuca.destroy().then(() => {
+                create();
+            });
+
+        } else {
+            create();
+        }
+    })
+
+</script>
+
+</body>
+</html>

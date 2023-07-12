@@ -2,90 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>jessibuca pro playback demo</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Jessibuca Pro 回放流 demo</title>
     <script src="./vconsole.js"></script>
     <script src="./jessibuca-pro-demo.js"></script>
+    <link rel="stylesheet" href="./demo.css">
     <style>
-        .root {
-            display: flex;
-            place-content: center;
-            margin-top: 3rem;
-        }
-
-        .container-shell {
-            backdrop-filter: blur(5px);
-            background: hsla(0, 0%, 50%, 0.5);
-            padding: 30px 4px 10px 4px;
-            /* border: 2px solid black; */
-            width: auto;
-            position: relative;
-            border-radius: 5px;
-            box-shadow: 0 10px 20px;
-        }
-
         .container-shell:before {
-            content: "jessibuca TF stream demo player";
-            position: absolute;
-            color: darkgray;
-            top: 4px;
-            left: 10px;
-            text-shadow: 1px 1px black;
-        }
-
-        #container {
-            background: rgba(13, 14, 27, 0.7);
-            width: 900px;
-            height: 568px;
-        }
-
-        .input {
-            display: flex;
-            margin-top: 10px;
-            color: white;
-            place-content: stretch;
-        }
-
-        .input2 {
-            bottom: 0px;
-        }
-
-        .input input {
-            flex: auto;
-        }
-
-        .err {
-            position: absolute;
-            top: 40px;
-            left: 10px;
-            color: red;
-        }
-
-        .option {
-            position: absolute;
-            top: 4px;
-            right: 10px;
-            display: flex;
-            place-content: center;
-            font-size: 12px;
-        }
-
-        .option span {
-            color: white;
-        }
-
-        .page {
-            background: url('./bg.jpg');
-            background-repeat: no-repeat;
-            background-position: top;
-        }
-
-        @media (max-width: 720px) {
-            #container {
-                width: 90vw;
-                height: 52.7vw;
-            }
+            content: "jessibuca pro 回放流 demo";
         }
     </style>
 </head>
@@ -94,14 +19,14 @@
     <div class="container-shell">
         <div id="container"></div>
         <div class="input">
-            <div style="width: 900px">
+            <div>
                 <span><span style="color: red">TPS:动态(根据流):</span>播放器的倍率播放完全是根据服务器端推流的速率，如果服务器端推的是一倍率且动态码率的流，
                 播放器就按照一倍率动态码率渲染。<span style="color: green">例如 fps会15到30之间跳动。</span>
             </span>
             </div>
         </div>
         <div class="input">
-            <div style="width: 900px">
+            <div>
                 <span><span style="color: red">TPS:定频（本地设置）:</span>则支持播放器端控制播放速率(设置FPS+播放倍率)，播放器端设置的播放速率是固定的，不会随着流的速率变化而变化。
                 支持设置播放器的播放倍率（提高渲染倍率）。<span
                         style="color: green">在推流码率足够的情况下，播放器会按照固定倍率播放</span>
@@ -109,60 +34,68 @@
             </div>
         </div>
         <div class="input">
-            <div style="width: 900px">
+            <div >
                 <span><span style="color: red">TPS:解码前缓冲数据:</span>对于存在有些流会一下子以2倍甚至4倍的速率推送的情况，如果设置为true，则会根据计算出来的fps，只根据fps和倍率来解码数据，其他数据还是被缓存在队列中，等待解码。
             </span>
             </div>
         </div>
         <div class="input">
-            <div style="width: 900px">
+            <div >
                 <span><span style="color: red">TPS:服务器端倍率推流:</span> 如果服务器端按照倍率推流，播放器端也需要同步的以倍率播放【调用forward(rate)】接口
             </span>
             </div>
         </div>
         <div class="input">
-            <div style="width: 900px">
-                <span style="color: red">TPS:</span> 录像流暂只支持wasm（simd）解码,canvas渲染。<span id="supportWebgpu"></span>
+            <div >
+                <span style="color: red">TPS:</span> 录像流暂只支持wasm（simd）解码,canvas渲染。
+
             </div>
         </div>
-
         <div class="input">
             <div class="playbackForward">
                 <span>FPS设置：</span>
                 <select id="isUseFpsRender" style="width: 140px">
                     <option value="false" selected>动态(根据流)</option>
-                    <option value="true">定频(本地设置)</option>
+                    <option value="true">定频（本地设置）</option>
                 </select>
-                <span>是否解码前缓冲数据(定频生效)</span>
-                <select id="isCacheBeforeDecodeForFpsRender" style="width: 50px">
-                    <option value="true">是</option>
-                    <option value="false" selected>否</option>
-                </select>
-                <span>是否显示操作按钮</span>
-                <select id="isShowControl" style="width: 50px">
-                    <option value="true" selected>是</option>
-                    <option value="false">否</option>
-                </select>
-                <span>是否显示24H时间轴</span>
-                <select id="isShow24H" style="width: 50px">
-                    <option value="true" selected>是</option>
-                    <option value="false">否</option>
-                </select>
-
             </div>
         </div>
         <div class="input">
-            <span>只解码I帧</span>
+            <span>是否解码前缓冲数据(定频生效)</span>
+            <select id="isCacheBeforeDecodeForFpsRender" style="width: 50px">
+                <option value="true">是</option>
+                <option value="false" selected>否</option>
+            </select>
+        </div>
+        <div class="input">
+            <span>是否显示操作按钮</span>
+            <select id="isShowControl" style="width: 50px">
+                <option value="true" selected>是</option>
+                <option value="false">否</option>
+            </select>
+        </div>
+        <div class="input">
+            <span>是否显示24H时间轴</span>
+            <select id="isShow24H" style="width: 50px">
+                <option value="true" selected>是</option>
+                <option value="false">否</option>
+            </select>
+        </div>
+        <div class="input">
+            <span>只解码I帧(<span style="color:red;">点击重播按钮生效</span>)</span>
             <select id="onlyDecoderIFrame" style="width: 50px">
                 <option value="1">1倍</option>
                 <option value="2">2倍</option>
                 <option value="4" selected>4倍</option>
                 <option value="8">8倍</option>
             </select>
-
+        </div>
+        <div class="input">
             <div class="playback-fps" style="margin-left: 10px">
                 <span>FPS（定频(本地设置)生效）：</span><input style="width: 50px" type="text" id="playbackFps" value="25">帧
             </div>
+        </div>
+        <div class="input">
             <div class="playback-fps" style="margin-left: 10px">
                 <span>不断流暂停是否清除缓存数据</span>
                 <select id="isPlaybackPauseClearCache" style="width: 50px">
@@ -177,11 +110,14 @@
                 <option value="true">是</option>
                 <option value="false" selected>否</option>
             </select>
+        </div>
+        <div class="input">
             <span>canvas渲染技术：</span>
-            <select id="isUseWebGPU">
+            <select id="isUseWebGPU" onchange="replay()">
                 <option value="webgl">webgl</option>
                 <option value="webgpu" selected>webgpu</option>
             </select>
+            <span id="supportWebgpu"></span>
         </div>
         <div class="input">
             <span>是否使用硬解码(https支持)</span>
@@ -191,12 +127,17 @@
             </select>
         </div>
         <div class="input">
+            <button onclick="replay()">重播</button>
+        </div>
+        <div class="input">
             <div>输入URL：</div>
             <input
                 autocomplete="on"
                 id="playUrl"
                 value=""
             />
+        </div>
+        <div class="input">
             <button id="play">播放</button>
             <button id="pause">停止(流会断开)</button>
             <button id="playbackPause">停止(流不断开)</button>
@@ -208,23 +149,10 @@
         </div>
         <div class="input" style="line-height: 30px">
             <button id="destroy">销毁</button>
-            <!--            <div id="playbackDom" style="width: 400px">-->
-            <!--                <div class="playbackForward">-->
-            <!--                    <span>播放倍率：</span>-->
-            <!--                    <select id="playbackRate" style="width: 50px">-->
-            <!--                        <option value="1" selected>1倍</option>-->
-            <!--                        <option value="2">2倍</option>-->
-            <!--                        <option value="4">4倍</option>-->
-            <!--                        <option value="8">8倍</option>-->
-            <!--                    </select>-->
-            <!--                    <button id="playbackForward">快进</button>-->
-            <!--                </div>-->
-
-            <!--            </div>-->
-
         </div>
     </div>
 </div>
+<script src="./demo.js"></script>
 
 <script>
     var $player = document.getElementById('play');
@@ -234,18 +162,18 @@
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
     var $playbackTime = document.getElementById('playbackTimes');
-    var $playbackForward = document.getElementById('playbackForward');
     var $playbackFps = document.getElementById('playbackFps');
     var $isUseFpsRender = document.getElementById('isUseFpsRender');
-    var $playbackDom = document.getElementById('playbackDom');
     var $isShowControl = document.getElementById('isShowControl'); // 是否显示按钮
     var $isShow24H = document.getElementById('isShow24H'); // 是否显示24H操作栏
-    var $onlyDecoderIFrame = document.getElementById('onlyDecoderIFrame'); // 是否显示24H操作栏
+    var $onlyDecoderIFrame = document.getElementById('onlyDecoderIFrame');
     var $isCacheBeforeDecodeForFpsRender = document.getElementById('isCacheBeforeDecodeForFpsRender');
     var $isPlaybackPauseClearCache = document.getElementById('isPlaybackPauseClearCache');
     var $uiUsePlaybackPause = document.getElementById('uiUsePlaybackPause');
     var $supportWebgpu = document.getElementById('supportWebgpu');
+    var $isUseWebGPU = document.getElementById('isUseWebGPU');
     var $playbackUseWCS = document.getElementById('playbackUseWCS');
+
     var forceNoOffscreen = true; //
     var jessibuca = null;
     var isPlaybackPause = false;
@@ -255,13 +183,11 @@
 
     if (isSupportWebgpu) {
         $supportWebgpu.style.color = 'green';
-        $supportWebgpu.innerHTML = '支持webgpu';
-    }
-    else {
+        $supportWebgpu.innerHTML = '支持webGPU';
+    } else {
         $supportWebgpu.style.color = 'red';
-        $supportWebgpu.innerHTML = '暂不支持webgpu，降级到webgl渲染';
+        $supportWebgpu.innerHTML = '暂不支持webGPU，降级到webgl渲染';
     }
-
 
     function isMobile() {
         return (/iphone|ipad|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));
@@ -302,7 +228,7 @@
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
             playbackForwardMaxRateDecodeIFrame: onlyDecoderIFrame,
-            useWebGPU: $isUseWebGPU.value === 'webgpu',
+            useWebGPU: $isUseWebGPU.value === 'webgpu' // 使用WebGPU
         },);
 
         jessibuca.onLog = msg => console.error(msg);
@@ -315,7 +241,6 @@
         $pause.style.display = 'none';
         $playbackPause.style.display = 'none';
         $destroy.style.display = 'none';
-        // $playbackDom.style.display = 'none';
 
 
         jessibuca.on('playbackPreRateChange', (rate) => {
@@ -327,7 +252,19 @@
 
     create();
 
-    $player.addEventListener('click', function () {
+    function replay() {
+        if (jessibuca) {
+            jessibuca.destroy().then(() => {
+                create();
+                play();
+            });
+        } else {
+            create();
+            play();
+        }
+    }
+
+    function play() {
         var href = $playHref.value;
         var playTimes = $playbackTime.value;
         var playFps = $playbackFps.value || 20;
@@ -367,7 +304,11 @@
         $pause.style.display = 'inline-block';
         $playbackPause.style.display = 'inline-block';
         $destroy.style.display = 'inline-block';
-        // $playbackDom.style.display = 'block';
+    }
+
+
+    $player.addEventListener('click', function () {
+        play();
     }, false)
 
 
@@ -394,16 +335,9 @@
         } else {
             create();
         }
+
     })
 
-
-    // $playbackForward.addEventListener('click', function () {
-    //     const playbackRate = document.querySelector('#playbackRate').value;
-    //
-    //     if (jessibuca) {
-    //         jessibuca.forward(playbackRate);
-    //     }
-    // })
 
 </script>
 
