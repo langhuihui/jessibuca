@@ -113,19 +113,6 @@
     var forceNoOffscreen = true; //
     var jessibuca = null;
 
-    function isMobile() {
-        return (/iphone|ipad|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));
-    }
-
-    function isPad() {
-        return (/ipad|android(?!.*mobile)|tablet|kindle|silk/i.test(window.navigator.userAgent.toLowerCase()));
-    }
-
-    const useVconsole = isMobile() || isPad()
-
-    if (useVconsole && window.VConsole) {
-        new window.VConsole();
-    }
 
 
     function create() {

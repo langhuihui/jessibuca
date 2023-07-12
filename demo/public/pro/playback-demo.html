@@ -189,20 +189,6 @@
         $supportWebgpu.innerHTML = '暂不支持webGPU，降级到webgl渲染';
     }
 
-    function isMobile() {
-        return (/iphone|ipad|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));
-    }
-
-    function isPad() {
-        return (/ipad|android(?!.*mobile)|tablet|kindle|silk/i.test(window.navigator.userAgent.toLowerCase()));
-    }
-
-    const useVconsole = isMobile() || isPad()
-
-    if (useVconsole && window.VConsole) {
-        new window.VConsole();
-    }
-
     function create() {
         const showOperateBtns = $isShowControl.value === 'true';
         const onlyDecoderIFrame = Number($onlyDecoderIFrame.value);
