@@ -41,7 +41,9 @@
         <div class="input">
             <div>
                 当前浏览器：
+                <span id="wasmSupport" style="color: green;display: none">支持WASM解码；</span>
                 <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码</span>
+                <span id="wasmNotSupport" style="color: red;display: none">不支持WASM解码</span>
                 <span id="simdNotSupport"
                       style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
             </div>

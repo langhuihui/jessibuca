@@ -86,6 +86,20 @@ function checkSupportWCS() {
     return "VideoEncoder" in window;
 }
 
+function checkSupportWasm() {
+    try {
+        if (typeof window.WebAssembly === 'object' && typeof window.WebAssembly.instantiate === 'function') {
+            const module = new window.WebAssembly.Module(Uint8Array.of(0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00));
+            if (module instanceof window.WebAssembly.Module) {
+                return new window.WebAssembly.Instance(module) instanceof window.WebAssembly.Instance;
+            }
+        }
+        return false;
+    } catch (e) {
+        return false;
+    }
+}
+
 
 function checkSupportSIMD() {
     return WebAssembly && WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 98, 11]));
@@ -104,7 +118,7 @@ if (support && notSupport) {
 
 let supportH264 = document.getElementById('mseSupport264');
 let notSupportH264 = document.getElementById('mseNotSupport264');
-if(supportH264 && notSupportH264){
+if (supportH264 && notSupportH264) {
     if (checkSupportMSEH264()) {
         supportH264.style.display = 'inline-block'
     } else {
@@ -113,11 +127,10 @@ if(supportH264 && notSupportH264){
 }
 
 
-
 let supportWcsHevc = document.getElementById('wcsSupport');
 let notSupportWcsHevc = document.getElementById('wcsNotSupport');
 
-if(supportWcsHevc && notSupportWcsHevc){
+if (supportWcsHevc && notSupportWcsHevc) {
     if (checkSupportWCSHevc()) {
         supportWcsHevc.style.display = 'inline-block';
     } else {
@@ -135,6 +148,18 @@ if (supportWcs && notSupportWcs) {
         notSupportWcs.style.display = 'inline-block'
     }
 }
+
+let wasmSupport = document.getElementById('wasmSupport');
+let wasmNotSupport = document.getElementById('wasmNotSupport');
+
+if (wasmSupport && wasmNotSupport) {
+    if (checkSupportWasm()) {
+        wasmSupport.style.display = 'inline-block';
+    } else {
+        wasmNotSupport.style.display = 'inline-block';
+    }
+}
+
 
 let supportSimd = document.getElementById('simdSupport');
 let notSupportSimd = document.getElementById('simdNotSupport');
