@@ -153,6 +153,15 @@
 
 ## 其他
 
+### （wasm+canvas）自动播放
+------
+#### https
+[https://jessibuca.com/pro/demo-auto-play.html](https://jessibuca.com/pro/demo-auto-play.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-auto-play.html](http://jessibuca.monibuca.com/pro/demo-auto-play.html)
+
+
 ### 移动端全屏
 ------
 #### https
