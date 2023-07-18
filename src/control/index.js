@@ -4,6 +4,7 @@ import property from './property';
 import events from './events';
 import './style.scss'
 import hotkey from "./hotkey";
+import {removeElement} from "../utils";
 
 export default class Control {
     constructor(player) {
@@ -20,21 +21,51 @@ export default class Control {
 
     destroy() {
         if (this.$poster) {
-            this.player.$container.removeChild(this.$poster);
+            const result = removeElement(this.$poster);
+            if(!result){
+                const $poster = this.player.$container.querySelector('.jessibuca-poster');
+                if ($poster && this.player.$container) {
+                    this.player.$container.removeChild($poster);
+                }
+            }
         }
         if (this.$loading) {
-            this.player.$container.removeChild(this.$loading);
+            const result = removeElement(this.$loading)
+            if (!result) {
+                const $loading = this.player.$container.querySelector('.jessibuca-loading');
+                if ($loading && this.player.$container) {
+                    this.player.$container.removeChild($loading);
+                }
+            }
         }
         if (this.$controls) {
-            this.player.$container.removeChild(this.$controls);
+            const result = removeElement(this.$controls)
+            if (!result) {
+                const $controls = this.player.$container.querySelector('.jessibuca-controls');
+                if ($controls && this.player.$container) {
+                    this.player.$container.removeChild($controls);
+                }
+            }
         }
 
-        if(this.$recording){
-            this.player.$container.removeChild(this.$recording);
+        if (this.$recording) {
+            const result = removeElement(this.$recording)
+            if (!result) {
+                const $recording = this.player.$container.querySelector('.jessibuca-recording');
+                if ($recording && this.player.$container) {
+                    this.player.$container.removeChild($recording);
+                }
+            }
         }
 
-        if(this.$playBig){
-            this.player.$container.removeChild(this.$playBig);
+        if (this.$playBig) {
+            const result = removeElement(this.$playBig)
+            if (!result) {
+                const $playBig = this.player.$container.querySelector('.jessibuca-play-big');
+                if ($playBig && this.player.$container) {
+                    this.player.$container.removeChild($playBig);
+                }
+            }
         }
 
         this.player.debug.log('control', 'destroy');

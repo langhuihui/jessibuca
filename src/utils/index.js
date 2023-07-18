@@ -579,3 +579,15 @@ export function closeVideoFrame(videoFrame) {
         videoFrame.destroy()
     }
 }
+
+
+export function removeElement(element) {
+    let result = false;
+    if (element) {
+        if (element.parentNode) {
+            element.parentNode.removeChild(element);
+            result = true;
+        }
+    }
+    return result;
+}
