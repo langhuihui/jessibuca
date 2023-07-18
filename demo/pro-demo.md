@@ -178,6 +178,17 @@
 #### http
 [http://jessibuca.monibuca.com/pro/async-demo.html](http://jessibuca.monibuca.com/pro/async-demo.html)
 
+### 弹幕
+------
+#### https
+[https://jessibuca.com/pro/demo-danmu.html](https://jessibuca.com/pro/demo-danmu.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-danmu.html](http://jessibuca.monibuca.com/pro/demo-danmu.html)
+
+
+
+
 
 ### 裸流(H264/H265)
 ------
