@@ -1400,6 +1400,56 @@ useWCS:false
 > 就是可能会在一段时间内没有数据流，导致网络中介认为连接已经断开了。
 
 
+## 关于播放器内部自定义DOM
+
+业务需要有自己的dom在播放器内部，例如
+
+```html
+<div id="container"></div>
+```
+
+当初始化播放器，传递 `container` 参数的时候，播放器会在 `container` 内部创建播放器的`DOM`
+
+```html
+<div id="container">
+    // 播放器自己初始化的dom元素
+    <canvas></canvas>
+    <video></video>
+</div>
+```
+
+如果业务需在播放器内部有自己的`DOM`，可以直接在`container`内部创建，播放器会自动识别并不会覆盖。
+
+
+```html
+<div id="container">
+    // 播放器自己初始化的dom元素
+    <canvas></canvas>
+    <video></video>
+    // 业务的dom
+    <div class="your-dom">业务自己的dom</div>
+</div>
+
+```
+
+
+小结： 所以在初始化播放器的时候，业务可以通过在container内部创建自己的dom。
+
+```html
+
+<div id="container">
+    // 业务的dom
+    <div class="your-dom">业务自己的dom</div>
+</div>
+```
+
+待播放器初始化的时候，播放器只会在container内部创建自己的dom，不会覆盖业务自己的dom。
+
+> 调用播放器destroy() 方法的时候，播放器内部也只会销毁掉播放器创建的dom，不会销毁业务自己创建的dom。
+
+
+
+
 ### 群
 <img src="/public/qrcode.jpeg">
 
