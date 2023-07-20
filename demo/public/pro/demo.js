@@ -78,8 +78,9 @@ function checkSupportMSEH264() {
 
 function checkSupportWCSHevc() {
     const browserInfo = getBrowser();
+    const supportWCS = checkSupportWCS();
 
-    return browserInfo.type.toLowerCase() === 'chrome' && browserInfo.version >= 107 && (location.protocol === 'https:' || location.hostname === 'localhost');
+    return supportWCS && browserInfo.type.toLowerCase() === 'chrome' && browserInfo.version >= 107 && (location.protocol === 'https:' || location.hostname === 'localhost');
 }
 
 function checkSupportWCS() {
