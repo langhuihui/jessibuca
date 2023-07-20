@@ -1,10 +1,10 @@
 <h1 align="center"> Jessibuca </h1>
 
-<p align="center"> 
+<p align="center">
 <b> English </b> | <a href="https://github.com/langhuihui/jessibuca/blob/v3/README.md"> 简体中文 </a>
 </p>
 
-Jessibuca is an open-source pure H5 live streaming player. 
+Jessibuca is an open-source pure H5 live streaming player.
 
 It compiles the audio and video decoding library into Js (wasm) through Emscripten to run in the browser. It is compatible with almost all browsers and can run on PC, mobile, and WeChat without the need for additional plug-ins.
 
@@ -161,3 +161,9 @@ Run `yarn build:wasm` or `npm run build:wasm`.
 ## Group
 
 <img src="/demo/public/qrcode.jpeg">
+
+## Group
+<img src="/demo/public/qrcode-qw.jpeg">
+
+## QQ Group
+<img src="/public/qq-qrcode.jpg">

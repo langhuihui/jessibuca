@@ -176,5 +176,9 @@ Jessibuca 是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 
 <img src="/demo/public/qrcode.jpeg">
 
-## 群
+## 企微群
 <img src="/demo/public/qrcode-qw.jpeg">
+
+## qq频道
+<img src="/public/qq-qrcode.jpg">
+

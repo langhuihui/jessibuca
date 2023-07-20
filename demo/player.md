@@ -10,7 +10,26 @@ sidebar: false
 3. http-flv 即http://localhost/live/test.flv
 - 注意http协议会有跨域问题，需要设置cors头
 - 协议同时支持https、wss
-- 同时支持H264和H265编码格式
+- 同时支持H264和H265编码格式 (wasm软解码)
 - 支持webcodecs和MSE硬解码(H264格式)
 
 <Rice/>
+
+## Pro
+
+更强大的功能请使用[Pro版本](https://jessibuca.com/player-pro.html)
+
+
+## 赞助作者
+
+<img src="/public/wx.jpg"><img src="/public/alipay.jpg">
+
+## 群
+<img src="/public/qrcode.jpeg">
+
+
+## 群
+<img src="/public/qrcode-qw.jpeg">
+
+## qq频道
+<img src="/public/qq-qrcode.jpg">
