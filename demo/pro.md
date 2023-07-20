@@ -632,3 +632,7 @@ Audio Context的部分音频节点提供了playbackRate属性以实现倍速播�
 
 # 群
 <img src="/public/qrcode-qw.jpeg">
+
+## qq频道
+<img src="/public/qq-qrcode.jpg">
+

@@ -158,5 +158,7 @@ toothbrush - 牙刷
 ## 群
 <img src="/public/qrcode-qw.jpeg">
 
+## qq频道
+<img src="/public/qq-qrcode.jpg">
 
 

@@ -195,6 +195,9 @@ https://github.com/bosscheng/jessibuca-MSE-3x3-demo
 ## 群
 <img src="/public/qrcode.jpeg">
 
-
 ## 群
 <img src="/public/qrcode-qw.jpeg">
+
+## qq频道
+<img src="/public/qq-qrcode.jpg">
+
