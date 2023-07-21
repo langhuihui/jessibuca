@@ -78,6 +78,15 @@
                 <button id="replay">重播</button>
             </div>
         </div>
+        <div class="input">
+            <div>
+                <input
+                    checked
+                    type="checkbox"
+                    id="demuxUseWorker"
+                /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
+            </div>
+        </div>
 
         <div class="input">
             <div>输入URL：</div>
@@ -131,6 +140,7 @@
     var $videoBuffer = document.getElementById('videoBuffer');
     var $videoBufferDelay = document.getElementById('videoBufferDelay');
     var $replay = document.getElementById('replay');
+    var $demuxUseWorker = document.getElementById('demuxUseWorker');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -170,13 +180,9 @@
                 right: 10,
                 top: 10
             },
+            demuxUseWorker: $demuxUseWorker.checked === true,
         },);
 
-        // jessibuca.onLog = msg => console.error(msg);
-        // jessibuca.onRecord = (status) => console.log('onRecord', status);
-        // jessibuca.onPause = () => console.log('onPause');
-        // jessibuca.onPlay = () => console.log('onPlay');
-        // jessibuca.onMute = msg => console.log('onMute', msg);
         jessibuca.on("fullscreen", function (flag) {
             console.log('is fullscreen', id, flag)
         })

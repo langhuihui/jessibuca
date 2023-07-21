@@ -41,7 +41,9 @@
         <div class="input">
             <div>
                 当前浏览器：
+                <span id="wasmSupport" style="color: green;display: none">支持WASM解码；</span>
                 <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码</span>
+                <span id="wasmNotSupport" style="color: red;display: none">不支持WASM解码</span>
                 <span id="simdNotSupport"
                       style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
             </div>
@@ -49,6 +51,7 @@
         <div class="input">
             <div><input
                 type="checkbox"
+                checked
                 id="useMSE"
             /><span>MediaSource</span>
                 <input
@@ -57,10 +60,46 @@
                 /><span>Webcodec</span>
                 <input
                     type="checkbox"
+                    id="useWASM"
+                /><span>WASM</span>
+                <input
+                    type="checkbox"
                     id="useSIMD"
-                /><span>SIMD</span>
+                /><span>WASM(SIMD)</span> <span style="color: green">默认使用wasm解码器</span>
+            </div>
+        </div>
+        <div class="input">
+            <span>渲染标签：</span>
+            <select id="renderDom" onchange="replay()">
+                <option value="video" selected>video</option>
+                <option value="canvas">canvas</option>
+            </select>
+
+            <span>canvas渲染技术：</span>
+            <select id="isUseWebGPU" onchange="replay()">
+                <option value="webgl">webgl</option>
+                <option value="webgpu" selected>webgpu</option>
+            </select>
+            <span id="supportWebgpu"></span>
+        </div>
+        <div class="input">
+            <div>
+                <span>缓存时长：</span>
+                <input placeholder="单位：秒" type="text" id="videoBuffer" style="width: 50px" value="0.2">秒
+                <span>缓存延迟(延迟超过会触发丢帧)：</span>
+                <input placeholder="单位：秒" type="text" id="videoBufferDelay" style="width: 50px" value="1">秒
+                <button id="replay">重播</button>
             </div>
 
+        </div>
+        <div class="input">
+            <div>
+                <input
+                    checked
+                    type="checkbox"
+                    id="demuxUseWorker"
+                /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
+            </div>
         </div>
         <div class="input">
             <input
@@ -98,7 +137,14 @@
     var $fps = document.querySelector('.fps-inner');
     var $useMSE = document.getElementById('useMSE');
     var $useSIMD = document.getElementById('useSIMD');
+    var $useWASM = document.getElementById('useWASM');
     var $useWCS = document.getElementById('useWCS');
+    var $videoBuffer = document.getElementById('videoBuffer');
+    var $videoBufferDelay = document.getElementById('videoBufferDelay');
+    var $replay = document.getElementById('replay');
+    var $renderDom = document.getElementById('renderDom');
+    var $isUseWebGPU = document.getElementById('isUseWebGPU');
+    var $demuxUseWorker = document.getElementById('demuxUseWorker');
     var $cryptoKeyUrl = document.getElementById('cryptoKeyUrl');
 
     var showOperateBtns = true; // 是否显示按钮
@@ -108,78 +154,107 @@
     function create() {
         jessibuca = new JessibucaPro({
             container: $container,
-            videoBuffer: 0.2, // 缓存时长
+            videoBuffer: Number($videoBuffer.value), // 缓存时长
+            videoBufferDelay: Number($videoBufferDelay.value), // 1000s
             isResize: false,
-            decoder: './decoder-pro.js',
             text: "",
             loadingText: "加载中",
             debug: true,
-            debugLevel: 'debug',
+            debugLevel: "debug",
             useMSE: $useMSE.checked === true,
             useSIMD: $useSIMD.checked === true,
             useWCS: $useWCS.checked === true,
             showBandwidth: showOperateBtns, // 显示网速
+            showPerformance: showOperateBtns, // 显示性能
             operateBtns: {
                 fullscreen: showOperateBtns,
                 screenshot: showOperateBtns,
                 play: showOperateBtns,
                 audio: showOperateBtns,
+                ptz: showOperateBtns,
+                quality: showOperateBtns,
                 performance: showOperateBtns,
             },
+            timeout: 10000,
+            heartTimeoutReplayUseLastFrameShow: true,
+            audioEngine: "worklet",
+            qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
-            loadingTimeout: 10000,
-            heartTimeout: 200,
-            isFlv: true,
-            openWebglAlignment: true,
+            heartTimeout: 10,
+            ptzClickType: 'mouseDownAndUp',
+            ptzZoomShow: true,
+            ptzMoreArrowShow: true,
+            ptzApertureShow: true,
+            ptzFocusShow: true,
+            useCanvasRender: $renderDom.value === 'canvas',
+            useWebGPU: $isUseWebGPU.value === 'webgpu',
+            demuxUseWorker: $demuxUseWorker.checked === true,
+            controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
+            // audioEngine:"worklet",
+            // isFlv: true
             isCrypto: true,
             cryptoKeyUrl: $cryptoKeyUrl.value,
         },);
 
-        jessibuca.onLog = msg => console.error(msg);
-        jessibuca.onRecord = (status) => console.log('onRecord', status);
-        jessibuca.onPause = () => console.log('onPause');
-        jessibuca.onPlay = () => console.log('onPlay');
-        jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
-        jessibuca.onMute = msg => console.log('onMute', msg);
+
+        jessibuca.on('ptz', (arrow) => {
+            // console.log('ptz', arrow);
+        })
+
+        jessibuca.on('streamQualityChange', (value) => {
+            console.log('streamQualityChange', value);
+        })
+
+        jessibuca.on('timeUpdate', (value) => {
+            // console.log('timeUpdate', value);
+        })
+
+        jessibuca.on('stats', (stats) => {
+            // console.log('stats', stats);
+            $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
+        })
+
+        jessibuca.on(JessibucaPro.EVENTS.crashLog, (log) => {
+            console.log('crashLog', log)
+        })
+
+
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
         $destroy.style.display = 'none';
-        jessibuca.on('stats', (stats) => {
-            console.log('stats', stats);
-            $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
-        })
+        $fps.textContent = '';
     }
 
-    function replay() {
-        if (jessibuca) {
-            jessibuca.destroy().then(()=>{
-                create();
-                play();
-            });
-        }
-        else {
-            create();
-            play();
-        }
 
-    }
+    create();
 
     function play() {
         var href = $playHref.value;
         if (href) {
-            jessibuca.play(href).then(()=>{
-                console.log('play success');
-            }).catch((e)=>{
-                console.error('play error', e);
-            });
+            jessibuca.play(href);
             $player.style.display = 'none';
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
         }
     }
 
-    create();
+
+    function replay() {
+        if (jessibuca) {
+            jessibuca.destroy().then(() => {
+                create();
+                play();
+            });
+        } else {
+            create();
+            play();
+        }
+    }
+
+    $replay.addEventListener('click', function () {
+        replay();
+    })
 
     $player.addEventListener('click', function () {
         play();
@@ -193,11 +268,23 @@
         jessibuca.pause();
     })
 
+    $destroy.addEventListener('click', function () {
+        if (jessibuca) {
+            jessibuca.destroy().then(() => {
+                create();
+            });
+        } else {
+            create();
+        }
+
+    })
+
     $useMSE.addEventListener('click', function () {
         const checked = $useMSE.checked;
         if (checked) {
             $useSIMD.checked = false
             $useWCS.checked = false
+            $useWASM.checked = false
         }
         replay();
     })
@@ -207,6 +294,7 @@
         if (checked) {
             $useMSE.checked = false
             $useWCS.checked = false
+            $useWASM.checked = false
         }
         replay();
     })
@@ -216,16 +304,19 @@
         if (checked) {
             $useMSE.checked = false
             $useSIMD.checked = false
+            $useWASM.checked = false
         }
         replay();
     })
 
-    $destroy.addEventListener('click', function () {
-        if (jessibuca) {
-            jessibuca.destroy();
-            $fps.textContent = '';
+    $useWASM.addEventListener('click', function () {
+        const checked = $useWASM.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useSIMD.checked = false
+            $useWCS.checked = false
         }
-        create();
+        replay();
     })
 
 </script>

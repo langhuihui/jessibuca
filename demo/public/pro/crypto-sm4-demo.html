@@ -23,8 +23,8 @@
                 当前浏览器：
                 <span id="mseSupport264" style="color: green;display: none">支持MSE H264解码；</span>
                 <span id="mseSupport" style="color: green;display: none">支持MSE H265解码；</span>
-                <span id="mseNotSupport" style="color: red;display: none">不支持MSE H264解码；</span>
-                <span id="mseNotSupport264"
+                <span id="mseNotSupport264" style="color: red;display: none">不支持MSE H264解码；</span>
+                <span id="mseNotSupport"
                       style="color: red;display: none">不支持MSE H265解码,会自动切换成wasm解码；</span>
             </div>
         </div>
@@ -41,7 +41,9 @@
         <div class="input">
             <div>
                 当前浏览器：
+                <span id="wasmSupport" style="color: green;display: none">支持WASM解码；</span>
                 <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码</span>
+                <span id="wasmNotSupport" style="color: red;display: none">不支持WASM解码</span>
                 <span id="simdNotSupport"
                       style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
             </div>
@@ -58,9 +60,27 @@
                 /><span>Webcodec</span>
                 <input
                     type="checkbox"
+                    id="useWASM"
+                /><span>WASM</span>
+                <input
+                    type="checkbox"
                     id="useSIMD"
-                /><span>SIMD</span>
+                /><span>WASM(SIMD)</span> <span style="color: green">默认使用wasm解码器</span>
             </div>
+        </div>
+        <div class="input">
+            <span>渲染标签：</span>
+            <select id="renderDom" onchange="replay()">
+                <option value="video" selected>video</option>
+                <option value="canvas">canvas</option>
+            </select>
+
+            <span>canvas渲染技术：</span>
+            <select id="isUseWebGPU" onchange="replay()">
+                <option value="webgl">webgl</option>
+                <option value="webgpu" selected>webgpu</option>
+            </select>
+            <span id="supportWebgpu"></span>
         </div>
         <div class="input">
             <div>
@@ -73,7 +93,22 @@
                 <button id="replay">重播</button>
             </div>
         </div>
-
+        <div class="input">
+            <div>
+                <input
+                    checked
+                    type="checkbox"
+                    id="demuxUseWorker"
+                /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
+            </div>
+        </div>
+        <div class="input">
+            <input
+                style="width: 400px"
+                type="text"
+                id="cryptoKeyUrl"
+                placeholder="密匙获取的域名[只需要域名，不需要带path](例如：http://test.com),若为空则取播放URL的域名"/>
+        </div>
 
         <div class="input">
             <div>输入URL：</div>
@@ -85,7 +120,7 @@
             <button id="play">播放</button>
             <button id="pause" style="display: none">停止</button>
         </div>
-        <div class="input" style="line-height: 30px">
+        <div class="input input-more" style="line-height: 30px">
             <button id="destroy">销毁</button>
             <span class="fps-inner"></span>
         </div>
@@ -100,12 +135,16 @@
     var $playHref = document.getElementById('playUrl');
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
+    var $fps = document.querySelector('.fps-inner');
     var $useMSE = document.getElementById('useMSE');
     var $useSIMD = document.getElementById('useSIMD');
+    var $useWASM = document.getElementById('useWASM');
     var $useWCS = document.getElementById('useWCS');
     var $videoBuffer = document.getElementById('videoBuffer');
     var $videoBufferDelay = document.getElementById('videoBufferDelay');
     var $replay = document.getElementById('replay');
+    var $renderDom = document.getElementById('renderDom');
+    var $isUseWebGPU = document.getElementById('isUseWebGPU');
     var $fps = document.querySelector('.fps-inner');
     var $sm4Key = document.getElementById('sm4Key');
 
@@ -139,12 +178,22 @@
                 quality: showOperateBtns,
                 performance: showOperateBtns,
             },
+            timeout: 10000,
             heartTimeoutReplayUseLastFrameShow: true,
             audioEngine: "worklet",
             qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
             heartTimeout: 10,
+            ptzClickType: 'mouseDownAndUp',
+            ptzZoomShow: true,
+            ptzMoreArrowShow: true,
+            ptzApertureShow: true,
+            ptzFocusShow: true,
+            useCanvasRender: $renderDom.value === 'canvas',
+            useWebGPU: $isUseWebGPU.value === 'webgpu',
+            demuxUseWorker: $demuxUseWorker.checked === true,
+            controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
             // audioEngine:"worklet",
             // isFlv: true
             isSm4Crypto: true,
@@ -153,7 +202,7 @@
 
 
         jessibuca.on('ptz', (arrow) => {
-            console.log('ptz', arrow);
+            // console.log('ptz', arrow);
         })
 
         jessibuca.on('streamQualityChange', (value) => {
@@ -242,6 +291,7 @@
         if (checked) {
             $useSIMD.checked = false
             $useWCS.checked = false
+            $useWASM.checked = false
         }
         replay();
     })
@@ -251,6 +301,7 @@
         if (checked) {
             $useMSE.checked = false
             $useWCS.checked = false
+            $useWASM.checked = false
         }
         replay();
     })
@@ -260,6 +311,17 @@
         if (checked) {
             $useMSE.checked = false
             $useSIMD.checked = false
+            $useWASM.checked = false
+        }
+        replay();
+    })
+
+    $useWASM.addEventListener('click', function () {
+        const checked = $useWASM.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useSIMD.checked = false
+            $useWCS.checked = false
         }
         replay();
     })

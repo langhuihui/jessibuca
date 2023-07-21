@@ -10,7 +10,7 @@
     <script src="./jessibuca-pro-demo.js"></script>
     <style>
         .container-shell:before {
-            content: "jessibuca demo player";
+            content: "jessibuca pro demo player";
         }
     </style>
 </head>
@@ -91,6 +91,15 @@
                 <button id="replay">重播</button>
             </div>
         </div>
+        <div class="input">
+            <div>
+                <input
+                    checked
+                    type="checkbox"
+                    id="demuxUseWorker"
+                /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
+            </div>
+        </div>
 
         <div class="input">
             <div>输入URL：</div>
@@ -116,6 +125,7 @@
     var $playHref = document.getElementById('playUrl');
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
+    var $fps = document.querySelector('.fps-inner');
     var $useMSE = document.getElementById('useMSE');
     var $useSIMD = document.getElementById('useSIMD');
     var $useWASM = document.getElementById('useWASM');
@@ -123,9 +133,9 @@
     var $videoBuffer = document.getElementById('videoBuffer');
     var $videoBufferDelay = document.getElementById('videoBufferDelay');
     var $replay = document.getElementById('replay');
-    var $fps = document.querySelector('.fps-inner');
     var $renderDom = document.getElementById('renderDom');
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
+    var $demuxUseWorker = document.getElementById('demuxUseWorker');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -169,7 +179,8 @@
             ptzFocusShow: true,
             useCanvasRender: $renderDom.value === 'canvas',
             useWebGPU: $isUseWebGPU.value === 'webgpu',
-            controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>'
+            demuxUseWorker: $demuxUseWorker.checked === true,
+            controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
             // audioEngine:"worklet",
             // isFlv: true
         },);

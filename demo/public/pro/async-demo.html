@@ -40,7 +40,9 @@
         <div class="input">
             <div>
                 当前浏览器：
+                <span id="wasmSupport" style="color: green;display: none">支持WASM解码；</span>
                 <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码</span>
+                <span id="wasmNotSupport" style="color: red;display: none">不支持WASM解码</span>
                 <span id="simdNotSupport"
                       style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
             </div>
@@ -48,6 +50,7 @@
         <div class="input">
             <div><input
                 type="checkbox"
+                checked
                 id="useMSE"
             /><span>MediaSource</span>
                 <input
@@ -56,9 +59,27 @@
                 /><span>Webcodec</span>
                 <input
                     type="checkbox"
+                    id="useWASM"
+                /><span>WASM</span>
+                <input
+                    type="checkbox"
                     id="useSIMD"
-                /><span>SIMD</span>
+                /><span>WASM(SIMD)</span> <span style="color: green">默认使用wasm解码器</span>
             </div>
+        </div>
+        <div class="input">
+            <span>渲染标签：</span>
+            <select id="renderDom" onchange="replay()">
+                <option value="video" selected>video</option>
+                <option value="canvas">canvas</option>
+            </select>
+
+            <span>canvas渲染技术：</span>
+            <select id="isUseWebGPU" onchange="replay()">
+                <option value="webgl">webgl</option>
+                <option value="webgpu" selected>webgpu</option>
+            </select>
+            <span id="supportWebgpu"></span>
         </div>
         <div class="input">
             <div>
@@ -67,6 +88,15 @@
                 <span>缓存延迟(延迟超过会触发丢帧)：</span>
                 <input placeholder="单位：秒" type="text" id="videoBufferDelay" style="width: 50px" value="1">秒
                 <button id="replay">重播</button>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <input
+                    checked
+                    type="checkbox"
+                    id="demuxUseWorker"
+                /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
             </div>
         </div>
 
@@ -79,31 +109,32 @@
             />
             <button id="play">播放</button>
             <button id="pause" style="display: none">停止</button>
-            <button id="pause2" style="display: none">停止(清屏)</button>
-
         </div>
         <div class="input" style="line-height: 30px">
             <button id="destroy">销毁</button>
+            <span class="fps-inner"></span>
         </div>
     </div>
 </div>
 
 <script src="./demo.js"></script>
-
 <script>
-
     var $player = document.getElementById('play');
     var $pause = document.getElementById('pause');
-    var $pause2 = document.getElementById('pause2');
     var $playHref = document.getElementById('playUrl');
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
     var $useMSE = document.getElementById('useMSE');
     var $useSIMD = document.getElementById('useSIMD');
+    var $useWASM = document.getElementById('useWASM');
     var $useWCS = document.getElementById('useWCS');
     var $videoBuffer = document.getElementById('videoBuffer');
     var $videoBufferDelay = document.getElementById('videoBufferDelay');
     var $replay = document.getElementById('replay');
+    var $fps = document.querySelector('.fps-inner');
+    var $renderDom = document.getElementById('renderDom');
+    var $isUseWebGPU = document.getElementById('isUseWebGPU');
+    var $demuxUseWorker = document.getElementById('demuxUseWorker');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -152,71 +183,50 @@
     function _create() {
         jessibuca = new JessibucaPro({
             container: $container,
-            decoder: './decoder-pro.js',
             videoBuffer: Number($videoBuffer.value), // 缓存时长
             videoBufferDelay: Number($videoBufferDelay.value), // 1000s
             isResize: false,
             text: "",
             loadingText: "加载中",
-
-            isFlv: true,
             debug: true,
             debugLevel: "debug",
-            // hasAudio:false,
             useMSE: $useMSE.checked === true,
             useSIMD: $useSIMD.checked === true,
             useWCS: $useWCS.checked === true,
             showBandwidth: showOperateBtns, // 显示网速
             showPerformance: showOperateBtns, // 显示性能
-            hiddenAutoPause: true,
             operateBtns: {
                 fullscreen: showOperateBtns,
                 screenshot: showOperateBtns,
                 play: showOperateBtns,
                 audio: showOperateBtns,
-                record: showOperateBtns,
                 ptz: showOperateBtns,
                 quality: showOperateBtns,
                 performance: showOperateBtns,
             },
+            timeout: 10000,
             heartTimeoutReplayUseLastFrameShow: true,
             audioEngine: "worklet",
             qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
-            loadingTimeout: 10,
             heartTimeout: 10,
-            contextmenuBtns: [
-                {
-                    content: '切换性能面板',
-                    index: 1,
-                    click: () => {
-                        const playStatus = jessibuca.getStatus()
-                        if (playStatus === 'playing') {
-                            jessibuca.togglePerformancePanel();
-                        } else {
-                            // ElMessage.warning('请先播放视频');
-                        }
-                    }
-                },
-                {
-                    content: '关于PRO',
-                    index: 2,
-                    click: () => {
-                        // ElMessage.success('如需要购买PRO版本可以联系添加作者微信：bosswancheng');
-                        console.log('如需要购买PRO版本可以联系添加作者微信：bosswancheng')
-                    }
-                }
-            ],
-            recordType: 'webm'
-
+            ptzClickType: 'mouseDownAndUp',
+            ptzZoomShow: true,
+            ptzMoreArrowShow: true,
+            ptzApertureShow: true,
+            ptzFocusShow: true,
+            useCanvasRender: $renderDom.value === 'canvas',
+            useWebGPU: $isUseWebGPU.value === 'webgpu',
+            demuxUseWorker: $demuxUseWorker.checked === true,
+            controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>'
             // audioEngine:"worklet",
             // isFlv: true
         },);
 
 
         jessibuca.on('ptz', (arrow) => {
-            console.log('ptz', arrow);
+            // console.log('ptz', arrow);
         })
 
         jessibuca.on('streamQualityChange', (value) => {
@@ -227,23 +237,16 @@
             // console.log('timeUpdate', value);
         })
 
+        jessibuca.on('stats', (stats) => {
+            // console.log('stats', stats);
+            $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
+        })
+
+
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
-        $pause2.style.display = 'none';
         $destroy.style.display = 'none';
-    }
-
-
-    function create() {
-        return new Promise((resolve, reject) => {
-            if (window.JessibucaPro) {
-                resolve()
-            } else {
-                loadJs('./jessibuca-pro-demo.js', 'jessibuca-pro', function () {
-                    resolve()
-                })
-            }
-        })
+        $fps.textContent = '';
     }
 
 
@@ -257,7 +260,6 @@
             jessibuca.play(href);
             $player.style.display = 'none';
             $pause.style.display = 'inline-block';
-            $pause2.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
         }
     }
@@ -293,14 +295,8 @@
     $pause.addEventListener('click', function () {
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
-        $pause2.style.display = 'none';
+        $fps.textContent = '';
         jessibuca.pause();
-    })
-    $pause2.addEventListener('click', function () {
-        $player.style.display = 'inline-block';
-        $pause.style.display = 'none';
-        $pause2.style.display = 'none';
-        jessibuca.pause(true);
     })
 
     $destroy.addEventListener('click', function () {
@@ -323,6 +319,7 @@
         if (checked) {
             $useSIMD.checked = false
             $useWCS.checked = false
+            $useWASM.checked = false
         }
         replay();
     })
@@ -332,6 +329,7 @@
         if (checked) {
             $useMSE.checked = false
             $useWCS.checked = false
+            $useWASM.checked = false
         }
         replay();
     })
@@ -341,6 +339,17 @@
         if (checked) {
             $useMSE.checked = false
             $useSIMD.checked = false
+            $useWASM.checked = false
+        }
+        replay();
+    })
+
+    $useWASM.addEventListener('click', function () {
+        const checked = $useWASM.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useSIMD.checked = false
+            $useWCS.checked = false
         }
         replay();
     })
