@@ -82,9 +82,20 @@
             <div>
                 <input
                     checked
+                    onclick="replay()"
                     type="checkbox"
                     id="demuxUseWorker"
                 /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <input
+                    checked
+                    onclick="toggleDebugLevel"
+                    type="checkbox"
+                    id="isDebug"
+                /><span>开启日志</span>
             </div>
         </div>
 
@@ -141,6 +152,7 @@
     var $videoBufferDelay = document.getElementById('videoBufferDelay');
     var $replay = document.getElementById('replay');
     var $demuxUseWorker = document.getElementById('demuxUseWorker');
+    var $isDebug = document.getElementById('isDebug');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -158,6 +170,7 @@
             text: "",
             loadingText: "加载中",
             debug: true,
+            debugLevel: $isDebug.checked === true ? "debug" : '',
             isMulti: true,
             useMSE: $useMSE.checked === true,
             useSIMD: $useSIMD.checked === true,
@@ -305,6 +318,18 @@
         replay();
     })
 
+
+    function toggleDebugLevel() {
+
+        for (let i = 0; i < size; i++) {
+            let player = playList[i];
+            if(player){
+                const isDebug = $isDebug.checked === true;
+                player.updateDebugLevel(isDebug ? 'debug' : 'warn')
+            }
+        }
+
+    }
 </script>
 
 </body>
