@@ -324,7 +324,7 @@ H265硬解码，对于电脑硬件支持情况：
 
 ### N卡官方对视频并发解码路数有限制
 
-使用N卡进行视频编码有着并发数的限制，https://developer.nvidia.com/video-encode-decode-gpu-support-matrix#Encoder，可以看到，GeForce 系列各种显卡大部分限制为 3 路并发。这个限制貌似并不是硬件能力的限制，而是Nvidia为了让更多的人购买高端系列的显卡而做的手脚。
+使用N卡进行视频编解码有着并发数的限制，https://developer.nvidia.com/video-encode-decode-gpu-support-matrix#Encoder，可以看到，GeForce 系列各种显卡大部分限制为 3 路并发。这个限制貌似并不是硬件能力的限制，而是Nvidia为了让更多的人购买高端系列的显卡而做的手脚。
 有同志已经制作了补丁，可以打破这一限制，https://github.com/keylase/nvidia-patch 。使用这个补丁后，现在同时进行19路编解码，连续两周，还很稳定。
 
 
