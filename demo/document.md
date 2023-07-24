@@ -70,6 +70,20 @@ this.$options.jessibuca = new Jessibuca({
 推荐绑定在 `this` 上面，不推荐绑定在`state` 对象上面。
 
 
+### 是否支持npm（yarn） install 安装
+
+> 暂不支持
+
+因为 项目中用到了`wasm`， node_modules  对于`wasm` 支持度不友好。所以暂不支持。
+
+### 其他解决方案
+可以考虑下把wasm文件编译成base64，然后通过打包合并到js文件中，这样就可以通过npm安装了。
+
+> 但是会增加js的文件大小，所以酌情考虑
+
+> 可以看下`vue-cli-plugin-jessibuca`解决方案
+
+
 ### vue-cli-plugin-jessibuca
 
 jessibuca 没有提供 npm package,只能通过 script 方式引入,所以使用 vue-cli 插件形式自动引入 jessibuca
@@ -115,7 +129,7 @@ const instance = new window.Jessibuca({})
 
 ### 关于解码（useMSE、useWCS、wasm）优先级
 
-### useMSE
+#### useMSE
 
 使用的是浏览器提供的`MediaSource`接口，来进行解码。
 
@@ -125,7 +139,7 @@ const instance = new window.Jessibuca({})
 - 支持H264和H265解码
 - 支持http和https
 
-### useWCS
+#### useWCS
 
 使用的是`WebCodec`接口，来进行解码。
 
@@ -135,7 +149,7 @@ const instance = new window.Jessibuca({})
 - ios safari不支持
 - 兼容性不如mse
 
-### wasm(simd)
+#### wasm(simd)
 
 使用的是`webassembly`来进行解码。
 
@@ -144,7 +158,7 @@ const instance = new window.Jessibuca({})
 - 支持H264和H265解码
 - 支持http和https
 
-### 优先级
+#### 优先级
 
 如果同时配置了`useMSE`和`useWCS`，则优先使用`useMSE`，如果`useMSE`不支持，则使用`useWCS`，如果 `useWCS` 不支持，则降级到`wasm`解码。
 
@@ -211,6 +225,7 @@ wasmBinaryFile = 'https://cdn.com/decoder.wasm';
 
 然后需要重新执行下 `npm run build` 命令 就可以了。
 
+> Pro版本支持在编译端通过 `rollup.config.js` 配置`WASM 的 CDN`地址。
 
 ### 对于渲染元素
 
@@ -229,6 +244,8 @@ wasmBinaryFile = 'https://cdn.com/decoder.wasm';
 
 > jessibuca pro 支持 `video` 标签渲染
 
+> Pro 支持 `canvas webgl2` 进行渲染的
+
 
 ##### 如果网页中存在大量消耗webgl性能的，会导致播放器不够webgl资源，导致canvas渲染挂掉，出现一个`哭脸表情`的表情。
 
@@ -244,6 +261,8 @@ wasmBinaryFile = 'https://cdn.com/decoder.wasm';
 #### 开源版本
 
 1. 支持WASM智能不花屏丢帧，长时间播放绝不累积延迟。
+
+> 请关闭F12控制台看延迟效果。
 
 #### pro 版本
 
@@ -384,7 +403,7 @@ Desktop,Android,Webview中已默认开启!
 
 > WebRTC标准是不支持h265的。
 
-> jessibuca pro 版本已经支持了。欢迎测试使用。 http://jessibuca.monibuca.com/player-pro.html
+> jessibuca pro 版本结合M7S已经支持了。欢迎测试使用。 http://jessibuca.monibuca.com/player-pro.html
 
 
 ### OffscreenCanvas这个特性需要特殊的环境和硬件支持吗
@@ -423,36 +442,6 @@ https://github.com/langhuihui/jessibuca/issues/135
 > 经测试，放到node+express服务中，16画面轮询跑了14个小时没有崩溃，chrome浏览器内存达到2G左右，destroy优化的效果还是很明显的，感谢大佬！
 
 
-### 关于视频卡顿
-
-#### 可能存在的问题
-1. 分辨率过高
-2. 带宽是否跟得上
-3. 是否是H265编码
-
-#### 自查
-监听下`stats` 事件，查看 `fps` 是否达到了预期的值。
-
-#### 通用解决方案
-1. 可以通过设置videoBuffer 变大些，一般1s，2s，3s都是可以的
-
-#### H264
-1. 可以采用`useMSE` 或者`useWCS`（需要https）开启硬解码模式
-2. 可以试下jessibuca pro 版本 （simd解码） http://jessibuca.monibuca.com/player-pro.html
-
-#### H265
-1. 可以试下jessibuca pro 版本 （simd解码） http://jessibuca.monibuca.com/player-pro.html
-
-
-### 关于黑屏
-
-在设置了videBuffer 为1s 之后， useMSE 和useWCS 下面会有1s的黑屏，wasm下面首屏会第一时间加载出来。但是页面会卡顿1s 。
-
-### 对于wasm
-
-我是先拿到i帧去解码，然后就播放了。然后后面的数据进行缓存。这段时间内是不播放解码出来的视频数据的
-
-
 ### 关于pts值
 
 可以的，http://jessibuca.monibuca.com/api.html#stats 监听 stats ,一秒回调一次，
@@ -462,7 +451,7 @@ buf: 当前缓冲区时长，单位毫秒,
 fps: 当前视频帧率,
 abps: 当前音频码率，单位bit,
 vbps: 当前视频码率，单位bit，
-ts:当前视频帧pts，单位毫秒
+ts: 当前视频帧pts，单位毫秒
 
 ```
 
@@ -474,6 +463,7 @@ fps: 当前视频帧率,
 abps: 当前音频码率，单位bit,
 vbps: 当前视频码率，单位bit，
 ts: 当前视频帧pts，单位毫秒
+... 其他参数,
 pTs: 当前播放器的播放时间，从0开始，单位毫秒
 ```
 
@@ -490,6 +480,8 @@ https://github.com/langhuihui/jessibuca/issues/126
 另外：
 > MP4格式支持在IOS VLC播放器显示时长播放，Android VLC播放器无法显示时长播放，PC VLC播放器可以播放
 
+
+> Jessibuca Pro 可以录制MP4格式(MPEG-4)的视频，就可以解决这个问题了。
 
 ### 无音频的flv视频流，无法录制，录制的文件大小都是0
 
@@ -513,25 +505,71 @@ https://github.com/langhuihui/jessibuca/issues/126
 可以测试看下 http://jessibuca.monibuca.com/pro-demo.html#only-audio
 
 
+### 创建单个视频播放卡顿
+
+是指播放器渲染的帧率太低，比如：1s 显示 3～5 帧，或者渲染完一帧后，过很久才渲染下一帧。
+
+- 网络带宽不足
+
+- 播放设备性能不足
+
+- 视频流时间戳问题
+
+#### 网络带宽不足
+
+摄像头 -> 流媒体服务器 -> 播放器
+
+- 摄像头的网络不好，导致推流上行不稳定
+
+- 流媒体服务器的线路质量不好，导致分发不稳定
+
+- 播放器的网络不好，导致拉流下行不稳定
+
+#### 播放设备性能不足
+
+- 增大缓冲区，有助于缓解解码不稳定带来的卡顿
+- 尽量硬解码（MSE）(WCS)
+
+#### 视频流时间戳问题
+
+播放器一般是严格根据码流中的音视频的时间戳来做音画同步的，
+
+因此，如果码流中的音视频时间戳出现错误，肯定会影响到播放画面的渲染时机。
+
+> 可以先通过设置 hasAudio: false 来排除音频的问题
+> 确保视频流的时间戳也得增加。
+
+
 ### 创建多个以上播放实例会非常卡顿，还会导致页面黑屏
 
 例如 h265,1280*720，wasm 肯定会卡顿的。 建议降低分辨率。还需要增大videoBuffer 大小。
 
+#### 可能存在的问题
+1. 分辨率过高
+2. 带宽是否跟得上
+3. 是否是H265编码
+
+#### 自查
+监听下`stats` 事件，查看 `fps` 是否达到了预期的值。
+
 #### h265 优化方案
 
 1. 降低分辨率
-2. 增大videoBuffer大小
+2. 增大videoBuffer大小，一般1s，2s，3s都是可以的
 3. 设置hasAudio 为false，不demux和decode音频数据。
 4. ~~条件允许(支持OffscreenCanvas)也可以配合设置 forceNoOffscreen 为 false  开启离屏渲染模式，提升性能。~~
 5. pro版本支持360 或者edge浏览器 H265硬解码。 http://jessibuca.monibuca.com/player-pro.html
 6. pro版本支持SIMD解码，尤其是1080p及以上的分辨率，会有很强的效果。http://jessibuca.monibuca.com/player-pro.html
+7. 如果是服务器端出口带宽跟不上的情况，增大服务器端出口带宽。
+
+
 > 某些显卡在支持OffscreenCanvas上面会存在问题，所以谨慎使用。
 > https://github.com/langhuihui/jessibuca/issues/227
 
 #### h264 优化方案
 
 1. 降低分辨率
-2. 增大videoBuffer大小
+2. 增大videoBuffer大小，一般1s，2s，3s都是可以的
 3. 设置hasAudio 为false，不demux和decode音频数据。
 4. ~~条件允许(支持OffscreenCanvas)也可以配合设置 forceNoOffscreen 为 false  开启离屏渲染模式，提升性能。~~
 5. 如果是https情况下 设置 useWCS 为 true。
@@ -543,20 +581,78 @@ https://github.com/langhuihui/jessibuca/issues/126
 
 
 
+### 播放过程中出现了延迟
+
+#### 对于开源版
+
+- wasm解码`做了`丢帧（消除延迟）`逻辑，保证长时间在设置的延迟范围内
+- mse解码`没有`做丢帧（消除延迟）逻辑
+- wcs解码`没有`做丢帧（消除延迟）逻辑
+
+#### 对于pro版
+
+- wasm解码`做了`丢帧（消除延迟）逻辑，保证长时间在设置的延迟范围内
+- mse解码`做了`丢帧（消除延迟）逻辑，保证长时间在设置的延迟范围内
+- wcs解码`做了`丢帧（消除延迟）逻辑，保证长时间在设置的延迟范围内
+
+
+
+### 播放过程中页面出现崩溃
+
+可能得原因：
+
+1. 分辨力过大
+2. 播放的屏幕数量过多
+3. 电脑内存过小
+4. 有没有打开devTools
+5. 是否H265
+
+
+开源版只能支持到720p的视频，如果超过这个分辨率，就会存在`解码堆积`，时间长了就会容易出现内存堆积，进而导致浏览器崩溃情况。
+
+因为devtools 会打印日志，日志本身就会占用很多内存，也会导致浏览器崩溃。
+
+如果视频是H265的，因为其本身的高压缩率，解码端非常依赖硬解码，如果硬解码不支持，就会导致软解码，软解码性能不好，也会导致浏览器崩溃。
+
+> pro 版本可以完美的支持到1080p的视频，甚至更高分辨率的视频，支持硬解码+软解码。
+
+> pro 版本可以完美的支持到H265的视频，支持硬解码+软解码。
+
+#### 解决方案
+
+1. 降低分辨率
+2. 降低播放的屏幕数量
+3. 增加电脑内存
+4. 升级到pro版本
+5. 关闭devTools
+6. H265降级到H264
+
+
 ### 可以播放本地视频吗？
 
-不可以，jessibuca 定位是直播流播放器。
+回答：不可以，
+
+jessibuca 定位是直播流播放器。
+
+Jessibuca是一款开源的纯H5直播流播放器。
+
+> 所以 暂不支持 本地文件打开。
+
 
 ### 可以播放MP4视频吗？
 
-不可以，jessibuca 定位是直播流播放器。
+回答：不可以.
+
+jessibuca 定位是直播流播放器。
+
+> 所以 暂不支持 MP4点播文件。
 
 
 ### 是否可支持倍速播放
 
 pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
 
-###  对于延迟
+###  关于延迟造成的原因
 
 可能的原因
 - 网络加载的延迟
@@ -782,20 +878,6 @@ jessibuca
 
 只支持内嵌 webview 模式播放。
 
-### 关于延迟
-
-#### 对于开源版
-
-- wasm解码`做了`丢帧（消除延迟）`逻辑
-- mse解码`没有`做丢帧（消除延迟）逻辑
-- wcs解码`没有`做丢帧（消除延迟）逻辑
-
-#### 对于pro版
-
-- wasm解码`做了`丢帧（消除延迟）逻辑
-- mse解码`做了`丢帧（消除延迟）逻辑
-- wcs解码`做了`丢帧（消除延迟）逻辑
-
 
 ### 关于超低延迟(300ms)以内
 
@@ -806,7 +888,7 @@ jessibuca
 
 ```
 {
-    videoBuffer:0
+    videoBuffer:0.1
 }
 ```
 
@@ -816,8 +898,8 @@ pro 由于使用了解码性能更强的simd解码，所以推荐使用simd 解�
 
 ```
 {
-    videoBuffer:0,
-    videoBufferDelay:0.3
+    videoBuffer:0.1,
+    videoBufferDelay:0.2
     useSIMD:true
 }
 ```
@@ -840,23 +922,6 @@ pro 由于使用了解码性能更强的simd解码，所以推荐使用simd 解�
 版本号大于10.15.4
 
 
-### 是否支持本地文件播放
-
-Jessibuca是一款开源的纯H5直播流播放器
-
-> 所以 暂不支持 本地文件打开。
-
-
-### 是否支持npm（yarn） install 安装
-
-> 暂不支持
-
-因为 项目中用到了`wasm`， node_modules  对于`wasm` 支持度不友好。所以暂不支持。
-
-### 其他解决方案
-可以考虑下把wasm文件编译成base64，然后通过打包合并到js文件中，这样就可以通过npm安装了。
-
-> 但是会增加js的文件大小，所以酌情考虑
 
 
 ### 关于遇到报错的时候，如何反馈给作者去定位问题。
@@ -866,13 +931,17 @@ Jessibuca是一款开源的纯H5直播流播放器
 #### 开源版
 
 1.设置`debug:true`
-2.从头开始播放，然后直到出错的时候，把控制台的所有内容右键（save as）保存下来，以及播放器的配置信息，发给作者。
+
+2.从头开始播放，然后直到出错的时候，把F12控制台(console tab)的所有内容右键（save as）保存下来，以及播放器的配置信息，发给作者。
+
 3.如果条件允许，把出问题的流，保存个flv文件，发给作者。
 
 #### pro版本
 
 1.设置`debug:true`，`debugLevel:'debug'`
-2.从头开始播放，然后直到出错的时候，把控制台的所有内容右键（save as）保存下来，以及播放器的配置信息，发给作者。
+
+2.从头开始播放，然后直到出错的时候，把F12控制台(console tab)的所有内容右键（save as）保存下来，以及播放器的配置信息，发给作者。
+
 3.如果条件允许，把出问题的流，保存个flv文件，发给作者。
 
 
@@ -888,39 +957,6 @@ Jessibuca是一款开源的纯H5直播流播放器
 - 推过来的流，码流中视频尺寸发生变化。
 - 硬编硬解的兼容性问题
 
-### 播放卡顿
-
-是指播放器渲染的帧率太低，比如：1s 显示 3～5 帧，或者渲染完一帧后，过很久才渲染下一帧。
-
-- 网络带宽不足
-
-- 播放设备性能不足
-
-- 视频流时间戳问题
-
-#### 网络带宽不足
-
-摄像头 -> 流媒体服务器 -> 播放器
-
-- 摄像头的网络不好，导致推流上行不稳定
-
-- 流媒体服务器的线路质量不好，导致分发不稳定
-
-- 播放器的网络不好，导致拉流下行不稳定
-
-#### 播放设备性能不足
-
-- 增大缓冲区，有助于缓解解码不稳定带来的卡顿
-- 尽量硬解码（MSE）(WCS)
-
-#### 视频流时间戳问题
-
-播放器一般是严格根据码流中的音视频的时间戳来做音画同步的，
-
-因此，如果码流中的音视频时间戳出现错误，肯定会影响到播放画面的渲染时机。
-
-> 可以先通过设置 hasAudio: false 来排除音频的问题
-> 确保视频流的时间戳也得增加。
 
 
 ### 关于浏览器崩溃(sbox_fatal_memory_exceeded)
@@ -1314,32 +1350,6 @@ WebAssembly 通过线性内存来存储和处理数据。线性内存是 WebAsse
 可以设置`hasAudio`为`false`，这样就不会解码音频数据了，可以提升性能。
 
 
-### 页面出现崩溃
-
-可能得原因：
-
-1. 分辨力过大
-2. 播放的屏幕数量过多
-3. 电脑内存过小
-4. 有没有打开devTools
-
-
-开源版只能支持到720p的视频，如果超过这个分辨率，就会存在`解码堆积`，时间长了就会容易出现内存堆积，进而导致浏览器崩溃情况。
-
-因为devtools 会打印日志，日志本身就会占用很多内存，也会导致浏览器崩溃。
-
-
-> pro 版本可以完美的支持到1080p的视频，甚至更高分辨率的视频，支持硬解码+软解码。
-
-
-#### 解决方案
-
-1. 降低分辨率
-2. 降低播放的屏幕数量
-3. 增加电脑内存
-4. 升级到pro版本
-5. 关闭devTools
-
 
 ### 黑屏，但是网速一直有数据
 
@@ -1359,12 +1369,6 @@ WebAssembly 通过线性内存来存储和处理数据。线性内存是 WebAsse
 如果不是上述可能的原因，就看下`f12`控制栏上面是否有报错信息。
 
 > 建议开启`debug:true` 参数，这样可以看到更多的日志信息。
-
-
-
-### 关于如何保持完整的日志内容
-
-在`f12` 控制台，`console tab` 栏目，右键 `save as` 即可。
 
 
 ### 支持浏览器打开连接立即播放视频

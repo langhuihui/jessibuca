@@ -250,6 +250,17 @@
         $fps.textContent = '';
     }
 
+    function create() {
+        return new Promise((resolve, reject) => {
+            if (window.JessibucaPro) {
+                resolve()
+            } else {
+                loadJs('./jessibuca-pro-demo.js', 'jessibuca-pro', function () {
+                    resolve()
+                })
+            }
+        })
+    }
 
     create().then(() => {
         _create();
