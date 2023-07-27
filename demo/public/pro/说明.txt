@@ -1,14 +1,28 @@
-jessibuca-pro-demo.js ---体验版主文件(需要通过script标签引入)
-jessibuca-pro-talk.js ---体验版语音通讯主文件(需要通过script标签引入)
 
-decoder-pro.js --- worker解码器(这个库无需引入)
-decoder-pro.wasm ---worker解码器胶水文件(这个库无需引入)
+开源版升级到Pro
 
-decoder-pro-simd.js ---worker-simd解码器(这个库无需引入)
-decoder-pro-simd.wasm ---worker-simd解码器胶水文件(这个库无需引入)
+需要将原本开源版的
 
-decoder-pro-audio.js ----- worker音频解码器(这个库无需引入)
-decoder-pro-audio.wasm ---- worker音频解码器胶水文件(这个库无需引入)
+- jessibuca.js
+- decoder.js
+- decoder.wasm
+
+替换成
+
+- jessibuca-pro-demo.js ---体验版主文件(需要通过script标签引入)
+- jessibuca-pro-talk.js ---体验版语音通讯主文件(需要通过script标签引入)
+
+- decoder-pro.js --- worker解码器(这个库无需引入)
+- decoder-pro.wasm ---worker解码器胶水文件(这个库无需引入)
+
+- decoder-pro-simd.js ---worker-simd解码器(这个库无需引入)
+- decoder-pro-simd.wasm ---worker-simd解码器胶水文件(这个库无需引入)
+
+- decoder-pro-hard.js ------worker硬解码解封装(这个库无需引入)
+- decoder-pro-audio.js ----- worker音频解码器(这个库无需引入)
+- decoder-pro-audio.wasm ---- worker音频解码器胶水文件(这个库无需引入)
+
+其他
 
 jessibuca-pro-face-detector-demo.js --- 体验版AI 人脸识别主文件(需要通过script标签引入)
 jessibuca-pro-face-detector-decoder.wasm --- 人脸识别胶水文件(这个库无需引入)
@@ -19,17 +33,36 @@ jessibuca-pro-object-detector-decoder.wasm --- 物品识别胶水文件(这个�
 本试用体验包一个小时自动断开连接，会增加全屏水印和右上角logo水印，其它与正式版功能完全一样，正式使用需商用授权。
 
 
-支持6种格式：(live/test为streamPath)
-ws-raw 即ws://host-name:port/jessica/live/test (该协议只对接了monibuca服务器，其他服务器需要额外对接)
-ws-flv 即ws://host-name:port/jessica/live/test.flv
-http-flv 即http://host-name:port/hdl/live/test.flv
-Hls 即http://host-name:port/hls/live/test.m3u8
-WebTransport 即wt://host-name:port/play/live/test (该协议只对接了monibuca服务器，其他服务器需要额外对接)
-Webrtc 即webrtc://host-name:port/webrtc/play/live/test (该协议只对接了monibuca服务器，其他服务器需要额外对接)
 
 由于wasm程序不能由本地路径加载，因此双击打开index.html文件无法使用，需要配合http服务来加载
 
 文档地址：https://jessibuca.com/pro.html
+
+- 支持14种格式：(live/test为streamPath)
+1. ws(s)-raw 即ws://host-name:port/jessica/`live/test` (该协议只对接了[monibuca服务器](https://monibuca.com),其他服务器需要额外对接)
+2. ws(s)-flv 即ws://host-name:port/jessica/`live/test`.flv（chrome下ip会报安全错误，建议域名形式访问，检查下端口范围chrome浏览器是否允许，chrome会默认禁用很多端口）
+3. http(s)-flv 即http://host-name:port/hdl/`live/test`.flv
+4. Hls 即http://host-name:port/hls/`live/test`.m3u8 (支持H254/H265)
+5. WebTransport 即wt://host-name:port/play/`live/test` (该协议只对接了[monibuca服务器](https://monibuca.com),其他服务器需要额外对接)
+6. Webrtc 即 webrtc://host-name:port/webrtc/play/`live/test` (支持H254/H265, 仅支持https://或者http://localhost环境)
+7. Webrtc-zlmediakit 即 webrtc://host-name:port/index/api/webrtc?app=live&stream=`stream-name`&type=play  (支持H254, 仅支持https://或者http://localhost环境)
+7. http(s)-fmp4 即http://host-name:port/your-path/`live/test`.(f)mp4
+8. ws(s)-fmp4 即ws://host-name:port/your-path/`live/test`.(f)mp4
+9. http(s)-h264 即http://host-name:port/jessica/`live/test`.h264
+10. ws(s)-h264 即ws://host-name:port/jessica/`live/test`.h264
+11. http(s)-h265 即http://host-name:port/jessica/`live/test`.h265
+12. ws(s)-h265 即ws://host-name:port/jessica/`live/test`.h265
+13. ws(s)-mpeg4 即ws://host-name:port/your-path/`live/test`.mpeg4
+- 注意http协议会有跨域问题，需要设置cors头
+- 协议同时支持https、wss
+- 同时支持H264和H265编码格式
+- 支持webcodecs硬解码(H264+H265)和MSE硬解码(H264+H265)
+- 支持HLS(H264+H265)软解码、硬解码
+- 支持webrtc(H264+H265(软解码、硬解码))，
+- 支持`zlmediakit`webrtc(H264)
+- 支持加密流(国标SM4、m7s加密流)
+
+
 
 商务技术咨询:
 QQ : 25022549
