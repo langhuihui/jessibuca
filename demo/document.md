@@ -1010,11 +1010,16 @@ windows 系统压缩方法
 
 解压后，将 `jessibuca.js` 和 `decoder.js`和 `decoder.wasm` 文件拖到 gzip.exe上，文件就压缩好了，也需要去掉.gz后缀
 
+<img src="/public/img/gzip.png">
+
 
 ### Brotli压缩jessibuca.js 和decoder.js 和decoder.wasm 文件
 
 可以看下解决方案
 [https://www.cnblogs.com/densen2014/p/16120778.html](https://www.cnblogs.com/densen2014/p/16120778.html)
+
+<img src="/public/img/br.png">
+
 
 ### falling back to arraybuffer instantiation 错误
 
