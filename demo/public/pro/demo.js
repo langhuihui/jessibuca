@@ -187,3 +187,17 @@ const useVconsole = isMobile() || isPad()
 if (useVconsole && window.VConsole) {
     new window.VConsole();
 }
+
+
+function toggleZoom(toggle) {
+    if (!jessibuca) {
+        return
+    }
+    if (toggle == 'true') {
+        jessibuca.openZoom();
+    } else {
+        jessibuca.closeZoom();
+    }
+
+}
+

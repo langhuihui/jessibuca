@@ -261,6 +261,93 @@
 [http://jessibuca.monibuca.com/pro/demo-sei.html](http://jessibuca.monibuca.com/pro/demo-sei.html)
 
 
+### 电子放大
+------
+#### https
+[https://jessibuca.com/pro/demo-zoom.html](https://jessibuca.com/pro/demo-zoom.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-zoom.html](http://jessibuca.monibuca.com/pro/demo-zoom.html)
+
+
+### 播放器自定义内容（文字、矩形框子、文字+矩形框子）
+------
+#### https
+[https://jessibuca.com/pro/demo-content.html](https://jessibuca.com/pro/demo-content.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-content.html](http://jessibuca.monibuca.com/pro/demo-content.html)
+
+
+
+### 显示模式（显示模式、画面镜像、画面旋转、显示比例）
+------
+#### https
+[https://jessibuca.com/pro/demo-show-type.html](https://jessibuca.com/pro/demo-show-type.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-show-type.html](http://jessibuca.monibuca.com/pro/demo-show-type.html)
+
+
+
+### 底部UI（自动隐藏、自定义按钮、自定义HTML、右键菜单、显示性能面板）
+------
+#### https
+[https://jessibuca.com/pro/demo-control-dom.html](https://jessibuca.com/pro/demo-control-dom.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-control-dom.html](http://jessibuca.monibuca.com/pro/demo-control-dom.html)
+
+
+### PTZ云台操作
+------
+#### https
+[https://jessibuca.com/pro/demo-ptz.html](https://jessibuca.com/pro/demo-ptz.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-ptz.html](http://jessibuca.monibuca.com/pro/demo-ptz.html)
+
+
+### 异常断开重连
+------
+#### https
+[https://jessibuca.com/pro/demo-retry.html](https://jessibuca.com/pro/demo-retry.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-retry.html](http://jessibuca.monibuca.com/pro/demo-retry.html)
+
+
+
+### 视频录制
+------
+#### https
+[https://jessibuca.com/pro/demo-record.html](https://jessibuca.com/pro/demo-record.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-record.html](http://jessibuca.monibuca.com/pro/demo-record.html)
+
+
+
+
+## AI
+
+### 人脸识别
+------
+#### https
+[https://jessibuca.com/pro/face-detector-demo.html](https://jessibuca.com/pro/face-detector-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/face-detector-demo.html](http://jessibuca.monibuca.com/pro/face-detector-demo.html)
+
+
+### 物品识别（人、车辆等）
+------
+#### https
+[https://jessibuca.com/pro/object-detector-demo.html](https://jessibuca.com/pro/object-detector-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/object-detector-demo.html](http://jessibuca.monibuca.com/pro/object-detector-demo.html)
+
 
 ## 群
 <img src="/public/qrcode.jpeg">
