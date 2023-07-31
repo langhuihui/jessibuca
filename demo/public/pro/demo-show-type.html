@@ -103,9 +103,9 @@
         </div>
         <div class="input">
             显示模式：
-            <button onclick="setScaleMode('1')">缩放</button>
+            <button onclick="setScaleMode('1')">默认</button>
+            <button onclick="setScaleMode('2')">填充</button>
             <button onclick="setScaleMode('0')">拉伸</button>
-            <button onclick="setScaleMode('2')">正常(默认)</button>
         </div>
         <div class="input">
             显示尺寸：
@@ -165,7 +165,6 @@
             container: $container,
             videoBuffer: Number($videoBuffer.value), // 缓存时长
             videoBufferDelay: Number($videoBufferDelay.value), // 1000s
-            isResize: false,
             text: "",
             loadingText: "加载中",
             debug: true,
