@@ -368,5 +368,8 @@ export default class MseDecoder extends Emitter {
         }
     }
 
+    getSourceBufferUpdating() {
+        return this.sourceBuffer && this.sourceBuffer.updating;
+    }
 
 }

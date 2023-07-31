@@ -65,6 +65,14 @@ export default class CommonLoader extends Emitter {
             let data;
             const videoBuffer = this.player._opt.videoBuffer;
             const videoBufferDelay = this.player._opt.videoBufferDelay;
+
+            if (this.player._opt.useMSE &&
+                this.player.mseDecoder &&
+                this.player.mseDecoder.getSourceBufferUpdating()) {
+                this.player.debug.warn('CommonDemux', `_loop getSourceBufferUpdating is true and bufferList length is ${this.bufferList.length}`);
+                return;
+            }
+
             if (this.bufferList.length) {
                 if (this.dropping) {
                     // this.player.debug.log('common dumex', `is dropping`);
