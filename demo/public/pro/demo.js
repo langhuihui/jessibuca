@@ -189,15 +189,3 @@ if (useVconsole && window.VConsole) {
 }
 
 
-function toggleZoom(toggle) {
-    if (!jessibuca) {
-        return
-    }
-    if (toggle == 'true') {
-        jessibuca.openZoom();
-    } else {
-        jessibuca.closeZoom();
-    }
-
-}
-

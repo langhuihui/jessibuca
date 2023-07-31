@@ -102,7 +102,9 @@
             </div>
         </div>
         <div class="input">
-            电子放大开关：<button onclick="toggleZoom('open')">打开电子放大</button><button onclick="toggleZoom('close')">关闭电子放大</button>
+            电子放大开关：
+            <button onclick="toggleZoom('open')">打开电子放大</button>
+            <button onclick="toggleZoom('close')">关闭电子放大</button>
         </div>
 
         <div class="input">
@@ -303,6 +305,15 @@
         replay();
     })
 
+    function toggleZoom(type) {
+        if (jessibuca) {
+            if (type === 'open') {
+                jessibuca.openZoom();
+            } else {
+                jessibuca.closeZoom();
+            }
+        }
+    }
 </script>
 
 </body>
