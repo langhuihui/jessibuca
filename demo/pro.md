@@ -407,8 +407,9 @@ Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
 
 [单路](https://jessibuca.com/pro-doc/single.pdf)
 
-[多路](https://jessibuca.com/pro-doc/multi.pdf)
+[多路-4路](https://jessibuca.com/pro-doc/multi.pdf)
 
+[多路-16路-内存消耗](https://jessibuca.com/pro-doc/16multi-1080p.pdf)
 
 
 
