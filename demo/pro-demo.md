@@ -84,7 +84,7 @@
 
 
 
-### 5X5 h265 WCS
+### 5X5 WCS
 ------
 #### https
 [https://jessibuca.com/pro/5x5-wcs-demo.html](https://jessibuca.com/pro/5x5-wcs-demo.html)
@@ -93,7 +93,7 @@
 [http://jessibuca.monibuca.com/pro/5x5-wcs-demo.html](http://jessibuca.monibuca.com/pro/5x5-wcs-demo.html)
 
 
-### 5X5 h265 MSE
+### 5X5 MSE
 ------
 #### https
 [https://jessibuca.com/pro/5x5-mse-demo.html](https://jessibuca.com/pro/5x5-mse-demo.html)
@@ -101,7 +101,7 @@
 #### http
 [http://jessibuca.monibuca.com/pro/5x5-mse-demo.html](http://jessibuca.monibuca.com/pro/5x5-mse-demo.html)
 
-### 6X7 h265 MSE
+### 6X7 MSE
 ------
 #### https
 [https://jessibuca.com/pro/6x7-mse-demo.html](https://jessibuca.com/pro/6x7-mse-demo.html)
@@ -110,14 +110,13 @@
 [http://jessibuca.monibuca.com/pro/6x7-mse-demo.html](http://jessibuca.monibuca.com/pro/6x7-mse-demo.html)
 
 
-### 6X7 h265 WCS
+### 6X7 WCS
 ------
 #### https
 [https://jessibuca.com/pro/6x7-wcs-demo.html](https://jessibuca.com/pro/6x7-wcs-demo.html)
 
 #### http
 [http://jessibuca.monibuca.com/pro/6x7-wcs-demo.html](http://jessibuca.monibuca.com/pro/6x7-wcs-demo.html)
-
 
 
 ## 回放(录像)流Demo(支持wcs、simd解码)
