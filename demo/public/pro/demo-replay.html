@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Jessica 播放异常 重播 demo</title>
+    <title>Jessica 一直播放,自动续连 demo</title>
     <link rel="stylesheet" href="./demo.css">
     <script src="./vconsole.js"></script>
     <script src="./jessibuca-pro-demo.js"></script>
     <style>
         .container-shell:before {
-            content: "jessibuca pro 播放异常 重播 demo player";
+            content: "jessibuca pro 一直播放,自动续连 player";
         }
     </style>
 </head>
@@ -101,84 +101,6 @@
                 /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
             </div>
         </div>
-        <div class="input">
-            <div>
-                播放开始加载：
-                <span>| 超时时间(单位：秒)</span>
-                <input
-                    autocomplete="on"
-                    style="width: 100px"
-                    id="loadingTimeout"
-                    value="10"
-                />
-                <span style="margin: 0 10px">|</span>
-                <input
-                    checked
-                    type="checkbox"
-                    id="loadingTimeoutReplay"
-                />
-                <span>是否超时重播</span>
-                <span style="margin-left: 10px">| 重试次数</span>
-                <input
-                    autocomplete="on"
-                    style="width: 100px"
-                    placeholder="-1 为无限次数"
-                    id="loadingTimeoutReplayTimes"
-                    value="-1"
-                />
-            </div>
-        </div>
-        <div class="input">
-            <div>
-                播放过程中超时：
-                <span>| 超时时间(单位：秒)</span>
-                <input
-                    autocomplete="on"
-                    style="width: 100px"
-                    id="heartTimeout"
-                    value="10"
-                />
-                <span style="margin: 0 10px">|</span>
-                <input
-                    checked
-                    type="checkbox"
-                    id="heartTimeoutReplay"
-                />
-                <span>是否超时重播</span>
-                <span style="margin-left: 10px">| 重试次数</span>
-                <input
-                    autocomplete="on"
-                    style="width: 100px"
-                    placeholder="-1 为无限次数"
-                    id="heartTimeoutReplayTimes"
-                    value="-1"
-                />
-            </div>
-        </div>
-
-        <div class="input">
-            <div>
-                播放异常(播放地址不同，报错等一切异常):
-                <input
-                    checked
-                    type="checkbox"
-                    id="playErrorReplay"
-                />
-                <span>是否重播</span>
-            </div>
-        </div>
-
-        <div class="input">
-            <div>
-                <input
-                    checked
-                    type="checkbox"
-                    id="replayUseLastFrameShow"
-                />
-                <span>触发重播的时候，是否使用最后一帧来显示</span>
-            </div>
-        </div>
-
 
         <div class="input">
             <div>输入URL：</div>
@@ -215,18 +137,6 @@
     var $renderDom = document.getElementById('renderDom');
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
     var $demuxUseWorker = document.getElementById('demuxUseWorker');
-    var $loadingTimeoutReplayTimes = document.getElementById('loadingTimeoutReplayTimes');
-    var $loadingTimeout = document.getElementById('loadingTimeout');
-    var $loadingTimeoutReplay = document.getElementById('loadingTimeoutReplay');
-
-    var $heartTimeoutReplayTimes = document.getElementById('heartTimeoutReplayTimes');
-    var $heartTimeoutReplay = document.getElementById('heartTimeoutReplay');
-    var $heartTimeout = document.getElementById('heartTimeout');
-
-    var replayUseLastFrameShow = document.getElementById('replayUseLastFrameShow');
-
-    var $playErrorReplay = document.getElementById('playErrorReplay');
-
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -252,20 +162,19 @@
                 screenshot: showOperateBtns,
                 play: showOperateBtns,
                 audio: showOperateBtns,
+                ptz: showOperateBtns,
+                quality: showOperateBtns,
                 performance: showOperateBtns,
             },
-            heartTimeoutReplayUseLastFrameShow: true,
+            replayUseLastFrameShow: true,
+            pauseAndNextPlayUseLastFrameShow: true,
             audioEngine: "worklet",
             qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
-            heartTimeout: Number($heartTimeout.value),
-            heartTimeoutReplay: $heartTimeoutReplay.checked === true,
-            heartTimeoutReplayTimes: Number($heartTimeoutReplayTimes.value),
-            loadingTimeout: Number($loadingTimeout.value),
-            loadingTimeoutReplay: $loadingTimeoutReplay.checked === true,
-            loadingTimeoutReplayTimes: Number($loadingTimeoutReplayTimes.value),
-            replayUseLastFrameShow: replayUseLastFrameShow.checked === true,
+            heartTimeout: 10,
+            loadingTimeoutReplayTimes: -1, // 自动续连
+            heartTimeoutReplayTimes: -1, // 自动续连
             useCanvasRender: $renderDom.value === 'canvas',
             useWebGPU: $isUseWebGPU.value === 'webgpu',
             demuxUseWorker: $demuxUseWorker.checked === true,
@@ -274,13 +183,28 @@
             // isFlv: true
         },);
 
+        //  一直播放
+        jessibuca.on('playFailedAndPaused', function (e) {
+            replay()
+        });
 
-        //  监听播放器事件
-        if ($playErrorReplay.checked === true) {
-            jessibuca.on(jessibuca.EVENTS.playFailedAndPaused, function (e) {
-                replay();
-            })
-        }
+        jessibuca.on('ptz', (arrow) => {
+            // console.log('ptz', arrow);
+        })
+
+        jessibuca.on('streamQualityChange', (value) => {
+            console.log('streamQualityChange', value);
+        })
+
+        jessibuca.on('timeUpdate', (value) => {
+            // console.log('timeUpdate', value);
+        })
+
+        jessibuca.on('stats', (stats) => {
+            // console.log('stats', stats);
+            $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
+        })
+
 
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';

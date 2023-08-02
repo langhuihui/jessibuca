@@ -186,9 +186,6 @@
 [http://jessibuca.monibuca.com/pro/demo-danmu.html](http://jessibuca.monibuca.com/pro/demo-danmu.html)
 
 
-
-
-
 ### 裸流(H264/H265)
 ------
 #### https
@@ -314,6 +311,16 @@
 
 #### http
 [http://jessibuca.monibuca.com/pro/demo-retry.html](http://jessibuca.monibuca.com/pro/demo-retry.html)
+
+### 一直播放,自动续连
+------
+#### https
+[https://jessibuca.com/pro/demo-replay.html](https://jessibuca.com/pro/demo-replay.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-replay.html](http://jessibuca.monibuca.com/pro/demo-replay.html)
+
+
 
 
 
