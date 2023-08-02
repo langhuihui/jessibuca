@@ -230,6 +230,11 @@ H265硬解码，对于电脑硬件支持情况：
 
 > Safari暂不支持SIMD指令集加速解码。
 
+> Chrome 113 支持 WebGPU
+
+> Chrome 97 支持 WebTransport
+
+
 | 浏览器 | 支持情况 |
 | :--- | :--- |
 | Chrome | 支持 |
