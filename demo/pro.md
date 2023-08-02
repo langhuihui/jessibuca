@@ -186,6 +186,16 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 
 > H265硬解码需要对于浏览器、电脑硬件有要求。
 
+检查浏览器是否支持H265硬解码，
+
+1.浏览器输入：`chrome://gpu/` 如果edge浏览器就`edge://gpu/`
+2.全局搜索下`hevc`关键词
+
+查看是否有：
+
+<img src="/public/img/h265.png">
+
+
 H265硬解码，对于电脑硬件支持情况：
 
 [支持情况](https://github.com/StaZhu/enable-chromium-hevc-hardware-decoding/blob/main/README.zh_CN.md)
