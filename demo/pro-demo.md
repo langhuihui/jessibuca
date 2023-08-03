@@ -312,7 +312,7 @@
 #### http
 [http://jessibuca.monibuca.com/pro/demo-retry.html](http://jessibuca.monibuca.com/pro/demo-retry.html)
 
-### 一直播放,自动续连
+### 一直播放,自动续连(超时、异常暂停播放等)
 ------
 #### https
 [https://jessibuca.com/pro/demo-replay.html](https://jessibuca.com/pro/demo-replay.html)
