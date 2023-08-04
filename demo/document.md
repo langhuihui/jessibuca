@@ -348,7 +348,7 @@ application/wasm            wasm
 application/wasm            wasm;
 
 ```
-##### nginx修改nginx.conf，添加
+##### 或者 nginx修改nginx.conf，添加
 
 ```shell
 {
