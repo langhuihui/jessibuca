@@ -25,7 +25,7 @@
 [http://jessibuca.monibuca.com/pro/index.html](http://jessibuca.monibuca.com/pro/index.html)
 
 
-## 音视频直播流Demo(支持 mse、wcs、wasm、simd解码)
+## 音视频直播流Demo(支持 mse、wcs、wasm、simd解码)(根据url地址解析协议)
 
 ### demo
 ------
@@ -193,6 +193,15 @@
 
 #### http
 [http://jessibuca.monibuca.com/pro/naked-flow-demo.html](http://jessibuca.monibuca.com/pro/naked-flow-demo.html)
+
+
+### Flv格式(H264/H265)
+------
+#### https
+[https://jessibuca.com/pro/demo-flv.html](https://jessibuca.com/pro/demo-flv.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-flv.html](http://jessibuca.monibuca.com/pro/demo-flv.html)
 
 
 ### Fmp4格式(H264/H265)
