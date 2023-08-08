@@ -55,6 +55,31 @@
             <button onclick="updateSplitSpecial('4-1')">不规则(4-1)</button>
         </div>
         <div class="input">
+            <div>
+                <span>选择：</span>
+                <select id="windowIndex" style="width: 140px">
+                    <option value="0" selected>第1屏</option>
+                    <option value="1">第2屏</option>
+                    <option value="2">第3屏</option>
+                    <option value="3">第4屏</option>
+                    <option value="4">第5屏</option>
+                    <option value="5">第6屏</option>
+                    <option value="6">第7屏</option>
+                    <option value="7">第8屏</option>
+                    <option value="8">第9屏</option>
+                    <option value="9">第10屏</option>
+                    <option value="10">第11屏</option>
+                    <option value="11">第12屏</option>
+                    <option value="12">第13屏</option>
+                    <option value="13">第14屏</option>
+                    <option value="14">第15屏</option>
+                    <option value="15">第16屏</option>
+                </select>
+                <button onclick="handleSelectWindow()">选中</button>
+                <button onclick="handleGetSelectWindow()">获取当前选择窗口</button>
+            </div>
+        </div>
+        <div class="input">
             <div>输入URL：</div>
             <input
                 autocomplete="on"
@@ -204,6 +229,21 @@
             jessibucaMulti.arrangeWindow(type);
         }
     }
+
+    function handleSelectWindow() {
+        if (jessibucaMulti) {
+            const index = document.getElementById('windowIndex').value
+            jessibucaMulti.selectWindow(Number(index));
+        }
+    }
+
+    function handleGetSelectWindow() {
+        if (jessibucaMulti) {
+            const index = jessibucaMulti.getSelectedWindowIndex();
+            console.log('当前选中窗口下标：', index);
+        }
+    }
+
 </script>
 </body>
 </html>
