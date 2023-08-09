@@ -141,6 +141,7 @@
             <button id="play">播放</button>
             <button id="pause">停止(流会断开)</button>
             <button id="playbackPause">停止(流不断开)</button>
+            <button id="playScroll" onclick="currentTimeScroll()">滚动到当前时间</button>
         </div>
         <div class="input">
              <textarea name="" id="playbackTimes" style="width: 100%" rows="10">
@@ -173,6 +174,7 @@
     var $supportWebgpu = document.getElementById('supportWebgpu');
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
     var $playbackUseWCS = document.getElementById('playbackUseWCS');
+    var $playScroll = document.getElementById('playScroll');
 
     var forceNoOffscreen = true; //
     var jessibuca = null;
@@ -227,10 +229,16 @@
         $pause.style.display = 'none';
         $playbackPause.style.display = 'none';
         $destroy.style.display = 'none';
+        $playScroll.style.display = 'none';
 
 
         jessibuca.on('playbackPreRateChange', (rate) => {
             jessibuca.forward(rate);
+        })
+
+        jessibuca.on('playbackSeek',(data)=>{
+            const currentTime = new Date(1653840000000).setHours(data.hour,data.min, data.second, 0);
+            jessibuca.setPlaybackStartTime(currentTime);
         })
 
     }
@@ -290,6 +298,7 @@
         $player.style.display = 'none';
         $pause.style.display = 'inline-block';
         $playbackPause.style.display = 'inline-block';
+        $playScroll.style.display = 'inline-block';
         $destroy.style.display = 'inline-block';
     }
 
@@ -303,12 +312,14 @@
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
         $playbackPause.style.display = 'none';
+        $playScroll.style.display = 'none';
         jessibuca.pause();
     })
 
     $playbackPause.addEventListener('click', function () {
         $playbackPause.style.display = 'none';
         $pause.style.display = 'none';
+        $playScroll.style.display = 'none';
         $player.style.display = 'inline-block';
         jessibuca.playbackPause();
         isPlaybackPause = true;
@@ -324,6 +335,12 @@
         }
 
     })
+
+    function currentTimeScroll(){
+        if(jessibuca){
+            jessibuca.playbackCurrentTimeScroll();
+        }
+    }
 
 
 </script>
