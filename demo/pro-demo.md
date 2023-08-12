@@ -121,13 +121,23 @@
 
 ## 回放(录像)流Demo(支持wcs、simd解码)
 
-### TF卡流（录像流）
+### TF卡流（录像流）- 24h时间轴
 ------
 #### https
 [https://jessibuca.com/pro/playback-demo.html](https://jessibuca.com/pro/playback-demo.html)
 
 #### http
 [http://jessibuca.monibuca.com/pro/playback-demo.html](http://jessibuca.monibuca.com/pro/playback-demo.html)
+
+### TF卡流（录像流）- 固定时长时间轴
+------
+#### https
+[https://jessibuca.com/pro/playback-simple-demo.html](https://jessibuca.com/pro/playback-simple-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/playback-simple-demo.html](http://jessibuca.monibuca.com/pro/playback-simple-demo.html)
+
+
 
 
 ## 音频直播流（支持移动端（平板端）息屏和后台播放）

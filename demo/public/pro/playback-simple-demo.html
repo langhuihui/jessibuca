@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Jessibuca Pro 回放流 demo</title>
+    <script src="./vconsole.js"></script>
+    <script src="./jessibuca-pro-demo.js"></script>
+    <link rel="stylesheet" href="./demo.css">
+    <style>
+        .container-shell:before {
+            content: "jessibuca pro 回放流 demo";
+        }
+    </style>
+</head>
+<body class="page">
+<div class="root">
+    <div class="container-shell">
+        <div id="container"></div>
+        <div class="input">
+            <div>
+                <span><span style="color: red">TPS:动态(根据流):</span>播放器的倍率播放完全是根据服务器端推流的速率，如果服务器端推的是一倍率且动态码率的流，
+                播放器就按照一倍率动态码率渲染。<span style="color: green">例如 fps会15到30之间跳动。</span>
+            </span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <span><span style="color: red">TPS:定频（本地设置）:</span>则支持播放器端控制播放速率(设置FPS+播放倍率)，播放器端设置的播放速率是固定的，不会随着流的速率变化而变化。
+                支持设置播放器的播放倍率（提高渲染倍率）。<span
+                        style="color: green">在推流码率足够的情况下，播放器会按照固定倍率播放</span>
+            </span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <span><span style="color: red">TPS:解码前缓冲数据:</span>对于存在有些流会一下子以2倍甚至4倍的速率推送的情况，如果设置为true，则会根据计算出来的fps，只根据fps和倍率来解码数据，其他数据还是被缓存在队列中，等待解码。
+            </span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <span><span style="color: red">TPS:服务器端倍率推流:</span> 如果服务器端按照倍率推流，播放器端也需要同步的以倍率播放【调用forward(rate)】接口
+            </span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <span style="color: red">TPS:</span> 录像流暂只支持wasm（simd）解码,canvas渲染。
+
+            </div>
+        </div>
+        <div class="input">
+            <div class="playbackForward">
+                <span>FPS设置：</span>
+                <select id="isUseFpsRender" style="width: 140px">
+                    <option value="false" selected>动态(根据流)</option>
+                    <option value="true">定频（本地设置）</option>
+                </select>
+            </div>
+        </div>
+        <div class="input">
+            <span>是否解码前缓冲数据(定频生效)</span>
+            <select id="isCacheBeforeDecodeForFpsRender" style="width: 50px">
+                <option value="true">是</option>
+                <option value="false" selected>否</option>
+            </select>
+        </div>
+        <div class="input">
+            <span>是否显示操作按钮</span>
+            <select id="isShowControl" style="width: 50px">
+                <option value="true" selected>是</option>
+                <option value="false">否</option>
+            </select>
+        </div>
+        <div class="input">
+            <span>是否显示时间轴</span>
+            <select id="isShow24H" style="width: 50px">
+                <option value="true" selected>是</option>
+                <option value="false">否</option>
+            </select>
+        </div>
+        <div class="input">
+            <span>只解码I帧(<span style="color:red;">点击重播按钮生效</span>)</span>
+            <select id="onlyDecoderIFrame" style="width: 50px">
+                <option value="1">1倍</option>
+                <option value="2">2倍</option>
+                <option value="4" selected>4倍</option>
+                <option value="8">8倍</option>
+            </select>
+        </div>
+        <div class="input">
+            <div class="playback-fps" style="margin-left: 10px">
+                <span>FPS（定频(本地设置)生效）：</span><input style="width: 50px" type="text" id="playbackFps" value="25">帧
+            </div>
+        </div>
+        <div class="input">
+            <div class="playback-fps" style="margin-left: 10px">
+                <span>不断流暂停是否清除缓存数据</span>
+                <select id="isPlaybackPauseClearCache" style="width: 50px">
+                    <option value="true" selected>是</option>
+                    <option value="false">否</option>
+                </select>
+            </div>
+        </div>
+        <div class="input">
+            <span>ui是否使用playbackPause</span>
+            <select id="uiUsePlaybackPause" style="width: 50px">
+                <option value="true">是</option>
+                <option value="false" selected>否</option>
+            </select>
+        </div>
+        <div class="input">
+            <span>canvas渲染技术：</span>
+            <select id="isUseWebGPU" onchange="replay()">
+                <option value="webgl">webgl</option>
+                <option value="webgpu" selected>webgpu</option>
+            </select>
+            <span id="supportWebgpu"></span>
+        </div>
+        <div class="input">
+            <span>是否使用硬解码(https支持)</span>
+            <select id="playbackUseWCS" style="width: 50px">
+                <option value="true">是</option>
+                <option value="false" selected>否</option>
+            </select>
+        </div>
+        <div class="input">
+            <div>
+                <span>进度条时长(单位：秒)</span>
+                <input id="playbackDuration" style="width: 100px" type="text" placeholder="单位秒" value="600">秒(例如十分钟：10*
+                60 = 600)
+            </div>
+        </div>
+        <div class="input">
+            <button onclick="replay()">重播</button>
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl"
+                value=""
+            />
+        </div>
+        <div class="input">
+            <button id="play">播放</button>
+            <button id="pause">停止(流会断开)</button>
+            <button id="playbackPause">停止(流不断开)</button>
+        </div>
+        <div class="input" style="line-height: 30px">
+            <button id="destroy">销毁</button>
+        </div>
+    </div>
+</div>
+<script src="./demo.js"></script>
+
+<script>
+    var $player = document.getElementById('play');
+    var $pause = document.getElementById('pause');
+    var $playbackPause = document.getElementById('playbackPause');
+    var $playHref = document.getElementById('playUrl');
+    var $container = document.getElementById('container');
+    var $destroy = document.getElementById('destroy');
+    var $playbackFps = document.getElementById('playbackFps');
+    var $isUseFpsRender = document.getElementById('isUseFpsRender');
+    var $isShowControl = document.getElementById('isShowControl'); // 是否显示按钮
+    var $isShow24H = document.getElementById('isShow24H'); // 是否显示操作栏
+    var $onlyDecoderIFrame = document.getElementById('onlyDecoderIFrame');
+    var $isCacheBeforeDecodeForFpsRender = document.getElementById('isCacheBeforeDecodeForFpsRender');
+    var $isPlaybackPauseClearCache = document.getElementById('isPlaybackPauseClearCache');
+    var $uiUsePlaybackPause = document.getElementById('uiUsePlaybackPause');
+    var $supportWebgpu = document.getElementById('supportWebgpu');
+    var $isUseWebGPU = document.getElementById('isUseWebGPU');
+    var $playbackUseWCS = document.getElementById('playbackUseWCS');
+    var $playbackDuration = document.getElementById('playbackDuration');
+
+    var forceNoOffscreen = true; //
+    var jessibuca = null;
+    var isPlaybackPause = false;
+    var $isUseWebGPU = document.getElementById('isUseWebGPU');
+
+    var isSupportWebgpu = 'gpu' in navigator;
+
+    if (isSupportWebgpu) {
+        $supportWebgpu.style.color = 'green';
+        $supportWebgpu.innerHTML = '支持webGPU';
+    } else {
+        $supportWebgpu.style.color = 'red';
+        $supportWebgpu.innerHTML = '暂不支持webGPU，降级到webgl渲染';
+    }
+
+    function create() {
+        const showOperateBtns = $isShowControl.value === 'true';
+        const onlyDecoderIFrame = Number($onlyDecoderIFrame.value);
+        jessibuca = new JessibucaPro({
+            container: $container,
+            videoBuffer: 0.2, // 缓存时长
+            isResize: false,
+            text: "",
+            loadingText: "加载中",
+            debug: true,
+            debugLevel: 'debug',
+            showPerformance: true,
+            showBandwidth: showOperateBtns, // 显示网速
+            showPlaybackOperate: showOperateBtns,
+            operateBtns: {
+                fullscreen: showOperateBtns,
+                screenshot: showOperateBtns,
+                play: showOperateBtns,
+                audio: showOperateBtns,
+                zoom: showOperateBtns,
+                performance: showOperateBtns,
+            },
+            forceNoOffscreen: forceNoOffscreen,
+            isNotMute: false,
+            playbackForwardMaxRateDecodeIFrame: onlyDecoderIFrame,
+            useWebGPU: $isUseWebGPU.value === 'webgpu' // 使用WebGPU
+        },);
+
+        jessibuca.onLog = msg => console.error(msg);
+        jessibuca.onRecord = (status) => console.log('onRecord', status);
+        jessibuca.onPause = () => console.log('onPause');
+        jessibuca.onPlay = () => console.log('onPlay');
+        jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
+        jessibuca.onMute = msg => console.log('onMute', msg);
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+        $playbackPause.style.display = 'none';
+        $destroy.style.display = 'none';
+
+
+        jessibuca.on('playbackPreRateChange', (rate) => {
+            jessibuca.forward(rate);
+        })
+
+        jessibuca.on('playbackSeek', (data) => {
+            jessibuca.setPlaybackStartTime(data.ts);
+        })
+
+    }
+
+
+    create();
+
+    function replay() {
+        if (jessibuca) {
+            jessibuca.destroy().then(() => {
+                create();
+                play();
+            });
+        } else {
+            create();
+            play();
+        }
+    }
+
+    function play() {
+        var href = $playHref.value;
+        var playFps = $playbackFps.value || 20;
+        var isUseFpsRender = $isUseFpsRender.value;
+        const isShow24H = $isShow24H.value === 'true';
+        const isCacheBeforeDecodeForFpsRender = $isCacheBeforeDecodeForFpsRender.value === 'true';
+
+        if (!href) {
+            return
+        }
+
+        if (isPlaybackPause) {
+            jessibuca.playbackResume()
+        } else {
+            jessibuca.playback(href, {
+                fps: playFps,
+                controlType: 'simple',
+                duration: Number($playbackDuration.value),
+                showControl: isShow24H,
+                isUseFpsRender: isUseFpsRender === 'true',
+                isCacheBeforeDecodeForFpsRender: isCacheBeforeDecodeForFpsRender,
+                showRateBtn: true,
+                supportWheel: true,
+                uiUsePlaybackPause: $uiUsePlaybackPause.value === 'true',
+                isPlaybackPauseClearCache: $isPlaybackPauseClearCache.value === 'true',
+                rateConfig: [
+                    {label: '正常', value: 1},
+                    {label: '2倍', value: 2},
+                    {label: '4倍', value: 4},
+                    {label: '8倍', value: 8},
+                    {label: '16倍', value: 16},
+                ],
+                useWCS: $playbackUseWCS.value === 'true',
+            });
+        }
+        isPlaybackPause = false;
+        $player.style.display = 'none';
+        $pause.style.display = 'inline-block';
+        $playbackPause.style.display = 'inline-block';
+        $destroy.style.display = 'inline-block';
+    }
+
+
+    $player.addEventListener('click', function () {
+        play();
+    }, false)
+
+
+    $pause.addEventListener('click', function () {
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+        $playbackPause.style.display = 'none';
+        jessibuca.pause();
+    })
+
+    $playbackPause.addEventListener('click', function () {
+        $playbackPause.style.display = 'none';
+        $pause.style.display = 'none';
+        $player.style.display = 'inline-block';
+        jessibuca.playbackPause();
+        isPlaybackPause = true;
+    })
+
+    $destroy.addEventListener('click', function () {
+        if (jessibuca) {
+            jessibuca.destroy().then(() => {
+                create();
+            });
+        } else {
+            create();
+        }
+
+    })
+
+    function currentTimeScroll() {
+        if (jessibuca) {
+            jessibuca.playbackCurrentTimeScroll();
+        }
+    }
+
+
+</script>
+
+</body>
+</html>
