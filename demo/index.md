@@ -57,6 +57,8 @@ features:
   details: 支持1*1，2*2，3*3外加不规则多屏显示
 - title: 支持语音通讯(Pro)
   details: 支持web端语音通讯
+- title: 支持国标SM-4加密(Pro)
+  details: 支持国标SM-4加密
 - title: 更多
   details: 请到Pro文档页单独查看
 footer: GPL Licensed | Copyright © 2020-present dexter
