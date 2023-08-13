@@ -119,6 +119,8 @@ Jessibuca 是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 
 [多路](https://jessibuca.com/pro-doc/multi.pdf)
 
+[多路-16路-内存消耗](https://jessibuca.com/pro-doc/16multi-1080p.pdf)
+
 ## 本地测试
 
 - 执行 `yarn` 或者 `npm i`
