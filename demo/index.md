@@ -61,5 +61,7 @@ features:
   details: 支持国标SM-4加密
 - title: 更多
   details: 请到Pro文档页单独查看
-footer: GPL Licensed | Copyright © 2020-present dexter | <a href="https://beian.miit.gov.cn/" target="_blank">苏ICP备2023025807号-2</a >
 ---
+
+
+GPL Licensed | Copyright © 2020-present dexter | [苏ICP备2023025807号-2](https://beian.miit.gov.cn/)
