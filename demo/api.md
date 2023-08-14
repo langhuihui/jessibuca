@@ -931,8 +931,8 @@ jessibuca.on("mute", function (flag) {
 
 1. buf: 当前缓冲区时长，单位毫秒,
 2. fps: 当前视频帧率,
-3. abps: 当前音频码率，单位bit,
-4. vbps: 当前视频码率，单位bit，
+3. abps: 当前音频码率，单位byte,
+4. vbps: 当前视频码率，单位byte，
 5. ts:当前视频帧pts，单位毫秒
 
 ```js
