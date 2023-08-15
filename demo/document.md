@@ -1037,6 +1037,43 @@ windows 系统压缩方法
 <img src="/public/wasm.png">
 
 
+#### nginx的配置
+
+1. 用的springboot的tomcat，所以修改tomcat的mime类型，多添加一个wasm的类型
+2. 用的是ISS，配置下wasm类型的数据就行了。
+
+Extension: .wasm (dot wasm)
+MIMEType: application/wasm
+
+##### apache修改 mime.types，添加
+
+```shell
+application/wasm            wasm
+
+```
+
+##### nginx修改mime.types，添加
+
+```shell
+application/wasm            wasm;
+
+```
+##### 或者 nginx修改nginx.conf，添加
+
+```shell
+{
+    # 配置 MIME 类型
+    types {
+        application/wasm wasm;
+    }
+
+    # 开启 gzip 压缩
+    gzip on;
+
+}
+```
+
+
 #### 通过springBoot 部署的静态资源遇到 `falling back to arraybuffer instantiation` 错误问题
 
 > decoder-pro-simd.js:1 wasm streaming compile failed: CompileError: WebAssembly.instantiateStreaming(): section (code 1, "Type") extends past end of the module (length 11493359, remaining bytes 2877270) @+8

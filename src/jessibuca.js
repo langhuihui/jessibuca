@@ -326,7 +326,7 @@ class Jessibuca extends Emitter {
                 this.pause().then(() => {
                     this.player.debug.log('Jessibuca', 'webglAlignmentError')
                     this._resetPlayer({openWebglAlignment: true})
-                    this.play(url).then(() => {
+                    this.play(url,options).then(() => {
                         // resolve();
                         this.player.debug.log('Jessibuca', 'webglAlignmentError and play success')
                     }).catch(() => {
@@ -358,7 +358,7 @@ class Jessibuca extends Emitter {
                 this.pause().then(() => {
                     this.player.debug.log('Jessibuca', 'media source full');
                     this._resetPlayer()
-                    this.play(url).then(() => {
+                    this.play(url,options).then(() => {
                         // resolve();
                         this.player.debug.log('Jessibuca', 'media source full and reset player and play success')
                     }).catch(() => {
@@ -372,7 +372,7 @@ class Jessibuca extends Emitter {
                 this.pause().then(() => {
                     this.player.debug.log('Jessibuca', 'media source append buffer error');
                     this._resetPlayer()
-                    this.play(url).then(() => {
+                    this.play(url,options).then(() => {
                         // resolve();
                         this.player.debug.log('Jessibuca', 'media source append buffer error and reset player and play success')
                     }).catch(() => {
@@ -386,7 +386,7 @@ class Jessibuca extends Emitter {
                 this.pause().then(() => {
                     this.player.debug.log('Jessibuca', 'media source buffer list large');
                     this._resetPlayer()
-                    this.play(url).then(() => {
+                    this.play(url,options).then(() => {
                         // resolve();
                         this.player.debug.log('Jessibuca', 'media source buffer list large and reset player and play success')
                     }).catch(() => {
@@ -400,7 +400,7 @@ class Jessibuca extends Emitter {
                 this.pause().then(() => {
                     this.player.debug.log('Jessibuca', 'media source append buffer end timeout');
                     this._resetPlayer()
-                    this.play(url).then(() => {
+                    this.play(url,options).then(() => {
                         // resolve();
                         this.player.debug.log('Jessibuca', 'media source append buffer end timeout and reset player and play success')
                     }).catch(() => {
@@ -422,7 +422,7 @@ class Jessibuca extends Emitter {
                     if (this.player._opt.autoWasm) {
                         this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play')
                         this._resetPlayer({useWCS: false})
-                        this.play(url).then(() => {
+                        this.play(url,options).then(() => {
                             // resolve();
                             this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play success')
                         }).catch(() => {
@@ -437,7 +437,7 @@ class Jessibuca extends Emitter {
                 this.pause().then(() => {
                     this.player.debug.log('Jessibuca', 'webcodecs Width Or Height Change reset player and play')
                     this._resetPlayer({useWCS: true})
-                    this.play(url).then(() => {
+                    this.play(url,options).then(() => {
                         // resolve();
                         this.player.debug.log('Jessibuca', 'webcodecs Width Or Height Change reset player and play success')
                     }).catch(() => {
@@ -452,7 +452,7 @@ class Jessibuca extends Emitter {
                     if (this.player._opt.autoWasm) {
                         this.player.debug.log('Jessibuca', 'webcodecs decode error reset player and play')
                         this._resetPlayer({useWCS: false})
-                        this.play(url).then(() => {
+                        this.play(url,options).then(() => {
                             // resolve();
                             this.player.debug.log('Jessibuca', 'webcodecs decode error  reset player and play success')
                         }).catch(() => {

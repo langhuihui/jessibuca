@@ -913,6 +913,18 @@
 	    videoFrame.destroy();
 	  }
 	}
+	function removeElement(element) {
+	  let result = false;
+
+	  if (element) {
+	    if (element.parentNode) {
+	      element.parentNode.removeChild(element);
+	      result = true;
+	    }
+	  }
+
+	  return result;
+	}
 
 	var events$1 = (player => {
 	  try {
@@ -2246,6 +2258,7 @@
 	    const {
 	      demux
 	    } = this.player;
+	    this.player.debug.log('FetchStream', 'fetchStream', url, JSON.stringify(options));
 	    this.player._times.streamStart = now();
 	    const fetchOptions = Object.assign({
 	      signal: this.abortController.signal
@@ -2330,7 +2343,7 @@
 
 	  destroy() {
 	    if (this.socket) {
-	      this.socket.close();
+	      this.socket.close(1000, 'Client disconnecting');
 	      this.socket = null;
 	    }
 
@@ -8991,6 +9004,11 @@
 	      const videoBuffer = this.player._opt.videoBuffer;
 	      const videoBufferDelay = this.player._opt.videoBufferDelay;
 
+	      if (this.player._opt.useMSE && this.player.mseDecoder && this.player.mseDecoder.getSourceBufferUpdating()) {
+	        this.player.debug.warn('CommonDemux', `_loop getSourceBufferUpdating is true and bufferList length is ${this.bufferList.length}`);
+	        return;
+	      }
+
 	      if (this.bufferList.length) {
 	        if (this.dropping) {
 	          // this.player.debug.log('common dumex', `is dropping`);
@@ -10591,23 +10609,63 @@
 
 	  destroy() {
 	    if (this.$poster) {
-	      this.player.$container.removeChild(this.$poster);
+	      const result = removeElement(this.$poster);
+
+	      if (!result) {
+	        const $poster = this.player.$container.querySelector('.jessibuca-poster');
+
+	        if ($poster && this.player.$container) {
+	          this.player.$container.removeChild($poster);
+	        }
+	      }
 	    }
 
 	    if (this.$loading) {
-	      this.player.$container.removeChild(this.$loading);
+	      const result = removeElement(this.$loading);
+
+	      if (!result) {
+	        const $loading = this.player.$container.querySelector('.jessibuca-loading');
+
+	        if ($loading && this.player.$container) {
+	          this.player.$container.removeChild($loading);
+	        }
+	      }
 	    }
 
 	    if (this.$controls) {
-	      this.player.$container.removeChild(this.$controls);
+	      const result = removeElement(this.$controls);
+
+	      if (!result) {
+	        const $controls = this.player.$container.querySelector('.jessibuca-controls');
+
+	        if ($controls && this.player.$container) {
+	          this.player.$container.removeChild($controls);
+	        }
+	      }
 	    }
 
 	    if (this.$recording) {
-	      this.player.$container.removeChild(this.$recording);
+	      const result = removeElement(this.$recording);
+
+	      if (!result) {
+	        const $recording = this.player.$container.querySelector('.jessibuca-recording');
+
+	        if ($recording && this.player.$container) {
+	          this.player.$container.removeChild($recording);
+	        }
+	      }
 	    }
 
 	    if (this.$playBig) {
-	      this.player.$container.removeChild(this.$playBig);
+	      const result = removeElement(this.$playBig);
+
+	      if (!result) {
+	        const $playBig = this.player.$container.querySelector('.jessibuca-play-big');
+
+	        if ($playBig && this.player.$container) {
+	          this.player.$container.removeChild($playBig);
+	        }
+	      }
 	    }
 
 	    this.player.debug.log('control', 'destroy');
@@ -11454,6 +11512,10 @@
 	        }
 	      }
 	    }
+	  }
+
+	  getSourceBufferUpdating() {
+	    return this.sourceBuffer && this.sourceBuffer.updating;
 	  }
 
 	}
@@ -12742,7 +12804,7 @@
 	            openWebglAlignment: true
 	          });
 
-	          this.play(url).then(() => {
+	          this.play(url, options).then(() => {
 	            // resolve();
 	            this.player.debug.log('Jessibuca', 'webglAlignmentError and play success');
 	          }).catch(() => {
@@ -12777,7 +12839,7 @@
 
 	          this._resetPlayer();
 
-	          this.play(url).then(() => {
+	          this.play(url, options).then(() => {
 	            // resolve();
 	            this.player.debug.log('Jessibuca', 'media source full and reset player and play success');
 	          }).catch(() => {
@@ -12793,7 +12855,7 @@
 
 	          this._resetPlayer();
 
-	          this.play(url).then(() => {
+	          this.play(url, options).then(() => {
 	            // resolve();
 	            this.player.debug.log('Jessibuca', 'media source append buffer error and reset player and play success');
 	          }).catch(() => {
@@ -12808,7 +12870,7 @@
 
 	          this._resetPlayer();
 
-	          this.play(url).then(() => {
+	          this.play(url, options).then(() => {
 	            // resolve();
 	            this.player.debug.log('Jessibuca', 'media source buffer list large and reset player and play success');
 	          }).catch(() => {
@@ -12823,7 +12885,7 @@
 
 	          this._resetPlayer();
 
-	          this.play(url).then(() => {
+	          this.play(url, options).then(() => {
 	            // resolve();
 	            this.player.debug.log('Jessibuca', 'media source append buffer end timeout and reset player and play success');
 	          }).catch(() => {
@@ -12847,7 +12909,7 @@
 	              useWCS: false
 	            });
 
-	            this.play(url).then(() => {
+	            this.play(url, options).then(() => {
 	              // resolve();
 	              this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play success');
 	            }).catch(() => {
@@ -12866,7 +12928,7 @@
 	            useWCS: true
 	          });
 
-	          this.play(url).then(() => {
+	          this.play(url, options).then(() => {
 	            // resolve();
 	            this.player.debug.log('Jessibuca', 'webcodecs Width Or Height Change reset player and play success');
 	          }).catch(() => {
@@ -12885,7 +12947,7 @@
 	              useWCS: false
 	            });
 
-	            this.play(url).then(() => {
+	            this.play(url, options).then(() => {
 	              // resolve();
 	              this.player.debug.log('Jessibuca', 'webcodecs decode error  reset player and play success');
 	            }).catch(() => {
