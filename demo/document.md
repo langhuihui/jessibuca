@@ -1517,6 +1517,28 @@ useWCS:false
 2. 监听播放器的stats事件，获取到`ts`，缓存一个开始时间点，通过最新的`ts`减去开始时间点，就是当前播放的时间点。
 
 
+### play() failed because the user didn't interact with the document first 报错
+
+> 这个报错是浏览器的规范，浏览器规定，必须要用户主动触发才能播放视频。
+
+解决方案
+
+```
+{
+    useMSE:false, // mse强制绑定了video标签，所以不能优先mse解码。
+    useWCS;true,
+    autoWASM:true,
+    useSIMD:true,
+    useVideoRender:false,
+    useCanvasRender:true
+}
+```
+
+优先使用`canvas`进行渲染。这样就可以规避掉浏览器的规范了。
+
+> wcs是硬解码，wasm是软解码
+
+
 
 ### 群
 <img src="/public/qrcode.jpeg">
