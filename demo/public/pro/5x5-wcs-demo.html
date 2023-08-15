@@ -156,6 +156,12 @@
                     checked
                     onclick="replay()"
                     type="checkbox"
+                    id="isFlv"
+                /><span>是否flv格式</span>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
                     id="demuxUseWorker"
                 /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
             </div>
@@ -376,6 +382,7 @@
     var $pause = document.getElementById('pause');
     var $destroy = document.getElementById('destroy');
     var $demuxUseWorker = document.getElementById('demuxUseWorker');
+    var $isFlv = document.getElementById('isFlv');
 
 
     var showOperateBtns = true; // 是否显示按钮
@@ -398,6 +405,7 @@
             showBandwidth: showOperateBtns, // 显示网速
             showPerformance:showOperateBtns,
             useWCS: true,
+            isFlv: $isFlv.checked === true,
             controlAutoHide:true,
             operateBtns: {
                 fullscreen: showOperateBtns,

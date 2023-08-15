@@ -99,6 +99,11 @@
         </div>
         <div class="input">
             <div>
+                <input
+                    checked
+                    type="checkbox"
+                    id="isFlv"
+                /><span>是否flv格式</span>
                 <span>缓存时长：</span>
                 <input placeholder="单位：秒" type="text" id="videoBuffer" style="width: 50px" value="0.2">秒
                 <span>缓存延迟(延迟超过会触发丢帧)：</span>
@@ -119,8 +124,7 @@
         <div class="input">
             <div>
                 <input
-                    checked
-                    onclick="toggleDebugLevel"
+                    onclick="toggleDebugLevel()"
                     type="checkbox"
                     id="isDebug"
                 /><span>开启日志</span>
@@ -278,6 +282,7 @@
     var $replay = document.getElementById('replay');
     var $demuxUseWorker = document.getElementById('demuxUseWorker');
     var $isDebug = document.getElementById('isDebug');
+    var $isFlv = document.getElementById('isFlv');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -305,6 +310,7 @@
             controlAutoHide: true,
             showBandwidth: showOperateBtns, // 显示网速
             showPerformance: showOperateBtns,
+            isFlv: $isFlv.checked === true,
             operateBtns: {
                 fullscreen: showOperateBtns,
                 screenshot: showOperateBtns,

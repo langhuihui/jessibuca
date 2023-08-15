@@ -148,7 +148,6 @@
             <div class="container" id="container34"></div>
             <div class="container" id="container35"></div>
             <div class="container" id="container36"></div>
-
         </div>
         <div>
             <div class="container" id="container37"></div>
@@ -176,6 +175,12 @@
         </div>
         <div class="input">
             <div>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="isFlv"
+                /><span>是否flv格式</span>
                 <input
                     checked
                     onclick="replay()"
@@ -536,6 +541,7 @@
     var $pause = document.getElementById('pause');
     var $destroy = document.getElementById('destroy');
     var $demuxUseWorker = document.getElementById('demuxUseWorker');
+    var $isFlv = document.getElementById('isFlv');
 
 
     var showOperateBtns = true; // 是否显示按钮
@@ -555,10 +561,10 @@
             loadingText: "加载中",
             debug: true,
             debugLevel: "debug",
-            hasAudio:false,
-            useVideoRender:true,
             showBandwidth: showOperateBtns, // 显示网速
+            showPerformance:showOperateBtns,
             useMSE: true,
+            isFlv: $isFlv.checked === true,
             controlAutoHide:true,
             operateBtns: {
                 fullscreen: showOperateBtns,
