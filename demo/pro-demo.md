@@ -331,6 +331,15 @@
 #### http
 [http://jessibuca.monibuca.com/pro/demo-retry.html](http://jessibuca.monibuca.com/pro/demo-retry.html)
 
+### 视频轮播（支持显示上一个视频最后一帧）
+------
+#### https
+[https://jessibuca.com/pro/demo-loop.html](https://jessibuca.com/pro/demo-loop.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-loop.html](http://jessibuca.monibuca.com/pro/demo-loop.html)
+
+
 ### 一直播放,自动续连(超时、异常暂停播放等)
 ------
 #### https
@@ -338,8 +347,6 @@
 
 #### http
 [http://jessibuca.monibuca.com/pro/demo-replay.html](http://jessibuca.monibuca.com/pro/demo-replay.html)
-
-
 
 
 

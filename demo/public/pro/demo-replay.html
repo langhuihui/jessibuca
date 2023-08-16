@@ -185,7 +185,10 @@
 
         //  一直播放
         jessibuca.on('playFailedAndPaused', function (e) {
-            replay()
+            //  延迟个5秒再重连
+            setTimeout(() => {
+                replay()
+            }, 5 * 1000)
         });
 
         jessibuca.on('ptz', (arrow) => {
