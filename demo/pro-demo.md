@@ -313,6 +313,17 @@
 #### http
 [http://jessibuca.monibuca.com/pro/demo-control-dom.html](http://jessibuca.monibuca.com/pro/demo-control-dom.html)
 
+### 底部按钮配置(全屏|截图|声音|录制|PTZ|电子放大|画面旋转|画面镜像|显示比例|显示模式|显示性能面板|自定义按钮)
+------
+#### https
+[https://jessibuca.com/pro/demo-control-btn.html](https://jessibuca.com/pro/demo-control-btn.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-control-btn.html](http://jessibuca.monibuca.com/pro/demo-control-btn.html)
+
+
+
+
 
 ### PTZ云台操作
 ------

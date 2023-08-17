@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Jessica pro btn demo</title>
+    <link rel="stylesheet" href="./demo.css">
+    <script src="./vconsole.js"></script>
+    <script src="./jessibuca-pro-demo.js"></script>
+    <style>
+        .container-shell:before {
+            content: "jessibuca pro btn demo player";
+        }
+    </style>
+</head>
+<body class="page">
+<div class="root">
+    <div class="container-shell">
+        <div id="container"></div>
+        <div class="input">
+            <div>
+                当前浏览器：
+                <span id="mseSupport264" style="color: green;display: none">支持MSE H264解码；</span>
+                <span id="mseSupport" style="color: green;display: none">支持MSE H265解码；</span>
+                <span id="mseNotSupport264" style="color: red;display: none">不支持MSE H264解码；</span>
+                <span id="mseNotSupport"
+                      style="color: red;display: none">不支持MSE H265解码,会自动切换成wasm解码；</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                当前浏览器：
+                <span id="wcsSupport264" style="color: green;display: none">支持Webcodecs H264解码；</span>
+                <span id="wcsSupport" style="color: green;display: none">支持Webcodecs H265解码（不一定准确）；</span>
+                <span id="wcsNotSupport264"
+                      style="color: red;display: none">不支持Webcodecs H264解码(https/localhost)；</span>
+                <span id="wcsNotSupport" style="color: red;display: none">不支持Webcodecs H265解码(https/localhost),会自动切换成wasm解码</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                当前浏览器：
+                <span id="wasmSupport" style="color: green;display: none">支持WASM解码；</span>
+                <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码</span>
+                <span id="wasmNotSupport" style="color: red;display: none">不支持WASM解码</span>
+                <span id="simdNotSupport"
+                      style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
+            </div>
+        </div>
+        <div class="input">
+            <div><input
+                type="checkbox"
+                checked
+                id="useMSE"
+            /><span>MediaSource</span>
+                <input
+                    type="checkbox"
+                    id="useWCS"
+                /><span>Webcodec</span>
+                <input
+                    type="checkbox"
+                    id="useWASM"
+                /><span>WASM</span>
+                <input
+                    type="checkbox"
+                    id="useSIMD"
+                /><span>WASM(SIMD)</span> <span style="color: green">默认使用wasm解码器</span>
+            </div>
+        </div>
+        <div class="input">
+            <span>渲染标签：</span>
+            <select id="renderDom" onchange="replay()">
+                <option value="video" selected>video</option>
+                <option value="canvas">canvas</option>
+            </select>
+
+            <span>canvas渲染技术：</span>
+            <select id="isUseWebGPU" onchange="replay()">
+                <option value="webgl">webgl</option>
+                <option value="webgpu" selected>webgpu</option>
+            </select>
+            <span id="supportWebgpu"></span>
+        </div>
+        <div class="input">
+            <div>
+                <span>缓存时长：</span>
+                <input placeholder="单位：秒" type="text" id="videoBuffer" style="width: 50px" value="0.2">秒
+                <span>缓存延迟(延迟超过会触发丢帧)：</span>
+                <input placeholder="单位：秒" type="text" id="videoBufferDelay" style="width: 50px" value="1">秒
+                <button id="replay">重播</button>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="demuxUseWorker"
+                /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <span style="color: red">按钮配置(勾选会触发重播):</span>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="fullscreen"
+                /><span>全屏</span>
+                <span> | </span>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="screenshot"
+                /><span>截图</span>
+                <span> | </span>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="audio"
+                /><span>声音</span>
+                <span> | </span>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="record"
+                /><span>录制</span>
+                <span> | </span>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="ptz"
+                /><span>PTZ</span>
+                <span> | </span>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="zoom"
+                /><span>电子放大</span>
+                <span> | </span>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="quality"
+                /><span>分辨率</span>
+                <span> | </span>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="scale"
+                /><span>显示模式</span>
+                <span> | </span>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="performance"
+                /><span>性能面板</span>
+                <span> | </span>
+
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="close"
+                /><span>关闭按钮</span>
+                <span> | </span>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="extendBtn"
+                /><span>自定义按钮</span>
+                <span> | </span>
+            </div>
+        </div>
+
+        <div class="input">
+            <div>
+                <span style="color: #3c8b3c">其他操作：</span>
+                <span>画面旋转</span>
+                <select id="rotate" onclick="rotateChange()">
+                    <option value="0">0</option>
+                    <option value="90">90</option>
+                    <option value="18">180</option>
+                    <option value="270">270</option>
+                </select>
+                <span> | </span>
+                <span>画面镜像</span>
+                <select id="mirrorRotate" onclick="mirrorRotateChange()">
+                    <option value="none">无</option>
+                    <option value="level">水平</option>
+                    <option value="vertical">垂直</option>
+                </select>
+                <span> | </span>
+                <span>宽高比</span>
+                <select id="aspectRatio" onclick="aspectRatioChange()">
+                    <option value="">无</option>
+                    <option value="16:9">16:9</option>
+                    <option value="4:3">4:3</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl"
+                value=""
+            />
+            <button id="play">播放</button>
+            <button id="pause" style="display: none">停止</button>
+        </div>
+        <div class="input" style="line-height: 30px">
+            <button id="destroy">销毁</button>
+            <span class="fps-inner"></span>
+        </div>
+    </div>
+</div>
+
+<script src="./demo.js"></script>
+<script>
+    var $player = document.getElementById('play');
+    var $pause = document.getElementById('pause');
+    var $playHref = document.getElementById('playUrl');
+    var $container = document.getElementById('container');
+    var $destroy = document.getElementById('destroy');
+    var $fps = document.querySelector('.fps-inner');
+    var $useMSE = document.getElementById('useMSE');
+    var $useSIMD = document.getElementById('useSIMD');
+    var $useWASM = document.getElementById('useWASM');
+    var $useWCS = document.getElementById('useWCS');
+    var $videoBuffer = document.getElementById('videoBuffer');
+    var $videoBufferDelay = document.getElementById('videoBufferDelay');
+    var $replay = document.getElementById('replay');
+    var $renderDom = document.getElementById('renderDom');
+    var $isUseWebGPU = document.getElementById('isUseWebGPU');
+    var $demuxUseWorker = document.getElementById('demuxUseWorker');
+
+    var $fullscreen = document.getElementById('fullscreen');
+    var $screenshot = document.getElementById('screenshot');
+    var $audio = document.getElementById('audio');
+    var $record = document.getElementById('record');
+    var $ptz = document.getElementById('ptz');
+    var $zoom = document.getElementById('zoom');
+    var $quality = document.getElementById('quality');
+    var $scale = document.getElementById('scale');
+    var $performance = document.getElementById('performance');
+    var $close = document.getElementById('close');
+    var $extendBtn = document.getElementById('extendBtn');
+
+    var showOperateBtns = true; // 是否显示按钮
+    var forceNoOffscreen = true; //
+    var jessibuca = null;
+
+    const configBtns = {
+        player: true,
+        fullscreen: $fullscreen.checked === true,
+        screenshot: $screenshot.checked === true,
+        audio: $audio.checked === true,
+        record: $record.checked === true,
+        ptz: $ptz.checked === true,
+        zoom: $zoom.checked === true,
+        quality: $quality.checked === true,
+        scale: $scale.checked === true,
+        performance: $performance.checked === true,
+        close: $close.checked === true,
+    }
+    let extendOperateBtns = [];
+    if ($extendBtn.checked === true) {
+        extendOperateBtns = [
+            {
+                name: 'testBtn',
+                index: 2,
+                icon: 'data:image/png;base64,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',
+                iconHover: 'data:image/png;base64,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',
+                iconTitle: '测试hover',
+                click: () => {
+                    console.log('点击了test按钮');
+                }
+            },
+        ]
+    }
+
+
+    function create() {
+        jessibuca = new JessibucaPro({
+            container: $container,
+            videoBuffer: Number($videoBuffer.value), // 缓存时长
+            videoBufferDelay: Number($videoBufferDelay.value), // 1000s
+            isResize: false,
+            text: "",
+            loadingText: "加载中",
+            debug: true,
+            debugLevel: "debug",
+            useMSE: $useMSE.checked === true,
+            useSIMD: $useSIMD.checked === true,
+            useWCS: $useWCS.checked === true,
+            showBandwidth: showOperateBtns, // 显示网速
+            showPerformance: showOperateBtns, // 显示性能
+            operateBtns: configBtns,
+            extendOperateBtns: extendOperateBtns,
+            timeout: 10000,
+            heartTimeoutReplayUseLastFrameShow: true,
+            audioEngine: "worklet",
+            qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
+            forceNoOffscreen: forceNoOffscreen,
+            isNotMute: false,
+            heartTimeout: 10,
+            ptzClickType: 'mouseDownAndUp',
+            ptzZoomShow: true,
+            ptzMoreArrowShow: true,
+            ptzApertureShow: true,
+            ptzFocusShow: true,
+            useCanvasRender: $renderDom.value === 'canvas',
+            useWebGPU: $isUseWebGPU.value === 'webgpu',
+            demuxUseWorker: $demuxUseWorker.checked === true,
+            controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
+            // audioEngine:"worklet",
+            // isFlv: true
+        },);
+
+
+        jessibuca.on('ptz', (arrow) => {
+            // console.log('ptz', arrow);
+        })
+
+        jessibuca.on('streamQualityChange', (value) => {
+            console.log('streamQualityChange', value);
+        })
+
+        jessibuca.on('timeUpdate', (value) => {
+            // console.log('timeUpdate', value);
+        })
+
+        jessibuca.on('stats', (stats) => {
+            // console.log('stats', stats);
+            $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
+        })
+
+        jessibuca.on('close', () => {
+            //  需要延迟触发重播。
+            setTimeout(() => {
+                jessibuca = null;
+                create();
+            }, 1 * 1000)
+        })
+
+
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+        $destroy.style.display = 'none';
+        $fps.textContent = '';
+    }
+
+
+    create();
+
+    function play() {
+        var href = $playHref.value;
+        if (href) {
+            jessibuca.play(href);
+            $player.style.display = 'none';
+            $pause.style.display = 'inline-block';
+            $destroy.style.display = 'inline-block';
+        }
+    }
+
+
+    function replay() {
+        if (jessibuca) {
+            jessibuca.destroy().then(() => {
+                create();
+                play();
+            });
+        } else {
+            create();
+            play();
+        }
+    }
+
+    $replay.addEventListener('click', function () {
+        replay();
+    })
+
+    $player.addEventListener('click', function () {
+        play();
+    }, false)
+
+
+    $pause.addEventListener('click', function () {
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+        $fps.textContent = '';
+        jessibuca.pause();
+    })
+
+    $destroy.addEventListener('click', function () {
+        if (jessibuca) {
+            jessibuca.destroy().then(() => {
+                create();
+            });
+        } else {
+            create();
+        }
+
+    })
+
+    $useMSE.addEventListener('click', function () {
+        const checked = $useMSE.checked;
+        if (checked) {
+            $useSIMD.checked = false
+            $useWCS.checked = false
+            $useWASM.checked = false
+        }
+        replay();
+    })
+
+    $useSIMD.addEventListener('click', function () {
+        const checked = $useSIMD.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useWCS.checked = false
+            $useWASM.checked = false
+        }
+        replay();
+    })
+
+    $useWCS.addEventListener('click', function () {
+        const checked = $useWCS.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useSIMD.checked = false
+            $useWASM.checked = false
+        }
+        replay();
+    })
+
+    $useWASM.addEventListener('click', function () {
+        const checked = $useWASM.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useSIMD.checked = false
+            $useWCS.checked = false
+        }
+        replay();
+    })
+
+    function rotateChange() {
+        if (jessibuca) {
+            const $rotate = document.getElementById('rotate');
+            const rotate = Number($rotate.value);
+            jessibuca.setRotate(rotate);
+        }
+    }
+
+    function mirrorRotateChange() {
+        if (jessibuca) {
+            const $mirrorRotate = document.getElementById('mirrorRotate');
+            const mirror = $mirrorRotate.value;
+            jessibuca.setMirrorRotate(mirror);
+        }
+    }
+
+    function aspectRatioChange() {
+        if (jessibuca) {
+            const $aspectRatio = document.getElementById('aspectRatio');
+            const aspectRatio = $aspectRatio.value;
+            jessibuca.setAspectRatio(aspectRatio);
+        }
+    }
+
+</script>
+
+</body>
+</html>

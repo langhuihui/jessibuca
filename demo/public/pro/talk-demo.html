@@ -18,13 +18,21 @@
 <div class="root">
     <div class="container-shell">
         <div class="input">
-            <span style="color: red">Tips:</span> <span>麦克风权限需要Https 或者localhost</span>
+            <span style="color: red">Tips:</span> <span>麦克风权限需要Https 或者 localhost</span>
+        </div>
+        <div class="input">
+            <span style="color: red">Tips:</span> <span>单通道，只传输采集到的音频数据，如需播放音视频，请用播放器播放</span>
         </div>
         <div class="input">
             <span style="color: red">Tips:</span> <span>支持rtp协议封装和裸数据传输</span>
         </div>
         <div class="input">
             <span style="color: red">Tips:</span> <span>标准的g711a/u 协议 8k采样率，16位采样精度</span>
+        </div>
+        <div class="input">
+            <span style="color: red">Tips:</span> <span>rtp传输格式支持，国标 tcp/udp; <br>
+            <span style="color:green;">国标tcp:</span>`[2字节的rtp头]`+`[12字节的rtp扩展头]`+`[裸数据]`;<br>
+            <span style="color:green;">国标udp:</span>`[12字节的rtp扩展头]`+`[裸数据]`</span>
         </div>
         <div class="input">
             <input type="text" value="" placeholder="例如：ws://localhost:8080/" id="talkUrl">
@@ -48,14 +56,24 @@
               <span class="span-row">
                     封装格式
                     <select id="talkPacketType">
-                        <option value="rtp" selected>rtp</option>
+                        <option value="rtp">rtp</option>
                         <option value="empty" selected>裸数据</option>
                     </select>
                 </span>
+
+        </div>
+        <div class="input">
             <span class="span-row">
-                    rtpSsrc(封装格式是rtp的时候才会生效)
-                    <input style="width: 80px" type="text" value="0" id="talkRtpSsrc">
-                </span>
+                rtp 传输协议
+                <select id="talkPacketRtpSendType">
+                    <option value="tcp" selected>tcp</option>
+                    <option value="udp">udp</option>
+                </select>
+            </span>
+            <span class="span-row">
+                rtpSsrc(封装格式是rtp的时候才会生效)
+                <input style="width: 80px" type="text" value="0" id="talkRtpSsrc">
+            </span>
         </div>
         <div class="input">
              <span class="span-row">
@@ -148,6 +166,7 @@
         const talkRtpSsrc = document.getElementById('talkRtpSsrc').value;
         const talkTestMicrphone = document.getElementById('testMicrphone').checked;
         const talkEngine = document.getElementById('talkEngine').value;
+        const talkPacketRtpSendType = document.getElementById('talkPacketRtpSendType').value;
         if (jessibucaTalk && talkUrl) {
             jessibucaTalk.startTalk(talkUrl, {
                 encType: talkEncType,
@@ -157,6 +176,7 @@
                 debug: true,
                 debugLevel: "debug",
                 rtpSsrc: talkRtpSsrc,
+                packetTcpSendType: talkPacketRtpSendType,
                 engine: talkEngine,
                 saveRtpToFile: true,
                 testMicrophone: talkTestMicrphone === true || talkTestMicrphone === 'true',
