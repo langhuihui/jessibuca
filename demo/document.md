@@ -744,6 +744,19 @@ pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
 
 2.查看下decoder.js 返回的内容是否正确，是不是js内容。（会存在vue 或者react 项目 直接被返回了index.html 内容了）
 
+> 需要正确的配置`decoder`参数，播放器默认引用的是根目录下面的`decoder.js`
+
+#### react 解决方案
+
+见 https://github.com/bosscheng/jessibuca-react-demo/tree/v3
+
+
+### vue 解决方案
+
+https://github.com/bosscheng/jessibuca-vue-demo/tree/v3
+
+typescript:https://github.com/bosscheng/jessibuca-vue-ts-demo
+
 
 ### 有数据,但是没有画面出来
 
