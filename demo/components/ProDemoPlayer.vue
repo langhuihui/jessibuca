@@ -52,6 +52,10 @@
                 <div style="color: red" class="input-tips">Tips:支持录制MP4(MPEG-4)格式的视频(仅录制视频，不包含音频)
                 </div>
             </div>
+            <div class="input input-annnie">
+                <div style="color: red" class="input-tips">Tips:支持录制FLV格式的视频(视频+音频)
+                </div>
+            </div>
             <div class="input input-wrap">
                 <div>
                     当前浏览器：
@@ -219,52 +223,7 @@
                     /><span>显示性能面板</span>
                 </div>
             </div>
-            <div class="input" style="margin-top: 5px;padding-top:8px;border-top: 1px solid #eee">
-                <input type="text" placeholder="请输入ws通讯地址" v-model="talkUrl" style="width: 300px">
-                <span class="span-row">
-                    编码格式
-                <select v-model="talkEncType">
-                    <option value="g711a">g711a</option>
-                    <option value="g711u">g711u</option>
-                </select>
-                </span>
-                <span class="span-row">
-                    封装格式
-                    <select v-model="talkPacketType">
-                        <option value="rtp">rtp</option>
-                    </select>
-                </span>
-                <span class="span-row">
-                    采样率
-                    <select v-model="talkSampleRate">
-                        <option value="16000">16000</option>
-                        <option value="8000">8000</option>
-                    </select>
-                    Hz
-                </span>
-                <span class="span-row">
-                     采样精度
-                    <select v-model="talkSampleBitsWidth">
-                        <option value="32">32</option>
-                        <option value="16">16</option>
-                        <option value="8">8</option>
-                    </select>
-                    位
-                </span>
-            </div>
-            <div class="input">
-                <button @click="startTalk">开始对讲</button>
-                <button @click="stopTalk">停止对讲</button>
-                设置声音<input
-                type="range"
-                min="0"
-                max="100"
-                step="1"
-                v-model="talkVolume"
-                @change="talkSetVolume"
-            />
-                <button @click="talkGetVolume">获取声音</button>
-            </div>
+
             <div class="input" v-if="loaded" style="line-height: 30px">
                 <button @click="destroyPlayer">销毁</button>
                 <button v-if="quieting" @click="cancelMute">取消静音</button>

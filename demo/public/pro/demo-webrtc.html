@@ -37,6 +37,17 @@
             </div>
         </div>
         <div class="input">
+            <div>
+                <input
+                    onchange="replay()"
+                    type="checkbox"
+                    id="isForOthers"
+                /><span>其他Webrtc服务器</span>
+                <span>其他的webrtc地址：</span>webrtc://127.0.0.1/test/sdp <br>
+                播放器是不会根据url上面的路径来检测的的。
+            </div>
+        </div>
+        <div class="input">
             <div>输入URL：</div>
             <input
                 autocomplete="on"
@@ -60,6 +71,7 @@
     var $playHref = document.getElementById('playUrl');
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
+    var $isForOthers = document.getElementById('isForOthers');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -90,6 +102,7 @@
             audioEngine: "worklet",
             isNotMute: false,
             heartTimeout: 10,
+            isWebrtcForOthers:$isForOthers.checked === true,
         },);
 
 

@@ -50,21 +50,21 @@
         </div>
         <div class="input">
             <div><input
-                type="checkbox"
-                checked
-                id="useMSE"
+                    type="checkbox"
+                    checked
+                    id="useMSE"
             /><span>MediaSource</span>
                 <input
-                    type="checkbox"
-                    id="useWCS"
+                        type="checkbox"
+                        id="useWCS"
                 /><span>Webcodec</span>
                 <input
-                    type="checkbox"
-                    id="useWASM"
+                        type="checkbox"
+                        id="useWASM"
                 /><span>WASM</span>
                 <input
-                    type="checkbox"
-                    id="useSIMD"
+                        type="checkbox"
+                        id="useSIMD"
                 /><span>WASM(SIMD)</span> <span style="color: green">默认使用wasm解码器</span>
             </div>
         </div>
@@ -93,21 +93,34 @@
         </div>
         <div class="input">
             <div>
+
                 <input
-                    checked
-                    onclick="replay()"
-                    type="checkbox"
-                    id="demuxUseWorker"
+                        checked
+                        onclick="replay()"
+                        type="checkbox"
+                        id="demuxUseWorker"
                 /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
             </div>
         </div>
 
         <div class="input">
+            <div>
+                <span>录音格式：</span>
+                <select id="recordType" onchange="replay()">
+                    <option value="webm">webm(音频+视频)</option>
+                    <option value="mp4">mp4(视频)</option>
+                    <option value="flv" selected>flv(音频+视频)</option>
+                </select>
+            </div>
+        </div>
+
+
+        <div class="input">
             <div>输入URL：</div>
             <input
-                autocomplete="on"
-                id="playUrl"
-                value=""
+                    autocomplete="on"
+                    id="playUrl"
+                    value=""
             />
             <button id="play">播放</button>
             <button id="pause" style="display: none">停止</button>
@@ -137,6 +150,7 @@
     var $renderDom = document.getElementById('renderDom');
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
     var $demuxUseWorker = document.getElementById('demuxUseWorker');
+    var $recordType = document.getElementById('recordType')
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -158,12 +172,9 @@
             showBandwidth: showOperateBtns, // 显示网速
             showPerformance: showOperateBtns, // 显示性能
             operateBtns: {
-                fullscreen: showOperateBtns,
-                screenshot: showOperateBtns,
+                record:showOperateBtns,
                 play: showOperateBtns,
                 audio: showOperateBtns,
-                ptz: showOperateBtns,
-                quality: showOperateBtns,
                 performance: showOperateBtns,
             },
             timeout: 10000,
@@ -178,10 +189,12 @@
             ptzMoreArrowShow: true,
             ptzApertureShow: true,
             ptzFocusShow: true,
+            useVideoRender: $renderDom.value === 'video',
             useCanvasRender: $renderDom.value === 'canvas',
             useWebGPU: $isUseWebGPU.value === 'webgpu',
             demuxUseWorker: $demuxUseWorker.checked === true,
             controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
+            recordType: $recordType.value
             // audioEngine:"worklet",
             // isFlv: true
         },);

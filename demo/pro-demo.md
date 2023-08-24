@@ -342,14 +342,13 @@
 #### http
 [http://jessibuca.monibuca.com/pro/demo-retry.html](http://jessibuca.monibuca.com/pro/demo-retry.html)
 
-### 视频录制
+### 视频录制（WebM格式(音频+视频)、Mp4格式(视频)，Flv格式(音频+视频)）
 ------
 #### https
 [https://jessibuca.com/pro/demo-record.html](https://jessibuca.com/pro/demo-record.html)
 
 #### http
 [http://jessibuca.monibuca.com/pro/demo-record.html](http://jessibuca.monibuca.com/pro/demo-record.html)
-
 
 
 ### 视频轮播（支持显示上一个视频最后一帧）
