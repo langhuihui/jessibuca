@@ -17,28 +17,10 @@ sidebar: false
 >
 > 需要本地挂载在Nginx（或者自己搭建一个web-server服务）上面才能跑起来。
 
-> 多屏测试
->
-> [2x2 http地址](http://jessibuca.monibuca.com/pro/2x2-demo.html),
-> [2x2 https地址](https://jessibuca.com/pro/2x2-demo.html),
->
-> [3x3 http地址](http://jessibuca.monibuca.com/pro/3x3-demo.html),
-> [3x3 https地址](https://jessibuca.com/pro/3x3-demo.html),
->
-> [4x4 http地址](http://jessibuca.monibuca.com/pro/4x4-demo.html),
-> [4x4 https地址](https://jessibuca.com/pro/4x4-demo.html),
->
-> [NxN http地址](http://jessibuca.monibuca.com/pro/demo-multi.html),
-> [NxN https地址](https://jessibuca.com/pro/demo-multi.html),
+> Demo 列表
+[Http](http://jessibuca.monibuca.com/pro/index.html)
 
-
-> 如需要更好的体验录像流(TF卡流)，可以通过单独的测试页面，
-> [http地址](http://jessibuca.monibuca.com/pro/playback-demo.html),
-> [https地址](https://jessibuca.com/pro/playback-demo.html)
-
-> 如果需要更好的体验语音通讯，可以通过单独的测试页面， [http地址](http://jessibuca.monibuca.com/pro/talk-demo2.html),[https地址](https://jessibuca.com/pro/talk-demo2.html)
-
-> 如果需要超低延迟(300ms以内)，可以通过单独的测试页面， [http地址](http://jessibuca.monibuca.com/pro/demo-low-delay.html),[https地址](https://jessibuca.com/pro/demo-low-delay.html)
+[Https](https://jessibuca.com/pro/index.html)
 
 - 支持15种格式：(live/test为streamPath)
 1. ws(s)-raw 即ws://host-name:port/jessica/`live/test` (该协议只对接了[monibuca服务器](https://monibuca.com),其他服务器需要额外对接)
@@ -48,23 +30,28 @@ sidebar: false
 5. WebTransport 即wt://host-name:port/play/`live/test` (该协议只对接了[monibuca服务器](https://monibuca.com),其他服务器需要额外对接)
 6. Webrtc 即 webrtc://host-name:port/webrtc/play/`live/test` (支持H254/H265, 仅支持https://或者http://localhost环境)
 7. Webrtc-zlmediakit 即 webrtc://host-name:port/index/api/webrtc?app=live&stream=`stream-name`&type=play  (支持H254, 仅支持https://或者http://localhost环境)
-8. Webrtc-srs 即 webrtc://host-name:port//rtc/v1/play/`live/test`  (支持H254, 仅支持https://或者http://localhost环境)
-9. http(s)-fmp4 即http://host-name:port/your-path/`live/test`.(f)mp4
-10. ws(s)-fmp4 即ws://host-name:port/your-path/`live/test`.(f)mp4
-11. http(s)-h264 即http://host-name:port/jessica/`live/test`.h264
-12. ws(s)-h264 即ws://host-name:port/jessica/`live/test`.h264
-13. http(s)-h265 即http://host-name:port/jessica/`live/test`.h265
-14. ws(s)-h265 即ws://host-name:port/jessica/`live/test`.h265
-15. ws(s)-mpeg4 即ws://host-name:port/your-path/`live/test`.mpeg4
+8. Webrtc-srs 即 webrtc://host-name:port/rtc/v1/play/`live/test`  (支持H254, 仅支持https://或者http://localhost环境)
+9. Webrtc-others 即 webrtc://host-name:port/`live/test` (支持H254, 仅支持https://或者http://localhost环境)
+10. http(s)-fmp4 即http://host-name:port/your-path/`live/test`.(f)mp4
+11. ws(s)-fmp4 即ws://host-name:port/your-path/`live/test`.(f)mp4
+12. http(s)-h264 即http://host-name:port/jessica/`live/test`.h264
+13. ws(s)-h264 即ws://host-name:port/jessica/`live/test`.h264
+14. http(s)-h265 即http://host-name:port/jessica/`live/test`.h265
+15. ws(s)-h265 即ws://host-name:port/jessica/`live/test`.h265
+16. ws(s)-mpeg4 即ws://host-name:port/your-path/`live/test`.mpeg4
 - 注意http协议会有跨域问题，需要设置cors头
 - 协议同时支持https、wss
 - 同时支持H264和H265编码格式
 - 支持webcodecs硬解码(H264+H265)和MSE硬解码(H264+H265)
 - 支持HLS(H264+H265)软解码、硬解码
-- 支持webrtc(H264+H265(软解码、硬解码))，
-- 支持`zlmediakit`webrtc(H264)
-- 支持`srs`webrtc(H264)
+- 支持`m7s` webrtc(H264+H265(软解码、硬解码))，
+- 支持`zlmediakit` webrtc(H264)
+- 支持`srs` webrtc(H264)
+- 支持`others` webrtc(H264)
 - 支持加密流(国标SM4、m7s加密流)
+- 支持裸流(H264+H265)
+- 支持Fmp4格式(H264+H265)
+- 支持mpeg4格式(H264)
 
 <Rice/>
 
