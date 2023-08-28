@@ -483,10 +483,12 @@ jessibuca.clearView()
 > video标签(useMSE,useWCS+wcsUseVideoRender)渲染的页面暂不支持这个方法。
 
 
-### play([url])
+### play([url],[options])
 
 - **参数**：
-    - `{string} url`
+    - `{string} url` url 地址
+    - `{object} options` 额外参数
+      - `{object} headers` http 请求头
 
 - **返回**：
     - `{Promise}`
@@ -499,6 +501,15 @@ jessibuca.play('url').then(() => {
 }).catch((e) => {
     console.log('play error', e)
 })
+
+//  http 授权认证。
+jessibuca.play('url',{headers:{'Authorization':'test111'}}).then(() => {
+    console.log('play success')
+}).catch((e) => {
+    console.log('play error', e)
+})
+
+
 //
 jessibuca.play()
 ```
