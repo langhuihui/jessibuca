@@ -223,7 +223,7 @@
 [http://jessibuca.monibuca.com/pro/demo-fmp4.html](http://jessibuca.monibuca.com/pro/demo-fmp4.html)
 
 
-### Mpeg4格式
+### Mpeg4格式(H264)
 ------
 #### https
 [https://jessibuca.com/pro/demo-mpeg4.html](https://jessibuca.com/pro/demo-mpeg4.html)
@@ -258,7 +258,7 @@
 [http://jessibuca.monibuca.com/pro/demo-hls-H265.html](http://jessibuca.monibuca.com/pro/demo-hls-H265.html)
 
 
-### webrtc（m7s支持H264/H265、ZLM支持H264）
+### webrtc（m7s支持H264/H265、ZLM支持H264、SRS支持H264、其他流媒体支持H264）
 ------
 #### https
 [https://jessibuca.com/pro/demo-webrtc.html](https://jessibuca.com/pro/demo-webrtc.html)
@@ -324,8 +324,7 @@
 
 
 
-
-### PTZ云台操作
+### PTZ云台操作(支持生成国标编码)
 ------
 #### https
 [https://jessibuca.com/pro/demo-ptz.html](https://jessibuca.com/pro/demo-ptz.html)
@@ -334,7 +333,7 @@
 [http://jessibuca.monibuca.com/pro/demo-ptz.html](http://jessibuca.monibuca.com/pro/demo-ptz.html)
 
 
-### 异常断开重连
+### 异常断开重连(支持配置不黑屏)
 ------
 #### https
 [https://jessibuca.com/pro/demo-retry.html](https://jessibuca.com/pro/demo-retry.html)
@@ -360,14 +359,13 @@
 [http://jessibuca.monibuca.com/pro/demo-loop.html](http://jessibuca.monibuca.com/pro/demo-loop.html)
 
 
-### 一直播放,自动续连(超时、异常暂停播放等)
+### 一直播放,自动续连(超时、断网重连、异常暂停播放等)
 ------
 #### https
 [https://jessibuca.com/pro/demo-replay.html](https://jessibuca.com/pro/demo-replay.html)
 
 #### http
 [http://jessibuca.monibuca.com/pro/demo-replay.html](http://jessibuca.monibuca.com/pro/demo-replay.html)
-
 
 
 

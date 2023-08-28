@@ -241,6 +241,8 @@
 
         jessibuca.on('ptz', (arrow) => {
             console.log('ptz', arrow);
+            const ptzCode = jessibuca.getPTZCmd(arrow)
+            console.log('ptzCode', ptzCode);
         })
 
         $player.style.display = 'inline-block';
