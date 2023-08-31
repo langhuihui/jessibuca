@@ -672,3 +672,4 @@ class Jessibuca extends Emitter {
 window.Jessibuca = Jessibuca;
 
 export default Jessibuca;
+

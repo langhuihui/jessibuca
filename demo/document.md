@@ -1568,7 +1568,7 @@ useWCS:false
 > wcs是硬解码，wasm是软解码
 
 
-### Umi App 或者内嵌其他App 里面webview，需要截图下载或者录制视频下载。
+### Umi App 或者内嵌其他App（XX小程序） 里面webview，需要截图下载或者录制视频下载。
 
 > 由于webview的限制，无法像浏览器那样直接截图，或者录制视频可以通过a.download 下载。
 
@@ -1578,11 +1578,17 @@ useWCS:false
 
 可以通过`screenshot(filename, format, quality,'base64')`返回base64数据，然后通过`jsbridge`传给app，app再通过`base64`转成图片，然后保存到本地。
 
+> XX小程序可以通过`postMessage` 将base64传给小程序，小程序再使用系统级别api保存到本地。
+
 对于录制视频：
 
 目前 开源版暂不支持录制的视频返回`blob`格式。
 
 > pro版本支持录制视频返回`blob`格式。 可以通过`jsbridge`传给app，app再通过`blob`转成视频，然后保存到本地。
+
+> XX小程序可以通过`postMessage` 将blob转换成ArrayBuffer传给小程序，小程序再通过系统级别api保存到本地。
+
+
 
 ### 群
 <img src="/public/qrcode.jpeg">
