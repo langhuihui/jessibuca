@@ -21,6 +21,9 @@
             tip：支持回调ai识别出来的数据，x,y 坐标系，width，height 宽高。(F12 控制台可以看到)
         </div>
         <div class="input">
+            tip: 检测间隔时间设置为0 的时候，每一帧都会检查。（会非常吃性能）
+        </div>
+        <div class="input">
             <div>
                 <span>是否显示识别框子</span>
                 <input type="checkbox" id="aiFaceDetectShowRect" checked>
@@ -34,7 +37,7 @@
                 </select>
                 <span> | </span>
                 检测间隔时间(单位：秒)：
-                <input type="text" style="width: 100px" id="intervalTime" placeholder="0.5">
+                <input type="text" style="width: 100px" id="intervalTime" value="0.5">
                 <span style="color: red;margin-left: 10px">识别度越高，检测间隔越短,越吃CUP</span>
 
             </div>
