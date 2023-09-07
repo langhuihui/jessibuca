@@ -53,8 +53,6 @@
         </div>
         <div class="input" style="line-height: 30px">
             <button id="destroy">销毁</button>
-            <button id="openObjectDetector">打开物体检测</button>
-            <button id="closeObjectDetector">关闭物体检测</button>
         </div>
     </div>
 </div>
@@ -65,8 +63,6 @@
     var $playHref = document.getElementById('playUrl');
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
-    var $openObjectDetector = document.getElementById('openObjectDetector');
-    var $closeObjectDetector = document.getElementById('closeObjectDetector');
     var $detectWidth = document.getElementById('detectWidth');
     var $intervalTime = document.getElementById('intervalTime');
     var $aiObjectDetectShowRect = document.getElementById('aiObjectDetectShowRect');
@@ -141,8 +137,6 @@
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
         $destroy.style.display = 'none';
-        $openObjectDetector.style.display = 'none';
-        $closeObjectDetector.style.display = 'none';
     }
 
     create();
@@ -154,8 +148,6 @@
             $player.style.display = 'none';
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
-            $openObjectDetector.style.display = 'inline-block';
-            $closeObjectDetector.style.display = 'inline-block';
         }
     }
 
@@ -191,18 +183,6 @@
             create();
         }
 
-    })
-
-    $openObjectDetector.addEventListener('click', function () {
-        if (jessibuca) {
-            jessibuca.objectDetectOpen();
-        }
-    })
-
-    $closeObjectDetector.addEventListener('click', function () {
-        if (jessibuca) {
-            jessibuca.objectDetectClose();
-        }
     })
 
 

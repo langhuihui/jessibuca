@@ -1612,6 +1612,17 @@ useWCS:false
 2. 检查下`https` 下面是否请求的 `wss`地址，`http`下面是否请求的`ws`地址。
 
 
+### 关于 Uncaught (in promise) DOMException: BodyStreamBuffer was aborted 错误
+
+这个是当发起`http(s)`请求视频资源的时候，调用 `destroy()`销毁播放器的时候，worker线程调用了`abort()`方法，导致的浏览器抛出的错误。
+
+> 这个异常暂时无法捕获到，不影响业务逻辑，可以先无视掉。
+
+### 关于 Uncaught (in promise) DOMException: The user aborted a request. 错误
+
+这个是当发起`http(s)`请求视频资源的时候，调用 `destroy()`销毁播放器的时候，主线程调用了`abort()`方法，导致的浏览器抛出的错误。
+
+> 这个异常暂时无法捕获到，不影响业务逻辑，可以先无视掉。
 
 
 

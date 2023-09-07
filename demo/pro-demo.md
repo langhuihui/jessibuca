@@ -349,6 +349,14 @@
 #### http
 [http://jessibuca.monibuca.com/pro/demo-record.html](http://jessibuca.monibuca.com/pro/demo-record.html)
 
+### 视频录制（Mp4格式(视频+音频)）
+------
+#### https
+[https://jessibuca.com/pro/demo-record-mp4.html](https://jessibuca.com/pro/demo-record-mp4.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-record-mp4.html](http://jessibuca.monibuca.com/pro/demo-record-mp4.html)
+
 
 ### 视频轮播（支持显示上一个视频最后一帧）
 ------

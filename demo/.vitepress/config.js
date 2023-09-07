@@ -11,11 +11,12 @@ module.exports = {
             {text: '文档', link: '/document'},
             {text: 'Pro-播放器', link: '/player-pro'},
             {
-                text: "Pro",
+                text: "Pro-More",
                 items: [
                     {text: 'Demo', link: '/pro-demo'},
                     {text: '文档', link: '/pro'},
                     {text: 'AI', link: '/pro-ai'},
+                    {text: '扩展模块', link: '/pro-module'},
                     {text: '定制化服务', link: '/pro-more'},
                 ]
             },
