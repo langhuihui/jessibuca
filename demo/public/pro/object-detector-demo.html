@@ -30,16 +30,30 @@
             <span> | </span>
             识别度：
             <select id="detectWidth">
-                <option value="362">极高</option>
-                <option value="192" selected>高</option>
-                <option value="160">中等</option>
-                <option value="128">低</option>
+                <option value="5">极高</option>
+                <option value="4">较高</option>
+                <option value="3" selected>高</option>
+                <option value="2">中等</option>
+                <option value="1">低</option>
             </select>
             <span> | </span>
             检测间隔时间(单位：秒)：
             <input type="text" style="width: 100px" id="intervalTime" value="0.5">
-            <button >更新检测间隔</button>
+            <button>更新检测间隔</button>
             <span style="color: red;margin-left: 10px">识别度越高，越吃CUP</span>
+        </div>
+        <div class="input">
+            <div>
+                <span>边框宽度</span>
+                <input type="text" id="borderWidth" style="width:50px" value="2">
+                <span>边框颜色</span>
+                <input type="text" id="borderColor" style="width:80px" value="#0000FF">
+                <span>字体颜色</span>
+                <input type="text" id="color" style="width:80px" value="#000">
+                <span>字体大小</span>
+                <input type="text" id="fontSize" style="width:50px" value="14">
+            </div>
+            <button onclick="replay()">重播</button>
         </div>
         <div class="input">
             <div>输入URL：</div>
@@ -66,6 +80,10 @@
     var $detectWidth = document.getElementById('detectWidth');
     var $intervalTime = document.getElementById('intervalTime');
     var $aiObjectDetectShowRect = document.getElementById('aiObjectDetectShowRect');
+    var $borderWidth = document.getElementById('borderWidth');
+    var $borderColor = document.getElementById('borderColor');
+    var $color = document.getElementById('color');
+    var $fontSize = document.getElementById('fontSize');
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var jessibuca = null;
@@ -96,41 +114,21 @@
             heartTimeout: 10,
 
             useObjectDetector: true,
-            aiObjectDetectShowRect: false,
+            aiObjectDetectShowRect: $aiObjectDetectShowRect.checked,
             aiObjectDetectInterval: Number($intervalTime.value),
-            aiObjectDetectWidth: Number($detectWidth.value),
-            // audioEngine:"worklet",
-            // isFlv: true
+            aiObjectDetectLevel: Number($detectWidth.value),
+            aiObjectDetectRectConfig: {
+                borderWidth: Number($borderWidth.value),
+                borderColor: $borderColor.value,
+                color: $color.value,
+                fontSize: Number($fontSize.value),
+            }
         },);
 
 
         jessibuca.on('aiObjectDetectorInfo', (msg) => {
             console.log('aiObjectDetectorInfo', msg);
 
-            if($aiObjectDetectShowRect.checked) {
-                const list = [];
-                (msg.list || []).forEach((item) => {
-                    const boxItem = {
-                        type: 'rect',
-                        color: '#0000FF',
-                        x: item.box.x,
-                        y: item.box.y,
-                        width: item.box.width,
-                        height: item.box.height,
-                    }
-                    const textItem = {
-                        type: 'text',
-                        color: 'red',
-                        text: item.className,
-                        x: item.box.x,
-                        y: item.box.y - 25,
-                    }
-
-                    list.push(boxItem, textItem)
-                })
-
-                jessibuca.addContentToCanvas(list)
-            }
         })
 
 

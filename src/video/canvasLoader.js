@@ -67,9 +67,14 @@ export default class CanvasVideoLoader extends CommonLoader {
 
     _initContextGl() {
         this.contextGl = createContextGL(this.$videoElement);
-        const webgl = createWebGL(this.contextGl, this.player._opt.openWebglAlignment);
-        this.contextGlRender = webgl.render;
-        this.contextGlDestroy = webgl.destroy
+        if(this.contextGl){
+            const webgl = createWebGL(this.contextGl, this.player._opt.openWebglAlignment);
+            this.contextGlRender = webgl.render;
+            this.contextGlDestroy = webgl.destroy
+        }
+        else {
+            this.player.debug.error(`CanvasVideoLoader`, 'init webgl fail');
+        }
     }
 
     _initContext2D() {

@@ -145,6 +145,7 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 - decoder-pro-simd.wasm(胶水文件)
 - decoder-pro-audio.js(初始化参数decoder参数配置)（硬解码的时候用到的）
 - decoder-pro-audio.wasm(胶水文件)
+- decoder-pro-hard.js(硬解码解封装数据)
 
 > `jessibuca-pro-demo.js`与`jessibuca-pro-multi-demo.js`的区别是，前者是单路播放，后者是支持多路播放。 两者只需要引入一个就行了，不需要同时引入。
 

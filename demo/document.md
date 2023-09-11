@@ -1625,6 +1625,30 @@ useWCS:false
 > 这个异常暂时无法捕获到，不影响业务逻辑，可以先无视掉。
 
 
+### 关于 Uncaught (in promise) RuntimeError: Aborted(CompileError: WebAssembly.instantiate(): section (code 1, "Type") extends past end of the module (length 11493359, remaining bytes 2961839) @+8). Build with -sASSERTIONS for more info. 错误
+
+这是由于`decoder.js` 和`decoder.wasm` 不匹配导致的。
+
+解决方案：
+每次都要全量替换`decoder.js` 和`decoder.wasm`，不能只替换其中一个。
+
+
+### 关于iframe 页面里面有jessibuca 播放器，点击全屏按钮报：fullscreen request error TypeError Disallowed by permissions policy 错误
+
+这个是由于浏览器的安全策略导致的。
+
+iframe默认不允许全屏, 如果内嵌了video那么控制条上将不显示全屏按钮, 同理dom申请全屏事件也是不允许的。
+
+解决方案：
+
+通过添加allowfullscreen属性可以开启全屏功能
+
+```html
+<iframe allowfullscreen src=""></iframe>
+```
+
+这样就可以触发全屏了。
+
 
 ### 群
 <img src="/public/qrcode.jpeg">

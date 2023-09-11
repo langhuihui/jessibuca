@@ -30,10 +30,11 @@
                 <span> | </span>
                 <span>识别度：</span>
                 <select id="detectWidth">
-                    <option value="400">极高</option>
-                    <option value="362" selected>高</option>
-                    <option value="192">中等</option>
-                    <option value="128">低</option>
+                    <option value="5">极高</option>
+                    <option value="4">较高</option>
+                    <option value="3" selected>高</option>
+                    <option value="2">中等</option>
+                    <option value="1">低</option>
                 </select>
                 <span> | </span>
                 检测间隔时间(单位：秒)：
@@ -42,6 +43,16 @@
 
             </div>
 
+        </div>
+
+        <div class="input">
+            <div>
+                <span>边框宽度</span>
+                <input type="text" id="borderWidth" style="width:50px" value="2">
+                <span>边框颜色</span>
+                <input type="text" id="borderColor" style="width:80px" value="#0000FF">
+            </div>
+            <button onclick="replay()">重播</button>
         </div>
         <div class="input">
             <div>输入URL：</div>
@@ -68,7 +79,8 @@
     var $detectWidth = document.getElementById('detectWidth');
     var $intervalTime = document.getElementById('intervalTime');
     var $aiFaceDetectShowRect = document.getElementById('aiFaceDetectShowRect');
-
+    var $borderWidth = document.getElementById('borderWidth');
+    var $borderColor = document.getElementById('borderColor');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -99,24 +111,18 @@
             heartTimeout: 10,
 
             useFaceDetector: true,
-            aiFaceDetectShowRect: false,
-            aiFaceDetectWidth: Number($detectWidth.value),
+            aiFaceDetectShowRect: $aiFaceDetectShowRect.checked,
+            aiFaceDetectLevel: Number($detectWidth.value),
             aiFaceDetectInterval: Number($intervalTime.value),
+            aiFaceDetectRectStyle: {
+                borderWidth: Number($borderWidth.value),
+                borderColor: $borderColor.value,
+            },
         });
 
 
         jessibuca.on('aiFaceDetectorInfo', (msg) => {
             console.log('aiFaceDetectorInfo', msg);
-
-            if ($aiFaceDetectShowRect.checked) {
-                const list = (msg.list || []).map((item) => {
-                    item.type = 'rect';
-                    item.color = '#0000FF';
-                    return item;
-                });
-
-                jessibuca.addContentToCanvas(list)
-            }
         })
 
 
@@ -128,7 +134,7 @@
 
     create();
 
-    $player.addEventListener('click', function () {
+    function play() {
         var href = $playHref.value;
         if (href) {
             jessibuca.play(href);
@@ -136,6 +142,24 @@
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
         }
+    }
+
+
+    function replay() {
+        if (jessibuca) {
+            jessibuca.destroy().then(() => {
+                create();
+                play();
+            });
+        } else {
+            create();
+            play();
+        }
+    }
+
+
+    $player.addEventListener('click', function () {
+        play();
     }, false)
 
 
