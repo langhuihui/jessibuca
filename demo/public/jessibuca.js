@@ -1464,9 +1464,14 @@
 
 	  _initContextGl() {
 	    this.contextGl = createContextGL(this.$videoElement);
-	    const webgl = createWebGL(this.contextGl, this.player._opt.openWebglAlignment);
-	    this.contextGlRender = webgl.render;
-	    this.contextGlDestroy = webgl.destroy;
+
+	    if (this.contextGl) {
+	      const webgl = createWebGL(this.contextGl, this.player._opt.openWebglAlignment);
+	      this.contextGlRender = webgl.render;
+	      this.contextGlDestroy = webgl.destroy;
+	    } else {
+	      this.player.debug.error(`CanvasVideoLoader`, 'init webgl fail');
+	    }
 	  }
 
 	  _initContext2D() {
@@ -12522,6 +12527,7 @@
 	    this._loadingTimeoutReplayTimes = 0;
 	    this._heartTimeoutReplayTimes = 0;
 	    this.events = new Events(this);
+	    this.debug = new Debug(this);
 
 	    this._initPlayer($container, _opt);
 	  }
@@ -12550,7 +12556,7 @@
 
 	  _initPlayer($container, options) {
 	    this.player = new Player($container, options);
-	    this.player.debug.log('jessibuca', '_initPlayer', this.player.getOption());
+	    this.debug.log('jessibuca', '_initPlayer', this.player.getOption());
 
 	    this._bindEvents();
 	  }
@@ -12671,7 +12677,17 @@
 
 
 	  pause() {
-	    return this.player.pause();
+	    return new Promise((resolve, reject) => {
+	      if (this.player) {
+	        this.player.pause().then(() => {
+	          resolve();
+	        }).catch(e => {
+	          reject(e);
+	        });
+	      } else {
+	        reject('player is null');
+	      }
+	    });
 	  }
 	  /**
 	   *
@@ -12725,7 +12741,7 @@
 
 	                this.player.resumeAudioAfterPause();
 	              }).catch(e => {
-	                this.player.debug.warn('jessibuca', 'pause ->  play and play error', e);
+	                this.debug.warn('jessibuca', 'pause ->  play and play error', e);
 	                this.player.pause().then(() => {
 	                  reject(e);
 	                });
@@ -12740,11 +12756,11 @@
 	              this._play(url, options).then(() => {
 	                resolve();
 	              }).catch(e => {
-	                this.player.debug.warn('jessibuca', 'this._play error', e);
+	                this.debug.warn('jessibuca', 'this._play error', e);
 	                reject(e);
 	              });
 	            }).catch(e => {
-	              this.player.debug.warn('jessibuca', 'this._opt.url is null and pause error', e);
+	              this.debug.warn('jessibuca', 'this._opt.url is null and pause error', e);
 	              reject(e);
 	            });
 	          }
@@ -12752,7 +12768,7 @@
 	          this._play(url, options).then(() => {
 	            resolve();
 	          }).catch(e => {
-	            this.player.debug.warn('jessibuca', 'this._play error', e);
+	            this.debug.warn('jessibuca', 'this._play error', e);
 	            reject(e);
 	          });
 	        }
@@ -12764,7 +12780,7 @@
 
 	          this.player.resumeAudioAfterPause();
 	        }).catch(e => {
-	          this.player.debug.warn('jessibuca', 'url is null and play error', e);
+	          this.debug.warn('jessibuca', 'url is null and play error', e);
 	          this.player.pause().then(() => {
 	            reject(e);
 	          });
@@ -12798,7 +12814,7 @@
 	      });
 	      this.player.once(EVENTS_ERROR.webglAlignmentError, () => {
 	        this.pause().then(() => {
-	          this.player.debug.log('Jessibuca', 'webglAlignmentError');
+	          this.debug.log('Jessibuca', 'webglAlignmentError');
 
 	          this._resetPlayer({
 	            openWebglAlignment: true
@@ -12806,17 +12822,17 @@
 
 	          this.play(url, options).then(() => {
 	            // resolve();
-	            this.player.debug.log('Jessibuca', 'webglAlignmentError and play success');
+	            this.debug.log('Jessibuca', 'webglAlignmentError and play success');
 	          }).catch(() => {
 	            // reject();
-	            this.player.debug.log('Jessibuca', 'webglAlignmentError and play error');
+	            this.debug.log('Jessibuca', 'webglAlignmentError and play error');
 	          });
 	        });
 	      });
 	      this.player.once(EVENTS_ERROR.mediaSourceH265NotSupport, () => {
 	        this.pause().then(() => {
 	          if (this.player._opt.autoWasm) {
-	            this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play');
+	            this.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play');
 
 	            this._resetPlayer({
 	              useMSE: false
@@ -12824,10 +12840,10 @@
 
 	            this.play(url, options).then(() => {
 	              // resolve();
-	              this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play success');
+	              this.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play success');
 	            }).catch(() => {
 	              // reject();
-	              this.player.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play error');
+	              this.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play error');
 	            });
 	          }
 	        });
@@ -12835,75 +12851,75 @@
 
 	      this.player.once(EVENTS_ERROR.mediaSourceFull, () => {
 	        this.pause().then(() => {
-	          this.player.debug.log('Jessibuca', 'media source full');
+	          this.debug.log('Jessibuca', 'media source full');
 
 	          this._resetPlayer();
 
 	          this.play(url, options).then(() => {
 	            // resolve();
-	            this.player.debug.log('Jessibuca', 'media source full and reset player and play success');
+	            this.debug.log('Jessibuca', 'media source full and reset player and play success');
 	          }).catch(() => {
 	            // reject();
-	            this.player.debug.warn('Jessibuca', 'media source full and reset player and play error');
+	            this.debug.warn('Jessibuca', 'media source full and reset player and play error');
 	          });
 	        });
 	      }); // media source append buffer error
 
 	      this.player.once(EVENTS_ERROR.mediaSourceAppendBufferError, () => {
 	        this.pause().then(() => {
-	          this.player.debug.log('Jessibuca', 'media source append buffer error');
+	          this.debug.log('Jessibuca', 'media source append buffer error');
 
 	          this._resetPlayer();
 
 	          this.play(url, options).then(() => {
 	            // resolve();
-	            this.player.debug.log('Jessibuca', 'media source append buffer error and reset player and play success');
+	            this.debug.log('Jessibuca', 'media source append buffer error and reset player and play success');
 	          }).catch(() => {
 	            // reject();
-	            this.player.debug.warn('Jessibuca', 'media source append buffer error and reset player and play error');
+	            this.debug.warn('Jessibuca', 'media source append buffer error and reset player and play error');
 	          });
 	        });
 	      });
 	      this.player.once(EVENTS_ERROR.mediaSourceBufferListLarge, () => {
 	        this.pause().then(() => {
-	          this.player.debug.log('Jessibuca', 'media source buffer list large');
+	          this.debug.log('Jessibuca', 'media source buffer list large');
 
 	          this._resetPlayer();
 
 	          this.play(url, options).then(() => {
 	            // resolve();
-	            this.player.debug.log('Jessibuca', 'media source buffer list large and reset player and play success');
+	            this.debug.log('Jessibuca', 'media source buffer list large and reset player and play success');
 	          }).catch(() => {
 	            // reject();
-	            this.player.debug.warn('Jessibuca', 'media source buffer list large and reset player and play error');
+	            this.debug.warn('Jessibuca', 'media source buffer list large and reset player and play error');
 	          });
 	        });
 	      });
 	      this.player.once(EVENTS_ERROR.mediaSourceAppendBufferEndTimeout, () => {
 	        this.pause().then(() => {
-	          this.player.debug.log('Jessibuca', 'media source append buffer end timeout');
+	          this.debug.log('Jessibuca', 'media source append buffer end timeout');
 
 	          this._resetPlayer();
 
 	          this.play(url, options).then(() => {
 	            // resolve();
-	            this.player.debug.log('Jessibuca', 'media source append buffer end timeout and reset player and play success');
+	            this.debug.log('Jessibuca', 'media source append buffer end timeout and reset player and play success');
 	          }).catch(() => {
 	            // reject();
-	            this.player.debug.warn('Jessibuca', 'media source append buffer end timeout and reset player and play error');
+	            this.debug.warn('Jessibuca', 'media source append buffer end timeout and reset player and play error');
 	          });
 	        });
 	      });
 	      this.player.once(EVENTS_ERROR.mseSourceBufferError, () => {
 	        this.pause().then(() => {
-	          this.player.debug.log('Jessibuca', 'mseSourceBufferError close success');
+	          this.debug.log('Jessibuca', 'mseSourceBufferError close success');
 	        });
 	      }); //
 
 	      this.player.once(EVENTS_ERROR.webcodecsH265NotSupport, () => {
 	        this.pause().then(() => {
 	          if (this.player._opt.autoWasm) {
-	            this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play');
+	            this.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play');
 
 	            this._resetPlayer({
 	              useWCS: false
@@ -12911,10 +12927,10 @@
 
 	            this.play(url, options).then(() => {
 	              // resolve();
-	              this.player.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play success');
+	              this.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play success');
 	            }).catch(() => {
 	              // reject();
-	              this.player.debug.warn('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play error');
+	              this.debug.warn('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play error');
 	            });
 	          }
 	        });
@@ -12922,7 +12938,7 @@
 
 	      this.player.once(EVENTS_ERROR.webcodecsWidthOrHeightChange, () => {
 	        this.pause().then(() => {
-	          this.player.debug.log('Jessibuca', 'webcodecs Width Or Height Change reset player and play');
+	          this.debug.log('Jessibuca', 'webcodecs Width Or Height Change reset player and play');
 
 	          this._resetPlayer({
 	            useWCS: true
@@ -12930,10 +12946,10 @@
 
 	          this.play(url, options).then(() => {
 	            // resolve();
-	            this.player.debug.log('Jessibuca', 'webcodecs Width Or Height Change reset player and play success');
+	            this.debug.log('Jessibuca', 'webcodecs Width Or Height Change reset player and play success');
 	          }).catch(() => {
 	            // reject();
-	            this.player.debug.warn('Jessibuca', 'webcodecs Width Or Height Change reset player and play error');
+	            this.debug.warn('Jessibuca', 'webcodecs Width Or Height Change reset player and play error');
 	          });
 	        });
 	      }); // webcodecs
@@ -12941,7 +12957,7 @@
 	      this.player.once(EVENTS_ERROR.webcodecsDecodeError, () => {
 	        this.pause().then(() => {
 	          if (this.player._opt.autoWasm) {
-	            this.player.debug.log('Jessibuca', 'webcodecs decode error reset player and play');
+	            this.debug.log('Jessibuca', 'webcodecs decode error reset player and play');
 
 	            this._resetPlayer({
 	              useWCS: false
@@ -12949,10 +12965,10 @@
 
 	            this.play(url, options).then(() => {
 	              // resolve();
-	              this.player.debug.log('Jessibuca', 'webcodecs decode error  reset player and play success');
+	              this.debug.log('Jessibuca', 'webcodecs decode error  reset player and play success');
 	            }).catch(() => {
 	              // reject();
-	              this.player.debug.warn('Jessibuca', 'webcodecs decode error reset player and play error');
+	              this.debug.warn('Jessibuca', 'webcodecs decode error reset player and play error');
 	            });
 	          }
 	        });
@@ -12961,7 +12977,7 @@
 	      this.player.once(EVENTS_ERROR.wasmDecodeError, () => {
 	        if (this.player._opt.wasmDecodeErrorReplay) {
 	          this.pause().then(() => {
-	            this.player.debug.log('Jessibuca', 'wasm decode error and reset player and play');
+	            this.debug.log('Jessibuca', 'wasm decode error and reset player and play');
 
 	            this._resetPlayer({
 	              useWCS: false
@@ -12969,10 +12985,10 @@
 
 	            this.play(url, options).then(() => {
 	              // resolve();
-	              this.player.debug.log('Jessibuca', 'wasm decode error and reset player and play success');
+	              this.debug.log('Jessibuca', 'wasm decode error and reset player and play success');
 	            }).catch(() => {
 	              // reject();
-	              this.player.debug.warn('Jessibuca', 'wasm decode error and reset player and play error');
+	              this.debug.warn('Jessibuca', 'wasm decode error and reset player and play error');
 	            });
 	          });
 	        }
@@ -12980,7 +12996,7 @@
 
 	      this.player.on(EVENTS.delayTimeout, () => {
 	        if (this.player._opt.heartTimeoutReplay && (this._heartTimeoutReplayTimes < this.player._opt.heartTimeoutReplayTimes || this.player._opt.heartTimeoutReplayTimes === -1)) {
-	          this.player.debug.log('Jessibuca', `delay timeout replay time is ${this._heartTimeoutReplayTimes}`);
+	          this.debug.log('Jessibuca', `delay timeout replay time is ${this._heartTimeoutReplayTimes}`);
 	          this._heartTimeoutReplayTimes += 1;
 	          this.play(url, options).then(() => {
 	            // resolve();
@@ -12992,7 +13008,7 @@
 
 	      this.player.on(EVENTS.loadingTimeout, () => {
 	        if (this.player._opt.loadingTimeoutReplay && (this._loadingTimeoutReplayTimes < this.player._opt.loadingTimeoutReplayTimes || this.player._opt.loadingTimeoutReplayTimes === -1)) {
-	          this.player.debug.log('Jessibuca', `loading timeout replay time is ${this._loadingTimeoutReplayTimes}`);
+	          this.debug.log('Jessibuca', `loading timeout replay time is ${this._loadingTimeoutReplayTimes}`);
 	          this._loadingTimeoutReplayTimes += 1;
 	          this.play(url, options).then(() => {
 	            // resolve();
@@ -13006,8 +13022,8 @@
 	        this.player.play(url, options).then(() => {
 	          resolve();
 	        }).catch(e => {
-	          this.player.debug.warn('Jessibuca', 'hasLoaded and play error', e);
-	          this.player.pause().then(() => {
+	          this.debug.warn('Jessibuca', 'hasLoaded and play error', e);
+	          this.player && this.player.pause().then(() => {
 	            reject(e);
 	          });
 	        });
@@ -13016,8 +13032,8 @@
 	          this.player.play(url, options).then(() => {
 	            resolve();
 	          }).catch(e => {
-	            this.player.debug.warn('Jessibuca', 'decoderWorkerInit and play error', e);
-	            this.player.pause().then(() => {
+	            this.debug.warn('Jessibuca', 'decoderWorkerInit and play error', e);
+	            this.player && this.player.pause().then(() => {
 	              reject(e);
 	            });
 	          });
