@@ -62,17 +62,24 @@ export class FlvDemuxer extends BaseDemuxer {
           if (this.audioDecoderConfig.codec == "aac") {
             this.audioDecoderConfig.numberOfChannels = ((data[3] >> 3) & 0x0F); //声道
             this.audioDecoderConfig.sampleRate = samplingFrequencyIndexMap[((data[2] & 0x7) << 1) | (data[3] >> 7)];
+          } else {
+            this.emit(
+              DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED,
+              this.audioDecoderConfig
+            );
           }
         }
-        if (this.audioDecoderConfig.codec == "aac" && data[1] == 0x00) {
-          this.audioDecoderConfig.description = data.subarray(2);
-          this.emit(
-            DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED,
-            this.audioDecoderConfig
-          );
-          if (this.mode == DemuxMode.PULL)
-            return this.pull();
-          else return;
+        if (this.audioDecoderConfig.codec == "aac") {
+          if (data[1] == 0x00) {
+            this.audioDecoderConfig.description = data.subarray(2);
+            this.emit(
+              DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED,
+              this.audioDecoderConfig
+            );
+            if (this.mode == DemuxMode.PULL)
+              return this.pull();
+            else return;
+          }
         }
         return this.gotAudio?.({
           type: "key",
