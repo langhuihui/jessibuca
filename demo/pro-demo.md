@@ -235,18 +235,18 @@
 ### M7S加密流(H264/H265)
 ------
 #### https
-[https://jessibuca.com/pro/crypto-demo.html](https://jessibuca.com/pro/crypto-demo.html)
+[https://jessibuca.com/pro/crypto-m7s-demo.html](https://jessibuca.com/pro/crypto-m7s-demo.html)
 
 #### http
-[http://jessibuca.monibuca.com/pro/crypto-demo.html](http://jessibuca.monibuca.com/pro/crypto-demo.html)
+[http://jessibuca.monibuca.com/pro/crypto-m7s-demo.html](http://jessibuca.monibuca.com/pro/crypto-m7s-demo.html)
 
 ### 国标SM4加密流(H264/H265)
 ------
 #### https
-[https://jessibuca.com/pro/demo-crypto-sm4.html](https://jessibuca.com/pro/demo-crypto-sm4.html)
+[https://jessibuca.com/pro/crypto-sm4-demo.html](https://jessibuca.com/pro/crypto-sm4-demo.html)
 
 #### http
-[http://jessibuca.monibuca.com/pro/demo-crypto-sm4.html](http://jessibuca.monibuca.com/pro/demo-crypto-sm4.html)
+[http://jessibuca.monibuca.com/pro/crypto-sm4-demo.html](http://jessibuca.monibuca.com/pro/crypto-sm4-demo.html)
 
 
 ### HLS(h265)
