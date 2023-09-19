@@ -49,10 +49,10 @@
 ### 不规则多屏(n*n、3-1、4-1布局)
 ------
 #### https
-[https://jessibuca.com/pro/demo-multi.html](https://jessibuca.com/pro/demo-multi.html)
+[https://jessibuca.com/pro/multi-demo.html](https://jessibuca.com/pro/multi-demo.html)
 
 #### http
-[http://jessibuca.monibuca.com/pro/demo-multi.html](http://jessibuca.monibuca.com/pro/demo-multi.html)
+[http://jessibuca.monibuca.com/pro/multi-demo.html](http://jessibuca.monibuca.com/pro/multi-demo.html)
 
 
 
