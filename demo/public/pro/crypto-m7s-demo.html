@@ -193,7 +193,7 @@
             controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
             // audioEngine:"worklet",
             // isFlv: true
-            isCrypto: true,
+            isM7sCrypto: true,
             cryptoKeyUrl: $cryptoKeyUrl.value,
         },);
 
@@ -232,6 +232,9 @@
     function play() {
         var href = $playHref.value;
         if (href) {
+            if($cryptoKeyUrl.value){
+                jessibuca.setCryptoKeyUrl($cryptoKeyUrl.value);
+            }
             jessibuca.play(href);
             $player.style.display = 'none';
             $pause.style.display = 'inline-block';
