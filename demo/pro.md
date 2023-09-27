@@ -175,8 +175,8 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 | Webrtc H264(M7S服务器)        | 支持 |
 | Webrtc H265(M7S服务器)        | 支持 |
 | Webrtc H264(zlmediakit服务器) | 支持 |
-| Webrtc H265(SRS服务器)        | 支持 |
-| Webrtc H265(其他服务器)         | 支持 |
+| Webrtc H264(SRS服务器)        | 支持 |
+| Webrtc H264(其他服务器)         | 支持 |
 | 加密私有协议 (M7S服务器)            | 支持 |
 | 国标SM4加密流                   | 支持 |
 

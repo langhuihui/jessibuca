@@ -1651,6 +1651,79 @@ iframe默认不允许全屏, 如果内嵌了video那么控制条上将不显示�
 这样就可以触发全屏了。
 
 
+### 关于IOS不能系统全屏
+
+> IOS是不存在全屏API的，调用全屏会进入系统播放模式
+
+解决方案：
+
+可以通过配置`useWebFullscreen:true` 使用css全屏的方式进行模拟（即网页内全屏）。
+
+参考demo: http://jessibuca.monibuca.com/mobile-fullscreen.html
+
+
+### Android端webview全屏调用无效问题
+
+> android webView内默认是没有实现视频全屏的，调动dom.requestFullscreen没有任何响应，这个会表现为点击全屏按钮无效
+
+
+解决方案：
+
+该问题的解决必须依赖native端的开发，具体实现请参考以下方式WebView 实现全屏播放视频的示例代码
+
+https://cloud.tencent.com/developer/article/1741520
+
+
+### Android端webView灰色按钮问题
+
+> android端自动起播在首帧出来之前会有一个灰色的播放按钮闪现，不同的手机或者android版本会略有不同，这个是webview中video内置的poster导致，前端无法隐藏
+
+解决方案：
+
+找android webView的开发同学，参考以下方式实现隐藏 HTML5 video remove overlay play icon
+
+https://stackoverflow.com/questions/18271991/html5-video-remove-overlay-play-icon
+
+
+You can hide this picture. For example:
+
+```java
+WebView mWebView = (WebView) findViewById(R.id.web_view);
+mWebView.setWebChromeClient(new WebChromeClientCustomPoster());
+```
+
+Chrome client class:
+
+```java
+private class WebChromeClientCustomPoster extends WebChromeClient {
+
+    @Override
+    public Bitmap getDefaultVideoPoster() {
+        return Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888);
+    }
+}
+```
+
+### IOS端无法内联播放（行内播放）
+
+> 对于webrtc模式下
+
+> canvas 渲染不存在这样的问题
+
+ios10以下不支持内联播放
+
+解决方案：
+
+如果在webview内该属性不生效，则说明webview没有开启该属性，请找自己app native开发同学给webview容器对应的setting设置为true, 具体实现参考一下文档
+
+https://developer.apple.com/documentation/uikit/uiwebview/1617960-allowsinlinemediaplayback
+
+https://developer.apple.com/documentation/webkit/wkwebviewconfiguration/1614793-allowsinlinemediaplayback
+
+
+
+
+
 ### 群
 <img src="/public/qrcode.jpeg">
 
