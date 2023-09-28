@@ -27,29 +27,54 @@ export class DataChannelConnection extends Connection {
     this.dc.send(data);
   }
 }
-export class WebRTCStream {
-  mediaStream?: MediaStream;
+export class WebRTCStream extends EventEmitter<{ change: [MediaStream], close: []; }>{
+  private _mediaStream?: MediaStream;
+  public get mediaStream() {
+    return this._mediaStream;
+  }
+  public set mediaStream(value: MediaStream | undefined) {
+    this._mediaStream = value;
+    if (value) this.emit("change", value);
+  }
   audioTransceiver!: RTCRtpTransceiver;
   videoTransceiver!: RTCRtpTransceiver;
   private _videoTrack?: MediaStreamVideoTrack;
   private _audioTrack?: MediaStreamAudioTrack;
   constructor(public id: string, public direction: RTCRtpTransceiverDirection = "recvonly") {
-
+    super();
   }
   set audioTrack(track: MediaStreamAudioTrack | undefined) {
     this._audioTrack = track;
+    if (this._mediaStream) {
+      const oldTrack = this._mediaStream.getAudioTracks()[0];
+      if (oldTrack) this._mediaStream.removeTrack(oldTrack);
+    }
+    if (track) {
+      if (!this._mediaStream) this._mediaStream = new MediaStream([track]);
+      else this._mediaStream.addTrack(track);
+    }
+    if(this._mediaStream) this.emit("change", this._mediaStream);
   }
   get audioTrack() {
-    return this._audioTrack || this.mediaStream?.getAudioTracks()[0];
+    return this._audioTrack || this._mediaStream?.getAudioTracks()[0];
   }
   set videoTrack(track: MediaStreamVideoTrack | undefined) {
     this._videoTrack = track;
+    if (this._mediaStream) {
+      const oldTrack = this._mediaStream.getVideoTracks()[0];
+      if (oldTrack) this._mediaStream.removeTrack(oldTrack);
+    }
+    if (track) {
+      if (!this._mediaStream) this._mediaStream = new MediaStream([track]);
+      else this._mediaStream.addTrack(track);
+    }
+    if(this._mediaStream) this.emit("change", this._mediaStream);
   }
   get videoTrack(): MediaStreamVideoTrack | undefined {
-    return this._videoTrack || this.mediaStream?.getVideoTracks()[0];
+    return this._videoTrack || this._mediaStream?.getVideoTracks()[0];
   }
   close() {
-
+    this.emit("close");
   }
 }
 export class WebRTCConnection extends Connection {
