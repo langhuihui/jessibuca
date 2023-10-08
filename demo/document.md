@@ -1741,7 +1741,19 @@ https://developer.apple.com/documentation/webkit/wkwebviewconfiguration/1614793-
 2. 优先使用mse解码+video渲染
 3. 可以使用pro版本，pro 版本支持所有解码器（wasm+mse+webcodec）都可以使用video标签渲染，所以不会有任何限制情况。
 
+### 关于报“RuntimeError: abort(OOM). Build with -s ASSERTIONS=1 for more info” 错误
 
+这个错误是wasm的内存不足导致的。
+
+解决方案：
+
+1.提高wasm申请的内存大小。
+2.降级播放流的分辨率。
+
+
+> 开源版软解码（wasm）最高能支持的分辨率是720p的。
+
+> pro版本软解码（wasm simd）最高能支持的分辨率是4k的。
 
 ### 群
 <img src="/public/qrcode.jpeg">
