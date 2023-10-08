@@ -1721,6 +1721,25 @@ https://developer.apple.com/documentation/uikit/uiwebview/1617960-allowsinlineme
 https://developer.apple.com/documentation/webkit/wkwebviewconfiguration/1614793-allowsinlinemediaplayback
 
 
+### 关于报“Too many active WebGL contexts. Oldest context will be lost” 错误
+
+这个错误是由于浏览器的限制导致的。
+
+对于每个不同的浏览器
+
+- Google Chrome: 通常情况下，Chrome 的上限是 16 个 WebGL 上下文。这是一个相对较低的限制，如果超过这个数量，会出现 “Too many active WebGL contexts” 错误。
+
+- Mozilla Firefox: Firefox 也有一个上限，通常在 16 到 32 个 WebGL 上下文之间。这个上限可以在 about:config 中的 webgl.context-creation.max-ctx 设置中进行调整。
+
+- Microsoft Edge: Microsoft Edge 的上限通常与 Chromium 类似，大约为 16 个 WebGL 上下文。
+
+- Safari: Safari 在 macOS 上的上限通常比较高，可以达到几百个，但仍然受到系统资源的限制。
+
+解决方案：
+
+1. 降低多屏数量
+2. 优先使用mse解码+video渲染
+3. 可以使用pro版本，pro 版本支持所有解码器（wasm+mse+webcodec）都可以使用video标签渲染，所以不会有任何限制情况。
 
 
 
