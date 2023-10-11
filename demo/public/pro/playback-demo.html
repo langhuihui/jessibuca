@@ -20,6 +20,37 @@
         <div id="container"></div>
         <div class="input">
             <div>
+                当前浏览器：
+                <span id="mseSupport264" style="color: green;display: none">支持MSE H264解码；</span>
+                <span id="mseSupport" style="color: green;display: none">支持MSE H265解码；</span>
+                <span id="mseNotSupport264" style="color: red;display: none">不支持MSE H264解码；</span>
+                <span id="mseNotSupport"
+                      style="color: red;display: none">不支持MSE H265解码,会自动切换成wasm解码；</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                当前浏览器：
+                <span id="wcsSupport264" style="color: green;display: none">支持Webcodecs H264解码；</span>
+                <span id="wcsSupport" style="color: green;display: none">支持Webcodecs H265解码（不一定准确）；</span>
+                <span id="wcsNotSupport264"
+                      style="color: red;display: none">不支持Webcodecs H264解码(https/localhost)；</span>
+                <span id="wcsNotSupport" style="color: red;display: none">不支持Webcodecs H265解码(https/localhost),会自动切换成wasm解码</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                当前浏览器：
+                <span id="wasmSupport" style="color: green;display: none">支持WASM解码；</span>
+                <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码</span>
+                <span id="wasmNotSupport" style="color: red;display: none">不支持WASM解码</span>
+                <span id="simdNotSupport"
+                      style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
+            </div>
+        </div>
+
+        <div class="input">
+            <div>
                 <span><span style="color: red">TPS:动态(根据流):</span>播放器的倍率播放完全是根据服务器端推流的速率，如果服务器端推的是一倍率且动态码率的流，
                 播放器就按照一倍率动态码率渲染。<span style="color: green">例如 fps会15到30之间跳动。</span>
             </span>
@@ -34,21 +65,34 @@
             </div>
         </div>
         <div class="input">
-            <div >
+            <div>
                 <span><span style="color: red">TPS:解码前缓冲数据:</span>对于存在有些流会一下子以2倍甚至4倍的速率推送的情况，如果设置为true，则会根据计算出来的fps，只根据fps和倍率来解码数据，其他数据还是被缓存在队列中，等待解码。
             </span>
             </div>
         </div>
         <div class="input">
-            <div >
+            <div>
                 <span><span style="color: red">TPS:服务器端倍率推流:</span> 如果服务器端按照倍率推流，播放器端也需要同步的以倍率播放【调用forward(rate)】接口
             </span>
             </div>
         </div>
-        <div class="input">
-            <div >
-                <span style="color: red">TPS:</span> 录像流暂只支持wasm（simd）解码,canvas渲染。
 
+        <div class="input">
+            <div>
+                解码器：
+                <input
+                    type="checkbox"
+                    checked
+                    id="useMSE"
+                /><span>MediaSource</span>
+                <input
+                    type="checkbox"
+                    id="useWCS"
+                /><span>Webcodec</span>
+                <input
+                    type="checkbox"
+                    id="useSIMD"
+                /><span>WASM(SIMD)</span>
             </div>
         </div>
         <div class="input">
@@ -120,13 +164,6 @@
             <span id="supportWebgpu"></span>
         </div>
         <div class="input">
-            <span>是否使用硬解码(https支持)</span>
-            <select id="playbackUseWCS" style="width: 50px">
-                <option value="true">是</option>
-                <option value="false" selected>否</option>
-            </select>
-        </div>
-        <div class="input">
             <button onclick="replay()">重播</button>
         </div>
         <div class="input">
@@ -173,8 +210,11 @@
     var $uiUsePlaybackPause = document.getElementById('uiUsePlaybackPause');
     var $supportWebgpu = document.getElementById('supportWebgpu');
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
-    var $playbackUseWCS = document.getElementById('playbackUseWCS');
     var $playScroll = document.getElementById('playScroll');
+    var $useMSE = document.getElementById('useMSE');
+    var $useSIMD = document.getElementById('useSIMD');
+    var $useWCS = document.getElementById('useWCS');
+
 
     var forceNoOffscreen = true; //
     var jessibuca = null;
@@ -236,8 +276,8 @@
             jessibuca.forward(rate);
         })
 
-        jessibuca.on('playbackSeek',(data)=>{
-            const currentTime = new Date(1653840000000).setHours(data.hour,data.min, data.second, 0);
+        jessibuca.on('playbackSeek', (data) => {
+            const currentTime = new Date(1653840000000).setHours(data.hour, data.min, data.second, 0);
             jessibuca.setPlaybackStartTime(currentTime);
         })
 
@@ -291,7 +331,8 @@
                     {label: '8倍', value: 8},
                     {label: '16倍', value: 16},
                 ],
-                useWCS: $playbackUseWCS.value === 'true',
+                useWCS: $useWCS.checked,
+                useMSE: $useMSE.checked,
             });
         }
         isPlaybackPause = false;
@@ -316,6 +357,34 @@
         jessibuca.pause();
     })
 
+    $useMSE.addEventListener('click', function () {
+        const checked = $useMSE.checked;
+        if (checked) {
+            $useSIMD.checked = false
+            $useWCS.checked = false
+        }
+        replay();
+    })
+
+    $useSIMD.addEventListener('click', function () {
+        const checked = $useSIMD.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useWCS.checked = false
+        }
+        replay();
+    })
+
+    $useWCS.addEventListener('click', function () {
+        const checked = $useWCS.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useSIMD.checked = false
+        }
+        replay();
+    })
+
+
     $playbackPause.addEventListener('click', function () {
         $playbackPause.style.display = 'none';
         $pause.style.display = 'none';
@@ -336,8 +405,8 @@
 
     })
 
-    function currentTimeScroll(){
-        if(jessibuca){
+    function currentTimeScroll() {
+        if (jessibuca) {
             jessibuca.playbackCurrentTimeScroll();
         }
     }

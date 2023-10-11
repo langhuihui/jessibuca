@@ -142,8 +142,10 @@
     var forceNoOffscreen = true; //
     var jessibuca = null;
 
-    function create() {
-        jessibuca = new JessibucaPro({
+    function create(options) {
+        options = options || {}
+
+        var _options = Object.assign({}, {
             container: $container,
             videoBuffer: Number($videoBuffer.value), // 缓存时长
             videoBufferDelay: Number($videoBufferDelay.value), // 1000s
@@ -181,14 +183,17 @@
             controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
             // audioEngine:"worklet",
             // isFlv: true
-        },);
+        }, options);
+
+        jessibuca = new JessibucaPro(_options);
 
         //  一直播放
-        jessibuca.on('playFailedAndPaused', function (e) {
-            //  延迟个5秒再重连
+        jessibuca.on('playFailedAndPaused', function (error, frameInfo) {
+            console.error('playFailedAndPaused', error);
+            //  延迟个2秒再重连
             setTimeout(() => {
-                replay()
-            }, 5 * 1000)
+                replay(frameInfo)
+            }, 2 * 1000)
         });
 
         jessibuca.on('ptz', (arrow) => {
@@ -221,7 +226,11 @@
     function play() {
         var href = $playHref.value;
         if (href) {
-            jessibuca.play(href);
+            jessibuca.play(href).then(() => {
+
+            }).catch((e) => {
+
+            });
             $player.style.display = 'none';
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
@@ -229,10 +238,10 @@
     }
 
 
-    function replay() {
+    function replay(options) {
         if (jessibuca) {
             jessibuca.destroy().then(() => {
-                create();
+                create(options);
                 play();
             });
         } else {
