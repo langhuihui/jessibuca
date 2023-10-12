@@ -154,6 +154,10 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 - decoder-pro-audio-player.js(初始化参数decoder参数配置)
 - decoder-pro-audio.wasm(胶水文件)
 
+### 语音通讯（单向采集数据发送给服务器端）
+
+- jessibuca-pro-talk-demo.js(script标签引入)
+
 ## 直播协议支持
 
 支持17种直播格式
