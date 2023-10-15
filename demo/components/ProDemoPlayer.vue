@@ -56,6 +56,10 @@
                 <div style="color: red" class="input-tips">Tips:支持录制FLV格式的视频(视频+音频)
                 </div>
             </div>
+            <div class="input input-annnie">
+                <div style="color: green" class="input-tips">Tips:<a href="/pro-module.html">MP4录制扩展模块</a>支持(视频H264/H265+音频AAC,MP3)
+                </div>
+            </div>
             <div class="input input-wrap">
                 <div>
                     当前浏览器：
