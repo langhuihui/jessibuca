@@ -42,9 +42,10 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 | WCS智能不花屏丢帧，长时间播放绝不累积延迟                      | 不支持   | 支持 |
 | WCS解码失败自动切换到WASM解码                          | 支持    | 支持 |
 | WCS 离屏渲染                                    | 支持    | 支持 |
+| WebRTC支持canvas渲染                            | 不支持   | 支持 |
 | AAC音频                                       | 支持    | 支持 |
 | PCMA(g711a)、PCMU(g711u)音频                   | 支持    | 支持 |
-| MP3                                         | 不支持   | 支持 |
+| MP3音频                                       | 不支持   | 支持 |
 | 音频worlet引擎（https）                           | 不支持   | 支持 |
 | 音频script引擎 (默认)                             | 支持    | 支持 |
 | 音频active引擎（兼容安卓移动端）                         | 不支持   | 支持 |
@@ -113,6 +114,8 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 | 播放器自定义水印                                    | 不支持   | 支持 |
 | 截图加自定义水印                                    | 不支持   | 支持 |
 | 全屏水印                                        | 不支持   | 支持 |
+| 动态水印                                        | 不支持   | 支持 |
+| 幽灵水印                                        | 不支持   | 支持 |
 | AI人脸识别                                      | 不支持   | 支持 |
 | AI物品识别（人、车辆等）                               | 不支持   | 支持 |
 | 支持通过ws接口获取服务器端画面坐标系（画框子）<br/>实时渲染在播放器上，     | 不支持   | 支持 |
@@ -285,12 +288,34 @@ H265硬解码，对于电脑硬件支持情况：
 | Edge | 支持 | 支持 | 支持         | 支持 | 支持               | 支持 |
 | Safari | 支持 | 不支持 | 支持        | 支持 | 支持               | 不支持 |
 
-> mse 解码H265 需要window系统在10及以上，chrome的版本得108及以上才能够支持
+> mse 解码H265 需要window系统在10及以上，chrome/edge的版本得108及以上才能够支持
+
+> edge支持 硬解码H265 需要额外安装hevc扩展 具体见：[edge/chrome开启硬解码](https://blog.csdn.net/water1209/article/details/126959579)
 
 > webcodecs 解码H265 需要https环境，同样需要window系统在10及以上，chrome的版本得107及以上，safari的16.4及以上才能够支持。
 
 
+#### Chromium 内核的 Edge 在 Windows 系统下，额外支持了硬解 HEVC 视频，但必须满足如下条件：
 
+- 操作系统版本必须为 Windows 10 1709（16299.0）及以后版本。
+- 安装付费的 HEVC 视频扩展或免费的来自设备制造商的 HEVC 视频扩展且版本号必须大于等于 1.0.50361.0（由于一个存在了一年半以上的 Bug，老版本存在抖动的 Bug，Issue：https://techcommunity.microsoft.com/t5/discussions/hevc-video-decoding-broken-with-b-frames/td-p/2077247/page/4）。
+- 版本号必须大于等于 Edge 99 。
+
+在安装插件后，进入 edge://gpu 页面，可以查看 Edge 对于 HEVC 硬解支持的 Profile：
+
+##### 指标：
+
+- 分辨率最高支持 8192px * 8192px。
+- 支持 HEVC Main / Main10 / Main Still Picture Profile。
+##### 优势：
+
+- 在显卡支持的情况，性能是最好的。
+- HTMLVideoElement、MSE 等原生 API 的直接支持。
+##### 劣势：
+
+- 不支持 Windows 8 和老版本 Windows 10。
+- 需要手动装插件。
+- HDR 支持不够好。
 
 
 ### 移动端
@@ -539,27 +564,7 @@ Windows系统下,360浏览器可播放使用MSE加速解码H265。
 ## Windows系统下,win10商店购买hevc解码器后最新edge可硬件加速解码播放H265。
 Windows系统下,win10商店购买hevc解码器后最新edge可硬件加速解码播放H265。
 
-### Chromium 内核的 Edge 在 Windows 系统下，额外支持了硬解 HEVC 视频，但必须满足如下条件：
 
-- 操作系统版本必须为 Windows 10 1709（16299.0）及以后版本。
-- 安装付费的 HEVC 视频扩展或免费的来自设备制造商的 HEVC 视频扩展且版本号必须大于等于 1.0.50361.0（由于一个存在了一年半以上的 Bug，老版本存在抖动的 Bug，Issue：https://techcommunity.microsoft.com/t5/discussions/hevc-video-decoding-broken-with-b-frames/td-p/2077247/page/4）。
-- 版本号必须大于等于 Edge 99 。
-
-在安装插件后，进入 edge://gpu 页面，可以查看 Edge 对于 HEVC 硬解支持的 Profile：
-
-### 指标：
-
-- 分辨率最高支持 8192px * 8192px。
-- 支持 HEVC Main / Main10 / Main Still Picture Profile。
-### 优势：
-
-- 在显卡支持的情况，性能是最好的。
-- HTMLVideoElement、MSE 等原生 API 的直接支持。
-### 劣势：
-
-- 不支持 Windows 8 和老版本 Windows 10。
-- 需要手动装插件。
-- HDR 支持不够好。
 
 ## macOS系统下，Safari浏览器可播放使用MSE加速解码H265。
 

@@ -1751,9 +1751,31 @@ https://developer.apple.com/documentation/webkit/wkwebviewconfiguration/1614793-
 2.降级播放流的分辨率。
 
 
+### chrome chunk_demuxer_error_append_failed 错误
+
+"chrome chunk_demuxer_error_append_failed" 错误通常与视频播放相关。这个错误表示 Chrome 浏览器的 chunk demuxer（分段解复用器）无法将一些视频片段拼接在一起以播放视频。
+
+这个错误通常是由于视频文件本身的问题引起的，例如视频文件损坏或者格式不受支持。也可能是由于网络连接问题，例如视频文件未完全下载或下载过程中发生了错误。
+
+
 > 开源版软解码（wasm）最高能支持的分辨率是720p的。
 
 > pro版本软解码（wasm simd）最高能支持的分辨率是4k的。
+
+
+
+### failed to execute 'fetch' on 'workerGlobalScope' : failed to parse url from decoder.wasm 错误
+
+这个错误是由于`decoder.wasm`文件下载失败导致的。
+
+> 一般这种情况都是配置了，`decoder:cdn url` 缘故导致的，并没有修改decoder.js 里面引用的decoder.wasm的url。
+
+解决方案：见
+
+https://jessibuca.com/document.html#jessibuca-js-decoder-js-decoder-wasm%E6%96%87%E4%BB%B6%E6%83%B3%E9%80%9A%E8%BF%87cdn%E5%8A%A0%E8%BD%BD
+
+
+
 
 ### 群
 <img src="/public/qrcode.jpeg">
