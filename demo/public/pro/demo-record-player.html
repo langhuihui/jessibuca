@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Jessica demo</title>
+    <link rel="stylesheet" href="./demo.css">
+    <script src="./jessibuca-pro-mp4-recorder-demo.js"></script>
+    <script src="./jessibuca-pro-recorder-demo.js"></script>
+    <style>
+        .container-shell:before {
+            content: "jessibuca pro recorder demo player";
+        }
+    </style>
+</head>
+<body class="page">
+<div class="root">
+    <div class="container-shell">
+        <div class="input">
+            <div>
+                <span style="color: red">Tips:</span> 支持录制Mp4(MPEG-4)格式，支持音频(mp3/aac)和视频(h264/h265)。
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <span>录音格式：</span>
+                <select id="recordType" onchange="replay()">
+                    <option value="mp4">mp4</option>
+                    <option value="flv" selected>flv</option>
+                </select>
+                <input
+                    type="checkbox"
+                    checked
+                    id="hasAudio"
+                /><span>hasAudio</span>
+                <input
+                    type="checkbox"
+                    checked
+                    id="hasVideo"
+                /><span>hasVideo</span>
+            </div>
+        </div>
+
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                    autocomplete="on"
+                    id="playUrl"
+                    value="https://live.nodemedia.cn:8443/live/b480_264.flv"
+            />
+            <button id="play">录制</button>
+            <button id="pause" style="display: none">停止并下载</button>
+        </div>
+        <div class="input" style="line-height: 30px">
+            <button id="destroy">销毁</button>
+        </div>
+        <div class="input">
+            <span class="record-html"></span>
+        </div>
+    </div>
+</div>
+
+<script>
+    var $player = document.getElementById('play');
+    var $pause = document.getElementById('pause');
+    var $playHref = document.getElementById('playUrl');
+    var $destroy = document.getElementById('destroy');
+    var $recordType = document.getElementById('recordType');
+    var $hasAudio = document.getElementById('hasAudio');
+    var $hasVideo = document.getElementById('hasVideo');
+    var $recordHtml = document.querySelector('.record-html');
+
+    var showOperateBtns = true; // 是否显示按钮
+    var forceNoOffscreen = true; //
+    var jessibucaRecorder = null;
+
+    function create() {
+        jessibucaRecorder = new JessibucaProRecorder({
+            debug: true,
+            debugLevel: 'debug',
+            recordType: $recordType.value,
+            hasVideo: $hasVideo.checked,
+            hasAudio: $hasAudio.checked,
+        });
+
+
+        jessibucaRecorder.on('stats',(stats)=>{
+            const innerText = `时间戳:${stats.ts},
+            音频码率:${stats.abps},视频码率:${stats.vbps},
+            录制时长：${stats.durationShow},录制大小：${stats.sizeShow}`;
+
+            $recordHtml.innerHTML = innerText;
+        })
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+    }
+
+
+    create();
+
+    function play() {
+        var href = $playHref.value;
+        if (href) {
+            $recordHtml.innerHTML = '';
+            jessibucaRecorder.startRecord(href);
+            $player.style.display = 'none';
+            $pause.style.display = 'inline-block';
+            $destroy.style.display = 'inline-block';
+        }
+    }
+
+    function replay() {
+        if (jessibucaRecorder) {
+            jessibucaRecorder.destroy().then(() => {
+                create();
+                play();
+            });
+        } else {
+            create();
+            play();
+        }
+    }
+
+    $player.addEventListener('click', function () {
+        play();
+    }, false)
+
+
+    $pause.addEventListener('click', function () {
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+        jessibucaRecorder.stopRecordAndSave('blob').then((blob) => {
+            jessibucaRecorder.downloadBlob(blob, `${Date.now()}`, $recordType.value);
+        });
+    })
+
+    $destroy.addEventListener('click', function () {
+        if (jessibucaRecorder) {
+            jessibucaRecorder.destroy().then(() => {
+
+                create();
+            });
+        } else {
+            create();
+        }
+
+    })
+
+</script>
+
+</body>
+</html>

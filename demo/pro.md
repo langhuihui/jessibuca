@@ -13,12 +13,13 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 <Rice/>
 ## 开源版与PRO 差异性
 
-|                                             | 开源版   | Pro |
-|---------------------------------------------|-------| --- |
-| H.264 WASM视频(720P)                          | 支持    | 支持 |
-| H.265 WASM视频(720P)                          | 支持    | 支持 |
-| H.264 WASM SIMD视频(1080P及以上)                 | 不支持 | 支持 |
-| H.265 WASM SIMD视频(1080P及以上)                 | 不支持   | 支持 |
+|                                | 开源版   | Pro |
+|--------------------------------|-------| --- |
+| H.264 WASM视频(720P)             | 支持    | 支持 |
+| H.265 WASM视频(720P)             | 支持    | 支持 |
+| H.264 WASM SIMD视频(1080P及以上)    | 不支持 | 支持 |
+| H.265 WASM SIMD视频(1080P及以上)    | 不支持   | 支持 |
+| H.265 WASM SIMD多线程视频(1080P及以上) | 不支持   | 支持 |
 | Mpeg-4 视频格式软解码                              | 不支持   | 支持 |
 | WASM(SIMD)支持webgl canvas渲染                  | 支持   | 支持 |
 | WASM(SIMD)支持 video 渲染                       | 不支持   | 支持 |
@@ -137,6 +138,10 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 2. 体验版会强制在右上角有 jessibuca-pro 水印。
 3. 体验版会强制全屏水印（JessibucaPro 体验）。
 
+
+> 如需要购买PRO版本可以联系添加作者微信：bosswancheng
+
+
 包含的文件有：
 
 ### 音视频播放器
@@ -146,9 +151,13 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 - decoder-pro.wasm(胶水文件)
 - decoder-pro-simd.js (初始化参数decoder参数配置)
 - decoder-pro-simd.wasm(胶水文件)
-- decoder-pro-audio.js(初始化参数decoder参数配置)（硬解码的时候用到的）
+- decoder-pro-audio.js(不需要配置，播放器内部会引用)
 - decoder-pro-audio.wasm(胶水文件)
 - decoder-pro-hard.js(硬解码解封装数据)
+- decoder-pro-simd-mt.js(不需要配置，播放器内部会引用)
+- decoder-pro-simd-mt-worker.js(不需要配置，播放器内部会引用)
+- decoder-pro-simd-mt-worker.wasm(胶水文件)
+- decoder-pro-simd-mt-worker.worker.js(不需要配置，播放器内部会引用)
 
 > `jessibuca-pro-demo.js`与`jessibuca-pro-multi-demo.js`的区别是，前者是单路播放，后者是支持多路播放。 两者只需要引入一个就行了，不需要同时引入。
 

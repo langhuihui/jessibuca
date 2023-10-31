@@ -78,9 +78,8 @@ function checkSupportMSEH264() {
 
 function checkSupportWCSHevc() {
     const browserInfo = getBrowser();
-    const supportWCS = checkSupportWCS();
 
-    return supportWCS && browserInfo.type.toLowerCase() === 'chrome' && browserInfo.version >= 107 && (location.protocol === 'https:' || location.hostname === 'localhost');
+    return browserInfo.type.toLowerCase() === 'chrome' && browserInfo.version >= 107 && (location.protocol === 'https:' || location.hostname === 'localhost');
 }
 
 function checkSupportWCS() {
@@ -104,6 +103,15 @@ function checkSupportWasm() {
 
 function checkSupportSIMD() {
     return WebAssembly && WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 98, 11]));
+}
+
+function supportSharedArrayBuffer() {
+    try {
+        new SharedArrayBuffer(1);
+        return true;
+    } catch (e) {
+        return false;
+    }
 }
 
 let support = document.getElementById('mseSupport');
@@ -173,6 +181,18 @@ if (supportSimd && notSupportSimd) {
     }
 }
 
+let supportSimdMtSupport = document.getElementById('simdMtSupport');
+var notSupportSimdMtSupport = document.getElementById('simdMtNotSupport');
+
+
+if (supportSimdMtSupport) {
+    if (supportSharedArrayBuffer()) {
+        supportSimdMtSupport.style.display = 'inline-block';
+    } else {
+        notSupportSimdMtSupport.style.display = 'inline-block';
+    }
+}
+
 
 function isMobile() {
     return (/iphone|ipad|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));
@@ -187,5 +207,3 @@ const useVconsole = isMobile() || isPad()
 if (useVconsole && window.VConsole) {
     new window.VConsole();
 }
-
-

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="origin-trial" content="AhQB+uNRI7lww30oPK+0ZcGotIvuoHJL+NkkWOhqDdooY6+xnuiYmZli2SwlH1vkrKdB5WxMpsv5KRc/q9zFswoAAAB3eyJvcmlnaW4iOiJodHRwczovL2plc3NpYnVjYS5jb206NDQzIiwiZmVhdHVyZSI6IlVucmVzdHJpY3RlZFNoYXJlZEFycmF5QnVmZmVyIiwiZXhwaXJ5IjoxNzA5ODU1OTk5LCJpc1N1YmRvbWFpbiI6dHJ1ZX0=">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Jessibuca Pro 3x3 demo</title>
     <script src="./vconsole.js"></script>
@@ -57,8 +58,10 @@
             <div>
                 当前浏览器：
                 <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码</span>
+                <span id="simdMtSupport" style="color: green;display: none">支持WASM SIMD 多线程解码；</span>
                 <span id="simdNotSupport"
                       style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
+                <span id="simdMtNotSupport" style="color: red;display: none">不支持WASM SIMD 多线程解码；</span>
             </div>
         </div>
         <div class="input">
@@ -85,6 +88,12 @@
                     type="checkbox"
                     id="useSIMD"
                 /><span>SIMD</span>
+                <input
+                    type="checkbox"
+                    checked
+                    id="useSIMDMThreading"
+                    onclick="replay()"
+                /><span>启动多线程（仅WASM(SIMD)解码支持）</span>
             </div>
         </div>
         <div class="input">
@@ -219,6 +228,7 @@
     var $demuxUseWorker = document.getElementById('demuxUseWorker');
     var $isDebug = document.getElementById('isDebug');
     var $isFlv = document.getElementById('isFlv');
+    var $useSIMDMThreading = document.getElementById('useSIMDMThreading');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -241,6 +251,7 @@
             useMSE: $useMSE.checked === true,
             useSIMD: $useSIMD.checked === true,
             useWCS: $useWCS.checked === true,
+            useSIMDMThreading: $useSIMDMThreading.checked === true,
             hasAudio: false,
             useVideoRender: true,
             controlAutoHide: true,

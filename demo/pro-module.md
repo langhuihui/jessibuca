@@ -46,3 +46,31 @@ jessibuca pro 扩展模块
 ### 定价
 
 添加微信：bosswancheng 咨询
+
+
+## 直播流、回放(录像)流下载（录制）器
+
+支持 `ws(s)-raw`,`http(s)-flv`,`ws(s)-flv`,`http(s)-fmp4`,`ws(s)-fmp4`,`hls`,`http(s)-h264`,`ws(s)-h264`,`http(s)-h265`,`ws(s)-h265` 等协议的直播流、回放(录像)流下载（录制）器。
+
+视频支持的编码格式：h264、h265、
+音频支持的编码格式：aac、mp3、pcmu(g711u)、pcma(g711a)
+
+> mp4只支持 aac、mp3 两种格式。
+
+支持录制格式 `flv`,`mp4`
+
+### demo（十分钟）
+
+> 体验demo 只能最多录制10分钟，超过10分钟会自动停止录制（需要手动暂停下载录制的文件）
+>
+#### https
+[https://jessibuca.com/pro/demo-record-player.html](https://jessibuca.com/pro/demo-record-player.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-record-player.html](http://jessibuca.monibuca.com/pro/demo-record-player.html)
+
+### 定价
+
+添加微信：bosswancheng 咨询
+
+

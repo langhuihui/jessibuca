@@ -15,6 +15,7 @@ module.exports = {
                 items: [
                     {text: 'Demo', link: '/pro-demo'},
                     {text: '文档', link: '/pro'},
+                    {text: '帮助', link: '/pro-doc'},
                     {text: 'AI', link: '/pro-ai'},
                     {text: '扩展模块', link: '/pro-module'},
                     {text: '定制化服务', link: '/pro-more'},
@@ -38,6 +39,7 @@ module.exports = {
         logo: 'logo.png',
     },
     head: [
+        ['meta',{'http-equiv':'origin-trial',content:'AhQB+uNRI7lww30oPK+0ZcGotIvuoHJL+NkkWOhqDdooY6+xnuiYmZli2SwlH1vkrKdB5WxMpsv5KRc/q9zFswoAAAB3eyJvcmlnaW4iOiJodHRwczovL2plc3NpYnVjYS5jb206NDQzIiwiZmVhdHVyZSI6IlVucmVzdHJpY3RlZFNoYXJlZEFycmF5QnVmZmVyIiwiZXhwaXJ5IjoxNzA5ODU1OTk5LCJpc1N1YmRvbWFpbiI6dHJ1ZX0='}],
         ['script', {src: 'https://cdn.wwads.cn/js/makemoney.js'}],
         ['script', {src: 'https://hm.baidu.com/hm.js?ed323be621396bd133c1c9b856d16dad'}],
         ['script', {src: '/jessibuca.js'}],
