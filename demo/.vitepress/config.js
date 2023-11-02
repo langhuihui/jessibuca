@@ -25,7 +25,7 @@ module.exports = {
                 text: 'http/https',
                 items: [
                     {text: 'HTTP', link: 'http://jessibuca.monibuca.com/'},
-                    {text: 'HTTPS', link: 'https://j.m7s.live/'},
+                    {text: 'HTTPS', link: 'https://jessibuca.com/'},
                 ]
             },
             {

@@ -44,11 +44,11 @@
                 当前浏览器：
                 <span id="wasmSupport" style="color: green;display: none">支持WASM解码；</span>
                 <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码；</span>
-                <span id="simdMtSupport" style="color: green;display: none">支持WASM SIMD 多线程解码；</span>
+                <span id="simdMtSupport" style="color: green;display: none">支持WASM WASM(SIMD) 多线程解码；</span>
                 <span id="wasmNotSupport" style="color: red;display: none">不支持WASM解码；</span>
                 <span id="simdNotSupport"
                       style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码；</span>
-                <span id="simdMtNotSupport" style="color: red;display: none">不支持WASM SIMD 多线程解码；</span>
+                <span id="simdMtNotSupport" style="color: red;display: none">不支持WASM WASM(SIMD) 多线程解码；</span>
             </div>
         </div>
         <div class="input">
@@ -74,7 +74,7 @@
                     checked
                     id="useSIMDMThreading"
                     onclick="replay()"
-                /><span>启动多线程（仅WASM(SIMD)解码支持）</span>
+                /><span>启动多线程（WASM,WASM(SIMD)解码支持）</span>
                 <span style="color: green">默认使用wasm解码器</span>
             </div>
         </div>
@@ -165,7 +165,7 @@
             useMSE: $useMSE.checked === true,
             useSIMD: $useSIMD.checked === true,
             useWCS: $useWCS.checked === true,
-            useSIMDMThreading: $useSIMDMThreading.checked === true,
+            useMThreading: $useSIMDMThreading.checked === true,
             showBandwidth: showOperateBtns, // 显示网速
             showPerformance: showOperateBtns, // 显示性能
             operateBtns: {

@@ -27,7 +27,7 @@
 
 ## 音视频直播流Demo(支持 mse、wcs、wasm、simd解码)(根据url地址解析协议)
 
-### demo
+### demo（支持多线程）
 ------
 
 #### https
@@ -65,7 +65,7 @@
 [http://jessibuca.monibuca.com/pro/2x2-demo.html](http://jessibuca.monibuca.com/pro/2x2-demo.html)
 
 
-### 3x3
+### 3x3（支持多线程）
 ------
 #### https
 [https://jessibuca.com/pro/3x3-demo.html](https://jessibuca.com/pro/3x3-demo.html)
@@ -284,6 +284,13 @@
 #### http
 [http://jessibuca.monibuca.com/pro/demo-zoom.html](http://jessibuca.monibuca.com/pro/demo-zoom.html)
 
+### 水印（动态水印、幽灵水印）
+------
+#### https
+[https://jessibuca.com/pro/demo-dynamic-watermark.html](https://jessibuca.com/pro/demo-dynamic-watermark.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-dynamic-watermark.html](http://jessibuca.monibuca.com/pro/demo-dynamic-watermark.html)
 
 ### 播放器自定义内容（文字、矩形框子、文字+矩形框子）
 ------
