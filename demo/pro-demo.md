@@ -171,6 +171,15 @@
 [http://jessibuca.monibuca.com/pro/demo-auto-play.html](http://jessibuca.monibuca.com/pro/demo-auto-play.html)
 
 
+### 有声音播放
+------
+#### https
+[https://jessibuca.com/pro/demo-play-not-mute.html](https://jessibuca.com/pro/demo-play-not-mute.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-play-not-mute.html](http://jessibuca.monibuca.com/pro/demo-play-not-mute.html)
+
+
 ### 移动端全屏
 ------
 #### https

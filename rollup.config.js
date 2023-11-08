@@ -39,6 +39,7 @@ const baseConfig = {
             __ENV__: JSON.stringify(process.env.NODE_ENV || 'development'),
         }),
         isProd && terser({
+            mangle: true,
             output: {
                 comments: () => false,
             },
