@@ -98,12 +98,20 @@
                 <span v-else style="color: red;">不支持webgpu渲染,会自动切换成webgl渲染</span>（适用于wasm(simd)解码+canvas渲染）
             </div>
             <div class="input">
-                <div v-if="supportMT">
+                <div>
+                    <div v-if="supportMT" style="display: inline-block">
+                        <input
+
+                            type="checkbox"
+                            v-model="useMT"
+                            @change="restartPlay()"
+                        /><span>使用多线程解码</span>
+                    </div>
                     <input
                         type="checkbox"
-                        v-model="useMT"
+                        v-model="isMute"
                         @change="restartPlay()"
-                    /><span>使用多线程解码</span>
+                    /><span>静音播放</span>
                 </div>
             </div>
             <div class="input">
@@ -479,6 +487,7 @@ export default {
             quieting: true,
             loading: false,
             loaded: false, // mute
+            isMute: true, // 是否静音
             showOperateBtns: true,
             showBandwidth: true,
             hotKey: false,
@@ -628,7 +637,7 @@ export default {
                         isFmp4: this.isFmp4,
                         hiddenAutoPause: this.hiddenAutoPause,
                         forceNoOffscreen: !this.useOffscreen,
-                        // isNotMute: true,
+                        isNotMute: !this.isMute,
                         hasAudio: this.hasAudio,
                         hasVideo: this.hasVideo,
                         controlAutoHide: this.controlAutoHide,
