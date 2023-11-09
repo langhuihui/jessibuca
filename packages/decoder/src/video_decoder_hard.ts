@@ -13,8 +13,8 @@ export class VideoDecoderHard extends FSM implements VideoDecoderInterface {
         this.emit(VideoDecoderEvent.VideoFrame, frame);
       },
       error: (err) => {
-        this.emit(VideoDecoderEvent.Error, err);
         this.close();
+        this.emit(VideoDecoderEvent.Error, err);
       },
     });
   }
@@ -41,6 +41,7 @@ export class VideoDecoderHard extends FSM implements VideoDecoderInterface {
   }
   @ChangeState([], "closed", { ignoreError: true })
   close(): void {
-    this.decoder.close();
+    if (this.decoder.state !== "closed")
+      this.decoder.close();
   }
 }

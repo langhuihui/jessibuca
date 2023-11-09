@@ -17,16 +17,60 @@ export class PSDemuxer extends BaseDemuxer {
   audioStreamType = 0;
   pts = 0;
   dts = 0;
-  pull(): Promise<void> {
-    throw new Error("Method not implemented.");
+  tmp8 = new Uint8Array(4);
+  dv = new DataView(this.tmp8.buffer);
+  videoBuffer = [] as Array<Uint8Array>;
+  videoBufferSize = 0;
+  currentPTS = 0;
+  startTime = 0;
+  async pull(): Promise<void> {
+    const tmp8 = this.tmp8;
+    const dv = this.dv;
+    const source = this.source!;
+    await source.read(tmp8);
+    const code = dv.getUint32(0);
+    // console.log(code.toString(16));
+    switch (code) {
+      case StartCodePS:
+        await source.read(9);
+        await source.read(tmp8.subarray(0, 1));
+        const psl = dv.getUint8(0) & 0x07;
+        await source.read(psl);
+        break;
+      // case StartCodeSYS:
+      // case PrivateStreamCode:
+      //   await source.read(tmp8.subarray(0, 2));
+      //   const sl = dv.getUint16(0);
+      //   await source.read(sl);
+      //   break;
+      case StartCodeMAP:
+        await source.read(tmp8.subarray(0, 2));
+        this.decProgramStreamMap(await source.read(dv.getUint16(0)));
+        break;
+      case StartCodeVideo:
+        await source.read(tmp8.subarray(0, 2));
+        if (this.demuxVideo(await source.read(dv.getUint16(0)))) {
+          return;
+        }
+        break;
+      case StartCodeAudio:
+        await source.read(tmp8.subarray(0, 2));
+        if (this.demuxAudio(await source.read(dv.getUint16(0)))) {
+          return;
+        }
+        break;
+      case MEPGProgramEndCode:
+        return;
+      default:
+        await source.read(tmp8.subarray(0, 2));
+        const sl = dv.getUint16(0);
+        await source.read(sl);
+    }
+    return this.pull();
   }
   *demux(): Generator<number | Uint8Array, void, Uint8Array> {
-    let startTime = 0;
-    const tmp8 = new Uint8Array(4);
-    const dv = new DataView(tmp8.buffer);
-    const videoBuffer = [];
-    let videoBufferSize = 0;
-    let currentPTS = 0;
+    const tmp8 = this.tmp8;
+    const dv = this.dv;
     while (true) {
       yield tmp8;
       const code = dv.getUint32(0);
@@ -38,12 +82,12 @@ export class PSDemuxer extends BaseDemuxer {
           const psl = dv.getUint8(0) & 0x07;
           yield psl;
           break;
-        case StartCodeSYS:
-        case PrivateStreamCode:
-          yield tmp8.subarray(0, 2);
-          const sl = dv.getUint16(0);
-          yield sl;
-          break;
+        // case StartCodeSYS:
+        // case PrivateStreamCode:
+        //   yield tmp8.subarray(0, 2);
+        //   const sl = dv.getUint16(0);
+        //   yield sl;
+        //   break;
         case StartCodeMAP:
           yield tmp8.subarray(0, 2);
           const msl = dv.getUint16(0);
@@ -52,87 +96,100 @@ export class PSDemuxer extends BaseDemuxer {
           break;
         case StartCodeVideo:
           yield tmp8.subarray(0, 2);
-          const vpesl = dv.getUint16(0);
-          const vpes = yield vpesl;
-          const annexb = this.parsePESPacket(vpes);
-          console.log(vpesl, annexb.length);
-          // console.log("StartCodeVideo", annexb[4] & 0x0f);
-          if (!startTime) {
-            if ((annexb[4] & 0x0f) == 7) {
-              startTime = Date.now();
-              currentPTS = this.pts;
-            } else {
-              break;
-            }
-          }
-          if (currentPTS == this.pts) {
-            // console.log("append", annexb[4] & 0x0f);
-            videoBufferSize += annexb.length;
-            videoBuffer.push(annexb.slice());
-            // videoBuffer.write(annexb);
-            break;
-          }
-          // if (videoBuffer.buffer?.length) {
-          //   this.gotVideo?.({
-          //     type: (videoBuffer.buffer[4] & 0x0f) == 1 ? "delta" : "key",
-          //     data: videoBuffer.buffer!,
-          //     timestamp: (Date.now() - startTime) * 1000,
-          //   });
-          //   videoBuffer.buffer = undefined;
-          // }
-          if (videoBuffer.length && currentPTS != this.pts) {
-            let offset = 0;
-            this.gotVideo?.({
-              type: (videoBuffer[0][4] & 0x0f) == 1 ? "delta" : "key",
-              data: videoBuffer.length == 1 ? videoBuffer[0] : videoBuffer.reduce((a, b) => {
-                a.subarray(offset).set(b);
-                offset += b.length;
-                return a;
-              }, new Uint8Array(videoBufferSize)),
-              timestamp: (Date.now() - startTime) * 1000,
-            });
-            videoBuffer.length = 0;
-          }
-          // console.log("append", annexb[4] & 0x0f);
-          videoBufferSize += annexb.length;
-          videoBuffer.push(annexb.slice());
-          // videoBuffer.write(annexb);
-          currentPTS = this.pts;
+          this.demuxVideo(yield dv.getUint16(0));
           break;
         case StartCodeAudio:
           yield tmp8.subarray(0, 2);
-          const apesl = dv.getUint16(0);
-          const apes = yield apesl;
-          const audio = this.parsePESPacket(apes);
-          if (this.audioDecoderConfig?.codec == "aac" && !this.audioDecoderConfig?.description) {
-            const asc = adtsToAsc(audio.subarray(7));
-            this.audioDecoderConfig = {
-              codec: "aac",
-              description: asc.audioSpecificConfig,
-              sampleRate: asc.sampleRate,
-              numberOfChannels: asc.channel,
-            };
-            this.emit(
-              DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED,
-              this.audioDecoderConfig
-            );
-          }
-          this.gotAudio?.({
-            type: "key",
-            data:
-              this.audioDecoderConfig?.codec == "aac"
-                ? audio.subarray(7)
-                : audio,
-            timestamp: this.dts,
-            duration: 0,
-          });
+          this.demuxAudio(yield dv.getUint16(0));
           break;
         case MEPGProgramEndCode:
           return;
         default:
-          debugger;
+          yield tmp8.subarray(0, 2);
+          const sl = dv.getUint16(0);
+          yield sl;
+          break;
       }
     }
+  }
+  demuxVideo(vpes: Uint8Array) {
+    const annexb = this.parsePESPacket(vpes);
+    const videoBuffer = this.videoBuffer;
+    // console.log(vpes.length, annexb.length);
+    // console.log("StartCodeVideo", annexb[4] & 0x0f);
+    // console.log("StartCodeVideo", (annexb[4] & 0x7E) >> 1)
+    if (!this.startTime) {
+      if (this.videoDecoderConfig?.codec == "hevc") {
+        if ((annexb[4] & 0x7E) >> 1 === 0x20) {
+          this.startTime = Date.now();
+          this.currentPTS = this.pts;
+        } else {
+          return false;
+        }
+      } else if ((annexb[4] & 0x0f) == 7) {
+        this.startTime = Date.now();
+        this.currentPTS = this.pts;
+      } else {
+        return false;
+      }
+    }
+    if (this.currentPTS == this.pts) {
+      console.log("append", annexb[4] & 0x0f);
+      this.videoBufferSize += annexb.length;
+      videoBuffer.push(annexb.slice());
+      return false;
+    }
+    if (videoBuffer.length && this.currentPTS != this.pts) {
+      let offset = 0;
+      let type = "key" as "key" | "delta";
+      if (this.videoDecoderConfig?.codec == "hevc") {
+        if (((videoBuffer[0][4] & 0x7E) >> 1) != 0x20) type = "delta";
+      } else {
+        if ((videoBuffer[0][4] & 0x0f) == 1) type = "delta";
+      }
+      this.gotVideo?.({
+        type,
+        data: videoBuffer.length == 1 ? videoBuffer[0] : videoBuffer.reduce((a, b) => {
+          a.subarray(offset).set(b);
+          offset += b.length;
+          return a;
+        }, new Uint8Array(this.videoBufferSize)),
+        timestamp: (Date.now() - this.startTime) * 1000,
+      });
+      videoBuffer.length = 0;
+      return true;
+    }
+    // console.log("append", annexb[4] & 0x0f);
+    this.videoBufferSize += annexb.length;
+    videoBuffer.push(annexb.slice());
+    this.currentPTS = this.pts;
+    return false;
+  }
+  demuxAudio(apes: Uint8Array) {
+    const audio = this.parsePESPacket(apes);
+    if (this.audioDecoderConfig?.codec == "aac" && !this.audioDecoderConfig?.description) {
+      const asc = adtsToAsc(audio.subarray(7));
+      this.audioDecoderConfig = {
+        codec: "aac",
+        description: asc.audioSpecificConfig,
+        sampleRate: asc.sampleRate,
+        numberOfChannels: asc.channel,
+      };
+      this.emit(
+        DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED,
+        this.audioDecoderConfig
+      );
+    }
+    this.gotAudio?.({
+      type: "key",
+      data:
+        this.audioDecoderConfig?.codec == "aac"
+          ? audio.subarray(7)
+          : audio,
+      timestamp: this.dts,
+      duration: 0,
+    });
+    return true;
   }
   parsePESPacket(payload: Uint8Array) {
     if (payload.length < 4) {

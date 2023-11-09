@@ -35,7 +35,7 @@ export class AudioDecoderSoft extends FSM implements AudioDecoderInterface {
   @ChangeState("initialized", "configured")
   configure(config: AudioDecoderConfig): void {
     this.config = config;
-    this.decoder.setCodec(this.config.codec, this.config.description);
+    this.decoder.setCodec(this.config.codec, this.config.description ?? '');
   }
   @Includes("configured")
   decode(packet: EncodedAudioChunkInit): void {
@@ -79,22 +79,28 @@ export class AudioDecoderSoft extends FSM implements AudioDecoderInterface {
     }
 
     let pcmDatas: Float32Array[] = [];
-
+    let size = 0;
+    let offset = 0;
     for (let i = 0; i < this.channels; i++) {
       let fp = this.module.HEAPU32[(pcmDataArray >> 2) + i] >> 2;
-      pcmDatas.push(
-        Float32Array.of(...this.module.HEAPF32.subarray(fp, fp + samples))
-      );
+      const data = this.module.HEAPF32.subarray(fp, fp + samples);
+      pcmDatas.push(data);
+      size += data.length;
     }
-
-    let aFrame: AudioFrame = {
-      datas: pcmDatas,
-      sampleNum: samples,
-      channles: this.channels,
-      pts: pts,
-    };
-
-    this.emit(AudioDecoderEvent.AudioFrame, aFrame);
+    const data = new Float32Array(size);
+  
+    this.emit(AudioDecoderEvent.AudioFrame, new AudioData({
+      format: "f32-planar",
+      sampleRate: this.sampleRate,
+      numberOfChannels: this.channels,
+      timestamp: pts,
+      numberOfFrames: samples,
+      data: pcmDatas.reduce((prev, curr) => {
+        prev.subarray(offset).set(curr);
+        offset += curr.length;
+        return prev;
+      }, data),
+    }));
   }
 
   errorInfo(errormsg: string): void {

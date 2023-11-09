@@ -9,7 +9,7 @@ import Renderer from './components/Renderer.vue'
 
 <template>
   <n-message-provider>
-    <n-tabs type="segment">
+    <n-tabs type="segment" default-value="renderer">
       <n-tab-pane name="connection" tab="Connection">
         <Connection />
       </n-tab-pane>

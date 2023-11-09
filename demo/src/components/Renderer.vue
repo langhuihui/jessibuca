@@ -24,7 +24,6 @@ import {
 import { TimelineDataSeries, TimelineGraphView } from "webrtc-internals";
 import { ArchiveOutline as ArchiveIcon } from "@vicons/ionicons5";
 import {
-  AudioDecoderConfig,
   VideoDecoderEvent,
   AudioDecoderEvent,
   ErrorInfo,
@@ -44,6 +43,7 @@ import {
   VideoDecoderSoft,
   VideoDecoderSoftSIMD,
   AudioDecoderSoft,
+  AudioDecoderHard
 } from "jv4-decoder/src";
 import { FlvDemuxer, DemuxEvent, PSDemuxer } from "jv4-demuxer/src";
 import { WebCodecsVideoRenderer } from "jv4-renderer/src";
@@ -59,7 +59,7 @@ const removeMessage = () => {
   }
 };
 const muxType = ref('ps');
-const decoderv = ref('soft');
+const decoderv = ref('webcodecs');
 const dump = ref(false);
 const mode = ref(DemuxMode.PUSH);
 const stopDump = ref(() => { });
@@ -145,7 +145,7 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
     const videoDecoder = new { soft: VideoDecoderSoft, simd: VideoDecoderSoftSIMD, webcodecs: VideoDecoderHard }[decoderv.value]();
     await videoDecoder.initialize();
 
-    const audioDecoder = new AudioDecoderSoft();
+    const audioDecoder = new { soft: AudioDecoderSoft, simd: AudioDecoderSoft, webcodecs: AudioDecoderHard }[decoderv.value]();
     await audioDecoder.initialize();
     if (mode.value === DemuxMode.PULL) {
       await conn.connect();
@@ -154,55 +154,14 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
     const renderer = new WebCodecsVideoRenderer(
       document.getElementById("video") as HTMLVideoElement
     );
-    demuxer.on(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED, (data: Uint8Array) => {
-      message.info(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED);
-      // const aconfig: AudioDecoderConfig = {
-      //   codec: demuxer.audioEncoderConfig!.codec,
-      //   extraData: data,
-      //   outSampleType: "f32-planar",
-      // };
-      // audioDecoder.configure(aconfig);
+    demuxer.on(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED, (aconfig: AudioDecoderConfig) => {
+      // message.info(DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED);
+      audioDecoder.configure(aconfig);
     });
-    demuxer.on(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED, (extraData: Uint8Array) => {
-      message.info(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED);
-      switch (demuxer.videoEncoderConfig!.codec) {
-        case "avc":
-          videoDecoder.configure({
-            codec: "avc1.420028",
-            extraData,
-            videoType: "avc",
-            avc: { format: extraData ? "avcc" : "annexb" },
-          });
-          break;
-        case "hevc":
-          videoDecoder.configure({
-            codec: "hvc1.1.6.L0.12.34.56.78.9A.BC",
-            extraData,
-            videoType: "hevc",
-            hevc: { format: extraData ? "hvcc" : "annexb" },
-          });
-      }
+    demuxer.on(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED, (vconfig: VideoDecoderConfig) => {
+      // message.info(DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED);
+      videoDecoder.configure(vconfig);
     });
-    demuxer.gotAudio = (data: EncodedAudioChunkInit) => {
-      // display.audioTS = data.timestamp;
-      // display.audioSize = data.data.byteLength;
-      // audioDecoder.decode(data);
-      aframs++;
-    };
-    demuxer.gotVideo = (data: EncodedVideoChunkInit) => {
-      display.videoTS = data.timestamp;
-      display.videoSize = data.data.byteLength;
-      if (videoDecoder.config) {
-        try {
-          if (dumpFile) {
-            cache.push(data.data as Uint8Array);
-          }
-          videoDecoder.decode(data);
-        } catch (err) {
-          console.error(err);
-        }
-      }
-    };
 
     videoDecoder.on(
       VideoDecoderEvent.VideoCodecInfo,
@@ -215,43 +174,51 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
       vframs++;
       renderer.writeVideo(videoFrame);
     });
-    // videoDecoder.on(VideoDecoderEvent.VideoFrame, (videoFrame: JVideoFrame) => {
-    //   display.videoDecodedFrames++;
-    //   vframs++;
-    //   renderer.writeVideo(videoFrame.data, {
-    //     codedWidth: videoFrame.width,
-    //     codedHeight: videoFrame.height,
-    //     format: videoFrame.pixelType,
-    //     timestamp: videoFrame.pts,
-    //   });
-    // });
 
     videoDecoder.on(VideoDecoderEvent.Error, (error: Error) => {
       console.error(error);
+      videoDecoder.initialize();
     });
 
-    // audioDecoder.on(
-    //   AudioDecoderEvent.AudioCodecInfo,
-    //   (codecinfo: AudioCodecInfo) => { }
-    // );
+    audioDecoder.on(
+      AudioDecoderEvent.AudioCodecInfo,
+      (codecinfo: AudioCodecInfo) => { }
+    );
 
-    // audioDecoder.on(AudioDecoderEvent.AudioFrame, (audioFrame: AudioFrame) => {
-    //   display.audioDecodedFrames++;
-    //   // renderer.writeAudio(new AudioData({
-    //   //   data: audioFrame.data[0],
-    //   // }));
-    // });
+    audioDecoder.on(AudioDecoderEvent.AudioFrame, (audioFrame: AudioData) => {
+      display.audioDecodedFrames++;
+      renderer.writeAudio(audioFrame);
+    });
 
     // audioDecoder.on(AudioDecoderEvent.Error, (error: ErrorInfo) => { });
-
+    const gotAudio = (data: EncodedAudioChunkInit) => {
+      display.audioTS = data.timestamp;
+      display.audioSize = data.data.byteLength;
+     
+      audioDecoder.decode(data);
+      aframs++;
+    };
+    const gotVideo = (data: EncodedVideoChunkInit) => {
+      display.videoTS = data.timestamp;
+      display.videoSize = data.data.byteLength;
+      vframs++;
+      console.log(data.timestamp,data.type)
+      if (videoDecoder.config) {
+        try {
+          if (dumpFile) {
+            cache.push(data.data as Uint8Array);
+          }
+          videoDecoder.decode(data);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    };
     if (mode.value == DemuxMode.PULL) {
-      demuxer.audioReadable.pipeTo(
+      demuxer.audioReadable?.pipeTo(
         new WritableStream({
           write(chunk: EncodedAudioChunkInit) {
-            display.audioTS = chunk.timestamp;
-            display.audioSize = chunk.data.byteLength;
-
-            audioDecoder.decode(chunk);
+            gotAudio(chunk);
             if (file && options)
               options.onProgress({
                 percent: (100 * conn.down.total) / file.size,
@@ -260,26 +227,23 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
           },
         })
       );
-      demuxer.videoReadable.pipeTo(
+      demuxer.videoReadable?.pipeTo(
         new WritableStream({
           write(chunk: EncodedVideoChunkInit) {
-            display.videoTS = chunk.timestamp;
-            display.videoSize = chunk.data.byteLength;
-
-            // console.log(`JS Chunk ${chunk.data.byteLength}  ${chunk.data[5]} ${chunk.data[6]} ${chunk.data[7]} ${chunk.data[8]} ${chunk.data[9]}`)
-
-            videoDecoder.decode(chunk);
+            gotVideo(chunk);
 
             if (file && options)
               options.onProgress({
                 percent: (100 * conn.down.total) / file.size,
               });
 
-            return readDelay(0);
+            return readDelay(40);
           },
         })
       );
     } else {
+      demuxer.gotAudio = gotAudio;
+      demuxer.gotVideo = gotVideo;
       await conn.connect();
     }
   } catch (e) {
@@ -374,7 +338,7 @@ function onRemove(options: {
     <n-button @click="connect()">Connect</n-button>
     <n-button @click="disconnect">Close</n-button>
   </n-space>
-  <video id="video"></video>
+  <video id="video" style="width: 640px;height: 480px;object-fit: contain;"></video>
   <n-row>
     <n-col :span="12">
       <n-statistic label="下行总量" :value="data.totalDown"> </n-statistic>
