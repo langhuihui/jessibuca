@@ -31,7 +31,7 @@ module.exports = {
             {
                 text: '不卡系列',
                 items: [
-                    {text: 'Monibuca', link: 'https://m7s.live/'},
+                    {text: 'Monibuca', link: 'https://monibuca.com/'},
                     {text: 'Rebebuca', link: 'https://rebebuca.com/'}
                 ]
             },
