@@ -168,6 +168,10 @@ const instance = new window.Jessibuca({})
 
 #### 回答：浏览器不支持
 
+> 浏览器不支持rtmp:// ，rtsp:// 协议
+
+浏览器只支持，`http(s)://`、 `ws(s)://`、`Webrtc`、`Webtransport` 等协议
+
 因为在js的环境中，无法直接使用tcp或者udp传数据（js没提供接口），而rtsp的流是基于tcp或者udp， 所以纯web的方式目前是没办法直接播放rtsp流的，rtmp也是类似
 
 ### jessibuca.js decoder.js decoder.wasm文件想存放特定地址
