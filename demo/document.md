@@ -174,6 +174,10 @@ const instance = new window.Jessibuca({})
 
 因为在js的环境中，无法直接使用tcp或者udp传数据（js没提供接口），而rtsp的流是基于tcp或者udp， 所以纯web的方式目前是没办法直接播放rtsp流的，rtmp也是类似
 
+#### 解决方案（使用M7S）
+
+https://qun.qq.com/qqweb/qunpro/share?_wv=3&_wwv=128&appChannel=share&inviteCode=21lyeGcXwMe&contentID=1qiMyF&businessType=2&from=181174&shareSource=5&biz=ka
+
 ### jessibuca.js decoder.js decoder.wasm文件想存放特定地址
 
 一般情况下，建议放置在 `public` 目录下面，如果需要放置在子目录，需要修改的地方有
