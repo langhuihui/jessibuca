@@ -63,7 +63,8 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 | http-flv协议流(H264/H265)                      | 支持    | 支持 |
 | websocket-flv协议流(H264/H265)                 | 支持    | 支持 |
 | websocket-raw(M7S)协议流(H264/H265)            | 支持    | 支持 |
-| Hls协议流(H264/H265)                           | 不支持   | 支持 |
+| Hls协议流(H264/H265+aac) m3u8+ts               | 不支持   | 支持 |
+| Hls协议流(H264/H265+aac) m3u8+mp4                  | 不支持   | 支持 |
 | WebTransport协议流(H264/H265)                  | 不支持   | 支持 |
 | WebRTC协议流(H264)                             | 不支持   | 支持 |
 | WebRTC协议流(H265) m7s 服务器                     | 不支持   | 支持 |
