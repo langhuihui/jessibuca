@@ -1783,6 +1783,13 @@ https://developer.apple.com/documentation/webkit/wkwebviewconfiguration/1614793-
 https://jessibuca.com/document.html#jessibuca-js-decoder-js-decoder-wasm%E6%96%87%E4%BB%B6%E6%83%B3%E9%80%9A%E8%BF%87cdn%E5%8A%A0%E8%BD%BD
 
 
+## 支持作者
+
+### 第一作者
+<img src="/public/wx.jpg"><img src="/public/alipay.jpg">
+
+### V3版本作者
+<img src="/public/wx-pay-wc.jpg" style="width:333px"><img src="/public/alipay-wc.jpg" style="width:333px">
 
 
 ### 群

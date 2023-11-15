@@ -412,6 +412,14 @@
 #### http
 [http://jessibuca.monibuca.com/pro/object-detector-demo.html](http://jessibuca.monibuca.com/pro/object-detector-demo.html)
 
+## 支持作者
+
+### 第一作者
+<img src="/public/wx.jpg"><img src="/public/alipay.jpg">
+
+### V3版本作者
+<img src="/public/wx-pay-wc.jpg" style="width:333px"><img src="/public/alipay-wc.jpg" style="width:333px">
+
 
 ## 群
 <img src="/public/qrcode.jpeg">

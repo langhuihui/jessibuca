@@ -7,14 +7,19 @@ module.exports = {
         sidebar: "auto",
         nav: [
             {text: 'API', link: '/api'},
-            {text: 'Demo', link: '/demo'},
-            {text: '文档', link: '/document'},
-            {text: 'Pro-播放器', link: '/player-pro'},
+            {
+                text: "More",
+                items: [
+                    {text: '文档', link: '/document'},
+                    {text: 'Demo', link: '/demo'},
+                ]
+            },
+            {text: '播放器(Pro)', link: '/player-pro'},
             {
                 text: "Pro-More",
                 items: [
-                    {text: 'Demo', link: '/pro-demo'},
                     {text: '文档', link: '/pro'},
+                    {text: 'Demo', link: '/pro-demo'},
                     {text: '帮助', link: '/pro-doc'},
                     {text: 'AI', link: '/pro-ai'},
                     {text: '扩展模块', link: '/pro-module'},

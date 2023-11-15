@@ -60,3 +60,13 @@
 ### 定价
 
 添加微信：bosswancheng 咨询
+
+## 群
+
+<img src="/public/qrcode.jpeg">
+
+## 群
+<img src="/public/qrcode-qw.jpeg">
+
+## qq频道
+<img src="/public/qq-qrcode.jpg">

@@ -58,3 +58,12 @@ nginx 配置
 add_header Cross-Origin-Opener-Policy same-origin;
 add_header Cross-Origin-Embedder-Policy require-corp;
 ```
+## 群
+
+<img src="/public/qrcode.jpeg">
+
+## 群
+<img src="/public/qrcode-qw.jpeg">
+
+## qq频道
+<img src="/public/qq-qrcode.jpg">

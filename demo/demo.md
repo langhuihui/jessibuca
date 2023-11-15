@@ -192,6 +192,16 @@ https://github.com/bosscheng/jessibuca-MSE-3x3-demo
 
 [online MediaSource 硬解码h264 9画面 https](http://jessibuca.com/MSE-3x3-demo.html)
 
+## 支持作者
+
+### 第一作者
+<img src="/public/wx.jpg"><img src="/public/alipay.jpg">
+
+### V3版本作者
+<img src="/public/wx-pay-wc.jpg" style="width:333px"><img src="/public/alipay-wc.jpg" style="width:333px">
+
+
+
 ## 群
 <img src="/public/qrcode.jpeg">
 

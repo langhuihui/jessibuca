@@ -20,13 +20,16 @@ sidebar: false
 更强大的功能请使用[Pro版本](https://jessibuca.com/player-pro.html)
 
 
-## 赞助作者
+## 支持作者
 
+### 第一作者
 <img src="/public/wx.jpg"><img src="/public/alipay.jpg">
+
+### V3版本作者
+<img src="/public/wx-pay-wc.jpg" style="width:333px"><img src="/public/alipay-wc.jpg" style="width:333px">
 
 ## 群
 <img src="/public/qrcode.jpeg">
-
 
 ## 群
 <img src="/public/qrcode-qw.jpeg">

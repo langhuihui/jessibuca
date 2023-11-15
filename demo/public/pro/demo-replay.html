@@ -101,6 +101,26 @@
                 /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
             </div>
         </div>
+        <div class="input">
+            <div>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="replayUseLastFrameShow"
+                /><span>重播的时候是否使用最后一帧显示</span>
+                <input
+                    onclick="replay()"
+                    type="checkbox"
+                    id="replayShowLoadingIcon"
+                /><span>重播的时候是否显示loading效果</span>
+                <input
+                    onclick="replay()"
+                    type="checkbox"
+                    id="decoderErrorAutoWasm"
+                /><span>重播的时候是否降级到wasm</span>
+            </div>
+        </div>
 
         <div class="input">
             <div>输入URL：</div>
@@ -137,6 +157,9 @@
     var $renderDom = document.getElementById('renderDom');
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
     var $demuxUseWorker = document.getElementById('demuxUseWorker');
+    var $replayUseLastFrameShow = document.getElementById('replayUseLastFrameShow');
+    var $replayShowLoadingIcon = document.getElementById('replayShowLoadingIcon');
+    var $decoderErrorAutoWasm = document.getElementById('decoderErrorAutoWasm')
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -168,7 +191,6 @@
                 quality: showOperateBtns,
                 performance: showOperateBtns,
             },
-            replayUseLastFrameShow: true,
             pauseAndNextPlayUseLastFrameShow: true,
             audioEngine: "worklet",
             qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
@@ -183,6 +205,9 @@
             controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
             // audioEngine:"worklet",
             // isFlv: true
+            replayUseLastFrameShow: $replayUseLastFrameShow.checked === true, // 重播使用上一帧显示
+            replayShowLoadingIcon: $replayShowLoadingIcon.checked === true,// 重播显示loading
+            decoderErrorAutoWasm: $decoderErrorAutoWasm.checked === true, // 解码失败自动降级到 wasm 模式
         }, options);
 
         jessibuca = new JessibucaPro(_options);
