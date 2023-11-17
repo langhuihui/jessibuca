@@ -149,6 +149,42 @@ toothbrush - 牙刷
 
 添加微信：bosswancheng 咨询
 
+## 黑屏、绿屏、花屏、马赛克检查
+
+利用opencv实现的黑屏、绿屏、花屏、马赛克检查
+
+### demo（十分钟）
+
+> 体验demo 只能最多录制10分钟，超过10分钟会暂停检查
+>
+#### https
+[https://jessibuca.com/pro/demo-check-frame.html](https://jessibuca.com/pro/demo-check-frame.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-check-frame.html](http://jessibuca.monibuca.com/pro/demo-check-frame.html)
+
+### 定价
+
+添加微信：bosswancheng 咨询
+
+## 遮挡物检查
+
+利用opencv实现的遮挡物检查
+
+
+### demo（十分钟）
+
+> 体验demo 只能最多录制10分钟，超过10分钟会暂停检查
+>
+#### https
+[https://jessibuca.com/pro/demo-check-occlusion.html](https://jessibuca.com/pro/demo-check-occlusion.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-check-occlusion.html](http://jessibuca.monibuca.com/pro/demo-check-occlusion.html)
+
+### 定价
+
+添加微信：bosswancheng 咨询
 
 
 ## 群
