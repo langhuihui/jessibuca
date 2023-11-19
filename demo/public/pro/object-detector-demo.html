@@ -5,8 +5,8 @@
     <title>Jessica demo</title>
     <link rel="stylesheet" href="./demo.css">
     <script src="./vconsole.js"></script>
-    <script src="./jessibuca-pro-object-detector-demo.js"></script>
-    <script src="./jessibuca-pro-demo.js"></script>
+    <script src="./js/jessibuca-pro-object-detector-demo.js"></script>
+    <script src="./js/jessibuca-pro-demo.js"></script>
     <style>
         .container-shell:before {
             content: "jessibuca pro object detect demo player";
@@ -92,6 +92,7 @@
         jessibuca = new JessibucaPro({
             container: $container,
             videoBuffer: 1, // 缓存时长
+            decoder: './js/decoder-pro.js',
             isResize: false,
             text: "",
             loadingText: "加载中",

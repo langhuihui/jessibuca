@@ -7,7 +7,7 @@
     <title>Jessica demo</title>
     <link rel="stylesheet" href="./demo.css">
     <script src="./vconsole.js"></script>
-    <script src="./jessibuca-pro-demo.js"></script>
+    <script src="./js/jessibuca-pro-demo.js"></script>
     <style>
         .container-shell:before {
             content: "jessibuca pro demo player";
@@ -147,6 +147,7 @@
             container: $container,
             videoBuffer: Number($videoBuffer.value), // 缓存时长
             videoBufferDelay: Number($videoBufferDelay.value), // 1000s
+            decoder: './js/decoder-pro.js',
             isResize: false,
             text: "",
             isFlv: true,

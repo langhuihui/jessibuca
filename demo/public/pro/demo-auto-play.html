@@ -7,7 +7,7 @@
     <title>Jessica wasm + canvas auto play demo</title>
     <link rel="stylesheet" href="./demo.css">
     <script src="./vconsole.js"></script>
-    <script src="./jessibuca-pro-demo.js"></script>
+    <script src="./js/jessibuca-pro-demo.js"></script>
     <style>
         .container-shell:before {
             content: "jessibuca wasm + canvas  auto player demo";
@@ -76,6 +76,7 @@
         jessibuca = new JessibucaPro({
             container: $container,
             loadingText: "加载中",
+            decoder: './js/decoder-pro.js',
             debug: true,
             debugLevel: "debug",
             useMSE: false,

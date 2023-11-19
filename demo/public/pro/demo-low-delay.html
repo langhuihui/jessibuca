@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Jessica 低延迟 demo</title>
     <script src="./vconsole.js"></script>
-    <script src="./jessibuca-pro-demo.js"></script>
+    <script src="./js/jessibuca-pro-demo.js"></script>
     <link rel="stylesheet" href="./demo.css">
     <style>
         .container-shell:before {
@@ -137,6 +137,7 @@
             container: $container,
             videoBuffer: 0.1, // 缓存时长
             videoBufferDelay: 0.2, //
+            decoder: './js/decoder-pro.js',
             isResize: false,
             text: "",
             loadingText: "加载中",

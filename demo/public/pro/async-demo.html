@@ -186,6 +186,7 @@
             container: $container,
             videoBuffer: Number($videoBuffer.value), // 缓存时长
             videoBufferDelay: Number($videoBufferDelay.value), // 1000s
+            decoder: './js/decoder-pro.js',
             isResize: false,
             text: "",
             loadingText: "加载中",
@@ -255,7 +256,7 @@
             if (window.JessibucaPro) {
                 resolve()
             } else {
-                loadJs('./jessibuca-pro-demo.js', 'jessibuca-pro', function () {
+                loadJs('./js/jessibuca-pro-demo.js', 'jessibuca-pro', function () {
                     resolve()
                 })
             }

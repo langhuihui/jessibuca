@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Jessica 裸流 demo</title>
-    <script src="./jessibuca-pro-demo.js"></script>
+    <script src="./js/jessibuca-pro-demo.js"></script>
     <link rel="stylesheet" href="./demo.css">
     <style>
         .container-shell:before {
@@ -102,6 +102,8 @@
         jessibuca = new JessibucaPro({
             container: $container,
             videoBuffer: 0.2, // 缓存时长
+            decoder: './js/decoder-pro.js',
+
             isResize: false,
             text: "",
             loadingText: "加载中",
