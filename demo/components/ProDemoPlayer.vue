@@ -580,7 +580,7 @@ export default {
                 Object.assign(
                     {
                         container: document.getElementById('container'),
-                        decoder: '/pro/decoder-pro.js',
+                        decoder: '/pro/js/decoder-pro.js',
                         videoBuffer: Number(this.videoBuffer), // 缓存时长
                         videoBufferDelay: Number(this.videoBufferDelay),
                         isResize: false,

@@ -48,7 +48,7 @@ module.exports = {
         ['script', {src: 'https://cdn.wwads.cn/js/makemoney.js'}],
         ['script', {src: 'https://hm.baidu.com/hm.js?ed323be621396bd133c1c9b856d16dad'}],
         ['script', {src: '/jessibuca.js'}],
-        ['script', {src: '/pro/jessibuca-pro-demo.js'}],
+        ['script', {src: '/pro/js/jessibuca-pro-demo.js'}],
         ['script', {src: '/vconsole.js'}]
     ]
 }
