@@ -30,7 +30,7 @@ jessibuca pro 扩展模块
 
 音频支持的编码格式：aac、mp3、
 
-> pcmu(g711u)、pcma(g711a) 可定制化支持。
+> pcmu(g711u)、pcma(g711a) 音频的流会录制成mov格式的视频文件。
 
 
 ### demo（十分钟）

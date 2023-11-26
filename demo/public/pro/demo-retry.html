@@ -176,7 +176,18 @@
                     id="replayUseLastFrameShow"
                 />
                 <span>触发重播的时候，是否使用最后一帧来显示</span>
+                <input
+                    onclick="replay()"
+                    type="checkbox"
+                    id="replayShowLoadingIcon"
+                /><span>重播的时候是否显示loading效果</span>
+                <input
+                    onclick="replay()"
+                    type="checkbox"
+                    id="decoderErrorAutoWasm"
+                /><span>重播的时候是否降级到wasm</span>
             </div>
+
         </div>
 
 
@@ -226,14 +237,16 @@
     var replayUseLastFrameShow = document.getElementById('replayUseLastFrameShow');
 
     var $playErrorReplay = document.getElementById('playErrorReplay');
-
+    var $replayShowLoadingIcon = document.getElementById('replayShowLoadingIcon');
+    var $decoderErrorAutoWasm = document.getElementById('decoderErrorAutoWasm')
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var jessibuca = null;
 
-    function create() {
-        jessibuca = new JessibucaPro({
+    function create(options) {
+        options = options || {}
+        var _options = Object.assign({},{
             container: $container,
             videoBuffer: Number($videoBuffer.value), // 缓存时长
             videoBufferDelay: Number($videoBufferDelay.value), // 1000s
@@ -255,6 +268,7 @@
                 audio: showOperateBtns,
                 performance: showOperateBtns,
             },
+            pauseAndNextPlayUseLastFrameShow: true,
             heartTimeoutReplayUseLastFrameShow: true,
             audioEngine: "worklet",
             qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
@@ -267,20 +281,28 @@
             loadingTimeoutReplay: $loadingTimeoutReplay.checked === true,
             loadingTimeoutReplayTimes: Number($loadingTimeoutReplayTimes.value),
             replayUseLastFrameShow: replayUseLastFrameShow.checked === true,
+            replayShowLoadingIcon: $replayShowLoadingIcon.checked === true,// 重播显示loading
+            decoderErrorAutoWasm: $decoderErrorAutoWasm.checked === true, // 解码失败自动降级到 wasm 模式
             useCanvasRender: $renderDom.value === 'canvas',
             useWebGPU: $isUseWebGPU.value === 'webgpu',
             demuxUseWorker: $demuxUseWorker.checked === true,
             controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
             // audioEngine:"worklet",
             // isFlv: true
-        },);
+        },options)
+        jessibuca = new JessibucaPro(_options);
 
 
         //  监听播放器事件
         if ($playErrorReplay.checked === true) {
-            jessibuca.on(jessibuca.EVENTS.playFailedAndPaused, function (e) {
-                replay();
-            })
+            //  一直播放
+            jessibuca.on('playFailedAndPaused', function (error, frameInfo) {
+                console.error('playFailedAndPaused', error);
+                //  延迟个2秒再重连
+                setTimeout(() => {
+                    replay(frameInfo)
+                }, 1 * 1000)
+            });
         }
 
         $player.style.display = 'inline-block';
@@ -295,7 +317,11 @@
     function play() {
         var href = $playHref.value;
         if (href) {
-            jessibuca.play(href);
+            jessibuca.play(href).then(() => {
+                console.log('play success')
+            }).catch((e) => {
+                console.error('play error',e);
+            });
             $player.style.display = 'none';
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
@@ -303,10 +329,10 @@
     }
 
 
-    function replay() {
+    function replay(options) {
         if (jessibuca) {
             jessibuca.destroy().then(() => {
-                create();
+                create(options);
                 play();
             });
         } else {

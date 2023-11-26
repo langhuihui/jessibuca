@@ -4,49 +4,6 @@
             <div class="container-shell-title">jessibuca Pro demo player <span class="tag-version" v-if="version">({{
                     version
                 }})</span></div>
-            <div class="option">
-                <span>最大网络延迟:</span>
-                <input
-                    style="width: 50px"
-                    type="number"
-                    v-model="networkDelay"
-                    @change="changeNetworkDelay"
-                /><span style="margin-right: 5px">秒</span>
-                <span>最大延迟:</span>
-                <input
-                    style="width: 50px"
-                    type="number"
-                    v-model="videoBufferDelay"
-                    @change="changeBufferDelay"
-                /><span style="margin-right: 5px">秒</span>
-                <span>缓冲:</span>
-                <input
-                    style="width: 50px"
-                    type="number"
-                    v-model="videoBuffer"
-                    @change="changeBuffer"
-                /><span style="margin-right: 5px">秒</span>
-
-                <input
-                    type="checkbox"
-                    v-model="useMSE"
-                    ref="vod"
-                    @change="restartPlay('mse')"
-                /><span>MediaSource</span>
-                <input
-                    type="checkbox"
-                    v-model="useWCS"
-                    ref="vod"
-                    @change="restartPlay('wcs')"
-                /><span>webcodecs</span>
-                <input
-                    type="checkbox"
-                    v-model="useSIMD"
-                    ref="vod"
-                    @change="restartPlay('simd')"
-                /><span>SIMD</span>
-
-            </div>
             <div id="container"></div>
             <div class="input input-annnie">
                 <div style="color: red" class="input-tips">Tips:支持录制MP4(MPEG-4)格式的视频(仅录制视频，不包含音频)
@@ -57,7 +14,7 @@
                 </div>
             </div>
             <div class="input input-annnie">
-                <div style="color: green" class="input-tips">Tips:<a href="/pro-module.html">MP4录制扩展模块</a>支持(视频H264/H265+音频AAC,MP3)
+                <div style="color: green" class="input-tips">Tips:<a href="/pro-module.html">MP4录制扩展模块</a>支持(视频H264/H265+音频AAC,MP3,G711a/u)
                 </div>
             </div>
             <div class="input input-wrap">
@@ -98,6 +55,53 @@
                 <span v-else style="color: red;">不支持webgpu渲染,会自动切换成webgl渲染</span>（适用于wasm(simd)解码+canvas渲染）
             </div>
             <div class="input">
+                <span>最大网络延迟:</span>
+                <input
+                    style="width: 50px"
+                    type="number"
+                    v-model="networkDelay"
+                    @change="changeNetworkDelay"
+                /><span style="margin-right: 5px">秒</span>
+                <span>最大延迟:</span>
+                <input
+                    style="width: 50px"
+                    type="number"
+                    v-model="videoBufferDelay"
+                    @change="changeBufferDelay"
+                /><span style="margin-right: 5px">秒</span>
+                <span>缓冲:</span>
+                <input
+                    style="width: 50px"
+                    type="number"
+                    v-model="videoBuffer"
+                    @change="changeBuffer"
+                /><span style="margin-right: 5px">秒</span>
+
+
+
+            </div>
+            <div class="input">
+                <span>解码器：</span>
+                <input
+                    type="checkbox"
+                    v-model="useMSE"
+                    ref="vod"
+                    @change="restartPlay('mse')"
+                /><span>MediaSource</span>
+                <input
+                    type="checkbox"
+                    v-model="useWCS"
+                    ref="vod"
+                    @change="restartPlay('wcs')"
+                /><span>webcodecs</span>
+                <input
+                    type="checkbox"
+                    v-model="useSIMD"
+                    ref="vod"
+                    @change="restartPlay('simd')"
+                /><span>SIMD</span>
+            </div>
+            <div class="input">
                 <div>
                     <div v-if="supportMT" style="display: inline-block">
                         <input
@@ -112,27 +116,17 @@
                         v-model="isMute"
                         @change="restartPlay()"
                     /><span>静音播放</span>
+                    <input
+                        type="checkbox"
+                        v-model="isFlv"
+                        @change="restartPlay()"
+                    /><span>设置Flv格式</span>
+                    <input
+                        type="checkbox"
+                        v-model="isFmp4"
+                        @change="restartPlay()"
+                    /><span>设置Fmp4格式</span>
                 </div>
-            </div>
-            <div class="input">
-                <div>输入URL：</div>
-                <input
-                    placeholder="支持 hls/ws-raw/ws-flv/http-flv/fmp4协议"
-                    type="input"
-                    autocomplete="on"
-                    v-model="playUrl"
-                />
-                <template v-if="!playing">
-                    <button v-if="playType === '' || playType === 'play'" @click="play">播放</button>
-                    <button v-if="playType === '' || playType === 'playback'" @click="playback">播放录像流</button>
-                </template>
-                <template v-if="loading || playing">
-                    <template v-if="playType === 'play'">
-                        <button @click="()=> pause()">停止</button>
-                        <button @click="()=> pause(true)">停止(清屏)</button>
-                    </template>
-                    <button v-if="playType === 'playback'" @click="pause">停止录像流</button>
-                </template>
             </div>
             <div class="input">
                 <input
@@ -140,16 +134,7 @@
                     v-model="networkDelayTimeoutReplay"
                     @change="restartPlay()"
                 /><span>网络延迟重新播放</span>
-                <input
-                    type="checkbox"
-                    v-model="isFlv"
-                    @change="restartPlay()"
-                /><span>设置Flv格式</span>
-                <input
-                    type="checkbox"
-                    v-model="isFmp4"
-                    @change="restartPlay()"
-                /><span>设置Fmp4格式</span>
+
                 <input
                     type="checkbox"
                     v-model="hiddenAutoPause"
@@ -247,6 +232,27 @@
                     /><span>显示性能面板</span>
                 </div>
             </div>
+            <div class="input">
+                <div>输入URL：</div>
+                <input
+                    placeholder="支持 hls/ws-raw/ws-flv/http-flv/fmp4协议"
+                    type="input"
+                    autocomplete="on"
+                    v-model="playUrl"
+                />
+                <template v-if="!playing">
+                    <button v-if="playType === '' || playType === 'play'" @click="play">播放</button>
+                    <button v-if="playType === '' || playType === 'playback'" @click="playback">播放录像流</button>
+                </template>
+                <template v-if="loading || playing">
+                    <template v-if="playType === 'play'">
+                        <button @click="()=> pause()">停止</button>
+                        <button @click="()=> pause(true)">停止(清屏)</button>
+                    </template>
+                    <button v-if="playType === 'playback'" @click="pause">停止录像流</button>
+                </template>
+            </div>
+
 
             <div class="input" v-if="loaded" style="line-height: 30px">
                 <button @click="destroyPlayer">销毁</button>

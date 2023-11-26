@@ -4,7 +4,8 @@
             <div class="container-shell-title">jessibuca demo player <span class="tag-version" v-if="version">({{
                     version
                 }})</span></div>
-            <div class="option">
+            <div id="container" ref="container"></div>
+            <div class="input">
                 <span>缓冲(秒):</span>
                 <input
                     style="width: 50px"
@@ -18,7 +19,27 @@
                     v-model="isDebug"
                     ref="isDebug"
                     @change="restartPlay"
-                /><span>日志</span>
+                /><span>开启日志</span>
+
+            </div>
+
+            <div class="input">
+                <div>
+                    <input
+                        type="checkbox"
+                        v-model="isFlv"
+                        @change="restartPlay()"
+                    /><span>设置Flv格式</span>
+                    <input
+                        type="checkbox"
+                        v-model="controlAutoHide"
+                        @change="restartPlay()"
+                    /><span>控制栏自动隐藏(移动端不支持)</span>
+                </div>
+
+            </div>
+            <div class="input">
+                <span>解码器：</span>
                 <input
                     type="checkbox"
                     v-model="useMSE"
@@ -31,15 +52,12 @@
                     ref="vod"
                     @change="restartPlay('wcs')"
                 /><span>webcodecs</span>
-
-            </div>
-            <div id="container" ref="container"></div>
-            <div class="input">
                 <input
                     type="checkbox"
-                    v-model="controlAutoHide"
-                    @change="restartPlay()"
-                /><span>控制栏自动隐藏(移动端不支持)</span>
+                    v-model="useWasm"
+                    ref="vod"
+                    @change="restartPlay('wasm')"
+                /><span>wasm</span>
             </div>
             <div class="input">
                 <div>输入URL：</div>
@@ -151,13 +169,15 @@ export default {
             rotate: 0,
             useWCS: false,
             useMSE: false,
+            useWasm: true,
             useOffscreen: false,
             recording: false,
-            isDebug: false,
+            isDebug: true,
             recordType: 'webm',
             scale: 0,
             vConsole: null,
             controlAutoHide: true,
+            isFlv: false,
         };
     },
     mounted() {
@@ -206,7 +226,8 @@ export default {
                         forceNoOffscreen: !this.useOffscreen,
                         isNotMute: true,
                         timeout: 10,
-                        recordType: 'mp4'
+                        recordType: 'mp4',
+                        isFlv: this.isFlv,
                     },
                     options
                 )
@@ -390,10 +411,16 @@ export default {
             if (type === 'mse') {
                 this.useWCS = false;
                 this.useOffscreen = false;
+                this.useWasm = false;
             } else if (type === 'wcs') {
                 this.useMSE = false
+                this.useWasm = false;
             } else if (type === 'offscreen') {
                 this.useMSE = false
+            } else if (type === 'wasm') {
+                this.useWCS = false;
+                this.useMSE = false;
+                this.useOffscreen = false;
             }
 
             this.destroy();
