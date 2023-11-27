@@ -557,6 +557,8 @@ Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
 
 [多路-16路-内存消耗](https://jessibuca.com/pro-doc/16multi-1080p.pdf)
 
+[多路-12路-低延迟](https://jessibuca.com/pro-doc/12multi-delay.pdf)
+
 ## PRO AI
 
 ### 人脸识别
