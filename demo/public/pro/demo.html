@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta http-equiv="origin-trial" content="AhQB+uNRI7lww30oPK+0ZcGotIvuoHJL+NkkWOhqDdooY6+xnuiYmZli2SwlH1vkrKdB5WxMpsv5KRc/q9zFswoAAAB3eyJvcmlnaW4iOiJodHRwczovL2plc3NpYnVjYS5jb206NDQzIiwiZmVhdHVyZSI6IlVucmVzdHJpY3RlZFNoYXJlZEFycmF5QnVmZmVyIiwiZXhwaXJ5IjoxNzA5ODU1OTk5LCJpc1N1YmRvbWFpbiI6dHJ1ZX0=">
+    <meta http-equiv="origin-trial"
+          content="AhQB+uNRI7lww30oPK+0ZcGotIvuoHJL+NkkWOhqDdooY6+xnuiYmZli2SwlH1vkrKdB5WxMpsv5KRc/q9zFswoAAAB3eyJvcmlnaW4iOiJodHRwczovL2plc3NpYnVjYS5jb206NDQzIiwiZmVhdHVyZSI6IlVucmVzdHJpY3RlZFNoYXJlZEFycmF5QnVmZmVyIiwiZXhwaXJ5IjoxNzA5ODU1OTk5LCJpc1N1YmRvbWFpbiI6dHJ1ZX0=">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Jessica demo</title>
     <link rel="stylesheet" href="./demo.css">
@@ -190,7 +191,7 @@
             ptzMoreArrowShow: true,
             ptzApertureShow: true,
             ptzFocusShow: true,
-            isDropSameTimestampGop:true,
+            isDropSameTimestampGop: true,
             useCanvasRender: $renderDom.value === 'canvas',
             useWebGPU: $isUseWebGPU.value === 'webgpu',
             demuxUseWorker: $demuxUseWorker.checked === true,
@@ -234,6 +235,8 @@
             $player.style.display = 'none';
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
+        } else {
+            jessibuca.showErrorMessageTips('播放地址不能为空');
         }
     }
 

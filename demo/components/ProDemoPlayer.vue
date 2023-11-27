@@ -78,7 +78,6 @@
                 /><span style="margin-right: 5px">秒</span>
 
 
-
             </div>
             <div class="input">
                 <span>解码器：</span>
@@ -515,7 +514,7 @@ export default {
             useWCS: false,
             useMSE: false,
             useSIMD: true,
-            useMT:true,
+            useMT: true,
             useOffscreen: false,
             networkDelayTimeoutReplay: false,
             recording: false,
@@ -849,6 +848,7 @@ export default {
                 this.loading = true;
             } else {
                 ElMessage.error('play url is empty')
+                this.$options.jessibuca.showErrorMessageTips('播放地址不能为空');
             }
         },
         playback() {
