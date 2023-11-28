@@ -112,6 +112,21 @@
                 /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
             </div>
         </div>
+        <div class="input">
+            <div>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="replayUseLastFrameShow"
+                /><span>暂停->播放的时候是否使用最后一帧显示</span>
+                <input
+                    onclick="replay()"
+                    type="checkbox"
+                    id="replayShowLoadingIcon"
+                /><span>暂停->播放的时候是否显示loading效果</span>
+            </div>
+        </div>
 
         <div class="input">
             <div>输入URL：</div>
@@ -149,11 +164,16 @@
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
     var $demuxUseWorker = document.getElementById('demuxUseWorker');
     var $useSIMDMThreading = document.getElementById('useSIMDMThreading');
+    var $replayUseLastFrameShow = document.getElementById('replayUseLastFrameShow');
+    var $replayShowLoadingIcon = document.getElementById('replayShowLoadingIcon');
+
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var jessibuca = null;
 
-    function create() {
+    function create(options) {
+        options = options || {}
+
         jessibuca = new JessibucaPro({
             container: $container,
             videoBuffer: Number($videoBuffer.value), // 缓存时长
@@ -180,7 +200,7 @@
                 performance: showOperateBtns,
             },
             timeout: 10,
-            heartTimeoutReplayUseLastFrameShow: true,
+
             audioEngine: "worklet",
             qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
             forceNoOffscreen: forceNoOffscreen,
@@ -198,6 +218,10 @@
             controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
             // audioEngine:"worklet",
             // isFlv: true
+            pauseAndNextPlayUseLastFrameShow: $replayUseLastFrameShow.checked === true,
+            heartTimeoutReplayUseLastFrameShow: $replayUseLastFrameShow.checked === true,
+            replayUseLastFrameShow: $replayUseLastFrameShow.checked === true, // 重播使用上一帧显示
+            replayShowLoadingIcon: $replayShowLoadingIcon.checked === true,// 重播显示loading
         },);
 
 
@@ -241,10 +265,10 @@
     }
 
 
-    function replay() {
+    function replay(options) {
         if (jessibuca) {
             jessibuca.destroy().then(() => {
-                create();
+                create(options);
                 play();
             });
         } else {

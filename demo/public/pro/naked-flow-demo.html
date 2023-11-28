@@ -63,6 +63,21 @@
             <div style="margin-left: 10px">
                 | FPS:<input type="number" id="fps" value="25" min="1" max="60"/>
             </div>
+        </div>
+        <div class="input">
+            <div>
+                <span>H265解封装器：</span>
+                <input
+                    checked
+                    type="checkbox"
+                    id="h265DemuxType1"
+                /><span>V1</span>
+                <input
+                    type="checkbox"
+                    id="h265DemuxType2"
+                /><span>V2</span>
+                <span>(v1版本兼容性更强，v2版本性能更强)</span>
+            </div>
 
         </div>
         <div class="input">
@@ -93,6 +108,8 @@
     var $useSIMD = document.getElementById('useSIMD');
     var $useWCS = document.getElementById('useWCS');
     var $fps = document.getElementById('fps');
+    var $h265DemuxType1 = document.getElementById('h265DemuxType1');
+    var $h265DemuxType2 = document.getElementById('h265DemuxType2');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -108,7 +125,7 @@
             text: "",
             loadingText: "加载中",
             debug: true,
-            debugLevel:'debug',
+            debugLevel: 'debug',
             useMSE: $useMSE.checked === true,
             useSIMD: $useSIMD.checked === true,
             useWCS: $useWCS.checked === true,
@@ -131,6 +148,7 @@
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
             heartTimeout: 10,
+            nakedFlowH265DemuxUseNew: $h265DemuxType2.checked === true
             // checkFirstIFrame:false,
             // isFlv: true
         },);
@@ -156,12 +174,11 @@
 
     function replay() {
         if (jessibuca) {
-            jessibuca.destroy().then(()=>{
+            jessibuca.destroy().then(() => {
                 create();
                 play();
             });
-        }
-        else {
+        } else {
             create();
             play();
         }
@@ -175,8 +192,7 @@
             $player.style.display = 'none';
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
-        }
-        else{
+        } else {
             jessibuca.showErrorMessageTips('播放地址不能为空');
         }
     }
@@ -196,11 +212,10 @@
 
     $destroy.addEventListener('click', function () {
         if (jessibuca) {
-            jessibuca.destroy().then(()=>{
+            jessibuca.destroy().then(() => {
                 create();
             });
-        }
-        else {
+        } else {
             create();
         }
     })
@@ -238,10 +253,25 @@
         replay();
     })
 
+    $h265DemuxType1.addEventListener('click', function () {
+        const checked = $h265DemuxType1.checked;
+        if (checked) {
+            $h265DemuxType2.checked = false;
+        }
+        replay();
+    })
+    $h265DemuxType2.addEventListener('click', function () {
+        const checked = $h265DemuxType2.checked;
+        if (checked) {
+            $h265DemuxType1.checked = false;
+        }
+        replay();
+    })
+
     $fps.addEventListener('change', function () {
-       if(jessibuca){
-           jessibuca.setNakedFlowFps(Number($fps.value));
-       }
+        if (jessibuca) {
+            jessibuca.setNakedFlowFps(Number($fps.value));
+        }
     })
 
 
