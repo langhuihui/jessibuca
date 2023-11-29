@@ -26,6 +26,7 @@ export default class CommonLoader extends Emitter {
     updateVideoInfo(data) {
         if (data.encTypeCode) {
             this.videoInfo.encType = VIDEO_ENC_TYPE[data.encTypeCode];
+            this.videoInfo.encTypeCode = data.encTypeCode;
         }
 
         if (data.width) {

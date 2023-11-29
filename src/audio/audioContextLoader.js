@@ -96,6 +96,7 @@ export default class AudioContextLoader extends Emitter {
     updateAudioInfo(data) {
         if (data.encTypeCode) {
             this.audioInfo.encType = AUDIO_ENC_TYPE[data.encTypeCode];
+            this.audioInfo.encTypeCode = data.encTypeCode;
         }
 
         if (data.channels) {

@@ -761,6 +761,8 @@ jessibuca.on('timeUpdate', function (ts) {
 
 1. width：视频宽
 2. height：视频高
+3. encTypeCode 视频编码类型(10:h264,12:h265)
+4. encType 视频编码类型(字符串)
 
 ```js
 
@@ -775,6 +777,8 @@ jessibuca.on("videoInfo", function (data) {
 
 1. numOfChannels：声频通道
 2. sampleRate 采样率
+3. encTypeCode 音频编码类型(10:aac,7:ALAW(g711a),8:MULAW(g711u))
+4. encType 音频编码类型(字符串)
 
 ```js
 

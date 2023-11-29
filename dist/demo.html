@@ -138,12 +138,14 @@
             isNotMute: false,
         },);
 
-        jessibuca.onLog = msg => console.error(msg);
-        jessibuca.onRecord = (status) => console.log('onRecord', status);
-        jessibuca.onPause = () => console.log('onPause');
-        jessibuca.onPlay = () => console.log('onPlay');
-        jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
-        jessibuca.onMute = msg => console.log('onMute', msg);
+        jessibuca.on('audioInfo', function (audioInfo) {
+            console.log('audioInfo',audioInfo);
+        })
+
+        jessibuca.on('videoInfo', function (videoInfo) {
+            console.log('videoInfo',videoInfo);
+        })
+
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
         $destroy.style.display = 'none';
