@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta http-equiv="origin-trial" content="AhQB+uNRI7lww30oPK+0ZcGotIvuoHJL+NkkWOhqDdooY6+xnuiYmZli2SwlH1vkrKdB5WxMpsv5KRc/q9zFswoAAAB3eyJvcmlnaW4iOiJodHRwczovL2plc3NpYnVjYS5jb206NDQzIiwiZmVhdHVyZSI6IlVucmVzdHJpY3RlZFNoYXJlZEFycmF5QnVmZmVyIiwiZXhwaXJ5IjoxNzA5ODU1OTk5LCJpc1N1YmRvbWFpbiI6dHJ1ZX0=">
+    <meta http-equiv="origin-trial"
+          content="AhQB+uNRI7lww30oPK+0ZcGotIvuoHJL+NkkWOhqDdooY6+xnuiYmZli2SwlH1vkrKdB5WxMpsv5KRc/q9zFswoAAAB3eyJvcmlnaW4iOiJodHRwczovL2plc3NpYnVjYS5jb206NDQzIiwiZmVhdHVyZSI6IlVucmVzdHJpY3RlZFNoYXJlZEFycmF5QnVmZmVyIiwiZXhwaXJ5IjoxNzA5ODU1OTk5LCJpc1N1YmRvbWFpbiI6dHJ1ZX0=">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Jessica demo</title>
     <link rel="stylesheet" href="./demo.css">
@@ -109,6 +110,12 @@
                     type="checkbox"
                     id="demuxUseWorker"
                 /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
+
+                <span>&nbsp;&nbsp; | &nbsp;&nbsp; 隐藏/最小化</span>
+                <input id="pageVisibilityHiddenTimeout" style="width: 50px" type="text" value="30">
+                <span>秒之后触发暂停播放</span>
+
+                <button onclick="replay()">重播</button>
             </div>
         </div>
 
@@ -148,6 +155,7 @@
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
     var $demuxUseWorker = document.getElementById('demuxUseWorker');
     var $useSIMDMThreading = document.getElementById('useSIMDMThreading');
+    var $pageVisibilityHiddenTimeout = document.getElementById('pageVisibilityHiddenTimeout');
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var jessibuca = null;
@@ -190,13 +198,14 @@
             ptzMoreArrowShow: true,
             ptzApertureShow: true,
             ptzFocusShow: true,
-            isDropSameTimestampGop:true,
+            isDropSameTimestampGop: true,
             useCanvasRender: $renderDom.value === 'canvas',
             useWebGPU: $isUseWebGPU.value === 'webgpu',
             demuxUseWorker: $demuxUseWorker.checked === true,
             controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
             // audioEngine:"worklet",
             // isFlv: true
+            pageVisibilityHiddenTimeout: Number($pageVisibilityHiddenTimeout.value), //
         },);
 
 
@@ -206,6 +215,13 @@
 
         jessibuca.on('streamQualityChange', (value) => {
             console.log('streamQualityChange', value);
+        })
+
+        jessibuca.on(JessibucaPro.EVENTS.pageVisibilityHiddenTimeout, () => {
+            console.error('pageVisibilityHiddenTimeout');
+            if (jessibuca) {
+                jessibuca.pause();
+            }
         })
 
         jessibuca.on('timeUpdate', (value) => {
@@ -234,8 +250,7 @@
             $player.style.display = 'none';
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
-        }
-        else{
+        } else {
             jessibuca.showErrorMessageTips('播放地址不能为空');
         }
     }

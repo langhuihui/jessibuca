@@ -1783,6 +1783,19 @@ https://developer.apple.com/documentation/webkit/wkwebviewconfiguration/1614793-
 https://jessibuca.com/document.html#jessibuca-js-decoder-js-decoder-wasm%E6%96%87%E4%BB%B6%E6%83%B3%E9%80%9A%E8%BF%87cdn%E5%8A%A0%E8%BD%BD
 
 
+
+### 播放内网https地址报错
+
+> 一般这种情况是浏览器端不认可https证书的缘故。
+
+解决方案：
+
+通过chrome 浏览器设置 `隐私和安全` -> `允许显示不安全内容` 配置让浏览器端认可这个内网https证书。
+
+<img src="/public/img/https-setting.png">
+
+
+
 ## 支持作者
 
 ### 第一作者

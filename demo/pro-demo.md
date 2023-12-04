@@ -401,6 +401,15 @@
 [http://jessibuca.monibuca.com/pro/demo-replay.html](http://jessibuca.monibuca.com/pro/demo-replay.html)
 
 
+### 窗口最小化一定时间触发暂停播放
+------
+#### https
+[https://jessibuca.com/pro/demo-page-visibility-change.html](https://jessibuca.com/pro/demo-page-visibility-change.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-page-visibility-change.html](http://jessibuca.monibuca.com/pro/demo-page-visibility-change.html)
+
+
 
 ## AI
 
