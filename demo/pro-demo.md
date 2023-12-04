@@ -257,6 +257,15 @@
 #### http
 [http://jessibuca.monibuca.com/pro/crypto-sm4-demo.html](http://jessibuca.monibuca.com/pro/crypto-sm4-demo.html)
 
+### XOR加密流(H264/H265)
+------
+#### https
+[https://jessibuca.com/pro/crypto-xor-demo.html](https://jessibuca.com/pro/crypto-xor-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/crypto-xor-demo.html](http://jessibuca.monibuca.com/pro/crypto-xor-demo.html)
+
+
 
 ### HLS(h265)
 ------
