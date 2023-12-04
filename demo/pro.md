@@ -572,7 +572,7 @@ Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
 >
 > 需要单独购买人脸识别的授权，授权后才能使用。
 
-体验demo [demo](/pro/face-detector-demo.html)
+体验demo [demo](https://jessibuca.com/pro/face-detector-demo.html)
 
 ### 物品识别
 
@@ -581,7 +581,7 @@ Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
 >
 > 需要单独购买人脸识别的授权，授权后才能使用。
 
-体验demo [demo](/pro/object-detector-demo.html)
+体验demo [demo](https://jessibuca.com/pro/object-detector-demo.html)
 
 ### 黑屏、绿屏、花屏、马赛克检查
 
@@ -589,7 +589,7 @@ Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
 
 > 需要单独购买，授权后才能使用。
 
-体验demo [demo](/pro/demo-check-frame.html)
+体验demo [demo](https://jessibuca.com/pro/demo-check-frame.html)
 
 
 ### 遮挡物检查
@@ -597,7 +597,7 @@ Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
 
 > 需要单独购买，授权后才能使用。
 
-体验demo [demo](/pro/demo-check-occlusion.html)
+体验demo [demo](https://jessibuca.com/pro/demo-check-occlusion.html)
 
 
 ## 支持定制化服务开发

@@ -430,6 +430,35 @@
 #### http
 [http://jessibuca.monibuca.com/pro/object-detector-demo.html](http://jessibuca.monibuca.com/pro/object-detector-demo.html)
 
+### 黑屏、绿屏、花屏、马赛克检查
+------
+#### https
+[https://jessibuca.com/pro/demo-ai-check-frame.html](https://jessibuca.com/pro/demo-ai-check-frame.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-ai-check-frame.html](http://jessibuca.monibuca.com/pro/demo-ai-check-frame.html)
+
+
+### 遮挡物检查
+------
+#### https
+[https://jessibuca.com/pro/demo-ai-check-occlusion.html](https://jessibuca.com/pro/demo-ai-check-occlusion.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-ai-check-occlusion.html](http://jessibuca.monibuca.com/pro/demo-ai-check-occlusion.html)
+
+## 扩展模块
+
+### 直播流、回放(录像)流下载（录制）器
+------
+#### https
+[https://jessibuca.com/pro/demo-record-player.html](https://jessibuca.com/pro/demo-record-player.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-record-player.html](http://jessibuca.monibuca.com/pro/demo-record-player.html)
+
+
+
 ## 支持作者
 
 ### 第一作者
