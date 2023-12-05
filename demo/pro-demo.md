@@ -119,7 +119,7 @@
 [http://jessibuca.monibuca.com/pro/6x7-wcs-demo.html](http://jessibuca.monibuca.com/pro/6x7-wcs-demo.html)
 
 
-## 回放(录像)流Demo(支持wcs、simd解码)
+## 回放(录像)流Demo(支持mse、wcs、simd解码)
 
 ### TF卡流（录像流）- 24h时间轴
 ------
