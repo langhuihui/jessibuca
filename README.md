@@ -85,6 +85,8 @@ Jessibuca 是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 - 支持抛出SEI数据，方便上层业务进行二次开发。
 - 支持NxN路UI多屏播放(支持1x1,2x2,3x3,4x4),支持不规则多屏播放(3-1，4-1)。
 - 支持国标SM4加密流播放。
+- 支持XOR加密流播放。
+- 支持[enhanced-rtmp](https://github.com/veovera/enhanced-rtmp/blob/main/enhanced-rtmp.pdf)H265格式。
 - 支持定制化服务开发。
 
 ### PRO和开源版对比
