@@ -95,7 +95,22 @@ Jessibuca 是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 
 ## PRO AI 能力
 
-- 人脸识别
+- 人脸识别 [链接](https://jessibuca.com/pro-ai.html)
+- 物品识别 [链接](https://jessibuca.com/pro-ai.html)
+- 黑屏、绿屏、花屏、马赛克检查 [链接](https://jessibuca.com/pro-ai.html)
+- 遮挡物检查 [链接](https://jessibuca.com/pro-ai.html)
+
+## PRO 扩展模块
+
+- Mp4 录制（MPEG-4）(支持音视频) [链接](https://jessibuca.com/pro-module.html)
+- 直播流、回放(录像)流下载（录制）器 [链接](https://jessibuca.com/pro-module.html)
+
+
+## LiveVideoStack 分享
+
+- [掘金](https://juejin.cn/post/7306736066361753634)
+- [CSDN](https://blog.csdn.net/wancheng815926/article/details/134705526?spm=1001.2014.3001.5502)
+- [知乎](https://zhuanlan.zhihu.com/p/669605282)
 
 ## 体验地址
 
