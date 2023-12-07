@@ -19,6 +19,8 @@ export default class M7sLoader extends CommonLoader {
         const dv = new DataView(data)
         const type = dv.getUint8(0);
         const ts = dv.getUint32(1, false);
+        const tmp = new ArrayBuffer(4);
+        const tmp32 = new Uint32Array(tmp);
         switch (type) {
             case MEDIA_TYPE.audio:
                 if (player._opt.hasAudio) {
@@ -38,12 +40,22 @@ export default class M7sLoader extends CommonLoader {
                     }
                     if (dv.byteLength > 5) {
                         const payload = new Uint8Array(data, 5);
-                        const isIframe = dv.getUint8(5) >> 4 === 1;
-                        player.updateStats({
-                            vbps: payload.byteLength
-                        })
-                        if (payload.byteLength > 0) {
-                            this._doDecode(payload, type, ts, isIframe)
+
+                        const flags = payload[0];
+                        if (this._isEnhancedH265Header(flags)) {
+                            this._decodeEnhancedH265Video(payload, ts);
+                        } else {
+                            const isIframe = dv.getUint8(5) >> 4 === 1;
+                            player.updateStats({
+                                vbps: payload.byteLength
+                            })
+
+                            tmp32[0] = payload[4]
+                            tmp32[1] = payload[3]
+                            tmp32[2] = payload[2]
+                            tmp32[3] = 0
+                            let cts = tmp32[0]
+                            this._doDecode(payload, type, ts, isIframe, cts);
                         }
                     } else {
                         this.player.debug.warn('M7sDemux', 'dispatch', 'dv byteLength is', dv.byteLength)

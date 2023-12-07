@@ -21,8 +21,10 @@ features:
   details: 支持创建多个播放实例，WebWorker多核解码，提升多画面播放性能。
 - title: 支持多种视频缩放模式
   details: 支持填充，等比，等比缩放 3中视频缩放模式。
-- title: 支持H264/H265
+- title: 支持H264/H265(FLV_EXT_ID_12标准)
   details: 软解码H.264/H.265+AAC/G711A/G711U流，WebGL视频渲染，WebAudio音频播放。
+- title: 支持enhanced-rtmp H265格式
+  details:  支持enhanced-rtmp H265格式(最新标准传输265编码，ffmpeg_6.1、OBS_29.1的传输标准,完美配合M7S服务器)
 - title: 支持MediaSource硬解码（H.264）
   details: 支持MediaSource硬解码H.264视频。(Safari on iOS不支持)。
 - title: 支持Webcodecs硬解码（H.264）
@@ -63,6 +65,8 @@ features:
   details: 支持web端语音通讯
 - title: 支持国标SM-4加密(Pro)
   details: 支持国标SM-4加密
+- title: 支持XOR加密(Pro)
+  details: 支持XOR加密
 - title: 更多
   details: 请到Pro文档页单独查看
 ---

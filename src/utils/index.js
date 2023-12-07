@@ -1,5 +1,6 @@
 import {MP4_CODECS, FILE_SUFFIX} from "../constant";
 import screenfull from "screenfull";
+
 export function noop() {
 }
 
@@ -590,4 +591,25 @@ export function removeElement(element) {
         }
     }
     return result;
+}
+
+export function hevcEncoderNalePacketNotLength(oneNALBuffer, isIframe) {
+    const idrBit = 0x10 | 12;
+    const nIdrBit = 0x20 | 12;
+    let tmp = [];
+    if (isIframe) {
+        tmp[0] = idrBit;
+    } else {
+        tmp[0] = nIdrBit;
+    }
+    tmp[1] = 1;
+    //
+    tmp[2] = 0;
+    tmp[3] = 0;
+    tmp[4] = 0;
+
+    const arrayBuffer = new Uint8Array(tmp.length + oneNALBuffer.byteLength);
+    arrayBuffer.set(tmp, 0);
+    arrayBuffer.set(oneNALBuffer, tmp.length);
+    return arrayBuffer;
 }

@@ -327,6 +327,16 @@
 	  abortError2: 'AbortError',
 	  abort: 'AbortError'
 	};
+	const FRAME_HEADER_EX = 0x80;
+	const PACKET_TYPE_EX = {
+	  PACKET_TYPE_SEQ_START: 0,
+	  PACKET_TYPE_FRAMES: 1,
+	  PACKET_TYPE_FRAMESX: 3
+	};
+	const FRAME_TYPE_EX = {
+	  FT_KEY: 0x10,
+	  FT_INTER: 0x20
+	};
 
 	class Debug {
 	  constructor(master) {
@@ -925,6 +935,27 @@
 
 	  return result;
 	}
+	function hevcEncoderNalePacketNotLength(oneNALBuffer, isIframe) {
+	  const idrBit = 0x10 | 12;
+	  const nIdrBit = 0x20 | 12;
+	  let tmp = [];
+
+	  if (isIframe) {
+	    tmp[0] = idrBit;
+	  } else {
+	    tmp[0] = nIdrBit;
+	  }
+
+	  tmp[1] = 1; //
+
+	  tmp[2] = 0;
+	  tmp[3] = 0;
+	  tmp[4] = 0;
+	  const arrayBuffer = new Uint8Array(tmp.length + oneNALBuffer.byteLength);
+	  arrayBuffer.set(tmp, 0);
+	  arrayBuffer.set(oneNALBuffer, tmp.length);
+	  return arrayBuffer;
+	}
 
 	var events$1 = (player => {
 	  try {
@@ -1216,6 +1247,7 @@
 	  updateVideoInfo(data) {
 	    if (data.encTypeCode) {
 	      this.videoInfo.encType = VIDEO_ENC_TYPE[data.encTypeCode];
+	      this.videoInfo.encTypeCode = data.encTypeCode;
 	    }
 
 	    if (data.width) {
@@ -2014,6 +2046,7 @@
 	  updateAudioInfo(data) {
 	    if (data.encTypeCode) {
 	      this.audioInfo.encType = AUDIO_ENC_TYPE[data.encTypeCode];
+	      this.audioInfo.encTypeCode = data.encTypeCode;
 	    }
 
 	    if (data.channels) {
@@ -9143,6 +9176,58 @@
 
 	  close() {}
 
+	  _decodeEnhancedH265Video(payload, ts) {
+	    const flags = payload[0];
+	    const frameTypeEx = flags & 0x30;
+	    const packetEx = flags & 0x0F;
+	    const codecId = payload.slice(1, 5);
+	    const tmp = new ArrayBuffer(4);
+	    const tmp32 = new Uint32Array(tmp);
+	    const isAV1 = String.fromCharCode(codecId[0]) == 'a';
+
+	    if (packetEx === PACKET_TYPE_EX.PACKET_TYPE_SEQ_START) {
+	      if (frameTypeEx === FRAME_TYPE_EX.FT_KEY) {
+	        // header video info
+	        const extraData = payload.slice(5);
+
+	        if (!isAV1) {
+	          const payloadBuffer = new Uint8Array(5 + extraData.length);
+	          payloadBuffer.set([0x1c, 0x00, 0x00, 0x00, 0x00], 0);
+	          payloadBuffer.set(extraData, 5);
+
+	          this._doDecode(payloadBuffer, MEDIA_TYPE.video, 0, true, 0);
+	        }
+	      }
+	    } else if (packetEx === PACKET_TYPE_EX.PACKET_TYPE_FRAMES) {
+	      let payloadBuffer = payload;
+	      let cts = 0;
+	      const isIFrame = frameTypeEx === FRAME_TYPE_EX.FT_KEY;
+
+	      if (!isAV1) {
+	        // h265
+	        tmp32[0] = payload[4];
+	        tmp32[1] = payload[3];
+	        tmp32[2] = payload[2];
+	        tmp32[3] = 0;
+	        cts = tmp32[0];
+	        const data = payload.slice(8);
+	        payloadBuffer = hevcEncoderNalePacketNotLength(data, isIFrame);
+
+	        this._doDecode(payloadBuffer, MEDIA_TYPE.video, ts, isIFrame, cts);
+	      }
+	    } else if (packetEx === PACKET_TYPE_EX.PACKET_TYPE_FRAMESX) {
+	      const isIFrame = frameTypeEx === FRAME_TYPE_EX.FT_KEY;
+	      const data = payload.slice(5);
+	      let payloadBuffer = hevcEncoderNalePacketNotLength(data, isIFrame);
+
+	      this._doDecode(payloadBuffer, MEDIA_TYPE.video, ts, isIFrame, 0);
+	    }
+	  }
+
+	  _isEnhancedH265Header(flags) {
+	    return (flags & FRAME_HEADER_EX) === FRAME_HEADER_EX;
+	  }
+
 	}
 
 	class FlvLoader extends CommonLoader {
@@ -9214,16 +9299,22 @@
 	            player.updateStats({
 	              vbps: payload.byteLength
 	            });
-	            const isIFrame = payload[0] >> 4 === 1;
+	            const flags = payload[0];
 
-	            if (payload.byteLength > 0) {
-	              tmp32[0] = payload[4];
-	              tmp32[1] = payload[3];
-	              tmp32[2] = payload[2];
-	              tmp32[3] = 0;
-	              let cts = tmp32[0];
+	            if (this._isEnhancedH265Header(flags)) {
+	              this._decodeEnhancedH265Video(payload, ts);
+	            } else {
+	              const isIFrame = payload[0] >> 4 === 1;
 
-	              this._doDecode(payload, MEDIA_TYPE.video, ts, isIFrame, cts);
+	              if (payload.byteLength > 0) {
+	                tmp32[0] = payload[4];
+	                tmp32[1] = payload[3];
+	                tmp32[2] = payload[2];
+	                tmp32[3] = 0;
+	                let cts = tmp32[0];
+
+	                this._doDecode(payload, MEDIA_TYPE.video, ts, isIFrame, cts);
+	              }
 	            }
 	          }
 
@@ -9281,6 +9372,8 @@
 	    const dv = new DataView(data);
 	    const type = dv.getUint8(0);
 	    const ts = dv.getUint32(1, false);
+	    const tmp = new ArrayBuffer(4);
+	    const tmp32 = new Uint32Array(tmp);
 
 	    switch (type) {
 	      case MEDIA_TYPE.audio:
@@ -9305,13 +9398,22 @@
 
 	          if (dv.byteLength > 5) {
 	            const payload = new Uint8Array(data, 5);
-	            const isIframe = dv.getUint8(5) >> 4 === 1;
-	            player.updateStats({
-	              vbps: payload.byteLength
-	            });
+	            const flags = payload[0];
 
-	            if (payload.byteLength > 0) {
-	              this._doDecode(payload, type, ts, isIframe);
+	            if (this._isEnhancedH265Header(flags)) {
+	              this._decodeEnhancedH265Video(payload, ts);
+	            } else {
+	              const isIframe = dv.getUint8(5) >> 4 === 1;
+	              player.updateStats({
+	                vbps: payload.byteLength
+	              });
+	              tmp32[0] = payload[4];
+	              tmp32[1] = payload[3];
+	              tmp32[2] = payload[2];
+	              tmp32[3] = 0;
+	              let cts = tmp32[0];
+
+	              this._doDecode(payload, type, ts, isIframe, cts);
 	            }
 	          } else {
 	            this.player.debug.warn('M7sDemux', 'dispatch', 'dv byteLength is', dv.byteLength);

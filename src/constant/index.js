@@ -297,7 +297,7 @@ export const HOT_KEY = {
 }
 export const WCS_ERROR = {
     keyframeIsRequiredError: 'A key frame is required after configure() or flush()',
-    canNotDecodeClosedCodec:"Cannot call 'decode' on a closed codec"
+    canNotDecodeClosedCodec: "Cannot call 'decode' on a closed codec"
 }
 
 
@@ -306,3 +306,21 @@ export const FETCH_ERROR = {
     abortError2: 'AbortError',
     abort: 'AbortError'
 }
+
+export const FRAME_HEADER_EX = 0x80
+
+
+export const PACKET_TYPE_EX = {
+    PACKET_TYPE_SEQ_START: 0,
+    PACKET_TYPE_FRAMES: 1,
+    PACKET_TYPE_FRAMESX: 3,
+};
+
+
+export const FRAME_TYPE_EX = {
+    FT_KEY: 0x10,
+    FT_INTER: 0x20
+};
+
+
+

@@ -1,5 +1,6 @@
 import Emitter from "../utils/emitter";
-import {MEDIA_TYPE} from "../constant";
+import {FRAME_HEADER_EX, FRAME_TYPE_EX, MEDIA_TYPE, PACKET_TYPE_EX} from "../constant";
+import {hevcEncoderNalePacketNotLength} from "../utils";
 
 export default class CommonLoader extends Emitter {
     constructor(player) {
@@ -190,5 +191,52 @@ export default class CommonLoader extends Emitter {
 
     }
 
+    _decodeEnhancedH265Video(payload, ts) {
+        const flags = payload[0];
+        const frameTypeEx = flags & 0x30;
+        const packetEx = flags & 0x0F;
+        const codecId = payload.slice(1, 5);
+        const tmp = new ArrayBuffer(4);
+        const tmp32 = new Uint32Array(tmp);
+        const isAV1 = String.fromCharCode(codecId[0]) == 'a';
+        if (packetEx === PACKET_TYPE_EX.PACKET_TYPE_SEQ_START) {
+            if (frameTypeEx === FRAME_TYPE_EX.FT_KEY) {
+                // header video info
+                const extraData = payload.slice(5);
+                if (!isAV1) {
+                    const payloadBuffer = new Uint8Array(5 + extraData.length);
+                    payloadBuffer.set([0x1c, 0x00, 0x00, 0x00, 0x00], 0);
+                    payloadBuffer.set(extraData, 5);
+                    this._doDecode(payloadBuffer, MEDIA_TYPE.video, 0, true, 0);
+                }
+            }
+        } else if (packetEx === PACKET_TYPE_EX.PACKET_TYPE_FRAMES) {
+            let payloadBuffer = payload;
+            let cts = 0;
+            const isIFrame = frameTypeEx === FRAME_TYPE_EX.FT_KEY;
 
+            if (!isAV1) {
+                // h265
+                tmp32[0] = payload[4]
+                tmp32[1] = payload[3]
+                tmp32[2] = payload[2]
+                tmp32[3] = 0
+                cts = tmp32[0];
+                const data = payload.slice(8);
+                payloadBuffer = hevcEncoderNalePacketNotLength(data, isIFrame);
+                this._doDecode(payloadBuffer, MEDIA_TYPE.video, ts, isIFrame, cts);
+            }
+
+        } else if (packetEx === PACKET_TYPE_EX.PACKET_TYPE_FRAMESX) {
+            const isIFrame = frameTypeEx === FRAME_TYPE_EX.FT_KEY;
+            const data = payload.slice(5);
+            let payloadBuffer = hevcEncoderNalePacketNotLength(data, isIFrame);
+            this._doDecode(payloadBuffer, MEDIA_TYPE.video, ts, isIFrame, 0);
+        }
+    }
+
+
+    _isEnhancedH265Header(flags) {
+        return (flags & FRAME_HEADER_EX) === FRAME_HEADER_EX;
+    }
 }

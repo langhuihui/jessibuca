@@ -64,15 +64,19 @@ export default class FlvLoader extends CommonLoader {
                         player.updateStats({
                             vbps: payload.byteLength
                         })
-                        const isIFrame = payload[0] >> 4 === 1;
-                        if (payload.byteLength > 0) {
-                            tmp32[0] = payload[4]
-                            tmp32[1] = payload[3]
-                            tmp32[2] = payload[2]
-                            tmp32[3] = 0
-                            let cts = tmp32[0]
-
-                            this._doDecode(payload, MEDIA_TYPE.video, ts, isIFrame, cts);
+                        const flags = payload[0];
+                        if (this._isEnhancedH265Header(flags)) {
+                            this._decodeEnhancedH265Video(payload, ts);
+                        } else {
+                            const isIFrame = payload[0] >> 4 === 1;
+                            if (payload.byteLength > 0) {
+                                tmp32[0] = payload[4]
+                                tmp32[1] = payload[3]
+                                tmp32[2] = payload[2]
+                                tmp32[3] = 0
+                                let cts = tmp32[0]
+                                this._doDecode(payload, MEDIA_TYPE.video, ts, isIFrame, cts);
+                            }
                         }
                     }
                     break
