@@ -423,6 +423,8 @@ H265硬解码，对于电脑硬件支持情况：
 <img src="/public/configuration.png">
 
 
+> 2k,4k的视频，需要更高的配置才能够流畅播放。一般默认情况下，只能支持一路2k或者4k的视频。
+
 ### windows 开启多线程模式下
 
 > 多线程依赖https，并且需要额外开启支持才行 见：[开启多线程解码](/pro-doc.html#localhost)
