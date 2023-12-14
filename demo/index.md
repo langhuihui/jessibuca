@@ -2,7 +2,7 @@
 home: true
 heroImage: /logo.png
 heroText: Jessibuca
-tagline: 纯H5直播流播放器
+tagline: 纯H5低延迟直播流播放器
 actionText: 打开播放器
 actionLink: /player
 sidebarDepth: 2

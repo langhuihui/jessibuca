@@ -1262,11 +1262,33 @@ PIPELINE_ERROR_DECODE 是指视频解码器在解码视频流时发生了错误�
 
 会抛出`DOMException: play() failed because the user didn't interact with the document first. https://goo.gl/xX8pDD` 错误。
 
+
+> 这个报错是浏览器的规范，浏览器规定，必须要用户主动触发才能播放视频。
+
+优先使用`canvas`进行渲染。这样就可以规避掉浏览器的规范了。
+
+> wcs是硬解码，wasm是软解码
+
+
 #### 解决方案
 
 1. 添加一个交互事件，让用户手动触发下，再去播放视频。
 2. 使用`wcs`解码(在https环境下)，然后使用`canvas`标签渲染。
 3. 使用wasm(simd) 软解码，然后使用`canvas`标签渲染。
+
+
+```
+{
+    useMSE:false, // mse强制绑定了video标签，所以不能优先mse解码。
+    useWCS;true,
+    autoWASM:true,
+    useSIMD:true,
+    useVideoRender:false,
+    useCanvasRender:true
+}
+```
+
+> pro 可以支持配置`mse+video`渲染或者`wasm+canvas`自动播放。
 
 ### 浏览器报：SBOX FATAL MEMORY EXCEEDED 错误
 
@@ -1568,27 +1590,6 @@ useWCS:false
 1. 从服务器获取当前播放的时间点，
 2. 监听播放器的stats事件，获取到`ts`，缓存一个开始时间点，通过最新的`ts`减去开始时间点，就是当前播放的时间点。
 
-
-### play() failed because the user didn't interact with the document first 报错
-
-> 这个报错是浏览器的规范，浏览器规定，必须要用户主动触发才能播放视频。
-
-解决方案
-
-```
-{
-    useMSE:false, // mse强制绑定了video标签，所以不能优先mse解码。
-    useWCS;true,
-    autoWASM:true,
-    useSIMD:true,
-    useVideoRender:false,
-    useCanvasRender:true
-}
-```
-
-优先使用`canvas`进行渲染。这样就可以规避掉浏览器的规范了。
-
-> wcs是硬解码，wasm是软解码
 
 
 ### Umi App 或者内嵌其他App（XX小程序） 里面webview，需要截图下载或者录制视频下载。
