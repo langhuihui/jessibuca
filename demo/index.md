@@ -43,6 +43,8 @@ features:
   details: 支持录制Flv格式的视频录制（视频数据+音频数据）。
 - title: 支持webrtc(Pro)
   details: 支持 webrtc标准流播放
+- title: 支持阿里云Web Rtc播放(Pro)
+  details: 支持阿里云Web Rtc播放
 - title: 支持语音通讯(Pro)
   details: 支持语音通讯(支持采集PCM/G711A/G711U格式的数据、支持采样率16000Hz或8000Hz，采样精度32bits或者16bits，支持单通道或双通道)
 - title: 支持录像流播放(Pro)
