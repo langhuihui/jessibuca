@@ -111,7 +111,16 @@
                 <button onclick="handleAddCanvasRect()">矩形</button>
             </div>
             <div>
+                <button onclick="handleAddCanvasRect('red')">矩形(填充)</button>
+            </div>
+            <div>
                 <button onclick="handleAddCanvasRectAndText()">文字+矩形</button>
+            </div>
+            <div>
+                <button onclick="handleAddCanvasRectAndText('green')">文字+矩形(填充)</button>
+            </div>
+            <div>
+                <button onclick="handleAddCanvasPolygon()">不规则多边形</button>
             </div>
             <div>
                 <button onclick="handleClearCanvasContent()">清除</button>
@@ -237,9 +246,6 @@
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
         }
-        else{
-            jessibuca.showErrorMessageTips('播放地址不能为空');
-        }
     }
 
 
@@ -355,7 +361,7 @@
         }
     }
 
-    function handleAddCanvasRect() {
+    function handleAddCanvasRect(fill) {
         if (jessibuca) {
             const position1 = getPosition();
             const position2 = getPosition();
@@ -367,6 +373,8 @@
                     width: 100,
                     height: 100,
                     color: '#FF0000',
+                    fill: fill ? fill : '',
+                    fillOpacity: fill ? 0.1 : '',
                 },
                 {
                     type: 'rect',
@@ -375,12 +383,14 @@
                     width: 100,
                     height: 100,
                     color: '#0000FF',
+                    fill: fill ? fill : '',
+                    fillOpacity: fill ? 0.1 : '',
                 }
             ])
         }
     }
 
-    function handleAddCanvasRectAndText() {
+    function handleAddCanvasRectAndText(fill) {
         if (jessibuca) {
             const {x, y} = getPosition();
             jessibuca.addContentToCanvas([
@@ -391,6 +401,8 @@
                     width: 100,
                     height: 100,
                     color: '#0000FF',
+                    fill: fill ? fill : '',
+                    fillOpacity: fill ? 0.3 : '',
                 },
                 {
                     type: 'text',
@@ -402,6 +414,53 @@
                     color: '#0000FF',
                 }
             ])
+        }
+    }
+
+    function createPoints() {
+        const positionObj = getPosition();
+        let numSides = Math.floor(Math.random() * 4) + 3; // 边数
+        var points = [];
+        var centerX = positionObj.x; // 多边形中心的X坐标
+        var centerY = positionObj.y; // 多边形中心的Y坐标
+        var angles = [];
+
+        // 随机生成角度，并排序
+        for (var i = 0; i < numSides; i++) {
+            angles.push(Math.random() * 2 * Math.PI);
+        }
+        angles.sort();
+
+        // 根据角度和随机半径生成顶点
+        for (var angle of angles) {
+            var radius = 50 + Math.random() * 150; // 随机半径
+            var x = centerX + radius * Math.cos(angle);
+            var y = centerY + radius * Math.sin(angle);
+            points.push({x: x, y: y});
+        }
+        return points;
+    }
+
+    function handleAddCanvasPolygon() {
+        if (jessibuca) {
+            const points = createPoints();
+            const points2 = createPoints();
+
+            jessibuca.addContentToCanvas([
+                {
+                    type: 'polygon',
+                    color: 'red',
+                    lineWidth: 2,
+                    list: points
+                },
+                {
+                    type: 'polygon',
+                    color: 'green',
+                    lineWidth: 2,
+                    list: points2
+                }
+            ])
+
         }
     }
 

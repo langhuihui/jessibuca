@@ -310,7 +310,7 @@
 #### http
 [http://jessibuca.monibuca.com/pro/demo-dynamic-watermark.html](http://jessibuca.monibuca.com/pro/demo-dynamic-watermark.html)
 
-### 播放器自定义内容（文字、矩形框子、文字+矩形框子）
+### 播放器自定义内容（文字、矩形框子、文字+矩形框子、不规则多边形）
 ------
 #### https
 [https://jessibuca.com/pro/demo-content.html](https://jessibuca.com/pro/demo-content.html)

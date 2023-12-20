@@ -1783,6 +1783,20 @@ https://developer.apple.com/documentation/webkit/wkwebviewconfiguration/1614793-
 https://jessibuca.com/document.html#jessibuca-js-decoder-js-decoder-wasm%E6%96%87%E4%BB%B6%E6%83%B3%E9%80%9A%E8%BF%87cdn%E5%8A%A0%E8%BD%BD
 
 
+### The play() request was interrupted because video-only background media was paused to save power 错误
+
+通常发生在网页应用尝试自动播放视频时，但浏览器出于节能目的暂停了视频的播放。
+
+1. 浏览器的自动播放策略：许多现代浏览器，尤其是移动设备上的浏览器，会限制在不同条件下自动播放媒体内容，尤其是如果媒体内容没有与用户的互动。这是为了节约数据和电池。
+2. 视频内容的属性：如果视频是静音的或不包含音频轨道，某些浏览器可能会允许自动播放。但如果视频包含音频，且页面没有得到用户的明确互动（如点击），浏览器可能会阻止自动播放。
+3. 电源节约模式：在某些设备上，如果启用了电源节约模式，浏览器可能会限制背景媒体的播放，以减少电量消耗。
+
+解决方案：
+
+1. 用户交互：确保在用户与页面互动（如点击按钮）后再播放视频。
+2. 静音视频：如果视频不需要音频，可以尝试将其设置为静音。
+3. 检查浏览器设置：用户可以查看浏览器的隐私或安全设置，看看是否有限制自动播放媒体的选项。
+4. 检查设备设置：用户可以查看设备的电源设置，看看是否有限制自动播放媒体的选项。
 
 ### 播放内网https地址报错
 
