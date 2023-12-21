@@ -89,7 +89,7 @@
                 <span>缓存延迟(延迟超过会触发丢帧)：</span>
                 <input placeholder="单位：秒" type="text" id="videoBufferDelay" style="width: 50px" value="1">秒
                 <span>秘钥：</span>
-                <input type="text" id="sm4Key" style="width: 200px" placeholder="请输入32位的sm4秘钥">
+                <input type="text" id="sm4Key" style="width: 200px" placeholder="请输入32位的sm4秘钥" value="">
                 <button id="replay">重播</button>
             </div>
         </div>
@@ -147,6 +147,7 @@
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
     var $fps = document.querySelector('.fps-inner');
     var $sm4Key = document.getElementById('sm4Key');
+    var $demuxUseWorker = document.getElementById('demuxUseWorker');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -244,9 +245,6 @@
             $player.style.display = 'none';
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
-        }
-        else{
-            jessibuca.showErrorMessageTips('播放地址不能为空');
         }
     }
 

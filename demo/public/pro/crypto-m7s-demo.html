@@ -88,6 +88,8 @@
                 <input placeholder="单位：秒" type="text" id="videoBuffer" style="width: 50px" value="0.2">秒
                 <span>缓存延迟(延迟超过会触发丢帧)：</span>
                 <input placeholder="单位：秒" type="text" id="videoBufferDelay" style="width: 50px" value="1">秒
+                <span>秘钥：</span>
+                <input type="text" id="m7sKey" style="width: 200px" placeholder="请输入秘钥" value="">
                 <button id="replay">重播</button>
             </div>
 
@@ -96,6 +98,13 @@
             <div>
                 <input
                     checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="m7sCryptoAudio"
+                /><span>解密音频数据</span>
+                <input
+                    checked
+                    onclick="replay()"
                     type="checkbox"
                     id="demuxUseWorker"
                 /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
@@ -146,6 +155,8 @@
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
     var $demuxUseWorker = document.getElementById('demuxUseWorker');
     var $cryptoKeyUrl = document.getElementById('cryptoKeyUrl');
+    var $m7sKey = document.getElementById('m7sKey');
+    var $m7sCryptoAudio = document.getElementById('m7sCryptoAudio');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -196,6 +207,8 @@
             // isFlv: true
             isM7sCrypto: true,
             cryptoKeyUrl: $cryptoKeyUrl.value,
+            m7sCryptoKey: $m7sKey.value,
+            m7sCryptoAudio: $m7sCryptoAudio.checked === true,
         },);
 
 
@@ -233,16 +246,18 @@
     function play() {
         var href = $playHref.value;
         if (href) {
-            if($cryptoKeyUrl.value){
+            if ($cryptoKeyUrl.value) {
                 jessibuca.setCryptoKeyUrl($cryptoKeyUrl.value);
             }
+
+            if ($m7sKey.value) {
+                jessibuca.setM7sCryptoKey($m7sKey.value);
+            }
+
             jessibuca.play(href);
             $player.style.display = 'none';
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
-        }
-        else{
-            jessibuca.showErrorMessageTips('播放地址不能为空');
         }
     }
 
