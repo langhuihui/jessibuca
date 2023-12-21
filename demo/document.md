@@ -1696,7 +1696,9 @@ iframe默认不允许全屏, 如果内嵌了video那么控制条上将不显示�
 https://cloud.tencent.com/developer/article/1741520
 
 
-### Android端webView灰色按钮问题
+### Android端webView灰色按钮（默认的播放按钮）问题
+
+<img src="/public/img/android-webview-play-icon.png">
 
 > android端自动起播在首帧出来之前会有一个灰色的播放按钮闪现，不同的手机或者android版本会略有不同，这个是webview中video内置的poster导致，前端无法隐藏
 

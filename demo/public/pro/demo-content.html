@@ -50,21 +50,21 @@
         </div>
         <div class="input">
             <div><input
-                type="checkbox"
-                checked
-                id="useMSE"
+                    type="checkbox"
+                    checked
+                    id="useMSE"
             /><span>MediaSource</span>
                 <input
-                    type="checkbox"
-                    id="useWCS"
+                        type="checkbox"
+                        id="useWCS"
                 /><span>Webcodec</span>
                 <input
-                    type="checkbox"
-                    id="useWASM"
+                        type="checkbox"
+                        id="useWASM"
                 /><span>WASM</span>
                 <input
-                    type="checkbox"
-                    id="useSIMD"
+                        type="checkbox"
+                        id="useSIMD"
                 /><span>WASM(SIMD)</span> <span style="color: green">默认使用wasm解码器</span>
             </div>
         </div>
@@ -94,10 +94,10 @@
         <div class="input">
             <div>
                 <input
-                    checked
-                    onclick="replay()"
-                    type="checkbox"
-                    id="demuxUseWorker"
+                        checked
+                        onclick="replay()"
+                        type="checkbox"
+                        id="demuxUseWorker"
                 /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
             </div>
         </div>
@@ -120,7 +120,10 @@
                 <button onclick="handleAddCanvasRectAndText('green')">文字+矩形(填充)</button>
             </div>
             <div>
-                <button onclick="handleAddCanvasPolygon()">不规则多边形</button>
+                <button onclick="handleAddCanvasPolygon()">多边形</button>
+            </div>
+            <div>
+                <button onclick="handleAddCanvasPolygon('blue')">多边形(填充)</button>
             </div>
             <div>
                 <button onclick="handleClearCanvasContent()">清除</button>
@@ -130,9 +133,9 @@
         <div class="input">
             <div>输入URL：</div>
             <input
-                autocomplete="on"
-                id="playUrl"
-                value=""
+                    autocomplete="on"
+                    id="playUrl"
+                    value=""
             />
             <button id="play">播放</button>
             <button id="pause" style="display: none">停止</button>
@@ -417,50 +420,55 @@
         }
     }
 
-    function createPoints() {
-        const positionObj = getPosition();
-        let numSides = Math.floor(Math.random() * 4) + 3; // 边数
-        var points = [];
-        var centerX = positionObj.x; // 多边形中心的X坐标
-        var centerY = positionObj.y; // 多边形中心的Y坐标
-        var angles = [];
 
-        // 随机生成角度，并排序
-        for (var i = 0; i < numSides; i++) {
-            angles.push(Math.random() * 2 * Math.PI);
+    function handleAddCanvasPolygon(fill) {
+        function createPoints() {
+            const positionObj = getPosition();
+            let numSides = Math.floor(Math.random() * 4) + 3; // 边数
+            var points = [];
+            var centerX = positionObj.x; // 多边形中心的X坐标
+            var centerY = positionObj.y; // 多边形中心的Y坐标
+            var angles = [];
+
+            // 随机生成角度，并排序
+            for (var i = 0; i < numSides; i++) {
+                angles.push(Math.random() * 2 * Math.PI);
+            }
+            angles.sort();
+
+            // 根据角度和随机半径生成顶点
+            for (var angle of angles) {
+                var radius = 50 + Math.random() * 150; // 随机半径
+                var x = centerX + radius * Math.cos(angle);
+                var y = centerY + radius * Math.sin(angle);
+                points.push({x: x, y: y});
+            }
+
+            return points;
         }
-        angles.sort();
 
-        // 根据角度和随机半径生成顶点
-        for (var angle of angles) {
-            var radius = 50 + Math.random() * 150; // 随机半径
-            var x = centerX + radius * Math.cos(angle);
-            var y = centerY + radius * Math.sin(angle);
-            points.push({x: x, y: y});
-        }
-        return points;
-    }
-
-    function handleAddCanvasPolygon() {
         if (jessibuca) {
+
             const points = createPoints();
             const points2 = createPoints();
-
             jessibuca.addContentToCanvas([
                 {
                     type: 'polygon',
                     color: 'red',
                     lineWidth: 2,
-                    list: points
+                    list: points,
+                    fill: fill ? fill : '',
+                    fillOpacity: fill ? 0.3 : '',
                 },
                 {
                     type: 'polygon',
                     color: 'green',
                     lineWidth: 2,
-                    list: points2
+                    list: points2,
+                    fill: fill ? fill : '',
+                    fillOpacity: fill ? 0.1 : '',
                 }
             ])
-
         }
     }
 
