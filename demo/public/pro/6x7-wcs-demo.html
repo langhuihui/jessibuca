@@ -582,7 +582,9 @@
             },
             demuxUseWorker: $demuxUseWorker.checked === true,
         },);
-
+        jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
+            jessibuca.showErrorMessageTips('播放异常：' + error);
+        })
 
         playList.push(jessibuca);
     }

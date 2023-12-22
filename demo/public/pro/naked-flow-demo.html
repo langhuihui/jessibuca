@@ -166,6 +166,9 @@
             console.log('timeUpdate', value);
         })
 
+        jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
+            jessibuca.showErrorMessageTips('播放异常：' + error);
+        })
 
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';

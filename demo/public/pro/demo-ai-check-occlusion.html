@@ -168,6 +168,10 @@
             console.log('aiOcclusionDetectResult', result);
         })
 
+        jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
+            jessibuca.showErrorMessageTips('播放异常：' + error);
+        })
+
         jessibuca.on('stats', (stats) => {
             // console.log('stats', stats);
             $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`

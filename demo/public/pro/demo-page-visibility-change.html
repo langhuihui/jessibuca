@@ -224,6 +224,10 @@
             }
         })
 
+        jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
+            jessibuca.showErrorMessageTips('播放异常：' + error);
+        })
+
         jessibuca.on('timeUpdate', (value) => {
             // console.log('timeUpdate', value);
         })

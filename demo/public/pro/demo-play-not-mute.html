@@ -187,6 +187,9 @@
             // isFlv: true
         },);
 
+        jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
+            jessibuca.showErrorMessageTips('播放异常：' + error);
+        })
 
         jessibuca.on('ptz', (arrow) => {
             // console.log('ptz', arrow);

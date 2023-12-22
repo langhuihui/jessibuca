@@ -66,12 +66,12 @@
             <span>渲染标签：</span>
             <select id="renderDom" onchange="replay()">
                 <option value="video" selected>video</option>
-                <option value="canvas" >canvas</option>
+                <option value="canvas">canvas</option>
             </select>
 
             <span>canvas渲染技术：</span>
             <select id="isUseWebGPU" onchange="replay()">
-                <option value="webgl" >webgl</option>
+                <option value="webgl">webgl</option>
                 <option value="webgpu" selected>webgpu</option>
             </select>
             <span id="supportWebgpu"></span>
@@ -83,6 +83,16 @@
                 <span>缓存延迟(延迟超过会触发丢帧)：</span>
                 <input placeholder="单位：秒" type="text" id="videoBufferDelay" style="width: 50px" value="1">秒
                 <button id="replay">重播</button>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <input
+                    type="checkbox"
+                    onclick="replay()"
+                    checked
+                    id="supportHls265"
+                /><span>支持HlS265解码</span>
             </div>
         </div>
 
@@ -120,6 +130,7 @@
     var $fps = document.querySelector('.fps-inner');
     var $renderDom = document.getElementById('renderDom');
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
+    var $supportHls265 = document.getElementById('supportHls265');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -157,11 +168,11 @@
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
             heartTimeout: 10,
-            ptzZoomShow:true,
+            ptzZoomShow: true,
             useCanvasRender: $renderDom.value === 'canvas',
             useWebGPU: $isUseWebGPU.value === 'webgpu',
-            controlHtml:'<div>我是 <span style="color: red">test</span>文案</div>',
-            supportHls265: true,
+            controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
+            supportHls265: $supportHls265.checked === true,
         },);
 
 
@@ -181,6 +192,9 @@
             // console.log('stats', stats);
             $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
         })
+        jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
+            jessibuca.showErrorMessageTips('播放异常：' + error);
+        })
 
 
         $player.style.display = 'inline-block';
@@ -199,8 +213,7 @@
             $player.style.display = 'none';
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
-        }
-        else{
+        } else {
             jessibuca.showErrorMessageTips('播放地址不能为空');
         }
     }

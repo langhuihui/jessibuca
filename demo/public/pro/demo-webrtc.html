@@ -115,6 +115,10 @@
             // console.log('timeUpdate', value);
         })
 
+        jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
+            jessibuca.showErrorMessageTips('播放异常：' + error);
+        })
+
         jessibuca.on(JessibucaPro.EVENTS.crashLog, (log) => {
             console.log('crashLog', log)
         })

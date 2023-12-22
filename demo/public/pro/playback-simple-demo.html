@@ -272,6 +272,10 @@
         $destroy.style.display = 'none';
 
 
+        jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
+            jessibuca.showErrorMessageTips('播放异常：' + error);
+        })
+
         jessibuca.on('playbackPreRateChange', (rate) => {
             jessibuca.forward(rate);
         })

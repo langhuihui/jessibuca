@@ -167,6 +167,9 @@
             console.log('aiImageDetectResult', `ts ${result.ts} : type ${result.type}`);
         })
 
+        jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
+            jessibuca.showErrorMessageTips('播放异常：' + error);
+        })
 
         jessibuca.on('stats', (stats) => {
             // console.log('stats', stats);

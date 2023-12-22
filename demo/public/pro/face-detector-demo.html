@@ -124,6 +124,9 @@
             },
         });
 
+        jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
+            jessibuca.showErrorMessageTips('播放异常：' + error);
+        })
 
         jessibuca.on('aiFaceDetectorInfo', (msg) => {
             console.log('aiFaceDetectorInfo', msg);

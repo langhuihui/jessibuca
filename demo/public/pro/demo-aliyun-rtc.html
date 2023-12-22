@@ -96,6 +96,9 @@
                 // 降级到其他播放协议上去，例如flv、hls 等。
             }
         })
+        jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
+            jessibuca.showErrorMessageTips('播放异常：' + error);
+        })
 
 
         $player.style.display = 'inline-block';
