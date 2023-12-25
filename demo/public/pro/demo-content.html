@@ -50,21 +50,21 @@
         </div>
         <div class="input">
             <div><input
-                    type="checkbox"
-                    checked
-                    id="useMSE"
+                type="checkbox"
+                checked
+                id="useMSE"
             /><span>MediaSource</span>
                 <input
-                        type="checkbox"
-                        id="useWCS"
+                    type="checkbox"
+                    id="useWCS"
                 /><span>Webcodec</span>
                 <input
-                        type="checkbox"
-                        id="useWASM"
+                    type="checkbox"
+                    id="useWASM"
                 /><span>WASM</span>
                 <input
-                        type="checkbox"
-                        id="useSIMD"
+                    type="checkbox"
+                    id="useSIMD"
                 /><span>WASM(SIMD)</span> <span style="color: green">默认使用wasm解码器</span>
             </div>
         </div>
@@ -94,10 +94,10 @@
         <div class="input">
             <div>
                 <input
-                        checked
-                        onclick="replay()"
-                        type="checkbox"
-                        id="demuxUseWorker"
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="demuxUseWorker"
                 /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
             </div>
         </div>
@@ -126,6 +126,9 @@
                 <button onclick="handleAddCanvasPolygon('blue')">多边形(填充)</button>
             </div>
             <div>
+                <button onclick="handleAddCanvasLine()">线条</button>
+            </div>
+            <div>
                 <button onclick="handleClearCanvasContent()">清除</button>
             </div>
         </div>
@@ -133,9 +136,9 @@
         <div class="input">
             <div>输入URL：</div>
             <input
-                    autocomplete="on"
-                    id="playUrl"
-                    value=""
+                autocomplete="on"
+                id="playUrl"
+                value=""
             />
             <button id="play">播放</button>
             <button id="pause" style="display: none">停止</button>
@@ -213,9 +216,6 @@
             // isFlv: true
         },);
 
-        jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
-            jessibuca.showErrorMessageTips('播放异常：' + error);
-        })
 
         jessibuca.on('ptz', (arrow) => {
             // console.log('ptz', arrow);
@@ -470,6 +470,36 @@
                     list: points2,
                     fill: fill ? fill : '',
                     fillOpacity: fill ? 0.1 : '',
+                }
+            ])
+        }
+    }
+
+
+    function handleAddCanvasLine() {
+        if (jessibuca) {
+            const position1 = getPosition();
+            const position2 = getPosition();
+            const position3 = getPosition();
+            const position4 = getPosition();
+            jessibuca.addContentToCanvas([
+                {
+                    type: 'line',
+                    color: 'red',
+                    lineWidth: 2,
+                    x1: position1.x,
+                    y1: position1.y,
+                    x2: position2.x,
+                    y2: position2.y
+                },
+                {
+                    type: 'line',
+                    color: 'green',
+                    lineWidth: 2,
+                    x1: position3.x,
+                    y1: position3.y,
+                    x2: position4.x,
+                    y2: position4.y
                 }
             ])
         }
