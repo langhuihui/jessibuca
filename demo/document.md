@@ -1814,11 +1814,17 @@ https://jessibuca.com/document.html#jessibuca-js-decoder-js-decoder-wasm%E6%96%8
 3. 检查浏览器设置：用户可以查看浏览器的隐私或安全设置，看看是否有限制自动播放媒体的选项。
 4. 检查设备设置：用户可以查看设备的电源设置，看看是否有限制自动播放媒体的选项。
 
-### 播放内网https地址报错
+### 播放内网https地址报错(ERR_CERT_COMMON_NAME_INVALID 错误)
 
 > 一般这种情况是浏览器端不认可https证书的缘故。
 
 解决方案：
+
+方案1：修改自签名证书
+
+https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
+
+方案2：
 
 通过chrome 浏览器设置 `隐私和安全` -> `允许显示不安全内容` 配置让浏览器端认可这个内网https证书。
 
