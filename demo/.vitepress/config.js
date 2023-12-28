@@ -27,6 +27,7 @@ module.exports = {
                     {text: 'LVS分享', link: 'https://jessibuca.com/pro-doc/2023-11-25-live-video-stack-wancheng.pdf'},
                 ]
             },
+            {text: '点播播放器(ProVod)', link: '/player-pro-vod'},
             {
                 text: 'http/https',
                 items: [

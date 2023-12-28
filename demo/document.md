@@ -1831,6 +1831,17 @@ https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
 <img src="/public/img/https-setting.png">
 
 
+### 点播H265需求（点播mp4、Hls）
+
+> jessibuca 是流播放器，目前暂不支持点播的逻辑。
+
+
+解决方案：
+
+1. [video.js](https://videojs.com/)
+2. [xgplayer.js](https://h5player.bytedance.com/)
+3. JessibucaProVod 正在开发中，敬请期待。
+
 
 ## 支持作者
 
