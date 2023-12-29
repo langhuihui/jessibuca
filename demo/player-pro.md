@@ -28,24 +28,25 @@ sidebar: false
 
 [Pro 文档](/pro.html)
 
-# 支持17种格式：(live/test为streamPath)
+# 支持18种格式：(live/test为streamPath)
 
-1. ws(s)-raw 即ws://host-name:port/jessica/`live/test` (该协议只对接了[monibuca服务器](https://monibuca.com),其他服务器需要额外对接)
-2. ws(s)-flv 即ws://host-name:port/jessica/`live/test`.flv（chrome下ip会报安全错误，建议域名形式访问，检查下端口范围chrome浏览器是否允许，chrome会默认禁用很多端口）
-3. http(s)-flv 即http://host-name:port/hdl/`live/test`.flv
-4. Hls 即http://host-name:port/hls/`live/test`.m3u8 (支持H264/H265)
+1. ws(s)-raw 即ws(s)://host-name:port/jessica/`live/test` (该协议只对接了[monibuca服务器](https://monibuca.com),其他服务器需要额外对接)
+2. ws(s)-flv 即ws(s)://host-name:port/jessica/`live/test`.flv（chrome下ip会报安全错误，建议域名形式访问，检查下端口范围chrome浏览器是否允许，chrome会默认禁用很多端口）
+3. http(s)-flv 即http(s)://host-name:port/hdl/`live/test`.flv
+4. Hls 即http(s)://host-name:port/hls/`live/test`.m3u8 (支持H264/H265)
 5. WebTransport 即wt://host-name:port/play/`live/test` (该协议只对接了[monibuca服务器](https://monibuca.com),其他服务器需要额外对接)
 6. Webrtc 即 webrtc://host-name:port/webrtc/play/`live/test` (支持H264/H265, 仅支持https://或者http://localhost环境)
 7. Webrtc-zlmediakit 即 webrtc://host-name:port/index/api/webrtc?app=live&stream=`stream-name`&type=play  (支持H264, 仅支持https://或者http://localhost环境)
 8. Webrtc-srs 即 webrtc://host-name:port/rtc/v1/play/`live/test`  (支持H264, 仅支持https://或者http://localhost环境)
 9. Webrtc-others 即 webrtc://host-name:port/`live/test` (支持H264, 仅支持https://或者http://localhost环境)
-10. http(s)-fmp4 即http://host-name:port/your-path/`live/test`.(f)mp4
-11. ws(s)-fmp4 即ws://host-name:port/your-path/`live/test`.(f)mp4
-12. http(s)-h264 即http://host-name:port/jessica/`live/test`.h264
-13. ws(s)-h264 即ws://host-name:port/jessica/`live/test`.h264
-14. http(s)-h265 即http://host-name:port/jessica/`live/test`.h265
-15. ws(s)-h265 即ws://host-name:port/jessica/`live/test`.h265
-16. ws(s)-mpeg4 即ws://host-name:port/your-path/`live/test`.mpeg4
+10. http(s)-fmp4 即http(s)://host-name:port/your-path/`live/test`.(f)mp4
+11. ws(s)-fmp4 即ws(s)://host-name:port/your-path/`live/test`.(f)mp4
+12. http(s)-h264 即http(s)://host-name:port/jessica/`live/test`.h264
+13. ws(s)-h264 即ws(s)://host-name:port/jessica/`live/test`.h264
+14. http(s)-h265 即http(s)://host-name:port/jessica/`live/test`.h265
+15. ws(s)-h265 即ws(s)://host-name:port/jessica/`live/test`.h265
+16. ws(s)-mpeg4 即ws(s)://host-name:port/your-path/`live/test`.mpeg4
+17. http(s)-mpeg4 即http(s)://host-name:port/your-path/`live/test`.mpeg4
 17. artc-aliyun Web Rtc 即artc://host-name:port/xxxx(根据阿里云的播放地址来)
 - 注意http协议会有跨域问题，需要设置cors头
 - 协议同时支持https、wss
