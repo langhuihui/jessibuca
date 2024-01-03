@@ -1831,6 +1831,21 @@ https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
 <img src="/public/img/https-setting.png">
 
 
+### 苹果IOS系统webglcontextlost问题（ios内核的bug）
+
+> 在IOS手机 解码视频流的时候，第一次可以正常播放，但只要IOS手机熄屏，再重新唤醒，就会一直播放失败，无论换哪个浏览器都不行。安卓手机则一切正常。
+
+> 重新打开新的窗口也不行。
+
+> 只能通过手动关闭safari / chrome 浏览器，重新打开才行。
+
+> 16.7.x 和 17.0.x 都有机会遇到
+
+解决方案： 升级到最新的17.1.x版本。
+
+参考：https://blog.csdn.net/s18813688772/article/details/134203931
+
+
 ### 点播H265需求（点播mp4、Hls）
 
 > jessibuca 是流播放器，目前暂不支持点播的逻辑。
