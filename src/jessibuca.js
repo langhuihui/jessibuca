@@ -424,7 +424,17 @@ class Jessibuca extends Emitter {
 
             this.player.once(EVENTS_ERROR.mseSourceBufferError, () => {
                 this.pause().then(() => {
-                    this.debug.log('Jessibuca', 'mseSourceBufferError close success')
+                    if (this.player._opt.autoWasm) {
+                        this.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play')
+                        this._resetPlayer({useMSE: false})
+                        this.play(url, options).then(() => {
+                            // resolve();
+                            this.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play success')
+                        }).catch(() => {
+                            // reject();
+                            this.debug.warn('Jessibuca', 'auto wasm [mse-> wasm] reset player and play error')
+                        });
+                    }
                 })
             })
 
