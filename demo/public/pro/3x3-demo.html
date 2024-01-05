@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta http-equiv="origin-trial" content="AhQB+uNRI7lww30oPK+0ZcGotIvuoHJL+NkkWOhqDdooY6+xnuiYmZli2SwlH1vkrKdB5WxMpsv5KRc/q9zFswoAAAB3eyJvcmlnaW4iOiJodHRwczovL2plc3NpYnVjYS5jb206NDQzIiwiZmVhdHVyZSI6IlVucmVzdHJpY3RlZFNoYXJlZEFycmF5QnVmZmVyIiwiZXhwaXJ5IjoxNzA5ODU1OTk5LCJpc1N1YmRvbWFpbiI6dHJ1ZX0=">
+    <meta http-equiv="origin-trial"
+          content="AhQB+uNRI7lww30oPK+0ZcGotIvuoHJL+NkkWOhqDdooY6+xnuiYmZli2SwlH1vkrKdB5WxMpsv5KRc/q9zFswoAAAB3eyJvcmlnaW4iOiJodHRwczovL2plc3NpYnVjYS5jb206NDQzIiwiZmVhdHVyZSI6IlVucmVzdHJpY3RlZFNoYXJlZEFycmF5QnVmZmVyIiwiZXhwaXJ5IjoxNzA5ODU1OTk5LCJpc1N1YmRvbWFpbiI6dHJ1ZX0=">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Jessibuca Pro 3x3 demo</title>
     <script src="./vconsole.js"></script>
@@ -249,6 +250,7 @@
             debugLevel: $isDebug.checked === true ? "debug" : '',
             isMulti: true,
             useMSE: $useMSE.checked === true,
+            decoderErrorAutoWasm: false,
             useSIMD: $useSIMD.checked === true,
             useWCS: $useWCS.checked === true,
             useMThreading: $useSIMDMThreading.checked === true,
@@ -405,7 +407,7 @@
 
         for (let i = 0; i < size; i++) {
             let player = playList[i];
-            if(player){
+            if (player) {
                 const isDebug = $isDebug.checked === true;
                 player.updateDebugLevel(isDebug ? 'debug' : 'warn')
             }
