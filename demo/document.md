@@ -1858,6 +1858,26 @@ https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
 3. JessibucaProVod 正在开发中，敬请期待。
 
 
+### 测试的时候遇到请求的连接（播放地址）跨域报错
+
+#### 方法1：使用扩展程序
+安装CORS扩展: 在Chrome Web Store中搜索并安装一个允许跨域请求的扩展程序，如“CORS Unblock”或“Allow CORS: Access-Control-Allow-Origin”。
+
+启用扩展程序: 安装完成后，在浏览器扩展程序栏中找到该扩展并启用。
+
+配置扩展程序: 根据需要配置扩展程序的设置，以允许特定的跨域请求。
+
+#### 方法2：修改浏览器启动参数
+关闭所有Chrome实例: 确保所有Chrome窗口都已关闭。
+
+修改启动快捷方式: 右击Chrome的启动快捷方式，选择“属性”。
+
+添加参数: 在“目标”字段中，Chrome.exe后添加参数 --disable-web-security --user-data-dir=[某个文件夹路径]。例如: "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --disable-web-security --user-data-dir=C:\ChromeDevSession。
+
+重启Chrome: 使用修改后的快捷方式启动Chrome。
+
+
+
 ## 支持作者
 
 ### 第一作者

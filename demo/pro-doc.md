@@ -30,6 +30,8 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 需要在线申请一个origin trial token
 https://developer.chrome.com/origintrials/?utm_source=devtools#/view_trial/303992974847508481
 
+> 例如本地的地址为：http://localhost:8080，申请的时候，需要填写`http://localhost:8080`就可以了。
+
 然后配置到`index.html`中
 
 ```html
