@@ -1861,7 +1861,7 @@ https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
 ### 测试的时候遇到请求的连接（播放地址）跨域报错
 
 #### 方法1：使用扩展程序
-安装CORS扩展: 在Chrome Web Store中搜索并安装一个允许跨域请求的扩展程序，如“CORS Unblock”或“Allow CORS: Access-Control-Allow-Origin”。
+安装`CORS`扩展: 在`Chrome Web Store`中搜索并安装一个允许跨域请求的扩展程序，如“`CORS Unblock`”或“`Allow CORS: Access-Control-Allow-Origin`”。
 
 启用扩展程序: 安装完成后，在浏览器扩展程序栏中找到该扩展并启用。
 
@@ -1872,11 +1872,28 @@ https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
 
 修改启动快捷方式: 右击Chrome的启动快捷方式，选择“属性”。
 
-添加参数: 在“目标”字段中，Chrome.exe后添加参数 --disable-web-security --user-data-dir=[某个文件夹路径]。例如: "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --disable-web-security --user-data-dir=C:\ChromeDevSession。
+添加参数: 在“目标”字段中，Chrome.exe后添加参数 `--disable-web-security --user-data-dir=[某个文件夹路径]。`例如: "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --disable-web-security --user-data-dir=C:\ChromeDevSession。
 
 重启Chrome: 使用修改后的快捷方式启动Chrome。
 
 
+### 公网访问内网地址的时候报跨域错误
+
+比如在`https://jessibuca.com` 访问 `http://192.168.xxx.xxx/test.flv` 地址，会报`the request client is not a secure context and the resource is in more-private address space 'private'` 错误
+
+<img src="/public/img/play-192-error.png">
+
+#### 方法1：修改flags 参数
+打开  `chrome://flags/` 搜索 `Block insecure private network requests`，将其设置为 `Disabled`，然后重启浏览器。
+
+<img src="/public/img/block-insecure-setting.png">
+
+#### 方法2：使用扩展程序
+安装`CORS`扩展: 在`Chrome Web Store`中搜索并安装一个允许跨域请求的扩展程序，如“`CORS Unblock`”或“`Allow CORS: Access-Control-Allow-Origin`”。
+
+启用扩展程序: 安装完成后，在浏览器扩展程序栏中找到该扩展并启用。
+
+配置扩展程序: 根据需要配置扩展程序的设置，以允许特定的跨域请求。
 
 ## 支持作者
 
