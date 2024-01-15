@@ -1895,6 +1895,28 @@ https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
 
 配置扩展程序: 根据需要配置扩展程序的设置，以允许特定的跨域请求。
 
+
+### 关于播放器地址不带协议后缀的判断逻辑
+
+播放地址带协议后缀的：`https://test.com/play/xxxx.flv`
+
+播放地址不带协议后缀的：`https://test.com/play/xxxx`
+
+
+#### 开源版
+
+开源版目前支持`.flv`，还有 `m7s` 私有格式。 如果播放的地址不带`.flv` 例如:`https://test.com/play/xxxx` 播放器默认会按照`m7s`格式解析播放的。
+
+如果 `https://test.com/play/xxxx`  这种播放地址需要按照`flv` 协议解封装，则需要通过配置参数`isFlv:true`就行了。
+
+#### Pro 版本
+
+Pro版本支持所有的格式，如果播放的地址不带后缀，播放器会默认识别为`m7s`的私有格式。
+
+同理，如下想法按照某种特定格式解析播放的，例如 `flv`协议解析,则需要配置`isFlv:true`就行了，例如 `裸流的格式`， 则需要配置`isNakedFlow:true`就行了
+
+> 推荐如果没有协议后缀（例如.flv）的播放地址，通过指定解析协议参数来播放。
+
 ## 支持作者
 
 ### 第一作者
