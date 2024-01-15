@@ -77,6 +77,8 @@
                 </select>
                 <button onclick="handleSelectWindow()">选中</button>
                 <button onclick="handleGetSelectWindow()">获取当前选择窗口</button>
+                <button onclick="handleInitPlayerBySelectWindow()">初始化当前窗口播放器</button>
+                <button onclick="handleErrorMessage()">显示错误信息</button>
             </div>
         </div>
         <div class="input">
@@ -142,16 +144,24 @@
             console.log('dblSelected', selectedIndex);
         })
 
-        jessibucaMulti.on(JessibucaProMulti.MULTI_EVENTS.mouseOver, (selectedIndex) => {
+        jessibucaMulti.on(JessibucaProMulti.MULTI_EVENTS.mouseover, (selectedIndex) => {
             console.log('mouseOver', selectedIndex);
         })
 
-        jessibucaMulti.on(JessibucaProMulti.MULTI_EVENTS.mouseOut, (selectedIndex) => {
+        jessibucaMulti.on(JessibucaProMulti.MULTI_EVENTS.mouseout, (selectedIndex) => {
             console.log('mouseOut', selectedIndex);
         })
 
-        jessibucaMulti.on(JessibucaProMulti.MULTI_EVENTS.mouseUp, (selectedIndex) => {
+        jessibucaMulti.on(JessibucaProMulti.MULTI_EVENTS.mouseup, (selectedIndex) => {
             console.log('mouseUp', selectedIndex);
+        })
+
+        jessibucaMulti.on(JessibucaProMulti.MULTI_EVENTS.mousedown, (selectedIndex) => {
+            console.log('mousedown', selectedIndex);
+        })
+
+        jessibucaMulti.on(JessibucaProMulti.MULTI_EVENTS.mousemove, (selectedIndex) => {
+            console.log('mousemove', selectedIndex);
         })
 
         jessibucaMulti.on(JessibucaProMulti.EVENTS.stats, (index, stats) => {
@@ -165,9 +175,8 @@
         var href = $playHref.value;
         if (href) {
             jessibucaMulti.play(href);
-        }
-        else{
-            jessibucaMulti.showErrorMessageTips('播放地址不能为空');
+        } else {
+            handleErrorMessage('播放地址不能为空')
         }
     }
 
@@ -244,6 +253,32 @@
         if (jessibucaMulti) {
             const index = jessibucaMulti.getSelectedWindowIndex();
             console.log('当前选中窗口下标：', index);
+        }
+    }
+
+    function handleInitPlayerBySelectWindow() {
+        if (jessibucaMulti) {
+            jessibucaMulti.initSingle().then(() => {
+
+            }).catch((e) => {
+
+            });
+        }
+    }
+
+
+    function handleErrorMessage(msg) {
+        if (jessibucaMulti) {
+            // 判断是否已经初始化了player 了。
+            const isWindowItemHasInitPlayer = jessibucaMulti.isWindowItemHasInitPlayer();
+            msg = msg || '我是错误信息';
+            if (isWindowItemHasInitPlayer) {
+                jessibucaMulti.showErrorMessageTips(msg);
+            } else {
+                jessibucaMulti.initSingle().then(() => {
+                    jessibucaMulti.showErrorMessageTips(msg);
+                })
+            }
         }
     }
 
