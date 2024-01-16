@@ -438,10 +438,10 @@ https://caniuse.com/?search=OffscreenCanvas
 #### QUESTION
 多个iframe一起播放视频，如果有一个视频地址播放不了会导致其他地址也无法播放。
 
-
 #### ANSWER
 
-m7s ui 里面 我也是setTimeout 0去渲染的。或者建议你用Promise.resolve的形式去播放。
+1. m7s ui 里面 我也是setTimeout 0去渲染的。或者建议你用Promise.resolve的形式去播放。
+2. 如果是http或者ws接口，可以尝试换成https或者wss接口。
 
 
 ### vue3 下面使用Typescript
@@ -959,7 +959,13 @@ pro 由于使用了解码性能更强的simd解码，所以推荐使用simd 解�
 
 #### 开源版
 
-1.设置`debug:true`
+1.初始化播放器的时候，设置`debug:true`
+```js
+const jessibuca = new Jessibuca({
+    // 其他参数
+    debug:true
+})
+```
 
 2.从头开始播放，然后直到出错的时候，把F12控制台(console tab)的所有内容右键（save as）保存下来，以及播放器的配置信息，发给作者。
 
@@ -967,7 +973,15 @@ pro 由于使用了解码性能更强的simd解码，所以推荐使用simd 解�
 
 #### pro版本
 
-1.设置`debug:true`，`debugLevel:'debug'`
+1.初始化播放器的时候，设置`debug:true`，`debugLevel:'debug'`
+
+```js
+const jessibuca = new JessibucaPro({
+    // 其他参数
+    debug:true,
+    debugLevel:'debug'
+})
+```
 
 2.从头开始播放，然后直到出错的时候，把F12控制台(console tab)的所有内容右键（save as）保存下来，以及播放器的配置信息，发给作者。
 
