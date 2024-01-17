@@ -21,15 +21,24 @@ sidebar: false
 # 正在开发中，敬请期待
 
 
-开发进度：HLS(95%)
+开发进度：HLS(95%),MP4(95%)
 
 HLS体验版本请前往
 
 #### https
-[https://jessibuca.com/pro-vod/play-vod-demo.html](https://jessibuca.com/pro-vod/play-vod-demo.html)
+[https://jessibuca.com/pro-vod/play-vod-demo-hls.html](https://jessibuca.com/pro-vod/play-vod-demo-hls.html)
 
 #### http
-[http://jessibuca.monibuca.com/pro-vod/play-vod-demo.html](http://jessibuca.monibuca.com/pro-vod/play-vod-demo.html)
+[http://jessibuca.monibuca.com/pro-vod/play-vod-demo-hls.html](http://jessibuca.monibuca.com/pro-vod/play-vod-demo-hls.html)
+
+
+MP4体验版本请前往
+
+#### https
+[https://jessibuca.com/pro-vod/play-vod-demo-mp4.html](https://jessibuca.com/pro-vod/play-vod-demo-mp4.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro-vod/play-vod-demo-mp4.html](http://jessibuca.monibuca.com/pro-vod/play-vod-demo-mp4.html)
 
 
 离线版请前往 [下载](https://jessibuca.com/pro-vod.zip)
