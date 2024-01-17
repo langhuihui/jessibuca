@@ -108,6 +108,13 @@
                     checked
                     onclick="replay()"
                     type="checkbox"
+                    id="playBtn"
+                /><span>播放</span>
+                <span> | </span>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
                     id="fullscreen"
                 /><span>全屏</span>
                 <span> | </span>
@@ -186,6 +193,13 @@
                     id="extendBtn"
                 /><span>自定义按钮</span>
                 <span> | </span>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="speed"
+                /><span>网速</span>
+                <span> | </span>
             </div>
         </div>
 
@@ -263,6 +277,8 @@
     var $performance = document.getElementById('performance');
     var $close = document.getElementById('close');
     var $extendBtn = document.getElementById('extendBtn');
+    var $speed = document.getElementById('speed');
+    var $play = document.getElementById('playBtn');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -271,7 +287,7 @@
     function create() {
 
         const configBtns = {
-            play: true,
+            play: $play.checked === true,
             fullscreen: $fullscreen.checked === true,
             screenshot: $screenshot.checked === true,
             audio: $audio.checked === true,
@@ -313,7 +329,7 @@
             useMSE: $useMSE.checked === true,
             useSIMD: $useSIMD.checked === true,
             useWCS: $useWCS.checked === true,
-            showBandwidth: showOperateBtns, // 显示网速
+            showBandwidth: $speed.checked === true, // 显示网速
             showPerformance: showOperateBtns, // 显示性能
             operateBtns: configBtns,
             extendOperateBtns: extendOperateBtns,
@@ -332,7 +348,7 @@
             useCanvasRender: $renderDom.value === 'canvas',
             useWebGPU: $isUseWebGPU.value === 'webgpu',
             demuxUseWorker: $demuxUseWorker.checked === true,
-            controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
+            // controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
             // audioEngine:"worklet",
             // isFlv: true
         },);
