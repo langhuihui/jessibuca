@@ -226,6 +226,11 @@
                     /><span>音视频同步</span>
                     <input
                         type="checkbox"
+                        v-model="isDropSameTimestampGop"
+                        @change="restartPlay()"
+                    /><span>遇到相同时间戳是否丢gop</span>
+                    <input
+                        type="checkbox"
                         v-model="showPerformance"
                         @change="togglePerformance"
                     /><span>显示性能面板</span>
@@ -552,7 +557,8 @@ export default {
             talkSampleRate: 16000,
             talkSampleBitsWidth: 16,
             talkUrl: '',
-            checkFirstIFrame: true
+            checkFirstIFrame: true,
+            isDropSameTimestampGop: false
         };
     },
     mounted() {
@@ -694,6 +700,7 @@ export default {
                         ptzFocusShow: true,
                         controlHtml: '<div style="color: red">这个是自定义HTML</div>',
                         useWebGPU: this.canvasRenderType === 'webgpu',
+                        isDropSameTimestampGop: this.isDropSameTimestampGop
                     },
                     options
                 )
