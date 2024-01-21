@@ -41,4 +41,13 @@ MP4体验版本请前往
 [http://jessibuca.monibuca.com/pro-vod/play-vod-demo-mp4.html](http://jessibuca.monibuca.com/pro-vod/play-vod-demo-mp4.html)
 
 
+M7S-Crypto 加密流体验版本请前往
+
+#### https
+[https://jessibuca.com/pro-vod/play-vod-demo-crypto-m7s.html](https://jessibuca.com/pro-vod/play-vod-demo-crypto-m7s.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro-vod/play-vod-demo-crypto-m7s.html](http://jessibuca.monibuca.com/pro-vod/play-vod-demo-crypto-m7s.html)
+
+
 离线版请前往 [下载](https://jessibuca.com/pro-vod.zip)

@@ -68,6 +68,18 @@
             </div>
         </div>
         <div class="input">
+
+            <div>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="m7sCryptoAudio"
+                /><span>解密音频数据</span>
+                <span>秘钥：</span>
+                <input type="text" id="m7sKey" style="width: 200px" placeholder="请输入秘钥" value="">
+            </div>
+
             <button onclick="replay()">重播</button>
         </div>
         <div class="input">
@@ -104,6 +116,8 @@
     var $useWCS = document.getElementById('useWCS');
     var $playVodForward = document.getElementById('playVodForward');
     var $playVodBackword = document.getElementById('playVodBackword');
+    var $m7sKey = document.getElementById('m7sKey');
+    var $m7sCryptoAudio = document.getElementById('m7sCryptoAudio');
 
     var forceNoOffscreen = true; //
     var jessibuca = null;
@@ -136,6 +150,9 @@
             },
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
+            isM7sCrypto: true,
+            m7sCryptoKey: $m7sKey.value,
+            m7sCryptoAudio: $m7sCryptoAudio.checked === true,
         },);
 
         jessibuca.onLog = msg => console.error(msg);
