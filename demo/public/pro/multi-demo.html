@@ -53,6 +53,13 @@
             <button onclick="updateSplit(4)">4*4</button>
             <button onclick="updateSplitSpecial('3-1')">不规则(3-1)</button>
             <button onclick="updateSplitSpecial('4-1')">不规则(4-1)</button>
+            <div>
+                <input
+                    type="checkbox"
+                    onchange="replay()"
+                    id="supportDraggable"
+                /><span>支持拖拽</span>
+            </div>
         </div>
         <div class="input">
             <div>
@@ -107,6 +114,7 @@
     var $destroy = document.getElementById('destroy');
     var $destroySingle = document.getElementById('destroySingle');
     var $fullscreenMulti = document.getElementById('fullscreenMulti');
+    var $supportDraggable = document.getElementById('supportDraggable');
 
     let jessibucaMulti = null;
     var showOperateBtns = true; // 是否显示按钮
@@ -134,6 +142,8 @@
                 quality: showOperateBtns,
                 performance: showOperateBtns,
             },
+            draggable:$supportDraggable.checked === true
+            // supportMousemoveEvent: true,
         })
 
         jessibucaMulti.on(JessibucaProMulti.MULTI_EVENTS.selected, (selectedIndex) => {
@@ -166,6 +176,10 @@
 
         jessibucaMulti.on(JessibucaProMulti.EVENTS.stats, (index, stats) => {
             console.log(`stats-${index}`, stats);
+        })
+
+        jessibucaMulti.on(JessibucaProMulti.EVENTS.error, (selectedIndex,errorType,message) => {
+            console.error('error', selectedIndex,errorType,message);
         })
     }
 
