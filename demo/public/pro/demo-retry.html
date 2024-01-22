@@ -158,7 +158,7 @@
 
         <div class="input">
             <div>
-                播放异常(播放地址不同，报错等一切异常):
+                <span>播放异常(播放地址不同，报错等一切异常):</span>
                 <input
                     checked
                     type="checkbox"
@@ -167,10 +167,21 @@
                 <span>是否重播</span>
             </div>
         </div>
+        <div class="input">
+            <div>
+                <span>websocket 1006 错误内部重播：</span>
+                <input
+                    checked
+                    type="checkbox"
+                    id="websocket1006ErrorReplay"
+                />
+            </div>
+        </div>
 
         <div class="input">
             <div>
                 <input
+                    onclick="replay()"
                     checked
                     type="checkbox"
                     id="replayUseLastFrameShow"
@@ -189,7 +200,6 @@
             </div>
 
         </div>
-
 
         <div class="input">
             <div>输入URL：</div>
@@ -234,9 +244,10 @@
     var $heartTimeoutReplay = document.getElementById('heartTimeoutReplay');
     var $heartTimeout = document.getElementById('heartTimeout');
 
-    var replayUseLastFrameShow = document.getElementById('replayUseLastFrameShow');
+    var $replayUseLastFrameShow = document.getElementById('replayUseLastFrameShow');
 
     var $playErrorReplay = document.getElementById('playErrorReplay');
+    var $websocket1006ErrorReplay = document.getElementById('websocket1006ErrorReplay');
     var $replayShowLoadingIcon = document.getElementById('replayShowLoadingIcon');
     var $decoderErrorAutoWasm = document.getElementById('decoderErrorAutoWasm')
 
@@ -246,7 +257,7 @@
 
     function create(options) {
         options = options || {}
-        var _options = Object.assign({},{
+        var _options = Object.assign({}, {
             container: $container,
             videoBuffer: Number($videoBuffer.value), // 缓存时长
             videoBufferDelay: Number($videoBufferDelay.value), // 1000s
@@ -280,27 +291,35 @@
             loadingTimeout: Number($loadingTimeout.value),
             loadingTimeoutReplay: $loadingTimeoutReplay.checked === true,
             loadingTimeoutReplayTimes: Number($loadingTimeoutReplayTimes.value),
-            replayUseLastFrameShow: replayUseLastFrameShow.checked === true,
+            replayUseLastFrameShow: $replayUseLastFrameShow.checked === true,
             replayShowLoadingIcon: $replayShowLoadingIcon.checked === true,// 重播显示loading
             decoderErrorAutoWasm: $decoderErrorAutoWasm.checked === true, // 解码失败自动降级到 wasm 模式
             useCanvasRender: $renderDom.value === 'canvas',
             useWebGPU: $isUseWebGPU.value === 'webgpu',
             demuxUseWorker: $demuxUseWorker.checked === true,
             controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
+            websocket1006ErrorReplay: $websocket1006ErrorReplay.checked === true,
             // audioEngine:"worklet",
             // isFlv: true
-        },options)
+        }, options)
         jessibuca = new JessibucaPro(_options);
 
 
         //  监听播放器事件
         if ($playErrorReplay.checked === true) {
             //  一直播放
-            jessibuca.on('playFailedAndPaused', function (error, frameInfo) {
-                console.error('playFailedAndPaused', error);
+            jessibuca.on('playFailedAndPaused', function (error, frameInfo, msg) {
+                console.error('playFailedAndPaused', error, msg);
                 //  延迟个2秒再重连
                 setTimeout(() => {
-                    replay(frameInfo)
+                    //  触发重播的时候，是否使用最后一帧来显示
+                    if ($replayUseLastFrameShow.checked === true) {
+                        // 最后一帧显示
+                        replay(frameInfo)
+                    } else {
+                        replay();
+                    }
+
                 }, 1 * 1000)
             });
         }
@@ -320,13 +339,12 @@
             jessibuca.play(href).then(() => {
                 console.log('play success')
             }).catch((e) => {
-                console.error('play error',e);
+                console.error('play error', e);
             });
             $player.style.display = 'none';
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
-        }
-        else{
+        } else {
             jessibuca.showErrorMessageTips('播放地址不能为空');
         }
     }

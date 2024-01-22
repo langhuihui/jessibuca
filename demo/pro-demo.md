@@ -356,7 +356,6 @@
 
 
 
-
 ### PTZ云台操作(支持生成国标编码)
 ------
 #### https
@@ -364,15 +363,6 @@
 
 #### http
 [http://jessibuca.monibuca.com/pro/demo-ptz.html](http://jessibuca.monibuca.com/pro/demo-ptz.html)
-
-
-### 异常断开重连(支持配置不黑屏)
-------
-#### https
-[https://jessibuca.com/pro/demo-retry.html](https://jessibuca.com/pro/demo-retry.html)
-
-#### http
-[http://jessibuca.monibuca.com/pro/demo-retry.html](http://jessibuca.monibuca.com/pro/demo-retry.html)
 
 ### 视频录制（WebM格式(音频+视频)、Mp4格式(视频)，Flv格式(音频+视频)）
 ------
@@ -400,13 +390,13 @@
 [http://jessibuca.monibuca.com/pro/demo-loop.html](http://jessibuca.monibuca.com/pro/demo-loop.html)
 
 
-### 一直播放,自动续连(超时、断网重连、异常暂停播放等)
+### 异常断开重连,自动续连(超时、断网重连、异常暂停播放等,支持配置不黑屏)
 ------
 #### https
-[https://jessibuca.com/pro/demo-replay.html](https://jessibuca.com/pro/demo-replay.html)
+[https://jessibuca.com/pro/demo-retry.html](https://jessibuca.com/pro/demo-retry.html)
 
 #### http
-[http://jessibuca.monibuca.com/pro/demo-replay.html](http://jessibuca.monibuca.com/pro/demo-replay.html)
+[http://jessibuca.monibuca.com/pro/demo-retry.html](http://jessibuca.monibuca.com/pro/demo-retry.html)
 
 
 ### 窗口最小化一定时间触发暂停播放
