@@ -310,17 +310,24 @@
             //  一直播放
             jessibuca.on('playFailedAndPaused', function (error, frameInfo, msg) {
                 console.error('playFailedAndPaused', error, msg);
-                //  延迟个2秒再重连
-                setTimeout(() => {
-                    //  触发重播的时候，是否使用最后一帧来显示
-                    if ($replayUseLastFrameShow.checked === true) {
-                        // 最后一帧显示
-                        replay(frameInfo)
-                    } else {
-                        replay();
-                    }
+                //  触发重播的时候，是否使用最后一帧来显示
+                if ($replayUseLastFrameShow.checked === true) {
+                    // 最后一帧显示
+                    resetPlayer(frameInfo).then(() => {
+                        //  延迟个1秒再重连
+                        setTimeout(() => {
+                            play();
+                        }, 1 * 1000)
 
-                }, 1 * 1000)
+                    });
+                } else {
+                    resetPlayer().then(() => {
+                        //  延迟个1秒再重连
+                        setTimeout(() => {
+                            play();
+                        }, 1 * 1000)
+                    });
+                }
             });
         }
 
@@ -347,6 +354,20 @@
         } else {
             jessibuca.showErrorMessageTips('播放地址不能为空');
         }
+    }
+
+    function resetPlayer(options) {
+        return new Promise((resolve, reject) => {
+            if (jessibuca) {
+                jessibuca.destroy().then(() => {
+                    create(options);
+                    resolve();
+                });
+            } else {
+                create();
+                resolve();
+            }
+        })
     }
 
 
