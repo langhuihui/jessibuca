@@ -101,6 +101,18 @@
                 /><span>SIMD</span>
             </div>
             <div class="input">
+                <input
+                    v-model="demuxUseWorker"
+                    type="checkbox"
+                    @change="restartPlay()"
+                /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
+                <input
+                    v-model="mseDecoderUseWorker"
+                    type="checkbox"
+                    @change="restartPlay()"
+                /><span>硬解码(MediaSource)worker解码</span>
+            </div>
+            <div class="input">
                 <div>
                     <div v-if="supportMT" style="display: inline-block">
                         <input
@@ -558,7 +570,9 @@ export default {
             talkSampleBitsWidth: 16,
             talkUrl: '',
             checkFirstIFrame: true,
-            isDropSameTimestampGop: false
+            isDropSameTimestampGop: false,
+            demuxUseWorker: true,
+            mseDecoderUseWorker: false
         };
     },
     mounted() {
@@ -700,7 +714,9 @@ export default {
                         ptzFocusShow: true,
                         controlHtml: '<div style="color: red">这个是自定义HTML</div>',
                         useWebGPU: this.canvasRenderType === 'webgpu',
-                        isDropSameTimestampGop: this.isDropSameTimestampGop
+                        isDropSameTimestampGop: this.isDropSameTimestampGop,
+                        demuxUseWorker: this.demuxUseWorker,
+                        mseDecoderUseWorker: this.mseDecoderUseWorker,
                     },
                     options
                 )
@@ -1361,6 +1377,7 @@ export default {
     margin-top: 3px;
     color: white;
     place-content: stretch;
+    border-bottom: 1px solid #ccc;
 }
 
 .input-wrap {

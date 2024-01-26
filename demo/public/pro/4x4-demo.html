@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="origin-trial"
+          content="AhQB+uNRI7lww30oPK+0ZcGotIvuoHJL+NkkWOhqDdooY6+xnuiYmZli2SwlH1vkrKdB5WxMpsv5KRc/q9zFswoAAAB3eyJvcmlnaW4iOiJodHRwczovL2plc3NpYnVjYS5jb206NDQzIiwiZmVhdHVyZSI6IlVucmVzdHJpY3RlZFNoYXJlZEFycmF5QnVmZmVyIiwiZXhwaXJ5IjoxNzA5ODU1OTk5LCJpc1N1YmRvbWFpbiI6dHJ1ZX0=">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Jessibuca Pro 4x4 demo</title>
     <script src="./vconsole.js"></script>
@@ -95,6 +97,12 @@
                     type="checkbox"
                     id="useSIMD"
                 /><span>SIMD</span>
+                <input
+                    type="checkbox"
+                    checked
+                    id="useSIMDMThreading"
+                    onclick="replay()"
+                /><span>启动多线程（仅WASM,WASM(SIMD)解码支持）</span>
             </div>
         </div>
         <div class="input">
@@ -119,6 +127,12 @@
                     type="checkbox"
                     id="demuxUseWorker"
                 /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="mseDecoderUseWorker"
+                /><span>硬解码(MediaSource)worker解码</span>
             </div>
         </div>
         <div class="input">
@@ -281,8 +295,10 @@
     var $videoBufferDelay = document.getElementById('videoBufferDelay');
     var $replay = document.getElementById('replay');
     var $demuxUseWorker = document.getElementById('demuxUseWorker');
+    var $mseDecoderUseWorker = document.getElementById('mseDecoderUseWorker');
     var $isDebug = document.getElementById('isDebug');
     var $isFlv = document.getElementById('isFlv');
+    var $useSIMDMThreading = document.getElementById('useSIMDMThreading');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -303,8 +319,10 @@
             debugLevel: $isDebug.checked === true ? "debug" : '',
             isMulti: true,
             useMSE: $useMSE.checked === true,
+            decoderErrorAutoWasm: false,
             useSIMD: $useSIMD.checked === true,
             useWCS: $useWCS.checked === true,
+            useMThreading: $useSIMDMThreading.checked === true,
             hasAudio: false,
             useVideoRender: true,
             controlAutoHide: true,
@@ -325,6 +343,7 @@
                 top: 10
             },
             demuxUseWorker: $demuxUseWorker.checked === true,
+            mseDecoderUseWorker:$mseDecoderUseWorker.checked === true,
         },);
 
         jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {

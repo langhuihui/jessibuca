@@ -187,6 +187,12 @@
                     type="checkbox"
                     id="demuxUseWorker"
                 /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="mseDecoderUseWorker"
+                /><span>硬解码(MediaSource)worker解码</span>
             </div>
         </div>
         <div class="input">
@@ -541,6 +547,7 @@
     var $pause = document.getElementById('pause');
     var $destroy = document.getElementById('destroy');
     var $demuxUseWorker = document.getElementById('demuxUseWorker');
+    var $mseDecoderUseWorker = document.getElementById('mseDecoderUseWorker');
     var $isFlv = document.getElementById('isFlv');
 
 
@@ -561,6 +568,7 @@
             loadingText: "加载中",
             debug: true,
             debugLevel: "debug",
+            decoderErrorAutoWasm: false,
             showBandwidth: showOperateBtns, // 显示网速
             showPerformance:showOperateBtns,
             useMSE: true,
@@ -580,6 +588,8 @@
                 top: 10
             },
             demuxUseWorker: $demuxUseWorker.checked === true,
+            mseDecoderUseWorker:$mseDecoderUseWorker.checked === true,
+
         },);
         jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
             jessibuca.showErrorMessageTips('播放异常：' + error);

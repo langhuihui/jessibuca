@@ -110,6 +110,12 @@
                     type="checkbox"
                     id="demuxUseWorker"
                 /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="mseDecoderUseWorker"
+                /><span>硬解码(MediaSource)worker解码</span>
             </div>
         </div>
         <div class="input">
@@ -166,6 +172,7 @@
     var $useSIMDMThreading = document.getElementById('useSIMDMThreading');
     var $replayUseLastFrameShow = document.getElementById('replayUseLastFrameShow');
     var $replayShowLoadingIcon = document.getElementById('replayShowLoadingIcon');
+    var $mseDecoderUseWorker = document.getElementById('mseDecoderUseWorker');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -185,6 +192,7 @@
             debug: true,
             debugLevel: "debug",
             useMSE: $useMSE.checked === true,
+            decoderErrorAutoWasm: false,
             useSIMD: $useSIMD.checked === true,
             useWCS: $useWCS.checked === true,
             useMThreading: $useSIMDMThreading.checked === true,
@@ -222,6 +230,8 @@
             heartTimeoutReplayUseLastFrameShow: $replayUseLastFrameShow.checked === true,
             replayUseLastFrameShow: $replayUseLastFrameShow.checked === true, // 重播使用上一帧显示
             replayShowLoadingIcon: $replayShowLoadingIcon.checked === true,// 重播显示loading
+            mseDecoderUseWorker:$mseDecoderUseWorker.checked === true,
+
         },);
 
 
