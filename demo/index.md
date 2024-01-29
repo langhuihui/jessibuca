@@ -35,6 +35,8 @@ features:
   details: 支持录制MP4和WebM格式(video/webm;codecs=h264)的视频录制。(基于MediaRecorder),(MP4格式支持在IOS VLC播放器显示时长播放，Android VLC播放器无法显示时长播放，PC VLC播放器可以播放)。
 - title: 支持MediaSource硬解码（H.265）(Pro)
   details: 支持MediaSource硬解码H.265视频。(Safari on iOS不支持)。
+- title: 支持MediaSource Worker硬解码（H.264/H.265）(Pro)
+  details: 支持MediaSource Worker线程硬解码H.264/H.265视频。(Safari on iOS不支持)。
 - title: 支持Webcodecs硬解码（H.265）(Pro)
   details: 支持Webcodecs硬解码H.265。(需在chrome 94版本、Safari 16版本以上，需要https或者localhost环境)。
 - title: 支持视频录制MP4格式(Pro)
