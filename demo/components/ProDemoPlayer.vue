@@ -553,7 +553,7 @@ export default {
             audioInfo: {},
             playbackRate: 1,
             playModel: 'video+audio',
-            isFlv: true,
+            isFlv: false,
             isFmp4: false,
             hiddenAutoPause: false,
             hasVideo: true,
