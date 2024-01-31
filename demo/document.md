@@ -654,16 +654,6 @@ Jessibuca是一款开源的纯H5直播流播放器。
 
 > 所以 暂不支持 本地文件打开。
 
-
-### 可以播放MP4视频吗？
-
-回答：不可以.
-
-jessibuca 定位是直播流播放器。
-
-> 所以 暂不支持 MP4点播文件。
-
-
 ### 是否可支持倍速播放
 
 pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
@@ -767,11 +757,15 @@ pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
 见 https://github.com/bosscheng/jessibuca-react-demo/tree/v3
 
 
-### vue 解决方案
+#### vue 解决方案
 
 https://github.com/bosscheng/jessibuca-vue-demo/tree/v3
 
 typescript:https://github.com/bosscheng/jessibuca-vue-ts-demo
+
+#### 网友的解决方案
+
+https://blog.csdn.net/nbwgl/article/details/122652003
 
 
 ### 有数据,但是没有画面出来
@@ -1874,7 +1868,7 @@ https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
 
 1. [video.js](https://videojs.com/)
 2. [xgplayer.js](https://h5player.bytedance.com/)
-3. JessibucaProVod 正在开发中，敬请期待。
+3. [JessibucaProVod](https://jessibuca.com/player-pro-vod.html) 正在开发中，敬请期待。
 
 
 ### 测试的时候遇到请求的连接（播放地址）跨域报错
