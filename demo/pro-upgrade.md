@@ -23,25 +23,26 @@
 
 替换成
 
-- jessibuca-pro.js（web-player-pro.js） 或 jessibuca-pro-multi.js（web-player-pro-multi.js）   // 主文件(需要通过script标签引入)
+- jessibuca-pro-demo.js 或 jessibuca-pro-multi-demo.js   // 主文件(需要通过script标签引入)
 
-- decoder-pro.js  //  worker解码器(这个库无需引入)
-- decoder-pro.wasm // worker解码器胶水文件(这个库无需引入)
+- decoder-pro.js  //  worker解码器(这个库无需引入,播放器内部会自己引入)
+- decoder-pro.wasm // worker解码器胶水文件(这个库无需引入,播放器内部会自己引入)
 
-- decoder-pro-simd.js // worker-simd解码器(这个库无需引入)
-- decoder-pro-simd.wasm // worker-simd解码器胶水文件(这个库无需引入)
+- decoder-pro-simd.js // worker-simd解码器(这个库无需引入,播放器内部会自己引入)
+- decoder-pro-simd.wasm // worker-simd解码器胶水文件(这个库无需引入,播放器内部会自己引入)
 
-- decoder-pro-hard.js // worker硬解码解封装+audio解码(这个库无需引入)
-- decoder-pro-audio.js // worker音频解码器(这个库无需引入)
-- decoder-pro-audio.wasm // worker音频解码器胶水文件(这个库无需引入)
+- decoder-pro-hard.js // worker硬解码解封装+audio解码(这个库无需引入,播放器内部会自己引入)
+- decoder-pro-hard-not-wasm.hs // worker硬解码解封装(这个库无需引入,播放器内部会自己引入)
+- decoder-pro-audio.js // worker音频解码器(这个库无需引入,播放器内部会自己引入)
+- decoder-pro-audio.wasm // worker音频解码器胶水文件(这个库无需引入,播放器内部会自己引入)
 
-- decoder-pro-mt.js // worker多线程解码器(这个库无需引入)
-- decoder-pro-mt.wasm // worker多线程解码器胶水文件(这个库无需引入)
-- decoder-pro-mt-worker.js // worker多线程解码器(这个库无需引入)
+- decoder-pro-mt.js // worker多线程解码器(这个库无需引入,播放器内部会自己引入)
+- decoder-pro-mt.wasm // worker多线程解码器胶水文件(这个库无需引入,播放器内部会自己引入)
+- decoder-pro-mt-worker.js // worker多线程解码器(这个库无需引入,播放器内部会自己引入)
 
-- decoder-pro-simd-mt.jd // worker-simd多线程解码器(这个库无需引入)
-- decoder-pro-simd-mt.wasm // worker-simd多线程解码器胶水文件(这个库无需引入)
-- decoder-pro-simd-mt-worker.js // worker-simd多线程解码器(这个库无需引入)
+- decoder-pro-simd-mt.jd // worker-simd多线程解码器(这个库无需引入,播放器内部会自己引入)
+- decoder-pro-simd-mt.wasm // worker-simd多线程解码器胶水文件(这个库无需引入,播放器内部会自己引入)
+- decoder-pro-simd-mt-worker.js // worker-simd多线程解码器(这个库无需引入,播放器内部会自己引入)
 
 > 如果有多屏需求，可以将`jessibuca-pro.js`替换成`jessibuca-pro-multi.js`。
 
@@ -49,6 +50,38 @@
 
 > `decoder-pro-simd.js`是simd解码器（适用于高分辨率解码）
 
+## js以及decoder的配置
+
+将原本html 里面引用的 `jessibuca.js` 替换成 `jessibuca-pro-demo.js` 或者 `jessibuca-pro-multi-demo.js`
+
+```html
+<html>
+    <head>
+<!--        <script src="./js/jessibuca.js"></script>-->
+        <script src="./js/jessibuca-pro-demo.js"></script>
+    </head>
+</html>
+
+```
+
+将配置参数 解码器`decoder` 替换成 pro解码器
+
+原本的开源版的
+```js
+// 原本的
+const jessibuca = new Jessibuca({
+    // ...
+    decoder:'your-path/decoder.js'
+})
+```
+
+
+```js
+const jessibucaPro = new JessibucaPro({
+    // ...
+    decoder:'your-path/decoder-pro.js'
+})
+```
 
 
 ## 替换方法
