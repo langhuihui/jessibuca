@@ -251,7 +251,7 @@
             <div class="input">
                 <div>输入URL：</div>
                 <input
-                    placeholder="支持 hls/ws-raw/ws-flv/http-flv/fmp4协议"
+                    placeholder="支持 hls/ws-raw/ws-flv/http-flv/fmp4/mpeg-ts/webrtc/Aliyun-rtc/裸流/等协议"
                     type="input"
                     autocomplete="on"
                     v-model="playUrl"

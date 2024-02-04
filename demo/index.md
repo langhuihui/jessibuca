@@ -52,11 +52,13 @@ features:
 - title: 支持录像流播放(Pro)
   details: 支持音视频流的倍数播放
 - title: 支持HLS直播协议(Pro)
-  details: 支持HLS直播协议
+  details: 支持HLS直播(H264/H265)协议
 - title: 支持fmp4格式直播协议(Pro)
-  details: 支持fmp4格式直播协议
+  details: 支持fmp4格式(H264/H265)直播协议
+- title: 支持MPEG-TS格式直播协议(Pro)
+  details: 支持MPEG-TS格式(H264/H265)直播协议
 - title: 支持crypto解密播放(Pro)
-  details: 支持crypto解密播放
+  details: 支持crypto解密(H264/H265)播放
 - title: 支持WebTransport协议播放(Pro)
   details: 支持WebTransport协议播放
 - title: 支持裸流播放（H.264/H.265）(Pro)

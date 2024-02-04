@@ -28,7 +28,7 @@ sidebar: false
 
 [Pro 文档](/pro.html)
 
-# 支持18种格式：(live/test为streamPath)
+# 支持19种格式：(live/test为streamPath)
 
 1. ws(s)-raw 即ws(s)://host-name:port/jessica/`live/test` (该协议只对接了[monibuca服务器](https://monibuca.com),其他服务器需要额外对接)
 2. ws(s)-flv 即ws(s)://host-name:port/jessica/`live/test`.flv（chrome下ip会报安全错误，建议域名形式访问，检查下端口范围chrome浏览器是否允许，chrome会默认禁用很多端口）
@@ -47,10 +47,12 @@ sidebar: false
 15. ws(s)-h265 即ws(s)://host-name:port/jessica/`live/test`.h265
 16. ws(s)-mpeg4 即ws(s)://host-name:port/your-path/`live/test`.mpeg4
 17. http(s)-mpeg4 即http(s)://host-name:port/your-path/`live/test`.mpeg4
-17. artc-aliyun Web Rtc 即artc://host-name:port/xxxx(根据阿里云的播放地址来)
+18. artc-aliyun Web Rtc 即artc://host-name:port/xxxx(根据阿里云的播放地址来)
+19. http(s)-ts 即http(s)://host-name:port/your-path/`live/test`.ts (mpeg-ts 支持H264/H265)
 - 注意http协议会有跨域问题，需要设置cors头
 - 协议同时支持https、wss
 - 同时支持H264和H265编码格式
+- 支持mpeg4编码格式
 - 支持webcodecs硬解码(H264+H265)和MSE硬解码(H264+H265)
 - 支持HLS(H264+H265)软解码、硬解码
 - 支持`m7s` webrtc(H264+H265(软解码、硬解码))，
@@ -60,7 +62,7 @@ sidebar: false
 - 支持加密流(国标SM4、m7s加密流)
 - 支持裸流(H264+H265)
 - 支持Fmp4格式(H264+H265)
-- 支持mpeg4格式(H264)
+- 支持mpeg-ts格式(H264+H265)
 - 支持阿里云Web Rtc播放 [阿里云Web Rtc](https://help.aliyun.com/zh/live/user-guide/web-rts-sdk-overview?spm=a2c4g.11186623.0.i1)
 
 <Rice/>

@@ -79,6 +79,8 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 | xor加密流                                           | 不支持    | 支持 |
 | 支持fmp4协议流(H264/H265)                             | 不支持   | 支持 |
 | 支持裸流格式(H264/H265)                                | 不支持   | 支持 |
+| 支持mpeg4格式                                  | 不支持   | 支持 |
+| 支持MPEG-TS格式(H264/H265)                                      | 不支持   | 支持 |
 | 动态分辨率                                            | 不支持   | 支持 |
 | 微信等H5页面加载自动播放视频                                  | 支持    | 支持 |
 | 显示模式（填充，等比，等比缩放）                                 | 支持    | 支持 |
@@ -170,7 +172,8 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 - decoder-pro-simd.wasm(胶水文件)
 - decoder-pro-audio.js(不需要配置，播放器内部会引用)
 - decoder-pro-audio.wasm(胶水文件)
-- decoder-pro-hard.js(硬解码解封装数据)
+- decoder-pro-hard.js(硬解码解封装数据,播放器内部会引用)
+- decoder-pro-hard-not-wasm.js(硬解码解封装数据,播放器内部会引用)
 - decoder-pro-mt.js(不需要配置，播放器内部会引用)
 - decoder-pro-mt-worker.js(不需要配置，播放器内部会引用)
 - decoder-pro-mt-worker.wasm(胶水文件)
@@ -192,10 +195,9 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 - jessibuca-pro-talk-demo.js(script标签引入)
 
 
-
 ## 直播协议支持
 
-支持17种直播格式
+支持18种直播格式
 
 | 协议                         | 支持情况 |
 |:---------------------------| :--- |
@@ -210,12 +212,14 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 | http-h265                  | 支持 |
 | ws-h265                    | 支持 |
 | mpeg4                      | 支持 |
+| mpeg-ts                    | 支持 |
 | WebTransport(M7S服务器)       | 支持 |
 | Webrtc H264(M7S服务器)        | 支持 |
 | Webrtc H265(M7S服务器)        | 支持 |
 | Webrtc H264(zlmediakit服务器) | 支持 |
 | Webrtc H264(SRS服务器)        | 支持 |
 | Webrtc H264(其他服务器)         | 支持 |
+| 阿里云Web Rtc                 | 支持 |
 | 加密私有协议 (M7S服务器)            | 支持 |
 | 国标SM4加密流                   | 支持 |
 
