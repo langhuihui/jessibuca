@@ -202,19 +202,6 @@
             sm4CryptoKey: $sm4Key.value
         },);
 
-
-        jessibuca.on('ptz', (arrow) => {
-            // console.log('ptz', arrow);
-        })
-
-        jessibuca.on('streamQualityChange', (value) => {
-            console.log('streamQualityChange', value);
-        })
-
-        jessibuca.on('timeUpdate', (value) => {
-            // console.log('timeUpdate', value);
-        })
-
         jessibuca.on('stats', (stats) => {
             // console.log('stats', stats);
             $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`

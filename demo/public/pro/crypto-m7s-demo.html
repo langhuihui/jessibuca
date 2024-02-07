@@ -211,31 +211,18 @@
             m7sCryptoAudio: $m7sCryptoAudio.checked === true,
         },);
 
-
-        jessibuca.on('ptz', (arrow) => {
-            // console.log('ptz', arrow);
-        })
-
-        jessibuca.on('streamQualityChange', (value) => {
-            console.log('streamQualityChange', value);
-        })
-
-        jessibuca.on('timeUpdate', (value) => {
-            // console.log('timeUpdate', value);
-        })
-
         jessibuca.on('stats', (stats) => {
             // console.log('stats', stats);
             $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
         })
 
-        jessibuca.on(JessibucaPro.EVENTS.crashLog, (log) => {
-            console.log('crashLog', log)
-        })
-
 
         jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
             jessibuca.showErrorMessageTips('播放异常：' + error);
+        })
+
+        jessibuca.on(JessibucaPro.EVENTS.crashLog,(log)=>{
+            console.error('crashLog',log)
         })
 
         $player.style.display = 'inline-block';

@@ -208,6 +208,10 @@
             $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
         })
 
+        jessibuca.on(JessibucaPro.EVENTS.crashLog,(log)=>{
+            console.error('crashLog',log)
+        })
+
 
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';

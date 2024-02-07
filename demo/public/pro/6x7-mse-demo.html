@@ -595,6 +595,10 @@
             jessibuca.showErrorMessageTips('播放异常：' + error);
         })
 
+        jessibuca.on(JessibucaPro.EVENTS.crashLog,(log)=>{
+            console.error('crashLog',log)
+        })
+
         playList.push(jessibuca);
     }
 

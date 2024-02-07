@@ -827,6 +827,15 @@ export default {
                 console.log('ptz arrow', arrow);
             })
 
+            jessibuca.on(JessibucaPro.EVENTS.crashLog, (log) => {
+                console.error('crashLog', log)
+            })
+
+            jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
+                jessibuca.showErrorMessageTips('播放异常：' + error);
+            })
+
+
             jessibuca.on('performance', (performance) => {
                 !this.isDebug && console.log('performance: ', performance);
             })
