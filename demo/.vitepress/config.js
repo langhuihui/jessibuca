@@ -12,6 +12,7 @@ module.exports = {
                 items: [
                     {text: '文档', link: '/document'},
                     {text: 'Demo', link: '/demo'},
+                    {text: '测试地址', link: '/test-url'},
                 ]
             },
             {text: '播放器(Pro)', link: '/player-pro'},
