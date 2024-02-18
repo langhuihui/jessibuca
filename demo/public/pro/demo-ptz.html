@@ -108,6 +108,21 @@
                     <option value="click" selected>鼠标点击</option>
                     <option value="mouseDownAndUp">鼠标点中、松开</option>
                 </select>
+                <span>ptz排版布局：</span>
+                <select id="ptzShowType" onchange="replay()">
+                    <option value="vertical" selected>垂直</option>
+                    <option value="level">水平</option>
+                </select>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="ptzSupportDraggable"
+                /><span>是否显示ptz拖拽</span>
             </div>
         </div>
         <div class="input">
@@ -150,7 +165,36 @@
                 /><span>是否显示ptz focus（光圈） 按钮</span>
             </div>
         </div>
-
+        <div class="input">
+            <div>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="ptzCruiseShow"
+                /><span>是否显示cruise（巡航） 按钮</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="ptzFogShow"
+                /><span>是否显示Fog（透雾） 按钮</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="ptzWiperShow"
+                /><span>是否显示wiper（雨刷） 按钮</span>
+            </div>
+        </div>
         <div class="input">
             <div>输入URL：</div>
             <input
@@ -164,6 +208,12 @@
         <div class="input" style="line-height: 30px">
             <button id="destroy">销毁</button>
             <span class="fps-inner"></span>
+        </div>
+        <div class="input">
+            <div>
+                <textarea name="" id="ptzPosition" cols="30" rows="10">{"left":"10px","top":"100px"}</textarea>
+                <button onclick="setPtzPosition()">更新位置</button>
+            </div>
         </div>
     </div>
 </div>
@@ -191,6 +241,12 @@
     var $ptzZoomShow = document.getElementById('ptzZoomShow');
     var $ptzApertureShow = document.getElementById('ptzApertureShow');
     var $ptzFocusShow = document.getElementById('ptzFocusShow');
+    var $ptzCruiseShow = document.getElementById('ptzCruiseShow');
+    var $ptzFogShow = document.getElementById('ptzFogShow');
+    var $ptzShowType = document.getElementById('ptzShowType');
+    var $ptzWiperShow = document.getElementById('ptzWiperShow')
+    var $ptzPosition = document.getElementById('ptzPosition');
+    var $ptzSupportDraggable = document.getElementById('ptzSupportDraggable');
 
 
     var showOperateBtns = true; // 是否显示按钮
@@ -235,14 +291,20 @@
             ptzMoreArrowShow: $ptzMoreArrowShow.checked === true,
             ptzApertureShow: $ptzApertureShow.checked === true,
             ptzFocusShow: $ptzFocusShow.checked === true,
+            ptzCruiseShow: $ptzCruiseShow.checked === true,
+            ptzFogShow: $ptzFogShow.checked === true,
+            ptzWiperShow: $ptzWiperShow.checked === true,
+            ptzShowType: $ptzShowType.value,
             useCanvasRender: $renderDom.value === 'canvas',
             useWebGPU: $isUseWebGPU.value === 'webgpu',
             demuxUseWorker: $demuxUseWorker.checked === true,
+            ptzPositionConfig: {
+                right: '10px',
+                top: '10px'
+            },
+            ptzSupportDraggable: $ptzSupportDraggable.checked === true,
         },);
 
-        jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
-            jessibuca.showErrorMessageTips('播放异常：' + error);
-        })
 
         jessibuca.on('ptz', (arrow) => {
             console.log('ptz', arrow);
@@ -267,9 +329,6 @@
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
         }
-        else{
-            jessibuca.showErrorMessageTips('播放地址不能为空');
-        }
     }
 
 
@@ -282,6 +341,14 @@
         } else {
             create();
             play();
+        }
+    }
+
+    function setPtzPosition(){
+        if(jessibuca){
+            let value = $ptzPosition.value;
+            value = JSON.parse(value);
+            jessibuca.setPtzPosition(value);
         }
     }
 
