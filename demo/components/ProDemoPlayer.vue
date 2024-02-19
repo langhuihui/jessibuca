@@ -580,7 +580,7 @@ export default {
             this.vConsole = new window.VConsole();
         }
         this.supportMSEHevc = window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="hev1.1.6.L123.b0"');
-        this.supportMSE = window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="avc1.64002A"');
+        this.supportMSE = ('MediaSource' in self) || ('ManagedMediaSource' in self);
         this.supportWCS = "VideoEncoder" in window;
         this.supportWebgpu = 'gpu' in navigator;
         const browserInfo = getBrowser();

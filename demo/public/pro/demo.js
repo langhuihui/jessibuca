@@ -73,7 +73,7 @@ function checkSupportMSEHevc() {
 }
 
 function checkSupportMSEH264() {
-    return window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="avc1.64002A"');
+    return ('MediaSource' in self) || ('ManagedMediaSource' in self)
 }
 
 function checkSupportWCSHevc() {
