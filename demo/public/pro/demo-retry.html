@@ -255,7 +255,7 @@
     var forceNoOffscreen = true; //
     var jessibuca = null;
 
-    function create(options) {
+    function create(options, isReplay) {
         options = options || {}
         var _options = Object.assign({}, {
             container: $container,
@@ -293,6 +293,7 @@
             loadingTimeoutReplayTimes: Number($loadingTimeoutReplayTimes.value),
             replayUseLastFrameShow: $replayUseLastFrameShow.checked === true,
             replayShowLoadingIcon: $replayShowLoadingIcon.checked === true,// 重播显示loading
+            loadingIcon: isReplay !== true || ($replayShowLoadingIcon.checked === true && isReplay === true),
             decoderErrorAutoWasm: $decoderErrorAutoWasm.checked === true, // 解码失败自动降级到 wasm 模式
             useCanvasRender: $renderDom.value === 'canvas',
             useWebGPU: $isUseWebGPU.value === 'webgpu',
@@ -360,11 +361,11 @@
         return new Promise((resolve, reject) => {
             if (jessibuca) {
                 jessibuca.destroy().then(() => {
-                    create(options);
+                    create(options, true);
                     resolve();
                 });
             } else {
-                create();
+                create({}, true);
                 resolve();
             }
         })
