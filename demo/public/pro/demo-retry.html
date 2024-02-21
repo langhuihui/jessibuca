@@ -281,10 +281,8 @@
             },
             pauseAndNextPlayUseLastFrameShow: true,
             heartTimeoutReplayUseLastFrameShow: true,
-            audioEngine: "worklet",
             qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
             forceNoOffscreen: forceNoOffscreen,
-            isNotMute: false,
             heartTimeout: Number($heartTimeout.value),
             heartTimeoutReplay: $heartTimeoutReplay.checked === true,
             heartTimeoutReplayTimes: Number($heartTimeoutReplayTimes.value),
@@ -300,6 +298,7 @@
             demuxUseWorker: $demuxUseWorker.checked === true,
             controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
             websocket1006ErrorReplay: $websocket1006ErrorReplay.checked === true,
+            playFailedAndPausedShowPlayBtn:false, //
             // audioEngine:"worklet",
             // isFlv: true
         }, options)
