@@ -748,7 +748,9 @@ pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
 
 1.查看network 面板下面的 decoder.wasm 有没有被正确引入。返回个格式是不是 `application/wasm`格式的。
 
-2.查看下decoder.js 返回的内容是否正确，是不是js内容。（会存在vue 或者react 项目 直接被返回了index.html 内容了）
+2.查看下`decoder.js` 返回的内容是否正确，是不是js内容。（会存在vue 或者react 项目 直接被返回了index.html 内容了）
+
+3.查看`decoder`参数是否配置的正确，见[decoder参数配置](http://jessibuca.monibuca.com/api.html#decoder)
 
 > 需要正确的配置`decoder`参数，播放器默认引用的是根目录下面的`decoder.js`
 
