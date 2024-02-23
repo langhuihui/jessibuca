@@ -577,7 +577,7 @@ Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
 
 [多路-12路-低延迟](https://jessibuca.com/pro-doc/12multi-delay.pdf)
 
-[多路-24路-720p-1080p](https://jessibuca.com/pro-doc/24multi-720p-1080p.pdf)
+[多路-24路-720p-1080p](https://jessibuca.com/pro-doc/24multi-720-1080.pdf)
 
 
 ## PRO AI
