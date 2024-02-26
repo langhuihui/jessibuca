@@ -746,11 +746,11 @@ pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
 
 ### decoder.js 报 Unexpected token '<'错误
 
-1.查看network 面板下面的 decoder.wasm 有没有被正确引入。返回个格式是不是 `application/wasm`格式的。
+1.查看控制台的`network` 面板下面的 `decoder.wasm`文件有没有被正确返回。返回个格式是不是 `application/wasm`格式的。
 
-2.查看下`decoder.js` 返回的内容是否正确，是不是js内容。（会存在vue 或者react 项目 直接被返回了index.html 内容了）
+2.查看控制台的`network` 面板下面的 decoder.js 文件有没有被正确返回。返回个格式是不是 `application/javascript`格式的。（会存在vue 或者react 项目 直接被返回了index.html 内容了）
 
-3.查看`decoder`参数是否配置的正确，见[decoder参数配置](http://jessibuca.monibuca.com/api.html#decoder)
+4.查看`decoder`参数是否配置的正确，见[decoder参数配置](http://jessibuca.monibuca.com/api.html#decoder)，如果配置错误，会被web服务器以找不到文件，然后返回index.html的内容。
 
 > 需要正确的配置`decoder`参数，播放器默认引用的是根目录下面的`decoder.js`
 
