@@ -169,24 +169,26 @@
         </div>
         <div class="input">
             <div>
-                <span>websocket 1006 错误内部重播：</span>
                 <input
                     checked
                     type="checkbox"
                     id="websocket1006ErrorReplay"
                 />
-                <span>stream error 内部重播：</span>
+                <span>websocket 1006 错误内部重播：</span>
+
                 <input
                     checked
                     type="checkbox"
                     id="streamErrorReplay"
                 />
-                <span>stream end 内部重播：</span>
+                <span>stream error 内部重播：</span>
+
                 <input
                     checked
                     type="checkbox"
                     id="streamEndReplay"
                 />
+                <span>stream end 内部重播：</span>
             </div>
         </div>
 
@@ -265,7 +267,7 @@
     var $streamErrorReplay = document.getElementById('streamErrorReplay');
     var $streamEndReplay = document.getElementById('streamEndReplay');
 
-    var showOperateBtns = true; // 是否显示按钮
+    var showOperateBtns = false; // 是否显示按钮
     var forceNoOffscreen = true; //
     var jessibuca = null;
 
