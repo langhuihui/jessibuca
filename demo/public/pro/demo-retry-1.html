@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Jessica 播放异常 重播 demo</title>
+    <link rel="stylesheet" href="./demo.css">
+    <script src="./vconsole.js"></script>
+    <script src="./js/jessibuca-pro-demo.js"></script>
+    <style>
+        .container-shell:before {
+            content: "jessibuca pro 播放异常 重播 demo player";
+        }
+    </style>
+</head>
+<body class="page">
+<div class="root">
+    <div class="container-shell">
+        <div id="container"></div>
+        <div class="input">
+            <div>
+                当前浏览器：
+                <span id="mseSupport264" style="color: green;display: none">支持MSE H264解码；</span>
+                <span id="mseSupport" style="color: green;display: none">支持MSE H265解码；</span>
+                <span id="mseNotSupport264" style="color: red;display: none">不支持MSE H264解码；</span>
+                <span id="mseNotSupport"
+                      style="color: red;display: none">不支持MSE H265解码,会自动切换成wasm解码；</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                当前浏览器：
+                <span id="wcsSupport264" style="color: green;display: none">支持Webcodecs H264解码；</span>
+                <span id="wcsSupport" style="color: green;display: none">支持Webcodecs H265解码（不一定准确）；</span>
+                <span id="wcsNotSupport264"
+                      style="color: red;display: none">不支持Webcodecs H264解码(https/localhost)；</span>
+                <span id="wcsNotSupport" style="color: red;display: none">不支持Webcodecs H265解码(https/localhost),会自动切换成wasm解码</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                当前浏览器：
+                <span id="wasmSupport" style="color: green;display: none">支持WASM解码；</span>
+                <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码</span>
+                <span id="wasmNotSupport" style="color: red;display: none">不支持WASM解码</span>
+                <span id="simdNotSupport"
+                      style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
+            </div>
+        </div>
+        <div class="input">
+            <div><input
+                type="checkbox"
+                checked
+                id="useMSE"
+            /><span>MediaSource</span>
+                <input
+                    type="checkbox"
+                    id="useWCS"
+                /><span>Webcodec</span>
+                <input
+                    type="checkbox"
+                    id="useWASM"
+                /><span>WASM</span>
+                <input
+                    type="checkbox"
+                    id="useSIMD"
+                /><span>WASM(SIMD)</span> <span style="color: green">默认使用wasm解码器</span>
+            </div>
+        </div>
+        <div class="input">
+            <span>渲染标签：</span>
+            <select id="renderDom" onchange="replay()">
+                <option value="video" selected>video</option>
+                <option value="canvas">canvas</option>
+            </select>
+
+            <span>canvas渲染技术：</span>
+            <select id="isUseWebGPU" onchange="replay()">
+                <option value="webgl">webgl</option>
+                <option value="webgpu" selected>webgpu</option>
+            </select>
+            <span id="supportWebgpu"></span>
+        </div>
+        <div class="input">
+            <div>
+                <span>缓存时长：</span>
+                <input placeholder="单位：秒" type="text" id="videoBuffer" style="width: 50px" value="0.2">秒
+                <span>缓存延迟(延迟超过会触发丢帧)：</span>
+                <input placeholder="单位：秒" type="text" id="videoBufferDelay" style="width: 50px" value="1">秒
+                <button id="replay">重播</button>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="demuxUseWorker"
+                /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                播放开始加载：
+                <span>| 超时时间(单位：秒)</span>
+                <input
+                    autocomplete="on"
+                    style="width: 100px"
+                    id="loadingTimeout"
+                    value="10"
+                />
+                <span style="margin: 0 10px">|</span>
+                <input
+                    checked
+                    type="checkbox"
+                    id="loadingTimeoutReplay"
+                />
+                <span>是否超时重播</span>
+                <span style="margin-left: 10px">| 重试次数</span>
+                <input
+                    autocomplete="on"
+                    style="width: 100px"
+                    placeholder="-1 为无限次数"
+                    id="loadingTimeoutReplayTimes"
+                    value="-1"
+                />
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                播放过程中超时：
+                <span>| 超时时间(单位：秒)</span>
+                <input
+                    autocomplete="on"
+                    style="width: 100px"
+                    id="heartTimeout"
+                    value="10"
+                />
+                <span style="margin: 0 10px">|</span>
+                <input
+                    checked
+                    type="checkbox"
+                    id="heartTimeoutReplay"
+                />
+                <span>是否超时重播</span>
+                <span style="margin-left: 10px">| 重试次数</span>
+                <input
+                    autocomplete="on"
+                    style="width: 100px"
+                    placeholder="-1 为无限次数"
+                    id="heartTimeoutReplayTimes"
+                    value="-1"
+                />
+            </div>
+        </div>
+
+        <div class="input">
+            <div>
+                <span>播放异常(播放地址不同，报错等一切异常):</span>
+                <input
+                    checked
+                    type="checkbox"
+                    id="playErrorReplay"
+                />
+                <span>是否重播</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <span>websocket 1006 错误内部重播：</span>
+                <input
+                    checked
+                    type="checkbox"
+                    id="websocket1006ErrorReplay"
+                />
+                <span>stream error 内部重播：</span>
+                <input
+                    checked
+                    type="checkbox"
+                    id="streamErrorReplay"
+                />
+                <span>stream end 内部重播：</span>
+                <input
+                    checked
+                    type="checkbox"
+                    id="streamEndReplay"
+                />
+            </div>
+        </div>
+
+        <div class="input">
+            <div>
+                <input
+                    onclick="replay()"
+                    checked
+                    type="checkbox"
+                    id="replayUseLastFrameShow"
+                />
+                <span>触发重播的时候，是否使用最后一帧来显示</span>
+                <input
+                    onclick="replay()"
+                    type="checkbox"
+                    id="replayShowLoadingIcon"
+                /><span>重播的时候是否显示loading效果</span>
+                <input
+                    onclick="replay()"
+                    type="checkbox"
+                    id="decoderErrorAutoWasm"
+                /><span>重播的时候是否降级到wasm</span>
+            </div>
+
+        </div>
+
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl"
+                value="http://43.225.47.39:8080/live/hzw.flv"
+            />
+            <button id="play">播放</button>
+            <button id="pause" style="display: none">停止</button>
+        </div>
+        <div class="input" style="line-height: 30px">
+            <button id="destroy">销毁</button>
+            <span class="fps-inner"></span>
+        </div>
+    </div>
+</div>
+
+<script src="./demo.js"></script>
+<script>
+    var $player = document.getElementById('play');
+    var $pause = document.getElementById('pause');
+    var $playHref = document.getElementById('playUrl');
+    var $container = document.getElementById('container');
+    var $destroy = document.getElementById('destroy');
+    var $fps = document.querySelector('.fps-inner');
+    var $useMSE = document.getElementById('useMSE');
+    var $useSIMD = document.getElementById('useSIMD');
+    var $useWASM = document.getElementById('useWASM');
+    var $useWCS = document.getElementById('useWCS');
+    var $videoBuffer = document.getElementById('videoBuffer');
+    var $videoBufferDelay = document.getElementById('videoBufferDelay');
+    var $replay = document.getElementById('replay');
+    var $renderDom = document.getElementById('renderDom');
+    var $isUseWebGPU = document.getElementById('isUseWebGPU');
+    var $demuxUseWorker = document.getElementById('demuxUseWorker');
+    var $loadingTimeoutReplayTimes = document.getElementById('loadingTimeoutReplayTimes');
+    var $loadingTimeout = document.getElementById('loadingTimeout');
+    var $loadingTimeoutReplay = document.getElementById('loadingTimeoutReplay');
+
+    var $heartTimeoutReplayTimes = document.getElementById('heartTimeoutReplayTimes');
+    var $heartTimeoutReplay = document.getElementById('heartTimeoutReplay');
+    var $heartTimeout = document.getElementById('heartTimeout');
+
+    var $replayUseLastFrameShow = document.getElementById('replayUseLastFrameShow');
+
+    var $playErrorReplay = document.getElementById('playErrorReplay');
+    var $websocket1006ErrorReplay = document.getElementById('websocket1006ErrorReplay');
+    var $replayShowLoadingIcon = document.getElementById('replayShowLoadingIcon');
+    var $decoderErrorAutoWasm = document.getElementById('decoderErrorAutoWasm')
+    var $streamErrorReplay = document.getElementById('streamErrorReplay');
+    var $streamEndReplay = document.getElementById('streamEndReplay');
+
+    var showOperateBtns = true; // 是否显示按钮
+    var forceNoOffscreen = true; //
+    var jessibuca = null;
+
+    function create(options, isReplay) {
+        options = options || {}
+        var _options = Object.assign({}, {
+            container: $container,
+            videoBuffer: Number($videoBuffer.value), // 缓存时长
+            videoBufferDelay: Number($videoBufferDelay.value), // 1000s
+            decoder: './js/decoder-pro.js',
+            isResize: false,
+            text: "",
+            loadingText: "加载中",
+            debug: true,
+            debugLevel: "debug",
+            useMSE: $useMSE.checked === true,
+            useSIMD: $useSIMD.checked === true,
+            useWCS: $useWCS.checked === true,
+            showBandwidth: showOperateBtns, // 显示网速
+            showPerformance: showOperateBtns, // 显示性能
+            operateBtns: {
+                fullscreen: showOperateBtns,
+                screenshot: showOperateBtns,
+                play: showOperateBtns,
+                audio: showOperateBtns,
+                performance: showOperateBtns,
+            },
+            pauseAndNextPlayUseLastFrameShow: true,
+            heartTimeoutReplayUseLastFrameShow: true,
+            qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
+            forceNoOffscreen: forceNoOffscreen,
+            heartTimeout: Number($heartTimeout.value),
+            heartTimeoutReplay: $heartTimeoutReplay.checked === true,
+            heartTimeoutReplayTimes: Number($heartTimeoutReplayTimes.value),
+            loadingTimeout: Number($loadingTimeout.value),
+            loadingTimeoutReplay: $loadingTimeoutReplay.checked === true,
+            loadingTimeoutReplayTimes: Number($loadingTimeoutReplayTimes.value),
+            replayUseLastFrameShow: $replayUseLastFrameShow.checked === true,
+            replayShowLoadingIcon: $replayShowLoadingIcon.checked === true,// 重播显示loading
+            loadingIcon: isReplay !== true || ($replayShowLoadingIcon.checked === true && isReplay === true),
+            isNotMute: isReplay === true,
+            decoderErrorAutoWasm: $decoderErrorAutoWasm.checked === true, // 解码失败自动降级到 wasm 模式
+            useCanvasRender: $renderDom.value === 'canvas',
+            useWebGPU: $isUseWebGPU.value === 'webgpu',
+            demuxUseWorker: $demuxUseWorker.checked === true,
+            controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
+            websocket1006ErrorReplay: $websocket1006ErrorReplay.checked === true,
+            streamErrorReplay: $streamErrorReplay.checked === true,
+            streamEndReplay:$streamEndReplay.checked === true,
+            streamErrorReplayDelayTime: 1, // 延迟1s去触发播放。
+            playFailedAndPausedShowPlayBtn: false, //
+            // isFlv: true
+            audioEngine: 'script',
+        }, options)
+        jessibuca = new JessibucaPro(_options);
+
+
+        //  监听播放器事件
+        if ($playErrorReplay.checked === true) {
+            //  一直播放
+            jessibuca.on('playFailedAndPaused', function (error, frameInfo, msg) {
+                console.error('playFailedAndPaused', error, msg, frameInfo);
+                //  触发重播的时候，是否使用最后一帧来显示
+                if ($replayUseLastFrameShow.checked === true) {
+                    // 最后一帧显示
+                    resetPlayer(frameInfo).then(() => {
+                        //  延迟个1秒再重连
+                        setTimeout(() => {
+                            play();
+                        }, 1 * 1000)
+
+                    });
+                } else {
+                    resetPlayer().then(() => {
+                        //  延迟个1秒再重连
+                        setTimeout(() => {
+                            play();
+                        }, 1 * 1000)
+                    });
+                }
+            });
+        }
+
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+        $destroy.style.display = 'none';
+        $fps.textContent = '';
+    }
+
+
+    create();
+
+    function play() {
+        var href = $playHref.value;
+        if (href) {
+            jessibuca.play(href).then(() => {
+                console.log('play success')
+            }).catch((e) => {
+                console.error('play error', e);
+            });
+            $player.style.display = 'none';
+            $pause.style.display = 'inline-block';
+            $destroy.style.display = 'inline-block';
+        } else {
+            jessibuca.showErrorMessageTips('播放地址不能为空');
+        }
+    }
+
+    function resetPlayer(options) {
+        return new Promise((resolve, reject) => {
+            if (jessibuca) {
+                jessibuca.destroy().then(() => {
+                    create(options, true);
+                    resolve();
+                });
+            } else {
+                create({}, true);
+                resolve();
+            }
+        })
+    }
+
+
+    function replay(options) {
+        if (jessibuca) {
+            jessibuca.destroy().then(() => {
+                create(options);
+                play();
+            });
+        } else {
+            create();
+            play();
+        }
+    }
+
+    $replay.addEventListener('click', function () {
+        replay();
+    })
+
+    $player.addEventListener('click', function () {
+        play();
+    }, false)
+
+
+    $pause.addEventListener('click', function () {
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+        $fps.textContent = '';
+        jessibuca.pause();
+    })
+
+    $destroy.addEventListener('click', function () {
+        if (jessibuca) {
+            jessibuca.destroy().then(() => {
+                create();
+            });
+        } else {
+            create();
+        }
+
+    })
+
+    $useMSE.addEventListener('click', function () {
+        const checked = $useMSE.checked;
+        if (checked) {
+            $useSIMD.checked = false
+            $useWCS.checked = false
+            $useWASM.checked = false
+        }
+        replay();
+    })
+
+    $useSIMD.addEventListener('click', function () {
+        const checked = $useSIMD.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useWCS.checked = false
+            $useWASM.checked = false
+        }
+        replay();
+    })
+
+    $useWCS.addEventListener('click', function () {
+        const checked = $useWCS.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useSIMD.checked = false
+            $useWASM.checked = false
+        }
+        replay();
+    })
+
+    $useWASM.addEventListener('click', function () {
+        const checked = $useWASM.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useSIMD.checked = false
+            $useWCS.checked = false
+        }
+        replay();
+    })
+
+</script>
+
+</body>
+</html>
