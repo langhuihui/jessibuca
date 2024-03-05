@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <script src="../vconsole.js"></script>
-    <script src="./js/jessibuca-pro-audio-player-demo.js"></script>
+    <script src="./audio/jessibuca-pro-audio-player-demo.js"></script>
     <link rel="stylesheet" href="./demo.css">
     <style>
 
@@ -60,7 +60,7 @@
         jessibuca = new JessibucaProAudio({
             videoBuffer: 0.3, // 缓存时长
             videoBufferDelay: 1,
-            decoder: './js/decoder-pro-audio-player.js',
+            decoder: './audio/decoder-pro-audio-player.js',
             debug: true,
             debugLevel: 'debug',
             isNotMute: true,
@@ -90,9 +90,6 @@
 
         jessibuca.on('audioResumeState', (result) => {
             console.log('audioResumeState', result);
-        })
-        jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
-            jessibuca.showErrorMessageTips('播放异常：' + error);
         })
 
         $player.style.display = 'inline-block';
