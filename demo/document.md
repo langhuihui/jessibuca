@@ -877,9 +877,9 @@ jessibuca
 
 ```
 
-### 是否支持原生、小程序等
+### 是否支持原生、小程序（UniApp,小程序）等
 
-#### 对于Umiapp
+#### 对于UniApp
 
 |Vue2|Vue3|
 | --- | --- |
@@ -900,6 +900,8 @@ jessibuca
 
 
 #### 对于小程序
+
+> 例如 微信小程序、快手小程序、钉钉小程序、飞书小程序、京东小程序
 
 只支持内嵌 webview 模式播放。
 
@@ -1620,7 +1622,7 @@ useWCS:false
 
 
 
-### Umi App 或者内嵌其他App（XX小程序） 里面webview，需要截图下载或者录制视频下载。
+### UniApp 或者内嵌其他App（XX小程序） 里面webview，需要截图下载或者录制视频下载。
 
 > 由于webview的限制，无法像浏览器那样直接截图，或者录制视频可以通过a.download 下载。
 
@@ -1946,6 +1948,14 @@ const jessibuca = new Jessibuca({
     container: document.getElementById('your-container')
 })
 ```
+
+### RuntimeError： Aborted(compileError:Webassembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 44 4f @+0)
+
+一般这种报错是`decoder.js` 对应的`decoder.wasm`胶水文件错误导致的。
+
+> decoder.js 和 decoder.wasm 胶水文件是一一对应的，不同版本的不能混在一起使用。
+
+如果发现这个错误，检查下是不是缓存原因导致的两个文件的版本没有一一对应上。如果不是，可以去官网或者github 上下载最新版本的jessibuca，全量替换更新下就行了。
 
 
 ## 支持作者

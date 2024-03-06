@@ -101,6 +101,16 @@
                 /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
             </div>
         </div>
+        <div class="input">
+            <div>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="flvDemuxBufferSizeTooLargeReplay"
+                /><span>解封装flv失败重播</span>
+            </div>
+        </div>
 
         <div class="input">
             <div>输入URL：</div>
@@ -137,6 +147,7 @@
     var $renderDom = document.getElementById('renderDom');
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
     var $demuxUseWorker = document.getElementById('demuxUseWorker');
+    var $flvDemuxBufferSizeTooLargeReplay = document.getElementById('flvDemuxBufferSizeTooLargeReplay');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -184,6 +195,7 @@
             useWebGPU: $isUseWebGPU.value === 'webgpu',
             demuxUseWorker: $demuxUseWorker.checked === true,
             controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
+            flvDemuxBufferSizeTooLargeReplay:$flvDemuxBufferSizeTooLargeReplay.checked === true
             // audioEngine:"worklet",
             // isFlv: true
         },);
