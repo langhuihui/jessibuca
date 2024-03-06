@@ -1820,6 +1820,8 @@ https://jessibuca.com/document.html#jessibuca-js-decoder-js-decoder-wasm%E6%96%8
 
 通常发生在网页应用尝试自动播放视频时，但浏览器出于节能目的暂停了视频的播放。
 
+可以看下[chrome的自动播放策略](https://developer.chrome.com/blog/autoplay?hl=zh-cn)
+
 1. 浏览器的自动播放策略：许多现代浏览器，尤其是移动设备上的浏览器，会限制在不同条件下自动播放媒体内容，尤其是如果媒体内容没有与用户的互动。这是为了节约数据和电池。
 2. 视频内容的属性：如果视频是静音的或不包含音频轨道，某些浏览器可能会允许自动播放。但如果视频包含音频，且页面没有得到用户的明确互动（如点击），浏览器可能会阻止自动播放。
 3. 电源节约模式：在某些设备上，如果启用了电源节约模式，浏览器可能会限制背景媒体的播放，以减少电量消耗。
@@ -1830,6 +1832,19 @@ https://jessibuca.com/document.html#jessibuca-js-decoder-js-decoder-wasm%E6%96%8
 2. 静音视频：如果视频不需要音频，可以尝试将其设置为静音。
 3. 检查浏览器设置：用户可以查看浏览器的隐私或安全设置，看看是否有限制自动播放媒体的选项。
 4. 检查设备设置：用户可以查看设备的电源设置，看看是否有限制自动播放媒体的选项。
+5. 顶级帧可以将自动播放权限委托给其 `iframe`，以允许有声自动播放。
+
+
+```html
+
+<!-- 允许自动播放 -->
+<iframe src="https://cross-origin.com/myvideo.html" allow="autoplay">
+
+<!-- 允许自动播放和全屏 -->
+<iframe src="https://cross-origin.com/myvideo.html" allow="autoplay; fullscreen">
+```
+
+可以看在[权限策略](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Permissions_Policy)
 
 ### 播放内网https地址报错(ERR_CERT_COMMON_NAME_INVALID 错误)
 
