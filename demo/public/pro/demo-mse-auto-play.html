@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Jessica wasm + canvas auto play demo</title>
+    <link rel="stylesheet" href="./demo.css">
+    <script src="./vconsole.js"></script>
+    <script src="./js/jessibuca-pro-demo.js"></script>
+    <style>
+        .container-shell:before {
+            content: "jessibuca wasm + canvas  auto player demo";
+        }
+    </style>
+</head>
+<body class="page">
+<div class="root">
+    <div class="container-shell">
+        <div id="container"></div>
+        <div class="input">
+            <div>
+                当前浏览器：
+                <span id="mseSupport264" style="color: green;display: none">支持MSE H264解码；</span>
+                <span id="mseSupport" style="color: green;display: none">支持MSE H265解码；</span>
+                <span id="mseNotSupport264" style="color: red;display: none">不支持MSE H264解码；</span>
+                <span id="mseNotSupport"
+                      style="color: red;display: none">不支持MSE H265解码,会自动切换成wasm解码；</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                当前浏览器：
+                <span id="wcsSupport264" style="color: green;display: none">支持Webcodecs H264解码；</span>
+                <span id="wcsSupport" style="color: green;display: none">支持Webcodecs H265解码（不一定准确）；</span>
+                <span id="wcsNotSupport264"
+                      style="color: red;display: none">不支持Webcodecs H264解码(https/localhost)；</span>
+                <span id="wcsNotSupport" style="color: red;display: none">不支持Webcodecs H265解码(https/localhost),会自动切换成wasm解码</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                当前浏览器：
+                <span id="wasmSupport" style="color: green;display: none">支持WASM解码；</span>
+                <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码</span>
+                <span id="wasmNotSupport" style="color: red;display: none">不支持WASM解码</span>
+                <span id="simdNotSupport"
+                      style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
+            </div>
+        </div>
+
+        <div class="input">
+            iPhone，chrome等要求自动播放时，音频必须静音，需要由一个真实的用户交互
+            <br>
+            操作来恢复，不能使用代码。
+            <br>
+            https://developers.google.com/web/updates/2017/09/autoplay-policy-changes
+        </div>
+        <div class="input">
+            自动播放是默认静音的，需要手动触发cancelMute()
+            <br>
+            我绑定了container窗口的点击事件，来激活声音。
+        </div>
+    </div>
+</div>
+
+<script src="./demo.js"></script>
+<script>
+    var $container = document.getElementById('container');
+
+    var showOperateBtns = true; // 是否显示按钮
+    var forceNoOffscreen = true; //
+    var jessibuca = null;
+
+    function create() {
+        jessibuca = new JessibucaPro({
+            container: $container,
+            loadingText: "加载中",
+            decoder: './js/decoder-pro.js',
+            debug: true,
+            debugLevel: "debug",
+            useMSE: true,
+            useSIMD: true,
+            useWCS: false,
+            showBandwidth: showOperateBtns, // 显示网速
+            showPerformance: showOperateBtns, // 显示性能
+            operateBtns: {
+                fullscreen: showOperateBtns,
+                screenshot: showOperateBtns,
+                play: showOperateBtns,
+                audio: showOperateBtns,
+                ptz: showOperateBtns,
+                quality: showOperateBtns,
+                performance: showOperateBtns,
+            },
+            heartTimeoutReplayUseLastFrameShow: true,
+            audioEngine: "worklet",
+            qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
+            forceNoOffscreen: forceNoOffscreen,
+            isNotMute: true,
+            heartTimeout: 10,
+            useCanvasRender: false,
+            useVideoRender: true,
+            mseDecodeAudio: true,
+        },);
+        jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
+            jessibuca.showErrorMessageTips('播放异常：' + error);
+        })
+
+        jessibuca.on(JessibucaPro.EVENTS.crashLog, (log) => {
+            console.error('crashLog', log)
+        })
+
+        jessibuca.on('ptz', (arrow) => {
+            // console.log('ptz', arrow);
+        })
+
+        jessibuca.on('streamQualityChange', (value) => {
+            console.log('streamQualityChange', value);
+        })
+
+        jessibuca.on('timeUpdate', (value) => {
+            // console.log('timeUpdate', value);
+        })
+
+        jessibuca.on('stats', (stats) => {
+            // console.log('stats', stats);
+        })
+
+    }
+
+
+    create();
+
+    function play() {
+        jessibuca.play('https://live.nodemedia.cn:8443/live/b480_264.flv');
+    }
+
+    play();
+
+    $container.addEventListener('click', function () {
+        jessibuca.cancelMute()
+    }, false)
+
+</script>
+
+</body>
+</html>

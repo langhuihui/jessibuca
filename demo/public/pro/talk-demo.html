@@ -53,6 +53,15 @@
             </span>
         </div>
         <div class="input">
+            <div>
+                <input
+                    id="debug"
+                    checked
+                    type="checkbox"
+                /><span>debug模式(支持文件下载)</span>
+            </div>
+        </div>
+        <div class="input">
               <span class="span-row">
                     封装格式
                     <select id="talkPacketType">
@@ -96,8 +105,8 @@
             <span class="span-row">
                     engine
                     <select id="talkEngine">
-                        <option value="worklet" selected>worklet</option>
-                        <option value="script">script</option>
+                        <option value="worklet" >worklet</option>
+                        <option value="script" selected>script</option>
                     </select>
                 </span>
         </div>
@@ -118,7 +127,18 @@
             <button onclick="talkGetVolume()">获取声音</button>
         </div>
         <div class="input">
-            <button onclick="saveTalk()">下载rtp文件(配置debug:true才会缓存数据)</button>
+            <span style="color: green">如需测试下载文件，不要点击停止对讲和销毁对讲，<br>会销毁掉缓存的数据的，直接点击下载即可</span>
+        </div>
+        <div class="input">
+            <button onclick="saveTalkRtp()">下载rtp文件(配置debug:true才会缓存数据， <span style="color: red">封装格式选rtp</span> )</button>
+        </div>
+        <div class="input">
+            <button onclick="saveTalkG711()">下载g711a/u文件(配置debug:true才会缓存数据，<span style="color: red">封装格式选裸流</span>)</button>
+        </div>
+        <div class="input">
+            <div>
+                <span><a href="https://jessibuca.com/talk-doc.html" target="_blank">测试播放g711a/u数据指南</a></span>
+            </div>
         </div>
 
         <div class="input" style="line-height: 30px">
@@ -134,6 +154,7 @@
     var $playHref = document.getElementById('playUrl');
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
+    var $debug = document.getElementById('debug');
 
 
     var showOperateBtns = true; // 是否显示按钮
@@ -158,7 +179,7 @@
     })
 
     function startTalk() {
-        const talkUrl = document.getElementById('talkUrl').value;
+        let talkUrl = document.getElementById('talkUrl').value;
         const talkEncType = document.getElementById('talkEncType').value;
         const talkPacketType = document.getElementById('talkPacketType').value;
         const talkSampleRate = document.getElementById('talkSampleRate').value;
@@ -167,19 +188,25 @@
         const talkTestMicrphone = document.getElementById('testMicrphone').checked;
         const talkEngine = document.getElementById('talkEngine').value;
         const talkPacketRtpSendType = document.getElementById('talkPacketRtpSendType').value;
+        const testMicrophone = talkTestMicrphone === true || talkTestMicrphone === 'true'
+
+        if(testMicrophone && !talkUrl){
+            talkUrl = 'ws://localhost:8080/'; // 传一个假的
+        }
+
         if (jessibucaTalk && talkUrl) {
             jessibucaTalk.startTalk(talkUrl, {
                 encType: talkEncType,
                 packetType: talkPacketType,
                 sampleBitsWidth: talkSampleBitsWidth,
                 sampleRate: talkSampleRate,
-                debug: true,
+                debug: $debug.checked === true,
                 debugLevel: "debug",
                 rtpSsrc: talkRtpSsrc,
                 packetTcpSendType: talkPacketRtpSendType,
                 engine: talkEngine,
-                saveRtpToFile: true,
-                testMicrophone: talkTestMicrphone === true || talkTestMicrphone === 'true',
+                saveToTempFile: $debug.checked === true,
+                testMicrophone: testMicrophone,
             }).then(() => {
 
             }).catch((e) => {
@@ -207,9 +234,21 @@
         }
     }
 
-    function saveTalk() {
+    function saveTalkRtp() {
         if (jessibucaTalk) {
             jessibucaTalk.downloadTempRtpFile().then(() => {
+                console.log('download success');
+            }).catch((e) => {
+                console.error('save talk error', e);
+            });
+        } else {
+            console.log('jessibucaTalk is not ready');
+        }
+    }
+
+    function saveTalkG711() {
+        if (jessibucaTalk) {
+            jessibucaTalk.downloadTempG711File().then(() => {
                 console.log('download success');
             }).catch((e) => {
                 console.error('save talk error', e);
