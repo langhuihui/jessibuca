@@ -57,8 +57,12 @@ features:
   details: 支持fmp4格式(H264/H265)直播协议
 - title: 支持MPEG-TS格式直播协议(Pro)
   details: 支持MPEG-TS格式(H264/H265)直播协议
-- title: 支持crypto解密播放(Pro)
-  details: 支持crypto解密(H264/H265)播放
+- title: 支持m7s-crypto解密播放(Pro)
+  details: 支持m7s-crypto解密(H264/H265)播放
+- title: 支持国标SM4解密播放(Pro)
+  details: 支持国标SM4解密播放(H264/H265)播放
+- title: 支持HLS(aes-128-cbc)解密播放(Pro)
+  details: 支持HLS(aes-128-cbc)解密播放(H264/H265)播放
 - title: 支持WebTransport协议播放(Pro)
   details: 支持WebTransport协议播放
 - title: 支持裸流播放（H.264/H.265）(Pro)
