@@ -1551,6 +1551,8 @@ useWCS:false
 #### 解决方案
 1. 需要在nginx加入一段proxy的timeout超时设置，加了500s
 
+2. Pro播放器支持内部检测到1006错误，会内部自动重连。
+
 #### 资料
 
 1. https://zhuanlan.zhihu.com/p/351747258
