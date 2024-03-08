@@ -1282,6 +1282,7 @@ PIPELINE_ERROR_DECODE 是指视频解码器在解码视频流时发生了错误�
 
 会抛出`DOMException: play() failed because the user didn't interact with the document first. https://goo.gl/xX8pDD` 错误。
 
+> 手动刷新页面也会出现这个异常。
 
 > 这个报错是浏览器的规范，浏览器规定，必须要用户主动触发才能播放视频。
 
@@ -1296,7 +1297,6 @@ PIPELINE_ERROR_DECODE 是指视频解码器在解码视频流时发生了错误�
 2. 使用`wcs`解码(在https环境下)，然后使用`canvas`标签渲染。
 3. 使用wasm(simd) 软解码，然后使用`canvas`标签渲染。
 
-
 ```
 {
     useMSE:false, // mse强制绑定了video标签，所以不能优先mse解码。
@@ -1309,6 +1309,8 @@ PIPELINE_ERROR_DECODE 是指视频解码器在解码视频流时发生了错误�
 ```
 
 > pro 可以支持配置`mse+video`渲染或者`wasm+canvas`自动播放。
+
+> pro 在检测到这种情况，会尝试恢复播放，如果重试之后，仍然不行，会主动降级到wasm + canvas渲染
 
 ### 浏览器报：SBOX FATAL MEMORY EXCEEDED 错误
 
@@ -1832,7 +1834,7 @@ https://jessibuca.com/document.html#jessibuca-js-decoder-js-decoder-wasm%E6%96%8
 2. 静音视频：如果视频不需要音频，可以尝试将其设置为静音。
 3. 检查浏览器设置：用户可以查看浏览器的隐私或安全设置，看看是否有限制自动播放媒体的选项。
 4. 检查设备设置：用户可以查看设备的电源设置，看看是否有限制自动播放媒体的选项。
-5. 顶级帧可以将自动播放权限委托给其 `iframe`，以允许有声自动播放。
+5. 顶级帧可以将自动播放权限委托给其 `iframe`，以允许有声自动播放(测试了没有啥效果)。
 
 
 ```html
@@ -1843,6 +1845,7 @@ https://jessibuca.com/document.html#jessibuca-js-decoder-js-decoder-wasm%E6%96%8
 <!-- 允许自动播放和全屏 -->
 <iframe src="https://cross-origin.com/myvideo.html" allow="autoplay; fullscreen">
 ```
+> 测试了iframe感觉没啥效果，还是会触发 `play() failed because the user didn't interact with the document first` 异常
 
 可以看在[权限策略](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Permissions_Policy)
 
