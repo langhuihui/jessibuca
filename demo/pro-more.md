@@ -71,6 +71,13 @@
 
 添加微信：bosswancheng 咨询
 
+## 支持解析私有格式的视频流，例如rtp封装的ps流
+
+> ws传送rtp封装的ps流，播放器解析播放
+
+### 定价
+添加微信：bosswancheng 咨询
+
 ## 群
 
 <img src="/public/qrcode.jpeg">
