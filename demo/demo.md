@@ -62,6 +62,8 @@ https://github.com/bosscheng/jessibuca-uni-app-demo/tree/v3
 
 https://ext.dcloud.net.cn/plugin?id=8296
 
+https://ext.dcloud.net.cn/plugin?name=sy-new-jessibuca
+
 ## React
 
 
