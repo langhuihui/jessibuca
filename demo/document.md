@@ -1976,6 +1976,50 @@ const jessibuca = new Jessibuca({
 })
 ```
 
+### 关于在H5中实现横竖屏自适应
+
+> 这个需要业务层借助resize() 方法自己实现
+
+1. 监听到横竖屏切换事件
+2. 修改`your-container`的宽高
+3. 调用播放器的`resize()`方法。
+
+> your-container 是new Jessibuca() 的 container 参数
+
+```js
+const jessibuca = new Jessibuca({
+    container: document.getElementById('your-container')
+})
+```
+
+监听横竖屏切换事件
+
+```js
+window.addEventListener('orientationchange', function () {
+    // 横屏
+    if (window.orientation === 90 || window.orientation === -90) {
+        // 修改your-container的宽高
+        // 调用播放器的resize()方法
+    } else {
+        // 竖屏
+        // 修改your-container的宽高
+        // 调用播放器的resize()方法
+    }
+})
+```
+
+### 关于IOS实现全屏效果
+
+1. 业务层自己修改 `container`的宽高 + `resize()` 方法实现全屏效果
+
+> 缺点：没法使用到播放器提供的底部控制栏，因为控制栏不会跟着变化。
+
+2. 参数`useWebFullScreen`配置为`true`
+
+> 播放器会检测当前环境是否支持系统级别的全屏方法，如果不支持，则会使用web全屏
+
+> `jessibucaPro播放器`内部会自动判断，根据当前环境是否支持系统级别的全屏方法，来降级选择使用web全屏。
+
 ### RuntimeError： Aborted(compileError:Webassembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 44 4f @+0)
 
 一般这种报错是`decoder.js` 对应的`decoder.wasm`胶水文件错误导致的。

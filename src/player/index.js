@@ -27,6 +27,7 @@ import './style.scss'
 import observer from "./observer";
 import MseDecoder from "../decoder/mediaSource";
 import NoSleep from "../utils/noSleep";
+import screenfull from "screenfull";
 
 export default class Player extends Emitter {
     constructor(container, options) {
@@ -34,6 +35,20 @@ export default class Player extends Emitter {
         this.$container = container;
         this._opt = Object.assign({}, DEFAULT_PLAYER_OPTIONS, options)
         this.debug = new Debug(this);
+
+        // disable offscreen
+        this._opt.forceNoOffscreen = true;
+
+        if(isMobile()){
+            this.debug.log('Player', 'isMobile and set _opt.controlAutoHide false');
+            this._opt.controlAutoHide = false;
+
+            if(screenfull.isEnabled &&
+                this._opt.useWebFullScreen){
+                this.debug.log('Player', 'screenfull.isEnabled is true and _opt.useWebFullScreen is true , set _opt.useWebFullScreen false');
+                this._opt.useWebFullScreen = false;
+            }
+        }
 
         //
         if (this._opt.useWCS) {
