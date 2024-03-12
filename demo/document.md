@@ -794,6 +794,8 @@ https://blog.csdn.net/nbwgl/article/details/122652003
 
 使用`http`协议启动，可以配合`nginx`或者`node` 启动。
 
+> pro 支持通过配置参数，只使用mse解码，不启动worker。 见
+
 #### node 启动
 通过 jessibuca-vue-demo 中的 preview 进行查看。
 
@@ -2042,6 +2044,182 @@ window.addEventListener('orientationchange', function () {
 https://juejin.cn/post/7215608036394614844
 
 > 当然 pro 可以做到1s以内的更低延迟。
+
+
+### 播放器内部的样式发生变形或者class 丢失
+
+可能得原因：
+
+- 播放器样式被其他样式覆盖了,检查下是否有全局样式覆盖了播放器的样式（播放器内部会有`video`,`canvas`标签）。
+- container 设置了双向绑定，导致class丢失。
+
+推荐的 vue 写法
+
+```vue
+<template>
+    <div class="wrap">
+      <!--  不要绑定任何的 :class :style 样式  -->
+        <div ref="container" ></div>
+    </div>
+</template>
+<script>
+export default {
+    name: 'App',
+    mounted() {
+        // 通过 ref 获取到 dom 节点
+        const dom = this.$refs['container']
+        // 通过 dom 节点获取到 player 实例
+        const player = new window.Jessibuca({
+            container: dom,
+        })
+    }
+}
+</script>
+```
+
+推荐的 react 写法
+
+```jsx
+import React, { useEffect, useRef } from 'react'
+
+export default function App() {
+    const container = useRef(null)
+    useEffect(() => {
+        const player = new window.Jessibuca({
+            container: container.current,
+        })
+    }, [])
+    return (
+        <div className="wrap">
+            <div ref={container}></div>
+        </div>
+    )
+}
+
+```
+
+
+### 当container窗口发生变化的时候，播放器如何自适应
+
+播放器提供一个`resize()` 方法。当外界窗口发生变化的时候，调用该方法即可。
+
+```js
+const player = new window.Jessibuca({
+    container: dom,
+})
+
+
+
+// 当container的宽高发生变化的时候，调用resize方法
+player.resize();
+```
+
+### 出现页面崩溃之后，问题定位
+
+#### 是否开启了`devTools`
+
+首先检查下是否开启了`devTools`。
+
+因为devtools 会打印日志，日志本身就会占用很多内存，也会导致浏览器崩溃。
+
+#### 检查崩溃日志
+
+通过`chrome://crashes/`查看崩溃日志
+
+#### 如果是必先的
+
+可以通过
+
+<img src="/img/crash-1.png">
+
+<img src="/img/crash-2.png">
+
+观察下内存是否一致增加。
+
+### 安卓webview 下面的一些问题
+
+> 在项目中，会有在webview嵌入的网页中播放视频的需求，会在部分手机上出现白屏或有声音无画面等问题，并且存在全屏按钮点击无效果的问题。
+
+
+借鉴：https://www.cnblogs.com/hwb04160011/p/13960585.html
+
+#### 播放视频白屏、无画面问题解决
+原因是WebView播放视频时可能需要硬件加速才可以正常播放视频，关闭硬件加速可能在部分手机上出现白屏、无画面、无法暂停等问题。解决方法就是开启硬件加速：
+
+在AndroidManifest.xml的application中声明HardwareAccelerate属性
+在AndroidManifest.xml的对应activity中声明HardwareAccelerate属性
+在使用WebView的代码前添加如下代码：
+
+```java
+window.setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+    WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
+```
+#### 视频不能全屏问题解决
+
+原因是WebView的视频全屏事件是需要客户端完成后续逻辑的，网页点击全屏按钮会触发WebChromeClient的onShowCustomView方法，全屏后缩回来会触发onHideCustomView方法，在这两个方法中我们要对视频进行一个全屏放大的处理。
+
+在我们的WebView使用之前需要添加的代码如下：
+
+```java
+    var fullscreenContainer: FrameLayout? = null
+    var customViewCallback: WebChromeClient.CustomViewCallback? = null
+    val mWebChromeClient = object : WebChromeClient() {
+        override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
+            super.onShowCustomView(view, callback)
+            showCustomView(view, callback)
+        }
+
+        override fun onHideCustomView() {
+            super.onHideCustomView()
+            hideCustomView()
+        }
+    }
+
+    /**
+     * 显示自定义控件
+     */
+    private fun showCustomView(view: View?, callback: WebChromeClient.CustomViewCallback?) {
+        if (fullscreenContainer != null) {
+            callback?.onCustomViewHidden()
+            return
+        }
+
+        fullscreenContainer = FrameLayout(context).apply { setBackgroundColor(Color.BLACK) }
+        customViewCallback = callback
+        fullscreenContainer?.addView(view)
+        val decorView = (context as? Activity)?.window?.decorView as? FrameLayout
+        (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        decorView?.addView(fullscreenContainer)
+    }
+
+    /**
+     * 隐藏自定义控件
+     */
+    private fun hideCustomView() {
+        if (fullscreenContainer == null) {
+            return
+        }
+
+        val decorView = (context as? Activity)?.window?.decorView as? FrameLayout
+        (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        fullscreenContainer?.removeAllViews()
+        decorView?.removeView(fullscreenContainer)
+        fullscreenContainer = null
+        customViewCallback?.onCustomViewHidden()
+        customViewCallback = null
+    }
+
+```
+
+最终在WebView使用时，为WebView设置WebChromeClient：
+
+```java
+    webView.webChromeClient = mWebChromeClient
+```
+
+### wasm编译打包 之后报：uncaught referenceError:module is not defined
+
+ 一般是因为wasm没有编译成功，导致的。
 
 
 ## 支持作者

@@ -415,6 +415,12 @@
 [http://jessibuca.monibuca.com/pro/demo-page-visibility-change.html](http://jessibuca.monibuca.com/pro/demo-page-visibility-change.html)
 
 
+### 支持File://协议播放音视频
+
+> 需要通过离线版demo进行测试，通过浏览器直接打开html文件进行测试。
+
+文件：`demo-file.html`
+
 
 ## AI
 
