@@ -2029,6 +2029,21 @@ window.addEventListener('orientationchange', function () {
 如果发现这个错误，检查下是不是缓存原因导致的两个文件的版本没有一一对应上。如果不是，可以去官网或者github 上下载最新版本的jessibuca，全量替换更新下就行了。
 
 
+### 关于播放webrtc 的 H265格式的视频
+
+目前 `pro版本` 是支持`[M7S流媒体服务器](https://m7s.live/)`来播放 webrtc 的 H265格式的视频。
+
+> 同时也支持音频
+
+是借助DataChannel实现的。
+
+可以看网友的基于DataChannel 实现的 H265 的方案。
+
+https://juejin.cn/post/7215608036394614844
+
+> 当然 pro 可以做到1s以内的更低延迟。
+
+
 ## 支持作者
 
 ### 第一作者
