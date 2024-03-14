@@ -27,8 +27,10 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 
 不限制 `http`或者 `https`协议
 
-需要在线申请一个origin trial token
+需要在线申请一个chrome的 `origin trial token`
 https://developer.chrome.com/origintrials/?utm_source=devtools#/view_trial/303992974847508481
+
+> 需要自备机场才能访问的到。
 
 > 例如本地的地址为：http://localhost:8080，申请的时候，需要填写`http://localhost:8080`就可以了。
 
