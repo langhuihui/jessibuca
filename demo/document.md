@@ -394,14 +394,15 @@ application/wasm            wasm;
 
 ### webcodecs
 
-#### Chrome86及之后
+#### Chrome/Edge 86及之后
 
 提供的WebCodecs API来进行硬解码,为实验特性,需要手动开启 enable chrome://flags/#enable-experimental-web-platform-features, or pass --enable-blink-features=WebCodecs flag via the command line.
 
-#### Chrome94之后
+#### Chrome/Edge 94之后
 Desktop,Android,Webview中已默认开启!
 
 需要https加载web,播放https/wss-flv流. 如果控制台打印 "WCS is not supported or experimental-web-platform-features not enabled" 请将当前页面使用https访问
+
 
 
 ### http vs https

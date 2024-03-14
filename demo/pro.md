@@ -307,9 +307,9 @@ H265硬解码，对于电脑硬件支持情况：
 
 > Safari暂不支持SIMD指令集加速解码。
 
-> Chrome 113 支持 WebGPU
+> Chrome/Edge 113 支持 WebGPU
 
-> Chrome 97 支持 WebTransport
+> Chrome/Edge 97 支持 WebTransport
 
 
 | 浏览器     | 支持情况 |
@@ -332,7 +332,7 @@ H265硬解码，对于电脑硬件支持情况：
 
 [caniuse详情](https://caniuse.com/?search=hevc)
 
-> 可以在浏览器地址栏上面输入：`chrome://gpu/` 就可以查看显卡支持情况了
+> 可以在浏览器地址栏上面输入：`chrome://gpu/` 或者 `edge://gpu/` 就可以查看显卡支持情况了
 
 
 <img src="/public/img/gpu-support.jpg">
