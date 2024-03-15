@@ -327,9 +327,23 @@ Extension: .wasm (dot wasm)
 MIMEType: application/wasm
 
 
-### wasm 格式返回错误  Incorrect response MIME type. Expected 'application/wasm'.
+### wasm 格式返回错误  Incorrect response MIME type. Expected 'application/wasm'. falling back to arraybuffer instantiation 错误
 
 > Uncaught (in promise) TypeError: Failed to execute 'compile' on 'WebAssembly': Incorrect response MIME type. Expected 'application/wasm'.
+
+
+> Expected 'application/wasm'., falling back to ArrayBuffer instantiation.
+> These warnings refers to incorrect response MIME type of the wasm file.
+> In order to fix it, please try to set the MIME filetype to application/wasm
+> for the actual wasm file in your server config
+
+
+> 这个错误通常是由WebAssembly模块加载时失败而导致的。当WebAssembly模块不能成功编译时，JavaScript代码会回退到使用ArrayBuffer实例化来代替。
+
+- 检查浏览器版本是否过旧，尝试更新下浏览器版本。
+- 修复下wasm文件的MIME类型，设置为application/wasm
+
+<img src="/public/wasm.png">
 
 
 类似
@@ -378,6 +392,24 @@ application/wasm            wasm;
 
 }
 ```
+
+#### 通过springBoot 部署的静态资源遇到 `falling back to arraybuffer instantiation` 错误问题
+
+> decoder-pro-simd.js:1 wasm streaming compile failed: CompileError: WebAssembly.instantiateStreaming(): section (code 1, "Type") extends past end of the module (length 11493359, remaining bytes 2877270) @+8
+
+> decoder-pro-simd.js:1 falling back to ArrayBuffer instantiation
+
+检查下是不是通过`maven`方式进行打包的。
+
+> maven 进行打包的时候，使用maven进行资源过滤的时候，会把二进制文件破坏掉。导致内容变大。
+
+https://www.mianshigee.com/note/detail/72131ooi/
+
+##### 解决方案
+
+使用maven进行资源过滤的时候，只要过滤需要过滤的文件，一些二进制文件，比如https证书等，就不要参与资源过滤，否则打包后会破坏文件内容。
+
+<img src="/public/img/maven-wasm.png">
 
 
 ### 优化加载速度
@@ -1064,77 +1096,6 @@ windows 系统压缩方法
 
 <img src="/public/img/br.png">
 
-
-### falling back to arraybuffer instantiation 错误
-
-> Expected 'application/wasm'., falling back to ArrayBuffer instantiation.
-> These warnings refers to incorrect response MIME type of the wasm file.
-> In order to fix it, please try to set the MIME filetype to application/wasm
-> for the actual wasm file in your server config
-
-
-> 这个错误通常是由WebAssembly模块加载时失败而导致的。当WebAssembly模块不能成功编译时，JavaScript代码会回退到使用ArrayBuffer实例化来代替。
-
-- 检查浏览器版本是否过旧，尝试更新下浏览器版本。
-- 修复下wasm文件的MIME类型，设置为application/wasm
-
-<img src="/public/wasm.png">
-
-
-#### nginx的配置
-
-1. 用的springboot的tomcat，所以修改tomcat的mime类型，多添加一个wasm的类型
-2. 用的是ISS，配置下wasm类型的数据就行了。
-
-Extension: .wasm (dot wasm)
-MIMEType: application/wasm
-
-##### apache修改 mime.types，添加
-
-```shell
-application/wasm            wasm
-
-```
-
-##### nginx修改mime.types，添加
-
-```shell
-application/wasm            wasm;
-
-```
-##### 或者 nginx修改nginx.conf，添加
-
-```shell
-{
-    # 配置 MIME 类型
-    types {
-        application/wasm wasm;
-    }
-
-    # 开启 gzip 压缩
-    gzip on;
-
-}
-```
-
-
-#### 通过springBoot 部署的静态资源遇到 `falling back to arraybuffer instantiation` 错误问题
-
-> decoder-pro-simd.js:1 wasm streaming compile failed: CompileError: WebAssembly.instantiateStreaming(): section (code 1, "Type") extends past end of the module (length 11493359, remaining bytes 2877270) @+8
-
-> decoder-pro-simd.js:1 falling back to ArrayBuffer instantiation
-
-检查下是不是通过`maven`方式进行打包的。
-
-> maven 进行打包的时候，使用maven进行资源过滤的时候，会把二进制文件破坏掉。导致内容变大。
-
-https://www.mianshigee.com/note/detail/72131ooi/
-
-##### 解决方案
-
-使用maven进行资源过滤的时候，只要过滤需要过滤的文件，一些二进制文件，比如https证书等，就不要参与资源过滤，否则打包后会破坏文件内容。
-
-<img src="/public/img/maven-wasm.png">
 
 
 ### aborted(rangeError:webassembly.instance():out of memory: cannot allocate wasm memory for new instance) 错误

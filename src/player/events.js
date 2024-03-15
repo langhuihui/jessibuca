@@ -92,10 +92,20 @@ export default (player) => {
 
     if (player._opt.debug) {
         const ignoreList = [EVENTS.timeUpdate];
+        const stringList = [
+            EVENTS.stats,
+            EVENTS.playToRenderTimes,
+            EVENTS.audioInfo,
+            EVENTS.videoInfo
+        ]
         Object.keys(EVENTS).forEach((key) => {
             player.on(EVENTS[key], (value) => {
                 if (ignoreList.includes(key)) {
                     return;
+                }
+
+                if (stringList.includes(key)) {
+                    value = JSON.stringify(value)
                 }
 
                 player.debug.log('player events', EVENTS[key], value);

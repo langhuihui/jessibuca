@@ -341,7 +341,7 @@
 	class Debug {
 	  constructor(master) {
 	    this.log = function (name) {
-	      if (master._opt.debug) {
+	      if (master._opt && master._opt.debug) {
 	        for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
 	          args[_key - 1] = arguments[_key];
 	        }
@@ -351,7 +351,7 @@
 	    };
 
 	    this.warn = function (name) {
-	      if (master._opt.debug) {
+	      if (master._opt && master._opt.debug) {
 	        for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
 	          args[_key2 - 1] = arguments[_key2];
 	        }
@@ -1038,10 +1038,15 @@
 
 	  if (player._opt.debug) {
 	    const ignoreList = [EVENTS.timeUpdate];
+	    const stringList = [EVENTS.stats, EVENTS.playToRenderTimes, EVENTS.audioInfo, EVENTS.videoInfo];
 	    Object.keys(EVENTS).forEach(key => {
 	      player.on(EVENTS[key], value => {
 	        if (ignoreList.includes(key)) {
 	          return;
+	        }
+
+	        if (stringList.includes(key)) {
+	          value = JSON.stringify(value);
 	        }
 
 	        player.debug.log('player events', EVENTS[key], value);
@@ -11762,7 +11767,20 @@
 	    super();
 	    this.$container = container;
 	    this._opt = Object.assign({}, DEFAULT_PLAYER_OPTIONS, options);
-	    this.debug = new Debug(this); //
+	    this.debug = new Debug(this); // disable offscreen
+
+	    this._opt.forceNoOffscreen = true;
+
+	    if (isMobile()) {
+	      this.debug.log('Player', 'isMobile and set _opt.controlAutoHide false');
+	      this._opt.controlAutoHide = false;
+
+	      if (screenfull.isEnabled && this._opt.useWebFullScreen) {
+	        this.debug.log('Player', 'screenfull.isEnabled is true and _opt.useWebFullScreen is true , set _opt.useWebFullScreen false');
+	        this._opt.useWebFullScreen = false;
+	      }
+	    } //
+
 
 	    if (this._opt.useWCS) {
 	      this._opt.useWCS = supportWCS();
@@ -13014,7 +13032,21 @@
 	      });
 	      this.player.once(EVENTS_ERROR.mseSourceBufferError, () => {
 	        this.pause().then(() => {
-	          this.debug.log('Jessibuca', 'mseSourceBufferError close success');
+	          if (this.player._opt.autoWasm) {
+	            this.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play');
+
+	            this._resetPlayer({
+	              useMSE: false
+	            });
+
+	            this.play(url, options).then(() => {
+	              // resolve();
+	              this.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play success');
+	            }).catch(() => {
+	              // reject();
+	              this.debug.warn('Jessibuca', 'auto wasm [mse-> wasm] reset player and play error');
+	            });
+	          }
 	        });
 	      }); //
 
