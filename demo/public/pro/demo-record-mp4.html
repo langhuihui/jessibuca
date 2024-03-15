@@ -128,6 +128,9 @@
 
 <script src="./demo.js"></script>
 <script>
+ window.JESSIBUCA_PRO_MP4_RECORDER_WASM_URL='./js/jessibuca-pro-mp4-recorder-decoder.wasm'
+</script>
+<script>
     var $player = document.getElementById('play');
     var $pause = document.getElementById('pause');
     var $playHref = document.getElementById('playUrl');
@@ -155,6 +158,7 @@
             videoBuffer: Number($videoBuffer.value), // 缓存时长
             videoBufferDelay: Number($videoBufferDelay.value), // 1000s
             decoder: './js/decoder-pro.js',
+            wasmMp4RecorderDecoder:'./js/jessibuca-pro-mp4-recorder-decoder.js',
             isResize: false,
             text: "",
             loadingText: "加载中",
