@@ -62,6 +62,65 @@ nginx 配置
 add_header Cross-Origin-Opener-Policy same-origin;
 add_header Cross-Origin-Embedder-Policy require-corp;
 ```
+
+### -enable-features=SharedArrayBuffer启动 Chrome
+
+您可以使用命令行标志--enable-features=SharedArrayBuffer启动 Chrome，从而在不启用跨域隔离的情况下启用SharedArrayBuffer。
+
+谷歌浏览器版本 >= 92.
+
+在window系统下，可以在快捷方式的目标中添加 `--enable-features=SharedArrayBuffer`
+
+或者通过执行脚本
+
+```shell
+chrome --enable-features=SharedArrayBuffer
+```
+
+
+``` bat
+/*&cls
+@echo off
+rem 在指定快捷方式的目标项后面添加/增加一个参数值
+title %#% +%@%%$%%$% %z%
+cd /d "%~dp0"
+rem 指定快捷方式的路径
+
+for /f "tokens=2*" %%a in ('reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v Desktop') do set Desktop=%%b
+rem 通过注册表查找出桌面所在的位置，并将位置路径定义为变量Desktop
+
+set "lnkfile=%Desktop%\Google Chrome.lnk"
+rem 指定添加的参数
+set "arguments= --enable-features=SharedArrayBuffer"
+cscript -nologo -e:jscript "%~f0" "%lnkfile%" "%arguments%"
+echo;%#% +%@%%$%%$% %z%
+pause
+exit
+*/
+var ws=new ActiveXObject('WScript.Shell');
+var lnk=ws.CreateShortcut(WSH.Arguments(0));
+lnk.Arguments=WSH.Arguments(1);
+lnk.Save();
+```
+
+将文件保存为 `chrome.bat`，双击运行即可。
+
+或者直接下载 [chrome.bat](https://jessibuca.com/public/zip/set-chrome.zip)
+
+成功后通过桌面的快捷方式打开谷歌，将默认开启SharedArrayBuffer特性。
+
+如果因系统权限问题开启失败，你可以通过以下途径手动开启：
+
+1. 在桌面上右键点击谷歌浏览器图标
+2. 选择属性，选择“快捷方式”
+
+看到目标栏的内容类似于 `"C:\Program Files\Google\Chrome\Application\chrome.exe"`，在后面添加 `--enable-features=SharedArrayBuffer`，然后点击确定。
+
+`"C:\Program Files\Google\Chrome\Application\chrome.exe" --enable-features=SharedArrayBuffer`
+
+保存后重启浏览器，通过该快捷方式启动浏览器，将自动启用多线程特性
+
+
 ## 群
 
 <img src="/public/qrcode.jpeg">
