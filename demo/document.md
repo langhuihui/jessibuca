@@ -2183,6 +2183,12 @@ window.setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
 
  一般是因为wasm没有编译成功，导致的。
 
+### video 抛出 PIPELINE_ERROR_DECODE: video decode error! 错误
+
+### video 抛出 PIPELINE_ERROR_COULD_NOT_RENDER 错误
+
+### video 抛出 PIPELINE_ERROR_DECODE: VDA Error 4 错误
+
 
 ## 支持作者
 
