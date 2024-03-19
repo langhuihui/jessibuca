@@ -28,9 +28,7 @@ jessibuca pro 扩展模块
 
 视频支持的编码格式：h264、h265、
 
-音频支持的编码格式：aac、mp3、
-
-> pcmu(g711u)、pcma(g711a) 音频的流会录制成mov格式的视频文件。
+音频支持的编码格式：aac、mp3、pcmu(g711u)、pcma(g711a)
 
 > 支持定制支持水印。
 
@@ -56,9 +54,7 @@ jessibuca pro 扩展模块
 视频支持的编码格式：h264、h265、
 音频支持的编码格式：aac、mp3、pcmu(g711u)、pcma(g711a)
 
-> mp4只支持 aac、mp3 两种格式。
-
-支持录制格式 `flv`,`mp4`
+支持录制格式 `flv`,`mp4`，`webm`。
 
 ### demo（十分钟）
 
