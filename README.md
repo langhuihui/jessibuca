@@ -1,3 +1,4 @@
+<p align="center"><img src="/demo/public/logo.png" /></p>
 <h1 align="center"> Jessibuca </h1>
 
 <p align="center">
