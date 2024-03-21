@@ -781,7 +781,7 @@ pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
 
 1.查看控制台的`network` 面板下面的 `decoder.wasm`文件有没有被正确返回。返回个格式是不是 `application/wasm`格式的。
 
-2.查看控制台的`network` 面板下面的 decoder.js 文件有没有被正确返回。返回个格式是不是 `application/javascript`格式的。（会存在vue 或者react 项目 直接被返回了index.html 内容了）
+2.查看控制台的`network` 面板下面的 decoder.js 文件有没有被正确返回。返回个格式是不是 `application/javascript`格式的。（因为配置的路径不对，会存在vue 或者react 项目 直接被返回了index.html 内容了）
 
 4.查看`decoder`参数是否配置的正确，见[decoder参数配置](http://jessibuca.monibuca.com/api.html#decoder)，如果配置错误，会被web服务器以找不到文件，然后返回index.html的内容。
 
@@ -2189,6 +2189,13 @@ window.setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
 
 ### video 抛出 PIPELINE_ERROR_DECODE: VDA Error 4 错误
 
+### window.Jessibuca is not a constructor 错误
+
+这种错误一般都是 `jessibuca.js` 没有加载成功导致的。
+
+检查F12 -> 网络(network) -> 找到加载的 `jessibuca.js` 文件,然后看下 `response` 返回的内容是否是正常的。
+
+> 如果路径配置的不对的话，会存在vue 或者react 项目 直接被返回了index.html 内容了
 
 ## 支持作者
 
