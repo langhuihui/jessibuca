@@ -4,7 +4,14 @@ import {isWebglRenderSupport, now} from "../utils";
 export default class DecoderWorker {
     constructor(player) {
         this.player = player;
-        this.decoderWorker = new Worker(player._opt.decoder)
+        // 解决worker跨域
+        if(player._opt.decoder.substr(0,4) === 'http'){
+            var blob = new Blob([`importScripts("${player._opt.decoder}")`], {"type": 'application/javascript'});
+            const blobUrl = window.URL.createObjectURL(blob);
+            this.decoderWorker = new Worker(blobUrl);
+        }else{
+            this.decoderWorker = new Worker(player._opt.decoder)
+        }
         this._initDecoderWorker();
         player.debug.log('decoderWorker', 'init')
     }
