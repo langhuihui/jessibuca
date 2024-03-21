@@ -153,6 +153,15 @@ Jessibuca 是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 
 [API](/demo/api.md)
 
+## Document/Question 文档/答疑
+
+[DOC](/demo/document.md)
+
+## DEMO
+
+[Demo](/demo/demo.md)
+
+
 ## HTTP 地址
 
 [http://jessibuca.monibuca.com/](http://jessibuca.monibuca.com/)
@@ -161,9 +170,6 @@ Jessibuca 是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 
 [https://jessibuca.com](https://jessibuca.com)
 
-## DEMO
-
-[Demo](/demo/demo.md)
 
 ## 源码目录结构
 
