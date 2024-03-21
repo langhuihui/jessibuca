@@ -12615,6 +12615,15 @@
 
 	    if (_opt.videoBuffer >= _opt.heartTimeout) {
 	      throw new Error(`Jessibuca videoBuffer ${_opt.videoBuffer}s must be less than heartTimeout ${_opt.heartTimeout}s`);
+	    } // videoBuffer set too long
+
+
+	    if (_opt.videoBuffer > 1 * 60) {
+	      console.warn('Jessibuca videoBuffer is too long, it is recommended to set it to 1 minute');
+	    }
+
+	    if (!$container.classList) {
+	      throw new Error('Jessibuca container option must be DOM Element');
 	    }
 
 	    $container.classList.add('jessibuca-container');
@@ -12676,7 +12685,7 @@
 
 	  _initPlayer($container, options) {
 	    this.player = new Player($container, options);
-	    this.debug.log('jessibuca', '_initPlayer', this.player.getOption());
+	    this.debug.log('jessibuca', '_initPlayer', JSON.stringify(this.player.getOption()));
 
 	    this._bindEvents();
 	  }

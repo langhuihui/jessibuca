@@ -36,6 +36,15 @@ class Jessibuca extends Emitter {
             return;
         }
 
+        // videoBuffer set too long
+        if (_opt.videoBuffer > 10) {
+            console.warn('JbPro', `videoBuffer ${_opt.videoBuffer}s is too long, will black screen for ${_opt.videoBuffer}s , it is recommended to set it to less than 10s`);
+        }
+
+        if (!$container.classList) {
+            throw new Error('Jessibuca container option must be DOM Element');
+            return;
+        }
 
         $container.classList.add('jessibuca-container');
 
