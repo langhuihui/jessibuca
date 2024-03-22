@@ -39,6 +39,22 @@ if (!$container) {
 }
 ```
 
+> 不建议业务层在container参数上面有额外的css属性样式，尤其是缩放，旋转之类的，这样会导致播放器内部的画面不正常。
+
+可以通过在业务层的`div` 下面再放一个`div`作为播放器容器,这样可以规避掉一些问题。
+
+```html
+<div id="your-container">
+    <div id="player-container"></div>
+</div>
+```
+
+```js
+new Jessibuca({
+    container: '#player-container'
+})
+```
+
 ### videoBuffer
 
 - **类型**：`number`
