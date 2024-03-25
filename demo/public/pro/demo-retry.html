@@ -169,12 +169,33 @@
         </div>
         <div class="input">
             <div>
-                <span>websocket 1006 错误内部重播：</span>
                 <input
                     checked
                     type="checkbox"
                     id="websocket1006ErrorReplay"
                 />
+                <span>websocket 1006 错误内部重播</span>
+
+                <input
+                    checked
+                    type="checkbox"
+                    id="streamErrorReplay"
+                />
+                <span>stream error 内部重播</span>
+
+                <input
+                    checked
+                    type="checkbox"
+                    id="streamEndReplay"
+                />
+                <span>stream end 内部重播</span>
+
+                <input
+                    checked
+                    type="checkbox"
+                    id="networkDisconnectReplay"
+                />
+                <span>断网重连</span>
             </div>
         </div>
 
@@ -250,6 +271,9 @@
     var $websocket1006ErrorReplay = document.getElementById('websocket1006ErrorReplay');
     var $replayShowLoadingIcon = document.getElementById('replayShowLoadingIcon');
     var $decoderErrorAutoWasm = document.getElementById('decoderErrorAutoWasm')
+    var $streamErrorReplay = document.getElementById('streamErrorReplay');
+    var $streamEndReplay = document.getElementById('streamEndReplay');
+    var $networkDisconnectReplay = document.getElementById('networkDisconnectReplay');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -298,9 +322,14 @@
             demuxUseWorker: $demuxUseWorker.checked === true,
             controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
             websocket1006ErrorReplay: $websocket1006ErrorReplay.checked === true,
-            playFailedAndPausedShowPlayBtn:false, //
-            // audioEngine:"worklet",
+            streamErrorReplay: $streamErrorReplay.checked === true,
+            streamEndReplay:$streamEndReplay.checked === true,
+            streamErrorReplayDelayTime: 5, // 延迟1s去触发播放。
+            streamEndReplayDelayTime: 5, // 延迟1s去触发播放。
+            networkDisconnectReplay: $networkDisconnectReplay.checked === true,
+            playFailedAndPausedShowPlayBtn: false, //
             // isFlv: true
+            audioEngine: 'script',
         }, options)
         jessibuca = new JessibucaPro(_options);
 
@@ -309,7 +338,7 @@
         if ($playErrorReplay.checked === true) {
             //  一直播放
             jessibuca.on('playFailedAndPaused', function (error, frameInfo, msg) {
-                console.error('playFailedAndPaused', error, msg);
+                console.error('playFailedAndPaused', error, msg, frameInfo);
                 //  触发重播的时候，是否使用最后一帧来显示
                 if ($replayUseLastFrameShow.checked === true) {
                     // 最后一帧显示
