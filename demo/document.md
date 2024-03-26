@@ -166,6 +166,9 @@ const instance = new window.Jessibuca({})
 - 支持H264和H265解码
 - 支持http和https
 
+> wasm(simd) 主要是只支持`simd`指令集的浏览器，比如`chrome`，`edge`，`safari`不支持。
+
+
 #### 优先级
 
 如果同时配置了`useMSE`和`useWCS`，则优先使用`useMSE`，如果`useMSE`不支持，则使用`useWCS`，如果 `useWCS` 不支持，则降级到`wasm`解码。
@@ -424,7 +427,7 @@ https://www.mianshigee.com/note/detail/72131ooi/
 
 > jessibuca pro 版本已经支持了。欢迎测试使用。http://jessibuca.monibuca.com/player-pro.html
 
-### webcodecs
+### webcodecs 硬解码H265
 
 #### Chrome/Edge 86及之后
 
@@ -435,6 +438,7 @@ Desktop,Android,Webview中已默认开启!
 
 需要https加载web,播放https/wss-flv流. 如果控制台打印 "WCS is not supported or experimental-web-platform-features not enabled" 请将当前页面使用https访问
 
+> jessibuca pro 版本已经支持了。欢迎测试使用。http://jessibuca.monibuca.com/player-pro.html
 
 
 ### http vs https
@@ -1341,6 +1345,10 @@ loadingTimeout 是指在`播放器在请求url的时候`，接口是返回200状
 #### delayTimeout
 delayTimeout 是指在`播放器播放过程中`，如果在`delayTimeout`时间内，没有收到流数据，则会抛出`delayTimeout`错误。
 
+#### loadingTimeoutReplay(delayTimeoutReplay) 与 loadingTimeoutReplayTimes(delayTimeoutReplayTimes)
+
+> 如果在`loadingTimeout`时间内，没有收到流数据，则会抛出`loadingTimeout`错误，如果设置了`loadingTimeoutReplay`，则会重新播放，会重试`loadingTimeoutReplayTimes`次。
+
 
 ### 关于移动端（H5）切换网络的时候，播放器会触发什么事件。
 
@@ -2196,6 +2204,86 @@ window.setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
 检查F12 -> 网络(network) -> 找到加载的 `jessibuca.js` 文件,然后看下 `response` 返回的内容是否是正常的。
 
 > 如果路径配置的不对的话，会存在vue 或者react 项目 直接被返回了index.html 内容了
+
+
+
+### 关于硬解码或者video标签渲染自动播放
+
+背景：用户希望打开页面的时候就直接自动播放视频（单屏或者多屏），但是浏览器的自动播放策略是，必须是用户手动触发了事件之后，才能自动播放。
+
+会抛出`DOMException: play() failed because the user didn't interact with the document first. https://goo.gl/xX8pDD` 错误。
+
+### 解决方案
+
+1. 添加一个交互事件，让用户手动触发下，再去播放视频。
+2. 使用`wcs`解码(在https环境下)，然后使用`canvas`标签渲染。
+3. 使用wasm(simd) 软解码，然后使用`canvas`标签渲染。
+
+### 页面首次加载超时检测
+
+目前播放器的默认配置是
+
+```
+{
+    loadingTimeout: 10,
+    loadingTimeoutReplay:true,
+    loadingTimeoutReplayTimes:3
+}
+```
+
+> 如果想要如果想无限次重试，可以设置loadingTimeoutReplayTimes为-1
+
+### 页面播放过程中超时检测
+
+目前播放器的默认配置是
+
+```
+{
+    heartTimeout: 10,
+    heartTimeoutReplay:true,
+    heartTimeoutReplayTimes:3
+}
+```
+
+> 如果想要如果想无限次重试，可以设置heartTimeoutReplayTimes为-1
+
+
+### 播放的时候解除静音
+
+播放器默认播放的时候，是静音播放的。所以如果想播放的时候解除静音，则需要配置`isNotMute:true`就可以了。
+
+> 如果是程序触发的自动播放播放器，是不会有声音的，需要用户手动触发才会有声音。
+
+### 苹果手机默认没有声音。
+
+在设置`isNotMute:true` 在苹果的手机端默认是没有声音的。
+
+> iPhone，chrome等要求自动播放时，音频必须静音，需要由一个真实的用户交互操作来恢复，不能使用代码。
+
+
+程序里面可以检查下播放器的状态，如果是静音状态，就需要需要出一个ui交互，让用户手动恢复声音播放。
+
+```js
+var result = jessibuca.isMute()
+console.log(result) // true
+if (result) {
+
+    // 这里可以出一个ui交互，让用户手动恢复声音播放
+}
+```
+
+可以结合`audioResume()`方法。
+
+```js
+jessibuca.audioResume();
+```
+
+### IOS 手机端全屏
+
+> 由于IOS不支持系统级别的全屏方法，所以只能降级到web全屏。
+
+配置 `useWebFullScreen:true` ,可以实现IOS手机端全屏。
+
 
 ## 支持作者
 
