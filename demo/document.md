@@ -2285,6 +2285,24 @@ jessibuca.audioResume();
 配置 `useWebFullScreen:true` ,可以实现IOS手机端全屏。
 
 
+### 关于初始化webgl失败的可能性
+
+1. 浏览器不支持webgl。
+2. 浏览器支持webgl，但是被禁用了。
+3. 如果是套壳在QT等环境下，可能会有webgl初始化失败的情况。检查是否选择了正确的显卡，或者显卡驱动是否正常。
+
+#### 浏览器如何禁用/开启 webgl
+
+要在Chrome浏览器中禁用WebGL，您可以按照以下步骤操作：
+
+1. 打开Chrome浏览器并输入以下地址：chrome://flags。
+2. 在Chrome Flags页面中，搜索框中输入"webgl"，以查找与WebGL相关的标志。
+3. 找到名为"WebGL"的选项，并将其设置为"Disabled"。
+4. 关闭Chrome浏览器，并重新启动它以使更改生效。
+
+
+完成上述步骤后，Chrome浏览器将禁用WebGL功能。请注意，这将影响所有网站上使用WebGL的内容，包括3D图形和游戏等。
+
 ## 支持作者
 
 ### 第一作者
