@@ -137,6 +137,11 @@
                         v-model="isFmp4"
                         @change="restartPlay()"
                     /><span>设置Fmp4格式</span>
+                    <input
+                        type="checkbox"
+                        v-model="decoderErrorAutoWasm"
+                        @change="restartPlay()"
+                    /><span>硬解码失败降级到wasm</span>
                 </div>
             </div>
             <div class="input">
@@ -555,6 +560,7 @@ export default {
             playModel: 'video+audio',
             isFlv: false,
             isFmp4: false,
+            decoderErrorAutoWasm: true,
             hiddenAutoPause: false,
             hasVideo: true,
             hasAudio: true,
@@ -610,6 +616,7 @@ export default {
                         videoBufferDelay: Number(this.videoBufferDelay),
                         isResize: false,
                         useWCS: this.useWCS,
+                        decoderErrorAutoWasm: this.decoderErrorAutoWasm,
                         useMSE: this.useMSE,
                         useSIMD: this.useSIMD,
                         useMThreading: this.useMT,
