@@ -138,6 +138,9 @@
             isNotMute: false,
         },);
 
+        jessibuca.on('mute',function (state) {
+            console.log('mute',state)
+        })
 
         jessibuca.on('recordEnd',function (){
             console.log('recordEnd')
