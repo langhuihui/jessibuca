@@ -2303,6 +2303,13 @@ jessibuca.audioResume();
 
 完成上述步骤后，Chrome浏览器将禁用WebGL功能。请注意，这将影响所有网站上使用WebGL的内容，包括3D图形和游戏等。
 
+
+### 关于切换分辨率
+
+目前pro版本支持配置分辨率参数，会在底部UI 展示，当点击分辨率的时候，会抛出事件，然后业务层监听到事件，通过调用播放器的`play(url)` 方法来实现分辨率的切换逻辑。
+
+体验demo：[https://jessibuca.com/pro/demo-control-dom.html](https://jessibuca.com/pro/demo-control-dom.html)
+
 ## 支持作者
 
 ### 第一作者

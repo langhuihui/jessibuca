@@ -345,7 +345,7 @@
 
 
 
-### 底部UI（自动隐藏、自定义按钮、自定义HTML、右键菜单、显示性能面板）
+### 底部UI（自动隐藏、自定义按钮、自定义HTML、右键菜单、显示性能面板、分辨率）
 ------
 #### https
 [https://jessibuca.com/pro/demo-control-dom.html](https://jessibuca.com/pro/demo-control-dom.html)
