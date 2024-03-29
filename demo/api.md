@@ -402,6 +402,9 @@ jessibuca.mute()
 jessibuca.cancelMute()
 ```
 
+> iPhone，chrome等要求自动播放时，音频必须静音，需要由一个真实的用户交互操作来恢复，不能使用代码。
+
+
 ### audioResume()
 
 - **用法**： 留给上层用户操作来触发音频恢复的方法。

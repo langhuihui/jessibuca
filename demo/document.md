@@ -2213,7 +2213,7 @@ window.setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
 
 会抛出`DOMException: play() failed because the user didn't interact with the document first. https://goo.gl/xX8pDD` 错误。
 
-### 解决方案
+#### 解决方案
 
 1. 添加一个交互事件，让用户手动触发下，再去播放视频。
 2. 使用`wcs`解码(在https环境下)，然后使用`canvas`标签渲染。
@@ -2309,6 +2309,11 @@ jessibuca.audioResume();
 目前pro版本支持配置分辨率参数，会在底部UI 展示，当点击分辨率的时候，会抛出事件，然后业务层监听到事件，通过调用播放器的`play(url)` 方法来实现分辨率的切换逻辑。
 
 体验demo：[https://jessibuca.com/pro/demo-control-dom.html](https://jessibuca.com/pro/demo-control-dom.html)
+
+
+### 关于播放webrtc 报： Failed to execute 'setRemoteDescription' on 'RTCPeerConnection': Failed to parse SessionDescription.  Duplicate a=msid lines detected
+
+解决方案：https://blog.csdn.net/dualvencsdn/article/details/137049065
 
 ## 支持作者
 
