@@ -693,7 +693,7 @@ Jessibuca是一款开源的纯H5直播流播放器。
 
 ### 是否可支持倍速播放
 
-pro 已经支持了 http://jessibuca.monibuca.com/player-pro.html
+pro 已经支持了 [回放(录像)流Demo(支持mse、wcs、simd解码)](https://jessibuca.com/pro-demo.html#tf%E5%8D%A1%E6%B5%81%EF%BC%88%E5%BD%95%E5%83%8F%E6%B5%81%EF%BC%89-24h%E6%97%B6%E9%97%B4%E8%BD%B4)
 
 ###  关于延迟造成的原因
 
