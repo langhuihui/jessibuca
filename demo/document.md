@@ -452,13 +452,6 @@ Desktop,Android,Webview中已默认开启!
 
 在https 协议里面，是不能播放http 或者 ws 协议的，会报跨域报错。
 
-### WebRTC
-
-> WebRTC标准是不支持h265的。
-
-> jessibuca pro 版本结合M7S已经支持了。欢迎测试使用。 http://jessibuca.monibuca.com/player-pro.html
-
-
 ### OffscreenCanvas这个特性需要特殊的环境和硬件支持吗
 
 默认是关闭的. 如果开启需要设置 forceNoOffscreen 为 false 就可以了。
@@ -2001,7 +1994,14 @@ window.addEventListener('orientationchange', function () {
 如果发现这个错误，检查下是不是缓存原因导致的两个文件的版本没有一一对应上。如果不是，可以去官网或者github 上下载最新版本的jessibuca，全量替换更新下就行了。
 
 
-### 关于播放webrtc 的 H265格式的视频
+### WebRTC
+
+> WebRTC标准是不支持h265的。
+
+> jessibuca pro 版本结合M7S已经支持了。欢迎测试使用。 http://jessibuca.monibuca.com/player-pro.html
+
+
+#### 关于播放webrtc 的 H265格式的视频
 
 目前 `pro版本` 是支持`[M7S流媒体服务器](https://m7s.live/)`来播放 webrtc 的 H265格式的视频。
 
@@ -2014,6 +2014,8 @@ window.addEventListener('orientationchange', function () {
 https://juejin.cn/post/7215608036394614844
 
 > 当然 pro 可以做到1s以内的更低延迟。
+
+> 对于ZLMediaKit，目前官网版本是不支持DataChannel的，需要自己实现。如需要对接集成，可以联系Pro作者：bosswancheng
 
 
 ### 播放器内部的样式发生变形或者class 丢失

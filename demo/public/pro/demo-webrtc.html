@@ -38,14 +38,24 @@
         </div>
         <div class="input">
             <div>
+                <input onchange="replayByType('srs')" type="checkbox" id="isForSRS"><span>SRS Webrtc服务器</span>
+                <input onchange="replayByType('zlm')" type="checkbox" id="isForZLM"><span>ZLM Webrtc服务器</span>
+
+            </div>
+        </div>
+        <div class="input">
+            <div>
                 <input
-                    onchange="replay()"
+                    onchange="replayByType('others')"
                     type="checkbox"
                     id="isForOthers"
                 /><span>其他Webrtc服务器</span>
                 <span>其他的webrtc地址：</span>webrtc://127.0.0.1/test/sdp <br>
                 播放器是不会根据url上面的路径来检测的的。
             </div>
+        </div>
+        <div class="input">
+            <a href="/pro-webrtc.html">对接SRS和zlmedia的详细文档</a>
         </div>
         <div class="input">
             <div>输入URL：</div>
@@ -72,11 +82,13 @@
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
     var $isForOthers = document.getElementById('isForOthers');
+    var $isForSRS = document.getElementById('isForSRS');
+    var $isForZLM = document.getElementById('isForZLM');
+
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var jessibuca = null;
-
 
 
     function create() {
@@ -103,7 +115,9 @@
             audioEngine: "worklet",
             isNotMute: false,
             heartTimeout: 10,
-            isWebrtcForOthers:$isForOthers.checked === true,
+            isWebrtcForOthers: $isForOthers.checked === true,
+            isWebrtcForZLM: $isForZLM.checked === true,
+            isWebrtcForSRS: $isForSRS.checked === true,
         },);
 
 
@@ -139,8 +153,7 @@
             $player.style.display = 'none';
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
-        }
-        else{
+        } else {
             jessibuca.showErrorMessageTips('播放地址不能为空');
         }
     }
@@ -156,6 +169,20 @@
             create();
             play();
         }
+    }
+
+    function replayByType(type) {
+        $isForZLM.checked = false;
+        $isForSRS.checked = false;
+        $isForOthers.checked = false;
+        if (type === 'srs') {
+            $isForSRS.checked = true;
+        } else if (type === 'zlm') {
+            $isForZLM.checked = true;
+        } else if (type === 'others') {
+            $isForOthers.checked = true;
+        }
+        replay();
     }
 
     $player.addEventListener('click', function () {
