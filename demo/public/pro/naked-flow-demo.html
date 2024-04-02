@@ -66,6 +66,15 @@
         </div>
         <div class="input">
             <div>
+                <span>缓存时长：</span>
+                <input placeholder="单位：秒" type="text" id="videoBuffer" style="width: 50px" value="0.2">秒
+                <span>缓存延迟(延迟超过会触发丢帧)：</span>
+                <input placeholder="单位：秒" type="text" id="videoBufferDelay" style="width: 50px" value="1">秒
+                <button onclick="replay()">重播</button>
+            </div>
+        </div>
+        <div class="input">
+            <div>
                 <span>H265解封装器：</span>
                 <input
                     checked
@@ -116,7 +125,8 @@
     var $fps = document.getElementById('fps');
     var $h265DemuxType1 = document.getElementById('h265DemuxType1');
     var $h265DemuxType2 = document.getElementById('h265DemuxType2');
-
+    var $videoBuffer = document.getElementById('videoBuffer');
+    var $videoBufferDelay = document.getElementById('videoBufferDelay');
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var jessibuca = null;
@@ -124,7 +134,8 @@
     function create() {
         jessibuca = new JessibucaPro({
             container: $container,
-            videoBuffer: 0.2, // 缓存时长
+            videoBuffer: Number($videoBuffer.value), // 缓存时长
+            videoBufferDelay: Number($videoBufferDelay.value), // 1000s
             decoder: './js/decoder-pro.js',
 
             isResize: false,
