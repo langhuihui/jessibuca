@@ -75,6 +75,22 @@
         </div>
         <div class="input">
             <div>
+                <span>H264解封装器：</span>
+                <input
+                    checked
+                    type="checkbox"
+                    id="h264DemuxType1"
+                /><span>V1</span>
+                <input
+                    type="checkbox"
+                    id="h264DemuxType2"
+                /><span>V2</span>
+                <span>(v1版本兼容性更强，v2版本性能更强)</span>
+            </div>
+        </div>
+        <div class="input">
+
+            <div>
                 <span>H265解封装器：</span>
                 <input
                     checked
@@ -87,6 +103,7 @@
                 /><span>V2</span>
                 <span>(v1版本兼容性更强，v2版本性能更强)</span>
             </div>
+
         </div>
         <div class="input">
             <div>
@@ -125,6 +142,8 @@
     var $fps = document.getElementById('fps');
     var $h265DemuxType1 = document.getElementById('h265DemuxType1');
     var $h265DemuxType2 = document.getElementById('h265DemuxType2');
+    var $h264DemuxType1 = document.getElementById('h264DemuxType1');
+    var $h264DemuxType2 = document.getElementById('h264DemuxType2');
     var $videoBuffer = document.getElementById('videoBuffer');
     var $videoBufferDelay = document.getElementById('videoBufferDelay');
     var showOperateBtns = true; // 是否显示按钮
@@ -165,7 +184,8 @@
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
             heartTimeout: 10,
-            nakedFlowH265DemuxUseNew: $h265DemuxType2.checked === true
+            nakedFlowH265DemuxUseNew: $h265DemuxType2.checked === true,
+            nakedFlowH264DemuxUseNew:$h264DemuxType1.checked === true
             // checkFirstIFrame:false,
             // isFlv: true
         },);
@@ -287,6 +307,23 @@
         }
         replay();
     })
+
+    $h264DemuxType1.addEventListener('click', function () {
+        const checked = $h264DemuxType1.checked;
+        if (checked) {
+            $h264DemuxType2.checked = false;
+        }
+        replay();
+    })
+
+    $h264DemuxType2.addEventListener('click', function () {
+        const checked = $h264DemuxType2.checked;
+        if (checked) {
+            $h264DemuxType1.checked = false;
+        }
+        replay();
+    })
+
 
     $fps.addEventListener('change', function () {
         if (jessibuca) {
