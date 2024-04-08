@@ -75,7 +75,7 @@
         </div>
         <div class="input">
             <div>
-                <span>H264解封装器：</span>
+                <span>(H264/H265)解封装器：</span>
                 <input
                     checked
                     type="checkbox"
@@ -185,7 +185,8 @@
             isNotMute: false,
             heartTimeout: 10,
             nakedFlowH265DemuxUseNew: $h265DemuxType2.checked === true,
-            nakedFlowH264DemuxUseNew:$h264DemuxType1.checked === true
+            nakedFlowDemuxUseNew:$h264DemuxType1.checked === true,
+            // demuxUseWorker:false,
             // checkFirstIFrame:false,
             // isFlv: true
         },);
