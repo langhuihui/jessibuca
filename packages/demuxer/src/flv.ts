@@ -1,6 +1,7 @@
 import { BaseDemuxer, DemuxEvent, DemuxMode } from "./base";
 import { samplingFrequencyIndexMap } from "./util";
-
+const FourCC_H265 = "hvc1";
+const FourCC_AV1 = "av01";
 export interface FlvTag {
   type: number;
   data: Uint8Array;
@@ -31,11 +32,7 @@ export class FlvDemuxer extends BaseDemuxer {
     await this.source!.read(9).then((data) => {
       this.header = data;
       console.log(data);
-      if (
-        data[0] != "F".charCodeAt(0) ||
-        data[1] != "L".charCodeAt(0) ||
-        data[2] != "V".charCodeAt(0)
-      ) {
+      if (data.subarray(0, 3).reduce((acc, cur) => acc + String.fromCharCode(cur), "") !== "FLV") {
         throw new Error("not flv");
       }
       console.timeEnd("flv");
@@ -54,14 +51,16 @@ export class FlvDemuxer extends BaseDemuxer {
         if (!this.audioDecoderConfig) {
           this.audioDecoderConfig = {
             codec:
-              { 10: "aac", 7: "pcma", 8: "pcmu" }[data[0] >> 4] ||
-              "unknown",
+              { 10: "aac", 7: "pcma", 8: "pcmu" }[data[0] >> 4] || "unknown",
             numberOfChannels: 1,
             sampleRate: 8000,
           };
           if (this.audioDecoderConfig.codec == "aac") {
-            this.audioDecoderConfig.numberOfChannels = ((data[3] >> 3) & 0x0F); //声道
-            this.audioDecoderConfig.sampleRate = samplingFrequencyIndexMap[((data[2] & 0x7) << 1) | (data[3] >> 7)];
+            this.audioDecoderConfig.numberOfChannels = (data[3] >> 3) & 0x0f; //声道
+            this.audioDecoderConfig.sampleRate =
+              samplingFrequencyIndexMap[
+              ((data[2] & 0x7) << 1) | (data[3] >> 7)
+              ];
           } else {
             this.emit(
               DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED,
@@ -76,8 +75,7 @@ export class FlvDemuxer extends BaseDemuxer {
               DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED,
               this.audioDecoderConfig
             );
-            if (this.mode == DemuxMode.PULL)
-              return this.pull();
+            if (this.mode == DemuxMode.PULL) return this.pull();
             else return;
           }
         }
@@ -91,21 +89,56 @@ export class FlvDemuxer extends BaseDemuxer {
           duration: 0,
         });
       case 9:
-        if (!this.videoDecoderConfig) {
+        if (data[0] >> 7) {
+          // rtmp 扩展协议
+          if (data[0] & 0x0f) {
+            return this.gotVideo?.({
+              type: data[0] >> 4 == 1 ? "key" : "delta",
+              data: data.subarray(
+                this.videoDecoderConfig.codec == "hevc" ? 8 : 5
+              ),
+              timestamp: timestamp,
+              duration: 0,
+            });
+          } else {
+            switch (
+            data
+              .subarray(1, 5)
+              .reduce((acc, cur) => acc + String.fromCharCode(cur), "")
+            ) {
+              case FourCC_H265:
+                this.videoDecoderConfig = {
+                  codec: "hevc",
+                  description: data.subarray(5),
+                };
+                break;
+              case FourCC_AV1:
+                this.videoDecoderConfig = {
+                  codec: "av1",
+                };
+                break;
+            }
+            this.emit(
+              DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED,
+              this.videoDecoderConfig!
+            );
+            if (this.mode == DemuxMode.PULL) return this.pull();
+            else return;
+          }
+        } else if (data[1] === 0) {
           this.videoDecoderConfig = {
             codec:
-              { 7: "avc", 12: "hevc" }[data[0] & 0xf] || "unknown",
+              { 7: "avc", 12: "hevc", 13: "av1" }[data[0] & 0xf] || "unknown",
             description: data.subarray(5),
           };
-          //TODO: parse video config
-        }
-        if (data[1] == 0x00) {
+          if (this.videoDecoderConfig.codec == "av1") {
+            delete this.videoDecoderConfig.description;
+          }
           this.emit(
             DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED,
             this.videoDecoderConfig!
           );
-          if (this.mode == DemuxMode.PULL)
-            return this.pull();
+          if (this.mode == DemuxMode.PULL) return this.pull();
           else return;
         }
         return this.gotVideo?.({
@@ -115,8 +148,7 @@ export class FlvDemuxer extends BaseDemuxer {
           duration: 0,
         });
       default:
-        if (this.mode == DemuxMode.PULL)
-          return this.pull();
+        if (this.mode == DemuxMode.PULL) return this.pull();
     }
   }
   async pull(): Promise<void> {
@@ -144,11 +176,7 @@ export class FlvDemuxer extends BaseDemuxer {
     console.time("flv");
     this.header = data;
     console.log(data);
-    if (
-      data[0] != "F".charCodeAt(0) ||
-      data[1] != "L".charCodeAt(0) ||
-      data[2] != "V".charCodeAt(0)
-    ) {
+    if (data.subarray(0, 3).reduce((acc, cur) => acc + String.fromCharCode(cur), "") !== "FLV") {
       throw new Error("not flv");
     }
     console.timeEnd("flv");
