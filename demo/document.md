@@ -2317,6 +2317,28 @@ jessibuca.audioResume();
 
 解决方案：https://blog.csdn.net/dualvencsdn/article/details/137049065
 
+
+### chrome 如何开启HEVC硬件解码
+
+解决方案：https://www.nxrte.com/jishu/11365.html
+
+主要就是检测步骤就是：
+
+1. 判断客户机是否支持HEVC硬解码
+2. chrome浏览器配置
+
+#### 判断客户机是否支持HEVC（H265）硬解码
+
+首先检查自己的电脑是否支持HEVC硬解码，可以下载dxva checker检测软件，DXVAChecker是一个windows系统PC检测DirectX视频加速的工具，其可检测解码是否支持GPU
+
+#### chrome浏览器配置
+
+1. 首先安装最新版本的google chrome浏览器，打开帮助->关于，查看版本号是否大于104。
+2. 地址栏输入：chrome://settings，打开配置页面，搜索”硬件加速”，使用硬件加速开启：
+3. 地址栏输入：chrome://flags，搜索hardware，使能Hardware-accelerated video decode硬件解码：
+4. 如果chrome浏览器没有快捷方式，建立一个快捷方式，增加启动运行参数：–enable-features=PlatformHEVCDecoderSupport 这样使用此快捷方式打开即可直接加上此运行参数，也可cmd下运行exe加上此运行参数运行，比较麻烦，这里直接添加到快捷方式上，加入方式如下(右键->属性->目标(T) 末尾加个空格，然后赋值上面的参数)：
+5. 通过快捷键打开chrome，地址栏输入chrome://gpu,搜索”Video Acceleration”,验证chrome是否开启成功:
+
 ## 支持作者
 
 ### 第一作者

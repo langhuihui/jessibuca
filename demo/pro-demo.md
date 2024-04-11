@@ -362,6 +362,15 @@
 [http://jessibuca.monibuca.com/pro/demo-control-btn.html](http://jessibuca.monibuca.com/pro/demo-control-btn.html)
 
 
+### 水印截图（文字水印，图片水印，暗水印（数字水印））
+#### https
+[https://jessibuca.com/pro/demo-screenshot.html](https://jessibuca.com/pro/demo-screenshot.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-screenshot.html](http://jessibuca.monibuca.com/pro/demo-screenshot.html)
+
+
+
 
 ### PTZ云台操作(支持生成国标编码)
 ------
