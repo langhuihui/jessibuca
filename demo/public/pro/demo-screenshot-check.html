@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<input type="file">
+<script>
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+    document.querySelector('input').addEventListener('change', function (e) {
+        var file = e.target.files[0];
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var image = new Image();
+            image.src = e.target.result;
+            image.onload = function () {
+                console.log(image.width, image.height);
+                canvas.width = image.width;
+                canvas.height = image.height;
+                context.drawImage(image, 0, 0);
+                var watermark = "Hello, World!";
+                var hashValue = hash(watermark)
+                // putImageData 重新绘制imageData
+                var extractedWatermarkValue = extractWatermark(context.getImageData(0, 0, canvas.width, canvas.height), hashValue);
+                document.getElementById('watermark').innerHTML = `
+                    watermark : ${watermark} </br>
+                    embed hash value : " + ${hashValue} </br>
+                    extracted watermark hash value : ${extractedWatermarkValue} <br/>
+            `
+            };
+        };
+        reader.readAsDataURL(file);
+    });
+</script>
+</body>
+</html>
