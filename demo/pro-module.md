@@ -26,9 +26,9 @@ jessibuca pro 扩展模块
 
 利用ffmpeg实现的 mp4录制，支持录制视频和音频。
 
-视频支持的编码格式：h264、h265、
+视频支持的编码格式：`h264`、`h265`、
 
-音频支持的编码格式：aac、mp3、pcmu(g711u)、pcma(g711a)
+音频支持的编码格式：`aac`、`mp3`、`pcmu(g711u)`、`pcma(g711a)`
 
 > 支持定制支持水印。
 
@@ -51,8 +51,8 @@ jessibuca pro 扩展模块
 
 支持 `ws(s)-raw`,`http(s)-flv`,`ws(s)-flv`,`http(s)-fmp4`,`ws(s)-fmp4`,`hls`,`http(s)-h264`,`ws(s)-h264`,`http(s)-h265`,`ws(s)-h265` 等协议的直播流、回放(录像)流下载（录制）器。
 
-视频支持的编码格式：h264、h265、
-音频支持的编码格式：aac、mp3、pcmu(g711u)、pcma(g711a)
+视频支持的编码格式：`h264`、`h265`、
+音频支持的编码格式：`aac`、`mp3`、`pcmu(g711u)`、`pcma(g711a)`
 
 支持录制格式 `flv`,`mp4`，`webm`。
 

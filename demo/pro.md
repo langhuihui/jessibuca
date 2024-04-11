@@ -639,6 +639,25 @@ Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
 体验demo [demo](https://jessibuca.com/pro/demo-check-occlusion.html)
 
 
+## PRO 扩展模块
+
+### Mp4 录制（MPEG-4）
+
+利用ffmpeg实现的 mp4录制，支持录制视频和音频。
+
+视频支持的编码格式：`h264`、`h265`、
+
+音频支持的编码格式：`aac`、`mp3`、`pcmu(g711u)`、`pcma(g711a)`
+
+### 直播流、回放(录像)流下载（录制）器
+
+支持 `ws(s)-raw`,`http(s)-flv`,`ws(s)-flv`,`http(s)-fmp4`,`ws(s)-fmp4`,`hls`,`http(s)-h264`,`ws(s)-h264`,`http(s)-h265`,`ws(s)-h265` 等协议的直播流、回放(录像)流下载（录制）器。
+
+视频支持的编码格式：`h264`、`h265`、
+音频支持的编码格式：`aac`、`mp3`、`pcmu(g711u)`、`pcma(g711a)`
+
+支持录制格式 `flv`,`mp4`，`webm`。
+
 ## 支持定制化服务开发
 支持一系类和业务耦合的开发需求。
 
