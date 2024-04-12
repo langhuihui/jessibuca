@@ -343,7 +343,7 @@ export default {
                     console.log('play success');
                     this.playing = true;
                     this.loaded = true;
-                    this.quieting = jessibuca.isMute();
+                    this.quieting = this.$options.jessibuca.isMute();
                 }).catch((err) => {
                     console.log('play error', err);
                 });
