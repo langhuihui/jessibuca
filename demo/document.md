@@ -2339,6 +2339,37 @@ jessibuca.audioResume();
 4. 如果chrome浏览器没有快捷方式，建立一个快捷方式，增加启动运行参数：–enable-features=PlatformHEVCDecoderSupport 这样使用此快捷方式打开即可直接加上此运行参数，也可cmd下运行exe加上此运行参数运行，比较麻烦，这里直接添加到快捷方式上，加入方式如下(右键->属性->目标(T) 末尾加个空格，然后赋值上面的参数)：
 5. 通过快捷键打开chrome，地址栏输入chrome://gpu,搜索”Video Acceleration”,验证chrome是否开启成功:
 
+### 浏览器播放视频过程中，整个显示器会突然的白屏下
+
+> 大概率是显卡驱动问题，可以尝试升级显卡驱动，或者降级浏览器版本。
+
+可以看下这个解决方案：
+https://blog.csdn.net/DYxiao666/article/details/136072932
+
+
+### JbFro container has been created and can not be created again
+
+这个错误的原因通常是调用`destroy()` 方法不对导致的。
+
+> destroy() 返回的是Promise
+
+解决方案
+```js
+
+await jessibuca.destroy();
+
+// 重置解码器
+```
+或者
+```js
+jessibuca.destroy().then(()=>{
+  // 重置播放器。
+
+}).catch(()=>{
+
+})
+```
+
 ## 支持作者
 
 ### 第一作者
