@@ -36,6 +36,7 @@ export default class AudioContextLoader extends Emitter {
         this.audioEnabled(true);
         // default setting 0
         this.gainNode.gain.value = 0;
+        this._prevVolume = null;
 
         this.playing = false;
         //
@@ -89,6 +90,7 @@ export default class AudioContextLoader extends Emitter {
         this.audioSyncVideoOption = {
             diff: null
         };
+        this._prevVolume = null;
         this.off();
         this.player.debug.log('AudioContext', 'destroy');
     }
@@ -204,15 +206,15 @@ export default class AudioContextLoader extends Emitter {
 
     mute(flag) {
         if (flag) {
-            if (!this.isMute) {
-                this.player.emit(EVENTS.mute, flag);
-            }
+            // if (!this.isMute) {
+            //     this.player.emit(EVENTS.mute, flag);
+            // }
             this.setVolume(0);
             this.clear();
         } else {
-            if (this.isMute) {
-                this.player.emit(EVENTS.mute, flag);
-            }
+            // if (this.isMute) {
+            //     this.player.emit(EVENTS.mute, flag);
+            // }
             this.setVolume(0.5);
         }
     }
@@ -224,9 +226,21 @@ export default class AudioContextLoader extends Emitter {
         }
         this.audioEnabled(true);
         volume = clamp(volume, 0, 1);
+        if (this._prevVolume === null) {
+            this.player.emit(EVENTS.mute, volume === 0);
+        } else {
+            if (this._prevVolume === 0 && volume > 0) {
+                this.player.emit(EVENTS.mute, false);
+            } else if (this._prevVolume > 0 && volume === 0) {
+                this.player.emit(EVENTS.mute, true);
+            }
+        }
         this.gainNode.gain.value = volume;
         this.gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
         this.player.emit(EVENTS.volumechange, this.player.volume);
+        this.player.emit(EVENTS.volume, this.player.volume); // outer
+        // save last volume
+        this._prevVolume = volume;
     }
 
     closeAudio() {

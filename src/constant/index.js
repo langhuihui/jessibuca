@@ -148,6 +148,7 @@ export const EVENTS = {
     streamMessage: 'streamMessage',
     streamError: 'streamError',
     volumechange: 'volumechange',
+    volume: 'volume',
     destroy: 'destroy',
     mseSourceOpen: 'mseSourceOpen',
     mseSourceClose: 'mseSourceClose',
@@ -184,7 +185,8 @@ export const JESSIBUCA_EVENTS = {
     recordingTimestamp: EVENTS.recordingTimestamp,
     recordStart: EVENTS.recordStart,
     recordEnd: EVENTS.recordEnd,
-    playToRenderTimes: EVENTS.playToRenderTimes
+    playToRenderTimes: EVENTS.playToRenderTimes,
+    volume: EVENTS.volume
 }
 
 export const EVENTS_ERROR = {

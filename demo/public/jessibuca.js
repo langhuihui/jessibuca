@@ -204,6 +204,7 @@
 	  streamMessage: 'streamMessage',
 	  streamError: 'streamError',
 	  volumechange: 'volumechange',
+	  volume: 'volume',
 	  destroy: 'destroy',
 	  mseSourceOpen: 'mseSourceOpen',
 	  mseSourceClose: 'mseSourceClose',
@@ -238,7 +239,8 @@
 	  recordingTimestamp: EVENTS.recordingTimestamp,
 	  recordStart: EVENTS.recordStart,
 	  recordEnd: EVENTS.recordEnd,
-	  playToRenderTimes: EVENTS.playToRenderTimes
+	  playToRenderTimes: EVENTS.playToRenderTimes,
+	  volume: EVENTS.volume
 	};
 	const EVENTS_ERROR = {
 	  playError: 'playIsNotPauseOrUrlIsNull',
@@ -1995,6 +1997,7 @@
 	    this.audioEnabled(true); // default setting 0
 
 	    this.gainNode.gain.value = 0;
+	    this._prevVolume = null;
 	    this.playing = false; //
 
 	    this.audioSyncVideoOption = {
@@ -2044,6 +2047,7 @@
 	    this.audioSyncVideoOption = {
 	      diff: null
 	    };
+	    this._prevVolume = null;
 	    this.off();
 	    this.player.debug.log('AudioContext', 'destroy');
 	  }
@@ -2156,17 +2160,15 @@
 
 	  mute(flag) {
 	    if (flag) {
-	      if (!this.isMute) {
-	        this.player.emit(EVENTS.mute, flag);
-	      }
-
+	      // if (!this.isMute) {
+	      //     this.player.emit(EVENTS.mute, flag);
+	      // }
 	      this.setVolume(0);
 	      this.clear();
 	    } else {
-	      if (this.isMute) {
-	        this.player.emit(EVENTS.mute, flag);
-	      }
-
+	      // if (this.isMute) {
+	      //     this.player.emit(EVENTS.mute, flag);
+	      // }
 	      this.setVolume(0.5);
 	    }
 	  }
@@ -2180,9 +2182,24 @@
 
 	    this.audioEnabled(true);
 	    volume = clamp(volume, 0, 1);
+
+	    if (this._prevVolume === null) {
+	      this.player.emit(EVENTS.mute, volume === 0);
+	    } else {
+	      if (this._prevVolume === 0 && volume > 0) {
+	        this.player.emit(EVENTS.mute, false);
+	      } else if (this._prevVolume > 0 && volume === 0) {
+	        this.player.emit(EVENTS.mute, true);
+	      }
+	    }
+
 	    this.gainNode.gain.value = volume;
 	    this.gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
 	    this.player.emit(EVENTS.volumechange, this.player.volume);
+	    this.player.emit(EVENTS.volume, this.player.volume); // outer
+	    // save last volume
+
+	    this._prevVolume = volume;
 	  }
 
 	  closeAudio() {
@@ -12618,8 +12635,8 @@
 	    } // videoBuffer set too long
 
 
-	    if (_opt.videoBuffer > 1 * 60) {
-	      console.warn('Jessibuca videoBuffer is too long, it is recommended to set it to 1 minute');
+	    if (_opt.videoBuffer > 10) {
+	      console.warn('JbPro', `videoBuffer ${_opt.videoBuffer}s is too long, will black screen for ${_opt.videoBuffer}s , it is recommended to set it to less than 10s`);
 	    }
 
 	    if (!$container.classList) {

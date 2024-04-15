@@ -1,5 +1,4 @@
 import AudioContextLoader from "./audioContextLoader";
-import AudioLoader from "./audioLoader";
 
 export default class Audio {
     constructor(player) {

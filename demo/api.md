@@ -959,6 +959,16 @@ jessibuca.on("mute", function (flag) {
 })
 ```
 
+### volume
+
+触发音量事件，返回音量值
+
+```js
+jessibuca.on("volume", function (volume) {
+    console.log('volume', volume)
+})
+```
+
 ### stats
 
 流状态统计，流开始播放后回调，每秒1次。
