@@ -980,6 +980,9 @@ pro 由于使用了解码性能更强的simd解码，所以推荐使用simd 解�
 #### mac
 版本号大于10.15.4
 
+#### 扩展
+
+[window chrome 如何开启HEVC硬件解码](https://jessibuca.com/document.html#chrome-%E5%A6%82%E4%BD%95%E5%BC%80%E5%90%AFhevc%E7%A1%AC%E4%BB%B6%E8%A7%A3%E7%A0%81)
 
 
 
