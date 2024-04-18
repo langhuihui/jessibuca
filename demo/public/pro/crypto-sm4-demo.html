@@ -154,7 +154,6 @@
     var jessibuca = null;
 
 
-
     function create() {
         jessibuca = new JessibucaPro({
             container: $container,
@@ -199,7 +198,8 @@
             // audioEngine:"worklet",
             // isFlv: true
             isSm4Crypto: true,
-            sm4CryptoKey: $sm4Key.value
+            sm4CryptoKey: $sm4Key.value,
+            isSm4CryptoH265V2: true
         },);
 
         jessibuca.on('stats', (stats) => {

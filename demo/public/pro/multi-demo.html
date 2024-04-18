@@ -59,6 +59,11 @@
                     onchange="replay()"
                     id="supportDraggable"
                 /><span>支持拖拽</span>
+                <input
+                    type="checkbox"
+                    onchange="replay()"
+                    id="supportContainerFullscreen"
+                /><span>支持双击container内全屏</span>
             </div>
         </div>
         <div class="input">
@@ -115,6 +120,7 @@
     var $destroySingle = document.getElementById('destroySingle');
     var $fullscreenMulti = document.getElementById('fullscreenMulti');
     var $supportDraggable = document.getElementById('supportDraggable');
+    var $supportContainerFullscreen = document.getElementById('supportContainerFullscreen');
 
     let jessibucaMulti = null;
     var showOperateBtns = true; // 是否显示按钮
@@ -143,7 +149,8 @@
                 quality: showOperateBtns,
                 performance: showOperateBtns,
             },
-            draggable:$supportDraggable.checked === true
+            draggable:$supportDraggable.checked === true,
+            supportDblclickContainerFullscreen:$supportContainerFullscreen.checked === true,
             // supportMousemoveEvent: true,
         })
 
