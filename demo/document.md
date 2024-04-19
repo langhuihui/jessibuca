@@ -1026,13 +1026,17 @@ const jessibuca = new JessibucaPro({
 现象： 播放画面出现图像紊乱，大面积的异常颜色的方块图，或者绿屏现象
 
 可能得原因：
-
+#### 流媒体服务器-> 播放器端
 - 网络不好，编码后的数据发不出去，导致丢失参考帧。
-- 系统低内存，队列里面无法承受更多的帧数据。
 - 推过来的流，不是从i帧开始的，会导致首帧解码出现绿屏或者花屏的情况。
 - 推过来的流，码流中视频尺寸发生变化。
-- 硬编硬解的兼容性问题
 
+#### 推流端->流媒体服务器
+- 如果是`rtsp协议`推流，因为默认采用的udp，不能保证数据的完整性，可以尝试使用`rtmp协议`推流（使用的是tcp）推流。
+
+#### 播放器端
+- 系统低内存，队列里面无法承受更多的帧数据。
+- 硬编硬解的兼容性问题
 
 
 ### 关于浏览器崩溃(sbox_fatal_memory_exceeded)
@@ -2192,6 +2196,14 @@ window.setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
     webView.webChromeClient = mWebChromeClient
 ```
 
+
+### PC电脑端播放视频，整个显示器会突然白屏一下
+
+1. 看下浏览器有没有关闭硬解码。
+2. 看下显卡驱动是不是好久没有更新了。
+
+> 显卡驱动太老的话，会有可能导致硬解码出现问题，导致整个显示器画面白屏下的。
+
 ### wasm编译打包 之后报：uncaught referenceError:module is not defined
 
  一般是因为wasm没有编译成功，导致的。
@@ -2348,6 +2360,12 @@ jessibuca.audioResume();
 
 可以看下这个解决方案：
 https://blog.csdn.net/DYxiao666/article/details/136072932
+
+
+### Failed to execute 'requestfullscreen' on 'Element': APl can only be initiated by a user gesture.
+
+这个错误是因为全屏操作必须是用户手动触发的，不能是程序触发的。
+
 
 
 ### JbFro container has been created and can not be created again
