@@ -2367,7 +2367,75 @@ https://blog.csdn.net/DYxiao666/article/details/136072932
 这个错误是因为全屏操作必须是用户手动触发的，不能是程序触发的。
 
 
+### 如何在electron中使用 jessibuca 播放视频
 
+> 在electron中这样就是以file:///路径格式加载，而浏览器加载wasm必须以web形式加载。否则控制台报错：
+
+而使用Electron开发App肯定是希望离线部署的，所以也不能部署到cdn来加载。
+
+解决方法很简单，就是用nodejs创建一个http static file 服务即可。
+
+解决方案：
+
+####  安装 node-static
+
+```
+npm i node-static
+```
+
+#### 创建静态文件服务器
+
+
+```js
+const { app, BrowserWindow } = require('electron')
+const static = require('node-static');
+const http = require('http');
+// 将程序目录下的js目录设为webroot目录
+const file = new (static.Server)(__dirname+"/js");
+
+app.whenReady().then(() => {
+  http.createServer(function (req, res) {
+    file.serve(req, res);
+    // 在本机上监听8080端口提供服务
+  }).listen(8888, "127.0.0.1");
+  createWindow()
+})
+```
+#### 引用jessibuca
+
+将 jessibuca 的 `dist`文件夹下面的  `js文件`和`wasm文件` 放到 `/js`目录下。
+
+> pro 的文件夹是 pro/js 文件夹
+
+#### 在html中引用
+
+```html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--    注意：这个需要注释掉 -->
+<!--    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">-->
+<!--    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">-->
+    <title>Document</title>
+    <script type="text/javascript" src="http://localhost:8080/jessibuca.js"></script>
+</head>
+<body>
+    <div id="container"></div>
+    <script>
+        //
+        var jessibuca = new Jessibuca({
+            container: document.getElementById('container'),
+        })
+
+        jessibuca.play('http://xxx.xxx.xxx.xxx:8080/xxx.flv')
+    </script>
+
+</body>
+```
 ### JbFro container has been created and can not be created again
 
 这个错误的原因通常是调用`destroy()` 方法不对导致的。
