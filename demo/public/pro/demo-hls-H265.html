@@ -82,6 +82,13 @@
             <span id="supportWebgpu"></span>
         </div>
         <div class="input">
+            <span>音频引擎：</span>
+            <select id="audioEngine" onchange="replay()">
+                <option value="script">script</option>
+                <option value="active" selected>active</option>
+            </select>
+        </div>
+        <div class="input">
             <div>
                 <span>缓存时长：</span>
                 <input placeholder="单位：秒" type="text" id="videoBuffer" style="width: 50px" value="0.2">秒
@@ -136,6 +143,7 @@
     var $renderDom = document.getElementById('renderDom');
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
     var $supportHls265 = document.getElementById('supportHls265');
+    var $audioEngine = document.getElementById('audioEngine');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -169,7 +177,7 @@
             },
             timeout: 20,
             heartTimeoutReplayUseLastFrameShow: true,
-            audioEngine: "worklet",
+            audioEngine: $audioEngine.value,
             qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
