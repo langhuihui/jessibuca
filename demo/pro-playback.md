@@ -12,7 +12,9 @@
 <Rice/>
 ## 简介
 
-什么是回放流(TF卡流)
+什么是 GB28181 回放流(TF卡流)
+
+关于国标 GB28181 [国标协议介绍](https://help.aliyun.com/zh/vecs/support/introduction-to-the-gb-or-t28181-standard)
 
 ### 工作原理
 

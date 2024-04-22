@@ -2459,6 +2459,23 @@ jessibuca.destroy().then(()=>{
 })
 ```
 
+
+### window.jessibuca is not a constructor
+
+这个错误通常是因为`jessibuca.js`没有加载成功导致的。
+
+排查：
+
+查看html页面的`script`标签是否引入了`jessibuca.js`文件。
+
+```html
+<script src="jessibuca.js"></script>
+```
+> 确保`jessibuca.js`文件的路径是正确的。能够访问到。返回的是正常的js文件。而不是html文件（Nginx配置当访问资源404的时候会默认返回index.html内容）。
+
+检查：f12 打开控制台，然后切换到network tab选项卡，然后找到`jessibuca.js`文件，看下`response`返回的内容是否是正常的js文件。
+
+
 ## 支持作者
 
 ### 第一作者
