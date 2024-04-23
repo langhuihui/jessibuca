@@ -315,8 +315,18 @@ chrome限制同源http（协议+域名+端口）请求最多6个并发
 > 浏览器对同源 HTTP/1.x 连接的并发个数有限制, 几种方式规避这个问题：
 
 1. 通过 WebSocket 协议(chrome下ip会报安全错误，建议域名形式访问，检查下端口范围chrome浏览器是否允许，chrome会默认禁用很多端口)访问直播流，如：播放 WS-FLV 直播流
-2. 开启 HTTPS(确保证书有效，不然仍然没法生效), 通过 HTTPS 协议访问直播流
+2. 开启 [HTTP/2.0](https://datatracker.ietf.org/doc/html/rfc7540), 通过 HTTP2协议访问直播流
 3. 准备多个域名，每个域名上限6个并发。
+
+#### HTTP/2.0
+
+关于HTTP/2.0的解决方案
+1. https://zhuanlan.zhihu.com/p/77803705
+2. https://blog.csdn.net/u014552102/article/details/116418790
+
+nginx开启http2
+
+1.https://www.cnblogs.com/flydean/p/15196067.html
 
 ### IIS下wasm返回404错误
 
