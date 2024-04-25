@@ -2224,6 +2224,14 @@ window.setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
 
 ### video 抛出 PIPELINE_ERROR_DECODE: VDA Error 4 错误
 
+### 关于：The play() request was interrupted by a call to pause() 报错
+
+这是因为在发起 video标签的 `play()` 还没有返回结果的时候，调用了`pause()`方法导致的。
+
+因为 `play()` 方法是是个`Promise`,所以需要等待`play()`方法返回结果之后，再调用`pause()`方法。
+
+
+
 ### window.Jessibuca is not a constructor 错误
 
 这种错误一般都是 `jessibuca.js` 没有加载成功导致的。
