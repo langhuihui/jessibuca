@@ -41,7 +41,8 @@ https://github.com/bosscheng/jessibuca-mobile-demo/tree/v3
 
 ## Vue
 
-https://github.com/bosscheng/jessibuca-vue-demo/tree/v3
+vue3: https://github.com/bosscheng/jessibuca-vue-demo/tree/v3
+vue2: https://github.com/bosscheng/jessibuca-vue-demo/tree/v2
 
 typescript:https://github.com/bosscheng/jessibuca-vue-ts-demo
 

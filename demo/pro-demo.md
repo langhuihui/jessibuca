@@ -18,7 +18,10 @@
 
 
 ## vue 版本
-[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro](https://github.com/bosscheng/jessibuca-vue-demo/tree/pro)
+vue3:[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro](https://github.com/bosscheng/jessibuca-vue-demo/tree/pro)
+
+vue2:[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue2](https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue2)
+
 
 ## react 版本
 
