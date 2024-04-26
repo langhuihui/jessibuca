@@ -2494,6 +2494,34 @@ jessibuca.destroy().then(()=>{
 检查：f12 打开控制台，然后切换到network tab选项卡，然后找到`jessibuca.js`文件，看下`response`返回的内容是否是正常的js文件。
 
 
+### 关于window Hevc是否支持
+
+### 查看设备是否支持
+
+要知道自己的电脑支持什么格式的硬解码，可以下载DXVA Checker
+下载地址：https://bluesky-soft.com/en/DXVAChecker.html
+
+也可以直接查询BlueSky的数据库（可直接点击超链接）
+- AMD ：https://bluesky-soft.com/en/dxvac/deviceInfo/decoder/amd.html
+- Intel ：https://bluesky-soft.com/en/dxvac/deviceInfo/decoder/intel.html
+- NVIDIA ：https://bluesky-soft.com/en/dxvac/deviceInfo/decoder/nvidia.html
+
+浏览器通常采用核显加速，同时有独显核显的，参考核显的解码能力。
+
+HEVC硬解支持的硬件较多，Intel第六代酷睿处理器及以后的核显全部支持HEVC，六代之前的部分支持，具体请看BlueSky的数据库。
+
+AV1硬解目前仅限于AMD RX 6000系（除6500XT）、Nvidia 30系、Intel Arc显卡、Intel UHD 700系和Iris 锐炬Xe核显，后续型号应该也会支持AV1。
+
+### 开启Hevc硬解码
+
+1. 开启HEVC之前需要下载HEVC插件，这个插件可以在微软商店花7块钱购买。
+
+搜索：HEVC视频扩展
+
+2. 也可以直接在网上免费下载，两者都是一样的。
+HEVC视频拓展下载地址：https://www.free-codecs.com/hevc_video_extension_download.htm
+由于以前的bug已经修复，所以可以直接下载最新版的插件，选择x64版本的HEVC Video Extension 1.0.50361下载并安装。
+
 ## 支持作者
 
 ### 第一作者

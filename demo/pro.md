@@ -366,6 +366,8 @@ H265硬解码，对于电脑硬件支持情况：
 
 > edge支持 硬解码H265 需要额外安装hevc扩展 具体见：[edge/chrome开启硬解码](https://blog.csdn.net/water1209/article/details/126959579)
 
+> edge浏览器检查并打开HEVC的支持： [开启HEVC支持](https://blog.csdn.net/liulilittle/article/details/135027589)
+
 > webcodecs 解码H265 需要https环境，同样需要window系统在10及以上，chrome的版本得107及以上，safari的16.4及以上才能够支持。
 
 
