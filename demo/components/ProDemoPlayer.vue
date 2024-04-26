@@ -40,6 +40,7 @@
                 <span v-if="!supportWCS" style="color: red;">不支持Webcodec H265解码(需要https/localhost),</span>
                 <span v-if="supportWCSHevc" style="color: green;">支持Webcodec H265解码；</span>
                 <span v-if="!supportWCSHevc" style="color: red;">不支持Webcodec H265解码(需要https/localhost),会自动切换成wasm(simd)解码</span>
+                <span v-if="!isEdgeSupportHevc"><a href="https://jessibuca.com/zip/HEVCVideoExtensions.zip" target="_blank">下载window Edge Hevc扩展插件</a></span>
             </div>
             <div class="input">
                 当前浏览器：
@@ -578,7 +579,8 @@ export default {
             checkFirstIFrame: true,
             isDropSameTimestampGop: false,
             demuxUseWorker: true,
-            mseDecoderUseWorker: false
+            mseDecoderUseWorker: false,
+            isEdgeSupportHevc: false,// 默认
         };
     },
     mounted() {
@@ -592,6 +594,8 @@ export default {
         const browserInfo = getBrowser();
         this.supportWCSHevc = browserInfo.type.toLowerCase() === 'chrome' && browserInfo.version >= 107 && (location.protocol === 'https:' || location.hostname === 'localhost');
         this.supportSIMDHevc = WebAssembly && WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 98, 11]));
+        this.isEdgeSupportHevc = browserInfo.type.toLowerCase() === 'edge' && (this.supportMSEHevc || this.supportWCSHevc);
+
         this.supportMT = typeof SharedArrayBuffer !== 'undefined';
         this.create();
         window.onerror = (msg) => (this.err = msg);
