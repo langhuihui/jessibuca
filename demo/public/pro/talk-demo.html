@@ -48,6 +48,7 @@
                 </span>
             <span class="span-row">
                  <input
+                     checked
                      id="testMicrphone"
                      type="checkbox"
                  /><span>测试麦克风(不会触发ws连接)</span>
@@ -89,10 +90,12 @@
              <span class="span-row">
                     采样率
                     <select id="talkSampleRate">
+                        <option value="48000" selected>48000</option>
+                        <option value="24000">24000</option>
                         <option value="16000">16000</option>
-                        <option value="8000" selected>8000</option>
+                        <option value="12000">12000</option>
+                        <option value="8000">8000</option>
                     </select>
-                    Hz
                 </span>
             <span class="span-row">
                      采样精度
@@ -134,7 +137,18 @@
             <button onclick="saveTalkRtp()">下载rtp文件(配置debug:true才会缓存数据， <span style="color: red">封装格式选rtp</span> )</button>
         </div>
         <div class="input">
-            <button onclick="saveTalkG711()">下载g711a/u文件(配置debug:true才会缓存数据，<span style="color: red">封装格式选裸流</span>)</button>
+            <button onclick="saveTalkG711()">下载g711a/u文件(配置debug:true才会缓存数据，<span style="color: red">封装格式选裸数据</span>)</button>
+        </div>
+        <div class="input">
+            <div>
+                <button onclick="saveTalkPcm()">下载pcm文件(配置debug:true才会缓存数据，<span style="color: red">封装格式选裸数据</span>)</button>
+                <input
+                    id="encodeWav"
+                    checked
+                    type="checkbox"
+                /><span>封装成wav格式</span>
+            </div>
+
         </div>
         <div class="input">
             <div>
@@ -156,6 +170,7 @@
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
     var $debug = document.getElementById('debug');
+    var $encodeWav = document.getElementById('encodeWav');
 
 
     var showOperateBtns = true; // 是否显示按钮
@@ -171,12 +186,16 @@
 
     create();
 
-
-    $destroy.addEventListener('click', function () {
+    function destroyAndCreate() {
         if (jessibucaTalk) {
             jessibucaTalk.destroy();
         }
         create();
+    }
+
+
+    $destroy.addEventListener('click', function () {
+        destroyAndCreate();
     })
 
     function startTalk() {
@@ -239,6 +258,8 @@
         if (jessibucaTalk) {
             jessibucaTalk.downloadTempRtpFile().then(() => {
                 console.log('download success');
+                destroyAndCreate()
+
             }).catch((e) => {
                 console.error('save talk error', e);
             });
@@ -251,6 +272,35 @@
         if (jessibucaTalk) {
             jessibucaTalk.downloadTempG711File().then(() => {
                 console.log('download success');
+                destroyAndCreate()
+
+            }).catch((e) => {
+                console.error('save talk error', e);
+            });
+        } else {
+            console.log('jessibucaTalk is not ready');
+        }
+    }
+
+    function saveTalkPcm(){
+        if (jessibucaTalk) {
+            const encodeWav = $encodeWav.checked;
+            jessibucaTalk.downloadTempPcmFile(encodeWav).then(() => {
+                console.log('download success');
+                destroyAndCreate()
+            }).catch((e) => {
+                console.error('save talk error', e);
+            });
+        } else {
+            console.log('jessibucaTalk is not ready');
+        }
+    }
+
+    function saveTalkOpus(){
+        if (jessibucaTalk) {
+            jessibucaTalk.downloadTempOpusFile().then(() => {
+                console.log('download success');
+                destroyAndCreate()
             }).catch((e) => {
                 console.error('save talk error', e);
             });
