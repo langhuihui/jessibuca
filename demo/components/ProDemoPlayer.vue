@@ -24,6 +24,7 @@
                     <span v-if="!supportMSE" style="color: red;">不支持MSE H264解码；</span>
                     <span v-if="supportMSEHevc" style="color: green;margin-right: 10px">支持MSE H265解码;</span>
                     <span v-if="!supportMSEHevc" style="color: red;margin-right: 10px;">不支持MSE H265解码,会自动切换成wasm(simd)解码</span>
+                    <span v-if="!isEdgeSupportHevc"><a href="https://jessibuca.com/zip/HEVCVideoExtensions.zip" target="_blank">下载window Edge Hevc扩展插件</a></span>
                 </div>
                 <div>
                     <div v-if="playing && decodeType">
@@ -40,7 +41,6 @@
                 <span v-if="!supportWCS" style="color: red;">不支持Webcodec H265解码(需要https/localhost),</span>
                 <span v-if="supportWCSHevc" style="color: green;">支持Webcodec H265解码；</span>
                 <span v-if="!supportWCSHevc" style="color: red;">不支持Webcodec H265解码(需要https/localhost),会自动切换成wasm(simd)解码</span>
-                <span v-if="!isEdgeSupportHevc"><a href="https://jessibuca.com/zip/HEVCVideoExtensions.zip" target="_blank">下载window Edge Hevc扩展插件</a></span>
             </div>
             <div class="input">
                 当前浏览器：
