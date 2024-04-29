@@ -2496,12 +2496,12 @@ jessibuca.destroy().then(()=>{
 
 ### 关于window Hevc是否支持
 
-### edge/chrome 自查
+#### edge/chrome 自查
 
 1.浏览器输入：`chrome://gpu/` 如果edge浏览器就`edge://gpu/`
 2.全局搜索下`hevc`关键词
 
-### 查看设备是否支持
+#### 查看设备是否支持
 
 要知道自己的电脑支持什么格式的硬解码，可以下载DXVA Checker
 下载地址：https://bluesky-soft.com/en/DXVAChecker.html

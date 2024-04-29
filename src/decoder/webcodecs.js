@@ -89,7 +89,15 @@ export default class WebcodecsDecoder extends Emitter {
                 }
 
                 const config = formatVideoDecoderConfigure(payload.slice(5));
-                this.decoder.configure(config);
+                this.player.debug.log('Webcodecs', 'VideoDecoder configure', config)
+                try {
+                    this.decoder.configure(config);
+                }
+                catch (e){
+                    this.player.debug.error('Webcodecs', 'VideoDecoder configure', e);
+                    this.player.emit(EVENTS_ERROR.webcodecsConfigureError);
+                    return;
+                }
                 this.hasInit = true;
             }
         } else {

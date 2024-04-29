@@ -194,6 +194,7 @@ export const EVENTS_ERROR = {
     fetchError: "fetchError",
     websocketError: 'websocketError',
     webcodecsH265NotSupport: 'webcodecsH265NotSupport',
+    webcodecsConfigureError:'webcodecsConfigureError',
     webcodecsDecodeError: 'webcodecsDecodeError',
     webcodecsWidthOrHeightChange: 'webcodecsWidthOrHeightChange',
     mediaSourceH265NotSupport: 'mediaSourceH265NotSupport',
