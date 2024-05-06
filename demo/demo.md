@@ -55,7 +55,6 @@ https://github.com/bosscheng/jessibuca-umi-app-hBuilderX-demo/tree/v3
 
 ## Uni-app
 
-
 https://github.com/bosscheng/jessibuca-uni-app-demo/tree/v3
 
 
@@ -65,8 +64,11 @@ https://ext.dcloud.net.cn/plugin?id=8296
 
 https://ext.dcloud.net.cn/plugin?name=sy-new-jessibuca
 
-## React
+## Uni-app apk（网友[hexiaoisboy](https://github.com/hexiaoisboy)提供的, 非官方）
 
+https://github.com/hexiaoisboy/jessibuca-Apk
+
+## React
 
 https://github.com/bosscheng/jessibuca-react-demo/tree/v3
 
