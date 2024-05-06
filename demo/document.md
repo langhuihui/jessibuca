@@ -1710,10 +1710,11 @@ https://cloud.tencent.com/developer/article/1741520
 
 解决方案：
 
-找android webView的开发同学，参考以下方式实现隐藏 HTML5 video remove overlay play icon
+方案一：找android webView的开发同学，参考以下方式实现隐藏 HTML5 video remove overlay play icon
 
 https://stackoverflow.com/questions/18271991/html5-video-remove-overlay-play-icon
 
+https://www.mengke.me/blog/202312/Remove_Android_WebView_video_poster
 
 You can hide this picture. For example:
 
@@ -1733,6 +1734,18 @@ private class WebChromeClientCustomPoster extends WebChromeClient {
     }
 }
 ```
+
+方案二：设置Video的poster属性为一个透明的图片,或者'noposter'
+
+```
+// 透明 base64
+<video poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" />
+// or
+<video poster="https://via.placeholder.com/1x1" />
+// or
+<video poster="noposter" />
+```
+> poster="" 直接给空字符串会被忽略，所以需要设置一个透明的图片或者noposter
 
 ### IOS端无法内联播放（行内播放）
 
