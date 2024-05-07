@@ -1,6 +1,6 @@
 import Emitter from "../utils/emitter";
 import {CONTROL_HEIGHT, EVENTS, SCREENSHOT_TYPE, VIDEO_ENC_TYPE} from "../constant";
-import {dataURLToFile, downloadImg, getBrowser, isMobile, now} from "../utils";
+import {dataURLToFile, downloadImg, getBrowser, isAndroid, isMobile, now} from "../utils";
 import CommonLoader from "./commonLoader";
 import saveAs from "../utils/file-save";
 
@@ -11,6 +11,11 @@ export default class VideoLoader extends CommonLoader {
         const $videoElement = document.createElement('video');
         const $canvasElement = document.createElement('canvas');
         $videoElement.muted = true;
+        $videoElement.disablePictureInPicture = true;
+        if(isAndroid()){
+            // default no poster
+            $videoElement.poster = 'noposter';
+        }
         $videoElement.style.position = "absolute";
         $videoElement.style.top = 0;
         $videoElement.style.left = 0;
