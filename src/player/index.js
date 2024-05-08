@@ -39,12 +39,12 @@ export default class Player extends Emitter {
         // disable offscreen
         this._opt.forceNoOffscreen = true;
 
-        if(isMobile()){
+        if (isMobile()) {
             this.debug.log('Player', 'isMobile and set _opt.controlAutoHide false');
             this._opt.controlAutoHide = false;
 
-            if(screenfull.isEnabled &&
-                this._opt.useWebFullScreen){
+            if (screenfull.isEnabled &&
+                this._opt.useWebFullScreen) {
                 this.debug.log('Player', 'screenfull.isEnabled is true and _opt.useWebFullScreen is true , set _opt.useWebFullScreen false');
                 this._opt.useWebFullScreen = false;
             }
@@ -173,7 +173,11 @@ export default class Player extends Emitter {
             this.debug.log('Player', 'use offscreen')
         }
 
-        this.debug.log('Player options', this._opt);
+        try {
+            this.debug.log('Player options', JSON.stringify(this._opt));
+        } catch (e) {
+            // ignore
+        }
     }
 
 

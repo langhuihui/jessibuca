@@ -105,7 +105,11 @@ class Jessibuca extends Emitter {
 
     _initPlayer($container, options) {
         this.player = new Player($container, options);
-        this.debug.log('jessibuca', '_initPlayer', JSON.stringify(this.player.getOption()))
+        try {
+            this.debug.log('jessibuca', '_initPlayer', JSON.stringify(this.player.getOption()))
+        } catch (e) {
+            // ignore
+        }
         this._bindEvents();
     }
 
@@ -370,6 +374,8 @@ class Jessibuca extends Emitter {
                             // reject();
                             this.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play error')
                         });
+                    } else {
+                        this.debug.log('Jessibuca', 'media source h265 not support and paused');
                     }
                 });
             })
@@ -443,6 +449,8 @@ class Jessibuca extends Emitter {
                             // reject();
                             this.debug.warn('Jessibuca', 'auto wasm [mse-> wasm] reset player and play error')
                         });
+                    } else {
+                        this.debug.log('Jessibuca', 'mse source buffer error and paused');
                     }
                 })
             })
@@ -460,6 +468,8 @@ class Jessibuca extends Emitter {
                             // reject();
                             this.debug.warn('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play error')
                         });
+                    } else {
+                        this.debug.log('Jessibuca', 'webcodecs h265 not support and paused');
                     }
                 });
             })
@@ -490,6 +500,8 @@ class Jessibuca extends Emitter {
                             // reject();
                             this.debug.warn('Jessibuca', 'webcodecs decode error reset player and play error')
                         });
+                    } else {
+                        this.debug.log('Jessibuca', 'webcodecs decode error and paused');
                     }
                 });
             })
@@ -506,6 +518,8 @@ class Jessibuca extends Emitter {
                             // reject();
                             this.debug.warn('Jessibuca', 'webcodecs Configure error reset player and play error')
                         });
+                    } else {
+                        this.debug.log('Jessibuca', 'webcodecs Configure error and paused');
                     }
                 });
             })
@@ -523,6 +537,8 @@ class Jessibuca extends Emitter {
                             this.debug.warn('Jessibuca', 'wasm decode error and reset player and play error')
                         });
                     })
+                } else {
+                    this.debug.warn('Jessibuca', 'wasm decode error and paused');
                 }
             })
 

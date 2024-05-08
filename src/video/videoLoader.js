@@ -12,7 +12,7 @@ export default class VideoLoader extends CommonLoader {
         const $canvasElement = document.createElement('canvas');
         $videoElement.muted = true;
         $videoElement.disablePictureInPicture = true;
-        if(isAndroid()){
+        if (isAndroid()) {
             // default no poster
             $videoElement.poster = 'noposter';
         }
@@ -41,14 +41,16 @@ export default class VideoLoader extends CommonLoader {
         const {proxy} = this.player.events;
 
         proxy(this.$videoElement, 'canplay', () => {
-            this.player.debug.log('Video', `canplay and _delayPlay is ${this._delayPlay}`);
+            this.player.debug.log('Video', `canplay`);
             if (this._delayPlay) {
+                this.player.debug.log('Video', `canplay and _delayPlay is true and next play()`);
                 this._play();
             }
         })
 
         proxy(this.$videoElement, 'waiting', () => {
-            this.player.emit(EVENTS.videoWaiting);
+            // this.player.emit(EVENTS.videoWaiting);
+            this.player.debug.log('Video', 'waiting');
         })
 
         proxy(this.$videoElement, 'timeupdate', (event) => {

@@ -252,6 +252,7 @@ export default class MseDecoder extends Emitter {
         if (this.sourceBuffer === null) {
             this.sourceBuffer = this.mediaSource.addSourceBuffer(MP4_CODECS.avc);
             proxy(this.sourceBuffer, 'error', (error) => {
+                debug.error('MediaSource', 'sourceBuffer error', error);
                 this.player.emit(EVENTS.mseSourceBufferError, error);
                 // this.dropSourceBuffer(false)
             })
