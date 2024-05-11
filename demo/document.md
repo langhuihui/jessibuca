@@ -994,6 +994,62 @@ pro 由于使用了解码性能更强的simd解码，所以推荐使用simd 解�
 
 [window chrome 如何开启HEVC硬件解码](https://jessibuca.com/document.html#chrome-%E5%A6%82%E4%BD%95%E5%BC%80%E5%90%AFhevc%E7%A1%AC%E4%BB%B6%E8%A7%A3%E7%A0%81)
 
+### chrome 如何开启HEVC硬件解码
+
+解决方案：https://www.nxrte.com/jishu/11365.html
+
+主要就是检测步骤就是：
+
+1. 判断客户机是否支持HEVC硬解码
+2. chrome浏览器配置
+
+#### 判断客户机是否支持HEVC（H265）硬解码
+
+首先检查自己的电脑是否支持HEVC硬解码，可以下载dxva checker检测软件，DXVAChecker是一个windows系统PC检测DirectX视频加速的工具，其可检测解码是否支持GPU
+
+#### chrome浏览器配置
+
+1. 首先安装最新版本的google chrome浏览器，打开帮助->关于，查看版本号是否大于104。
+2. 地址栏输入：chrome://settings，打开配置页面，搜索”硬件加速”，使用硬件加速开启：
+3. 地址栏输入：chrome://flags，搜索hardware，使能Hardware-accelerated video decode硬件解码：
+4. 如果chrome浏览器没有快捷方式，建立一个快捷方式，增加启动运行参数：–enable-features=PlatformHEVCDecoderSupport 这样使用此快捷方式打开即可直接加上此运行参数，也可cmd下运行exe加上此运行参数运行，比较麻烦，这里直接添加到快捷方式上，加入方式如下(右键->属性->目标(T) 末尾加个空格，然后赋值上面的参数)：
+5. 通过快捷键打开chrome，地址栏输入chrome://gpu,搜索”Video Acceleration”,验证chrome是否开启成功:
+
+### 关于window Hevc是否支持
+
+#### edge/chrome 自查
+
+1.浏览器输入：`chrome://gpu/` 如果edge浏览器就`edge://gpu/`
+2.全局搜索下`hevc`关键词
+
+#### 查看设备是否支持
+
+要知道自己的电脑支持什么格式的硬解码，可以下载DXVA Checker
+下载地址：https://bluesky-soft.com/en/DXVAChecker.html
+
+也可以直接查询BlueSky的数据库（可直接点击超链接）
+- AMD ：https://bluesky-soft.com/en/dxvac/deviceInfo/decoder/amd.html
+- Intel ：https://bluesky-soft.com/en/dxvac/deviceInfo/decoder/intel.html
+- NVIDIA ：https://bluesky-soft.com/en/dxvac/deviceInfo/decoder/nvidia.html
+
+浏览器通常采用核显加速，同时有独显核显的，参考核显的解码能力。
+
+HEVC硬解支持的硬件较多，Intel第六代酷睿处理器及以后的核显全部支持HEVC，六代之前的部分支持，具体请看BlueSky的数据库。
+
+AV1硬解目前仅限于AMD RX 6000系（除6500XT）、Nvidia 30系、Intel Arc显卡、Intel UHD 700系和Iris 锐炬Xe核显，后续型号应该也会支持AV1。
+
+#### 开启Hevc硬解码
+
+1. 开启HEVC之前需要下载HEVC插件，这个插件可以在微软商店花7块钱购买。
+
+搜索：HEVC视频扩展
+
+2. 也可以直接在网上免费下载，两者都是一样的。
+   HEVC视频拓展下载地址：https://www.free-codecs.com/hevc_video_extension_download.htm
+   由于以前的bug已经修复，所以可以直接下载最新版的插件，选择x64版本的HEVC Video Extension 1.0.50361下载并安装。
+   或者直接下载已经下载好的：[HEVCVideoExtensions.zip](https://jessibuca.com/zip/HEVCVideoExtensions.zip)
+
+3. 在地址栏输入edge://flags/ 进入搜索 Choose ANGLE graphics backend 选择 D3D11，选择后重启浏览器再打开。
 
 
 ### 关于遇到报错的时候，如何反馈给作者去定位问题。
@@ -1047,6 +1103,12 @@ const jessibuca = new JessibucaPro({
 #### 播放器端
 - 系统低内存，队列里面无法承受更多的帧数据。
 - 硬编硬解的兼容性问题
+
+#### 自查
+
+1. 同样的播放地址，用客户端播放器（例如客户端的vlc）播放是否正常，检查是否流本身的问题。
+2. 同样的播放地址，用其他浏览器播放是否正常，检查是否浏览器的问题，检查是否浏览器的问题。
+3. 同样的播放地址，用其他的web播放器（[video.js](https://videojs.com/),[xgplayer.js](https://h5player.bytedance.com/)）,播放是否有问题，检查是否Jessibuca的问题。
 
 
 ### 关于浏览器崩溃(sbox_fatal_memory_exceeded)
@@ -2364,26 +2426,6 @@ jessibuca.audioResume();
 解决方案：https://blog.csdn.net/dualvencsdn/article/details/137049065
 
 
-### chrome 如何开启HEVC硬件解码
-
-解决方案：https://www.nxrte.com/jishu/11365.html
-
-主要就是检测步骤就是：
-
-1. 判断客户机是否支持HEVC硬解码
-2. chrome浏览器配置
-
-#### 判断客户机是否支持HEVC（H265）硬解码
-
-首先检查自己的电脑是否支持HEVC硬解码，可以下载dxva checker检测软件，DXVAChecker是一个windows系统PC检测DirectX视频加速的工具，其可检测解码是否支持GPU
-
-#### chrome浏览器配置
-
-1. 首先安装最新版本的google chrome浏览器，打开帮助->关于，查看版本号是否大于104。
-2. 地址栏输入：chrome://settings，打开配置页面，搜索”硬件加速”，使用硬件加速开启：
-3. 地址栏输入：chrome://flags，搜索hardware，使能Hardware-accelerated video decode硬件解码：
-4. 如果chrome浏览器没有快捷方式，建立一个快捷方式，增加启动运行参数：–enable-features=PlatformHEVCDecoderSupport 这样使用此快捷方式打开即可直接加上此运行参数，也可cmd下运行exe加上此运行参数运行，比较麻烦，这里直接添加到快捷方式上，加入方式如下(右键->属性->目标(T) 末尾加个空格，然后赋值上面的参数)：
-5. 通过快捷键打开chrome，地址栏输入chrome://gpu,搜索”Video Acceleration”,验证chrome是否开启成功:
 
 ### 浏览器播放视频过程中，整个显示器会突然的白屏下
 
@@ -2507,41 +2549,6 @@ jessibuca.destroy().then(()=>{
 检查：f12 打开控制台，然后切换到network tab选项卡，然后找到`jessibuca.js`文件，看下`response`返回的内容是否是正常的js文件。
 
 
-### 关于window Hevc是否支持
-
-#### edge/chrome 自查
-
-1.浏览器输入：`chrome://gpu/` 如果edge浏览器就`edge://gpu/`
-2.全局搜索下`hevc`关键词
-
-#### 查看设备是否支持
-
-要知道自己的电脑支持什么格式的硬解码，可以下载DXVA Checker
-下载地址：https://bluesky-soft.com/en/DXVAChecker.html
-
-也可以直接查询BlueSky的数据库（可直接点击超链接）
-- AMD ：https://bluesky-soft.com/en/dxvac/deviceInfo/decoder/amd.html
-- Intel ：https://bluesky-soft.com/en/dxvac/deviceInfo/decoder/intel.html
-- NVIDIA ：https://bluesky-soft.com/en/dxvac/deviceInfo/decoder/nvidia.html
-
-浏览器通常采用核显加速，同时有独显核显的，参考核显的解码能力。
-
-HEVC硬解支持的硬件较多，Intel第六代酷睿处理器及以后的核显全部支持HEVC，六代之前的部分支持，具体请看BlueSky的数据库。
-
-AV1硬解目前仅限于AMD RX 6000系（除6500XT）、Nvidia 30系、Intel Arc显卡、Intel UHD 700系和Iris 锐炬Xe核显，后续型号应该也会支持AV1。
-
-### 开启Hevc硬解码
-
-1. 开启HEVC之前需要下载HEVC插件，这个插件可以在微软商店花7块钱购买。
-
-搜索：HEVC视频扩展
-
-2. 也可以直接在网上免费下载，两者都是一样的。
-HEVC视频拓展下载地址：https://www.free-codecs.com/hevc_video_extension_download.htm
-由于以前的bug已经修复，所以可以直接下载最新版的插件，选择x64版本的HEVC Video Extension 1.0.50361下载并安装。
-或者直接下载已经下载好的：[HEVCVideoExtensions.zip](https://jessibuca.com/zip/HEVCVideoExtensions.zip)
-
-3. 在地址栏输入edge://flags/ 进入搜索 Choose ANGLE graphics backend 选择 D3D11，选择后重启浏览器再打开。
 
 ## 支持作者
 
