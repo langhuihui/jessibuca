@@ -120,6 +120,9 @@ export default (player, control) => {
         setStyle(control.$record, 'display', player.recording ? 'none' : 'flex');
         setStyle(control.$recordStop, 'display', player.recording ? 'flex' : 'none');
         setStyle(control.$recording, 'display', player.recording ? 'flex' : 'none')
+        if(!player.recording && control.$recordingTime){
+            control.$recordingTime.innerHTML = formatTimeTips(0);
+        }
     })
 
     //
