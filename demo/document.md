@@ -1485,6 +1485,9 @@ WebAssembly 通过线性内存来存储和处理数据。线性内存是 WebAsse
 
 如果申请的内存不够大的情况下，播放的视频流过大，就会出现这个错误。
 
+##### 流数据越界了
+
+流数据本身就是越界的，导致解码的时候，越界了。给得流数据本身就是有问题，不是完整的流数据。
 
 #### 解决方案
 
@@ -1492,6 +1495,9 @@ WebAssembly 通过线性内存来存储和处理数据。线性内存是 WebAsse
 
 如果是`系统资源限制`导致的，可以尝试增加系统资源，或者降低视频的分辨率。
 
+如果是`流数据越界了`，可以尝试检查下流数据本身是否存在问题。
+
+真实客户案例：[案例一](https://jessibuca.com/document-demo-1.html)
 
 
 ### 多屏需求
@@ -2298,6 +2304,20 @@ window.setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
 ### video 抛出 PIPELINE_ERROR_COULD_NOT_RENDER 错误
 
 ### video 抛出 PIPELINE_ERROR_DECODE: VDA Error 4 错误
+
+
+### video 抛出  PIPELINE_ERROR_COULD_NOT_RENDER 错误
+
+这是因为访问的是受限制的端口
+
+> 例如 10080 端口
+
+
+解决方案：
+
+1. 这个方法就很简单了，直接改网站监听的端口就行了，不要使用受限制的端口即可。（推荐）
+2. 配置 `--explicitly-allowed-ports=10080` 参数，允许访问受限制ed端口。（强烈不推荐）
+
 
 ### 关于：The play() request was interrupted by a call to pause() 报错
 
