@@ -680,7 +680,7 @@ https://github.com/langhuihui/jessibuca/issues/126
 2. 降低播放的屏幕数量
 3. 增加电脑内存
 4. 升级到pro版本
-5. 关闭devTools
+5. 关闭devTools(如果是长时间测试，建议把 `debug:false` 配置起来，因为日志也会存留在内存里面的)
 6. H265降级到H264
 
 
@@ -2304,6 +2304,12 @@ window.setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
 这是因为在发起 video标签的 `play()` 还没有返回结果的时候，调用了`pause()`方法导致的。
 
 因为 `play()` 方法是是个`Promise`,所以需要等待`play()`方法返回结果之后，再调用`pause()`方法。
+
+
+### video 抛出 Unmuting failed and the element was paused instead because the user didn't interact with the document before
+
+这个错误是由于浏览器的自动播放策略导致的。
+
 
 
 
