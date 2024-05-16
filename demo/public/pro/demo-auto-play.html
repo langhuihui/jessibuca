@@ -57,9 +57,23 @@
             https://developers.google.com/web/updates/2017/09/autoplay-policy-changes
         </div>
         <div class="input">
-            自动播放是默认静音的，需要手动触发cancelMute()
-            <br>
-            我绑定了container窗口的点击事件，来激活声音。
+            <div>
+                如果是通过点击链接、脚本操作等方式加载页面，可以通过js程序去掉静音（地址栏输入貌似不支持js解除禁音）。
+                <br>
+                <span style="color:green">目前demo 借助performance.navigation.type 判断是否满足加载声音的条件。来实现自动播放(带声音)。</span>
+                <br>
+                <span style="color:blueviolet">TIPS:“重新加载”按钮或者location.reload()方法加载,通过“前进”或“后退”按钮加载 这种是不会带有声音播放的</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <span>自动播放是默认静音的，需要手动触发cancelMute()</span>
+                <br>
+                <span style="color:red">我绑定了container窗口的点击事件，来激活声音。</span>
+            </div>
+        </div>
+        <div class="input">
+            <button onclick="destroy()">销毁</button>
         </div>
     </div>
 </div>
@@ -79,9 +93,9 @@
             decoder: './js/decoder-pro.js',
             debug: true,
             debugLevel: "debug",
-            useMSE: false,
-            useSIMD: false,
-            useWCS: false,
+            useMSE: true,
+            useSIMD: true,
+            useWCS: true,
             showBandwidth: showOperateBtns, // 显示网速
             showPerformance: showOperateBtns, // 显示性能
             operateBtns: {
@@ -97,22 +111,14 @@
             audioEngine: "worklet",
             qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
             forceNoOffscreen: forceNoOffscreen,
-            isNotMute: true,
             heartTimeout: 10,
-            ptzClickType: 'mouseDownAndUp',
-            ptzZoomShow: true,
-            ptzMoreArrowShow: true,
-            ptzApertureShow: true,
-            ptzFocusShow: true,
-            useCanvasRender: true,
-            useVideoRender: false,
         },);
         jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
             jessibuca.showErrorMessageTips('播放异常：' + error);
         })
 
-        jessibuca.on(JessibucaPro.EVENTS.crashLog,(log)=>{
-            console.error('crashLog',log)
+        jessibuca.on(JessibucaPro.EVENTS.crashLog, (log) => {
+            console.error('crashLog', log)
         })
 
         jessibuca.on('ptz', (arrow) => {
@@ -131,6 +137,19 @@
             // console.log('stats', stats);
         })
 
+        jessibuca.on('start', () => {
+            /**
+             * 0：网页通过点击链接、地址栏输入、表单提交、脚本操作等方式加载，相当于常数performance.navigation.TYPE_NAVIGATE。
+             * 1：网页通过“重新加载”按钮或者location.reload()方法加载，相当于常数performance.navigation.TYPE_RELOAD。
+             * 2：网页通过“前进”或“后退”按钮加载，相当于常数performance.navigation.TYPE_BACK_FORWARD。
+             * 255：任何其他来源的加载，相当于常数performance.navigation.TYPE_RESERVED。
+             */
+            if (performance.navigation.type === 0) {
+                jessibuca.cancelMute();
+                console.log('volume',jessibuca.getVolume());
+            }
+        })
+
     }
 
 
@@ -146,6 +165,12 @@
         jessibuca.cancelMute()
     }, false)
 
+
+    function destroy() {
+        if (jessibuca) {
+            jessibuca.destroy();
+        }
+    }
 </script>
 
 </body>
