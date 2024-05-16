@@ -2328,10 +2328,50 @@ window.setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
 
 ### video 抛出 Unmuting failed and the element was paused instead because the user didn't interact with the document before
 
-这个错误是由于浏览器的自动播放策略导致的。
+这个错误是由于浏览器的自动播放策略导致的，浏览器不允许播放带有音频的视频。
+
+#### 对于硬解码
+如果业务系统是设置了打开页面的时候，就自动进行播放视频的话，建议不要将`isNotMute`参数设置为`true` 在硬解码的时候，浏览器会抛出以上异常。
+
+#### 对于软解码
+软解码的时候，由于调用的是 audioContext 进行播放音频数据，不会影响视频播放。
+
+#### 解决方案
+
+不要将`isNotMute`参数设置为`true`，通过监听start事件，然后根据当前场景判断是否调用 `cancelMute()` 方法
+
+```js
+jessibuca.on('start', () => {
+    /**
+     * 0：网页通过点击链接、地址栏输入、表单提交、脚本操作等方式加载，相当于常数performance.navigation.TYPE_NAVIGATE。
+     * 1：网页通过“重新加载”按钮或者location.reload()方法加载，相当于常数performance.navigation.TYPE_RELOAD。
+     * 2：网页通过“前进”或“后退”按钮加载，相当于常数performance.navigation.TYPE_BACK_FORWARD。
+     * 255：任何其他来源的加载，相当于常数performance.navigation.TYPE_RESERVED。
+     */
+    if (performance.navigation.type === 0) {
+        // 这里如果是地址栏输入（书签）打开，貌似也会进去，奈何浏览器也不允许这种逻辑进行自动播放音频，播放器内部会降级到软解码去。。
+        jessibuca.cancelMute();
+        console.log('volume',jessibuca.getVolume());
+    }
+})
+```
+
+参考demo:[demo-auto-play.html](https://jessibuca.com/pro/demo-auto-play.html)
 
 
+### 浏览器抛出 Unmuting failed and the element was paused instead because the user didn't interact with the document before
 
+这是由于 浏览器的安全机制，在某些情况下
+
+1. 网页通过“前进”或“后退”按钮加载
+2. 网页通过“重新加载”按钮或者location.reload()方法加载
+3. 网页通过`地址栏输入`或者`书签`加载
+
+这些情况下，浏览器会认为用户没有主动操作，所以会禁止自动播放。
+
+> 浏览器允许通过`点击链接`方式打开的页面自动播放。
+
+参考demo:[demo-auto-play.html](https://jessibuca.com/pro/demo-auto-play.html)
 
 ### window.Jessibuca is not a constructor 错误
 

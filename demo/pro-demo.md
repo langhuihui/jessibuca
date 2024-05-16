@@ -172,7 +172,7 @@ vue2:[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue2](https://git
 
 ## 其他
 
-### （wasm+canvas）自动播放
+### 自动播放(点击连接跳转打开页面允许自动播放并支持声音，刷新页面之后浏览器就不允许自动播放声音了)
 ------
 #### https
 [https://jessibuca.com/pro/demo-auto-play.html](https://jessibuca.com/pro/demo-auto-play.html)
