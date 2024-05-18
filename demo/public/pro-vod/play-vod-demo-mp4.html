@@ -68,7 +68,15 @@
             </div>
         </div>
         <div class="input">
-            <button onclick="replay()">重播</button>
+            <div>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="isMP4"
+                /><span>强制MP4</span>
+                <button onclick="replay()">重播</button>
+            </div>
         </div>
         <div class="input">
             <div>输入URL：</div>
@@ -104,6 +112,7 @@
     var $useWCS = document.getElementById('useWCS');
     var $playVodForward = document.getElementById('playVodForward');
     var $playVodBackword = document.getElementById('playVodBackword');
+    var $isMP4 = document.getElementById('isMP4');
 
     var forceNoOffscreen = true; //
     var jessibuca = null;
@@ -119,7 +128,6 @@
             isResize: false,
             text: "",
             loadingText: "加载中",
-            isNotMute: true,
             debug: true,
             debugLevel: 'debug',
             timeout: 10000,
@@ -135,7 +143,8 @@
                 performance: showOperateBtns,
             },
             forceNoOffscreen: forceNoOffscreen,
-            isNotMute: false,
+            isNotMute: true,
+            isFmp4: $isMP4.checked,
         },);
 
         jessibuca.onLog = msg => console.error(msg);

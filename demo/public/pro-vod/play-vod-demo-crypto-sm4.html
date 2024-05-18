@@ -71,6 +71,10 @@
 
             <div>
                 <input
+                    type="checkbox"
+                    id="isMP4"
+                /><span>强制MP4</span>
+                <input
                     checked
                     onclick="replay()"
                     type="checkbox"
@@ -118,6 +122,7 @@
     var $playVodBackword = document.getElementById('playVodBackword');
     var $m7sKey = document.getElementById('m7sKey');
     var $m7sCryptoAudio = document.getElementById('m7sCryptoAudio');
+    var $isMP4 = document.getElementById('isMP4');
 
     var forceNoOffscreen = true; //
     var jessibuca = null;
@@ -149,10 +154,10 @@
                 performance: showOperateBtns,
             },
             forceNoOffscreen: forceNoOffscreen,
-            isNotMute: false,
             isSm4Crypto: true,
             sm4CryptoKey: $m7sKey.value,
             isCryptoAudio: $m7sCryptoAudio.checked === true,
+            isFmp4: $isMP4.checked,
         },);
 
         jessibuca.onLog = msg => console.error(msg);
