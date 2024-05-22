@@ -2592,14 +2592,14 @@ https://github.com/StaZhu/enable-chromium-hevc-hardware-decoding/blob/main/READM
 
 ### 如何验证视频播放是否走硬解？
 
-打开 chrome://gpu, 搜索 Video Acceleration Information, 如果能看到 Decode hevc main 和 Decode hevc main 10 (macOS 还会显示 Decode hevc main still-picture 和 Decode hevc range extensions) 说明支持硬解（这里 macOS 是个例外，显示仅代表支持 VideoToolbox 解码，至于是否硬解取决于 GPU 支持情况)。
+打开 `chrome://gpu`, 搜索 `Video Acceleration Information`, 如果能看到 `Decode hevc main` 和 `Decode hevc main 10` (macOS 还会显示 `Decode hevc main still-picture` 和 `Decode hevc range extensions`) 说明支持硬解（这里 macOS 是个例外，显示仅代表支持 `VideoToolbox` 解码，至于是否硬解取决于 GPU 支持情况)。
 
-打开 chrome://media-internals 并尝试播放一些 HEVC 视频 (测试页面)，如果最终使用的 Decoder 是 VDAVideoDecoder 或 D3D11VideoDecoder 或 VaapiVideoDecoder 说明走了硬解（这里 macOS 是个例外，macOS Big Sur 以上版本，在不支持的 GPU 上，VideoToolbox 会自动 fallback 到软解，性能相比 FFMPEG 软解更好，Decoder 同样为 VDAVideoDecoder）, 如果 Decoder 是 FFMpegVideoDecoder 说明走的是软解。
+打开 `chrome://media-internals` 并尝试播放一些 HEVC 视频 (测试页面)，如果最终使用的 Decoder 是 `VDAVideoDecoder` 或 `D3D11VideoDecoder` 或 `VaapiVideoDecoder` 说明走了硬解（这里 macOS 是个例外，macOS Big Sur 以上版本，在不支持的 GPU 上，VideoToolbox 会自动 fallback 到软解，性能相比 FFMPEG 软解更好，Decoder 同样为 `VDAVideoDecoder`）, 如果 Decoder 是 `FFMpegVideoDecoder` 说明走的是软解。
 
 #### MAC
-如果是 Mac，请打开 活动监视器并搜索 VTDecoderXPCService, 如果播放时进程的 CPU 利用率大于0说明走了硬解（或软解)。
+如果是 Mac，请打开 活动监视器并搜索 `VTDecoderXPCService`, 如果播放时进程的 CPU 利用率大于0说明走了硬解（或软解)。
 #### Windows
-如果是 Windows，请打开 任务管理器 并切换到 性能 - GPU 面板，如果 Video Decoding 的利用率大于0说明走了硬解。
+如果是 Windows，请打开 任务管理器 并切换到 性能 - GPU 面板，如果 `Video Decoding` 的利用率大于0说明走了硬解。
 
 ### 为什么我的显卡支持，但仍无法使用硬解？
 
@@ -2611,21 +2611,21 @@ https://github.com/StaZhu/enable-chromium-hevc-hardware-decoding/blob/main/READM
 
 ##### Windows
 
-请确保操作系统版本大于等于 Windows 8，这是因为 Chromium 的 D3D11VideoDecoder 仅支持 Windows 8 以上系统，在 Windows 8 以下操作系统使用 VDAVideoDecoder 进行硬解。而 VDAVideoDecoder 基于 Media Foundation 实现，Media Foundation 对于 HEVC 硬解的支持（需要安装 HEVC视频扩展 插件），系统版本需大于 Windows 10 1709。
+请确保操作系统版本大于等于 `Windows 8`，这是因为 Chromium 的 `D3D11VideoDecoder` 仅支持 Windows 8 以上系统，在 Windows 8 以下操作系统使用 `VDAVideoDecoder` 进行硬解。而 `VDAVideoDecoder` 基于 `Media Foundation` 实现，`Media Foundation` 对于 HEVC 硬解的支持（`需要安装 HEVC视频扩展 插件`），系统版本需大于 `Windows 10 1709`。
 
 ##### macOS
 
-请确保操作系统版本大于等于 Big Sur，这是因为CMVideoFormatDescriptionCreateFromHEVCParameterSets API，在 Big Sur 以下版本有兼容问题。
+请确保操作系统版本大于等于 `Big Sur`，这是因为`CMVideoFormatDescriptionCreateFromHEVCParameterSets API`，在 Big Sur 以下版本有兼容问题。
 
 
 #### 显卡驱动版本有问题
 
-部分显卡驱动版本有 BUG，导致被禁用使用D3D11VideoDecoder，因此若你确保 GPU 支持 HEVC 硬解，请先更新到最新版本显卡驱动再尝试。
+部分显卡驱动版本有 BUG，导致被禁用使用`D3D11VideoDecoder`，因此若你确保 GPU 支持 HEVC 硬解，请先更新到最新版本显卡驱动再尝试。
 
 
 #### 特定硬件有问题
 
-部分硬解有 BUG，导致被禁用 D3D11VideoDecoder，这种情况没什么办法解决，只能软解。
+部分硬解有 BUG，导致被禁用 `D3D11VideoDecoder`，这种情况没什么办法解决，只能软解。
 
 
 
