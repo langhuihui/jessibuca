@@ -1086,6 +1086,9 @@ const jessibuca = new JessibucaPro({
 
 3.如果条件允许，把出问题的流，保存个flv文件，发给作者。
 
+#### 日志下载
+
+<img src="/public/img/save-log.png">
 
 ### 关于绿屏和花屏
 

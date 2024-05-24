@@ -454,7 +454,6 @@ class Jessibuca extends Emitter {
                     }
                 })
             })
-
             //
             this.player.once(EVENTS_ERROR.webcodecsH265NotSupport, () => {
                 this.pause().then(() => {
@@ -532,20 +531,50 @@ class Jessibuca extends Emitter {
                         this.play(url, options).then(() => {
                             // resolve();
                             this.debug.log('Jessibuca', 'wasm decode error and reset player and play success')
-                        }).catch(() => {
+                        }).catch((e) => {
                             // reject();
                             this.debug.warn('Jessibuca', 'wasm decode error and reset player and play error')
                         });
                     })
                 } else {
-                    this.debug.warn('Jessibuca', 'wasm decode error and paused');
+                    this.pause().then(() => {
+                        this.debug.log('Jessibuca', 'wasm decode error and paused');
+                    }).catch((e) => {
+                        this.debug.warn('Jessibuca', 'wasm decode error and paused error', e)
+                    })
                 }
             })
+            // fetch error
+            this.player.once(EVENTS_ERROR.fetchError, () => {
+                this.pause().then(() => {
+                    this.debug.log('Jessibuca', 'fetch error and pause play')
+                }).catch((e) => {
+                    this.debug.warn('Jessibuca', 'fetch error and pause play error', e)
+                })
+            })
 
+            //
+            this.player.once(EVENTS_ERROR.websocketError, () => {
+                this.pause().then(() => {
+                    this.debug.log('Jessibuca', 'websocket Error and pause play')
+                }).catch((e) => {
+                    this.debug.warn('Jessibuca', 'websocket Error and pause play error', e)
+                })
+            })
+
+            //
+            this.player.once(EVENTS.streamEnd, () => {
+                this.pause().then(() => {
+                    this.debug.log('Jessibuca', 'stream End and pause play')
+                }).catch((e) => {
+                    this.debug.warn('Jessibuca', 'stream End and pause play error', e)
+                })
+            })
 
             // 监听 delay timeout
             this.player.on(EVENTS.delayTimeout, () => {
-                if (this.player._opt.heartTimeoutReplay && (this._heartTimeoutReplayTimes < this.player._opt.heartTimeoutReplayTimes || this.player._opt.heartTimeoutReplayTimes === -1)) {
+                if (this.player._opt.heartTimeoutReplay &&
+                    (this._heartTimeoutReplayTimes < this.player._opt.heartTimeoutReplayTimes || this.player._opt.heartTimeoutReplayTimes === -1)) {
                     this.debug.log('Jessibuca', `delay timeout replay time is ${this._heartTimeoutReplayTimes}`)
                     this._heartTimeoutReplayTimes += 1;
                     this.play(url, options).then(() => {
@@ -559,7 +588,8 @@ class Jessibuca extends Emitter {
 
             // 监听 loading timeout
             this.player.on(EVENTS.loadingTimeout, () => {
-                if (this.player._opt.loadingTimeoutReplay && (this._loadingTimeoutReplayTimes < this.player._opt.loadingTimeoutReplayTimes || this.player._opt.loadingTimeoutReplayTimes === -1)) {
+                if (this.player._opt.loadingTimeoutReplay &&
+                    (this._loadingTimeoutReplayTimes < this.player._opt.loadingTimeoutReplayTimes || this.player._opt.loadingTimeoutReplayTimes === -1)) {
                     this.debug.log('Jessibuca', `loading timeout replay time is ${this._loadingTimeoutReplayTimes}`)
                     this._loadingTimeoutReplayTimes += 1;
                     this.play(url, options).then(() => {

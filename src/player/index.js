@@ -520,17 +520,20 @@ export default class Player extends Emitter {
                 this.checkLoadingTimeout();
                 // fetch error
                 this.stream.once(EVENTS_ERROR.fetchError, (error) => {
-                    reject(error)
+                    // reject(error)
+                    this.emitError(EVENTS_ERROR.fetchError, error);
                 })
 
                 // ws
                 this.stream.once(EVENTS_ERROR.websocketError, (error) => {
-                    reject(error)
+                    // reject(error)
+                    this.emitError(EVENTS_ERROR.websocketError, error);
                 })
 
                 // stream end
-                this.stream.once(EVENTS.streamEnd, () => {
-                    reject();
+                this.stream.once(EVENTS.streamEnd, (msg) => {
+                    // reject();
+                    this.emitError(EVENTS.streamEnd, msg);
                 })
 
                 // success
