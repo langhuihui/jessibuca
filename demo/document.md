@@ -1113,6 +1113,10 @@ const jessibuca = new JessibucaPro({
 2. 同样的播放地址，用其他浏览器播放是否正常，检查是否浏览器的问题，检查是否浏览器的问题。
 3. 同样的播放地址，用其他的web播放器（[video.js](https://videojs.com/),[xgplayer.js](https://h5player.bytedance.com/)）,播放是否有问题，检查是否Jessibuca的问题。
 
+> 千万不要web端跑的是http协议的 ，然后用rtsp协议这样的协议去vlc播放测试，这也是毫无意义的，因为不同的封装协议，不同的传输协议，不同的编码协议，都会导致不同的问题。
+
+> 一定要用同样的协议，同样的封装，同样的编码，同样的传输协议，去测试，这样才能正常是否是流本身的问题导致的绿屏。
+
 
 ### 关于浏览器崩溃(sbox_fatal_memory_exceeded)
 
