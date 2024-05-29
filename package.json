@@ -1,6 +1,30 @@
 {
     "name": "jessibuca",
     "version": "1.0.0",
+    "main": "dist/jessibuca.js",
+    "module": "dist/jessibuca.esm.js",
+    "unpkg": "dist/jessibuca.js",
+    "jsdelivr": "dist/jessibuca.js",
+    "types": "dist/jessibuca.d.ts",
+    "files": [
+      "dist",
+      "package.json",
+      "LICENSE",
+      "README.md",
+      "README.en.md"
+    ],
+    "exports": {
+      ".": {
+        "import": {
+          "types": "./dist/jessibuca.d.ts",
+          "default": "./dist/jessibuca.esm.js"
+        },
+        "require": {
+          "types": "./dist/jessibuca.d.ts",
+          "default": "./dist/jessibuca.js"
+        }
+      }
+    },
     "scripts": {
         "build": "npx cross-env NODE_ENV=production rollup -c",
         "build:wasm": "python wasm/make.py --wasm && npm run build && npm run build:demo",
