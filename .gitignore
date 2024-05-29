@@ -7,6 +7,4 @@ node_modules
 .cache
 .parcel-cache
 demo/.vitepress/dist
-yarn.lock
-package-lock.json
 .DS_Store
