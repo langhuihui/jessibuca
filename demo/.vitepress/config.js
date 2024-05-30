@@ -30,6 +30,12 @@ module.exports = {
             },
             {text: '点播播放器(ProVod)', link: '/player-pro-vod'},
             {
+                text: "ProVod-More",
+                items:[
+                    {text: '文档', link: '/pro-vod'},
+                ]
+            },
+            {
                 text: 'http/https',
                 items: [
                     {text: 'HTTP', link: 'http://jessibuca.monibuca.com/'},
