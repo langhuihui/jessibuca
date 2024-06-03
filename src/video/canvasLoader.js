@@ -42,7 +42,7 @@ export default class CanvasVideoLoader extends CommonLoader {
         this.player.debug.log('CanvasVideo', 'init');
     }
 
-    destroy() {
+    async destroy() {
         super.destroy();
         if (this.contextGl) {
             this.contextGl = null;

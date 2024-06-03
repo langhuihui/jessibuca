@@ -486,9 +486,16 @@ jessibuca.close();
 ### destroy()
 
 - **用法**： 关闭视频，释放底层资源
+- **返回**：
+    - `{Promise}`
 
 ```js
-jessibuca.destroy()
+jessibuca.destroy().then(()=>{
+    // todo: next
+})
+
+// 或者
+await jessibuca.destroy();
 ```
 
 ### clearView()

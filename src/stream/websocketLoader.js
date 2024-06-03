@@ -17,7 +17,7 @@ export default class WebsocketLoader extends Emitter {
         player.debug.log('WebsocketLoader', 'init');
     }
 
-    destroy() {
+    async destroy() {
         if (this.socket) {
             this.socket.close(1000, 'Client disconnecting');
             this.socket = null;

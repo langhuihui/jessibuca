@@ -33,7 +33,7 @@
             text-shadow: 1px 1px black;
         }
 
-        .container-wrap{
+        .container-wrap {
             width: 640px;
             height: 398px;
             position: relative;
@@ -104,7 +104,7 @@
                 height: 52.7vw;
             }
 
-            .container-wrap{
+            .container-wrap {
                 width: 90vw;
                 height: 52.7vw;
             }
@@ -238,11 +238,10 @@
         timeInterval: 1200,
         randomSort: true,
         hSpacing: 0.8,
-        direction:'v'
+        direction: 'v'
     });
     console.log(dm);
     dm.pause();
-
 
 
     $player.addEventListener('click', function () {
@@ -267,10 +266,15 @@
 
     $destroy.addEventListener('click', function () {
         if (jessibuca) {
-            jessibuca.destroy();
+            jessibuca.destroy().then(() => {
+                dm.pause();
+                create();
+            });
+        } else {
+            dm.pause();
+            create();
         }
-        dm.pause();
-        create();
+
     })
 
 </script>

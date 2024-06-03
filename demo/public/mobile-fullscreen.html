@@ -250,10 +250,16 @@
 
     function replay() {
         if (jessibuca) {
-            jessibuca.destroy();
+            jessibuca.destroy().then(()=>{
+                create();
+                play();
+            });
         }
-        create();
-        play();
+        else {
+            create();
+            play();
+        }
+
     }
 
     function play() {

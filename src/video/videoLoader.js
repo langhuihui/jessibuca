@@ -67,7 +67,7 @@ export default class VideoLoader extends CommonLoader {
         this.player.debug.log('Video', 'init');
     }
 
-    destroy() {
+    async destroy() {
         super.destroy();
         this.$canvasElement = null;
         this.canvasContext = null;
@@ -83,7 +83,7 @@ export default class VideoLoader extends CommonLoader {
             this.trackGenerator = null;
         }
         if (this.vwriter) {
-            this.vwriter.close();
+            await this.vwriter.close();
             this.vwriter = null;
         }
         this.player.debug.log('Video', 'destroy');

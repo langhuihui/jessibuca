@@ -122,7 +122,7 @@
             <input
                 autocomplete="on"
                 id="playUrl2"
-                value="http://flv.bdplay.nodemedia.cn/live/bbb.flv"
+                value="http://flv.bdplay.nodemedia.cn/live/bbb_264.flv"
             />
         </div>
         <div class="input">
@@ -138,7 +138,7 @@
             <input
                 autocomplete="on"
                 id="playUrl4"
-                value="http://flv.bdplay.nodemedia.cn/live/bbb.flv"
+                value="http://flv.bdplay.nodemedia.cn/live/bbb_264.flv"
             />
         </div>
         <div class="input">
@@ -160,6 +160,7 @@
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var playList = [];
+    var size = 4;
 
     function create(id) {
         var $container = document.getElementById('container' + id);
@@ -170,7 +171,7 @@
             isResize: false,
             text: "",
             loadingText: "加载中",
-            debug: true,
+            debug: false,
             showBandwidth: showOperateBtns, // 显示网速
             operateBtns: {
                 fullscreen: showOperateBtns,
@@ -192,7 +193,7 @@
     }
 
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < size; i++) {
         create(i + 1);
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
@@ -201,7 +202,7 @@
 
 
     $player.addEventListener('click', function () {
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < size; i++) {
             var id = i + 1;
             var $playHref = document.getElementById('playUrl' + id);
             let player = playList[i];
@@ -227,26 +228,35 @@
     $pause.addEventListener('click', function () {
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < size; i++) {
             let player = playList[i];
             player && player.pause()
         }
     })
 
     $destroy.addEventListener('click', function () {
-        for (let i = 0; i < 4; i++) {
+        const destroyList = [];
+        for (let i = 0; i < size; i++) {
             let player = playList[i];
-            player && player.destroy()
-        }
-        playList = [];
-        setTimeout(() => {
-            for (let i = 0; i < 4; i++) {
-                create(i + 1);
+            if (player) {
+                destroyList.push(player.destroy());
             }
-            $player.style.display = 'inline-block';
-            $pause.style.display = 'none';
-            $destroy.style.display = 'none';
-        }, 100)
+        }
+        Promise.all(destroyList).then(() => {
+            playList = [];
+            setTimeout(() => {
+                for (let i = 0; i < size; i++) {
+                    create(i + 1);
+                }
+                $player.style.display = 'inline-block';
+                $pause.style.display = 'none';
+                $destroy.style.display = 'none';
+            }, 100)
+        }).catch((e) => {
+            console.error(e);
+        })
+
+
     })
 
 </script>

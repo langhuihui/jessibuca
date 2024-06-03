@@ -206,11 +206,15 @@
 
     $destroy.addEventListener('click', function () {
         if (jessibuca) {
-            jessibuca.destroy();
+            jessibuca.destroy().then(()=>{
+                clearTimeout(looper);
+                create();
+            });
+        }
+        else {
             clearTimeout(looper);
             create();
         }
-
     })
 
 </script>

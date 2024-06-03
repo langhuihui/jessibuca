@@ -9,7 +9,7 @@ export default class DecoderWorker {
         player.debug.log('decoderWorker', 'init')
     }
 
-    destroy() {
+    async destroy() {
         this.decoderWorker.postMessage({cmd: WORKER_SEND_TYPE.close})
         this.decoderWorker.terminate();
         this.decoderWorker = null;

@@ -35,6 +35,7 @@ export default class Player extends Emitter {
         this.$container = container;
         this._opt = Object.assign({}, DEFAULT_PLAYER_OPTIONS, options)
         this.debug = new Debug(this);
+        this.debug.log('Player', 'init');
 
         // disable offscreen
         this._opt.forceNoOffscreen = true;
@@ -181,7 +182,7 @@ export default class Player extends Emitter {
     }
 
 
-    destroy() {
+    async destroy() {
         this._loading = false;
         this._playing = false;
         this._hasLoaded = false;
@@ -189,7 +190,7 @@ export default class Player extends Emitter {
         this._times = initPlayTimes();
 
         if (this.decoderWorker) {
-            this.decoderWorker.destroy();
+            await this.decoderWorker.destroy();
             this.decoderWorker = null;
         }
         if (this.video) {
@@ -203,7 +204,7 @@ export default class Player extends Emitter {
         }
 
         if (this.stream) {
-            this.stream.destroy();
+            await this.stream.destroy();
             this.stream = null;
         }
 

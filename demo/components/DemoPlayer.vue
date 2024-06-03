@@ -188,9 +188,9 @@ export default {
         this.create();
         window.onerror = (msg) => (this.err = msg);
     },
-    unmounted() {
+    async unmounted() {
         if (this.$options && this.$options.jessibuca) {
-            this.$options.jessibuca.destroy();
+            await this.$options.jessibuca.destroy();
         }
         this.vConsole.destroy();
     },
@@ -373,9 +373,9 @@ export default {
         rotateChange() {
             this.$options.jessibuca.setRotate(this.rotate);
         },
-        destroy() {
+        async destroy() {
             if (this.$options.jessibuca) {
-                this.$options.jessibuca.destroy();
+                await this.$options.jessibuca.destroy()
             }
             this.create();
             this.playing = false;
@@ -400,13 +400,11 @@ export default {
             this.$options.jessibuca.stopRecordAndSave();
         },
 
-
         screenShot() {
             this.$options.jessibuca.screenshot();
         },
 
-
-        restartPlay(type) {
+        async restartPlay(type) {
 
             if (type === 'mse') {
                 this.useWCS = false;
@@ -423,7 +421,7 @@ export default {
                 this.useOffscreen = false;
             }
 
-            this.destroy();
+            await this.destroy();
             setTimeout(() => {
                 this.play();
             }, 100)

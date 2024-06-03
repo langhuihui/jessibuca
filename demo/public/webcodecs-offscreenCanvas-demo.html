@@ -176,9 +176,13 @@
 
     $destroy.addEventListener('click', function () {
         if (jessibuca) {
-            jessibuca.destroy();
+            jessibuca.destroy().then(()=>{
+                create();
+            });
         }
-        create();
+        else {
+            create();
+        }
     })
 
 </script>

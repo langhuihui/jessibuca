@@ -72,11 +72,14 @@ export default class AudioContextLoader extends Emitter {
     }
 
 
-    destroy() {
+    async destroy() {
         this.closeAudio();
         this.resetInit();
-        this.audioContext.close();
-        this.audioContext = null;
+        if(this.audioContext){
+            await this.audioContext.close();
+            this.audioContext = null;
+        }
+
         this.gainNode = null;
         this.hasAudio = false;
         this.playing = false;

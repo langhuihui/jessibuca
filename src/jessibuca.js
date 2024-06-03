@@ -86,14 +86,14 @@ class Jessibuca extends Emitter {
     /**
      *
      */
-    destroy() {
+    async destroy() {
         if (this.events) {
             this.events.destroy();
             this.events = null;
         }
 
         if (this.player) {
-            this.player.destroy();
+            await this.player.destroy();
             this.player = null;
         }
         this.$container = null;
