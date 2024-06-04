@@ -385,6 +385,11 @@ H265硬解码，对于电脑硬件支持情况：
 
 [caniuse详情](https://caniuse.com/?search=webassembly)
 
+### 对于webassembly SIMD 支持情况
+
+<img src="/public/webassembly-simd.png">
+
+[caniuse详情](https://caniuse.com/?search=webassembly)
 
 ### PC端
 
