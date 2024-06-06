@@ -974,6 +974,29 @@ pro 由于使用了解码性能更强的simd解码，所以推荐使用simd 解�
 ```
 
 
+### 对于hevc(265)支持情况
+
+<img src="/public/hevc-support.png">
+
+[caniuse详情](https://caniuse.com/?search=hevc)
+
+#### chrome
+
+1. Supported for all devices on macOS (>= Big Sur 11.0) and Android (>= 5.0),
+2. for devices with hardware support on Windows (>= Windows 8),
+3. and for devices with hardware support powered by VAAPI on Linux and ChromeOS
+
+#### edge
+
+1. Supported for all devices on macOS (>= Big Sur 11.0) and Android (>= 5.0) if Edge >= 107,
+2. for devices with hardware support on Windows (>= Windows 10 1709) when HEVC video extensions from the Microsoft Store is installed
+
+
+#### 实际测试情况
+
+1. 遇到过两台电脑操作系统，浏览器版本都是一样，cpu 不一样，GPU不一样,4050显卡的所有浏览器都能走硬解码,2060显卡就有谷歌浏览器能走硬解码，预测是 HEVC video extensions 这个插件的兼容性问题。
+
+
 ### 关于PRO提示MSE不支持265解码可能得原因
 
 #### 检查下chrome（edge）的版本号
@@ -983,12 +1006,15 @@ pro 由于使用了解码性能更强的simd解码，所以推荐使用simd 解�
 #### 检查操作系统
 
 ##### window
-可能window10 1809 以前的版本不支持，建议升级到最新版本。
 
-或者安装360浏览器（最新版本）
+1. 确保GPU 支持 Hevc硬解
+2. window10 1709 以前的版本不支持，建议升级到最新版本。
+3. 需要安装 `HEVC video extensions` HEVC扩展
+4. 或者安装360浏览器（最新版本）
 
 #### mac
-版本号大于10.15.4
+1. macOS (>= Big Sur 11.0)
+2. Edge >= 107
 
 #### 扩展
 

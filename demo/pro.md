@@ -372,6 +372,18 @@ H265硬解码，对于电脑硬件支持情况：
 
 [caniuse详情](https://caniuse.com/?search=hevc)
 
+#### chrome
+
+1. Supported for all devices on macOS (>= Big Sur 11.0) and Android (>= 5.0),
+2. for devices with hardware support on Windows (>= Windows 8),
+3. and for devices with hardware support powered by VAAPI on Linux and ChromeOS
+
+#### edge
+
+1. Supported for all devices on macOS (>= Big Sur 11.0) and Android (>= 5.0) if Edge >= 107,
+2. for devices with hardware support on Windows (>= Windows 10 1709) when HEVC video extensions from the Microsoft Store is installed
+
+
 > 可以在浏览器地址栏上面输入：`chrome://gpu/` 或者 `edge://gpu/` 就可以查看显卡支持情况了
 
 
