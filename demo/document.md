@@ -2042,6 +2042,7 @@ https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
 
 播放地址不带协议后缀的：`https://test.com/play/xxxx`
 
+> 播放器不会检查?参数里面携带的后缀，只会检查地址里面的后缀。例如：`https://test.com/play/xxxx?format=flv` 这种不会被检查成flv格式。
 
 #### 开源版
 
