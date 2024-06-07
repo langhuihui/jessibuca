@@ -2705,6 +2705,15 @@ jessibuca.destroy().then(()=>{
 检查：f12 打开控制台，然后切换到network tab选项卡，然后找到`jessibuca.js`文件，看下`response`返回的内容是否是正常的js文件。
 
 
+### 关于WASM压缩优化
+
+压缩是有效提高下载速度的方式，浏览器目前支持的主流压缩格式包括 `gzip` 和 `brotli` 两种。针对wasm包的压缩，`brotli` 算法有显著的优势。
+
+- gzip： 一种流行的压缩文件格式，能有效的降低文件大小。
+- brotli： Google 在 2015 年推出的一种压缩方式，相对于 Gzip 约有 20% 的压缩比提升。
+
+
+
 
 ## 支持作者
 
