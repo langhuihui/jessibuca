@@ -660,13 +660,13 @@ https://github.com/langhuihui/jessibuca/issues/126
 1. 分辨力过大
 2. 播放的屏幕数量过多
 3. 电脑内存过小
-4. 有没有打开devTools
+4. 有没有打开devTools，配置debug:true
 5. 是否H265
 
 
 开源版只能支持到720p的视频，如果超过这个分辨率，就会存在`解码堆积`，时间长了就会容易出现内存堆积，进而导致浏览器崩溃情况。
 
-因为devtools 会打印日志，日志本身就会占用很多内存，也会导致浏览器崩溃。
+因为配置了debug:true之后 devtools 会打印日志，日志本身就会占用很多内存，也会导致浏览器崩溃。
 
 如果视频是H265的，因为其本身的高压缩率，解码端非常依赖硬解码，如果硬解码不支持，就会导致软解码，软解码性能不好，也会导致浏览器崩溃。
 
@@ -683,6 +683,14 @@ https://github.com/langhuihui/jessibuca/issues/126
 5. 关闭devTools(如果是长时间测试，建议把 `debug:false` 配置起来，因为日志也会存留在内存里面的)
 6. H265降级到H264
 
+
+### 关于浏览器崩溃(sbox_fatal_memory_exceeded)
+
+- 看下本身电脑的内存是否足够，分配给浏览器的内存是否足够。
+
+可以看下 http://jessibuca.monibuca.com/pro.html#%E7%94%B5%E8%84%91%E5%9E%8B%E5%8F%B7%E4%BB%A5%E5%8F%8A%E7%A0%81%E7%8E%87
+
+每路所需的内存情况。
 
 ### 可以播放本地视频吗？
 
@@ -1144,13 +1152,6 @@ const jessibuca = new JessibucaPro({
 > 一定要用同样的协议，同样的封装，同样的编码，同样的传输协议，去测试，这样才能正常是否是流本身的问题导致的绿屏。
 
 
-### 关于浏览器崩溃(sbox_fatal_memory_exceeded)
-
-- 看下本身电脑的内存是否足够，分配给浏览器的内存是否足够。
-
-可以看下 http://jessibuca.monibuca.com/pro.html#%E7%94%B5%E8%84%91%E5%9E%8B%E5%8F%B7%E4%BB%A5%E5%8F%8A%E7%A0%81%E7%8E%87
-
-每路所需的内存情况。
 
 ### 首屏打开慢
 
