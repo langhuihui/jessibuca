@@ -1795,6 +1795,12 @@ iframe默认不允许全屏, 如果内嵌了video那么控制条上将不显示�
 
 ### 关于IOS不能系统全屏
 
+
+IOS 全屏效果
+
+<img src="/public/ios-fullscreen.png">
+
+
 > IOS是不存在全屏API的，调用全屏会进入系统播放模式
 
 解决方案：
