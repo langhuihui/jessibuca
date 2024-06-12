@@ -445,8 +445,9 @@ export default class Player extends Emitter {
 
             if (!this.decoderWorker && !this._onlyMseOrWcsVideo()) {
                 this.decoderWorker = new DecoderWorker(this);
-
+                this.debug.log('Player', 'waiting decoderWorker init');
                 this.once(EVENTS.decoderWorkerInit, () => {
+                    this.debug.log('Player', 'decoderWorker init success');
                     resolve()
                 })
             } else {
