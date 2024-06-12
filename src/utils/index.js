@@ -177,6 +177,10 @@ export function isMobile() {
     return (/iphone|ipod|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));
 }
 
+export function isPad(){
+    return (/ipad|android(?!.*mobile)|tablet|kindle|silk/i.test(window.navigator.userAgent.toLowerCase()));
+}
+
 export function isAndroid() {
     const UA = window.navigator.userAgent.toLowerCase();
     return (/android/i.test(UA));
@@ -612,4 +616,13 @@ export function hevcEncoderNalePacketNotLength(oneNALBuffer, isIframe) {
     arrayBuffer.set(tmp, 0);
     arrayBuffer.set(oneNALBuffer, tmp.length);
     return arrayBuffer;
+}
+
+
+export function isTrue(value) {
+    return value === true || value === 'true';
+}
+
+export function isFalse(value) {
+    return value !== true && value !== 'true';
 }

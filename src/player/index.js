@@ -6,7 +6,7 @@ import events from './events';
 import {
     fpsStatus,
     initPlayTimes,
-    isEmpty,
+    isEmpty, isFalse,
     isFullScreen, isMobile,
     isNotEmpty,
     now, supportMediaStreamTrack,
@@ -40,16 +40,23 @@ export default class Player extends Emitter {
         // disable offscreen
         this._opt.forceNoOffscreen = true;
 
-        if (isMobile()) {
+        if (isMobile() || isPad()) {
             this.debug.log('Player', 'isMobile and set _opt.controlAutoHide false');
             this._opt.controlAutoHide = false;
-
-            if (screenfull.isEnabled &&
-                this._opt.useWebFullScreen) {
-                this.debug.log('Player', 'screenfull.isEnabled is true and _opt.useWebFullScreen is true , set _opt.useWebFullScreen false');
-                this._opt.useWebFullScreen = false;
-            }
         }
+
+        if (screenfull.isEnabled &&
+            this._opt.useWebFullScreen) {
+            this.debug.log('Player', 'screenfull.isEnabled is true and _opt.useWebFullScreen is true , set _opt.useWebFullScreen false');
+            this._opt.useWebFullScreen = false;
+        }
+
+        if (isFalse(screenfull.isEnabled) &&
+            isFalse(this._opt.useWebFullScreen)) {
+            this.debug.log('Player', 'screenfull.isEnabled is false and _opt.useWebFullScreen is false , set _opt.useWebFullScreen true');
+            this._opt.useWebFullScreen = true;
+        }
+
 
         //
         if (this._opt.useWCS) {
