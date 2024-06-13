@@ -427,8 +427,57 @@ https://www.mianshigee.com/note/detail/72131ooi/
 
 ### 优化加载速度
 
-1. 将js程序进行gzip压缩
+1. 将js程序进行gzip/Brotli压缩
+2. 将wasm文件进行gzip/Brotli压缩
 
+> 推荐 Brotli 压缩，Brotli 压缩比 gzip 压缩更高效（提升20%性能），更快速。
+
+### gzip压缩jessibuca.js 和decoder.js 和decoder.wasm 文件
+
+linux(mac)
+#### jessibuca.js
+```
+gzip jessibuca.js
+mv jessibuca.js.gz jessibuca.js
+```
+
+#### decoder.js
+
+```
+gzip 和decoder.js
+mv 和decoder.js.gz 和decoder.js
+```
+
+#### decoder.wasm
+
+```
+gzip 和decoder.wasm
+mv 和decoder.wasm.gz 和decoder.wasm
+```
+
+windows 系统压缩方法
+
+下载 gzip.exe
+
+[http://gnuwin32.sourceforge.net/downlinks/gzip-bin-zip.php](http://gnuwin32.sourceforge.net/downlinks/gzip-bin-zip.php)
+
+解压后，将 `jessibuca.js` 和 `decoder.js`和 `decoder.wasm` 文件拖到 gzip.exe上，文件就压缩好了，也需要去掉.gz后缀
+
+<img src="/public/img/gzip.png">
+
+### Brotli压缩jessibuca.js 和decoder.js 和decoder.wasm 文件
+
+可以看下解决方案
+[https://www.cnblogs.com/densen2014/p/16120778.html](https://www.cnblogs.com/densen2014/p/16120778.html)
+
+<img src="/public/img/br.png">
+
+### 关于WASM压缩优化
+
+压缩是有效提高下载速度的方式，浏览器目前支持的主流压缩格式包括 `gzip` 和 `brotli` 两种。针对wasm包的压缩，`brotli` 算法有显著的优势。
+
+- gzip： 一种流行的压缩文件格式，能有效的降低文件大小。
+- brotli： Google 在 2015 年推出的一种压缩方式，相对于 Gzip 约有 20% 的压缩比提升。
 
 ### Media Source Extensions 硬解码H265
 
@@ -649,17 +698,19 @@ http://jessibuca.monibuca.com/pro/audio-player-demo.html
 
 #### 对于开源版
 
-- wasm解码`做了`丢帧（消除延迟）`逻辑，保证长时间在设置的延迟范围内
+- wasm解码`做了`丢帧（消除延迟）`逻辑，保证`前台`长时间在设置的延迟范围内
 - mse解码`没有`做丢帧（消除延迟）逻辑
 - wcs解码`没有`做丢帧（消除延迟）逻辑
 
+> 浏览器切换到后台（最小化，tab窗口被关闭），导致的窗口不可见的情况，会导致延迟增大。
+
 #### 对于pro版
 
-- wasm解码`做了`丢帧（消除延迟）逻辑，保证长时间在设置的延迟范围内
-- mse解码`做了`丢帧（消除延迟）逻辑，保证长时间在设置的延迟范围内
-- wcs解码`做了`丢帧（消除延迟）逻辑，保证长时间在设置的延迟范围内
+- wasm解码`做了`丢帧（消除延迟）逻辑，保证`前台和窗口不可见的情况下`长时间在设置的延迟范围内
+- mse解码`做了`丢帧（消除延迟）逻辑，保证`前台和窗口不可见的情况下`长时间在设置的延迟范围内
+- wcs解码`做了`丢帧（消除延迟）逻辑，保证`前台和窗口不可见的情况下`长时间在设置的延迟范围内
 
-
+> pro播放器在窗口不可见的情况下是利用黑科技实现的消除延迟的逻辑。
 
 ### 播放过程中页面出现崩溃
 
@@ -672,11 +723,11 @@ http://jessibuca.monibuca.com/pro/audio-player-demo.html
 5. 是否H265
 
 
-开源版只能支持到720p的视频，如果超过这个分辨率，就会存在`解码堆积`，时间长了就会容易出现内存堆积，进而导致浏览器崩溃情况。
+开源版只能支持到`720p`的视频，如果超过这个分辨率，就会存在`解码堆积`，时间长了就会容易出现内存堆积，进而导致浏览器崩溃情况。
 
-因为配置了debug:true之后 devtools 会打印日志，日志本身就会占用很多内存，也会导致浏览器崩溃。
+因为配置了`debug:true`之后 devtools 会打印日志，日志本身就会占用很多内存，也会导致浏览器崩溃。
 
-如果视频是H265的，因为其本身的高压缩率，解码端非常依赖硬解码，如果硬解码不支持，就会导致软解码，软解码性能不好，也会导致浏览器崩溃。
+如果视频是`H265`的，因为其本身的高压缩率，解码端非常依赖硬解码，如果硬解码不支持，就会导致软解码，软解码性能不好，也会导致浏览器崩溃。
 
 > pro 版本可以完美的支持到1080p的视频，甚至更高分辨率的视频，支持硬解码+软解码。
 
@@ -852,15 +903,52 @@ https://blog.csdn.net/nbwgl/article/details/122652003
 
 > pro 支持通过配置参数，只使用mse解码，不启动worker。 见
 
-#### node 启动
+#### node 启动(解决方案)
 通过 jessibuca-vue-demo 中的 preview 进行查看。
 
 https://github.com/bosscheng/jessibuca-vue-demo/blob/v3/preview/preview.js
 
-#### nginx 配置
+#### nginx 配置(解决方案)
 
 待补充
 
+
+### Failed to construct 'Worker': Script at 'https://a.com' cannot be accessed from origin 'https://b.com'
+
+这个错误是由于`同源策略（Same-Origin Policy）`引起的。具体来说，浏览器禁止从一个源（在这个例子中是 https://a.com）访问或加载另一个源（在这个例子中是`https://b.com`）的资源。
+
+同源策略：
+
+> 同源策略是一种浏览器的安全机制，用于防止一个源中的文档或脚本对另一个源中的资源进行不安全的访问。它确保了一个网页只能请求与其同源的资源，避免了潜在的跨站脚本攻击（XSS）。
+
+源的定义：
+
+> 一个源是由协议（protocol）如：`http 或者 https` 、主机（host）如：`localhost 或者 test.com` 和 端口（port）如：`3000和4000` 组成的。如果两个 URL 的协议、主机和端口都相同，那么它们就是同源的。
+
+解决方案：
+
+> CORS（跨域资源共享）是一种机制，它使用额外的 HTTP 头来告诉浏览器，允许一个源（域）的 Web 应用访问另一个源（域）的资源。
+
+例如 node 服务端代码：
+
+```js
+
+const express = require('express');
+const app = express();
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*'); // 允许所有的源，生产环境建议设置指定的源
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
+
+
+app.listen(80, () => {
+  console.log('Server is running on port 80');
+});
+
+```
 
 ### 对于出现渲染页面直接倒过来180度的解决方案
 
@@ -907,6 +995,8 @@ Access to fetch at 'http://192.168.0.2:8000/live/test.flv' from origin 'http://j
 > 将Block insecure private network requests配置禁用掉（Disable）。但是一定要注意，修改了配置后必须点击Chrome此时在右下角出现的“重启”（Restart）按钮才能生效。自己主动关闭浏览器全部页面再打开是不会触发Chrome更新配置的。
 
 ###  报错：jessibuca need container option
+
+这是由于初始化播放器的时候，`container` 的 `dom` 还没有生成,这个和生命周期有关系。
 
 #### vue 项目中使用
 不能在create 生命周期里面初始化jessibuca，因为这个时候，DOM 还没有生成，所以会报错。
@@ -1173,47 +1263,6 @@ const jessibuca = new JessibucaPro({
 > 用的cdn方式就可以了。
 
 
-### gzip压缩jessibuca.js 和decoder.js 和decoder.wasm 文件
-
-linux(mac)
-#### jessibuca.js
-```
-gzip jessibuca.js
-mv jessibuca.js.gz jessibuca.js
-```
-
-#### decoder.js
-
-```
-gzip 和decoder.js
-mv 和decoder.js.gz 和decoder.js
-```
-
-#### decoder.wasm
-
-```
-gzip 和decoder.wasm
-mv 和decoder.wasm.gz 和decoder.wasm
-```
-
-windows 系统压缩方法
-
-下载 gzip.exe
-
-[http://gnuwin32.sourceforge.net/downlinks/gzip-bin-zip.php](http://gnuwin32.sourceforge.net/downlinks/gzip-bin-zip.php)
-
-解压后，将 `jessibuca.js` 和 `decoder.js`和 `decoder.wasm` 文件拖到 gzip.exe上，文件就压缩好了，也需要去掉.gz后缀
-
-<img src="/public/img/gzip.png">
-
-
-### Brotli压缩jessibuca.js 和decoder.js 和decoder.wasm 文件
-
-可以看下解决方案
-[https://www.cnblogs.com/densen2014/p/16120778.html](https://www.cnblogs.com/densen2014/p/16120778.html)
-
-<img src="/public/img/br.png">
-
 
 
 ### aborted(rangeError:webassembly.instance():out of memory: cannot allocate wasm memory for new instance) 错误
@@ -1276,30 +1325,6 @@ WebGL的CONTEXT_LOST_WEBGL错误通常表示WebGL上下文（context）已经丢
 WebGL是一种在Web浏览器中渲染3D图形的技术，需要高帧率和持续更新来保持流畅的体验。如果WebGL上下文被暂停或挂起，它就无法满足要求的性能需求，因此浏览器会释放WebGL上下文，以回收资源和内存。
 
 
-### 播放的时候直接就有声音
-
-> 播放器默认的情况下，是静音播放的（浏览器规范）。
-
-不过可以尝试通过配置`isNotMute:true` 参数尝试取消静音播放。
-
-> 如果是程序触发的自动播放播放器，是不会有声音的，需要用户手动触发才会有声音。
-
-程序里面可以检查下播放器的状态，如果是静音状态，就需要需要出一个ui交互，让用户手动恢复声音播放。
-
-```js
-var result = jessibuca.isMute()
-console.log(result) // true
-if(result){
-
-    // 这里可以出一个ui交互，让用户手动恢复声音播放
-}
-```
-
-通过调用方法：`audioResume()`来恢复播放器的声音。
-
-```js
-jessibuca.audioResume()
-```
 
 ### video 标签报 PIPELINE_ERROR_DECODE 错误
 
@@ -1478,6 +1503,7 @@ delayTimeout 是指在`播放器播放过程中`，如果在`delayTimeout`时间
 
 ### 关于移动端（H5）切换网络的时候，播放器会触发什么事件。
 
+
 #### http请求
 会触发`fetchError`事件
 
@@ -1487,6 +1513,8 @@ jessibuca.on("fetchError", function (msg) {
     console.log('fetchError:', msg)
 })
 ```
+
+> pro 版本只需要监听一个事件 playFailedAndPaused 即可
 
 
 #### websocket请求
@@ -1499,6 +1527,9 @@ jessibuca.on("websocketError", function (msg) {
 console.log('websocketError:', msg)
 })
 ```
+
+> pro 版本只需要监听一个事件 playFailedAndPaused 即可
+
 
 #### 小结
 
@@ -1519,6 +1550,20 @@ jessibuca.on("error", function (error) {
 })
 
 ```
+
+
+> pro 版本只需要监听一个事件 playFailedAndPaused 即可
+
+```js
+
+jessibuca.on("playFailedAndPaused", function (msg) {
+    console.log('playFailedAndPaused:', msg)
+    // 直接重新播放失效地址。
+    jessibuca.play(url);
+})
+
+```
+
 
 ### 浏览器报：Uncaught RuntimeError: memory access out of bounds
 
@@ -2486,39 +2531,54 @@ jessibuca.on('start', () => {
 > 如果想要如果想无限次重试，可以设置heartTimeoutReplayTimes为-1
 
 
-### 播放的时候解除静音
+### 播放的时候就有声音
 
-播放器默认播放的时候，是静音播放的。所以如果想播放的时候解除静音，则需要配置`isNotMute:true`就可以了。
+分两种业务场景
 
-> 如果是程序触发的自动播放播放器，是不会有声音的，需要用户手动触发才会有声音。
+1.希望页面打开的时候，就自动播放，并且带有声音
+2.通过交互点击事件打开播放器，带有声音
+
+#### 页面打开，刷新的时候页面的时候，就需要自动播放，并且带有声音
+
+
+> 如果是通过点击链接、脚本操作等方式加载页面，可以通过js程序去掉静音。
+
+> “重新加载”按钮或者location.reload()方法加载,通过“前进”或“后退”按钮加载 这种是不会带有声音播放的。
+
+
+目前推荐的方案是：借助`performance.navigation.type 判断是否满足加载声音的条件`。来实现自动播放(带声音)
+
+```js
+ jessibuca.on('start', () => {
+    /**
+     * 0：网页通过点击链接、地址栏输入、表单提交、脚本操作等方式加载，相当于常数performance.navigation.TYPE_NAVIGATE。
+     * 1：网页通过“重新加载”按钮或者location.reload()方法加载，相当于常数performance.navigation.TYPE_RELOAD。
+     * 2：网页通过“前进”或“后退”按钮加载，相当于常数performance.navigation.TYPE_BACK_FORWARD。
+     * 255：任何其他来源的加载，相当于常数performance.navigation.TYPE_RESERVED。
+     */
+    if (performance.navigation.type === 0) {
+        jessibuca.cancelMute();
+    }
+})
+```
+
+可以监听点击事件来解除静音
+
+```js
+
+$container.addEventListener('click', function () {
+    jessibuca.cancelMute()
+}, false)
+```
 
 可以看下demo:[demo-auto-play.html](https://jessibuca.com/pro/demo-auto-play.html)
 
-### 苹果手机默认没有声音。
+#### 通过交互点击事件打开播放器，带有声音
 
-在设置`isNotMute:true` 在苹果的手机端默认是没有声音的。
+播放器默认播放的时候，是静音播放的。所以如果想播放的时候解除静音，则需要配置`isNotMute:true`就可以了。
 
-> iPhone，chrome等要求自动播放时，音频必须静音，需要由一个真实的用户交互操作来恢复，不能使用代码。
+可以看下demo:[demo-play-not-mute.html](https://jessibuca.com/pro/demo-play-not-mute.html)
 
-
-程序里面可以检查下播放器的状态，如果是静音状态，就需要需要出一个ui交互，让用户手动恢复声音播放。
-
-```js
-var result = jessibuca.isMute()
-console.log(result) // true
-if (result) {
-
-    // 这里可以出一个ui交互，让用户手动恢复声音播放
-}
-```
-
-可以结合`audioResume()`方法。
-
-```js
-jessibuca.audioResume();
-```
-
-见demo:[demo-auto-play.html](https://jessibuca.com/pro/demo-auto-play.html)
 
 ### 关于初始化webgl失败的可能性
 
@@ -2724,13 +2784,6 @@ jessibuca.destroy().then(()=>{
 
 检查：f12 打开控制台，然后切换到network tab选项卡，然后找到`jessibuca.js`文件，看下`response`返回的内容是否是正常的js文件。
 
-
-### 关于WASM压缩优化
-
-压缩是有效提高下载速度的方式，浏览器目前支持的主流压缩格式包括 `gzip` 和 `brotli` 两种。针对wasm包的压缩，`brotli` 算法有显著的优势。
-
-- gzip： 一种流行的压缩文件格式，能有效的降低文件大小。
-- brotli： Google 在 2015 年推出的一种压缩方式，相对于 Gzip 约有 20% 的压缩比提升。
 
 
 
