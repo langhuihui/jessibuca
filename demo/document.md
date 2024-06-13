@@ -76,7 +76,7 @@ this.$options.jessibuca = new Jessibuca({
 
 因为 项目中用到了`wasm`， node_modules  对于`wasm` 支持度不友好。所以暂不支持。
 
-### 其他解决方案
+#### 其他解决方案
 可以考虑下把wasm文件编译成base64，然后通过打包合并到js文件中，这样就可以通过npm安装了。
 
 > 但是会增加js的文件大小，所以酌情考虑
@@ -304,7 +304,7 @@ wasmBinaryFile = 'https://cdn.com/decoder.wasm';
 3. pro 可以监听到网络延迟，可以等到延迟达到一个阈值，断开连接，重新请求地址（不推荐使用，依然解决不了延迟问题）。
 
 
-### 延迟时间
+### 播放器的延迟时间
 
 实际测试 videoBuffer设置为100 毫秒，实测延迟300-400毫秒。低于1秒，达到毫秒级低延迟。
 
@@ -475,10 +475,10 @@ https://caniuse.com/?search=OffscreenCanvas
 
 ### 多个iframe一起播放视频，如果有一个视频地址播放不了会导致其他地址也无法播放
 
-#### QUESTION
-多个iframe一起播放视频，如果有一个视频地址播放不了会导致其他地址也无法播放。
+#### 问题
+多个iframe一起播放视频，如果有一个视频地址播放不了会导致其他地址也无法播放(请求被堵塞住了)。
 
-#### ANSWER
+#### 解决方案
 
 1. m7s ui 里面 我也是setTimeout 0去渲染的。或者建议你用Promise.resolve的形式去播放。
 2. 如果是http或者ws接口，可以尝试换成https或者wss接口。
@@ -556,9 +556,17 @@ https://github.com/langhuihui/jessibuca/issues/126
 
 ### 如果只需要播放音频数据
 
-> jessibuca pro 版本已经支持
+> jessibuca pro 已经有了单独的音频播放器，支持播放音频数据
 
-可以测试看下 http://jessibuca.monibuca.com/pro-demo.html#only-audio
+音频直播流（支持移动端（平板端）息屏和后台播放）
+
+https
+
+https://jessibuca.com/pro/audio-player-demo.html
+
+http
+
+http://jessibuca.monibuca.com/pro/audio-player-demo.html
 
 
 ### 创建单个视频播放卡顿
@@ -1809,6 +1817,19 @@ IOS 全屏效果
 
 参考demo: http://jessibuca.monibuca.com/mobile-fullscreen.html
 
+#### IOS实现全屏效果
+
+1. 业务层自己修改 `container`的宽高 + `resize()` 方法实现全屏效果
+
+> 缺点：没法使用到播放器提供的底部控制栏，因为控制栏不会跟着变化。
+
+2. 参数`useWebFullScreen`配置为`true`
+
+> 播放器会检测当前环境是否支持系统级别的全屏方法，如果不支持，则会使用web全屏
+
+> `jessibucaPro播放器`内部会自动判断，根据当前环境是否支持系统级别的全屏方法，来降级选择使用web全屏。
+
+
 
 ### Android端webview全屏调用无效问题
 
@@ -2123,18 +2144,6 @@ window.addEventListener('orientationchange', function () {
     }
 })
 ```
-
-### 关于IOS实现全屏效果
-
-1. 业务层自己修改 `container`的宽高 + `resize()` 方法实现全屏效果
-
-> 缺点：没法使用到播放器提供的底部控制栏，因为控制栏不会跟着变化。
-
-2. 参数`useWebFullScreen`配置为`true`
-
-> 播放器会检测当前环境是否支持系统级别的全屏方法，如果不支持，则会使用web全屏
-
-> `jessibucaPro播放器`内部会自动判断，根据当前环境是否支持系统级别的全屏方法，来降级选择使用web全屏。
 
 ### RuntimeError： Aborted(compileError:Webassembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 44 4f @+0)
 
@@ -2510,13 +2519,6 @@ jessibuca.audioResume();
 ```
 
 见demo:[demo-auto-play.html](https://jessibuca.com/pro/demo-auto-play.html)
-
-### IOS 手机端全屏
-
-> 由于IOS不支持系统级别的全屏方法，所以只能降级到web全屏。
-
-配置 `useWebFullScreen:true` ,可以实现IOS手机端全屏。
-
 
 ### 关于初始化webgl失败的可能性
 

@@ -7,7 +7,7 @@ import {
     fpsStatus,
     initPlayTimes,
     isEmpty, isFalse,
-    isFullScreen, isMobile,
+    isFullScreen, isMobile,isPad,
     isNotEmpty,
     now, supportMediaStreamTrack,
     supportMSE,
