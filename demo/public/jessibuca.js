@@ -49,6 +49,7 @@
 	  mp4: 'mp4',
 	  webm: 'webm'
 	};
+	const CONTAINER_DATA_SET_KEY = 'jessibuca'; // default player options
 
 	const DEFAULT_PLAYER_OPTIONS = {
 	  videoBuffer: 1000,
@@ -726,6 +727,9 @@
 	function isMobile() {
 	  return /iphone|ipod|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase());
 	}
+	function isPad() {
+	  return /ipad|android(?!.*mobile)|tablet|kindle|silk/i.test(window.navigator.userAgent.toLowerCase());
+	}
 	function isAndroid() {
 	  const UA = window.navigator.userAgent.toLowerCase();
 	  return /android/i.test(UA);
@@ -733,6 +737,13 @@
 
 	function supportWCS() {
 	  return "VideoEncoder" in window;
+	}
+	function uuid16() {
+	  return 'xxxxxxxxxxxx4xxx'.replace(/[xy]/g, function (c) {
+	    var r = Math.random() * 16 | 0,
+	        v = c == 'x' ? r : r & 0x3 | 0x8;
+	    return v.toString(16);
+	  });
 	}
 	function formatVideoDecoderConfigure(avcC) {
 	  let codecArray = avcC.subarray(1, 4);
@@ -962,6 +973,42 @@
 	  arrayBuffer.set(tmp, 0);
 	  arrayBuffer.set(oneNALBuffer, tmp.length);
 	  return arrayBuffer;
+	}
+	function isFalse(value) {
+	  return value !== true && value !== 'true';
+	}
+	function getElementDataset(element, key) {
+	  if (!element) {
+	    return '';
+	  }
+
+	  if (element.dataset) {
+	    return element.dataset[key];
+	  }
+
+	  return element.getAttribute('data-' + key);
+	}
+	function setElementDataset(element, key, value) {
+	  if (!element) {
+	    return;
+	  }
+
+	  if (element.dataset) {
+	    element.dataset[key] = value;
+	  } else {
+	    element.setAttribute('data-' + key, value);
+	  }
+	}
+	function removeElementDataset(element, key) {
+	  if (!element) {
+	    return;
+	  }
+
+	  if (element.dataset) {
+	    delete element.dataset[key];
+	  } else {
+	    element.removeAttribute('data-' + key);
+	  }
 	}
 
 	var events$1 = (player => {
@@ -11822,14 +11869,19 @@
 
 	    this._opt.forceNoOffscreen = true;
 
-	    if (isMobile()) {
+	    if (isMobile() || isPad()) {
 	      this.debug.log('Player', 'isMobile and set _opt.controlAutoHide false');
 	      this._opt.controlAutoHide = false;
+	    }
 
-	      if (screenfull.isEnabled && this._opt.useWebFullScreen) {
-	        this.debug.log('Player', 'screenfull.isEnabled is true and _opt.useWebFullScreen is true , set _opt.useWebFullScreen false');
-	        this._opt.useWebFullScreen = false;
-	      }
+	    if (screenfull.isEnabled && this._opt.useWebFullScreen) {
+	      this.debug.log('Player', 'screenfull.isEnabled is true and _opt.useWebFullScreen is true , set _opt.useWebFullScreen false');
+	      this._opt.useWebFullScreen = false;
+	    }
+
+	    if (isFalse(screenfull.isEnabled) && isFalse(this._opt.useWebFullScreen)) {
+	      this.debug.log('Player', 'screenfull.isEnabled is false and _opt.useWebFullScreen is false , set _opt.useWebFullScreen true');
+	      this._opt.useWebFullScreen = true;
 	    } //
 
 
@@ -12218,7 +12270,9 @@
 
 	      if (!this.decoderWorker && !this._onlyMseOrWcsVideo()) {
 	        this.decoderWorker = new DecoderWorker(this);
+	        this.debug.log('Player', 'waiting decoderWorker init');
 	        this.once(EVENTS.decoderWorkerInit, () => {
+	          this.debug.log('Player', 'decoderWorker init success');
 	          resolve();
 	        });
 	      } else {
@@ -12672,11 +12726,15 @@
 
 	    if (_opt.videoBuffer >= _opt.heartTimeout) {
 	      throw new Error(`Jessibuca videoBuffer ${_opt.videoBuffer}s must be less than heartTimeout ${_opt.heartTimeout}s`);
+	    }
+
+	    if (this._checkHasCreated($container)) {
+	      throw new Error(`Jessibuca container has been created and can not be created again`, $container);
 	    } // videoBuffer set too long
 
 
 	    if (_opt.videoBuffer > 10) {
-	      console.warn('JbPro', `videoBuffer ${_opt.videoBuffer}s is too long, will black screen for ${_opt.videoBuffer}s , it is recommended to set it to less than 10s`);
+	      console.warn('Jessibuca', `videoBuffer ${_opt.videoBuffer}s is too long, will black screen for ${_opt.videoBuffer}s , it is recommended to set it to less than 10s`);
 	    }
 
 	    if (!$container.classList) {
@@ -12684,6 +12742,7 @@
 	    }
 
 	    $container.classList.add('jessibuca-container');
+	    setElementDataset($container, CONTAINER_DATA_SET_KEY, uuid16());
 	    delete _opt.container; // 禁用离屏渲染
 
 	    _opt.forceNoOffscreen = true; // 移动端不支持自动关闭控制栏
@@ -12712,6 +12771,7 @@
 	    this.$container = $container;
 	    this._loadingTimeoutReplayTimes = 0;
 	    this._heartTimeoutReplayTimes = 0;
+	    this._destroyed = false;
 	    this.events = new Events(this);
 	    this.debug = new Debug(this);
 
@@ -12723,6 +12783,8 @@
 
 
 	  async destroy() {
+	    this._destroyed = true;
+
 	    if (this.events) {
 	      this.events.destroy();
 	      this.events = null;
@@ -12733,7 +12795,13 @@
 	      this.player = null;
 	    }
 
-	    this.$container = null;
+	    if (this.$container) {
+	      this.$container.classList.remove('jessibuca-container');
+	      this.$container.classList.remove('jessibuca-fullscreen-web');
+	      removeElementDataset(this.$container, CONTAINER_DATA_SET_KEY);
+	      this.$container = null;
+	    }
+
 	    this._opt = null;
 	    this._loadingTimeoutReplayTimes = 0;
 	    this._heartTimeoutReplayTimes = 0;
@@ -12768,6 +12836,15 @@
 	        this.emit(key, value);
 	      });
 	    });
+	  }
+	  /**
+	   * 是否销毁
+	   * @returns {boolean}
+	   */
+
+
+	  isDestroyed() {
+	    return this._destroyed;
 	  }
 	  /**
 	   * 是否开启控制台调试打印
@@ -13448,6 +13525,17 @@
 
 	  isRecording() {
 	    return this.player.recorder.recording;
+	  }
+
+	  _checkHasCreated(element) {
+	    if (!element) return false;
+	    const gbProV = getElementDataset(element, CONTAINER_DATA_SET_KEY);
+
+	    if (gbProV) {
+	      return true;
+	    }
+
+	    return false;
 	  }
 
 	}

@@ -626,3 +626,38 @@ export function isTrue(value) {
 export function isFalse(value) {
     return value !== true && value !== 'true';
 }
+
+export function getElementDataset(element, key) {
+    if (!element) {
+        return '';
+    }
+
+    if (element.dataset) {
+        return element.dataset[key];
+    }
+    return element.getAttribute('data-' + key);
+}
+
+export function setElementDataset(element, key, value) {
+    if (!element) {
+        return;
+    }
+
+    if (element.dataset) {
+        element.dataset[key] = value;
+    } else {
+        element.setAttribute('data-' + key, value);
+    }
+}
+
+export function removeElementDataset(element, key) {
+    if (!element) {
+        return;
+    }
+
+    if (element.dataset) {
+        delete element.dataset[key];
+    } else {
+        element.removeAttribute('data-' + key);
+    }
+}

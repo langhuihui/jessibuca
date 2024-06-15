@@ -1,7 +1,24 @@
 import Player from './player';
 import Events from "./utils/events";
-import {DEMUX_TYPE, EVENTS, EVENTS_ERROR, JESSIBUCA_EVENTS, PLAYER_PLAY_PROTOCOL, SCALE_MODE_TYPE} from "./constant";
-import {isEmpty, isMobile, isNotEmpty, supportWCS, uuid16} from "./utils";
+import {
+    CONTAINER_DATA_SET_KEY,
+    DEMUX_TYPE,
+    EVENTS,
+    EVENTS_ERROR,
+    JESSIBUCA_EVENTS,
+    PLAYER_PLAY_PROTOCOL,
+    SCALE_MODE_TYPE
+} from "./constant";
+import {
+    getElementDataset,
+    isEmpty,
+    isMobile,
+    isNotEmpty,
+    removeElementDataset,
+    setElementDataset,
+    supportWCS,
+    uuid16
+} from "./utils";
 import Emitter from "./utils/emitter";
 import Debug from "./utils/debug";
 
@@ -36,9 +53,15 @@ class Jessibuca extends Emitter {
             return;
         }
 
+
+        if (this._checkHasCreated($container)) {
+            throw new Error(`Jessibuca container has been created and can not be created again`, $container);
+            return;
+        }
+
         // videoBuffer set too long
         if (_opt.videoBuffer > 10) {
-            console.warn('JbPro', `videoBuffer ${_opt.videoBuffer}s is too long, will black screen for ${_opt.videoBuffer}s , it is recommended to set it to less than 10s`);
+            console.warn('Jessibuca', `videoBuffer ${_opt.videoBuffer}s is too long, will black screen for ${_opt.videoBuffer}s , it is recommended to set it to less than 10s`);
         }
 
         if (!$container.classList) {
@@ -47,6 +70,7 @@ class Jessibuca extends Emitter {
         }
 
         $container.classList.add('jessibuca-container');
+        setElementDataset($container, CONTAINER_DATA_SET_KEY, uuid16());
 
         delete _opt.container;
 
@@ -78,6 +102,7 @@ class Jessibuca extends Emitter {
         this.$container = $container;
         this._loadingTimeoutReplayTimes = 0;
         this._heartTimeoutReplayTimes = 0;
+        this._destroyed = false;
         this.events = new Events(this);
         this.debug = new Debug(this);
         this._initPlayer($container, _opt);
@@ -87,6 +112,7 @@ class Jessibuca extends Emitter {
      *
      */
     async destroy() {
+        this._destroyed = true;
         if (this.events) {
             this.events.destroy();
             this.events = null;
@@ -96,7 +122,13 @@ class Jessibuca extends Emitter {
             await this.player.destroy();
             this.player = null;
         }
-        this.$container = null;
+        if(this.$container){
+            this.$container.classList.remove('jessibuca-container');
+            this.$container.classList.remove('jessibuca-fullscreen-web');
+            removeElementDataset(this.$container, CONTAINER_DATA_SET_KEY);
+            this.$container = null;
+        }
+
         this._opt = null;
         this._loadingTimeoutReplayTimes = 0;
         this._heartTimeoutReplayTimes = 0;
@@ -128,6 +160,14 @@ class Jessibuca extends Emitter {
                 this.emit(key, value)
             })
         })
+    }
+
+    /**
+     * 是否销毁
+     * @returns {boolean}
+     */
+    isDestroyed(){
+        return this._destroyed;
     }
 
     /**
@@ -756,6 +796,15 @@ class Jessibuca extends Emitter {
      */
     isRecording() {
         return this.player.recorder.recording;
+    }
+
+    _checkHasCreated(element){
+        if (!element) return false;
+        const gbProV = getElementDataset(element, CONTAINER_DATA_SET_KEY);
+        if (gbProV) {
+            return true;
+        }
+        return false;
     }
 
 

@@ -17,6 +17,8 @@ export const FILE_SUFFIX = {
 
 export const MEDIA_SOURCE_UPDATE_END_TIMEOUT = 10 * 1000
 
+export const CONTAINER_DATA_SET_KEY = 'jessibuca'
+
 
 // default player options
 export const DEFAULT_PLAYER_OPTIONS = {

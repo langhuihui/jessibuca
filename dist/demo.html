@@ -118,6 +118,7 @@
     var jessibuca = null;
 
     function create() {
+        jessibuca = null;
         jessibuca = new Jessibuca({
             container: $container,
             videoBuffer: 0.2, // 缓存时长
@@ -173,9 +174,13 @@
 
     $destroy.addEventListener('click', function () {
         if (jessibuca) {
-            jessibuca.destroy();
+            jessibuca.destroy().then(()=>{
+                create();
+            });
         }
-        create();
+        else {
+            create();
+        }
     })
 
 </script>
