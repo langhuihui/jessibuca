@@ -12,6 +12,11 @@ jessibuca API 文档
 -
 -
 <Rice/>
+
+## TIPS
+
+这是`开源版`的API文档，这是`开源版`的API文档，这是`开源版`的API文档（三遍），`PRO的API文档`请联系作者。
+
 ## Jessibuca(options)
 
 options 支持的参数有：
@@ -720,6 +725,33 @@ console.log(result) // true
 var result = jessibuca.isRecording()
 console.log(result) // true
 ```
+
+### toggleControlBar(isShow)
+
+- **用法**： 切换底部控制条 隐藏/显示
+- **参数**：
+    - `{boolean} isShow` 是否显示
+
+```js
+
+// 显示
+jessibuca.toggleControlBar(true)
+// 隐藏
+jessibuca.toggleControlBar(false)
+
+// 切换 隐藏/显示
+jessibuca.toggleControlBar()
+
+````
+
+### getControlBarShow()
+- **用法**： 获取底部控制条是否显示
+- **返回**：`{boolean}`
+
+```js
+const isShow = jessibuca.getControlBarShow()
+```
+
 
 ### on(event, callback)
 

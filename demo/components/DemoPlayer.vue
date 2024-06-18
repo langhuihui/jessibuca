@@ -60,6 +60,9 @@
                 /><span>wasm</span>
             </div>
             <div class="input">
+                <button @click="toggleControlBar">toggle控制条</button>
+            </div>
+            <div class="input">
                 <div>输入URL：</div>
                 <input
                     placeholder="支持ws-raw/ws-flv/http-flv协议"
@@ -434,6 +437,10 @@ export default {
         scaleChange() {
             this.$options.jessibuca.setScaleMode(this.scale);
         },
+
+        toggleControlBar() {
+            this.$options.jessibuca.toggleControlBar();
+        }
     },
 };
 </script>

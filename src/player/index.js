@@ -871,4 +871,34 @@ export default class Player extends Emitter {
         this.emit(EVENTS.error, errorType, message);
         this.emit(errorType, message);
     }
+
+    isControlBarShow() {
+        const hasControl = this._opt.hasControl;
+        const controlAutoHide = this._opt.controlAutoHide;
+
+        let result = hasControl && !controlAutoHide;
+
+        if (result) {
+            if (this.control) {
+                result = this.control.getBarIsShow();
+            }
+        }
+
+        return result;
+    }
+
+    getControlBarShow(){
+        let result = false;
+        if (this.control) {
+            result = this.control.getBarIsShow();
+        }
+        return result;
+    }
+
+    toggleControlBar(isShow) {
+        if (this.control) {
+            this.control.toggleBar(isShow);
+            this.resize();
+        }
+    }
 }

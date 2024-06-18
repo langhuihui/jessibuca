@@ -808,6 +808,27 @@ class Jessibuca extends Emitter {
     }
 
 
+    toggleControlBar(isShow) {
+        if (this.isDestroyed()) {
+            return;
+        }
+
+        if (this.player) {
+            this.player.toggleControlBar(isShow);
+        }
+    }
+
+    getControlBarShow() {
+        if (this.isDestroyed()) {
+            return false;
+        }
+        let result = false;
+        if (this.player) {
+            result = this.player.getControlBarShow();
+        }
+        return result;
+    }
+
 }
 
 

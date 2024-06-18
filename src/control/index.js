@@ -4,7 +4,7 @@ import property from './property';
 import events from './events';
 import './style.scss'
 import hotkey from "./hotkey";
-import {removeElement} from "../utils";
+import {getStyle, isBoolean, removeElement, setStyle} from "../utils";
 
 export default class Control {
     constructor(player) {
@@ -68,6 +68,11 @@ export default class Control {
             }
         }
 
+        if(this.player.$container){
+            this.player.$container.classList.remove('jessibuca-controls-show-auto-hide');
+            this.player.$container.classList.remove('jessibuca-controls-show');
+        }
+
         this.player.debug.log('control', 'destroy');
     }
 
@@ -89,5 +94,26 @@ export default class Control {
         }
     }
 
+    toggleBar(flag) {
+        if (this.$controls) {
+            if (!isBoolean(flag)) {
+                // flag = this.$controls.style.display === 'none';
+                flag = getStyle(this.$controls, 'display', false) === 'none';
+            }
 
+            if (flag) {
+                setStyle(this.$controls, 'display', 'flex');
+            } else {
+                setStyle(this.$controls, 'display', 'none');
+            }
+        }
+    }
+
+    getBarIsShow() {
+        let result = false;
+        if (this.$controls) {
+            result = getStyle(this.$controls, 'display', false) !== 'none';
+        }
+        return result;
+    }
 }

@@ -2785,8 +2785,25 @@ jessibuca.destroy().then(()=>{
 检查：f12 打开控制台，然后切换到network tab选项卡，然后找到`jessibuca.js`文件，看下`response`返回的内容是否是正常的js文件。
 
 
+### 播放器是否支持IPv6 播放地址
 
+播放器不限制播放的地址，只要是浏览器所在环境支持的地址，播放器都是支持的。
 
+> 前提得保证所在web页面环境能够正常访问IPv6地址，请求能够被响应。
+
+### Mixed Content: The page at 'https://jessibuca.com' was loaded over HTTPS, but requested an insecure resource 'http://xxx.com/xxx.flv'. This request has been blocked; the content must be served over HTTPS.
+
+这个错误是因为页面是https，但是请求的资源是http，浏览器不允许这种请求。
+
+解决方案：
+
+1. 使用 http://jessibuca.monibuca.com/ 地址 代替 https://jessibuca.com 地址
+
+同理，如果是http页面，请求的资源是https，也会报同样的错误。
+
+解决方案
+
+1. 使用 https://jessibuca.com 地址 代替 http://jessibuca.monibuca.com 地址
 
 ## 支持作者
 

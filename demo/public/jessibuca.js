@@ -1688,7 +1688,7 @@
 	    let width = this.player.width;
 	    let height = this.player.height;
 
-	    if (option.hasControl && !option.controlAutoHide) {
+	    if (this.player.isControlBarShow()) {
 	      if (isMobile() && this.player.fullscreen && option.useWebFullScreen) {
 	        width -= CONTROL_HEIGHT;
 	      } else {
@@ -1964,7 +1964,7 @@
 	    const option = this.player._opt;
 	    const rotate = option.rotate;
 
-	    if (option.hasControl && !option.controlAutoHide) {
+	    if (this.player.isControlBarShow()) {
 	      if (isMobile() && this.player.fullscreen && option.useWebFullScreen) {
 	        width -= CONTROL_HEIGHT;
 	      } else {
@@ -10876,6 +10876,11 @@
 	      }
 	    }
 
+	    if (this.player.$container) {
+	      this.player.$container.classList.remove('jessibuca-controls-show-auto-hide');
+	      this.player.$container.classList.remove('jessibuca-controls-show');
+	    }
+
 	    this.player.debug.log('control', 'destroy');
 	  }
 
@@ -10896,6 +10901,31 @@
 	      const padding = (playerHeight - playerWidth / canvasRatio) / 2;
 	      player.$container.style.padding = `${padding}px 0`;
 	    }
+	  }
+
+	  toggleBar(flag) {
+	    if (this.$controls) {
+	      if (!isBoolean(flag)) {
+	        // flag = this.$controls.style.display === 'none';
+	        flag = getStyle(this.$controls, 'display', false) === 'none';
+	      }
+
+	      if (flag) {
+	        setStyle(this.$controls, 'display', 'flex');
+	      } else {
+	        setStyle(this.$controls, 'display', 'none');
+	      }
+	    }
+	  }
+
+	  getBarIsShow() {
+	    let result = false;
+
+	    if (this.$controls) {
+	      result = getStyle(this.$controls, 'display', false) !== 'none';
+	    }
+
+	    return result;
 	  }
 
 	}
@@ -12703,6 +12733,37 @@
 	    this.emit(errorType, message);
 	  }
 
+	  isControlBarShow() {
+	    const hasControl = this._opt.hasControl;
+	    const controlAutoHide = this._opt.controlAutoHide;
+	    let result = hasControl && !controlAutoHide;
+
+	    if (result) {
+	      if (this.control) {
+	        result = this.control.getBarIsShow();
+	      }
+	    }
+
+	    return result;
+	  }
+
+	  getControlBarShow() {
+	    let result = false;
+
+	    if (this.control) {
+	      result = this.control.getBarIsShow();
+	    }
+
+	    return result;
+	  }
+
+	  toggleControlBar(isShow) {
+	    if (this.control) {
+	      this.control.toggleBar(isShow);
+	      this.resize();
+	    }
+	  }
+
 	}
 
 	class Jessibuca extends Emitter {
@@ -13536,6 +13597,30 @@
 	    }
 
 	    return false;
+	  }
+
+	  toggleControlBar(isShow) {
+	    if (this.isDestroyed()) {
+	      return;
+	    }
+
+	    if (this.player) {
+	      this.player.toggleControlBar(isShow);
+	    }
+	  }
+
+	  getControlBarShow() {
+	    if (this.isDestroyed()) {
+	      return false;
+	    }
+
+	    let result = false;
+
+	    if (this.player) {
+	      result = this.player.getControlBarShow();
+	    }
+
+	    return result;
 	  }
 
 	}

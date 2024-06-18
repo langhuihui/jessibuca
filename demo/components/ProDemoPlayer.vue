@@ -255,6 +255,9 @@
                 </div>
             </div>
             <div class="input">
+                <button @click="toggleControlBar">toggle控制条</button>
+            </div>
+            <div class="input">
                 <div>输入URL：</div>
                 <input
                     placeholder="支持 hls/ws-raw/ws-flv/http-flv/fmp4/mpeg-ts/webrtc/Aliyun-rtc/裸流/等协议"
@@ -1340,7 +1343,11 @@ export default {
             }
 
             jessibuca.clearContentToCanvas();
-        }
+        },
+
+        toggleControlBar(){
+            this.$options.jessibuca.toggleControlBar();
+        },
     },
 };
 </script>

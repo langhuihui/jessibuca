@@ -215,7 +215,7 @@ export default class VideoLoader extends CommonLoader {
         let height = this.player.height;
         const option = this.player._opt;
         const rotate = option.rotate;
-        if (option.hasControl && !option.controlAutoHide) {
+        if (this.player.isControlBarShow()) {
             if (isMobile() && this.player.fullscreen && option.useWebFullScreen) {
                 width -= CONTROL_HEIGHT;
             } else {
