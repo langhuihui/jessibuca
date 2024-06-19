@@ -102,9 +102,16 @@
             </div>
         </div>
         <div class="input">
-            电子放大开关：
-            <button onclick="toggleZoom('open')">打开电子放大</button>
-            <button onclick="toggleZoom('close')">关闭电子放大</button>
+            <div>
+                电子放大开关：
+                <button onclick="toggleZoom('open')">打开电子放大</button>
+                <button onclick="toggleZoom('close')">关闭电子放大</button>
+                <button onclick="getCurrentZoomIndex()">获取当前电子放大档位</button>
+                <span> | </span>
+                电子放大最大倍数：
+                <input type="number" id="zoomMaxScale" value="5" style="width: 50px"> <button onclick="replay()">重播</button>
+            </div>
+
         </div>
 
         <div class="input">
@@ -142,6 +149,7 @@
     var $renderDom = document.getElementById('renderDom');
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
     var $demuxUseWorker = document.getElementById('demuxUseWorker');
+    var $zoomMaxScale = document.getElementById('zoomMaxScale');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -187,6 +195,7 @@
             useCanvasRender: $renderDom.value === 'canvas',
             useWebGPU: $isUseWebGPU.value === 'webgpu',
             demuxUseWorker: $demuxUseWorker.checked === true,
+            zoomMaxScale: Number($zoomMaxScale.value),
         },);
 
         jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
@@ -320,6 +329,13 @@
             } else {
                 jessibuca.closeZoom();
             }
+        }
+    }
+
+    function getCurrentZoomIndex(){
+        if(jessibuca){
+            const zoomIndex = jessibuca.getCurrentZoomIndex();
+            console.log('当前电子放大档位：', zoomIndex);
         }
     }
 </script>
