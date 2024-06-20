@@ -2808,6 +2808,8 @@ jessibuca.destroy().then(()=>{
 
 > pc 和 安卓的环境下播放正常（走的是硬解码）。
 
+> 如果安卓下面走的软解码，也会出现黑屏的情况。
+
 > IOS 现状就是黑屏，然后vconsole也没有啥报错信息。
 
 大概率是[wasm 格式返回错误 Incorrect response MIME type. Expected 'application/wasm'. falling back to arraybuffer instantiation 错误](/document.html#wasm-格式返回错误-incorrect-response-mime-type-expected-application-wasm-falling-back-to-arraybuffer-instantiation-错误) 这个原因导致的。

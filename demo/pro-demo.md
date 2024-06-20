@@ -129,9 +129,9 @@ vue2:[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue2](https://git
 [http://jessibuca.monibuca.com/pro/6x7-wcs-demo.html](http://jessibuca.monibuca.com/pro/6x7-wcs-demo.html)
 
 
-## 回放(录像)流Demo(支持mse、wcs、simd解码)
+## 国标回放(录像)流Demo(支持mse、wcs、simd解码)
 
-### TF卡流（录像流）- 24h时间轴
+### 国标TF卡流（录像流）- 24h时间轴
 ------
 #### https
 [https://jessibuca.com/pro/playback-demo.html](https://jessibuca.com/pro/playback-demo.html)
@@ -139,7 +139,7 @@ vue2:[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue2](https://git
 #### http
 [http://jessibuca.monibuca.com/pro/playback-demo.html](http://jessibuca.monibuca.com/pro/playback-demo.html)
 
-### TF卡流（录像流）- 固定时长时间轴
+### 国标TF卡流（录像流）- 固定时长时间轴
 ------
 #### https
 [https://jessibuca.com/pro/playback-simple-demo.html](https://jessibuca.com/pro/playback-simple-demo.html)
