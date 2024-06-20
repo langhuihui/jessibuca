@@ -2743,8 +2743,6 @@ https://github.com/StaZhu/enable-chromium-hevc-hardware-decoding/blob/main/READM
 部分硬解有 BUG，导致被禁用 `D3D11VideoDecoder`，这种情况没什么办法解决，只能软解。
 
 
-
-
 ### JbFro container has been created and can not be created again
 
 这个错误的原因通常是调用`destroy()` 方法不对导致的。
@@ -2804,6 +2802,16 @@ jessibuca.destroy().then(()=>{
 解决方案
 
 1. 使用 https://jessibuca.com 地址 代替 http://jessibuca.monibuca.com 地址
+
+
+### webview环境下，PC和安卓能够正常播放，IOS环境下播放器黑屏无法播放
+
+> pc 和 安卓的环境下播放正常（走的是硬解码）。
+
+> IOS 现状就是黑屏，然后vconsole也没有啥报错信息。
+
+大概率是[wasm 格式返回错误 Incorrect response MIME type. Expected 'application/wasm'. falling back to arraybuffer instantiation 错误](/document.html#wasm-格式返回错误-incorrect-response-mime-type-expected-application-wasm-falling-back-to-arraybuffer-instantiation-错误) 这个原因导致的。
+
 
 ## 支持作者
 
