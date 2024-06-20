@@ -13,7 +13,7 @@
 
 # 开源版 升级到 Pro 版本
 
-## 替换文件
+## 替换文件 （软解码+硬解码）
 
 > 只需要无脑的将`pro/js`下面的所有js和wasm文件替换到原本的开源版`js`目录下即可。
 
@@ -50,7 +50,23 @@
 
 > `jessibuca-pro.js` 与`jessibuca-pro-multi.js`只需要引用一个即可（不需要两个同时引用）。
 
-> `decoder-pro-simd.js`是simd解码器（适用于高分辨率解码）
+> `decoder-pro-simd.js`是simd解码器（适用于高分辨率解码）（） （）
+
+
+## 替换文件（只使用硬解码）
+
+需要将原本开源版的
+
+- jessibuca.js
+- decoder.js
+- decoder.wasm
+
+替换成
+
+- jessibuca-pro-demo.js 或 jessibuca-pro-multi-demo.js   // 主文件(需要通过script标签引入)
+- decoder-pro-hard-not-wasm.hs // worker硬解码解封装(这个库无需引入,播放器内部会自己引入)
+
+
 
 ## js以及decoder的配置
 

@@ -434,6 +434,17 @@ vue2:[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue2](https://git
 文件：`demo-file.html`
 
 
+### 只使用硬解码（禁用软解码）
+------
+#### https
+[https://jessibuca.com/pro/demo-hard-decode.html](https://jessibuca.com/pro/demo-hard-decode.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-hard-decode.html](http://jessibuca.monibuca.com/pro/demo-hard-decode.html)
+
+
+
+
 ## AI
 
 ### 人脸识别

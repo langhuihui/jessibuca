@@ -6,13 +6,13 @@
     <meta http-equiv="origin-trial"
           content="AhQB+uNRI7lww30oPK+0ZcGotIvuoHJL+NkkWOhqDdooY6+xnuiYmZli2SwlH1vkrKdB5WxMpsv5KRc/q9zFswoAAAB3eyJvcmlnaW4iOiJodHRwczovL2plc3NpYnVjYS5jb206NDQzIiwiZmVhdHVyZSI6IlVucmVzdHJpY3RlZFNoYXJlZEFycmF5QnVmZmVyIiwiZXhwaXJ5IjoxNzA5ODU1OTk5LCJpc1N1YmRvbWFpbiI6dHJ1ZX0=">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Jessica demo</title>
+    <title>Jessica pro hard demo</title>
     <link rel="stylesheet" href="./demo.css">
     <script src="./vconsole.js"></script>
     <script src="./js/jessibuca-pro-demo.js"></script>
     <style>
         .container-shell:before {
-            content: "jessibuca pro demo player";
+            content: "jessibuca pro hard demo player";
         }
     </style>
 </head>
@@ -53,14 +53,17 @@
             </div>
         </div>
         <div class="input">
+            <div style="color: yellow">
+                强制硬解码，不使用软解码（如果电脑不支持硬解码，就直接暂停播放）
+            </div>
+        </div>
+        <div class="input">
             <div><input
-                disabled
-                type="checkbox"
                 checked
+                type="checkbox"
                 id="useMSE"
             /><span>MediaSource</span>
                 <input
-                    disabled
                     type="checkbox"
                     id="useWCS"
                 /><span>Webcodec</span>
@@ -90,9 +93,9 @@
             </select>
 
             <span>canvas渲染技术：</span>
-            <select disabled id="isUseWebGPU" onchange="replay()">
-                <option value="webgl" selected>webgl</option>
-                <option value="webgpu">webgpu</option>
+            <select id="isUseWebGPU" onchange="replay()">
+                <option value="webgl">webgl</option>
+                <option value="webgpu" selected>webgpu</option>
             </select>
             <span id="supportWebgpu"></span>
         </div>
@@ -108,13 +111,13 @@
         <div class="input">
             <div>
                 <input
-                    disabled
+                    checked
                     onclick="replay()"
                     type="checkbox"
                     id="demuxUseWorker"
                 /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
                 <input
-                    disabled
+                    checked
                     onclick="replay()"
                     type="checkbox"
                     id="mseDecoderUseWorker"
@@ -181,6 +184,9 @@
     var forceNoOffscreen = true; //
     var jessibuca = null;
 
+    var isFirefox = (/firefox/i.test(window.navigator.userAgent.toLowerCase()));
+
+
     function create(options) {
         options = options || {}
 
@@ -196,6 +202,7 @@
             debugLevel: "debug",
             useMSE: $useMSE.checked === true,
             decoderErrorAutoWasm: false,
+            autoWasm: false, // 不降级到wasm解码
             useSIMD: $useSIMD.checked === true,
             useWCS: $useWCS.checked === true,
             useMThreading: $useSIMDMThreading.checked === true,
@@ -211,8 +218,7 @@
                 performance: showOperateBtns,
             },
             timeout: 10,
-
-            audioEngine: "worklet",
+            // audioEngine: "worklet",
             qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
@@ -222,32 +228,64 @@
             ptzMoreArrowShow: true,
             ptzApertureShow: true,
             ptzFocusShow: true,
+            isDropSameTimestampGop: false,
             useCanvasRender: $renderDom.value === 'canvas',
             useWebGPU: $isUseWebGPU.value === 'webgpu',
             demuxUseWorker: $demuxUseWorker.checked === true,
             controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
             // audioEngine:"worklet",
-            // isFlv: true
+            isFlv: true,
+            // mseDecodeAudio:false,
+            // wcsDecodeAudio:false,
+            // hasAudio: false,
             pauseAndNextPlayUseLastFrameShow: $replayUseLastFrameShow.checked === true,
             heartTimeoutReplayUseLastFrameShow: $replayUseLastFrameShow.checked === true,
             replayUseLastFrameShow: $replayUseLastFrameShow.checked === true, // 重播使用上一帧显示
             replayShowLoadingIcon: $replayShowLoadingIcon.checked === true,// 重播显示loading
-            mseDecoderUseWorker:$mseDecoderUseWorker.checked === true,
-
+            mseDecoderUseWorker: $mseDecoderUseWorker.checked === true,
+            isUseNewFullscreenWatermark: true,
+            mainThreadFetchUseWorker: false,
+            androidMobileFullscreenRotate: true,
+            // loadingTimeoutReplayTimes: -1, // 自动续连
+            // heartTimeoutReplayTimes: -1, // 自动续连
+            // hasAudio:false,
+            supportDblclickFullscreen: true,
+            // wasmPlayAudioUseVideoRender: true,
         },);
+
+
+        jessibuca.on('ptz', (arrow) => {
+            // console.log('ptz', arrow);
+        })
+
+        jessibuca.on('streamQualityChange', (value) => {
+            console.log('streamQualityChange', value);
+        })
+
+        jessibuca.on('timeUpdate', (value) => {
+            // console.log('timeUpdate', value);
+        })
 
         jessibuca.on('stats', (stats) => {
             // console.log('stats', stats);
             $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
         })
 
+        jessibuca.on('crashLog', (msg) => {
+            console.error('crashLog', msg);
+        })
+
         jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
             jessibuca.showErrorMessageTips('播放异常：' + error);
         })
 
-        jessibuca.on(JessibucaPro.EVENTS.crashLog,(log)=>{
-            console.error('crashLog',log)
-        })
+        // jessibuca.on(JessibucaPro.EVENTS.fullscreen, (flag) => {
+        //     if (flag) {
+        //         jessibuca.setRotate(90)
+        //     } else {
+        //         jessibuca.setRotate(0);
+        //     }
+        // })
 
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
@@ -276,6 +314,8 @@
             jessibuca.destroy().then(() => {
                 create(options);
                 play();
+            }).catch((e)=>{
+                console.error('destroy: ',e);
             });
         } else {
             create();
@@ -317,6 +357,9 @@
             $useWCS.checked = false
             $useWASM.checked = false
         }
+        else {
+            $useWCS.checked = true;
+        }
         replay();
     })
 
@@ -336,6 +379,9 @@
             $useMSE.checked = false
             $useSIMD.checked = false
             $useWASM.checked = false
+        }
+        else {
+            $useMSE.checked = true;
         }
         replay();
     })
