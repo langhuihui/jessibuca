@@ -1828,6 +1828,8 @@ useWCS:false
 
 每次都要全量替换`decoder.js` 和`decoder.wasm`，不能只替换其中一个。
 
+> 记得需要清除下浏览器缓存（f12-> Network Tab（网络） -> 勾选 Disable cache(禁用缓存) 选项 ），然后刷新页面
+
 
 ### 关于iframe 页面里面有jessibuca 播放器，点击全屏按钮报：fullscreen request error TypeError Disallowed by permissions policy 错误
 
@@ -2197,6 +2199,8 @@ window.addEventListener('orientationchange', function () {
 > decoder.js 和 decoder.wasm 胶水文件是一一对应的，不同版本的不能混在一起使用。
 
 如果发现这个错误，检查下是不是缓存原因导致的两个文件的版本没有一一对应上。如果不是，可以去官网或者github 上下载最新版本的jessibuca，全量替换更新下就行了。
+
+> 记得需要清除下浏览器缓存（f12-> Network Tab（网络） -> 勾选 Disable cache(禁用缓存) 选项 ），然后刷新页面
 
 
 ### WebRTC
