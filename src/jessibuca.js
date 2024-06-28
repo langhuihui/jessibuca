@@ -122,7 +122,7 @@ class Jessibuca extends Emitter {
             await this.player.destroy();
             this.player = null;
         }
-        if(this.$container){
+        if (this.$container) {
             this.$container.classList.remove('jessibuca-container');
             this.$container.classList.remove('jessibuca-fullscreen-web');
             removeElementDataset(this.$container, CONTAINER_DATA_SET_KEY);
@@ -166,7 +166,7 @@ class Jessibuca extends Emitter {
      * 是否销毁
      * @returns {boolean}
      */
-    isDestroyed(){
+    isDestroyed() {
         return this._destroyed;
     }
 
@@ -272,11 +272,9 @@ class Jessibuca extends Emitter {
     /**
      *
      */
-    close() {
-        // clear url
-        this._opt.url = '';
-        this._opt.playOptions = {};
-        return this.player.close();
+    async close() {
+        await this.destroy();
+        return true;
     }
 
 
@@ -798,7 +796,7 @@ class Jessibuca extends Emitter {
         return this.player.recorder.recording;
     }
 
-    _checkHasCreated(element){
+    _checkHasCreated(element) {
         if (!element) return false;
         const gbProV = getElementDataset(element, CONTAINER_DATA_SET_KEY);
         if (gbProV) {

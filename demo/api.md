@@ -88,7 +88,7 @@ worker地址
 
 
 
-### forceNoOffscreen
+### forceNoOffscreen（废弃）
 
 - **类型**：`boolean`
 - **默认值**：true
@@ -98,6 +98,9 @@ worker地址
 
 
 > 该特性是实验性特性，某些版本的浏览器会出现内存无缘无故变大的情况。谨慎使用。
+
+> 由于目前浏览器兼容性太差，会出现慕名奇妙的错误问题，目前播放器内部禁用离屏渲染。
+
 
 
 ### hiddenAutoPause
@@ -480,12 +483,22 @@ jessibuca.pause().then(() => {
 
 可以在pause 之后，再调用 `play()`方法就继续播放之前的流。
 
-### close()
+### close()（废弃）
 
 - **用法**： 关闭视频,不释放底层资源
+- **返回**：
+    - `{Promise}`
+
+废弃，推荐使用destroy()方法
+
+> 内部就是调用的destroy()方法
 
 ```js
-jessibuca.close();
+jessibuca.close().then(() => {
+    console.log('close success')
+}).catch((e) => {
+    console.log('close error', e);
+});
 ```
 
 ### destroy()
