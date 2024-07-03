@@ -2818,6 +2818,13 @@ jessibuca.destroy().then(()=>{
 
 大概率是[wasm 格式返回错误 Incorrect response MIME type. Expected 'application/wasm'. falling back to arraybuffer instantiation 错误](/document.html#wasm-格式返回错误-incorrect-response-mime-type-expected-application-wasm-falling-back-to-arraybuffer-instantiation-错误) 这个原因导致的。
 
+### 加载视频等待画面时长过长
+
+可能的原因：
+
+1. 检查下请求地址是否正常，是否有返回数据，以及相应的时长。
+2. 检查下首帧是否推送的I帧数据，如果没有I帧数据，会导致等待画面时长过长。
+
 
 ## 支持作者
 
