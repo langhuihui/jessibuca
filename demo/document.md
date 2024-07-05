@@ -2826,6 +2826,19 @@ jessibuca.destroy().then(()=>{
 2. 检查下首帧是否推送的I帧数据，如果没有I帧数据，会导致等待画面时长过长。
 
 
+### wasm 报："failed to asynchronously prepare wasm: Error: WebAssembly.Module doesn't parse at byte xxx: invalid opcode xxx, in function at index xxx" 异常
+
+完整的错误信息：
+
+> "failed to asynchronously prepare wasm: Error: WebAssembly.Module doesn't parse at byte xxx: invalid opcode xxx, in function at index xxx"
+> "Aborted(Error: WebAssembly.Module doesn't parse at byte xxx: invalid opcode xxx, in function at index xxx)
+
+Unhandled Promise Rejection: Error: Aborted (Error: WebAssembly.Module doesn't parse at byte 659: invalid opcode 192, in function at index101). Build with -sASSERTlONS for more info, (evaluating 'new WebAssembly,RuntimeErrorle)'
+
+
+
+
+
 ## 支持作者
 
 ### 第一作者
