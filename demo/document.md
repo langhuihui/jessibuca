@@ -1179,7 +1179,9 @@ AV1硬解目前仅限于AMD RX 6000系（除6500XT）、Nvidia 30系、Intel Arc
 2. 也可以直接在网上免费下载，两者都是一样的。
    HEVC视频拓展下载地址：https://www.free-codecs.com/hevc_video_extension_download.htm
    由于以前的bug已经修复，所以可以直接下载最新版的插件，选择x64版本的HEVC Video Extension 1.0.50361下载并安装。
-   或者直接下载已经下载好的：[HEVCVideoExtensions.zip](https://jessibuca.com/zip/HEVCVideoExtensions.zip)
+   或者直接下载已经下载好的：[Microsoft.HEVCVideoExtension_2.1.1803.0_neutra.zip](https://jessibuca.com/zip/Microsoft.HEVCVideoExtension_2.1.1803.0_neutra.zip)
+
+感谢：https://www.bilibili.com/read/cv35896480/ 的解决方案。
 
 3. 在地址栏输入edge://flags/ 进入搜索 Choose ANGLE graphics backend 选择 D3D11，选择后重启浏览器再打开。
 
@@ -2069,7 +2071,7 @@ https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
 参考：https://blog.csdn.net/s18813688772/article/details/134203931
 
 
-### 点播H265需求（点播mp4、Hls）
+### 点播H264、H265需求（点播mp4、Hls）
 
 > jessibuca 是流播放器，目前暂不支持点播的逻辑。
 
