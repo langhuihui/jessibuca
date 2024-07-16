@@ -23,7 +23,9 @@
 - decoder.js
 - decoder.wasm
 
-替换成
+替换成 `pro/js`下面的所有js和wasm文件
+
+文件介绍
 
 - jessibuca-pro-demo.js 或 jessibuca-pro-multi-demo.js   // 主文件(需要通过script标签引入)
 
@@ -64,8 +66,7 @@
 替换成
 
 - jessibuca-pro-demo.js 或 jessibuca-pro-multi-demo.js   // 主文件(需要通过script标签引入)
-- decoder-pro-hard-not-wasm.hs // worker硬解码解封装(这个库无需引入,播放器内部会自己引入)
-
+- decoder-pro-hard-not-wasm.js // worker硬解码解封装(这个库无需引入,播放器内部会自己引入)
 
 
 ## js以及decoder的配置

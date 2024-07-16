@@ -2837,7 +2837,16 @@ jessibuca.destroy().then(()=>{
 
 Unhandled Promise Rejection: Error: Aborted (Error: WebAssembly.Module doesn't parse at byte 659: invalid opcode 192, in function at index101). Build with -sASSERTlONS for more info, (evaluating 'new WebAssembly,RuntimeErrorle)'
 
+### 在已经使用硬解码基础上，播放多路视频，会出现卡顿，内存开始飙升
 
+> 在播放1路到4路的情况下，硬解码是没有问题的，但是播放到5路以上，就会出现卡顿，内存飙升的情况。
+
+这种情况大概率是因为显卡的解码性能跟不上导致的。
+
+解决方案
+1. 升级显卡
+2. 降低分辨率/帧率
+3. 降低播放路数
 
 
 

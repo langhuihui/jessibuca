@@ -171,40 +171,9 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 
 > 如需要购买PRO版本可以联系添加作者微信：bosswancheng
 
+## 开源版升级到Pro(体验)版本
 
-包含的文件有：
-
-### 音视频播放器
-- jessibuca-pro-demo.js(script标签引入)
-- jessibuca-pro-multi-demo.js(script标签引入)
-- decoder-pro.js (初始化参数decoder参数配置)
-- decoder-pro.wasm(胶水文件)
-- decoder-pro-simd.js (初始化参数decoder参数配置)
-- decoder-pro-simd.wasm(胶水文件)
-- decoder-pro-audio.js(不需要配置，播放器内部会引用)
-- decoder-pro-audio.wasm(胶水文件)
-- decoder-pro-hard.js(硬解码解封装数据,播放器内部会引用)
-- decoder-pro-hard-not-wasm.js(硬解码解封装数据,播放器内部会引用)
-- decoder-pro-mt.js(不需要配置，播放器内部会引用)
-- decoder-pro-mt-worker.js(不需要配置，播放器内部会引用)
-- decoder-pro-mt-worker.wasm(胶水文件)
-- decoder-pro-mt-worker.worker.js(不需要配置，播放器内部会引用)
-- decoder-pro-simd-mt.js(不需要配置，播放器内部会引用)
-- decoder-pro-simd-mt-worker.js(不需要配置，播放器内部会引用)
-- decoder-pro-simd-mt-worker.wasm(胶水文件)
-- decoder-pro-simd-mt-worker.worker.js(不需要配置，播放器内部会引用)
-
-> `jessibuca-pro-demo.js`与`jessibuca-pro-multi-demo.js`的区别是，前者是单路播放，后者是支持多路播放。 两者只需要引入一个就行了，不需要同时引入。
-
-### 音频播放器
-- jessibuca-pro-audio-payer-demo.js(script标签引入)
-- decoder-pro-audio-player.js(初始化参数decoder参数配置)
-- decoder-pro-audio.wasm(胶水文件)
-
-### 语音通讯（单向采集数据发送给服务器端）
-
-- jessibuca-pro-talk-demo.js(script标签引入)
-
+[升级文档](https://jessibuca.com/pro-upgrade.html)
 
 ## 直播协议支持(封装格式)
 
