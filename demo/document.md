@@ -2858,6 +2858,7 @@ Unhandled Promise Rejection: Error: Aborted (Error: WebAssembly.Module doesn't p
 2. 降低分辨率/帧率
 3. 降低播放路数
 
+> 如果是 pro 的话，可以通过配置配置 `最大缓冲区丢帧` 参数，把参数调整大些，来对抗卡顿的情况。
 
 
 ## 支持作者
