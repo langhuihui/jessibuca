@@ -116,6 +116,11 @@ button{
     width: 960px;
 }
 
+.textarea1{
+    width: 955px;
+    height: 150px
+}
+
 @media (max-width: 720px) {
     input {
         outline: 0;
@@ -156,7 +161,7 @@ button{
         height: 52.7vw;
         margin: 0 auto;
     }
-    
+
     .input{
         max-width: 95vw;
     }
@@ -171,5 +176,9 @@ button{
         margin: 0 auto;
         margin-bottom: 10px;
         display: block;
+    }
+
+    .textarea1{
+        width: 95vw;
     }
 }
