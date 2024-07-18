@@ -9,13 +9,13 @@ import json from '@rollup/plugin-json'; // 解析json格式
 import copy from 'rollup-plugin-copy';  // 直接复制文件和文件夹。
 import {terser} from 'rollup-plugin-terser'; // 压缩
 import base64 from 'postcss-base64'; // 图片变成base64
+import packageJson from './package.json';
 
 
 const isProd = process.env.NODE_ENV === 'production';
 
 const baseConfig = {
     output: {
-        format: 'umd',
         sourcemap: !isProd,
     },
     plugins: [
@@ -72,10 +72,19 @@ const baseConfig = {
 export default [
     {
         input: 'src/jessibuca.js',
-        output: {
-            name: 'jessibuca',
-            file: isProd ? 'dist/jessibuca.js' : 'demo/public/jessibuca.js',
-        },
+        output: [
+            {
+                name: 'jessibuca',
+                file: isProd ? packageJson.main : 'demo/public/jessibuca.js',
+                format: 'umd',
+                ...baseConfig.output
+            },
+            {
+                file: isProd ? packageJson.module : 'demo/public/jessibuca.js',
+                format: 'esm',
+                ...baseConfig.output
+            }
+        ],
         plugins: [
             postcss({
                 plugins: [
@@ -99,16 +108,14 @@ export default [
         output: {
             name: 'decoder',
             file: isProd ? 'dist/decoder.js' : 'demo/public/decoder.js',
+            ...baseConfig.output
         },
         plugins: [],
     }
 ].map(config => {
     return {
         input: config.input,
-        output: {
-            ...baseConfig.output,
-            ...config.output,
-        },
+        output: config.output,
         plugins: [...baseConfig.plugins, ...config.plugins],
     };
 });
