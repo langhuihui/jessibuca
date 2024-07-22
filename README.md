@@ -206,18 +206,18 @@ Jessibuca 是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 
 [![Star History Chart](https://api.star-history.com/svg?repos=langhuihui/jessibuca&type=Date)](https://star-history.com/#langhuihui/jessibuca&Date)
 
-## 支持
+## 支持作者
 
-<img src="/demo/public/wx.jpg">
+### 第一作者
+<img src="/public/wx.jpg"><img src="/public/alipay.jpg">
 
-<img src="/demo/public/alipay.jpg">
+### V3版本作者
+<img src="/public/wx-pay-wc.jpg" style="width:333px"><img src="/public/alipay-wc.jpg" style="width:333px">
 
 ## 群
 
 <img src="/demo/public/qrcode.jpeg">
 
-## 企微群
-<img src="/demo/public/qrcode-qw.jpeg">
 
 ## qq频道
 <img src="/public/qq-qrcode.jpg">

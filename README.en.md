@@ -155,15 +155,17 @@ Run `yarn build:wasm` or `npm run build:wasm`.
 
 ## Support
 
-<img src="/demo/public/wx.jpg">
-<img src="/demo/public/alipay.jpg">
+### Author of the First
+<img src="/public/wx.jpg"><img src="/public/alipay.jpg">
+
+### Author of the V3 Version
+<img src="/public/wx-pay-wc.jpg" style="width:333px"><img src="/public/alipay-wc.jpg" style="width:333px">
+
 
 ## Group
 
 <img src="/demo/public/qrcode.jpeg">
 
-## Group
-<img src="/demo/public/qrcode-qw.jpeg">
 
 ## QQ Group
 <img src="/public/qq-qrcode.jpg">

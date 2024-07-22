@@ -515,9 +515,6 @@ vue2:[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue2](https://git
 ## 群
 <img src="/public/qrcode.jpeg">
 
-## 群
-<img src="/public/qrcode-qw.jpeg">
-
 ## qq频道
 <img src="/public/qq-qrcode.jpg">
 

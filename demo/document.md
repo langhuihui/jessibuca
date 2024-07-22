@@ -2876,9 +2876,6 @@ function at index101). Build with -sASSERTlONS for more info, (evaluating 'new W
 
 <img src="/public/qrcode.jpeg">
 
-### 群
-
-<img src="/public/qrcode-qw.jpeg">
 
 ## qq频道
 

@@ -708,8 +708,6 @@ Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
 # 群
 <img src="/public/qrcode.jpeg">
 
-# 群
-<img src="/public/qrcode-qw.jpeg">
 
 ## qq频道
 <img src="/public/qq-qrcode.jpg">
