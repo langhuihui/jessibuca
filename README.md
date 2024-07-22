@@ -209,10 +209,10 @@ Jessibuca 是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 ## 支持作者
 
 ### 第一作者
-<img src="/public/wx.jpg"><img src="/public/alipay.jpg">
+<img src="/demo/public/wx.jpg"><img src="/demo/public/alipay.jpg">
 
 ### V3版本作者
-<img src="/public/wx-pay-wc.jpg" style="width:333px"><img src="/public/alipay-wc.jpg" style="width:333px">
+<img src="/demo/public/wx-pay-wc.jpg" style="width:333px"><img src="/demo/public/alipay-wc.jpg" style="width:333px">
 
 ## 群
 
@@ -220,5 +220,5 @@ Jessibuca 是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 
 
 ## qq频道
-<img src="/public/qq-qrcode.jpg">
+<img src="/demo/public/qq-qrcode.jpg">
 

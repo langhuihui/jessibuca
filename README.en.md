@@ -156,10 +156,10 @@ Run `yarn build:wasm` or `npm run build:wasm`.
 ## Support
 
 ### Author of the First
-<img src="/public/wx.jpg"><img src="/public/alipay.jpg">
+<img src="/demo/public/wx.jpg"><img src="/demo/public/alipay.jpg">
 
 ### Author of the V3 Version
-<img src="/public/wx-pay-wc.jpg" style="width:333px"><img src="/public/alipay-wc.jpg" style="width:333px">
+<img src="/demo/public/wx-pay-wc.jpg" style="width:333px"><img src="/demo/public/alipay-wc.jpg" style="width:333px">
 
 
 ## Group
@@ -168,4 +168,4 @@ Run `yarn build:wasm` or `npm run build:wasm`.
 
 
 ## QQ Group
-<img src="/public/qq-qrcode.jpg">
+<img src="/demo/public/qq-qrcode.jpg">
