@@ -7805,7 +7805,7 @@
 	      decoder: new VideoDecoder({
 	        output: function (videoFrame) {
 	          if (!wcsVideoDecoder.isEmitInfo) {
-	            decoder$1.opt.debug && console.log('Jessibuca: [worker] Webcodecs Video Decoder initSize');
+	            decoder$1.opt.debug && console.log('Jb: [worker] Webcodecs Video Decoder initSize');
 	            postMessage({
 	              cmd: WORKER_CMD_TYPE.initVideo,
 	              w: videoFrame.codedWidth,
@@ -7980,7 +7980,7 @@
 	          const yData = decoder.HEAPU8.subarray(y, y + size);
 	          const uData = decoder.HEAPU8.subarray(u, u + qsize);
 	          const vData = decoder.HEAPU8.subarray(v, v + qsize); // if (isGreenYUV(Uint8Array.from(yData))) {
-	          //     decoder.opt.debug && console.log('Jessibuca: [worker]: draw offscreenCanvas is green yuv');
+	          //     decoder.opt.debug && console.log('Jb: [worker]: draw offscreenCanvas is green yuv');
 	          //     return
 	          // }
 
@@ -7998,7 +7998,7 @@
 	          const yData = Uint8Array.from(decoder.HEAPU8.subarray(y, y + size));
 	          const uData = Uint8Array.from(decoder.HEAPU8.subarray(u, u + qsize));
 	          const vData = Uint8Array.from(decoder.HEAPU8.subarray(v, v + qsize)); // if (isGreenYUV(yData)) {
-	          //     decoder.opt.debug && console.log('Jessibuca: [worker]: draw is green yuv');
+	          //     decoder.opt.debug && console.log('Jb: [worker]: draw is green yuv');
 	          //     return
 	          // }
 
@@ -8042,14 +8042,14 @@
 	      this.delay = -1;
 	    },
 	    init: function () {
-	      decoder$1.opt.debug && console.log('Jessibuca: [worker] init');
+	      decoder$1.opt.debug && console.log('Jb: [worker] init');
 
 	      const _doDecode = data => {
-	        // decoder.opt.debug && console.log('Jessibuca: [worker]: _doDecode');
+	        // decoder.opt.debug && console.log('Jb: [worker]: _doDecode');
 	        if (decoder$1.opt.useWCS && decoder$1.useOffscreen() && data.type === MEDIA_TYPE.video && wcsVideoDecoder.decode) {
 	          wcsVideoDecoder.decode(data.payload, data.ts);
 	        } else {
-	          // decoder.opt.debug && console.log('Jessibuca: [worker]: _doDecode  wasm');
+	          // decoder.opt.debug && console.log('Jb: [worker]: _doDecode  wasm');
 	          data.decoder.decode(data.payload, data.ts);
 	        }
 	      };
@@ -8082,12 +8082,12 @@
 	            var data = buffer[0];
 
 	            if (this.getDelay(data.ts) === -1) {
-	              // decoder.opt.debug && console.log('Jessibuca: [worker]: common dumex delay is -1');
+	              // decoder.opt.debug && console.log('Jb: [worker]: common dumex delay is -1');
 	              buffer.shift();
 
 	              _doDecode(data);
 	            } else if (this.delay > decoder$1.opt.videoBuffer + decoder$1.opt.videoBufferDelay) {
-	              // decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, set dropping is true`);
+	              // decoder.opt.debug && console.log('Jb: [worker]:', `delay is ${this.delay}, set dropping is true`);
 	              this.resetDelay();
 	              this.dropping = true;
 	            } else {
@@ -8095,12 +8095,12 @@
 	                data = buffer[0];
 
 	                if (this.getDelay(data.ts) > decoder$1.opt.videoBuffer) {
-	                  // decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay}, decode`);
+	                  // decoder.opt.debug && console.log('Jb: [worker]:', `delay is ${this.delay}, decode`);
 	                  buffer.shift();
 
 	                  _doDecode(data);
 	                } else {
-	                  // decoder.opt.debug && console.log('Jessibuca: [worker]:', `delay is ${this.delay},opt.videoBuffer is ${decoder.opt.videoBuffer}`);
+	                  // decoder.opt.debug && console.log('Jb: [worker]:', `delay is ${this.delay},opt.videoBuffer is ${decoder.opt.videoBuffer}`);
 	                  break;
 	                }
 	              }
@@ -8112,7 +8112,7 @@
 	      this.stopId = setInterval(loop, 10);
 	    },
 	    close: function () {
-	      decoder$1.opt.debug && console.log('Jessibuca: [worker]: close');
+	      decoder$1.opt.debug && console.log('Jb: [worker]: close');
 	      clearInterval(this.stopId);
 	      this.stopId = null;
 	      audioDecoder.clear && audioDecoder.clear();

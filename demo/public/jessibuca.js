@@ -49,7 +49,8 @@
 	  mp4: 'mp4',
 	  webm: 'webm'
 	};
-	const CONTAINER_DATA_SET_KEY = 'jessibuca'; // default player options
+	const CONTAINER_DATA_SET_KEY = 'jessibuca';
+	const VERSION = '"3.2.6"'; // default player options
 
 	const DEFAULT_PLAYER_OPTIONS = {
 	  videoBuffer: 1000,
@@ -350,7 +351,7 @@
 	          args[_key - 1] = arguments[_key];
 	        }
 
-	        console.log(`Jessibuca: [${name}]`, ...args);
+	        console.log(`Jb: [${name}]`, ...args);
 	      }
 	    };
 
@@ -360,7 +361,7 @@
 	          args[_key2 - 1] = arguments[_key2];
 	        }
 
-	        console.warn(`Jessibuca: [${name}]`, ...args);
+	        console.warn(`Jb: [${name}]`, ...args);
 	      }
 	    };
 
@@ -369,7 +370,7 @@
 	        args[_key3 - 1] = arguments[_key3];
 	      }
 
-	      console.error(`Jessibuca: [${name}]`, ...args);
+	      console.error(`Jb: [${name}]`, ...args);
 	    };
 	  }
 
@@ -12024,6 +12025,7 @@
 
 	    events$1(this);
 	    observer(this);
+	    this.debug.log('Player', 'init and version is', VERSION);
 
 	    if (this._opt.useWCS) {
 	      this.debug.log('Player', 'use WCS');
@@ -12837,6 +12839,8 @@
 	    this.debug = new Debug(this);
 
 	    this._initPlayer($container, _opt);
+
+	    console.log(`Jessibuca version: ${VERSION}`);
 	  }
 	  /**
 	   *
@@ -13022,11 +13026,9 @@
 	   */
 
 
-	  close() {
-	    // clear url
-	    this._opt.url = '';
-	    this._opt.playOptions = {};
-	    return this.player.close();
+	  async close() {
+	    await this.destroy();
+	    return true;
 	  }
 	  /**
 	   *

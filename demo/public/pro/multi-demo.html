@@ -128,17 +128,17 @@
     function create() {
         jessibucaMulti = new JessibucaProMulti({
             container: $container,
-            split: 2,
+            split: 2,// default
             isResize: false,
             decoder: './js/decoder-pro.js',
             debug: true,
             useMSE: true,
-            decoderErrorAutoWasm:false,
+            decoderErrorAutoWasm: false,
             useSIMD: true,
             debugLevel: "debug",
             hasAudio: false,
-            loadingTimeout:3,
-            loadingTimeoutReplayTimes:10,
+            loadingTimeout: 3,
+            loadingTimeoutReplayTimes: 10,
             showBandwidth: showOperateBtns, // 显示网速
             showPerformance: showOperateBtns, // 显示性能
             operateBtns: {
@@ -151,8 +151,8 @@
                 quality: showOperateBtns,
                 performance: showOperateBtns,
             },
-            draggable:$supportDraggable.checked === true,
-            supportDblclickContainerFullscreen:$supportContainerFullscreen.checked === true,
+            draggable: $supportDraggable.checked === true,
+            supportDblclickContainerFullscreen: $supportContainerFullscreen.checked === true,
             // supportMousemoveEvent: true,
         })
 
@@ -188,12 +188,33 @@
             console.log(`stats-${index}`, stats);
         })
 
-        jessibucaMulti.on(JessibucaProMulti.EVENTS.error, (selectedIndex,errorType,message) => {
-            console.error('error', selectedIndex,errorType,message);
+        jessibucaMulti.on(JessibucaProMulti.EVENTS.error, (selectedIndex, errorType, message) => {
+            console.error('error', selectedIndex, errorType, message);
+        })
+
+        jessibucaMulti.on(JessibucaProMulti.MULTI_EVENTS.drop, (selectedIndex, event, options) => {
+            console.log('drop', selectedIndex, options);
+            updateExtendDom();
         })
     }
 
     create();
+    updateExtendDom();
+
+    function updateExtendDom() {
+        const playerUUidList = jessibucaMulti.getWindowUuidList();
+        playerUUidList.forEach((uuid, index) => {
+            const playerItem = jessibucaMulti.getWindowItem(uuid);
+            const player = playerItem.player;
+            if (player) {
+                player.setExtendHtml(`<div style="color: red;position: absolute;left: 20px;top: 20px;font-size: 16px">
+                                        <span>排序Index：${playerItem.order || playerItem.index}</span>
+                                        <br>
+                                        <span>Uuid：${playerItem.uuid}</span>
+                                    </div>`)
+            }
+        })
+    }
 
     function play() {
         var href = $playHref.value;
@@ -257,12 +278,14 @@
         if (jessibucaMulti) {
             split = Number(split);
             jessibucaMulti.arrangeWindow(split);
+            updateExtendDom();
         }
     }
 
     function updateSplitSpecial(type) {
         if (jessibucaMulti) {
             jessibucaMulti.arrangeWindow(type);
+            updateExtendDom();
         }
     }
 
@@ -283,7 +306,7 @@
     function handleInitPlayerBySelectWindow() {
         if (jessibucaMulti) {
             jessibucaMulti.initSingle().then(() => {
-
+                updateExtendDom();
             }).catch((e) => {
 
             });

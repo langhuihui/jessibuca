@@ -1,4 +1,4 @@
-import {DEFAULT_PLAYER_OPTIONS, EVENTS, EVENTS_ERROR, JESSIBUCA_EVENTS} from "../constant";
+import {DEFAULT_PLAYER_OPTIONS, EVENTS, EVENTS_ERROR, JESSIBUCA_EVENTS,VERSION} from "../constant";
 import Debug from "../utils/debug";
 import Events from "../utils/events";
 import property from './property';
@@ -168,6 +168,7 @@ export default class Player extends Emitter {
 
         events(this);
         observer(this);
+        this.debug.log('Player', 'init and version is',VERSION);
 
         if (this._opt.useWCS) {
             this.debug.log('Player', 'use WCS')

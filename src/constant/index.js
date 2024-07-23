@@ -19,6 +19,8 @@ export const MEDIA_SOURCE_UPDATE_END_TIMEOUT = 10 * 1000
 
 export const CONTAINER_DATA_SET_KEY = 'jessibuca'
 
+export const VERSION = '__VERSION__'
+
 
 // default player options
 export const DEFAULT_PLAYER_OPTIONS = {

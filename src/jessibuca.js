@@ -7,7 +7,8 @@ import {
     EVENTS_ERROR,
     JESSIBUCA_EVENTS,
     PLAYER_PLAY_PROTOCOL,
-    SCALE_MODE_TYPE
+    SCALE_MODE_TYPE,
+    VERSION
 } from "./constant";
 import {
     getElementDataset,
@@ -106,6 +107,7 @@ class Jessibuca extends Emitter {
         this.events = new Events(this);
         this.debug = new Debug(this);
         this._initPlayer($container, _opt);
+        console.log(`Jessibuca version: ${VERSION}`);
     }
 
     /**
