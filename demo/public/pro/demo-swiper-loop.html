@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Jessibuca Pro Swiper Loop demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+
+    <link rel="stylesheet" href="../swiper.min.css">
+    <script src="../swiper.min.js"></script>
+    <script src="./js/jessibuca-pro-demo.js"></script>
+    <style>
+        html,
+        body {
+            position: relative;
+            height: 100%;
+        }
+
+        body {
+            background: #eee;
+            font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            color: #000;
+            margin: 0;
+            padding: 0;
+        }
+
+        .swiper-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .swiper-slide {
+            text-align: center;
+            font-size: 18px;
+            background: #fff;
+
+            /* Center slide text vertically */
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            -webkit-justify-content: center;
+            justify-content: center;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            -webkit-align-items: center;
+            align-items: center;
+        }
+
+        .swiper-video {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+<div class="swiper-container">
+    <div class="swiper-wrapper">
+        <div id="slide0" class="swiper-slide"></div>
+        <div id="slide1" class="swiper-slide"></div>
+        <div id="slide2" class="swiper-slide"></div>
+    </div>
+</div>
+
+<script>
+    // 初始化播放列表，可以是通过接口返回
+    var playlist = [
+        "https://live.nodemedia.cn:8443/live/ls_1.flv",
+        "https://live.nodemedia.cn:8443/live/ls_2.flv",
+        "https://live.nodemedia.cn:8443/live/ls_3.flv",
+    ];
+
+    // 取最大安全数的一半做索引点
+    var index = (Number.MAX_SAFE_INTEGER - 1) / 2;
+
+    // 创建canvas画布，loop模式下，要手动插入，否则会被复制
+    var videoView = document.createElement("div");
+    videoView.className = "swiper-video";
+    var jessibuca = null;
+
+    videoView.addEventListener('click', function () {
+        jessibuca && jessibuca.cancelMute();
+    }, false)
+
+
+    function createPlayer() {
+        jessibuca = new JessibucaPro({
+            container: videoView,
+            decoder: './js/decoder-pro.js',
+            hiddenControl: true,// 隐藏控制条
+            muted: false,//
+        });
+
+        jessibuca.on('start', () => {
+            if (performance.navigation.type === 0) {
+                jessibuca.cancelMute();
+            }
+        })
+    }
+
+    createPlayer();
+
+    function destroyPlayer() {
+        return new Promise((resolve, reject) => {
+            if (jessibuca) {
+                jessibuca.destroy().then(() => {
+                    jessibuca = null;
+                    resolve();
+                });
+            } else {
+                resolve();
+            }
+        })
+    }
+
+    var swiper = new Swiper('.swiper-container', {
+        direction: 'vertical',//垂直翻动
+        loop: true,//循环模式
+        on: {
+            slideNextTransitionStart: function () {
+                //向后翻页，索引++
+                index++;
+            },
+            slidePrevTransitionStart: function () {
+                //向前翻页，索引--
+                index--;
+            },
+            slideChangeTransitionEnd: function () {
+                //翻页结束，停止播放
+                //如果播放试图存在父节点，则从父节点移除
+                if (videoView.parentNode) {
+                    videoView.parentNode.removeChild(videoView);
+                }
+                //把播放视图插入到当前slide页
+                this.slides[this.activeIndex].appendChild(videoView);
+                //取出索引的url后开始播放
+                jessibuca.play(playlist[index % playlist.length]);
+
+            }
+        }
+    });
+</script>
+</body>
+
+</html>

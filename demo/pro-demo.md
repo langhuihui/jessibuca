@@ -215,6 +215,14 @@ vue2:[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue2](https://git
 [http://jessibuca.monibuca.com/pro/demo-danmu.html](http://jessibuca.monibuca.com/pro/demo-danmu.html)
 
 
+### 上下滑动循环播放(仿抖音)
+------
+#### https
+[https://jessibuca.com/pro/demo-swiper-loop.html](https://jessibuca.com/pro/demo-swiper-loop.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-swiper-loop.html](http://jessibuca.monibuca.com/pro/demo-swiper-loop.html)
+
 ### 裸流(H264/H265)
 ------
 #### https
