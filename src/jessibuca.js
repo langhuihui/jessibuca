@@ -115,26 +115,26 @@ class Jessibuca extends Emitter {
      */
     async destroy() {
         this._destroyed = true;
+        this.off();
+        if (this.player) {
+            await this.player.destroy();
+            this.player = null;
+        }
+
         if (this.events) {
             this.events.destroy();
             this.events = null;
         }
 
-        if (this.player) {
-            await this.player.destroy();
-            this.player = null;
-        }
         if (this.$container) {
             this.$container.classList.remove('jessibuca-container');
             this.$container.classList.remove('jessibuca-fullscreen-web');
             removeElementDataset(this.$container, CONTAINER_DATA_SET_KEY);
             this.$container = null;
         }
-
-        this._opt = null;
+        this._opt = {};
         this._loadingTimeoutReplayTimes = 0;
         this._heartTimeoutReplayTimes = 0;
-        this.off();
     }
 
     _initPlayer($container, options) {
@@ -295,6 +295,11 @@ class Jessibuca extends Emitter {
      */
     play(url, options = {}) {
         return new Promise((resolve, reject) => {
+            if(this.isDestroyed()){
+                reject('Jessibuca is destroyed')
+                return;
+            }
+
             if (!url && !this._opt.url) {
                 this.emit(EVENTS.error, EVENTS_ERROR.playError)
                 reject('play url is empty')
