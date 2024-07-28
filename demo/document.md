@@ -1830,15 +1830,15 @@ useWCS:false
 
 ### 关于 Uncaught (in promise) DOMException: BodyStreamBuffer was aborted 错误
 
-这个是当发起`http(s)`请求视频资源的时候，调用 `destroy()`销毁播放器的时候，worker线程调用了`abort()`方法，导致的浏览器抛出的错误。
+~~这个是当发起`http(s)`请求视频资源的时候，调用 `destroy()`销毁播放器的时候，worker线程调用了`abort()`方法，导致的浏览器抛出的错误。~~
 
-> 这个异常暂时无法捕获到，不影响业务逻辑，可以先无视掉。
+> 该问题已经修复。
 
 ### 关于 Uncaught (in promise) DOMException: The user aborted a request. 错误
 
-这个是当发起`http(s)`请求视频资源的时候，调用 `destroy()`销毁播放器的时候，主线程调用了`abort()`方法，导致的浏览器抛出的错误。
+~~这个是当发起`http(s)`请求视频资源的时候，调用 `destroy()`销毁播放器的时候，主线程调用了`abort()`方法，导致的浏览器抛出的错误。~~
 
-> 这个异常暂时无法捕获到，不影响业务逻辑，可以先无视掉。
+> 该问题已经修复。
 
 ### 关于 Uncaught (in promise) RuntimeError: Aborted(CompileError: WebAssembly.instantiate(): section (code 1, "Type") extends past end of the module (length 11493359, remaining bytes 2961839) @+8). Build with -sASSERTIONS for more info. 错误
 
@@ -2861,6 +2861,22 @@ function at index101). Build with -sASSERTlONS for more info, (evaluating 'new W
 3. 降低播放路数
 
 > 如果是 pro 的话，可以通过配置配置 `最大缓冲区丢帧` 参数，把参数调整大些，来对抗卡顿的情况。
+
+
+### chrome/edge 等浏览器如何使用独立显卡
+
+1. 在chrome地址栏输入：`chrome://flags/#ignore-gpu-blocklist`
+2. 找到`Override software rendering list`选项
+3. 将其设为Enabled
+4. 重启浏览器
+
+
+
+
+
+
+
+
 
 ## 支持作者
 
