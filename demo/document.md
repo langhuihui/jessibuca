@@ -19,23 +19,19 @@
 
 #### http
 
-```js
+```
 {
     useMSE:true,
-        autoWasm
-:
-    true
+    autoWasm:true
 }
 ```
 
 #### https
 
-```js
+```
 {
     useWCS:true,
-        autoWasm
-:
-    true
+    autoWasm:true
 }
 ```
 
@@ -54,14 +50,14 @@
 
 见： https://cn.vuejs.org/api/options-state.html#data
 
-```vue
+```js
 // 可以挂载在Vue上面
 Vue.prototype.$player = new Jessibuca({
 
 })
 ```
 
-```vue
+```js
 // 也可以挂载在 $options 上面
 this.$options.jessibuca = new Jessibuca({
 
@@ -204,7 +200,7 @@ index.html文件
 
 对于 new Jessibuca()  的时候
 
-```shell
+```
 {
   decoder:'/jessibuca/decoder.js'
 }
@@ -220,7 +216,7 @@ index.html文件
 
 需要配置`decoder` 参数为CDN绝对地址文件。
 
-```js
+```
 {
     decoder:'https://your-cdn.com/decoder.js'
 }
@@ -834,26 +830,17 @@ pro
 
 因为H5 全屏采用的是web端的全屏方案
 
-```css
+```
 {
-    position: fixed
-;
-    z-index: 9999
-;
-    left: 0
-;
-    top: 0
-;
-    right: 0
-;
-    bottom: 0
-;
-    width: 100vw !important
-;
-    height: 100vh !important
-;
-    background: #000
-;
+    position: fixed ;
+    z-index: 9999 ;
+    left: 0 ;
+    top: 0 ;
+    right: 0 ;
+    bottom: 0 ;
+    width: 100vw !important ;
+    height: 100vh !important ;
+    background: #000 ;
 }
 ```
 
@@ -1011,9 +998,7 @@ Access to fetch at 'http://192.168.0.2:8000/live/test.flv' from origin 'http://j
 
 不能在create 生命周期里面初始化jessibuca，因为这个时候，DOM 还没有生成，所以会报错。
 
-```js
-jessibuca
-    ```js
+```
 {
     mounted(){
         // init jessibuca
@@ -1024,9 +1009,7 @@ jessibuca
 
 #### react 项目中使用
 
-```js
-jessibuca
-    ```js
+```
 {
     componentDidMount(){
         // init jessibuca
@@ -2871,9 +2854,14 @@ function at index101). Build with -sASSERTlONS for more info, (evaluating 'new W
 4. 重启浏览器
 
 
+### 关于国标 GBT28181 PTZ 指令操作摄像头
+
+见[GBT-28181-2016.pdf](https://jessibuca.com/pro-doc/GBT-28181-2016.pdf)
 
 
+### 关于国标 JTT 道路运输车辆卫星定位系统音视频通讯协议
 
+见[JTT-1078-2016.pdf](https://jessibuca.com/pro-doc/JTT-1078-2016.pdf)
 
 
 
