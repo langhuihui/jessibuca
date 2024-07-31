@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Jessica talk demo</title>
+    <script src="./vconsole.js"></script>
+    <script src="./js/jessibuca-pro-talk-demo.js"></script>
+    <link rel="stylesheet" href="./demo.css">
+    <style>
+        .container-shell:before {
+            content: "jessibuca pro mobile demo";
+        }
+    </style>
+</head>
+<body class="page">
+<div class="root">
+    <div class="container-shell">
+        <div class="input">
+            <span style="color: red">Tips:</span> <span>麦克风权限需要Https 或者 localhost</span>
+        </div>
+        <div class="input">
+            <span style="color: red">Tips:</span>
+            <span>单通道，只传输采集到的音频数据，如需播放音视频，请用播放器播放</span>
+        </div>
+        <div class="input">
+            <span style="color: red">Tips:</span> <span>支持rtp协议封装和裸数据传输</span>
+        </div>
+        <div class="input">
+            <span style="color: red">Tips:</span> <span>标准的g711a/u 协议 8k采样率，16位采样精度</span>
+        </div>
+        <div class="input">
+            <span style="color: red">Tips:</span> <span>rtp传输格式支持，国标 tcp/udp; <br>
+            <span style="color:green;">国标tcp:</span>`[2字节的rtp头]`+`[12字节的rtp扩展头]`+`[裸数据]`;<br>
+            <span style="color:green;">国标udp:</span>`[12字节的rtp扩展头]`+`[裸数据]`</span>
+        </div>
+        <div class="input">
+            <input type="text" value="" placeholder="例如：ws://localhost:8080/" id="talkUrl">
+        </div>
+        <div class="input">
+            <span class="span-row">
+                    编码格式
+                <select id="talkEncType">
+                    <option value="g711a" selected>g711a</option>
+                    <option value="g711u">g711u</option>
+                     <option value="pcm">pcm</option>
+                </select>
+                </span>
+            <span class="span-row">
+                 <input
+                     checked
+                     id="testMicrphone"
+                     type="checkbox"
+                 /><span>测试麦克风(不会触发ws连接)</span>
+            </span>
+        </div>
+        <div class="input">
+            <div>
+                <input
+                    id="debug"
+                    checked
+                    type="checkbox"
+                /><span>debug模式(支持文件下载)</span>
+            </div>
+        </div>
+        <div class="input">
+              <span class="span-row">
+                    封装格式
+                    <select id="talkPacketType">
+                        <option value="rtp">rtp</option>
+                        <option value="empty" selected>裸数据</option>
+                        <option value="jtt" selected>jtt</option>
+                    </select>
+                </span>
+
+        </div>
+        <div style="color: red">tip:封装格式是rtp的时候才会生效</div>
+        <div class="input">
+            <span class="span-row">
+                rtp 传输协议
+                <select id="talkPacketRtpSendType">
+                    <option value="tcp" selected>tcp</option>
+                    <option value="udp">udp</option>
+                </select>
+            </span>
+            <span class="span-row">
+                rtpSsrc
+                <input style="width: 80px" type="text" value="0" id="talkRtpSsrc">
+            </span>
+        </div>
+        <div style="color: red">tip:封装格式是jtt的时候才会生效</div>
+        <div class="input">
+            <span class="span-row">
+                SIM 卡号
+                <input style="width: 200px" type="text" value="" placeholder="请输入12位SIM卡号"
+                       id="jttSimNumber">
+            </span>
+            <span class="span-row">
+                通道号
+                <input style="width: 80px" type="text" value="" placeholder="请输入2位通道号" id="jttChannelNumber">
+            </span>
+        </div>
+        <div class="input">
+             <span class="span-row">
+                    采样率
+                    <select id="talkSampleRate">
+                        <option value="48000" selected>48000</option>
+                        <option value="24000">24000</option>
+                        <option value="16000">16000</option>
+                        <option value="12000">12000</option>
+                        <option value="8000">8000</option>
+                    </select>
+                </span>
+            <span class="span-row">
+                     采样精度
+                    <select id="talkSampleBitsWidth">
+                        <option value="32">32</option>
+                        <option value="16" selected>16</option>
+                        <option value="8">8</option>
+                    </select>
+                    位
+                </span>
+            <span class="span-row">
+                    engine
+                    <select id="talkEngine">
+                        <option value="worklet">worklet</option>
+                        <option value="script" selected>script</option>
+                    </select>
+                </span>
+        </div>
+        <div class="input">
+            <button onclick="startTalk()">开始对讲</button>
+            <button onclick="stopTalk()">停止对讲</button>
+            <span>
+                 设置声音<input
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value="100"
+                id="talkVolume"
+                onchange="talkSetVolume()"
+            />
+            </span>
+            <button onclick="talkGetVolume()">获取声音</button>
+        </div>
+        <div class="input">
+            <span style="color: green">如需测试下载文件，不要点击停止对讲和销毁对讲，<br>会销毁掉缓存的数据的，直接点击下载即可</span>
+        </div>
+        <div class="input">
+            <button onclick="saveTalkRtp()">下载rtp文件(配置debug:true才会缓存数据， <span
+                style="color: red">封装格式选rtp</span> )
+            </button>
+        </div>
+        <div class="input">
+            <button onclick="saveTalkG711()">下载g711a/u文件(配置debug:true才会缓存数据，<span style="color: red">封装格式选裸数据</span>)
+            </button>
+        </div>
+        <div class="input">
+            <div>
+                <button onclick="saveTalkPcm()">下载pcm文件(配置debug:true才会缓存数据，<span
+                    style="color: red">封装格式选裸数据</span>)
+                </button>
+                <input
+                    id="encodeWav"
+                    checked
+                    type="checkbox"
+                /><span>封装成wav格式</span>
+            </div>
+
+        </div>
+        <div class="input">
+            <div>
+                <span><a href="https://jessibuca.com/talk-doc.html" target="_blank">测试播放g711a/u数据指南</a></span>
+            </div>
+        </div>
+
+        <div class="input" style="line-height: 30px">
+            <button id="destroy">销毁</button>
+        </div>
+    </div>
+</div>
+<script src="./demo.js"></script>
+
+<script>
+    var $player = document.getElementById('play');
+    var $pause = document.getElementById('pause');
+    var $playHref = document.getElementById('playUrl');
+    var $container = document.getElementById('container');
+    var $destroy = document.getElementById('destroy');
+    var $debug = document.getElementById('debug');
+    var $encodeWav = document.getElementById('encodeWav');
+
+
+    var showOperateBtns = true; // 是否显示按钮
+    var forceNoOffscreen = true; //
+    var jessibucaTalk = null;
+
+    function create() {
+        jessibucaTalk = new JessibucaProTalk({
+            saveRtpToFile: true
+        });
+
+        jessibucaTalk.on('error', function (e) {
+            console.error('error', e);
+        });
+
+        jessibucaTalk.on('talkStreamMsg', function (arrayBuffer) {
+            // 监听采集到的音频数据
+            console.log('talkStreamMsg', arrayBuffer);
+        });
+    }
+
+
+    create();
+
+    function destroyAndCreate() {
+        if (jessibucaTalk) {
+            jessibucaTalk.destroy();
+        }
+        create();
+    }
+
+
+    $destroy.addEventListener('click', function () {
+        destroyAndCreate();
+    })
+
+    function startTalk() {
+        let talkUrl = document.getElementById('talkUrl').value;
+        const talkEncType = document.getElementById('talkEncType').value;
+        const talkPacketType = document.getElementById('talkPacketType').value;
+        const talkSampleRate = document.getElementById('talkSampleRate').value;
+        const talkSampleBitsWidth = document.getElementById('talkSampleBitsWidth').value;
+        const talkRtpSsrc = document.getElementById('talkRtpSsrc').value;
+        const talkTestMicrphone = document.getElementById('testMicrphone').checked;
+        const talkEngine = document.getElementById('talkEngine').value;
+        const talkPacketRtpSendType = document.getElementById('talkPacketRtpSendType').value;
+        const testMicrophone = talkTestMicrphone === true || talkTestMicrphone === 'true'
+
+        // if(testMicrophone && !talkUrl){
+        //     talkUrl = 'ws://localhost:8080/'; // 传一个假的
+        // }
+
+        if (jessibucaTalk && (talkUrl || testMicrophone)) {
+            jessibucaTalk.startTalk(talkUrl, {
+                encType: talkEncType,
+                packetType: talkPacketType,
+                sampleBitsWidth: talkSampleBitsWidth,
+                sampleRate: talkSampleRate,
+                debug: $debug.checked === true,
+                debugLevel: "debug",
+                rtpSsrc: talkRtpSsrc,
+                packetTcpSendType: talkPacketRtpSendType,
+                engine: talkEngine,
+                saveToTempFile: $debug.checked === true,
+                testMicrophone: testMicrophone,
+                jttSimNumber: document.getElementById('jttSimNumber').value,
+                jttChannelNumber: document.getElementById('jttChannelNumber').value
+            }).then(() => {
+
+            }).catch((e) => {
+                console.error('start talk error', e);
+            })
+        } else {
+            if (!jessibucaTalk) {
+                console.log('jessibucaTalk is not ready');
+            }
+            if (!talkUrl) {
+                console.log('talkUrl is empty');
+            }
+        }
+    }
+
+    function stopTalk() {
+        if (jessibucaTalk) {
+            jessibucaTalk.stopTalk().then(() => {
+
+            }).catch((e) => {
+                console.error('stop talk error', e);
+            });
+        } else {
+            console.log('jessibucaTalk is not ready');
+        }
+    }
+
+    function saveTalkRtp() {
+        if (jessibucaTalk) {
+            jessibucaTalk.downloadTempRtpFile().then(() => {
+                console.log('download success');
+                destroyAndCreate()
+
+            }).catch((e) => {
+                console.error('save talk error', e);
+            });
+        } else {
+            console.log('jessibucaTalk is not ready');
+        }
+    }
+
+    function saveTalkG711() {
+        if (jessibucaTalk) {
+            jessibucaTalk.downloadTempG711File().then(() => {
+                console.log('download success');
+                destroyAndCreate()
+
+            }).catch((e) => {
+                console.error('save talk error', e);
+            });
+        } else {
+            console.log('jessibucaTalk is not ready');
+        }
+    }
+
+    function saveTalkPcm() {
+        if (jessibucaTalk) {
+            const encodeWav = $encodeWav.checked;
+            jessibucaTalk.downloadTempPcmFile(encodeWav).then(() => {
+                console.log('download success');
+                destroyAndCreate()
+            }).catch((e) => {
+                console.error('save talk error', e);
+            });
+        } else {
+            console.log('jessibucaTalk is not ready');
+        }
+    }
+
+    function saveTalkOpus() {
+        if (jessibucaTalk) {
+            jessibucaTalk.downloadTempOpusFile().then(() => {
+                console.log('download success');
+                destroyAndCreate()
+            }).catch((e) => {
+                console.error('save talk error', e);
+            });
+        } else {
+            console.log('jessibucaTalk is not ready');
+        }
+    }
+
+    function talkSetVolume() {
+        var volume = document.getElementById('talkVolume').value;
+        console.log('talkSetVolume', volume);
+        if (jessibucaTalk) {
+            jessibucaTalk.setTalkVolume(volume).then(() => {
+                console.log('set talk volume success');
+            }).catch((e) => {
+                console.error('set talk volume error', e);
+            });
+        } else {
+            console.log('jessibucaTalk is not ready');
+        }
+    }
+
+    function talkGetVolume() {
+        if (jessibucaTalk) {
+            jessibucaTalk.getTalkVolume().then((volume) => {
+                console.log('talk volume', volume);
+            }).catch((e) => {
+                console.error('get talk volume error', e);
+            });
+        } else {
+            console.log('jessibucaTalk is not ready');
+        }
+    }
+</script>
+
+</body>
+</html>
