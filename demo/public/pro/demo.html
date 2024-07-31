@@ -133,6 +133,16 @@
                 /><span>暂停->播放的时候是否显示loading效果</span>
             </div>
         </div>
+        <div class="input">
+            <div>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="controlAutoHide"
+                /><span>自动隐藏控制条</span>
+            </div>
+        </div>
 
         <div class="input">
             <div>输入URL：</div>
@@ -173,6 +183,7 @@
     var $replayUseLastFrameShow = document.getElementById('replayUseLastFrameShow');
     var $replayShowLoadingIcon = document.getElementById('replayShowLoadingIcon');
     var $mseDecoderUseWorker = document.getElementById('mseDecoderUseWorker');
+    var $controlAutoHide = document.getElementById('controlAutoHide');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -203,8 +214,6 @@
                 screenshot: showOperateBtns,
                 play: showOperateBtns,
                 audio: showOperateBtns,
-                ptz: showOperateBtns,
-                quality: showOperateBtns,
                 performance: showOperateBtns,
             },
             timeout: 10,
@@ -230,6 +239,7 @@
             replayUseLastFrameShow: $replayUseLastFrameShow.checked === true, // 重播使用上一帧显示
             replayShowLoadingIcon: $replayShowLoadingIcon.checked === true,// 重播显示loading
             mseDecoderUseWorker:$mseDecoderUseWorker.checked === true,
+            controlAutoHide:$controlAutoHide.checked === true,
 
         },);
 
