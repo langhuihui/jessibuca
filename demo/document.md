@@ -2853,6 +2853,25 @@ function at index101). Build with -sASSERTlONS for more info, (evaluating 'new W
 3. 将其设为Enabled
 4. 重启浏览器
 
+### 如何结合m7s流媒体服务器，obs推流，然后使用播放器播放
+
+#### m7s 下载
+[https://m7s.live/download](https://m7s.live/download)
+
+#### obs 安装
+[https://obsproject.com/zh-cn/download](https://obsproject.com/zh-cn/download)
+
+#### 推流配置
+obs的推流配置
+
+<img src="/public/img/obs-setting.png">
+
+#### 预览
+
+访问`http://localhost:8080/preview` 页面，即可看到推流的地址，点击进去，就可以预览了。
+
+#### 播放器播放
+
 
 ### 关于国标 GBT28181 PTZ 指令操作摄像头
 
