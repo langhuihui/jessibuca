@@ -130,6 +130,8 @@ const jessibucaProMulti = new JessibucaProMulti({
 
 需要将原本开源版的 `destroy()` 从同步方法，修改为异步方法
 
+> jessibuca 开源版如果是v3.2.x 版本以上就不需要做任何修改，因为v3.2.x 版本以上的开源版已经是异步方法了。
+
 ```js
 // 原本的
 jessibuca.destroy()
