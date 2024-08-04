@@ -160,7 +160,7 @@ vue2:[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue2](https://git
 #### http
 [http://jessibuca.monibuca.com/pro/audio-player-demo.html](http://jessibuca.monibuca.com/pro/audio-player-demo.html)
 
-## 语音通讯（支持rtp包和裸流形式传输）
+## 语音通讯（支持rtp包、jtt包和裸流形式传输）
 
 ### demo
 ------
