@@ -2909,6 +2909,15 @@ obs的推流配置
 3. 升级浏览器版本（建议升级到最新版本）
 
 
+### 关于如何清除浏览器缓存
+
+F12 打开控制台 -> 切换到 `Network` 选项卡 -> 勾选`Disable cache` -> 刷新页面
+
+
+<img src="/public/img/disable-cache.jpg">
+
+
+
 ### 关于国标 GBT28181 PTZ 指令操作摄像头
 
 见[GBT-28181-2016.pdf](https://jessibuca.com/pro-doc/GBT-28181-2016.pdf)
@@ -2917,7 +2926,6 @@ obs的推流配置
 ### 关于国标 JTT 道路运输车辆卫星定位系统音视频通讯协议
 
 见[JTT-1078-2016.pdf](https://jessibuca.com/pro-doc/JTT-1078-2016.pdf)
-
 
 
 
