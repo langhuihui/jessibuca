@@ -118,6 +118,7 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 | 语音通讯（设置采样位数32位或16位或8位）                                                               | 不支持 | 支持  |
 | 语音通讯（设置声道单声道或双声道）                                                                    | 不支持 | 支持  |
 | 语音通讯（设置rtp包封装）                                                                       | 不支持 | 支持  |
+| 语音通讯（设置jtt包解封装）                                                                      | 不支持 | 支持  |
 | GB28181 TF卡（录像流）流播放 [介绍](https://jessibuca.com/pro-playback.html)                    | 不支持 | 支持  |
 | GB28181 TF卡（录像流）流播放，（2/4/8/16/32/64）倍率播放                                             | 不支持 | 支持  |
 | GB28181 TF卡（录像流）流播放，关键帧解码播放                                                          | 不支持 | 支持  |
@@ -209,7 +210,6 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 
 > webrtc 遵循的协议是：https://datatracker.ietf.org/doc/html/draft-ietf-wish-whip-03
 
-
 ## 视频编码格式支持
 
 | 编码格式       | 支持情况 |
@@ -245,7 +245,6 @@ H265硬解码，对于电脑硬件支持情况：
 | AAC   | 支持 |
 | MP3   | 支持 |
 
-
 ## 视频录制支持
 
 | 封装格式                        | 支持情况 |
@@ -256,7 +255,6 @@ H265硬解码，对于电脑硬件支持情况：
 | MPEG-4格式的mp4文件（音频+视频）【扩展模块】 | 支持 |
 
 > webrtc播放地址，录制的文件是webm格式的。
-
 
 ## 加密流支持
 
@@ -276,7 +274,6 @@ H265硬解码，对于电脑硬件支持情况：
 
 > 播放 `HLS(aes-128-cbc)`加密流 需要流媒体服务器端自己开发支持（集成规则请咨询作者bosswancheng）
 
-
 ## 水印支持
 
 | 加密格式            | 支持情况 |
@@ -295,7 +292,6 @@ H265硬解码，对于电脑硬件支持情况：
 > 截图加自定义水印（局部水印）支持`图片`，`文字`，支持单个水印。
 
 > 动态水印只支持文本信息。
-
 
 ## 分辨率支持
 
@@ -594,8 +590,6 @@ Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
 
 [NVIDIA](https://bluesky-soft.com/en/dxvac/deviceInfo/decoder/nvidia.html)
 
-
-
 ## 首屏时间、延迟
 
 ### 首屏时间
@@ -622,8 +616,6 @@ Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
 
 > 可以支持超低延迟300ms以内。
 
-## 关于延迟
-
 ## 测试报告：
 
 [单路](https://jessibuca.com/pro-doc/single.pdf)
@@ -636,6 +628,17 @@ Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
 
 [多路-24路-720p-1080p](https://jessibuca.com/pro-doc/24multi-720-1080.pdf)
 
+## 音频播放器
+
+支持播放`ws-flv`、`http-flv`、`webrtc`格式的音频流。
+
+> 可以支持移动端（平板端）息屏和后台播放。
+
+## 语音通讯
+
+支持在web页面采集麦克风数据，支持编码格式pcm、pcma(g711a)、pcmu(g711u)，支持封装成rtp包、jtt包。
+
+> 目前仅支持单向语音通讯，不支持双向语音通讯。（仅支持通过ws传输到服务器，不支持通过ws接收音频数据进行播放），根据国标情况，播放端是跟着音视频一起播放的，可以使用音视频播放器进行播放器音频和视频数据。
 
 ## PRO AI
 
@@ -665,14 +668,12 @@ Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
 
 体验demo [demo](https://jessibuca.com/pro/demo-check-frame.html)
 
-
 ### 遮挡物检查
 利用opencv实现的遮挡物检查
 
 > 需要单独购买，授权后才能使用。
 
 体验demo [demo](https://jessibuca.com/pro/demo-check-occlusion.html)
-
 
 ## PRO 扩展模块
 
@@ -703,7 +704,6 @@ Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
 
 ### V3版本作者
 <img src="/public/wx-pay-wc.jpg" style="width:333px"><img src="/public/alipay-wc.jpg" style="width:333px">
-
 
 # 群
 <img src="/public/qrcode.jpeg">
