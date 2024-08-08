@@ -103,6 +103,7 @@ class Jessibuca extends Emitter {
         this.$container = $container;
         this._loadingTimeoutReplayTimes = 0;
         this._heartTimeoutReplayTimes = 0;
+        this.initDecoderWorkerTimeout = null;
         this._destroyed = false;
         this.events = new Events(this);
         this.debug = new Debug(this);
@@ -116,6 +117,7 @@ class Jessibuca extends Emitter {
     async destroy() {
         this._destroyed = true;
         this.off();
+        this._clearInitDecoderWorkerTimeout();
         if (this.player) {
             await this.player.destroy();
             this.player = null;
@@ -295,7 +297,7 @@ class Jessibuca extends Emitter {
      */
     play(url, options = {}) {
         return new Promise((resolve, reject) => {
-            if(this.isDestroyed()){
+            if (this.isDestroyed()) {
                 reject('Jessibuca is destroyed')
                 return;
             }
@@ -657,7 +659,14 @@ class Jessibuca extends Emitter {
                     })
                 })
             } else {
+                this.debug.log('Jessibuca', '_play ant waiting decoderWorkerInit');
+                this._checkInitDecoderWorkerTimeout();
                 this.player.once(EVENTS.decoderWorkerInit, () => {
+                    this._clearInitDecoderWorkerTimeout();
+                    if (this.isDestroyed()) {
+                        return;
+                    }
+                    this.debug.log('Jessibuca', '_play decoderWorkerInit success and play');
                     this.player.play(url, options).then(() => {
                         resolve();
                     }).catch((e) => {
@@ -834,6 +843,28 @@ class Jessibuca extends Emitter {
         return result;
     }
 
+    _clearInitDecoderWorkerTimeout() {
+        if (this.initDecoderWorkerTimeout) {
+            clearTimeout(this.initDecoderWorkerTimeout);
+            this.initDecoderWorkerTimeout = null;
+        }
+    }
+
+    _checkInitDecoderWorkerTimeout() {
+        this._clearInitDecoderWorkerTimeout();
+        this.initDecoderWorkerTimeout = setTimeout(() => {
+            this._handleInitDecoderWorkerTimeout();
+        }, this._opt.initDecoderWorkerTimeout * 1000);
+    }
+
+
+    _handleInitDecoderWorkerTimeout() {
+        this.pause().then(() => {
+            this.debug.log('Jessibuca', 'init decoder worker timeout and pause play')
+        }).catch((e) => {
+            this.debug.warn('Jessibuca', 'init decoder worker timeout and pause play error', e)
+        })
+    }
 }
 
 

@@ -73,6 +73,7 @@ export const DEFAULT_PLAYER_OPTIONS = {
     wasmDecodeAudioSyncVideo: false,// wasm 解码之后音视频同步
     recordType: FILE_SUFFIX.webm,
     useWebFullScreen: false, // use web full screen
+    initDecoderWorkerTimeout: 10 //
 }
 
 
@@ -198,7 +199,7 @@ export const EVENTS_ERROR = {
     fetchError: "fetchError",
     websocketError: 'websocketError',
     webcodecsH265NotSupport: 'webcodecsH265NotSupport',
-    webcodecsConfigureError:'webcodecsConfigureError',
+    webcodecsConfigureError: 'webcodecsConfigureError',
     webcodecsDecodeError: 'webcodecsDecodeError',
     webcodecsWidthOrHeightChange: 'webcodecsWidthOrHeightChange',
     mediaSourceH265NotSupport: 'mediaSourceH265NotSupport',
