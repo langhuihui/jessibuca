@@ -88,6 +88,12 @@
                     checked
                     id="isEmitSEI"
                 /><span style="color: green">是否分析获取SEI数据</span>
+                <input
+                    type="checkbox"
+                    onclick="replay()"
+                    checked
+                    id="videoSEISyncPts"
+                /><span style="color: blue">是否同步当前时间抛出SEI数据</span>
             </div>
         </div>
         <div class="input">
@@ -139,6 +145,7 @@
     var $renderDom = document.getElementById('renderDom');
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
     var $isEmitSEI = document.getElementById('isEmitSEI');
+    var $videoSEISyncPts = document.getElementById('videoSEISyncPts');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -185,7 +192,7 @@
             useCanvasRender: $renderDom.value === 'canvas',
             useWebGPU: $isUseWebGPU.value === 'webgpu',
             controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
-            isEmitSEI: true,
+            isEmitSEI: $isEmitSEI.checked === true,
             // audioEngine:"worklet",
             // isFlv: true
         },);
@@ -208,46 +215,23 @@
             $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
         })
         var seiList = [];
-        jessibuca.on('videoSEI', (value) => {
-            console.log(`videoSEI ts is ${value.ts}, data is ${value.data}`);
-            //  todo: 代码注释掉了,这里接受sei 数据。
-            // seiList.push(value);
-        })
 
-        //  todo: 代码注释掉了，这里通过监听currentPts 来把sei 数据画框到播放窗口上面去。
-        // jessibuca.on('currentPts', (ts) => {
-        //     //  find sei
-        //     const seiItem = seiList.find((item) => {
-        //         const diff = Math.abs(item.ts - ts);
-        //         return diff <= 17
-        //     })
-        //     //  remove useless sei data
-        //     seiList = seiList.filter((item) => {
-        //         return item.ts > ts;
-        //     })
-        //     let pointList = []
-        //     //
-        //     if (seiItem.data) {
-        //         const decoder = new TextDecoder(); // 创建一个 TextDecoder 对象
-        //         const str = decoder.decode(seiItem.data)
-        //         const startIndex = str.indexOf('{')
-        //         const endIndex = str.lastIndexOf('}') + 1
-        //
-        //         const datas = str.slice(startIndex, endIndex);
-        //
-        //         if (datas && datas.includes('{') && datas.includes('}')) {
-        //             let d = {}
-        //             try {
-        //                 d = JSON.parse(datas)
-        //             } catch (e) {
-        //                 d = {}
-        //             }
-        //             // 这里就是自己根据自己的业务系统的内容格式化数据，然后push 到  pointList 里面去。
-        //         }
-        //     }
-        //     // add content to canvas
-        //     jessibuca.addContentToCanvas(pointList);
-        // })
+        if($videoSEISyncPts.checked){
+            jessibuca.on('videoSEISyncPts', (value) => {
+                console.log(`videoSEISyncPts pts is ${value.pts}, ts is ${value.ts}, data is`,value.data);
+
+                // 这里可以直接调用播放器的画框功能。
+            })
+        }
+        else {
+            jessibuca.on('videoSEI', (value) => {
+                console.log(`videoSEI ts is ${value.ts}, data is `,value.data);
+                //  todo: 代码注释掉了,这里接受sei 数据。
+                // seiList.push(value);
+            })
+        }
+
+
 
         jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
             jessibuca.showErrorMessageTips('播放异常：' + error);
