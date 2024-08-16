@@ -1,4 +1,4 @@
-import {DEFAULT_PLAYER_OPTIONS, EVENTS, EVENTS_ERROR, JESSIBUCA_EVENTS,VERSION} from "../constant";
+import {DEFAULT_PLAYER_OPTIONS, EVENTS, EVENTS_ERROR, JESSIBUCA_EVENTS, VERSION} from "../constant";
 import Debug from "../utils/debug";
 import Events from "../utils/events";
 import property from './property';
@@ -7,7 +7,7 @@ import {
     fpsStatus,
     initPlayTimes,
     isEmpty, isFalse,
-    isFullScreen, isMobile,isPad,
+    isFullScreen, isMobile, isPad,
     isNotEmpty,
     now, supportMediaStreamTrack,
     supportMSE,
@@ -168,7 +168,7 @@ export default class Player extends Emitter {
 
         events(this);
         observer(this);
-        this.debug.log('Player', 'init and version is',VERSION);
+        this.debug.log('Player', 'init and version is', VERSION);
 
         if (this._opt.useWCS) {
             this.debug.log('Player', 'use WCS')
@@ -657,7 +657,15 @@ export default class Player extends Emitter {
      * @param flag
      */
     mute(flag) {
-        this.audio && this.audio.mute(flag)
+        if (this.audio) {
+            const prev = this.audio.getLastVolume();
+            this.audio.mute(flag)
+            if (flag) {
+                this._lastVolume = 0;
+            } else {
+                this._lastVolume = prev || 0.5;
+            }
+        }
     }
 
     /**
@@ -888,7 +896,7 @@ export default class Player extends Emitter {
         return result;
     }
 
-    getControlBarShow(){
+    getControlBarShow() {
         let result = false;
         if (this.control) {
             result = this.control.getBarIsShow();

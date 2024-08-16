@@ -118,7 +118,7 @@
 	  // demux type
 	  useWCS: false,
 	  //
-	  wcsUseVideoRender: true,
+	  wcsUseVideoRender: false,
 	  // 默认设置为true
 	  useMSE: false,
 	  //
@@ -133,7 +133,9 @@
 	  wasmDecodeAudioSyncVideo: false,
 	  // wasm 解码之后音视频同步
 	  recordType: FILE_SUFFIX.webm,
-	  useWebFullScreen: false // use web full screen
+	  useWebFullScreen: false,
+	  // use web full screen
+	  initDecoderWorkerTimeout: 10 //
 
 	};
 	const WORKER_CMD_TYPE = {
@@ -1955,7 +1957,9 @@
 
 	  render(msg) {
 	    if (this.vwriter) {
-	      this.vwriter.write(msg.videoFrame);
+	      this.vwriter.write(msg.videoFrame); //  release memory
+
+	      msg.videoFrame.close();
 	    }
 	  }
 
@@ -12834,6 +12838,7 @@
 	    this.$container = $container;
 	    this._loadingTimeoutReplayTimes = 0;
 	    this._heartTimeoutReplayTimes = 0;
+	    this.initDecoderWorkerTimeout = null;
 	    this._destroyed = false;
 	    this.events = new Events(this);
 	    this.debug = new Debug(this);
@@ -12849,15 +12854,18 @@
 
 	  async destroy() {
 	    this._destroyed = true;
+	    this.off();
 
-	    if (this.events) {
-	      this.events.destroy();
-	      this.events = null;
-	    }
+	    this._clearInitDecoderWorkerTimeout();
 
 	    if (this.player) {
 	      await this.player.destroy();
 	      this.player = null;
+	    }
+
+	    if (this.events) {
+	      this.events.destroy();
+	      this.events = null;
 	    }
 
 	    if (this.$container) {
@@ -12867,10 +12875,9 @@
 	      this.$container = null;
 	    }
 
-	    this._opt = null;
+	    this._opt = {};
 	    this._loadingTimeoutReplayTimes = 0;
 	    this._heartTimeoutReplayTimes = 0;
-	    this.off();
 	  }
 
 	  _initPlayer($container, options) {
@@ -13049,6 +13056,11 @@
 	  play(url) {
 	    let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 	    return new Promise((resolve, reject) => {
+	      if (this.isDestroyed()) {
+	        reject('Jessibuca is destroyed');
+	        return;
+	      }
+
 	      if (!url && !this._opt.url) {
 	        this.emit(EVENTS.error, EVENTS_ERROR.playError);
 	        reject('play url is empty');
@@ -13432,7 +13444,18 @@
 	          });
 	        });
 	      } else {
+	        this.debug.log('Jessibuca', '_play ant waiting decoderWorkerInit');
+
+	        this._checkInitDecoderWorkerTimeout();
+
 	        this.player.once(EVENTS.decoderWorkerInit, () => {
+	          this._clearInitDecoderWorkerTimeout();
+
+	          if (this.isDestroyed()) {
+	            return;
+	          }
+
+	          this.debug.log('Jessibuca', '_play decoderWorkerInit success and play');
 	          this.player.play(url, options).then(() => {
 	            resolve();
 	          }).catch(e => {
@@ -13623,6 +13646,29 @@
 	    }
 
 	    return result;
+	  }
+
+	  _clearInitDecoderWorkerTimeout() {
+	    if (this.initDecoderWorkerTimeout) {
+	      clearTimeout(this.initDecoderWorkerTimeout);
+	      this.initDecoderWorkerTimeout = null;
+	    }
+	  }
+
+	  _checkInitDecoderWorkerTimeout() {
+	    this._clearInitDecoderWorkerTimeout();
+
+	    this.initDecoderWorkerTimeout = setTimeout(() => {
+	      this._handleInitDecoderWorkerTimeout();
+	    }, this._opt.initDecoderWorkerTimeout * 1000);
+	  }
+
+	  _handleInitDecoderWorkerTimeout() {
+	    this.pause().then(() => {
+	      this.debug.log('Jessibuca', 'init decoder worker timeout and pause play');
+	    }).catch(e => {
+	      this.debug.warn('Jessibuca', 'init decoder worker timeout and pause play error', e);
+	    });
 	  }
 
 	}

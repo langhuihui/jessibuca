@@ -75,7 +75,7 @@ export default class AudioContextLoader extends Emitter {
     async destroy() {
         this.closeAudio();
         this.resetInit();
-        if(this.audioContext){
+        if (this.audioContext) {
             await this.audioContext.close();
             this.audioContext = null;
         }
@@ -318,5 +318,7 @@ export default class AudioContextLoader extends Emitter {
         this.playing = true;
     }
 
-
+    getLastVolume() {
+        return this._prevVolume;
+    }
 }

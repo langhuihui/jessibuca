@@ -260,9 +260,7 @@ wasmBinaryFile = 'https://cdn.com/decoder.wasm';
 
 #### webcodecs 硬解码
 
-默认是通过 `canvas` 进行渲染的
-
-> jessibuca pro 支持 `video` 标签渲染
+默认是通过 `canvas` 进行渲染的,也支持video渲染
 
 > Pro 支持 `canvas webgl2` 进行渲染的
 

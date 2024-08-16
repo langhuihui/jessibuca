@@ -208,7 +208,6 @@ export default {
                         isResize: false,
                         useWCS: this.useWCS,
                         useMSE: this.useMSE,
-                        wcsUseVideoRender: this.useWCS,
                         text: "",
                         // background: "bg.jpg",
                         loadingText: "疯狂加载中...",

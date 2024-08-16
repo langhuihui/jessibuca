@@ -118,7 +118,7 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 | 语音通讯（设置采样位数32位或16位或8位）                                                               | 不支持 | 支持  |
 | 语音通讯（设置声道单声道或双声道）                                                                    | 不支持 | 支持  |
 | 语音通讯（设置rtp包封装）                                                                       | 不支持 | 支持  |
-| 语音通讯（设置jtt包解封装）                                                                      | 不支持 | 支持  |
+| 语音通讯（设置jtt包解封装)[jtt介绍](https://jessibuca.com/document.html#%E5%85%B3%E4%BA%8E%E5%9B%BD%E6%A0%87-jtt-%E9%81%93%E8%B7%AF%E8%BF%90%E8%BE%93%E8%BD%A6%E8%BE%86%E5%8D%AB%E6%98%9F%E5%AE%9A%E4%BD%8D%E7%B3%BB%E7%BB%9F%E9%9F%B3%E8%A7%86%E9%A2%91%E9%80%9A%E8%AE%AF%E5%8D%8F%E8%AE%AE)                                                             | 不支持 | 支持  |
 | GB28181 TF卡（录像流）流播放 [介绍](https://jessibuca.com/pro-playback.html)                    | 不支持 | 支持  |
 | GB28181 TF卡（录像流）流播放，（2/4/8/16/32/64）倍率播放                                             | 不支持 | 支持  |
 | GB28181 TF卡（录像流）流播放，关键帧解码播放                                                          | 不支持 | 支持  |
@@ -636,9 +636,11 @@ Apple M1, M1 Pro, M1 Max, M1 Ultra 及以上
 
 ## 语音通讯
 
-支持在web页面采集麦克风数据，支持编码格式pcm、pcma(g711a)、pcmu(g711u)，支持封装成rtp包、jtt包。
+支持在web页面采集麦克风数据，支持编码格式pcm、pcma(g711a)、pcmu(g711u)，支持封装成rtp协议包、jtt协议包。
 
 > 目前仅支持单向语音通讯，不支持双向语音通讯。（仅支持通过ws传输到服务器，不支持通过ws接收音频数据进行播放），根据国标情况，播放端是跟着音视频一起播放的，可以使用音视频播放器进行播放器音频和视频数据。
+
+> 关于 jtt协议包的封装格式，可以参考：[jtt协议包](https://jessibuca.com/document.html#%E5%85%B3%E4%BA%8E%E5%9B%BD%E6%A0%87-jtt-%E9%81%93%E8%B7%AF%E8%BF%90%E8%BE%93%E8%BD%A6%E8%BE%86%E5%8D%AB%E6%98%9F%E5%AE%9A%E4%BD%8D%E7%B3%BB%E7%BB%9F%E9%9F%B3%E8%A7%86%E9%A2%91%E9%80%9A%E8%AE%AF%E5%8D%8F%E8%AE%AE)
 
 ## PRO AI
 

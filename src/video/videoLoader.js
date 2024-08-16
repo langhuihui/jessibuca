@@ -207,6 +207,8 @@ export default class VideoLoader extends CommonLoader {
     render(msg) {
         if (this.vwriter) {
             this.vwriter.write(msg.videoFrame);
+            //  release memory
+            msg.videoFrame.close();
         }
     }
 

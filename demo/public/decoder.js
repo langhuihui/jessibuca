@@ -7523,7 +7523,7 @@
 	  // demux type
 	  useWCS: false,
 	  //
-	  wcsUseVideoRender: true,
+	  wcsUseVideoRender: false,
 	  // 默认设置为true
 	  useMSE: false,
 	  //
@@ -7538,7 +7538,9 @@
 	  wasmDecodeAudioSyncVideo: false,
 	  // wasm 解码之后音视频同步
 	  recordType: FILE_SUFFIX.webm,
-	  useWebFullScreen: false // use web full screen
+	  useWebFullScreen: false,
+	  // use web full screen
+	  initDecoderWorkerTimeout: 10 //
 
 	};
 	const WORKER_CMD_TYPE = {

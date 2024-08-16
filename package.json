@@ -1,6 +1,6 @@
 {
     "name": "jessibuca",
-    "version": "3.2.6",
+    "version": "3.2.8",
     "scripts": {
         "build": "npx cross-env NODE_ENV=production rollup -c",
         "build:wasm": "python wasm/make.py --wasm && npm run build && npm run build:demo",
