@@ -109,7 +109,7 @@
             <input
                 autocomplete="on"
                 id="playUrl"
-                value="wss://hywlsp.scshyzh.cn:18208/live/50103.live.flv"
+                value=""
             />
             <button id="play">播放</button>
             <button id="pause" style="display: none">停止</button>
@@ -186,6 +186,7 @@
             useWebGPU: $isUseWebGPU.value === 'webgpu',
             controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
             isEmitSEI: true,
+            // findSEI: true,
             // audioEngine:"worklet",
             // isFlv: true
         },);
@@ -208,15 +209,23 @@
             $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
         })
 
+        // jessibuca.on('videoSEI', (value) => {
+        //     console.log(`videoSEI pts is ${value.pts} ,ts is ${value.ts}, data is`, value.data);
+        // })
+
         jessibuca.on('videoSEISyncPts', (value) => {
             const decoder = new TextDecoder(); // 创建一个 TextDecoder 对象
             let str = decoder.decode(value.data);
-            // 将字符串前面18位的uuid 移除掉,和最后一位结尾字符串移除掉
-            str = str.slice(20, str.length - 1);
+            // 将字符串前面1位,和最后一位结尾字符串移除掉
+            str = str.slice(1, str.length - 1);
 
             try {
                 const array = JSON.parse(str);
-                console.log(`videoSEISyncPts pts is ${value.pts} ,ts is ${value.ts}, data is`,array);
+                let string = '';
+                array.forEach((item)=>{
+                    string +=`class_name: ${item.class_name}, x1: ${item.x1}, y1: ${item.y1}, x2: ${item.x2}, y2: ${item.y2} \n`
+                })
+                console.log(`videoSEISyncPts pts is ${value.pts} ,ts is ${value.ts}, data is`,string);
                 const contentArray = [];
                 if (array && array.length > 0) {
 
@@ -248,7 +257,7 @@
                 }
                 jessibuca.addContentToCanvas(contentArray)
             } catch (e) {
-
+                console.error(e);
             }
 
 
