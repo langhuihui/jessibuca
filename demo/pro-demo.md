@@ -18,9 +18,11 @@
 
 
 ## vue 版本
-vue3:[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro](https://github.com/bosscheng/jessibuca-vue-demo/tree/pro)
+vue3(单页面):[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro](https://github.com/bosscheng/jessibuca-vue-demo/tree/pro)
 
-vue2:[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue2](https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue2)
+vue3-router(多页面切换) [https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue3-router](https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue3-router)
+
+vue2(单页面):[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue2](https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue2)
 
 
 ## react 版本
