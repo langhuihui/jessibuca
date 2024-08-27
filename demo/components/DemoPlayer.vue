@@ -195,7 +195,7 @@ export default {
         if (this.$options && this.$options.jessibuca) {
             await this.$options.jessibuca.destroy();
         }
-        this.vConsole.destroy();
+        this.vConsole && this.vConsole.destroy();
     },
     methods: {
         create(options) {

@@ -1284,17 +1284,19 @@ jessibuca.play('url1')
 
 // 切换播放源
 
-jessibuca.destroy();
-jessibuca = null;
+jessibuca.destroy().then(()=>{
+    jessibuca = null;
 
-// 从新new一个出来
-let jessibuca = new Jessibuca({
-// 参数
-})
+    // 从新new一个出来
+    let jessibuca = new Jessibuca({
+    // 参数
+    })
 
 
-// 播放新的地址
-jessibuca.play('url2')
+    // 播放新的地址
+    jessibuca.play('url2')
+
+});
 
 ```
 
@@ -1535,10 +1537,11 @@ jessibuca.on("error", function (error) {
     if (error === jessibuca.ERROR.fetchError || error === jessibuca.ERROR.websocketError) {
         // 这里统一的做重连。
 
-        jessibuca.destroy();
-        jessibuca = null;
-        jessibuca = new Jessibuca();
-        jessibuca.play(url);
+        jessibuca.destroy().then(()=>{
+            jessibuca = null;
+            jessibuca = new Jessibuca();
+            jessibuca.play(url);
+        });
     }
 })
 
@@ -2249,6 +2252,10 @@ https://juejin.cn/post/7215608036394614844
             const player = new window.Jessibuca({
                 container: dom,
             })
+            this.player = player;
+        },
+        async unmounted() {
+            await this.player.destroy();
         }
     }
 </script>
