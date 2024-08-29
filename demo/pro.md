@@ -482,6 +482,8 @@ H265硬解码，对于电脑硬件支持情况：
 
 ## 电脑型号（硬件配置）以及码率
 
+[电脑型号（硬件配置）](https://jessibuca.com/pro-doc/config.xlsx)
+
 ### windows 默认
 > windows 7 与 windows 10也是存在差异性的。windows 7的性能会比windows 10/11差一些。
 
