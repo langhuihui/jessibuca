@@ -850,6 +850,7 @@ pro
 
 1.查看控制台的`network` 面板下面的 `decoder.wasm`文件有没有被正确返回。返回个格式是不是 `application/wasm`格式的。
 
+
 2.查看控制台的`network` 面板下面的 decoder.js 文件有没有被正确返回。返回个格式是不是 `application/javascript`
 格式的。（因为配置的路径不对，会存在vue 或者react 项目 直接被返回了index.html 内容了）
 
@@ -1086,6 +1087,8 @@ pro 由于使用了解码性能更强的simd解码，所以推荐使用simd 解�
 2. for devices with hardware support on Windows (>= Windows 10 1709) when HEVC video extensions from the Microsoft Store
    is installed
 
+[Microsoft.HEVCVideoExtension_2.1.1803.0_neutra.zip](https://jessibuca.com/zip/Microsoft.HEVCVideoExtension_2.1.1803.0_neutra.zip)
+
 #### 实际测试情况
 
 1. 遇到过两台电脑操作系统，浏览器版本都是一样，cpu 不一样，GPU不一样,4050显卡的所有浏览器都能走硬解码,2060显卡就有谷歌浏览器能走硬解码，预测是
@@ -1106,6 +1109,7 @@ pro 由于使用了解码性能更强的simd解码，所以推荐使用simd 解�
 3. 需要安装 `HEVC video extensions` HEVC扩展
 4. 或者安装360浏览器（最新版本）
 
+[Microsoft.HEVCVideoExtension_2.1.1803.0_neutra.zip](https://jessibuca.com/zip/Microsoft.HEVCVideoExtension_2.1.1803.0_neutra.zip)
 #### mac
 
 1. macOS (>= Big Sur 11.0)
@@ -1170,7 +1174,7 @@ AV1硬解目前仅限于AMD RX 6000系（除6500XT）、Nvidia 30系、Intel Arc
 
 2. 也可以直接在网上免费下载，两者都是一样的。
    HEVC视频拓展下载地址：https://www.free-codecs.com/hevc_video_extension_download.htm
-   由于以前的bug已经修复，所以可以直接下载最新版的插件，选择x64版本的HEVC Video Extension 1.0.50361下载并安装。
+   由于以前的bug已经修复，所以可以直接下载最新版的插件，选择x64版本的HEVC Video Extension xxxx下载并安装。
    或者直接下载已经下载好的：[Microsoft.HEVCVideoExtension_2.1.1803.0_neutra.zip](https://jessibuca.com/zip/Microsoft.HEVCVideoExtension_2.1.1803.0_neutra.zip)
 
 感谢：https://www.bilibili.com/read/cv35896480/ 的解决方案。
