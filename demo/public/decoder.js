@@ -7540,7 +7540,7 @@
 	  recordType: FILE_SUFFIX.webm,
 	  useWebFullScreen: false,
 	  // use web full screen
-	  initDecoderWorkerTimeout: 10 //
+	  loadingDecoderWorkerTimeout: 10 //
 
 	};
 	const WORKER_CMD_TYPE = {

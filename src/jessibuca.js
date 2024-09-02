@@ -854,7 +854,7 @@ class Jessibuca extends Emitter {
         this._clearInitDecoderWorkerTimeout();
         this.initDecoderWorkerTimeout = setTimeout(() => {
             this._handleInitDecoderWorkerTimeout();
-        }, this._opt.initDecoderWorkerTimeout * 1000);
+        }, this.player._opt.loadingDecoderWorkerTimeout * 1000);
     }
 
 

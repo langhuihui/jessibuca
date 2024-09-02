@@ -73,7 +73,7 @@ export const DEFAULT_PLAYER_OPTIONS = {
     wasmDecodeAudioSyncVideo: false,// wasm 解码之后音视频同步
     recordType: FILE_SUFFIX.webm,
     useWebFullScreen: false, // use web full screen
-    initDecoderWorkerTimeout: 10 //
+    loadingDecoderWorkerTimeout: 10 //
 }
 
 

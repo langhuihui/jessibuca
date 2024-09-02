@@ -50,7 +50,7 @@
 	  webm: 'webm'
 	};
 	const CONTAINER_DATA_SET_KEY = 'jessibuca';
-	const VERSION = '"3.2.6"'; // default player options
+	const VERSION = '"3.2.9"'; // default player options
 
 	const DEFAULT_PLAYER_OPTIONS = {
 	  videoBuffer: 1000,
@@ -135,7 +135,7 @@
 	  recordType: FILE_SUFFIX.webm,
 	  useWebFullScreen: false,
 	  // use web full screen
-	  initDecoderWorkerTimeout: 10 //
+	  loadingDecoderWorkerTimeout: 10 //
 
 	};
 	const WORKER_CMD_TYPE = {
@@ -2342,6 +2342,10 @@
 
 	  resume() {
 	    this.playing = true;
+	  }
+
+	  getLastVolume() {
+	    return this._prevVolume;
 	  }
 
 	}
@@ -12514,7 +12518,16 @@
 
 
 	  mute(flag) {
-	    this.audio && this.audio.mute(flag);
+	    if (this.audio) {
+	      const prev = this.audio.getLastVolume();
+	      this.audio.mute(flag);
+
+	      if (flag) {
+	        this._lastVolume = 0;
+	      } else {
+	        this._lastVolume = prev || 0.5;
+	      }
+	    }
 	  }
 	  /**
 	   *
@@ -13177,7 +13190,8 @@
 	            this.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play');
 
 	            this._resetPlayer({
-	              useMSE: false
+	              useMSE: false,
+	              useWCS: false
 	            });
 
 	            this.play(url, options).then(() => {
@@ -13282,7 +13296,8 @@
 	            this.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play');
 
 	            this._resetPlayer({
-	              useWCS: false
+	              useWCS: false,
+	              useMSE: false
 	            });
 
 	            this.play(url, options).then(() => {
@@ -13660,7 +13675,7 @@
 
 	    this.initDecoderWorkerTimeout = setTimeout(() => {
 	      this._handleInitDecoderWorkerTimeout();
-	    }, this._opt.initDecoderWorkerTimeout * 1000);
+	    }, this.player._opt.loadingDecoderWorkerTimeout * 1000);
 	  }
 
 	  _handleInitDecoderWorkerTimeout() {
