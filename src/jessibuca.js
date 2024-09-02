@@ -387,7 +387,7 @@ class Jessibuca extends Emitter {
             //
             const protocol = isHttp ? PLAYER_PLAY_PROTOCOL.fetch : PLAYER_PLAY_PROTOCOL.websocket
             //
-            const demuxType = (isHttp || url.indexOf(".flv") !== -1 || this._opt.isFlv) ? DEMUX_TYPE.flv : DEMUX_TYPE.m7s;
+            const demuxType = (isHttp || url.indexOf(".flv") !== -1 || this.player._opt.isFlv) ? DEMUX_TYPE.flv : DEMUX_TYPE.m7s;
 
             this.player.updateOption({
                 protocol,
@@ -712,7 +712,7 @@ class Jessibuca extends Emitter {
     setRotate(deg) {
         deg = parseInt(deg, 10)
         const list = [0, 90, 180, 270];
-        if (this._opt.rotate === deg || list.indexOf(deg) === -1) {
+        if (this.player._opt.rotate === deg || list.indexOf(deg) === -1) {
             return;
         }
         this.player.updateOption({
