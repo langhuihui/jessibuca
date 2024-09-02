@@ -413,7 +413,7 @@ class Jessibuca extends Emitter {
                 this.pause().then(() => {
                     if (this.player._opt.autoWasm) {
                         this.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play')
-                        this._resetPlayer({useMSE: false})
+                        this._resetPlayer({useMSE: false, useWCS: false})
                         this.play(url, options).then(() => {
                             // resolve();
                             this.debug.log('Jessibuca', 'auto wasm [mse-> wasm] reset player and play success')
@@ -506,7 +506,7 @@ class Jessibuca extends Emitter {
                 this.pause().then(() => {
                     if (this.player._opt.autoWasm) {
                         this.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play')
-                        this._resetPlayer({useWCS: false})
+                        this._resetPlayer({useWCS: false, useMSE: false})
                         this.play(url, options).then(() => {
                             // resolve();
                             this.debug.log('Jessibuca', 'auto wasm [wcs-> wasm] reset player and play success')
