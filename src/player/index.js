@@ -45,19 +45,19 @@ export default class Player extends Emitter {
             this._opt.controlAutoHide = false;
         }
 
-        if (screenfull.isEnabled &&
-            this._opt.useWebFullScreen) {
-            this.debug.log('Player', 'screenfull.isEnabled is true and _opt.useWebFullScreen is true , set _opt.useWebFullScreen false');
-            this._opt.useWebFullScreen = false;
+        if (this._opt.autoUseSystemFullScreen) {
+            if (screenfull.isEnabled &&
+                this._opt.useWebFullScreen) {
+                this.debug.log('Player', 'screenfull.isEnabled is true and _opt.useWebFullScreen is true , set _opt.useWebFullScreen false');
+                this._opt.useWebFullScreen = false;
+            }
+
+            if (isFalse(screenfull.isEnabled) &&
+                isFalse(this._opt.useWebFullScreen)) {
+                this.debug.log('Player', 'screenfull.isEnabled is false and _opt.useWebFullScreen is false , set _opt.useWebFullScreen true');
+                this._opt.useWebFullScreen = true;
+            }
         }
-
-        if (isFalse(screenfull.isEnabled) &&
-            isFalse(this._opt.useWebFullScreen)) {
-            this.debug.log('Player', 'screenfull.isEnabled is false and _opt.useWebFullScreen is false , set _opt.useWebFullScreen true');
-            this._opt.useWebFullScreen = true;
-        }
-
-
         //
         if (this._opt.useWCS) {
             this._opt.useWCS = supportWCS();
