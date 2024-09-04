@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Jessica demo</title>
     <link rel="stylesheet" href="./demo.css">
-    <script src="./vconsole.js"></script>
     <script src="./js/jessibuca-pro-mp4-recorder-demo.js"></script>
     <script src="./js/jessibuca-pro-recorder-demo.js"></script>
     <style>
@@ -61,7 +60,9 @@
         </div>
     </div>
 </div>
-
+<script>
+    window.JESSIBUCA_PRO_MP4_RECORDER_WASM_URL='./js/jessibuca-pro-mp4-recorder-decoder.wasm'
+</script>
 <script>
     var $player = document.getElementById('play');
     var $pause = document.getElementById('pause');
@@ -83,6 +84,7 @@
             recordType: $recordType.value,
             hasVideo: $hasVideo.checked,
             hasAudio: $hasAudio.checked,
+            wasmMp4RecorderDecoder:'./js/jessibuca-pro-mp4-recorder-decoder.js',
         });
 
 
@@ -95,6 +97,7 @@
         })
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
+        $recordHtml.innerHTML = '';
     }
 
 
@@ -108,9 +111,6 @@
             $player.style.display = 'none';
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
-        }
-        else{
-            jessibuca.showErrorMessageTips('播放地址不能为空');
         }
     }
 
