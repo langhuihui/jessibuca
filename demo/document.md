@@ -2944,6 +2944,32 @@ F12 打开控制台 -> 切换到 `Network` 选项卡 -> 勾选`Disable cache` ->
 暂时没有找到好的解决方案，如果有人有好的解决方案，可以分享出来，方便大家一起解决，可以联系我微信：bosswancheng
 
 
+### 关于如何查看手机端的日志信息并保存下来
+
+#### 安卓
+
+1. 借助安卓chrome浏览器 + window电脑
+
+- 在安卓手机上下载一个谷歌浏览器，下载完毕后，将手机与电脑用数据线链接
+- 在window系统电脑上，打开谷歌浏览器，在地址栏中输入：chrome://inspect/#devices
+- 选择需要调试的设备，点击inspect，即可查看手机端的日志信息
+
+https://blog.csdn.net/Kiruthika/article/details/125335590
+
+
+#### IOS
+
+
+1. 可以借助`ios-webkit-debug-proxy`来查看手机端的日志信息。
+
+github：https://github.com/google/ios-webkit-debug-proxy
+
+2. 借助safari + mac电脑
+
+https://blog.csdn.net/xyphf/article/details/105116223
+
+
+
 ## 支持作者
 
 ### 第一作者

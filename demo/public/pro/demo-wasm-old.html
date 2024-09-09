@@ -141,6 +141,11 @@
                     type="checkbox"
                     id="controlAutoHide"
                 /><span>自动隐藏控制条</span>
+                <input
+                    checked
+                    type="checkbox"
+                    id="isFlv"
+                /><span>是否flv格式</span>
             </div>
         </div>
 
@@ -184,6 +189,7 @@
     var $replayShowLoadingIcon = document.getElementById('replayShowLoadingIcon');
     var $mseDecoderUseWorker = document.getElementById('mseDecoderUseWorker');
     var $controlAutoHide = document.getElementById('controlAutoHide');
+    var $isFlv = document.getElementById('isFlv');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -241,7 +247,7 @@
             replayShowLoadingIcon: $replayShowLoadingIcon.checked === true,// 重播显示loading
             mseDecoderUseWorker:$mseDecoderUseWorker.checked === true,
             controlAutoHide:$controlAutoHide.checked === true,
-
+            isFlv:$isFlv.checked === true,
         },);
 
         jessibuca.on('stats', (stats) => {
