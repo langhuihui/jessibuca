@@ -49,6 +49,11 @@
             </div>
         </div>
         <div class="input">
+            <div>
+                Tips: 如果尝试自动播放带音频失败，可以尝试手动播放
+            </div>
+        </div>
+        <div class="input">
             <div><input
                 type="checkbox"
                 checked
@@ -310,6 +315,10 @@
         }
         replay();
     })
+
+    $container.addEventListener('click', function () {
+        jessibuca.cancelMute()
+    }, false)
 
 </script>
 
