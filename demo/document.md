@@ -1884,6 +1884,8 @@ IOS 全屏效果
 
 ### Android端webview全屏调用无效问题
 
+会抛出：`TypeError:Fullscreen is not supported`的异常错误。
+
 > android webView内默认是没有实现视频全屏的，调动dom.requestFullscreen没有任何响应，这个会表现为点击全屏按钮无效
 
 
