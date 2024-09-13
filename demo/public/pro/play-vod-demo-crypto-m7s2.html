@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Jessibuca Pro 点播(m7s) demo</title>
+    <title>Jessibuca Pro 点播 demo</title>
     <script src="./vconsole.js"></script>
-    <script src="./js/jessibuca-pro-vod-demo.js"></script>
+    <script src="./js/jessibuca-pro-demo.js"></script>
     <link rel="stylesheet" href="./demo.css">
     <style>
         .container-shell:before {
@@ -77,7 +77,7 @@
                     id="m7sCryptoAudio"
                 /><span>解密音频数据</span>
                 <span>秘钥：</span>
-                <input type="text" id="m7sKey" style="width: 200px" placeholder="请输入秘钥" value="">
+                <input type="text" id="m7sKey" style="width: 200px" placeholder="请输入秘钥" value="MjE3OTZhNzQ4NGQ5MDhiOWY1MGZhMGEwMWFlZDJiZDk.MWZmM2Y1MzA5MzJlNjVkNQ">
             </div>
 
             <button onclick="replay()">重播</button>
@@ -87,7 +87,7 @@
             <input
                 autocomplete="on"
                 id="playUrl"
-                value=""
+                value="https://vod.olelive.com:2053/hls/testenc/master.m3u8"
             />
         </div>
         <div class="input">
@@ -126,7 +126,7 @@
 
     function create() {
         const showOperateBtns = true;
-        jessibuca = new JessibucaProVod({
+        jessibuca = new JessibucaPro({
             container: $container,
             videoBuffer: 0.2, // 缓存时长
             decoder: './js/decoder-pro.js',

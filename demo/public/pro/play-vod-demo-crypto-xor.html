@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Jessibuca Pro 点播(xor) demo</title>
     <script src="./vconsole.js"></script>
-    <script src="./js/jessibuca-pro-vod-demo.js"></script>
+    <script src="./js/jessibuca-pro-demo.js"></script>
     <link rel="stylesheet" href="./demo.css">
     <style>
         .container-shell:before {
@@ -131,7 +131,7 @@
 
     function create() {
         const showOperateBtns = true;
-        jessibuca = new JessibucaProVod({
+        jessibuca = new JessibucaPro({
             container: $container,
             videoBuffer: 0.2, // 缓存时长
             decoder: './js/decoder-pro.js',

@@ -26,45 +26,45 @@ sidebar: false
 HLS体验版本请前往
 
 #### https
-[https://jessibuca.com/pro-vod/play-vod-demo-hls.html](https://jessibuca.com/pro-vod/play-vod-demo-hls.html)
+[https://jessibuca.com/pro/play-vod-demo-hls.html](https://jessibuca.com/pro/play-vod-demo-hls.html)
 
 #### http
-[http://jessibuca.monibuca.com/pro-vod/play-vod-demo-hls.html](http://jessibuca.monibuca.com/pro-vod/play-vod-demo-hls.html)
+[http://jessibuca.monibuca.com/pro/play-vod-demo-hls.html](http://jessibuca.monibuca.com/pro/play-vod-demo-hls.html)
 
 
 MP4体验版本请前往
 
 #### https
-[https://jessibuca.com/pro-vod/play-vod-demo-mp4.html](https://jessibuca.com/pro-vod/play-vod-demo-mp4.html)
+[https://jessibuca.com/pro/play-vod-demo-mp4.html](https://jessibuca.com/pro/play-vod-demo-mp4.html)
 
 #### http
-[http://jessibuca.monibuca.com/pro-vod/play-vod-demo-mp4.html](http://jessibuca.monibuca.com/pro-vod/play-vod-demo-mp4.html)
+[http://jessibuca.monibuca.com/pro/play-vod-demo-mp4.html](http://jessibuca.monibuca.com/pro/play-vod-demo-mp4.html)
 
 
 M7S-Crypto 加密流体验版本请前往
 
 #### https
-[https://jessibuca.com/pro-vod/play-vod-demo-crypto-m7s.html](https://jessibuca.com/pro-vod/play-vod-demo-crypto-m7s.html)
+[https://jessibuca.com/pro/play-vod-demo-crypto-m7s.html](https://jessibuca.com/pro/play-vod-demo-crypto-m7s.html)
 
 #### http
-[http://jessibuca.monibuca.com/pro-vod/play-vod-demo-crypto-m7s.html](http://jessibuca.monibuca.com/pro-vod/play-vod-demo-crypto-m7s.html)
+[http://jessibuca.monibuca.com/pro/play-vod-demo-crypto-m7s.html](http://jessibuca.monibuca.com/pro/play-vod-demo-crypto-m7s.html)
 
 
 SM4-Crypto 加密流体验版本请前往
 
 #### https
-[https://jessibuca.com/pro-vod/play-vod-demo-crypto-sm4.html](https://jessibuca.com/pro-vod/play-vod-demo-crypto-sm4.html)
+[https://jessibuca.com/pro/play-vod-demo-crypto-sm4.html](https://jessibuca.com/pro/play-vod-demo-crypto-sm4.html)
 
 #### http
-[http://jessibuca.monibuca.com/pro-vod/play-vod-demo-crypto-sm4.html](http://jessibuca.monibuca.com/pro-vod/play-vod-demo-crypto-sm4.html)
+[http://jessibuca.monibuca.com/pro/play-vod-demo-crypto-sm4.html](http://jessibuca.monibuca.com/pro/play-vod-demo-crypto-sm4.html)
 
 XOR-Crypto 加密流体验版本请前往
 
 #### https
-[https://jessibuca.com/pro-vod/play-vod-demo-crypto-xor.html](https://jessibuca.com/pro-vod/play-vod-demo-crypto-xor.html)
+[https://jessibuca.com/pro/play-vod-demo-crypto-xor.html](https://jessibuca.com/pro/play-vod-demo-crypto-xor.html)
 
 #### http
-[http://jessibuca.monibuca.com/pro-vod/play-vod-demo-crypto-xor.html](http://jessibuca.monibuca.com/pro-vod/play-vod-demo-crypto-xor.html)
+[http://jessibuca.monibuca.com/pro/play-vod-demo-crypto-xor.html](http://jessibuca.monibuca.com/pro/play-vod-demo-crypto-xor.html)
 
 
-离线版请前往 [下载](https://jessibuca.com/pro-vod.zip)
+离线版请前往 [下载](https://jessibuca.com/pro.zip)
