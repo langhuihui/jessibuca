@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="./demo.css">
     <style>
         .container-shell:before {
-            content: "jessibuca pro 点播 demo";
+            content: "jessibuca pro hls 点播 demo";
         }
     </style>
 </head>
@@ -68,7 +68,30 @@
             </div>
         </div>
         <div class="input">
-            <button onclick="replay()">重播</button>
+            <div>
+                <input
+                    checked
+                    onclick="replay()"
+                    type="checkbox"
+                    id="isHls"
+                /><span>强制HLS</span>
+                <button onclick="replay()">重播</button>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <div>
+                    <span style="color: red">H264:</span>https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/hls/xgplayer-demo.m3u8
+                </div>
+                <div>
+                    <span style="color: red">H264:</span>https://vod.lyhuicheng.com/20230719/oc5MCoON/index.m3u8
+                </div>
+                <div>
+                    <span style="color: red">H265:</span>
+                    <span style="word-break: break-all">https://voddemo-play.volcvod.com/8d1417d814b24fee8b8b0c2747f303e5/main.m3u8?a=0&auth_key=1765632280-d3569ddc77d445ab8647746220f67766-0-0222f8289976f07f8c91c230753ce911&br=384&bt=384&cd=0%7C0%7C0&ch=0&cr=1&cs=&cv=1&dr=0&ds=2&er=0&l=202212142122085BF19BF20712C413A9A2&lr=&mime_type=video_mp4&net=0&pl=0&qs=0&rc=amg6c2o0aTg6ZTQzNGRnM0ApZzlnZzNlPGRlNzZmZTg5NWdfZy9gMHFrYTBgLS1kYy9zczQxNi4wYmItLTVgYTFjXjU6Yw%3D%3D&vl=&vr=</span>
+
+                </div>
+            </div>
         </div>
         <div class="input">
             <div>输入URL：</div>
@@ -104,6 +127,7 @@
     var $useWCS = document.getElementById('useWCS');
     var $playVodForward = document.getElementById('playVodForward');
     var $playVodBackword = document.getElementById('playVodBackword');
+    var $isHls = document.getElementById('isHls');
 
     var forceNoOffscreen = true; //
     var jessibuca = null;
@@ -135,14 +159,16 @@
             },
             forceNoOffscreen: forceNoOffscreen,
             muted: false,
+            isHls: $isHls.checked,
         },);
 
-        jessibuca.onLog = msg => console.error(msg);
-        jessibuca.onRecord = (status) => console.log('onRecord', status);
-        jessibuca.onPause = () => console.log('onPause');
-        jessibuca.onPlay = () => console.log('onPlay');
-        jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
-        jessibuca.onMute = msg => console.log('onMute', msg);
+        jessibuca.on('playVodEnded', function () {
+            console.log('playVodEnded');
+        })
+
+        jessibuca.on('playVodRateChange', function (rate) {
+            console.log('playVodRateChange', rate);
+        })
         $player.style.display = 'inline-block';
         $playVodPause.style.display = 'none';
         $destroy.style.display = 'none';
