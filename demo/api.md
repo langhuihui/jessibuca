@@ -226,7 +226,7 @@ worker地址
 
 - **类型**：`number`
 - **默认值**：`3`
-- **用法**： heartTimeoutReplay 重试次数
+- **用法**： loadingTimeoutReplay 重试次数
 
 > loadingTimeoutReplay 重试失败之后，不再重新播放视频地址。
 
@@ -296,7 +296,7 @@ worker地址
 
 > 视频编码只支持H.264视频（Safari on iOS不支持）
 
-> 不支持 forceNoOffscreen 为 false (开启离屏渲染)
+~~> 不支持 forceNoOffscreen 为 false (开启离屏渲染)~~
 
 > 优先级高于useWCS:true
 
@@ -308,7 +308,7 @@ worker地址
 
 > 视频编码只支持H.264视频 (需在chrome 94版本以上，需要https或者localhost环境)
 
-> 支持 forceNoOffscreen 为 false （开启离屏渲染）
+~~> 支持 forceNoOffscreen 为 false （开启离屏渲染）~~
 
 > 如果同时设置了useMSE:true, 则优先使用useMSE
 
@@ -318,7 +318,7 @@ worker地址
 - **默认值**：`true`
 - **用法**： webcodecs硬解码是否通过video标签渲染
 
-> forceNoOffscreen 设置为false之后（通过OffscreenCanvas渲染之），wcsUseVideoRender不会生效。
+~~> forceNoOffscreen 设置为false之后（通过OffscreenCanvas渲染之），wcsUseVideoRender不会生效。~~
 
 > ~~webcodecs硬解码之后，默认是通过canvas 渲染出来的，可以通过配置通过video标签渲染，提升渲染性能。~~
 
