@@ -131,7 +131,7 @@ vue2(单页面):[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue2](
 [http://jessibuca.monibuca.com/pro/6x7-wcs-demo.html](http://jessibuca.monibuca.com/pro/6x7-wcs-demo.html)
 
 
-## 国标回放(录像)流Demo(支持mse、wcs、simd解码)
+## 国标回放(录像)流Demo(支持mse、wcs、wasm、simd解码)
 
 ### 国标TF卡流（录像流）- 24h时间轴
 ------
@@ -150,7 +150,67 @@ vue2(单页面):[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue2](
 [http://jessibuca.monibuca.com/pro/playback-simple-demo.html](http://jessibuca.monibuca.com/pro/playback-simple-demo.html)
 
 
+## 点播Demo(支持mse、wcs、wasm、simd)
 
+### demo
+------
+#### https
+
+[https://jessibuca.com/pro/play-vod-demo.html](https://jessibuca.com/pro/play-vod-demo.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/play-vod-demo.html](http://jessibuca.monibuca.com/pro/play-vod-demo.html)
+
+
+### mp4 demo
+------
+#### https
+
+[https://jessibuca.com/pro/play-vod-demo-mp4.html](https://jessibuca.com/pro/play-vod-demo-mp4.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/play-vod-demo-mp4.html](http://jessibuca.monibuca.com/pro/play-vod-demo-mp4.html)
+
+### hls demo
+
+------
+#### https
+
+[https://jessibuca.com/pro/play-vod-demo-hls.html](https://jessibuca.com/pro/play-vod-demo-hls.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/play-vod-demo-hls.html](http://jessibuca.monibuca.com/pro/play-vod-demo-hls.html)
+
+
+### m7s加密demo
+------
+#### https
+
+[https://jessibuca.com/pro/play-vod-demo-crypto-m7s.html](https://jessibuca.com/pro/play-vod-demo-crypto-m7s.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/play-vod-demo-crypto-m7s.html](http://jessibuca.monibuca.com/pro/play-vod-demo-crypto-m7s.html)
+
+
+
+### sm4加密demo
+------
+#### https
+
+[https://jessibuca.com/pro/play-vod-demo-crypto-sm4.html](https://jessibuca.com/pro/play-vod-demo-crypto-sm4.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/play-vod-demo-crypto-sm4.html](http://jessibuca.monibuca.com/pro/play-vod-demo-crypto-sm4.html)
+
+
+### xor加密demo
+------
+#### https
+
+[https://jessibuca.com/pro/play-vod-demo-crypto-xor.html](https://jessibuca.com/pro/play-vod-demo-crypto-xor.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/play-vod-demo-crypto-xor.html](http://jessibuca.monibuca.com/pro/play-vod-demo-crypto-xor.html)
 
 ## 音频直播流（支持移动端（平板端）息屏和后台播放）
 
