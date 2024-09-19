@@ -105,6 +105,12 @@
                     checked
                     id="supportHls265"
                 /><span>支持HlS265解码</span>
+                <input
+                    type="checkbox"
+                    onclick="replay()"
+                    checked
+                    id="isHls"
+                /><span>强制Hls</span>
             </div>
         </div>
 
@@ -144,6 +150,7 @@
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
     var $supportHls265 = document.getElementById('supportHls265');
     var $audioEngine = document.getElementById('audioEngine');
+    var $isHls = document.getElementById('isHls');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -164,6 +171,7 @@
             decoderErrorAutoWasm: false,
             useSIMD: $useSIMD.checked === true,
             useWCS: $useWCS.checked === true,
+            isHls: $isHls.checked === true,
             showBandwidth: showOperateBtns, // 显示网速
             showPerformance: showOperateBtns, // 显示性能
             operateBtns: {

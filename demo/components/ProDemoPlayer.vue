@@ -24,7 +24,9 @@
                     <span v-if="!supportMSE" style="color: red;">不支持MSE H264解码；</span>
                     <span v-if="supportMSEHevc" style="color: green;margin-right: 10px">支持MSE H265解码;</span>
                     <span v-if="!supportMSEHevc" style="color: red;margin-right: 10px;">不支持MSE H265解码,会自动切换成wasm(simd)解码</span>
-                    <span v-if="!isEdgeSupportHevc"><a href="https://jessibuca.com/zip/Microsoft.HEVCVideoExtension_2.1.1803.0_neutra.zip" target="_blank">下载window Edge Hevc扩展插件</a></span>
+                    <span v-if="!isEdgeSupportHevc"><a
+                        href="https://jessibuca.com/zip/Microsoft.HEVCVideoExtension_2.1.1803.0_neutra.zip"
+                        target="_blank">下载window Edge Hevc扩展插件</a></span>
                 </div>
                 <div>
                     <div v-if="playing && decodeType">
@@ -128,16 +130,7 @@
                         v-model="isMute"
                         @change="restartPlay()"
                     /><span>静音播放</span>
-                    <input
-                        type="checkbox"
-                        v-model="isFlv"
-                        @change="restartPlay()"
-                    /><span>设置Flv格式</span>
-                    <input
-                        type="checkbox"
-                        v-model="isFmp4"
-                        @change="restartPlay()"
-                    /><span>设置Fmp4格式</span>
+
                     <input
                         type="checkbox"
                         v-model="decoderErrorAutoWasm"
@@ -148,10 +141,31 @@
             <div class="input">
                 <input
                     type="checkbox"
+                    v-model="isFlv"
+                    @change="restartPlay('isFlv')"
+                /><span>设置Flv格式</span>
+                <input
+                    type="checkbox"
+                    v-model="isHls"
+                    @change="restartPlay('isHls')"
+                /><span>设置Hls格式</span>
+                <input
+                    type="checkbox"
+                    v-model="isFmp4"
+                    @change="restartPlay('isFmp4')"
+                /><span>设置Fmp4格式</span>
+                <input
+                    type="checkbox"
+                    v-model="isNakedFlow"
+                    @change="restartPlay('isNakedFlow')"
+                /><span>设置裸流格式</span>
+            </div>
+            <div class="input">
+                <input
+                    type="checkbox"
                     v-model="networkDelayTimeoutReplay"
                     @change="restartPlay()"
                 /><span>网络延迟重新播放</span>
-
                 <input
                     type="checkbox"
                     v-model="hiddenAutoPause"
@@ -564,6 +578,8 @@ export default {
             playModel: 'video+audio',
             isFlv: false,
             isFmp4: false,
+            isHls: false,
+            isNakedFlow: false,
             decoderErrorAutoWasm: true,
             hiddenAutoPause: false,
             hasVideo: true,
@@ -674,6 +690,8 @@ export default {
                         ],
                         isFlv: this.isFlv,
                         isFmp4: this.isFmp4,
+                        isHls: this.isHls,
+                        isNakedFlow: this.isNakedFlow,
                         hiddenAutoPause: this.hiddenAutoPause,
                         forceNoOffscreen: !this.useOffscreen,
                         isNotMute: !this.isMute,
@@ -1138,13 +1156,21 @@ export default {
             } else if (type === 'isNakedFlow') {
                 this.isFlv = false;
                 this.isFmp4 = false;
+                this.isHls = false;
             } else if (type === 'isFlv') {
                 this.isNakedFlow = false;
                 this.isFmp4 = false;
+                this.isHls = false;
             } else if (type === 'isFmp4') {
                 this.isNakedFlow = false;
                 this.isFlv = false;
+                this.isHls = false;
+            } else if (type === 'isHls') {
+                this.isNakedFlow = false;
+                this.isFlv = false;
+                this.isFmp4 = false;
             }
+
 
             this.replay();
         },
@@ -1345,7 +1371,7 @@ export default {
             jessibuca.clearContentToCanvas();
         },
 
-        toggleControlBar(){
+        toggleControlBar() {
             this.$options.jessibuca.toggleControlBar();
         },
     },
