@@ -73,10 +73,14 @@ features:
   details: 支持1*1，2*2，3*3外加不规则多屏显示
 - title: 支持语音通讯(Pro)
   details: 支持web端语音通讯
-- title: 支持国标SM-4加密(Pro)
-  details: 支持国标SM-4加密
-- title: 支持XOR加密(Pro)
-  details: 支持XOR加密
+- title: 支持国标SM-4加密直播流(Pro)
+  details: 支持国标SM-4加密直播流
+- title: 支持XOR加密直播流(Pro)
+  details: 支持XOR加密直播流
+- title: 支持MP4H264/H265点播(Pro)
+  details: 支持硬解码(MSE + WCS)和软解码(WASM + WASM(SIMD)) 播放
+- title: 支持HLSH264/H265点播(Pro)
+  details: 支持硬解码(MSE + WCS)和软解码(WASM + WASM(SIMD)) 播放
 - title: 更多
   details: 请到Pro文档页单独查看
 ---

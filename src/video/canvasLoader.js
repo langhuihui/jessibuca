@@ -10,7 +10,7 @@ import {
     supportOffscreen
 } from "../utils";
 import createWebGL from "../utils/webgl";
-import {CANVAS_RENDER_TYPE, CONTROL_HEIGHT, EVENTS, SCREENSHOT_TYPE, VIDEO_ENC_TYPE} from "../constant";
+import {CANVAS_RENDER_TYPE, CONTROL_HEIGHT, EVENTS, EVENTS_ERROR, SCREENSHOT_TYPE, VIDEO_ENC_TYPE} from "../constant";
 import CommonLoader from "./commonLoader";
 import saveAs from "../utils/file-save";
 
@@ -32,6 +32,7 @@ export default class CanvasVideoLoader extends CommonLoader {
         this.contextGlDestroy = null;
         this.bitmaprenderer = null;
         this.renderType = null;
+        this.isContextGlRenderLost = false;
         this.videoInfo = {
             width: '',
             height: '',
@@ -60,6 +61,7 @@ export default class CanvasVideoLoader extends CommonLoader {
         }
 
         this.renderType = null;
+        this.isContextGlRenderLost = false;
 
         this.player.debug.log(`CanvasVideoLoader`, 'destroy');
     }
@@ -67,12 +69,11 @@ export default class CanvasVideoLoader extends CommonLoader {
 
     _initContextGl() {
         this.contextGl = createContextGL(this.$videoElement);
-        if(this.contextGl){
+        if (this.contextGl) {
             const webgl = createWebGL(this.contextGl, this.player._opt.openWebglAlignment);
             this.contextGlRender = webgl.render;
             this.contextGlDestroy = webgl.destroy
-        }
-        else {
+        } else {
             this.player.debug.error(`CanvasVideoLoader`, 'init webgl fail');
         }
     }
@@ -119,7 +120,16 @@ export default class CanvasVideoLoader extends CommonLoader {
                 this.bitmaprenderer.transferFromImageBitmap(msg.buffer);
                 break;
             case CANVAS_RENDER_TYPE.webgl:
-                this.contextGlRender(this.$videoElement.width, this.$videoElement.height, msg.output[0], msg.output[1], msg.output[2]);
+                if (this.isContextGlRenderLost) {
+                    return;
+                }
+                try {
+                    this.contextGlRender(this.$videoElement.width, this.$videoElement.height, msg.output[0], msg.output[1], msg.output[2]);
+                } catch (e) {
+                    this.player.debug.error('CanvasVideoLoader', 'render', e);
+                    this.isContextGlRenderLost = true;
+                    this.player.emitError(EVENTS_ERROR.webglContextLostError)
+                }
                 break;
             case CANVAS_RENDER_TYPE.webcodecs:
                 // can use  createImageBitmap in wexin

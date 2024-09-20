@@ -20,51 +20,9 @@ sidebar: false
 <Rice/>
 # 正在开发中，敬请期待
 
-
-开发进度：HLS(95%),MP4(95%)
-
-HLS体验版本请前往
-
-#### https
-[https://jessibuca.com/pro/play-vod-demo-hls.html](https://jessibuca.com/pro/play-vod-demo-hls.html)
-
-#### http
-[http://jessibuca.monibuca.com/pro/play-vod-demo-hls.html](http://jessibuca.monibuca.com/pro/play-vod-demo-hls.html)
+开发进度：HLS(98%),MP4(98%)
 
 
-MP4体验版本请前往
-
-#### https
-[https://jessibuca.com/pro/play-vod-demo-mp4.html](https://jessibuca.com/pro/play-vod-demo-mp4.html)
-
-#### http
-[http://jessibuca.monibuca.com/pro/play-vod-demo-mp4.html](http://jessibuca.monibuca.com/pro/play-vod-demo-mp4.html)
+[测试地址](pro-demo.html#点播demo-支持mse、wcs、wasm、simd)
 
 
-M7S-Crypto 加密流体验版本请前往
-
-#### https
-[https://jessibuca.com/pro/play-vod-demo-crypto-m7s.html](https://jessibuca.com/pro/play-vod-demo-crypto-m7s.html)
-
-#### http
-[http://jessibuca.monibuca.com/pro/play-vod-demo-crypto-m7s.html](http://jessibuca.monibuca.com/pro/play-vod-demo-crypto-m7s.html)
-
-
-SM4-Crypto 加密流体验版本请前往
-
-#### https
-[https://jessibuca.com/pro/play-vod-demo-crypto-sm4.html](https://jessibuca.com/pro/play-vod-demo-crypto-sm4.html)
-
-#### http
-[http://jessibuca.monibuca.com/pro/play-vod-demo-crypto-sm4.html](http://jessibuca.monibuca.com/pro/play-vod-demo-crypto-sm4.html)
-
-XOR-Crypto 加密流体验版本请前往
-
-#### https
-[https://jessibuca.com/pro/play-vod-demo-crypto-xor.html](https://jessibuca.com/pro/play-vod-demo-crypto-xor.html)
-
-#### http
-[http://jessibuca.monibuca.com/pro/play-vod-demo-crypto-xor.html](http://jessibuca.monibuca.com/pro/play-vod-demo-crypto-xor.html)
-
-
-离线版请前往 [下载](https://jessibuca.com/pro.zip)
