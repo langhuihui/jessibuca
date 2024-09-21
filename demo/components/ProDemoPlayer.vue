@@ -537,7 +537,7 @@ export default {
             quieting: true,
             loading: false,
             loaded: false, // mute
-            isMute: true, // 是否静音
+            isMute: false, // 是否静音
             showOperateBtns: true,
             showBandwidth: true,
             hotKey: false,
