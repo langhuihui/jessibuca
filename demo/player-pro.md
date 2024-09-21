@@ -28,7 +28,7 @@ sidebar: false
 
 [Pro 文档](/pro.html)
 
-# 支持19种格式：(live/test为streamPath)
+# 支持19种直播格式：(live/test为streamPath)
 
 1. ws(s)-raw 即ws(s)://host-name:port/jessica/`live/test` (该协议只对接了[monibuca服务器](https://monibuca.com),其他服务器需要额外对接)
 2. ws(s)-flv 即ws(s)://host-name:port/jessica/`live/test`.flv（chrome下ip会报安全错误，建议域名形式访问，检查下端口范围chrome浏览器是否允许，chrome会默认禁用很多端口）
@@ -59,7 +59,7 @@ sidebar: false
 - 支持`zlmediakit` webrtc(H264)
 - 支持`srs` webrtc(H264)
 - 支持`others` webrtc(H264)
-- 支持加密流(国标SM4、m7s加密流)
+- 支持加密流(国标SM4、XOR加密、m7s加密流)
 - 支持裸流(H264+H265)
 - 支持Fmp4格式(H264+H265)
 - 支持mpeg-ts格式(H264+H265)
@@ -67,6 +67,14 @@ sidebar: false
 
 <Rice/>
 
+# 支持两种点播格式：(vod/test为streamPath)
+
+1. http(s)-mp4 即http(s)://host-name:port/hdl/`vod/test`.mp4 (支持H264/H265)
+2. http(s)-hls 即http(s)://host-name:port/hdl/`vod/test`.m3u8 (支持H264/H265)
+
+- 支持H264和H265编码格式
+- 支持硬解码(MediaSource、Webcodec)和软解码(Wasm,Wasm(simd))
+- 支持支持加密文件(国标SM4、XOR加密、m7s加密)
 
 # 群
 <img src="/public/qrcode.jpeg">
