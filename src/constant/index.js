@@ -51,6 +51,7 @@ export const DEFAULT_PLAYER_OPTIONS = {
         audio: false,
         record: false,
     },
+    iconsText: {},
     controlAutoHide: false, // control auto hide
     hasControl: false,
     loadingText: '', // loading Text

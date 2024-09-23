@@ -259,6 +259,31 @@ worker地址
 4. audio 是否显示声音按钮
 5. record 是否显示录制按钮
 
+
+### iconsText
+
+- **类型**：`object`
+- **默认值**：`{}`
+- **用法**： 配置 icon 文字提示
+
+数据结构如下。
+
+```
+{
+    play: '播放',
+    pause: '暂停',
+    audio: '',
+    mute: '',
+    screenshot: '截图',
+    loading: '加载',
+    fullscreen: '全屏',
+    fullscreenExit: '退出全屏',
+    record: '录制',
+    recordStop: '停止录制',
+}
+
+```
+
 ### keepScreenOn
 
 - **类型**：`boolean`

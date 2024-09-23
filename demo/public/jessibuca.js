@@ -10277,7 +10277,7 @@
 
 	}
 
-	const iconsMap = {
+	const DEFAULT_ICONS = {
 	  play: '播放',
 	  pause: '暂停',
 	  audio: '',
@@ -10289,13 +10289,16 @@
 	  record: '录制',
 	  recordStop: '停止录制'
 	};
-	var icons = Object.keys(iconsMap).reduce((icons, key) => {
-	  icons[key] = `
-    <i class="jessibuca-icon jessibuca-icon-${key}"></i>
-    ${iconsMap[key] ? `<span class="icon-title-tips"><span class="icon-title">${iconsMap[key]}</span></span>` : ''}
-`;
-	  return icons;
-	}, {});
+	var createIcons = (iconsText) => {
+		const iconsMap = Object.assign({}, DEFAULT_ICONS, iconsText)
+		return Object.keys(iconsMap).reduce((icons, key) => {
+			icons[key] = `
+			<i class="jessibuca-icon jessibuca-icon-${key}"></i>
+			${iconsMap[key] ? `<span class="icon-title-tips"><span class="icon-title">${iconsMap[key]}</span></span>` : ''}
+		`;
+			return icons;
+		}, {})
+	}
 
 	var template = ((player, control) => {
 	  if (player._opt.hasControl && player._opt.controlAutoHide) {
@@ -10306,6 +10309,7 @@
 
 	  const options = player._opt;
 	  const operateBtns = options.operateBtns;
+	  const icons = createIcons(options.iconsText);
 	  player.$container.insertAdjacentHTML('beforeend', `
             ${options.background ? `<div class="jessibuca-poster" style="background-image: url(${options.background})"></div>` : ''}
             <div class="jessibuca-loading">

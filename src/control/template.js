@@ -1,4 +1,4 @@
-import icons from './icons';
+import createIcons from './icons';
 
 export default (player, control) => {
 
@@ -10,7 +10,7 @@ export default (player, control) => {
     }
     const options = player._opt;
     const operateBtns = options.operateBtns;
-
+    const icons = createIcons(options.iconsText)
 
     player.$container.insertAdjacentHTML(
         'beforeend',
@@ -27,7 +27,7 @@ export default (player, control) => {
                     <div class="jessibuca-recording-time">00:00:01</div>
                     <div class="jessibuca-icon-recordStop jessibuca-recording-stop">${icons.recordStop}</div>
                 </div>
-            `:''}
+            `: ''}
             ${options.hasControl ? `
                 <div class="jessibuca-controls">
                     <div class="jessibuca-controls-bottom">
