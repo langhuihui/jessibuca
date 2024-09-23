@@ -1,4 +1,4 @@
-const iconsMap = {
+const DEFAULT_ICONS = {
     play: '播放',
     pause: '暂停',
     audio: '',
@@ -11,10 +11,13 @@ const iconsMap = {
     recordStop: '停止录制',
 }
 
-export default Object.keys(iconsMap).reduce((icons, key) => {
-    icons[key] = `
-    <i class="jessibuca-icon jessibuca-icon-${key}"></i>
-    ${iconsMap[key] ? `<span class="icon-title-tips"><span class="icon-title">${iconsMap[key]}</span></span>` : ''}
-`;
-    return icons;
-}, {});
+export default function (iconsText) {
+    const iconsMap = Object.assign({}, DEFAULT_ICONS, iconsText)
+    return Object.keys(iconsMap).reduce((icons, key) => {
+        icons[key] = `
+        <i class="jessibuca-icon jessibuca-icon-${key}"></i>
+        ${iconsMap[key] ? `<span class="icon-title-tips"><span class="icon-title">${iconsMap[key]}</span></span>` : ''}
+    `;
+        return icons;
+    }, {})
+};

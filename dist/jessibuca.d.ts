@@ -110,6 +110,31 @@ declare namespace Jessibuca {
             record?: boolean;
         };
         /**
+         * 配置 icon 文字提示
+         */
+        iconsText?: {
+            /** 播放 */
+            play?: string;
+            /** 暂停 */
+            pause?: string;
+            /** 声音调节 */
+            audio?: string;
+            /** 静音 */
+            mute?: string;
+            /** 截图 */
+            screenshot?: string;
+            /** 加载 */
+            loading?: string;
+            /** 全屏 */
+            fullscreen?: string;
+            /** 退出全屏 */
+            fullscreenExit?: string;
+            /** 录制 */
+            record?: string;
+            /** 停止录制 */
+            recordStop?: string;
+        };        
+        /**
          * 开启屏幕常亮，在手机浏览器上, canvas标签渲染视频并不会像video标签那样保持屏幕常亮
          */
         keepScreenOn?: boolean;
