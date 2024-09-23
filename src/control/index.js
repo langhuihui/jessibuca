@@ -2,7 +2,7 @@ import template from "./template";
 import observer from './observer';
 import property from './property';
 import events from './events';
-import './style.scss'
+import './style.less'
 import hotkey from "./hotkey";
 import {getStyle, isBoolean, removeElement, setStyle} from "../utils";
 

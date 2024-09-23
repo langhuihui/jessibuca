@@ -23,7 +23,7 @@ import Emitter from "../utils/emitter";
 import Demux from "../demux";
 import WebcodecsDecoder from "../decoder/webcodecs";
 import Control from "../control";
-import './style.scss'
+import './style.less'
 import observer from "./observer";
 import MseDecoder from "../decoder/mediaSource";
 import NoSleep from "../utils/noSleep";
