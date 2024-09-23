@@ -2074,14 +2074,15 @@ https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
 
 ### 点播H264、H265需求（点播mp4、Hls）
 
-> jessibuca 是流播放器，目前暂不支持点播的逻辑。
+~~> jessibuca 是流播放器，目前暂不支持点播的逻辑。~~
 
+最新版本已经支持点播的逻辑。
 
 解决方案：
 
 1. [video.js](https://videojs.com/)
 2. [xgplayer.js](https://h5player.bytedance.com/)
-3. [JessibucaProVod](https://jessibuca.com/player-pro-vod.html) 正在开发中，敬请期待。
+3. [JessibucaPro](https://jessibuca.com/player-pro.html)
 
 ### 测试的时候遇到请求的连接（播放地址）跨域报错
 
