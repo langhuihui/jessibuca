@@ -32,10 +32,10 @@ ai 模块都是独立于jessibuca pro 存在的，每个模块的引用都是单
 > 体验demo 只能人脸识别十分钟。
 >
 #### https
-[https://jessibuca.com/pro/face-detector-demo.html](https://jessibuca.com/pro/face-detector-demo.html)
+[https://jessibuca.com/pro/demo-ai-face-detector.html](https://jessibuca.com/pro/demo-ai-face-detector.html)
 
 #### http
-[http://jessibuca.monibuca.com/pro/face-detector-demo.html](http://jessibuca.monibuca.com/pro/face-detector-demo.html)
+[http://jessibuca.monibuca.com/pro/demo-ai-face-detector.html](http://jessibuca.monibuca.com/pro/demo-ai-face-detector.html)
 
 ### 定价
 
@@ -140,10 +140,10 @@ toothbrush - 牙刷
 > 体验demo 只能物品识别十分钟。
 >
 #### https
-[https://jessibuca.com/pro/object-detector-demo.html](https://jessibuca.com/pro/object-detector-demo.html)
+[https://jessibuca.com/pro/demo-ai-object-detector.html](https://jessibuca.com/pro/demo-ai-object-detector.html)
 
 #### http
-[http://jessibuca.monibuca.com/pro/object-detector-demo.html](http://jessibuca.monibuca.com/pro/object-detector-demo.html)
+[http://jessibuca.monibuca.com/pro/demo-ai-object-detector.html](http://jessibuca.monibuca.com/pro/demo-ai-object-detector.html)
 
 ### 定价
 
