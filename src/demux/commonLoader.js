@@ -66,6 +66,9 @@ export default class CommonLoader extends Emitter {
             let data;
             const videoBuffer = this.player._opt.videoBuffer;
             const videoBufferDelay = this.player._opt.videoBufferDelay;
+            if (this.player.isDestroyedOrClosed()) {
+                return;
+            }
 
             if (this.player._opt.useMSE &&
                 this.player.mseDecoder &&

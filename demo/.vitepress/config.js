@@ -25,7 +25,8 @@ module.exports = {
                     {text: 'AI', link: '/pro-ai'},
                     {text: '扩展模块', link: '/pro-module'},
                     {text: '定制化服务', link: '/pro-more'},
-                    {text: 'LVS分享', link: 'https://jessibuca.com/pro-doc/2023-11-25-live-video-stack-wancheng.pdf'},
+                    {text: 'LVS分享视频', link: 'https://mp.weixin.qq.com/s/J6zXY1QOvmSqN4kLIaja_Q'},
+                    {text: 'LVS分享PPT', link: 'https://jessibuca.com/pro-doc/2023-11-25-live-video-stack-wancheng.pdf'},
                 ]
             },
             {text: '点播(ProVod)', link: '/player-pro-vod'},

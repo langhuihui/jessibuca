@@ -2973,6 +2973,10 @@ https://blog.csdn.net/xyphf/article/details/105116223
 
 
 
+### 在使用useMSE:true 硬解码的时候video出现大量的 waiting canplay 日志
+
+
+
 ## 支持作者
 
 ### 第一作者

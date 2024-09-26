@@ -85,7 +85,7 @@ export default class MseDecoder extends Emitter {
     decodeVideo(payload, ts, isIframe, cts) {
         const player = this.player;
 
-        if (!player) {
+        if (!player || player.isDestroyedOrClosed()) {
             return;
         }
 

@@ -44,6 +44,10 @@ export default class WebcodecsDecoder extends Emitter {
     }
 
     handleDecode(videoFrame) {
+        if (this.player.isDestroyedOrClosed()) {
+            return;
+        }
+
         if (!this.isInitInfo) {
             this.player.video.updateVideoInfo({
                 width: videoFrame.codedWidth,
@@ -92,8 +96,7 @@ export default class WebcodecsDecoder extends Emitter {
                 this.player.debug.log('Webcodecs', 'VideoDecoder configure', config)
                 try {
                     this.decoder.configure(config);
-                }
-                catch (e){
+                } catch (e) {
                     this.player.debug.error('Webcodecs', 'VideoDecoder configure', e);
                     this.player.emit(EVENTS_ERROR.webcodecsConfigureError);
                     return;
@@ -137,8 +140,7 @@ export default class WebcodecsDecoder extends Emitter {
                     this.player.debug.error('Webcodecs', 'VideoDecoder', e)
                     if (e.toString().indexOf(WCS_ERROR.keyframeIsRequiredError) !== -1) {
                         this.player.emitError(EVENTS_ERROR.webcodecsDecodeError);
-                    }
-                    else if (e.toString().indexOf(WCS_ERROR.canNotDecodeClosedCodec) !== -1) {
+                    } else if (e.toString().indexOf(WCS_ERROR.canNotDecodeClosedCodec) !== -1) {
                         this.player.emitError(EVENTS_ERROR.webcodecsDecodeError);
                     }
                 }

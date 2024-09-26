@@ -19,6 +19,10 @@ Module.postRun = function () {
             offscreenCanvasCtx: null,
             decoder: new VideoDecoder({
                 output: function (videoFrame) {
+                    if (decoder.isDestroyed) {
+                        return;
+                    }
+
                     if (!wcsVideoDecoder.isEmitInfo) {
                         decoder.opt.debug && console.log('Jb: [worker] Webcodecs Video Decoder initSize');
                         postMessage({
@@ -82,6 +86,7 @@ Module.postRun = function () {
     }
 
     var decoder = {
+        isDestroyed: false,
         opt: {
             debug: DEFAULT_PLAYER_OPTIONS.debug,
             useOffscreen: DEFAULT_PLAYER_OPTIONS.useOffscreen,
@@ -238,6 +243,10 @@ Module.postRun = function () {
                 }
             };
             const loop = () => {
+                if (decoder.isDestroyed) {
+                    return;
+                }
+
                 if (buffer.length) {
                     if (this.dropping) {
                         // // dropping
@@ -282,13 +291,13 @@ Module.postRun = function () {
                             }
                         }
                     }
-                }
-                else {
+                } else {
                 }
             };
             this.stopId = setInterval(loop, 10);
         },
         close: function () {
+            decoder.isDestroyed = true;
             decoder.opt.debug && console.log('Jb: [worker]: close');
             clearInterval(this.stopId);
             this.stopId = null;

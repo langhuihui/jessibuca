@@ -105,6 +105,8 @@ export default class Player extends Emitter {
         this._loading = false;
         this._playing = false;
         this._hasLoaded = false;
+        this._destroyed = false;
+        this._closed = false;
 
         //
         this._checkHeartTimeout = null;
@@ -191,6 +193,7 @@ export default class Player extends Emitter {
 
 
     async destroy() {
+        this._destroyed = true;
         this._loading = false;
         this._playing = false;
         this._hasLoaded = false;
@@ -448,8 +451,13 @@ export default class Player extends Emitter {
                 this.decoderWorker = new DecoderWorker(this);
                 this.debug.log('Player', 'waiting decoderWorker init');
                 this.once(EVENTS.decoderWorkerInit, () => {
-                    this.debug.log('Player', 'decoderWorker init success');
-                    resolve()
+                    if (this.isDestroyedOrClosed()) {
+                        reject('init() failed and player is destroyed or closed');
+                    } else {
+                        this.debug.log('Player', 'decoderWorker init success');
+                        this.loaded = true;
+                        resolve()
+                    }
                 })
             } else {
                 resolve()
@@ -581,6 +589,7 @@ export default class Player extends Emitter {
 
     _close() {
         return new Promise((resolve, reject) => {
+            this._closed = true;
             //
             if (this.stream) {
                 this.stream.destroy();
@@ -732,6 +741,10 @@ export default class Player extends Emitter {
                 if (this._stats.fps !== 0) {
                     return;
                 }
+                if (this.isDestroyedOrClosed()) {
+                    return;
+                }
+
                 this.pause().then(() => {
                     this.emit(EVENTS.timeout, EVENTS.delayTimeout);
                     this.emit(EVENTS.delayTimeout);
@@ -762,6 +775,9 @@ export default class Player extends Emitter {
             if (this.playing) {
                 return;
             }
+            if (this.isDestroyedOrClosed()) {
+                return;
+            }
             this.pause().then(() => {
                 this.emit(EVENTS.timeout, EVENTS.loadingTimeout);
                 this.emit(EVENTS.loadingTimeout);
@@ -784,6 +800,10 @@ export default class Player extends Emitter {
     }
 
     handleRender() {
+        if (this.isDestroyedOrClosed()) {
+            return;
+        }
+
         if (this.loading) {
             this.emit(EVENTS.start);
             this.loading = false;
@@ -797,8 +817,10 @@ export default class Player extends Emitter {
 
 
     //
-    updateStats(options) {
-        options = options || {};
+    updateStats(options = {}) {
+        if (this.isDestroyedOrClosed()) {
+            return;
+        }
 
         if (!this._startBpsTime) {
             this._startBpsTime = now();
@@ -861,6 +883,10 @@ export default class Player extends Emitter {
     }
 
     handlePlayToRenderTimes() {
+        if (this.isDestroyedOrClosed()) {
+            return;
+        }
+
         const _times = this._times;
         _times.playTimestamp = _times.playStart - _times.playInitStart;
         _times.streamTimestamp = _times.streamStart - _times.playStart;
@@ -909,5 +935,17 @@ export default class Player extends Emitter {
             this.control.toggleBar(isShow);
             this.resize();
         }
+    }
+
+    isDestroyed() {
+        return this._destroyed;
+    }
+
+    isClosed() {
+        return this._closed;
+    }
+
+    isDestroyedOrClosed() {
+        return this.isDestroyed() || this.isClosed();
     }
 }
