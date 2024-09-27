@@ -305,7 +305,7 @@
     var playList = [];
     let size = 16
 
-    function _create(id) {
+    function _create(id, index) {
         var $container = document.getElementById('container' + id);
 
         var jessibuca = new JessibucaPro({
@@ -344,6 +344,8 @@
             },
             demuxUseWorker: $demuxUseWorker.checked === true,
             mseDecoderUseWorker:$mseDecoderUseWorker.checked === true,
+            websocketOpenTimeout: 3 + index * 0.5,
+            loadingTimeout: 5 + index * 0.5,
         },);
 
         jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
@@ -359,7 +361,7 @@
 
     function create() {
         for (let i = 0; i < size; i++) {
-            _create(i + 1);
+            _create(i + 1, i);
             $player.style.display = 'inline-block';
             $pause.style.display = 'none';
             $destroy.style.display = 'none';

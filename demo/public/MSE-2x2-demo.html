@@ -114,7 +114,7 @@
             <input
                 autocomplete="on"
                 id="playUrl1"
-                value="http://flv.bdplay.nodemedia.cn/live/bbb.flv"
+                value=""
             />
         </div>
         <div class="input">
@@ -122,7 +122,7 @@
             <input
                 autocomplete="on"
                 id="playUrl2"
-                value="http://flv.bdplay.nodemedia.cn/live/bbb_264.flv"
+                value=""
             />
         </div>
         <div class="input">
@@ -130,7 +130,7 @@
             <input
                 autocomplete="on"
                 id="playUrl3"
-                value="http://flv.bdplay.nodemedia.cn/live/bbb.flv"
+                value=""
             />
         </div>
         <div class="input">
@@ -138,7 +138,7 @@
             <input
                 autocomplete="on"
                 id="playUrl4"
-                value="http://flv.bdplay.nodemedia.cn/live/bbb_264.flv"
+                value=""
             />
         </div>
         <div class="input">
@@ -162,7 +162,7 @@
     var playList = [];
     var size = 4;
 
-    function create(id) {
+    function create(id, index) {
         var $container = document.getElementById('container' + id);
 
         var jessibuca = new Jessibuca({
@@ -180,7 +180,9 @@
                 audio: showOperateBtns,
             },
             useMSE: true,
-            hasAudio: false
+            hasAudio: false,
+            websocketOpenTimeout: 3 + index * 0.5,
+            loadingTimeout: 5 + index * 0.5,
         },);
 
         jessibuca.onLog = msg => console.error(msg);
@@ -194,7 +196,7 @@
 
 
     for (let i = 0; i < size; i++) {
-        create(i + 1);
+        create(i + 1, i);
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
         $destroy.style.display = 'none';

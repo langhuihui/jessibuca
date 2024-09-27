@@ -215,7 +215,7 @@
     var playList = [];
     var size = 9;
 
-    function create(id) {
+    function create(id, index) {
         var $container = document.getElementById('container' + id);
 
         var jessibuca = new Jessibuca({
@@ -234,6 +234,8 @@
             },
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
+            websocketOpenTimeout: 3 + index * 0.5,
+            loadingTimeout: 5 + index * 0.5,
         },);
 
         jessibuca.onLog = msg => console.error(msg);
@@ -247,7 +249,7 @@
 
 
     for (let i = 0; i < size; i++) {
-        create(i + 1);
+        create(i + 1, i);
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
         $destroy.style.display = 'none';

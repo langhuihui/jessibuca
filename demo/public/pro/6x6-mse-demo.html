@@ -499,7 +499,7 @@
     var playList = [];
     var num = 36;
 
-    function create(id) {
+    function _create(id, index) {
         var $container = document.getElementById('container' + id);
 
         var jessibuca = new JessibucaPro({
@@ -531,8 +531,9 @@
                 top: 10
             },
             demuxUseWorker: $demuxUseWorker.checked === true,
-            mseDecoderUseWorker:$mseDecoderUseWorker.checked === true,
-
+            mseDecoderUseWorker: $mseDecoderUseWorker.checked === true,
+            websocketOpenTimeout: 3 + index * 0.5,
+            loadingTimeout: 5 + index * 0.5,
         },);
         jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
             jessibuca.showErrorMessageTips('播放异常：' + error);
@@ -547,7 +548,7 @@
 
 
     for (let i = 0; i < num; i++) {
-        create(i + 1);
+        create(i + 1, i);
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
         $destroy.style.display = 'none';
