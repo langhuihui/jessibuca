@@ -528,16 +528,32 @@ https://caniuse.com/?search=OffscreenCanvas
 > 该特性是实验性特性，某些版本的浏览器会出现内存无缘无故变大的情况。谨慎使用。
 > https://github.com/langhuihui/jessibuca/issues/227
 
-### 多个iframe一起播放视频，如果有一个视频地址播放不了会导致其他地址也无法播放
+### 多个视频一起播放，如果有一个视频地址播放不了会导致其他地址也无法播放
 
 #### 问题
 
-多个iframe一起播放视频，如果有一个视频地址播放不了会导致其他地址也无法播放(请求被堵塞住了)。
+多个ws地址视频一起播放，如果有一个视频地址播放不了会导致其他地址也无法播放(请求被堵塞住了)。
+
+> 一般会出现在ws(s)地址播放不了，导致后续请求被堵塞住了。http(s)没有这个问题。
 
 #### 解决方案
+只要合理配置超时时间就行了。就是后面的播放视频的超时时间要大于前面的。
 
-1. m7s ui 里面 我也是setTimeout 0去渲染的。或者建议你用Promise.resolve的形式去播放。
-2. 如果是http或者ws接口，可以尝试换成https或者wss接口。
+> 当堵塞的播放地址触发超时重播的时候，也就会释放堵塞住的请求，把请求释放出来，给其他的请求使用。
+
+```js
+function create(index) {
+    var jessibuca = new Jessibuca({
+        loadingTimeout: 5 + index * 0.5, // 初始化超时时间， 0.5秒是个经验值，根据实际情况动态调整。
+    });
+}
+
+// 创建10个视频
+for (var i = 0; i < 10; i++) {
+    create(i);
+}
+
+```
 
 ### vue3 下面使用Typescript
 
