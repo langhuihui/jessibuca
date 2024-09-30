@@ -212,7 +212,7 @@ export const EVENTS_ERROR = {
     wasmDecodeError: 'wasmDecodeError',
     webglAlignmentError: 'webglAlignmentError',
     webglContextLostError: 'webglContextLostError',
-
+    webglInitError: 'webglInitError',
 }
 
 

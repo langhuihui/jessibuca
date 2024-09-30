@@ -416,6 +416,13 @@ class Jessibuca extends Emitter {
                 });
             })
 
+            this.player.once(EVENTS_ERROR.webglInitError, () => {
+                this.pause().then(() => {
+                    this.debug.log('Jessibuca', 'webglInitError and paused');
+                }).catch(() => {
+                    this.debug.warn('Jessibuca', 'webglInitError and paused error')
+                });
+            })
 
             this.player.once(EVENTS_ERROR.mediaSourceH265NotSupport, () => {
                 this.pause().then(() => {

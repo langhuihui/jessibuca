@@ -75,6 +75,7 @@ export default class CanvasVideoLoader extends CommonLoader {
             this.contextGlDestroy = webgl.destroy
         } else {
             this.player.debug.error(`CanvasVideoLoader`, 'init webgl fail');
+            this.player.emitError(EVENTS_ERROR.webglInitError);
         }
     }
 
@@ -126,7 +127,7 @@ export default class CanvasVideoLoader extends CommonLoader {
                 try {
                     this.contextGlRender(this.$videoElement.width, this.$videoElement.height, msg.output[0], msg.output[1], msg.output[2]);
                 } catch (e) {
-                    this.player.debug.error('CanvasVideoLoader', 'render', e);
+                    this.player.debug.error('CanvasVideoLoader', 'webgl render error and emit webglContextLostError', e);
                     this.isContextGlRenderLost = true;
                     this.player.emitError(EVENTS_ERROR.webglContextLostError)
                 }
