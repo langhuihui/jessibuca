@@ -276,6 +276,14 @@ vue2(单页面):[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue2](
 #### http
 [http://jessibuca.monibuca.com/pro/demo-danmu.html](http://jessibuca.monibuca.com/pro/demo-danmu.html)
 
+### 国际化
+------
+#### https
+[https://jessibuca.com/pro/demo-i18n.html](https://jessibuca.com/pro/demo-i18n.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-i18n.html](http://jessibuca.monibuca.com/pro/demo-i18n.html)
+
 
 ### 上下滑动循环播放(仿抖音)
 ------

@@ -81,6 +81,8 @@ features:
   details: 支持硬解码(MSE + WCS)和软解码(WASM + WASM(SIMD)) 播放
 - title: 支持HLS(H264/H265)点播(Pro)
   details: 支持硬解码(MSE + WCS)和软解码(WASM + WASM(SIMD)) 播放
+- title: 支持国际化配置(Pro)
+  details: 支持自定义国际化配置
 - title: 更多
   details: 请到Pro文档页单独查看
 ---
