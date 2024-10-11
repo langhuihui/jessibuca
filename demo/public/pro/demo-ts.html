@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Jessica 裸流 demo</title>
+    <title>Jessica ts demo</title>
+    <link rel="stylesheet" href="./demo.css">
     <script src="./vconsole.js"></script>
     <script src="./js/jessibuca-pro-demo.js"></script>
-    <link rel="stylesheet" href="./demo.css">
     <style>
         .container-shell:before {
-            content: "jessibuca pro 裸流 demo";
+            content: "jessibuca pro demo player";
         }
     </style>
 </head>
@@ -41,7 +41,9 @@
         <div class="input">
             <div>
                 当前浏览器：
+                <span id="wasmSupport" style="color: green;display: none">支持WASM解码；</span>
                 <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码</span>
+                <span id="wasmNotSupport" style="color: red;display: none">不支持WASM解码</span>
                 <span id="simdNotSupport"
                       style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
             </div>
@@ -58,12 +60,27 @@
                 /><span>Webcodec</span>
                 <input
                     type="checkbox"
+                    id="useWASM"
+                /><span>WASM</span>
+                <input
+                    type="checkbox"
                     id="useSIMD"
-                /><span>SIMD</span>
+                /><span>WASM(SIMD)</span> <span style="color: green">默认使用wasm解码器</span>
             </div>
-            <div style="margin-left: 10px">
-                | FPS:<input type="number" id="fps" value="25" min="1" max="60"/>
-            </div>
+        </div>
+        <div class="input">
+            <span>渲染标签：</span>
+            <select id="renderDom" onchange="replay()">
+                <option value="video" selected>video</option>
+                <option value="canvas">canvas</option>
+            </select>
+
+            <span>canvas渲染技术：</span>
+            <select id="isUseWebGPU" onchange="replay()">
+                <option value="webgl">webgl</option>
+                <option value="webgpu" selected>webgpu</option>
+            </select>
+            <span id="supportWebgpu"></span>
         </div>
         <div class="input">
             <div>
@@ -71,55 +88,29 @@
                 <input placeholder="单位：秒" type="text" id="videoBuffer" style="width: 50px" value="0.2">秒
                 <span>缓存延迟(延迟超过会触发丢帧)：</span>
                 <input placeholder="单位：秒" type="text" id="videoBufferDelay" style="width: 50px" value="1">秒
-                <button onclick="replay()">重播</button>
+                <button id="replay">重播</button>
             </div>
         </div>
         <div class="input">
             <div>
-                <span>(H264/H265)解封装器：</span>
                 <input
                     checked
+                    onclick="replay()"
                     type="checkbox"
-                    id="h264DemuxType1"
-                /><span>V1</span>
-                <input
-                    type="checkbox"
-                    id="h264DemuxType2"
-                /><span>V2</span>
-                <span>(v1版本兼容性更强，v2版本性能更强)</span>
+                    id="demuxUseWorker"
+                /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
             </div>
         </div>
         <div class="input">
+            <div>
+                <input
+                    onclick="replay()"
+                    type="checkbox"
+                    id="isTs"
+                /><span>强制识别成ts <span style="color: red">(播放路径不是以.ts结尾的，建议勾选上)</span> </span>
+            </div>
+        </div>
 
-            <div>
-                <span>H265解封装器：</span>
-                <input
-                    checked
-                    type="checkbox"
-                    id="h265DemuxType1"
-                /><span>V1</span>
-                <input
-                    type="checkbox"
-                    id="h265DemuxType2"
-                /><span>V2</span>
-                <span>(v1版本兼容性更强，v2版本性能更强)</span>
-            </div>
-        </div>
-        <div class="input">
-            <div>
-                测试地址：<br>
-                <span style="color: red">h265:</span> ws://47.106.101.70:6702?type=h265_2k_raw <br>
-                <span style="color: red">h264:</span> ws://47.106.101.70:6702?type=h264_360_mdraw
-            </div>
-        </div>
-        <div class="input">
-            <input
-                checked
-                onclick="replay()"
-                type="checkbox"
-                id="isNakedFlow"
-            /><span>强制识别成裸流 <span style="color: red">(播放路径不是以.h264/.h265结尾的，建议勾选上)</span> </span>
-        </div>
         <div class="input">
             <div>输入URL：</div>
             <input
@@ -132,10 +123,11 @@
         </div>
         <div class="input" style="line-height: 30px">
             <button id="destroy">销毁</button>
-            <!--            <button id="downloadNakedFlow">下载H265</button>-->
+            <span class="fps-inner"></span>
         </div>
     </div>
 </div>
+
 <script src="./demo.js"></script>
 <script>
     var $player = document.getElementById('play');
@@ -143,18 +135,19 @@
     var $playHref = document.getElementById('playUrl');
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
-    var $downloadNakedFlow = document.getElementById('downloadNakedFlow');
+    var $fps = document.querySelector('.fps-inner');
     var $useMSE = document.getElementById('useMSE');
     var $useSIMD = document.getElementById('useSIMD');
+    var $useWASM = document.getElementById('useWASM');
     var $useWCS = document.getElementById('useWCS');
-    var $fps = document.getElementById('fps');
-    var $h265DemuxType1 = document.getElementById('h265DemuxType1');
-    var $h265DemuxType2 = document.getElementById('h265DemuxType2');
-    var $h264DemuxType1 = document.getElementById('h264DemuxType1');
-    var $h264DemuxType2 = document.getElementById('h264DemuxType2');
     var $videoBuffer = document.getElementById('videoBuffer');
     var $videoBufferDelay = document.getElementById('videoBufferDelay');
-    var $isNakedFlow = document.getElementById('isNakedFlow');
+    var $replay = document.getElementById('replay');
+    var $renderDom = document.getElementById('renderDom');
+    var $isUseWebGPU = document.getElementById('isUseWebGPU');
+    var $demuxUseWorker = document.getElementById('demuxUseWorker');
+    var $isTs = document.getElementById('isTs');
+
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var jessibuca = null;
@@ -165,18 +158,14 @@
             videoBuffer: Number($videoBuffer.value), // 缓存时长
             videoBufferDelay: Number($videoBufferDelay.value), // 1000s
             decoder: './js/decoder-pro.js',
-
             isResize: false,
             text: "",
             loadingText: "加载中",
             debug: true,
-            debugLevel: 'debug',
+            debugLevel: "debug",
             useMSE: $useMSE.checked === true,
             useSIMD: $useSIMD.checked === true,
             useWCS: $useWCS.checked === true,
-            isNakedFlow: $isNakedFlow.checked === true,
-            nakedFlowFps: Number($fps.value),
-            checkFirstIFrame: false,
             showBandwidth: showOperateBtns, // 显示网速
             showPerformance: showOperateBtns, // 显示性能
             operateBtns: {
@@ -187,21 +176,33 @@
                 ptz: showOperateBtns,
                 quality: showOperateBtns,
                 performance: showOperateBtns,
-                scale: showOperateBtns,
             },
+            timeout: 10000,
+            heartTimeoutReplayUseLastFrameShow: true,
+            audioEngine: "worklet",
             qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
             forceNoOffscreen: forceNoOffscreen,
             isNotMute: false,
             heartTimeout: 10,
-            nakedFlowH265DemuxUseNew: $h265DemuxType2.checked === true,
-            nakedFlowDemuxUseNew:$h264DemuxType1.checked === true,
-            // demuxUseWorker:false,
-            // checkFirstIFrame:false,
+            ptzClickType: 'mouseDownAndUp',
+            ptzZoomShow: true,
+            ptzMoreArrowShow: true,
+            ptzApertureShow: true,
+            ptzFocusShow: true,
+            useCanvasRender: $renderDom.value === 'canvas',
+            useWebGPU: $isUseWebGPU.value === 'webgpu',
+            demuxUseWorker: $demuxUseWorker.checked === true,
+            controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
+            flvDemuxBufferSizeTooLargeReplay:$flvDemuxBufferSizeTooLargeReplay.checked === true,
+            // audioEngine:"worklet",
+            isTs: $isTs.checked === true,
         },);
 
-
+        jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
+            jessibuca.showErrorMessageTips('播放异常：' + error);
+        })
         jessibuca.on('ptz', (arrow) => {
-            console.log('ptz', arrow);
+            // console.log('ptz', arrow);
         })
 
         jessibuca.on('streamQualityChange', (value) => {
@@ -209,17 +210,41 @@
         })
 
         jessibuca.on('timeUpdate', (value) => {
-            console.log('timeUpdate', value);
+            // console.log('timeUpdate', value);
         })
 
-        jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
-            jessibuca.showErrorMessageTips('播放异常：' + error);
+        jessibuca.on('stats', (stats) => {
+            // console.log('stats', stats);
+            $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
         })
+
+        jessibuca.on(JessibucaPro.EVENTS.crashLog,(log)=>{
+            console.error('crashLog',log)
+        })
+
 
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
         $destroy.style.display = 'none';
+        $fps.textContent = '';
     }
+
+
+    create();
+
+    function play() {
+        var href = $playHref.value;
+        if (href) {
+            jessibuca.play(href);
+            $player.style.display = 'none';
+            $pause.style.display = 'inline-block';
+            $destroy.style.display = 'inline-block';
+        }
+        else{
+            jessibuca.showErrorMessageTips('播放地址不能为空');
+        }
+    }
+
 
     function replay() {
         if (jessibuca) {
@@ -231,22 +256,11 @@
             create();
             play();
         }
-
     }
 
-    function play() {
-        var href = $playHref.value;
-        if (href) {
-            jessibuca.play(href);
-            $player.style.display = 'none';
-            $pause.style.display = 'inline-block';
-            $destroy.style.display = 'inline-block';
-        } else {
-            jessibuca.showErrorMessageTips('播放地址不能为空');
-        }
-    }
-
-    create();
+    $replay.addEventListener('click', function () {
+        replay();
+    })
 
     $player.addEventListener('click', function () {
         play();
@@ -256,6 +270,7 @@
     $pause.addEventListener('click', function () {
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
+        $fps.textContent = '';
         jessibuca.pause();
     })
 
@@ -267,19 +282,15 @@
         } else {
             create();
         }
-    })
 
-    // $downloadNakedFlow.addEventListener('click', function () {
-    //     if (jessibuca) {
-    //         jessibuca.downloadTempNakedFlowFile();
-    //     }
-    // })
+    })
 
     $useMSE.addEventListener('click', function () {
         const checked = $useMSE.checked;
         if (checked) {
             $useSIMD.checked = false
             $useWCS.checked = false
+            $useWASM.checked = false
         }
         replay();
     })
@@ -289,6 +300,7 @@
         if (checked) {
             $useMSE.checked = false
             $useWCS.checked = false
+            $useWASM.checked = false
         }
         replay();
     })
@@ -298,48 +310,20 @@
         if (checked) {
             $useMSE.checked = false
             $useSIMD.checked = false
+            $useWASM.checked = false
         }
         replay();
     })
 
-    $h265DemuxType1.addEventListener('click', function () {
-        const checked = $h265DemuxType1.checked;
+    $useWASM.addEventListener('click', function () {
+        const checked = $useWASM.checked;
         if (checked) {
-            $h265DemuxType2.checked = false;
+            $useMSE.checked = false
+            $useSIMD.checked = false
+            $useWCS.checked = false
         }
         replay();
     })
-    $h265DemuxType2.addEventListener('click', function () {
-        const checked = $h265DemuxType2.checked;
-        if (checked) {
-            $h265DemuxType1.checked = false;
-        }
-        replay();
-    })
-
-    $h264DemuxType1.addEventListener('click', function () {
-        const checked = $h264DemuxType1.checked;
-        if (checked) {
-            $h264DemuxType2.checked = false;
-        }
-        replay();
-    })
-
-    $h264DemuxType2.addEventListener('click', function () {
-        const checked = $h264DemuxType2.checked;
-        if (checked) {
-            $h264DemuxType1.checked = false;
-        }
-        replay();
-    })
-
-
-    $fps.addEventListener('change', function () {
-        if (jessibuca) {
-            jessibuca.setNakedFlowFps(Number($fps.value));
-        }
-    })
-
 
 </script>
 

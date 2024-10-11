@@ -89,6 +89,13 @@
                 <button id="replay">重播</button>
             </div>
         </div>
+        <div class="input">
+            <input
+                onclick="replay()"
+                type="checkbox"
+                id="isFmp4"
+            /><span>强制识别成fmp4 <span style="color: red">(播放路径不是以.fmp4结尾的，建议勾选上)</span> </span>
+        </div>
 
         <div class="input">
             <div>输入URL：</div>
@@ -124,7 +131,7 @@
     var $fps = document.querySelector('.fps-inner');
     var $renderDom = document.getElementById('renderDom');
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
-
+    var $isFmp4 = document.getElementById('isFmp4');
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var jessibuca = null;
@@ -169,7 +176,7 @@
             useCanvasRender: $renderDom.value === 'canvas',
             useWebGPU: $isUseWebGPU.value === 'webgpu',
             controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
-            isFmp4: true,
+            isFmp4: $isFmp4.checked === true,
         },);
         jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
             jessibuca.showErrorMessageTips('播放异常：' + error);
