@@ -532,7 +532,7 @@ H265硬解码，对于电脑硬件支持情况：
 
 ## 电脑型号（硬件配置）以及码率
 
-[电脑型号（硬件配置）](https://jessibuca.com/pro-doc/config.xlsx)
+可下载完整的[电脑型号（硬件配置）信息.xlsx](https://jessibuca.com/pro-doc/config.xlsx) 查看
 
 ### windows 默认
 
