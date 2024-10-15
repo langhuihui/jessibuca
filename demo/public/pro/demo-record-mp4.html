@@ -99,13 +99,21 @@
         </div>
         <div class="input">
             <div>
-
                 <input
                         checked
                         onclick="replay()"
                         type="checkbox"
                         id="demuxUseWorker"
                 /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <input
+                    onclick="replay()"
+                    type="checkbox"
+                    id="isFlv"
+                /><span>强制识别成flv <span style="color: red">(播放路径不是以.flv结尾的，建议勾选上)</span> </span>
             </div>
         </div>
 
@@ -147,6 +155,7 @@
     var $renderDom = document.getElementById('renderDom');
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
     var $demuxUseWorker = document.getElementById('demuxUseWorker');
+    var $isFlv = document.getElementById('isFlv');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -192,9 +201,9 @@
             useWebGPU: $isUseWebGPU.value === 'webgpu',
             demuxUseWorker: $demuxUseWorker.checked === true,
             controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
-            recordType: 'mp4'
+            recordType: 'mp4',
             // audioEngine:"worklet",
-            // isFlv: true
+            isFlv: $isFlv.checked === true,
         },);
 
         jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {

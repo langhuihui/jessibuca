@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Jessica demo</title>
+    <title>Jessica recorder demo</title>
     <link rel="stylesheet" href="./demo.css">
     <script src="./vconsole.js"></script>
     <script src="./js/jessibuca-pro-demo.js"></script>
     <style>
         .container-shell:before {
-            content: "jessibuca pro demo player";
+            content: "jessibuca pro recorder demo player";
         }
     </style>
 </head>
@@ -113,6 +113,15 @@
                 </select>
             </div>
         </div>
+        <div class="input">
+            <div>
+                <input
+                    onclick="replay()"
+                    type="checkbox"
+                    id="isFlv"
+                /><span>强制识别成flv <span style="color: red">(播放路径不是以.flv结尾的，建议勾选上)</span> </span>
+            </div>
+        </div>
 
 
         <div class="input">
@@ -151,6 +160,8 @@
     var $isUseWebGPU = document.getElementById('isUseWebGPU');
     var $demuxUseWorker = document.getElementById('demuxUseWorker');
     var $recordType = document.getElementById('recordType')
+    var $isFlv = document.getElementById('isFlv');
+
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -195,9 +206,9 @@
             useWebGPU: $isUseWebGPU.value === 'webgpu',
             demuxUseWorker: $demuxUseWorker.checked === true,
             controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
-            recordType: $recordType.value
+            recordType: $recordType.value,
             // audioEngine:"worklet",
-            // isFlv: true
+            isFlv: $isFlv.checked === true,
         },);
 
         jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {

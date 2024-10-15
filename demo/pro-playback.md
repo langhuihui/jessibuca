@@ -65,4 +65,4 @@
 
 1. [video.js](https://videojs.com/)
 2. [xgplayer.js](https://h5player.bytedance.com/)
-3. [JessibucaProVod](https://jessibuca.com/player-pro-vod.html) 正在开发中，敬请期待。
+3. [JessibucaProVod](https://jessibuca.com/player-pro-vod.html)
