@@ -86,9 +86,9 @@ async function debugHLS() {
     // Wait for initial setup and monitor the process
     console.log('[Test] Monitoring HLS streaming process...');
 
-    // Monitor for 60 seconds
-    for (let i = 0; i < 12; i++) {
-      await page.waitForTimeout(5000);
+    // Monitor for 10 seconds
+    for (let i = 0; i < 5; i++) {
+      await page.waitForTimeout(2000);
 
       // Collect state
       const state = await page.evaluate(() => {
@@ -128,7 +128,7 @@ async function debugHLS() {
         };
       });
 
-      console.log(`[Test] State at ${i * 5}s:`, JSON.stringify(state, null, 2));
+      console.log(`[Test] State at ${i * 2}s:`, JSON.stringify(state, null, 2));
 
       // Check for errors or issues
       if (state.videoElement?.error) {

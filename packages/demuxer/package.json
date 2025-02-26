@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "afsm": "^2.2.3",
+    "crypto-js": "^4.2.0",
     "eventemitter3": "^4.0.7",
     "oput": "^1.2.2"
   }

@@ -43,7 +43,7 @@ import {
   AudioDecoderHard,
   VideoDecoderMSE,
 } from "jv4-decoder/src";
-import { FlvDemuxer, DemuxEvent, PSDemuxer, HLSDemuxer } from "jv4-demuxer/src";
+import { FlvDemuxer, DemuxEvent, PSDemuxer } from "jv4-demuxer/src";
 import {
   WebCodecsVideoRenderer,
   YUVCanvasRenderer,
@@ -83,8 +83,10 @@ const display = reactive({
   audioDecodedFrames: 0,
 });
 
-let vframs = 0;
-let aframs = 0;
+const vframs = ref(0);
+const aframs = ref(0);
+let playTimeout: NodeJS.Timeout | null = null;
+
 watchEffect(() => {
   if (!dump.value) {
     stopDump.value();
@@ -96,6 +98,21 @@ function readDelay(t: number): Promise<void> {
 }
 async function connect(file?: File, options?: UploadCustomRequestOptions) {
   try {
+    // 重置帧计数
+    vframs.value = 0;
+    aframs.value = 0;
+    
+    // 设置5秒超时
+    if (playTimeout) {
+      clearTimeout(playTimeout);
+    }
+    playTimeout = setTimeout(() => {
+      if (vframs.value === 0) {
+        message.error("播放失败：5秒内未渲染出任何视频帧");
+        disconnect();
+      }
+    }, 5000);
+
     const cache: Uint8Array[] = [];
     const p = new Promise<Blob>((resolve) => {
       stopDump.value = () => {
@@ -195,19 +212,32 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
       muxType.value === "flv"
         ? new FlvDemuxer(conn, mode.value)
         : muxType.value === "hls"
-        ? new HLSDemuxer(conn, mode.value)
+        ? null //new HLSDemuxer(conn, mode.value)
         : new PSDemuxer(conn, mode.value);
+    if (!demuxer) {
+      throw new Error("Demuxer not supported");
+    }
 
+    demuxer.on(
+      DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED,
+      (vconfig: VideoDecoderConfig) => {
+        console.log('[Renderer] Video encoder config changed:', {
+          codec: vconfig.codec,
+          width: vconfig.codedWidth,
+          height: vconfig.codedHeight,
+          description: vconfig.description ? 
+            Array.from(vconfig.description)
+              .map(b => b.toString(16).padStart(2, '0'))
+              .join(' ') 
+            : undefined
+        });
+        videoDecoder.configure(vconfig);
+      }
+    );
     demuxer.on(
       DemuxEvent.AUDIO_ENCODER_CONFIG_CHANGED,
       (aconfig: AudioDecoderConfig) => {
         audioDecoder.configure(aconfig);
-      }
-    );
-    demuxer.on(
-      DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED,
-      (vconfig: VideoDecoderConfig) => {
-        videoDecoder.configure(vconfig);
       }
     );
     if (decoderv.value == "mse") {
@@ -228,29 +258,51 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
       display.audioTS = data.timestamp;
       display.audioSize = data.data.byteLength;
 
+      console.log('[Renderer] Got audio data:', {
+        timestamp: data.timestamp,
+        size: data.data.byteLength,
+        type: data.type
+      });
+
       audioDecoder.decode(data);
-      aframs++;
+      aframs.value++;
     };
     const gotVideo = (data: EncodedVideoChunkInit) => {
       display.videoTS = data.timestamp;
       display.videoSize = data.data.byteLength;
-      vframs++;
-      console.log(data.timestamp, data.type);
+      vframs.value++;
+
+      console.log('[Renderer] Got video data:', {
+        timestamp: data.timestamp,
+        size: data.data.byteLength,
+        type: data.type,
+        duration: data.duration,
+        hasConfig: !!videoDecoder.config
+      });
+
       if (videoDecoder.config) {
         try {
           if (dumpFile) {
             cache.push(data.data as Uint8Array);
           }
           videoDecoder.decode(data);
+          console.log('[Renderer] Video data sent to decoder');
         } catch (err) {
-          console.error(err);
+          console.error('[Renderer] Error decoding video:', err);
         }
+      } else {
+        console.warn('[Renderer] Video decoder not configured yet');
       }
     };
     if (mode.value == DemuxMode.PULL) {
+      console.log('[Renderer] Setting up PULL mode streams');
       demuxer.audioReadable?.pipeTo(
         new WritableStream({
           write(chunk: EncodedAudioChunkInit) {
+            console.log('[Renderer] Audio stream received chunk:', {
+              timestamp: chunk.timestamp,
+              size: chunk.data.byteLength
+            });
             gotAudio(chunk);
             if (file && options)
               options.onProgress({
@@ -263,6 +315,11 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
       demuxer.videoReadable?.pipeTo(
         new WritableStream({
           write(chunk: EncodedVideoChunkInit) {
+            console.log('[Renderer] Video stream received chunk:', {
+              timestamp: chunk.timestamp,
+              size: chunk.data.byteLength,
+              type: chunk.type
+            });
             gotVideo(chunk);
 
             if (file && options)
@@ -275,6 +332,7 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
         })
       );
     } else {
+      console.log('[Renderer] Setting up PUSH mode callbacks');
       demuxer.gotAudio = gotAudio;
       demuxer.gotVideo = gotVideo;
       await conn.connect();
@@ -291,8 +349,13 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
   }
 }
 function disconnect() {
-  message.info(`disconnetion`);
-  conn.close();
+  if (playTimeout) {
+    clearTimeout(playTimeout);
+    playTimeout = null;
+  }
+  conn?.close();
+  vframs.value = 0;
+  aframs.value = 0;
 }
 const data = reactive({
   totalDown: 0,
@@ -313,13 +376,13 @@ onMounted(() => {
     let now = new Date().getTime();
 
     display.videoDecodedFrameRate = Math.floor(
-      (vframs * 1000) / (now - lastsec)
+      (vframs.value * 1000) / (now - lastsec)
     );
-    vframs = 0;
+    vframs.value = 0;
     display.audioDecodedFrameRate = Math.floor(
-      (aframs * 1000) / (now - lastsec)
+      (aframs.value * 1000) / (now - lastsec)
     );
-    aframs = 0;
+    aframs.value = 0;
 
     lastsec = now;
 
@@ -457,7 +520,14 @@ const initializeDecoder = async () => {
     VideoDecoderEvent.VideoFrame,
     async (videoFrame: VideoFrame) => {
       display.videoDecodedFrames++;
-      vframs++;
+      vframs.value++;
+      if (vframs.value === 5) {  
+        message.success("视频播放成功！");
+        if (playTimeout) {
+          clearTimeout(playTimeout);
+          playTimeout = null;
+        }
+      }
       if (rendererType.value === "yuv" || rendererType.value === "canvas") {
         if (
           renderer instanceof YUVCanvasRenderer ||
@@ -503,7 +573,7 @@ const initializeDecoder = async () => {
 
   audioDecoder.on(AudioDecoderEvent.AudioFrame, (audioFrame: AudioData) => {
     display.audioDecodedFrames++;
-    aframs++;
+    aframs.value++;
     if (renderer instanceof WebCodecsVideoRenderer) {
       renderer.writeAudio(audioFrame);
     }

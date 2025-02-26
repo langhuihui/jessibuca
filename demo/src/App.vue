@@ -5,11 +5,13 @@ import Connection from './components/Connection.vue';
 import Demuxer from './components/Demuxer.vue';
 import Decoder from './components/Decoder.vue'
 import Renderer from './components/Renderer.vue'
+import UI from './components/UI.vue'
+import TimeRangeDemo from './components/TimeRangeDemo.vue'
 </script>
 
 <template>
   <n-message-provider>
-    <n-tabs type="segment" default-value="renderer">
+    <n-tabs type="segment" default-value="time-range-demo">
       <n-tab-pane name="connection" tab="Connection">
         <Connection />
       </n-tab-pane>
@@ -24,6 +26,9 @@ import Renderer from './components/Renderer.vue'
       </n-tab-pane>
       <n-tab-pane name="ui" tab="UI">
         <UI/>
+      </n-tab-pane>
+      <n-tab-pane name="time-range-demo" tab="Time Range Demo">
+        <TimeRangeDemo />
       </n-tab-pane>
     </n-tabs>
   </n-message-provider>

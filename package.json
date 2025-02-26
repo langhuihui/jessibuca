@@ -4,7 +4,9 @@
   "description": "a h5 live stream player",
   "main": "index.js",
   "scripts": {
-    "build:demo": "pnpm run --filter demo build"
+    "build:demo": "pnpm run --filter demo build",
+    "build:ui": "pnpm run --filter jv4-ui build",
+    "build": "pnpm run build:ui && pnpm run build:demo"
   },
   "repository": {
     "type": "git",

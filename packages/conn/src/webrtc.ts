@@ -27,7 +27,7 @@ export class DataChannelConnection extends Connection {
     this.dc.send(data);
   }
 }
-export class WebRTCStream extends EventEmitter<{ change: [MediaStream], close: []; }>{
+export class WebRTCStream extends EventEmitter<{ change: [MediaStream], close: []; }> {
   private _mediaStream?: MediaStream;
   public get mediaStream() {
     return this._mediaStream;
@@ -53,7 +53,7 @@ export class WebRTCStream extends EventEmitter<{ change: [MediaStream], close: [
       if (!this._mediaStream) this._mediaStream = new MediaStream([track]);
       else this._mediaStream.addTrack(track);
     }
-    if(this._mediaStream) this.emit("change", this._mediaStream);
+    if (this._mediaStream) this.emit("change", this._mediaStream);
   }
   get audioTrack() {
     return this._audioTrack || this._mediaStream?.getAudioTracks()[0];
@@ -68,7 +68,7 @@ export class WebRTCStream extends EventEmitter<{ change: [MediaStream], close: [
       if (!this._mediaStream) this._mediaStream = new MediaStream([track]);
       else this._mediaStream.addTrack(track);
     }
-    if(this._mediaStream) this.emit("change", this._mediaStream);
+    if (this._mediaStream) this.emit("change", this._mediaStream);
   }
   get videoTrack(): MediaStreamVideoTrack | undefined {
     return this._videoTrack || this._mediaStream?.getVideoTracks()[0];
