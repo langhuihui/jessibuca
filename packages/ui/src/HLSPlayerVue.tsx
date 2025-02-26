@@ -36,12 +36,52 @@ export default defineComponent({
     const duration = ref(0);
     const isPlaying = ref(false);
     const currentRate = ref(1);
+    const hasMetadata = ref(false);
+    const loadingState = ref('idle'); // idle, loading, ready
 
     const updateProgress = () => {
       if (player.value) {
         currentTime.value = player.value.getCurrentTime();
-        duration.value = player.value.getDuration();
+        const newDuration = player.value.getDuration();
+        
+        // Only update duration if it's valid and different from current value
+        if (!isNaN(newDuration) && isFinite(newDuration) && newDuration > 0 && Math.abs(newDuration - duration.value) > 0.5) {
+          duration.value = newDuration;
+          console.log(`Duration updated: ${duration.value.toFixed(2)}s`);
+          hasMetadata.value = true;
+        }
       }
+    };
+
+    // Track buffering state
+    const setupBufferingListeners = () => {
+      if (!videoRef.value) return;
+      
+      videoRef.value.addEventListener('waiting', () => {
+        loadingState.value = 'loading';
+      });
+      
+      videoRef.value.addEventListener('canplay', () => {
+        loadingState.value = 'ready';
+      });
+      
+      // Additional events to track buffering state
+      videoRef.value.addEventListener('playing', () => {
+        isPlaying.value = true;
+        loadingState.value = 'ready';
+      });
+      
+      videoRef.value.addEventListener('pause', () => {
+        isPlaying.value = false;
+      });
+      
+      // Track buffered ranges
+      videoRef.value.addEventListener('progress', () => {
+        if (videoRef.value && videoRef.value.buffered.length > 0) {
+          const bufferedEnd = videoRef.value.buffered.end(videoRef.value.buffered.length - 1);
+          console.log(`Buffered range: 0 - ${bufferedEnd.toFixed(2)}s`);
+        }
+      });
     };
 
     onMounted(async () => {
@@ -55,9 +95,30 @@ export default defineComponent({
 
         videoRef.value.addEventListener("timeupdate", updateProgress);
         videoRef.value.addEventListener("durationchange", updateProgress);
+        // Additional event listeners for better metadata detection
+        videoRef.value.addEventListener("loadedmetadata", updateProgress);
+        videoRef.value.addEventListener("loadeddata", updateProgress);
+        
+        // Setup buffering state tracking
+        setupBufferingListeners();
+        
+        // Create an interval to check duration regularly, in case events don't fire
+        const durationCheckInterval = setInterval(() => {
+          if (player.value && !hasMetadata.value) {
+            updateProgress();
+          } else if (hasMetadata.value) {
+            clearInterval(durationCheckInterval);
+          }
+        }, 1000);
 
         if (props.src) {
+          loadingState.value = 'loading';
           await player.value.load(props.src);
+          
+          // Force several updates after loading to ensure UI is up-to-date
+          setTimeout(updateProgress, 500);
+          setTimeout(updateProgress, 1000);
+          setTimeout(updateProgress, 2000);
         }
       }
     });
@@ -68,7 +129,14 @@ export default defineComponent({
       async (newSrc, oldSrc) => {
         if (newSrc && newSrc !== oldSrc && player.value) {
           isPlaying.value = false;
+          loadingState.value = 'loading';
+          hasMetadata.value = false; // Reset metadata flag
           await player.value.load(newSrc);
+          
+          // Force several updates after loading
+          setTimeout(updateProgress, 500);
+          setTimeout(updateProgress, 1000);
+          setTimeout(updateProgress, 2000);
         }
       }
     );
@@ -77,6 +145,13 @@ export default defineComponent({
       if (videoRef.value) {
         videoRef.value.removeEventListener("timeupdate", updateProgress);
         videoRef.value.removeEventListener("durationchange", updateProgress);
+        videoRef.value.removeEventListener("loadedmetadata", updateProgress);
+        videoRef.value.removeEventListener("loadeddata", updateProgress);
+        videoRef.value.removeEventListener("waiting", () => {});
+        videoRef.value.removeEventListener("canplay", () => {});
+        videoRef.value.removeEventListener("playing", () => {});
+        videoRef.value.removeEventListener("pause", () => {});
+        videoRef.value.removeEventListener("progress", () => {});
       }
       player.value?.destroy();
     });
@@ -88,6 +163,7 @@ export default defineComponent({
         player.value.pause();
         isPlaying.value = false;
       } else {
+        loadingState.value = 'loading';
         await player.value.play();
         isPlaying.value = true;
       }

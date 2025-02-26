@@ -36,6 +36,7 @@ export class HLSPlayer {
   private debugContainer?: HTMLDivElement;
   private debugTimelineCanvas?: HTMLCanvasElement;
   private debugMediaCanvas?: HTMLCanvasElement;
+  private totalPlaylistDuration: number = 0;
 
   constructor(videoElement: HTMLVideoElement, options: HLSPlayerOptions = {}) {
     this.videoElement = videoElement;
@@ -305,6 +306,9 @@ export class HLSPlayer {
     const currentTime = this.getCurrentTime();
     const duration = this.getDuration();
 
+    // Make sure we have valid duration to prevent NaN calculations
+    const validDuration = isNaN(duration) || duration <= 0 || !isFinite(duration) ? 100 : duration;
+
     if (this.options.timeRangeMode && this.options.timeRanges?.length) {
       const totalStart = Math.min(...this.options.timeRanges.map(r => r.start));
       const totalEnd = Math.max(...this.options.timeRanges.map(r => r.end));
@@ -322,11 +326,26 @@ export class HLSPlayer {
       }
     } else {
       if (this.progressInput) {
-        this.progressInput.max = String(duration);
-        this.progressInput.value = String(currentTime);
+        // Ensure current time is within bounds
+        const boundedCurrentTime = Math.min(currentTime, validDuration);
+        
+        const percentage = (boundedCurrentTime / validDuration) * 100;
+        // Ensure the percentage is within valid bounds (0-100)
+        const normalizedPercentage = Math.min(100, Math.max(0, isNaN(percentage) ? 0 : percentage));
+        
+        // Use percentage-based value to avoid issues with non-standard durations
+        this.progressInput.max = '100';
+        this.progressInput.value = String(normalizedPercentage);
+        
+        // Limit debug logging frequency to avoid console spam
+        if (Math.floor(currentTime) % 5 === 0) { // Log every 5 seconds
+          console.log(`Progress: ${boundedCurrentTime.toFixed(2)}s / ${validDuration.toFixed(2)}s (${normalizedPercentage.toFixed(2)}%)`);
+        }
       }
+      
       if (this.timeDisplay) {
-        this.timeDisplay.textContent = `${this.formatTime(currentTime)} / ${this.formatTime(duration)}`;
+        // Format and display the time
+        this.timeDisplay.textContent = `${this.formatTime(currentTime)} / ${this.formatTime(validDuration)}`;
       }
     }
 
@@ -366,6 +385,167 @@ export class HLSPlayer {
 
   public async load(url: string): Promise<void> {
     await this.demuxer.load(url);
+    
+    // Calculate the total playlist duration after the demuxer has loaded the m3u8
+    try {
+      // Allow time for the video metadata to load
+      await new Promise(resolve => {
+        const checkDuration = () => {
+          if (this.videoElement.duration > 0 && !isNaN(this.videoElement.duration)) {
+            resolve(true);
+          } else {
+            setTimeout(checkDuration, 100); // Check every 100ms
+          }
+        };
+        
+        // Start checking
+        checkDuration();
+        
+        // Also listen for loadedmetadata event as a fallback
+        const onMetadataLoaded = () => {
+          this.videoElement.removeEventListener('loadedmetadata', onMetadataLoaded);
+          resolve(true);
+        };
+        this.videoElement.addEventListener('loadedmetadata', onMetadataLoaded);
+      });
+      
+      // Method 1: Get m3u8 segment information from the demuxer
+      if ((this.demuxer as any).playlistInfo && Array.isArray((this.demuxer as any).playlistInfo.segments)) {
+        const segments = (this.demuxer as any).playlistInfo.segments;
+        
+        // Calculate total duration by summing segment durations
+        let calculatedDuration = 0;
+        let validSegmentCount = 0;
+        
+        segments.forEach(segment => {
+          if (segment.duration && isFinite(segment.duration) && segment.duration > 0) {
+            calculatedDuration += segment.duration;
+            validSegmentCount++;
+          }
+        });
+        
+        if (calculatedDuration > 0 && isFinite(calculatedDuration)) {
+          this.totalPlaylistDuration = calculatedDuration;
+          console.log(`Total playlist duration calculated: ${this.totalPlaylistDuration.toFixed(2)}s from ${validSegmentCount} segments`);
+        } else if (segments.length > 0) {
+          // If we couldn't calculate from durations, try to estimate based on segment count
+          // Try to fetch the playlist directly for parsing durations
+          try {
+            await this.fetchAndParsePlaylist(url);
+          } catch (err) {
+            console.warn('Failed to fetch and parse playlist directly:', err);
+            
+            // Fall back to estimating duration based on segment count
+            const estimatedDuration = isFinite(this.videoElement.duration) && this.videoElement.duration > 0 
+              ? this.videoElement.duration 
+              : segments.length * 4; // Assume average 4 seconds per segment as fallback
+            
+            this.totalPlaylistDuration = estimatedDuration;
+            console.log(`Estimated playlist duration: ${this.totalPlaylistDuration.toFixed(2)}s (based on ${segments.length} segments)`);
+          }
+        } else {
+          // Try direct parsing if no valid segments found
+          try {
+            await this.fetchAndParsePlaylist(url);
+          } catch (err) {
+            console.warn('Failed to fetch and parse playlist directly:', err);
+            // Fallback to a reasonable default if we can't calculate
+            this.totalPlaylistDuration = 60; // Default 60s if we can't determine
+            console.log(`Using default duration: ${this.totalPlaylistDuration.toFixed(2)}s (could not calculate)`);
+          }
+        }
+      } else {
+        // Method 2: Try to fetch and parse the playlist directly
+        try {
+          await this.fetchAndParsePlaylist(url);
+        } catch (err) {
+          console.warn('Failed to fetch and parse playlist directly:', err);
+          
+          // Fallback to video element duration or default
+          this.totalPlaylistDuration = isFinite(this.videoElement.duration) && this.videoElement.duration > 0 
+            ? this.videoElement.duration 
+            : 60; // Default 60s
+          console.log(`Using video element duration: ${this.totalPlaylistDuration.toFixed(2)}s`);
+        }
+      }
+      
+      // Set up listeners to update duration as more segments are loaded
+      this.setupDurationUpdateListeners();
+      
+    } catch (error) {
+      console.error('Error calculating playlist duration:', error);
+      // Fallback to a reasonable default
+      this.totalPlaylistDuration = 60; // Default 60s if calculation fails
+      console.log(`Using default duration due to error: ${this.totalPlaylistDuration.toFixed(2)}s`);
+    }
+  }
+  
+  private async fetchAndParsePlaylist(url: string): Promise<void> {
+    try {
+      // Fetch the m3u8 file directly
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch playlist: ${response.status} ${response.statusText}`);
+      }
+      
+      const content = await response.text();
+      console.log('Successfully fetched m3u8 content');
+      
+      // Parse the m3u8 content to extract segment durations
+      const lines = content.split('\n');
+      let totalDuration = 0;
+      let segmentCount = 0;
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line.startsWith('#EXTINF:')) {
+          // Extract duration from the EXTINF tag
+          // Format is typically #EXTINF:duration,optional-title
+          const durationPart = line.split(':')[1].split(',')[0];
+          const duration = parseFloat(durationPart);
+          
+          if (!isNaN(duration) && isFinite(duration) && duration > 0) {
+            totalDuration += duration;
+            segmentCount++;
+          }
+        }
+      }
+      
+      if (totalDuration > 0 && segmentCount > 0) {
+        this.totalPlaylistDuration = totalDuration;
+        console.log(`Duration calculated from m3u8 parsing: ${this.totalPlaylistDuration.toFixed(2)}s from ${segmentCount} segments`);
+      } else {
+        throw new Error('No valid durations found in m3u8 content');
+      }
+    } catch (error) {
+      console.error('Error parsing m3u8 content:', error);
+      throw error; // Re-throw for the caller to handle
+    }
+  }
+  
+  private setupDurationUpdateListeners(): void {
+    // Listen for buffered ranges updates to improve duration calculation
+    const updateDurationFromBuffer = () => {
+      if (this.videoElement.buffered.length > 0) {
+        const bufferedEnd = this.videoElement.buffered.end(this.videoElement.buffered.length - 1);
+        if (bufferedEnd > 0 && isFinite(bufferedEnd) && bufferedEnd > this.totalPlaylistDuration) {
+          this.totalPlaylistDuration = bufferedEnd;
+          console.log(`Updated duration from buffer: ${this.totalPlaylistDuration}s`);
+        }
+      }
+    };
+    
+    // Update when more content is buffered
+    this.videoElement.addEventListener('progress', updateDurationFromBuffer);
+    
+    // Also update when seeking near the end
+    this.videoElement.addEventListener('seeking', () => {
+      const currentTime = this.videoElement.currentTime;
+      if (currentTime > 0 && isFinite(currentTime) && currentTime > this.totalPlaylistDuration * 0.9) {
+        // If seeking near the end, update duration if needed
+        updateDurationFromBuffer();
+      }
+    });
   }
 
   public async play(): Promise<void> {
@@ -420,7 +600,17 @@ export class HLSPlayer {
     if (this.options.timeRangeMode) {
       return this.options.timeRanges?.reduce((acc, range) => acc + range.mediaDuration, 0) || 0;
     }
-    return this.videoElement.duration;
+    
+    // Make sure we never return Infinity or NaN
+    if (!isFinite(this.totalPlaylistDuration) || this.totalPlaylistDuration <= 0) {
+      // If we couldn't calculate a valid duration, use a reasonable default
+      // or try to get it from the video element if available
+      return isFinite(this.videoElement.duration) && this.videoElement.duration > 0 
+        ? this.videoElement.duration 
+        : 60; // Default 60s
+    }
+    
+    return this.totalPlaylistDuration;
   }
 
   public isPlaying(): boolean {
