@@ -3,6 +3,7 @@ import { h, render } from 'vue';
 import Timeline from './Timeline';
 import { TimeRange } from './TimelineBase';
 import './HLSPlayer.css';
+import { SegmentLoader, VirtualTimeline, MediaSegment, BufferRange, SlidingWindowConfig } from 'jv4-demuxer';
 
 export type { TimeRange };
 
@@ -18,6 +19,12 @@ export interface HLSPlayerOptions {
     showTimeRanges?: boolean;
     showMediaTimeline?: boolean;
   };
+}
+
+interface PlaylistSegment {
+  duration: number;
+  time: Date;
+  url: string;
 }
 
 export class HLSPlayer {
@@ -37,31 +44,112 @@ export class HLSPlayer {
   private debugTimelineCanvas?: HTMLCanvasElement;
   private debugMediaCanvas?: HTMLCanvasElement;
   private totalPlaylistDuration: number = 0;
+  private loadingIndicator?: HTMLDivElement;
+  private container?: HTMLDivElement;
+  private progressInfoLabel?: HTMLDivElement;
+
+  // 静态属性，用于记录上次日志输出时间
+  private static lastProgressLogTime = 0;
+
+  // 静态属性，用于记录上次时间轴渲染日志输出时间
+  private static lastTimelineLogTime = 0;
 
   constructor(videoElement: HTMLVideoElement, options: HLSPlayerOptions = {}) {
     this.videoElement = videoElement;
     this.options = {
       showPlaybackRate: true,
       showProgress: true,
-      playbackRates: [0.5, 1, 1.5, 2],
+      playbackRates: [0.5, 1, 1.5, 2, 3],
       autoGenerateUI: true,
       timeRangeMode: false,
       timeRanges: [],
       ...options
     };
-    this.demuxer = new HLSv7Demuxer(videoElement);
 
+    // Create the HLSv7Demuxer instance with optimized configuration
+    this.demuxer = new HLSv7Demuxer(this.videoElement, {
+      logLevel: (options.debug?.enabled ? 'debug' : 'info'),
+      // Configure sliding window for efficient segment management
+      slidingWindow: {
+        enabled: true,
+        forward: 2,  // Preload 2 segments ahead
+        backward: 1  // Keep 1 segment in history
+      }
+    });
+
+    // Setup event listeners for demuxer
+    this.setupDemuxerListeners();
+
+    // Create UI if enabled
     if (this.options.autoGenerateUI) {
       this.createUI();
     }
 
-    // 初始化时间片段
+    // Create debug UI if enabled
+    if (this.options.debug?.enabled) {
+      this.createDebugUI();
+    }
+
+    // Initialize time ranges if provided
     if (this.options.timeRanges?.length) {
       this.initializeTimeRanges(this.options.timeRanges);
     }
 
-    // 监听视频时间更新
+    // Setup video element event listeners
     this.videoElement.addEventListener('timeupdate', this.handleTimeUpdate.bind(this));
+
+    // 启动进度更新
+    if (this.options.showProgress) {
+      this.startProgressUpdate();
+    }
+  }
+
+  /**
+   * Setup event listeners for demuxer to handle various events
+   */
+  private setupDemuxerListeners(): void {
+    // Listen for playlist updates
+    this.demuxer.on('playlistUpdate', (playlist) => {
+      this.log(`播放列表更新: 片段数=${playlist.length}`, 'info');
+
+      // Calculate total duration
+      this.totalPlaylistDuration = this.demuxer.getTotalDuration();
+
+      this.log(`总时长更新: ${this.totalPlaylistDuration}秒`, 'info');
+
+      // Update progress display
+      this.updateProgress();
+    });
+
+    // Listen for buffer updates
+    this.demuxer.on('bufferUpdate', (ranges: BufferRange[]) => {
+      // Update buffer visualization if in debug mode
+      if (this.options.debug?.enabled) {
+        this.updateDebugDisplay();
+      }
+    });
+
+    // Listen for segment loaded events
+    this.demuxer.on('segmentLoaded', (segmentIndex: number) => {
+      this.log(`片段 #${segmentIndex} 已加载`, 'debug');
+
+      // Update debug display if enabled
+      if (this.options.debug?.enabled) {
+        this.updateDebugDisplay();
+      }
+    });
+
+    // Listen for errors
+    this.demuxer.on('error', (error: Error) => {
+      this.log(`播放器错误: ${error.message}`, 'error');
+    });
+
+    // Listen for debug messages
+    this.demuxer.on('debug', (message: string) => {
+      if (this.options.debug?.enabled) {
+        this.log(message, 'debug');
+      }
+    });
   }
 
   private initializeTimeRanges(ranges: TimeRange[]): void {
@@ -86,10 +174,41 @@ export class HLSPlayer {
     }
   }
 
+  /**
+   * 查找指定时间所属的时间范围
+   */
   private findTimeRangeForTime(time: number): TimeRange | undefined {
-    return this.options.timeRanges?.find(range =>
-      time >= range.start && time <= range.end
-    );
+    if (!this.options.timeRanges?.length) return undefined;
+
+    // 遍历所有时间范围，查找包含指定时间的范围
+    for (const range of this.options.timeRanges) {
+      const rangeEnd = range.end;
+      if (time >= range.start && time <= rangeEnd) {
+        return range;
+      }
+    }
+
+    // 如果未找到，使用最接近的范围
+    let nearestRange: TimeRange | undefined;
+    let minDistance = Number.MAX_VALUE;
+
+    for (const range of this.options.timeRanges) {
+      const startDistance = Math.abs(time - range.start);
+      const endDistance = Math.abs(time - range.end);
+      const minRangeDistance = Math.min(startDistance, endDistance);
+
+      if (minRangeDistance < minDistance) {
+        minDistance = minRangeDistance;
+        nearestRange = range;
+      }
+    }
+
+    // 如果存在最近的范围，记录日志
+    if (nearestRange) {
+      this.log(`时间 ${time}秒 不在任何时间范围内，使用最近的范围 [${nearestRange.start}-${nearestRange.end}]`, 'debug');
+    }
+
+    return nearestRange;
   }
 
   private async switchToTimeRange(range: TimeRange): Promise<void> {
@@ -100,15 +219,17 @@ export class HLSPlayer {
   }
 
   private originalToMediaTime(time: number): number {
+    if (!this.options.timeRanges?.length) return time;
+
+    // 查找时间所在的范围
     const range = this.findTimeRangeForTime(time);
-    if (!range) {
-      const nextRange = this.options.timeRanges?.find(r => time < r.start);
-      if (nextRange) return nextRange.mediaStart;
-      const prevRange = [...(this.options.timeRanges || [])].reverse().find(r => time > r.end);
-      if (prevRange) return prevRange.mediaStart + prevRange.mediaDuration;
-      return 0;
-    }
-    return range.mediaStart + (time - range.start);
+    if (!range) return time; // 如果找不到范围，返回原始时间
+
+    // 计算在原始视频中的偏移量
+    const offsetInRange = time - range.start;
+
+    // 转换为媒体时间
+    return range.mediaStart + offsetInRange;
   }
 
   private mediaToOriginalTime(time: number): number {
@@ -128,6 +249,7 @@ export class HLSPlayer {
     this.videoElement.parentNode?.insertBefore(container, this.videoElement);
     container.appendChild(this.videoElement);
     this.videoElement.className = 'hls-player-video';
+    this.container = container;
 
     this.controlsElement = document.createElement('div');
     this.controlsElement.className = 'hls-player-controls';
@@ -142,6 +264,14 @@ export class HLSPlayer {
       const progressContainer = document.createElement('div');
       progressContainer.className = 'hls-player-progress';
 
+      // 添加详细进度信息标签
+      const progressInfoLabel = document.createElement('div');
+      progressInfoLabel.className = 'progress-info-label';
+      progressInfoLabel.style.cssText = 'font-size: 12px; color: #666; margin-bottom: 4px; white-space: nowrap;';
+      progressInfoLabel.textContent = '加载中...';
+      progressContainer.appendChild(progressInfoLabel);
+      this.progressInfoLabel = progressInfoLabel;
+
       // 创建进度条容器，包含 canvas 和 input
       const progressWrapper = document.createElement('div');
       progressWrapper.className = 'progress-wrapper';
@@ -154,7 +284,7 @@ export class HLSPlayer {
       this.progressInput = document.createElement('input');
       this.progressInput.type = 'range';
       this.progressInput.min = '0';
-      this.progressInput.max = '0';
+      this.progressInput.max = '100'; // 设置初始最大值为100
       this.progressInput.value = '0';
       this.progressInput.setAttribute('aria-label', '视频进度条');
       this.progressInput.oninput = this.handleSeek.bind(this);
@@ -163,7 +293,10 @@ export class HLSPlayer {
       progressContainer.appendChild(progressWrapper);
 
       this.timeDisplay = document.createElement('span');
-      this.timeDisplay.textContent = '0:00 / 0:00';
+      // 确保初始时间显示正确
+      const initialTimeText = `${this.formatTime(0)} / ${this.formatTime(0)}`;
+      console.log(`[HLSPlayer] 初始时间显示: ${initialTimeText}`);
+      this.timeDisplay.textContent = initialTimeText;
       progressContainer.appendChild(this.timeDisplay);
 
       this.controlsElement.appendChild(progressContainer);
@@ -287,6 +420,7 @@ export class HLSPlayer {
   private handleSeek(e: Event): void {
     const target = e.target as HTMLInputElement;
     const value = Number(target.value);
+    const duration = this.demuxer.getTotalDuration();
 
     if (this.options.timeRangeMode) {
       const { time, url } = this.calculateSeekTime(value);
@@ -296,18 +430,59 @@ export class HLSPlayer {
         this.seek(time);
       }
     } else {
-      this.seek(value);
+      // 将百分比转换为实际时间
+      const seekTime = (value / 100) * duration;
+      console.log(`[HLSPlayer] 跳转: value=${value}%, duration=${duration}秒, seekTime=${seekTime}秒`);
+      this.seek(seekTime);
     }
   }
 
   private updateProgress(): void {
     if (!this.options.showProgress) return;
 
-    const currentTime = this.getCurrentTime();
-    const duration = this.getDuration();
+    // 直接从视频元素获取当前时间，确保时间显示最新状态
+    const currentTime = this.videoElement.currentTime;
+    const rawDuration = this.demuxer.getTotalDuration();
+    const demuxerTime = this.demuxer.getCurrentTime();
+
+    // 记录当前时间和总时长，用于调试
+    const now = Date.now();
+    // 确保至少间隔 5 秒才输出一次日志
+    if (now - HLSPlayer.lastProgressLogTime >= 5000) {
+      console.log(`[HLSPlayer] 更新进度: currentTime=${currentTime.toFixed(2)}秒, totalDuration=${rawDuration.toFixed(2)}秒, demuxerTime=${demuxerTime.toFixed(2)}秒`);
+      HLSPlayer.lastProgressLogTime = now;
+    }
+
+    // 更新进度信息标签
+    if (this.progressInfoLabel) {
+      // 获取缓冲区信息
+      let bufferInfo = '';
+      if (this.videoElement.buffered.length > 0) {
+        for (let i = 0; i < this.videoElement.buffered.length; i++) {
+          const start = this.videoElement.buffered.start(i);
+          const end = this.videoElement.buffered.end(i);
+          bufferInfo += `缓冲区 #${i}: ${start.toFixed(1)}-${end.toFixed(1)}秒 `;
+        }
+      } else {
+        bufferInfo = '无缓冲区';
+      }
+
+      // 计算进度百分比
+      const validDuration = isNaN(rawDuration) || rawDuration <= 0 || !isFinite(rawDuration) ? 100 : rawDuration;
+      const progress = (currentTime / validDuration) * 100;
+
+      // 更新标签内容
+      this.progressInfoLabel.textContent = `当前时间: ${currentTime.toFixed(2)}秒 | ` +
+        `Demuxer时间: ${demuxerTime.toFixed(2)}秒 | ` +
+        `总时长: ${rawDuration.toFixed(2)}秒 | ` +
+        `进度: ${progress.toFixed(1)}% | ` +
+        `${bufferInfo} | ` +
+        `播放状态: ${this.isPlaying() ? '播放中' : '已暂停'} | ` +
+        `ReadyState: ${this.videoElement.readyState}`;
+    }
 
     // Make sure we have valid duration to prevent NaN calculations
-    const validDuration = isNaN(duration) || duration <= 0 || !isFinite(duration) ? 100 : duration;
+    const validDuration = isNaN(rawDuration) || rawDuration <= 0 || !isFinite(rawDuration) ? 100 : rawDuration;
 
     if (this.options.timeRangeMode && this.options.timeRanges?.length) {
       const totalStart = Math.min(...this.options.timeRanges.map(r => r.start));
@@ -321,43 +496,81 @@ export class HLSPlayer {
           this.progressInput.max = '100';
         }
         if (this.timeDisplay) {
-          this.timeDisplay.textContent = `${this.formatTime(currentTime - totalStart)} / ${this.formatTime(totalEnd - totalStart)}`;
+          // 确保传递给 formatTime 的是有效数字
+          const adjustedCurrentTime = Number(currentTime - totalStart);
+          const adjustedTotalTime = Number(totalEnd - totalStart);
+          console.log(`[HLSPlayer] 时间范围模式时间: adjustedCurrentTime=${adjustedCurrentTime}秒, adjustedTotalTime=${adjustedTotalTime}秒`);
+          this.timeDisplay.textContent = `${this.formatTime(adjustedCurrentTime)} / ${this.formatTime(adjustedTotalTime)}`;
         }
       }
+
+      // Update progress display for time ranges mode
+      this.updateProgressDisplay();
     } else {
       if (this.progressInput) {
-        // Ensure current time is within bounds
-        const boundedCurrentTime = Math.min(currentTime, validDuration);
-        
-        const percentage = (boundedCurrentTime / validDuration) * 100;
-        // Ensure the percentage is within valid bounds (0-100)
-        const normalizedPercentage = Math.min(100, Math.max(0, isNaN(percentage) ? 0 : percentage));
-        
-        // Use percentage-based value to avoid issues with non-standard durations
+        // 计算进度百分比
+        const progress = (currentTime / validDuration) * 100;
         this.progressInput.max = '100';
-        this.progressInput.value = String(normalizedPercentage);
-        
-        // Limit debug logging frequency to avoid console spam
-        if (Math.floor(currentTime) % 5 === 0) { // Log every 5 seconds
-          console.log(`Progress: ${boundedCurrentTime.toFixed(2)}s / ${validDuration.toFixed(2)}s (${normalizedPercentage.toFixed(2)}%)`);
-        }
+        this.progressInput.value = String(Math.min(100, Math.max(0, progress)));
       }
-      
+
       if (this.timeDisplay) {
-        // Format and display the time
-        this.timeDisplay.textContent = `${this.formatTime(currentTime)} / ${this.formatTime(validDuration)}`;
+        // 使用视频元素的当前时间和 demuxer 提供的总时长，确保显示正确的时间
+        // 确保传递给 formatTime 的是有效数字
+        const numCurrentTime = Number(currentTime);
+        const numValidDuration = Number(validDuration);
+        console.log(`[HLSPlayer] 标准模式时间: numCurrentTime=${numCurrentTime}秒, numValidDuration=${numValidDuration}秒`);
+
+        const formattedCurrentTime = this.formatTime(numCurrentTime);
+        const formattedTotalTime = this.formatTime(numValidDuration);
+        const timeDisplayText = `${formattedCurrentTime} / ${formattedTotalTime}`;
+
+        console.log(`[HLSPlayer] 时间显示: ${timeDisplayText}`);
+        this.timeDisplay.textContent = timeDisplayText;
       }
+
+      // Update progress display for normal mode
+      this.updateProgressDisplay();
     }
 
     if (this.playButton) {
       this.playButton.textContent = this.isPlaying() ? '暂停' : '播放';
     }
+
+    // 更新调试显示
+    if (this.options.debug?.enabled) {
+      this.updateDebugDisplay();
+    }
   }
 
   private formatTime(seconds: number): string {
-    const mins = Math.floor(seconds / 60);
+    // 添加调试日志，查看传入的秒数
+    console.log(`[HLSPlayer] formatTime 输入: ${seconds}秒, 类型: ${typeof seconds}, isNaN: ${isNaN(seconds)}, isFinite: ${isFinite(seconds)}`);
+
+    // 确保 seconds 是有效的数字
+    if (isNaN(seconds) || !isFinite(seconds) || seconds < 0) {
+      console.log(`[HLSPlayer] formatTime 检测到无效时间，重置为0`);
+      seconds = 0;
+    }
+
+    // 确保 seconds 是数字类型
+    seconds = Number(seconds);
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+
+    let formattedTime;
+    if (hours > 0) {
+      formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    } else {
+      formattedTime = `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // 添加调试日志，查看格式化后的时间
+    console.log(`[HLSPlayer] formatTime 输出: ${formattedTime}, 原始秒数: ${seconds}秒`);
+
+    return formattedTime;
   }
 
   private async togglePlay(): Promise<void> {
@@ -384,237 +597,204 @@ export class HLSPlayer {
   }
 
   public async load(url: string): Promise<void> {
-    await this.demuxer.load(url);
-    
-    // Calculate the total playlist duration after the demuxer has loaded the m3u8
+    this.log(`加载HLS地址: ${url}`, 'info');
+
     try {
-      // Allow time for the video metadata to load
-      await new Promise(resolve => {
-        const checkDuration = () => {
-          if (this.videoElement.duration > 0 && !isNaN(this.videoElement.duration)) {
-            resolve(true);
-          } else {
-            setTimeout(checkDuration, 100); // Check every 100ms
-          }
-        };
-        
-        // Start checking
-        checkDuration();
-        
-        // Also listen for loadedmetadata event as a fallback
-        const onMetadataLoaded = () => {
-          this.videoElement.removeEventListener('loadedmetadata', onMetadataLoaded);
-          resolve(true);
-        };
-        this.videoElement.addEventListener('loadedmetadata', onMetadataLoaded);
-      });
-      
-      // Method 1: Get m3u8 segment information from the demuxer
-      if ((this.demuxer as any).playlistInfo && Array.isArray((this.demuxer as any).playlistInfo.segments)) {
-        const segments = (this.demuxer as any).playlistInfo.segments;
-        
-        // Calculate total duration by summing segment durations
-        let calculatedDuration = 0;
-        let validSegmentCount = 0;
-        
-        segments.forEach(segment => {
-          if (segment.duration && isFinite(segment.duration) && segment.duration > 0) {
-            calculatedDuration += segment.duration;
-            validSegmentCount++;
+      // 销毁之前的实例(如果有)
+      if (this.demuxer) {
+        this.demuxer.destroy();
+
+        // 重新创建demuxer实例
+        this.demuxer = new HLSv7Demuxer(this.videoElement, {
+          logLevel: (this.options.debug?.enabled ? 'debug' : 'info'),
+          slidingWindow: {
+            enabled: true,
+            forward: 2,
+            backward: 1
           }
         });
-        
-        if (calculatedDuration > 0 && isFinite(calculatedDuration)) {
-          this.totalPlaylistDuration = calculatedDuration;
-          console.log(`Total playlist duration calculated: ${this.totalPlaylistDuration.toFixed(2)}s from ${validSegmentCount} segments`);
-        } else if (segments.length > 0) {
-          // If we couldn't calculate from durations, try to estimate based on segment count
-          // Try to fetch the playlist directly for parsing durations
-          try {
-            await this.fetchAndParsePlaylist(url);
-          } catch (err) {
-            console.warn('Failed to fetch and parse playlist directly:', err);
-            
-            // Fall back to estimating duration based on segment count
-            const estimatedDuration = isFinite(this.videoElement.duration) && this.videoElement.duration > 0 
-              ? this.videoElement.duration 
-              : segments.length * 4; // Assume average 4 seconds per segment as fallback
-            
-            this.totalPlaylistDuration = estimatedDuration;
-            console.log(`Estimated playlist duration: ${this.totalPlaylistDuration.toFixed(2)}s (based on ${segments.length} segments)`);
-          }
-        } else {
-          // Try direct parsing if no valid segments found
-          try {
-            await this.fetchAndParsePlaylist(url);
-          } catch (err) {
-            console.warn('Failed to fetch and parse playlist directly:', err);
-            // Fallback to a reasonable default if we can't calculate
-            this.totalPlaylistDuration = 60; // Default 60s if we can't determine
-            console.log(`Using default duration: ${this.totalPlaylistDuration.toFixed(2)}s (could not calculate)`);
-          }
-        }
-      } else {
-        // Method 2: Try to fetch and parse the playlist directly
-        try {
-          await this.fetchAndParsePlaylist(url);
-        } catch (err) {
-          console.warn('Failed to fetch and parse playlist directly:', err);
-          
-          // Fallback to video element duration or default
-          this.totalPlaylistDuration = isFinite(this.videoElement.duration) && this.videoElement.duration > 0 
-            ? this.videoElement.duration 
-            : 60; // Default 60s
-          console.log(`Using video element duration: ${this.totalPlaylistDuration.toFixed(2)}s`);
-        }
+
+        // 重新设置事件监听器
+        this.setupDemuxerListeners();
       }
-      
-      // Set up listeners to update duration as more segments are loaded
-      this.setupDurationUpdateListeners();
-      
-    } catch (error) {
-      console.error('Error calculating playlist duration:', error);
-      // Fallback to a reasonable default
-      this.totalPlaylistDuration = 60; // Default 60s if calculation fails
-      console.log(`Using default duration due to error: ${this.totalPlaylistDuration.toFixed(2)}s`);
-    }
-  }
-  
-  private async fetchAndParsePlaylist(url: string): Promise<void> {
-    try {
-      // Fetch the m3u8 file directly
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch playlist: ${response.status} ${response.statusText}`);
+
+      // 显示加载指示器
+      if (this.loadingIndicator) {
+        this.loadingIndicator.style.display = 'block';
       }
-      
-      const content = await response.text();
-      console.log('Successfully fetched m3u8 content');
-      
-      // Parse the m3u8 content to extract segment durations
-      const lines = content.split('\n');
-      let totalDuration = 0;
-      let segmentCount = 0;
-      
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (line.startsWith('#EXTINF:')) {
-          // Extract duration from the EXTINF tag
-          // Format is typically #EXTINF:duration,optional-title
-          const durationPart = line.split(':')[1].split(',')[0];
-          const duration = parseFloat(durationPart);
-          
-          if (!isNaN(duration) && isFinite(duration) && duration > 0) {
-            totalDuration += duration;
-            segmentCount++;
-          }
-        }
+
+      // 初始化解复用器
+      await this.demuxer.init(url);
+
+      // 初始化进度条
+      if (this.options.showProgress) {
+        this.updateProgressDisplay();
       }
-      
-      if (totalDuration > 0 && segmentCount > 0) {
-        this.totalPlaylistDuration = totalDuration;
-        console.log(`Duration calculated from m3u8 parsing: ${this.totalPlaylistDuration.toFixed(2)}s from ${segmentCount} segments`);
-      } else {
-        throw new Error('No valid durations found in m3u8 content');
+
+      // 更新调试UI(如果启用)
+      if (this.options.debug?.enabled) {
+        this.updateDebugDisplay();
+      }
+
+      // 隐藏加载指示器
+      if (this.loadingIndicator) {
+        this.loadingIndicator.style.display = 'none';
       }
     } catch (error) {
-      console.error('Error parsing m3u8 content:', error);
-      throw error; // Re-throw for the caller to handle
+      console.error('加载媒体失败:', error);
+
+      // 隐藏加载指示器
+      if (this.loadingIndicator) {
+        this.loadingIndicator.style.display = 'none';
+      }
+
+      throw error;
     }
-  }
-  
-  private setupDurationUpdateListeners(): void {
-    // Listen for buffered ranges updates to improve duration calculation
-    const updateDurationFromBuffer = () => {
-      if (this.videoElement.buffered.length > 0) {
-        const bufferedEnd = this.videoElement.buffered.end(this.videoElement.buffered.length - 1);
-        if (bufferedEnd > 0 && isFinite(bufferedEnd) && bufferedEnd > this.totalPlaylistDuration) {
-          this.totalPlaylistDuration = bufferedEnd;
-          console.log(`Updated duration from buffer: ${this.totalPlaylistDuration}s`);
-        }
-      }
-    };
-    
-    // Update when more content is buffered
-    this.videoElement.addEventListener('progress', updateDurationFromBuffer);
-    
-    // Also update when seeking near the end
-    this.videoElement.addEventListener('seeking', () => {
-      const currentTime = this.videoElement.currentTime;
-      if (currentTime > 0 && isFinite(currentTime) && currentTime > this.totalPlaylistDuration * 0.9) {
-        // If seeking near the end, update duration if needed
-        updateDurationFromBuffer();
-      }
-    });
   }
 
   public async play(): Promise<void> {
-    await this.demuxer.play();
-    this.updateProgress();
+    this.log(`开始播放`, 'info');
+    try {
+      // 让demuxer处理播放逻辑
+      await this.demuxer.play();
+
+      // 开始进度更新
+      this.startProgressUpdate();
+
+      // 更新播放按钮状态
+      if (this.playButton) {
+        this.playButton.textContent = '暂停';
+      }
+    } catch (error) {
+      console.error(`播放失败:`, error);
+
+      // 尝试直接播放
+      try {
+        await this.videoElement.play();
+        this.startProgressUpdate();
+        if (this.playButton) {
+          this.playButton.textContent = '暂停';
+        }
+      } catch (innerError) {
+        console.error(`直接播放也失败:`, innerError);
+      }
+    }
   }
 
   public pause(): void {
+    // 使用demuxer的pause方法
     this.demuxer.pause();
+    this.stopProgressUpdate();
+
+    // 更新播放按钮状态
+    if (this.playButton) {
+      this.playButton.textContent = '播放';
+    }
+
     this.updateProgress();
   }
 
+  /**
+   * 跳转到指定时间
+   */
   public seek(time: number): void {
-    if (this.options.timeRangeMode) {
-      const mediaTime = this.originalToMediaTime(time);
-      this.videoElement.currentTime = mediaTime;
-    } else {
-      this.videoElement.currentTime = time;
-    }
-  }
+    if (!this.demuxer) return;
 
-  public setPlaybackRate(rate: number): void {
-    this.demuxer.setPlaybackRate(rate);
-    if (this.options.autoGenerateUI) {
-      this.rateButtons.forEach(button => {
-        button.className = button.textContent === `${rate}x` ? 'rate-active' : '';
-      });
-    }
-  }
+    const startTime = performance.now();
+    this.log(`尝试跳转: ${this.videoElement.currentTime.toFixed(2)}s → ${time.toFixed(2)}s`, 'info');
 
-  public destroy(): void {
-    this.stopProgressUpdate();
-    this.demuxer.destroy();
-    if (this.options.autoGenerateUI) {
-      const container = this.videoElement.closest('.hls-player');
-      if (container && container.parentNode) {
-        container.parentNode.insertBefore(this.videoElement, container);
-        container.remove();
+    // 如果使用时间范围模式，则需要转换时间
+    if (this.options.timeRangeMode && this.options.timeRanges?.length) {
+      // 查找时间所在的范围
+      const range = this.findTimeRangeForTime(time);
+
+      if (range && this.currentTimeRange !== range) {
+        // 如果跳转到了不同的时间范围，需要切换范围
+        this.switchToTimeRange(range);
+        return;
       }
+
+      // 转换为媒体时间
+      const mediaTime = this.originalToMediaTime(time);
+
+      // 使用demuxer进行跳转
+      this.demuxer.seek(mediaTime);
+    } else {
+      // 普通模式，直接跳转
+      this.demuxer.seek(time);
     }
-    this.videoElement.removeEventListener('timeupdate', this.handleTimeUpdate.bind(this));
+
+    // 强制更新进度显示
+    this.forceUpdateProgress();
+
+    const seekDuration = performance.now() - startTime;
+    this.log(`跳转完成，耗时 ${seekDuration.toFixed(2)}ms`, 'debug');
   }
 
+  /**
+   * 获取当前播放时间
+   */
   public getCurrentTime(): number {
-    if (this.options.timeRangeMode) {
-      return this.mediaToOriginalTime(this.videoElement.currentTime);
+    if (!this.demuxer) return 0;
+
+    const time = this.demuxer.getCurrentTime();
+
+    // 如果使用时间范围模式，则需要转换时间
+    if (this.options.timeRangeMode && this.options.timeRanges?.length) {
+      return this.mediaToOriginalTime(time);
     }
-    return this.videoElement.currentTime;
+
+    return time;
   }
 
+  /**
+   * 获取总时长
+   */
   public getDuration(): number {
-    if (this.options.timeRangeMode) {
-      return this.options.timeRanges?.reduce((acc, range) => acc + range.mediaDuration, 0) || 0;
+    if (!this.demuxer) return 0;
+
+    // 如果使用时间范围模式，返回所有范围的总时长
+    if (this.options.timeRangeMode && this.options.timeRanges?.length) {
+      return this.options.timeRanges.reduce((total, range) => total + (range.end - range.start), 0);
     }
-    
-    // Make sure we never return Infinity or NaN
-    if (!isFinite(this.totalPlaylistDuration) || this.totalPlaylistDuration <= 0) {
-      // If we couldn't calculate a valid duration, use a reasonable default
-      // or try to get it from the video element if available
-      return isFinite(this.videoElement.duration) && this.videoElement.duration > 0 
-        ? this.videoElement.duration 
-        : 60; // Default 60s
-    }
-    
-    return this.totalPlaylistDuration;
+
+    return this.demuxer.getTotalDuration();
   }
 
-  public isPlaying(): boolean {
-    return !this.videoElement.paused;
+  /**
+   * 设置播放速率
+   */
+  public setPlaybackRate(rate: number): void {
+    if (!this.demuxer) return;
+
+    this.demuxer.setPlaybackRate(rate);
+    this.videoElement.playbackRate = rate;
+
+    // 更新播放速率按钮状态
+    this.rateButtons.forEach(button => {
+      button.classList.toggle('active', parseFloat(button.dataset.rate || '1') === rate);
+    });
+  }
+
+  /**
+   * 销毁播放器实例
+   */
+  public destroy(): void {
+    // 停止进度更新
+    this.stopProgressUpdate();
+
+    // 销毁demuxer
+    if (this.demuxer) {
+      this.demuxer.destroy();
+    }
+
+    // 移除事件监听器
+    this.videoElement.removeEventListener('timeupdate', this.handleTimeUpdate.bind(this));
+
+    // 清理UI元素
+    if (this.container && this.container.parentNode) {
+      this.container.parentNode.removeChild(this.container);
+    }
   }
 
   public getPlaybackRate(): number {
@@ -644,7 +824,7 @@ export class HLSPlayer {
   }
 
   private updateProgressDisplay(): void {
-    if (!this.progressCanvas || !this.options.timeRanges) return;
+    if (!this.progressCanvas) return;
     const ctx = this.progressCanvas.getContext('2d');
     if (!ctx) return;
 
@@ -656,27 +836,72 @@ export class HLSPlayer {
     // 清除画布
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (!this.options.timeRanges.length) return;
+    if (this.options.timeRangeMode && this.options.timeRanges?.length) {
+      // 计算总媒体时长
+      const totalDuration = this.options.timeRanges.reduce(
+        (acc, range) => acc + range.mediaDuration,
+        0
+      );
 
-    // 计算总媒体时长
-    const totalDuration = this.options.timeRanges.reduce(
-      (acc, range) => acc + range.mediaDuration,
-      0
-    );
+      // 绘制时间片段
+      ctx.fillStyle = 'rgba(0, 160, 255, 0.3)';
+      this.options.timeRanges.forEach(range => {
+        const startX = (range.mediaStart / totalDuration) * canvas.width;
+        const width = (range.mediaDuration / totalDuration) * canvas.width;
+        ctx.fillRect(startX, 0, width, canvas.height);
+      });
 
-    // 绘制时间片段
-    ctx.fillStyle = 'rgba(0, 160, 255, 0.3)';
-    this.options.timeRanges.forEach(range => {
-      const startX = (range.mediaStart / totalDuration) * canvas.width;
-      const width = (range.mediaDuration / totalDuration) * canvas.width;
-      ctx.fillRect(startX, 0, width, canvas.height);
-    });
+      // 绘制当前位置
+      if (this.currentMediaTime > 0) {
+        ctx.fillStyle = '#18a058';
+        const x = (this.currentMediaTime / totalDuration) * canvas.width;
+        ctx.fillRect(x - 1, 0, 2, canvas.height);
+      }
+    } else {
+      // 直接从视频元素获取当前时间，确保时间轴显示最新状态
+      const currentTime = this.videoElement.currentTime;
+      // 从 demuxer 获取总时长
+      const duration = this.demuxer.getTotalDuration();
+      const validDuration = isNaN(duration) || duration <= 0 || !isFinite(duration) ? 100 : duration;
 
-    // 绘制当前位置
-    if (this.currentMediaTime > 0) {
-      ctx.fillStyle = '#18a058';
-      const x = (this.currentMediaTime / totalDuration) * canvas.width;
-      ctx.fillRect(x - 1, 0, 2, canvas.height);
+      // 静态属性，用于记录上次时间轴渲染日志输出时间
+      if (!HLSPlayer.lastTimelineLogTime) {
+        HLSPlayer.lastTimelineLogTime = 0;
+      }
+
+      const now = Date.now();
+      // 确保至少间隔 10 秒才输出一次日志
+      if (now - HLSPlayer.lastTimelineLogTime >= 10000) {
+        console.log(`[HLSPlayer] 渲染时间轴: currentTime=${currentTime.toFixed(2)}秒, duration=${validDuration.toFixed(2)}秒, videoCurrentTime=${this.videoElement.currentTime.toFixed(2)}秒`);
+        HLSPlayer.lastTimelineLogTime = now;
+      }
+
+      // 绘制背景
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 绘制已缓冲区域
+      if (this.videoElement.buffered.length > 0) {
+        ctx.fillStyle = 'rgba(0, 160, 255, 0.3)';
+        for (let i = 0; i < this.videoElement.buffered.length; i++) {
+          const start = this.videoElement.buffered.start(i);
+          const end = this.videoElement.buffered.end(i);
+          const startX = (start / validDuration) * canvas.width;
+          const width = ((end - start) / validDuration) * canvas.width;
+          ctx.fillRect(startX, 0, width, canvas.height);
+        }
+      }
+
+      // 绘制已播放区域
+      if (currentTime > 0) {
+        ctx.fillStyle = 'rgba(24, 160, 88, 0.5)';
+        const playedWidth = (currentTime / validDuration) * canvas.width;
+        ctx.fillRect(0, 0, playedWidth, canvas.height);
+
+        // 绘制当前播放位置指示器
+        ctx.fillStyle = '#18a058';
+        ctx.fillRect(playedWidth - 1, 0, 2, canvas.height);
+      }
     }
   }
 
@@ -766,4 +991,97 @@ export class HLSPlayer {
     const x = (mediaTime / totalDuration) * canvas.width;
     ctx.fillRect(x - 1, 0, 2, canvas.height);
   }
-} 
+
+  // 添加一个方法，强制更新时间轴
+  public forceUpdateProgress(): void {
+    // 立即更新进度显示
+    this.updateProgress();
+
+    // 确保时间轴渲染使用最新的时间值
+    if (this.videoElement) {
+      // 触发 timeupdate 事件，确保 UI 更新
+      this.videoElement.dispatchEvent(new Event('timeupdate'));
+
+      // 额外更新进度信息标签，添加强制更新标记
+      if (this.progressInfoLabel) {
+        const currentText = this.progressInfoLabel.textContent || '';
+        this.progressInfoLabel.textContent = `${currentText} | [强制更新]`;
+
+        // 短暂改变标签颜色以突出显示更新
+        const originalColor = this.progressInfoLabel.style.color;
+        this.progressInfoLabel.style.color = '#ff5500';
+        setTimeout(() => {
+          if (this.progressInfoLabel) {
+            this.progressInfoLabel.style.color = originalColor;
+          }
+        }, 1000);
+      }
+
+      // 直接更新时间显示，确保显示正确
+      if (this.timeDisplay) {
+        const currentTime = Number(this.videoElement.currentTime);
+        const duration = Number(this.demuxer.getTotalDuration());
+        const validDuration = isNaN(duration) || duration <= 0 || !isFinite(duration) ? 100 : duration;
+
+        const formattedCurrentTime = this.formatTime(currentTime);
+        const formattedTotalTime = this.formatTime(validDuration);
+        const timeDisplayText = `${formattedCurrentTime} / ${formattedTotalTime}`;
+
+        console.log(`[HLSPlayer] 强制更新时间显示: ${timeDisplayText}`);
+        this.timeDisplay.textContent = timeDisplayText;
+      }
+    }
+
+    // 记录强制更新日志
+    console.log(`[HLSPlayer] 强制更新进度: currentTime=${this.videoElement.currentTime.toFixed(2)}秒, demuxerTime=${this.demuxer.getCurrentTime().toFixed(2)}秒`);
+  }
+
+  /**
+   * 记录日志信息
+   */
+  private log(message: string, level: 'info' | 'debug' | 'error' = 'info'): void {
+    const prefix = '[HLSPlayer]';
+    if (level === 'error') {
+      console.error(`${prefix} ${message}`);
+    } else if (level === 'info') {
+      console.log(`${prefix} ${message}`);
+    } else if (level === 'debug' && this.options.debug?.enabled) {
+      console.debug(`${prefix} ${message}`);
+    }
+  }
+
+  /**
+   * 配置滑动窗口参数
+   */
+  public setSlidingWindowConfig(config: Partial<SlidingWindowConfig>): void {
+    if (!this.demuxer) return;
+
+    this.demuxer.setSlidingWindowConfig(config);
+    this.log(`已更新滑动窗口配置: ${JSON.stringify(config)}`, 'debug');
+  }
+
+  /**
+   * 获取当前滑动窗口配置
+   */
+  public getSlidingWindowConfig(): SlidingWindowConfig | undefined {
+    if (!this.demuxer) return undefined;
+
+    return this.demuxer.getSlidingWindowConfig();
+  }
+
+  /**
+   * 获取视频片段总数
+   */
+  public getTotalSegments(): number {
+    if (!this.demuxer) return 0;
+
+    return this.demuxer.getTotalSegments();
+  }
+
+  /**
+   * 检查播放器是否正在播放
+   */
+  public isPlaying(): boolean {
+    return !this.videoElement.paused;
+  }
+}

@@ -6,7 +6,8 @@
   "scripts": {
     "build:demo": "pnpm run --filter demo build",
     "build:ui": "pnpm run --filter jv4-ui build",
-    "build": "pnpm run build:ui && pnpm run build:demo"
+    "build": "pnpm run build:ui && pnpm run build:demo",
+    "debug": "ts-node --project packages/demuxer/tsconfig.json packages/demuxer/src/debug-hls.ts"
   },
   "repository": {
     "type": "git",
@@ -35,9 +36,14 @@
   "devDependencies": {
     "@playwright/test": "^1.49.1",
     "@types/dom-mediacapture-transform": "^0.1.1",
+    "chrome-remote-interface": "^0.33.3",
+    "playwright": "^1.50.1",
+    "puppeteer-core": "^24.3.1",
+    "ts-node": "^10.9.2",
     "tsx": "^4.19.2"
   },
   "dependencies": {
-    "@types/dom-webcodecs": "^0.1.8"
+    "@types/dom-webcodecs": "^0.1.8",
+    "@vicons/antd": "^0.13.0"
   }
 }

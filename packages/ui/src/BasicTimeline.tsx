@@ -49,12 +49,32 @@ export default defineComponent({
     const timeTooltip = ref<HTMLDivElement>();
 
     const formatTime = (seconds: number): string => {
+      console.log(
+        `[BasicTimeline] formatTime 输入: ${seconds}秒, 类型: ${typeof seconds}, isNaN: ${isNaN(
+          seconds
+        )}, isFinite: ${isFinite(seconds)}`
+      );
+
+      if (isNaN(seconds) || !isFinite(seconds) || seconds < 0) {
+        console.log(`[BasicTimeline] formatTime 检测到无效时间，重置为0`);
+        seconds = 0;
+      }
+
+      seconds = Number(seconds);
+
       const hours = Math.floor(seconds / 3600);
       const minutes = Math.floor((seconds % 3600) / 60);
       const secs = Math.floor(seconds % 60);
-      return `${hours.toString().padStart(2, "0")}:${minutes
+
+      const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
         .toString()
         .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+
+      console.log(
+        `[BasicTimeline] formatTime 输出: ${formattedTime}, 原始秒数: ${seconds}秒`
+      );
+
+      return formattedTime;
     };
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -120,7 +140,21 @@ export default defineComponent({
     });
 
     const timelineStyles = computed(() => {
-      const currentPosition = (props.currentTime / props.duration) * 100;
+      // 确保当前位置计算正确
+      let currentPosition = 0;
+      if (props.duration > 0 && props.currentTime >= 0) {
+        currentPosition = (props.currentTime / props.duration) * 100;
+        // 限制在 0-100 范围内
+        currentPosition = Math.min(100, Math.max(0, currentPosition));
+      }
+
+      console.log(
+        `[BasicTimeline] 计算位置: currentTime=${props.currentTime.toFixed(
+          2
+        )}秒, duration=${props.duration.toFixed(
+          2
+        )}秒, position=${currentPosition.toFixed(2)}%`
+      );
 
       return {
         container: {

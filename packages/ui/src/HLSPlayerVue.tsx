@@ -37,18 +37,55 @@ export default defineComponent({
     const isPlaying = ref(false);
     const currentRate = ref(1);
     const hasMetadata = ref(false);
-    const loadingState = ref('idle'); // idle, loading, ready
+    const loadingState = ref("idle"); // idle, loading, ready
+
+    // 添加一个定时器，确保时间轴数据定期更新
+    let progressUpdateInterval: number | null = null;
 
     const updateProgress = () => {
       if (player.value) {
-        currentTime.value = player.value.getCurrentTime();
+        // 获取当前时间并确保是有效数字
+        const newTime = player.value.getCurrentTime();
+        if (!isNaN(newTime) && isFinite(newTime) && newTime >= 0) {
+          currentTime.value = newTime;
+          console.log(
+            `[HLSPlayerVue] 当前时间更新: ${currentTime.value.toFixed(2)}秒`
+          );
+        } else {
+          console.log(
+            `[HLSPlayerVue] 检测到无效的当前时间: ${newTime}, 保持原值: ${currentTime.value.toFixed(
+              2
+            )}秒`
+          );
+        }
+
+        // 获取总时长并确保是有效数字
         const newDuration = player.value.getDuration();
-        
+
         // Only update duration if it's valid and different from current value
-        if (!isNaN(newDuration) && isFinite(newDuration) && newDuration > 0 && Math.abs(newDuration - duration.value) > 0.5) {
+        if (
+          !isNaN(newDuration) &&
+          isFinite(newDuration) &&
+          newDuration > 0 &&
+          Math.abs(newDuration - duration.value) > 0.5
+        ) {
           duration.value = newDuration;
-          console.log(`Duration updated: ${duration.value.toFixed(2)}s`);
+          console.log(
+            `[HLSPlayerVue] 总时长更新: ${duration.value.toFixed(2)}秒`
+          );
           hasMetadata.value = true;
+        }
+
+        // 记录当前时间和总时长，用于调试
+        if (currentTime.value > 0 || duration.value > 0) {
+          console.log(
+            `[HLSPlayerVue] 时间轴数据: currentTime=${currentTime.value.toFixed(
+              2
+            )}秒, duration=${duration.value.toFixed(2)}秒, 进度=${(
+              (currentTime.value / duration.value) *
+              100
+            ).toFixed(2)}%`
+          );
         }
       }
     };
@@ -56,70 +93,68 @@ export default defineComponent({
     // Track buffering state
     const setupBufferingListeners = () => {
       if (!videoRef.value) return;
-      
-      videoRef.value.addEventListener('waiting', () => {
-        loadingState.value = 'loading';
+
+      videoRef.value.addEventListener("waiting", () => {
+        loadingState.value = "loading";
       });
-      
-      videoRef.value.addEventListener('canplay', () => {
-        loadingState.value = 'ready';
+
+      videoRef.value.addEventListener("canplay", () => {
+        loadingState.value = "ready";
       });
-      
+
       // Additional events to track buffering state
-      videoRef.value.addEventListener('playing', () => {
+      videoRef.value.addEventListener("playing", () => {
         isPlaying.value = true;
-        loadingState.value = 'ready';
+        loadingState.value = "ready";
       });
-      
-      videoRef.value.addEventListener('pause', () => {
+
+      videoRef.value.addEventListener("pause", () => {
         isPlaying.value = false;
       });
-      
+
       // Track buffered ranges
-      videoRef.value.addEventListener('progress', () => {
+      videoRef.value.addEventListener("progress", () => {
         if (videoRef.value && videoRef.value.buffered.length > 0) {
-          const bufferedEnd = videoRef.value.buffered.end(videoRef.value.buffered.length - 1);
+          const bufferedEnd = videoRef.value.buffered.end(
+            videoRef.value.buffered.length - 1
+          );
           console.log(`Buffered range: 0 - ${bufferedEnd.toFixed(2)}s`);
         }
       });
     };
 
-    onMounted(async () => {
-      if (videoRef.value) {
+    onMounted(() => {
+      if (videoRef.value && props.src) {
+        console.log(`[HLSPlayerVue] 组件挂载，初始化播放器: ${props.src}`);
+
+        // 初始化播放器
         player.value = new HLSPlayer(videoRef.value, {
           ...props.options,
-          timeRanges: props.timeRanges,
-          timeRangeMode: props.timeRanges.length > 0,
           autoGenerateUI: false,
         });
 
-        videoRef.value.addEventListener("timeupdate", updateProgress);
-        videoRef.value.addEventListener("durationchange", updateProgress);
-        // Additional event listeners for better metadata detection
-        videoRef.value.addEventListener("loadedmetadata", updateProgress);
-        videoRef.value.addEventListener("loadeddata", updateProgress);
-        
-        // Setup buffering state tracking
-        setupBufferingListeners();
-        
-        // Create an interval to check duration regularly, in case events don't fire
-        const durationCheckInterval = setInterval(() => {
-          if (player.value && !hasMetadata.value) {
-            updateProgress();
-          } else if (hasMetadata.value) {
-            clearInterval(durationCheckInterval);
-          }
-        }, 1000);
+        // 加载视频
+        player.value.load(props.src).then(() => {
+          console.log(`[HLSPlayerVue] 视频加载完成，初始化时间数据`);
+          // 初始化时间数据
+          updateProgress();
 
-        if (props.src) {
-          loadingState.value = 'loading';
-          await player.value.load(props.src);
-          
-          // Force several updates after loading to ensure UI is up-to-date
-          setTimeout(updateProgress, 500);
-          setTimeout(updateProgress, 1000);
-          setTimeout(updateProgress, 2000);
+          // 设置定时器，定期更新时间数据
+          progressUpdateInterval = window.setInterval(() => {
+            updateProgress();
+          }, 250); // 每 250ms 更新一次
+        });
+
+        // 设置播放速率
+        if (
+          props.options.playbackRates &&
+          props.options.playbackRates.length > 0
+        ) {
+          currentRate.value = props.options.playbackRates[0];
         }
+
+        // 设置缓冲状态监听
+        setupBufferingListeners();
       }
     });
 
@@ -129,10 +164,10 @@ export default defineComponent({
       async (newSrc, oldSrc) => {
         if (newSrc && newSrc !== oldSrc && player.value) {
           isPlaying.value = false;
-          loadingState.value = 'loading';
+          loadingState.value = "loading";
           hasMetadata.value = false; // Reset metadata flag
           await player.value.load(newSrc);
-          
+
           // Force several updates after loading
           setTimeout(updateProgress, 500);
           setTimeout(updateProgress, 1000);
@@ -142,18 +177,16 @@ export default defineComponent({
     );
 
     onBeforeUnmount(() => {
-      if (videoRef.value) {
-        videoRef.value.removeEventListener("timeupdate", updateProgress);
-        videoRef.value.removeEventListener("durationchange", updateProgress);
-        videoRef.value.removeEventListener("loadedmetadata", updateProgress);
-        videoRef.value.removeEventListener("loadeddata", updateProgress);
-        videoRef.value.removeEventListener("waiting", () => {});
-        videoRef.value.removeEventListener("canplay", () => {});
-        videoRef.value.removeEventListener("playing", () => {});
-        videoRef.value.removeEventListener("pause", () => {});
-        videoRef.value.removeEventListener("progress", () => {});
+      // 清除定时器
+      if (progressUpdateInterval !== null) {
+        clearInterval(progressUpdateInterval);
+        progressUpdateInterval = null;
       }
-      player.value?.destroy();
+
+      // 销毁播放器
+      if (player.value) {
+        player.value.destroy();
+      }
     });
 
     const togglePlay = async () => {
@@ -163,7 +196,7 @@ export default defineComponent({
         player.value.pause();
         isPlaying.value = false;
       } else {
-        loadingState.value = 'loading';
+        loadingState.value = "loading";
         await player.value.play();
         isPlaying.value = true;
       }
