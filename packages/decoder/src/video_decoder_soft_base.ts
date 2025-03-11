@@ -16,7 +16,7 @@ function WorkerScripts() {
             videoInfo(w: number, h: number): void {
               width = w;
               height = h;
-              console.log("video info",w,h)
+              console.log("video info", w, h);
             },
             yuvData(yuvArray: number, pts: number): void {
               const size = width * height;
@@ -54,9 +54,9 @@ function WorkerScripts() {
     } else if (evt.data.type === 'decode') {
       const { packet } = evt.data;
       decoder?.decode(packet.data, packet.type == 'key', packet.timestamp);
-    } else if (evt.data.type === 'setCodec'){
-      const {codec,format,description} = evt.data;
-      decoder?.setCodec(codec,format,description??'');
+    } else if (evt.data.type === 'setCodec') {
+      const { codec, format, description } = evt.data;
+      decoder?.setCodec(codec, format, description ?? '');
     }
   };
 }
@@ -69,7 +69,7 @@ export class VideoDecoderSoftBase extends FSM implements VideoDecoderInterface {
   width = 0;
   height = 0;
 
-  constructor(public createModule: any, private wasmBinary?: Promise<ArrayBuffer>, private workerMode = false, private canvas?: HTMLCanvasElement, private yuvMode= false) {
+  constructor(public createModule: any, private wasmBinary?: Promise<ArrayBuffer>, private workerMode = false, private canvas?: HTMLCanvasElement, private yuvMode = false) {
     super();
   };
   @ChangeState([FSM.INIT, "closed"], "initialized")
@@ -79,7 +79,7 @@ export class VideoDecoderSoftBase extends FSM implements VideoDecoderInterface {
       this.worker = new Worker(URL.createObjectURL(new Blob([script], { type: 'text/javascript' })));
       const offsetCanvas = this.canvas?.transferControlToOffscreen();
       const wasmBinary = await this.wasmBinary;
-      console.warn("worker mode",wasmBinary)
+      console.warn("worker mode", wasmBinary);
       this.worker.postMessage({ type: 'init', canvas: offsetCanvas, wasmScript: this.createModule.toString(), wasmBinary }, offsetCanvas ? [offsetCanvas, wasmBinary] : [wasmBinary]);
       return new Promise(resolve => {
         this.worker.onmessage = (evt) => {
@@ -114,12 +114,14 @@ export class VideoDecoderSoftBase extends FSM implements VideoDecoderInterface {
   @ChangeState("initialized", "configured")
   configure(config: VideoDecoderConfig): void {
     this.config = config;
-    this.decoder?.setCodec(this.config.codec, this.config.description ? 'avcc' : 'annexb', this.config.description ?? '');
-    this.worker?.postMessage({ type: 'setCodec', codec:this.config.codec,format:this.config.description ? 'avcc' : 'annexb', description: this.config.description});
+    const codec = this.config.codec.startsWith('avc') ? 'avc' : 'hevc';
+    const format = this.config.description ? (codec == 'avc' ? 'avcc' : 'hvcc') : 'annexb';
+    this.decoder?.setCodec(codec, format, this.config.description ?? '');
+    this.worker?.postMessage({ type: 'setCodec', codec, format, description: this.config.description });
   }
   decode(packet: EncodedVideoChunkInit): void {
     this.decoder?.decode(packet.data, packet.type == 'key', packet.timestamp);
-    if(this.state==="configured") this.worker?.postMessage({ type: 'decode', packet });
+    if (this.state === "configured") this.worker?.postMessage({ type: 'decode', packet });
   }
 
   flush(): void {
@@ -175,8 +177,8 @@ export class VideoDecoderSoftBase extends FSM implements VideoDecoderInterface {
     let uBuf = this.module.HEAPU8!.subarray(uPtr, uPtr + halfSize);
     let vBuf = this.module.HEAPU8!.subarray(vPtr, vPtr + halfSize);
     if (this.yuvMode) {
-      this.emit(VideoDecoderEvent.VideoFrame,[yBuf, uBuf, vBuf])
-      return
+      this.emit(VideoDecoderEvent.VideoFrame, [yBuf, uBuf, vBuf]);
+      return;
     }
     const data = new Uint8Array(size + halfSize + halfSize);
     data.set(yBuf);
