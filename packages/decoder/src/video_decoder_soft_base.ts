@@ -111,7 +111,7 @@ export class VideoDecoderSoftBase extends FSM implements VideoDecoderInterface {
       this.createModule(opts);
     });
   }
-  @ChangeState("initialized", "configured")
+  @ChangeState("initialized", "configured", { sync: true })
   configure(config: VideoDecoderConfig): void {
     this.config = config;
     const codec = this.config.codec.startsWith('avc') ? 'avc' : 'hevc';
@@ -127,14 +127,14 @@ export class VideoDecoderSoftBase extends FSM implements VideoDecoderInterface {
   flush(): void {
 
   }
-  @ChangeState([], FSM.INIT)
+  @ChangeState([], FSM.INIT, { sync: true })
   reset(): void {
     this.config = undefined;
     if (this.decoder) {
       this.decoder.clear();
     }
   }
-  @ChangeState([], "closed")
+  @ChangeState([], "closed", { sync: true })
   close(): void {
     this.removeAllListeners();
     if (this.decoder) {

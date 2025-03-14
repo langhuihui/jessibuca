@@ -46,7 +46,7 @@ export class VideoDecoderHard extends FSM implements VideoDecoderInterface {
   flush(): void {
     this.decoder.flush();
   }
-  @ChangeState([], FSM.INIT)
+  @ChangeState([], FSM.INIT, { sync: true })
   reset(): void {
     this.decoder.reset();
   }

@@ -38,6 +38,6 @@ export class AudioDecoderHard extends FSM implements AudioDecoderInterface {
   }
   @ChangeState([], "closed", { ignoreError: true, sync: true })
   close(): void {
-    this.decoder.close();
+    if (this.decoder.state !== "closed") this.decoder.close();
   }
 }
