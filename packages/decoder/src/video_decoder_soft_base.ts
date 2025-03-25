@@ -61,7 +61,7 @@ function WorkerScripts() {
   };
 }
 
-export class VideoDecoderSoftBase extends FSM implements VideoDecoderInterface {
+export class VideoDecoderSoftBase extends FSM<{ [VideoDecoderEvent.VideoCodecInfo]: [VideoCodecInfo], [VideoDecoderEvent.VideoFrame]: [VideoFrame | { y: Uint8Array, u: Uint8Array, v: Uint8Array, timestamp: number; }];[VideoDecoderEvent.Error]: [ErrorInfo]; }> implements VideoDecoderInterface {
   worker: Worker;
   decoder: any;
   config?: VideoDecoderConfig;
@@ -177,7 +177,7 @@ export class VideoDecoderSoftBase extends FSM implements VideoDecoderInterface {
     let uBuf = this.module.HEAPU8!.subarray(uPtr, uPtr + halfSize);
     let vBuf = this.module.HEAPU8!.subarray(vPtr, vPtr + halfSize);
     if (this.yuvMode) {
-      this.emit(VideoDecoderEvent.VideoFrame, [yBuf, uBuf, vBuf]);
+      this.emit(VideoDecoderEvent.VideoFrame, { y: yBuf, u: uBuf, v: vBuf, timestamp: pts });
       return;
     }
     const data = new Uint8Array(size + halfSize + halfSize);

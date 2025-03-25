@@ -104,7 +104,7 @@ export abstract class Connection extends FSM {
         this.disconnect(err);
       });
   }
-  @ChangeState(ConnectionState.CONNECTED, ConnectionState.DISCONNECTED)
+  @ChangeState(ConnectionState.CONNECTED, ConnectionState.DISCONNECTED, { sync: true })
   disconnect(reason: any) {
     console.warn(`disconnect: ${this.url}`, reason);
     if (this.options.reconnectCount) this.reconnectAfter();
@@ -120,7 +120,7 @@ export abstract class Connection extends FSM {
       });
     }, delay);
   }
-  @ChangeState([], FSM.INIT)
+  @ChangeState([], FSM.INIT, { sync: true })
   close() {
     this.abortCtrl?.abort();
     this._close();

@@ -1,20 +1,23 @@
 {
   "name": "jv4-connection",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "",
   "type": "module",
-  "main": "src/index.ts",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node build.js",
+    "build:types": "tsc --emitDeclarationOnly --declaration --outfile dist/index.d.ts src/index.ts",
+    "build:all": "npm run build && npm run build:types"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@types/sdp-transform": "^2.4.9",
-    "afsm": "^2.2.4",
+    "afsm": "^2.4.7",
     "eventemitter3": "^4.0.7",
     "oput": "^1.2.2",
-    "streamrx": "^0.0.3"
+    "esbuild": "^0.19.5"
   }
 }
