@@ -56,8 +56,8 @@ type RendererType = "webcodecs" | "yuv" | "canvas";
 type DecoderType = "soft" | "simd" | "webcodecs" | "mse";
 
 const message = useMessage();
-// const url = ref("ws://localhost:8080/flv/vod/test");
-const url = ref("http://giroro.tpddns.cn:8889/001.m3u8");
+const url = ref("ws://localhost:8080/flv/live/test_h265");
+// const url = ref("http://giroro.tpddns.cn:8889/001.m3u8");
 let messageReactive: MessageReactive | null = null;
 const removeMessage = () => {
   if (messageReactive) {
@@ -230,6 +230,7 @@ async function connect(file?: File, options?: UploadCustomRequestOptions) {
               .map(b => b.toString(16).padStart(2, '0'))
               .join(' ') 
             : undefined
+            
         });
         videoDecoder.configure(vconfig);
       }

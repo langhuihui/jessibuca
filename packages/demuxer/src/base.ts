@@ -36,7 +36,9 @@ export abstract class BaseDemuxer extends EventEmitter<{
   audioReadable?: ReadableStream<EncodedAudioChunkInit>;
   videoReadable?: ReadableStream<EncodedVideoChunkInit>;
   audioDecoderConfig?: AudioDecoderConfig;
-  videoDecoderConfig?: VideoDecoderConfig;
+  videoDecoderConfig?: VideoDecoderConfig & {
+    parameterSets?: Uint8Array[];
+  };
   abstract pull(): Promise<void>;
   startPull(source: Source) {
     this.mode = DemuxMode.PULL;

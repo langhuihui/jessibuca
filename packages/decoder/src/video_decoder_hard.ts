@@ -21,6 +21,11 @@ export class VideoDecoderHard extends FSM implements VideoDecoderInterface {
   @ChangeState("initialized", "configured", { sync: true })
   configure(config: VideoDecoderConfig): void {
     this.config = config;
+    if (!config.description && config.codec !== "av1") {
+      this.config[config.codec] = {
+        format: 'annexb',
+      };
+    }
     this.decoder.configure({
       ...config,
       codec: this.getCodec(config)

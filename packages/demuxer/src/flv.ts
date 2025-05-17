@@ -1,5 +1,5 @@
 import { BaseDemuxer, DemuxEvent, DemuxMode } from "./base";
-import { samplingFrequencyIndexMap, avccToAnnexb } from "./util";
+import { samplingFrequencyIndexMap, avccToAnnexb, extractParameterSetsFromHvcc, extractParameterSetsFromAvcc } from "./util";
 const FourCC_H265 = "hvc1";
 const FourCC_AV1 = "av01";
 export interface FlvTag {
@@ -91,18 +91,16 @@ export class FlvDemuxer extends BaseDemuxer {
       case 9:
         if (data[0] >> 7) {
           // rtmp 扩展协议
-          if (data[0] & 0x0f) {
-            const isKeyframe = data[0] >> 4 == 1;
-            const isHevc = this.videoDecoderConfig?.codec === "hevc";
-            const videoData = data.subarray(
-              isHevc ? 8 : 5
-            );
-            const description = this.videoDecoderConfig?.description instanceof Uint8Array ?
-              this.videoDecoderConfig.description : undefined;
+          const packetType = data[0] & 0x0f;
+          if (packetType) {
+            const isKeyframe = ((data[0]&0x70) >> 4) == 1;
+            // PacketTypeCodedFramesX 没有 CTS，跳过5，否则跳过8
+            const isCodedFramesX = packetType === 3;
+            const videoData = data.subarray(isCodedFramesX ? 5 : 8);
             return this.gotVideo?.({
               type: isKeyframe ? "key" : "delta",
-              data: this.format === 'annexb' ?
-                avccToAnnexb(videoData, isKeyframe, description) :
+              data: this.format === 'annexb' && this.videoDecoderConfig?.codec!=='av1' ?
+              avccToAnnexb(videoData, isKeyframe, this.videoDecoderConfig!.parameterSets) :
                 videoData,
               timestamp: timestamp,
               duration: 0,
@@ -114,10 +112,23 @@ export class FlvDemuxer extends BaseDemuxer {
               .reduce((acc, cur) => acc + String.fromCharCode(cur), "")
             ) {
               case FourCC_H265:
-                this.videoDecoderConfig = {
+                const videoDecoderConfig = {
                   codec: "hevc",
                   description: data.subarray(5),
                 };
+                if (this.format === 'annexb') {
+                  const params = extractParameterSetsFromHvcc(videoDecoderConfig.description);
+                  this.videoDecoderConfig = {
+                    codec: "hevc",
+                    parameterSets : [
+                      params.vps![0],
+                      params.sps[0],
+                      params.pps[0],
+                    ]
+                  };
+                } else {
+                  this.videoDecoderConfig = videoDecoderConfig;
+                }
                 break;
               case FourCC_AV1:
                 this.videoDecoderConfig = {
@@ -133,14 +144,42 @@ export class FlvDemuxer extends BaseDemuxer {
             else return;
           }
         } else if (data[1] === 0) {
-          this.videoDecoderConfig = {
+          const videoDecoderConfig = {
             codec:
               { 7: "avc", 12: "hevc", 13: "av1" }[data[0] & 0xf] || "unknown",
             description: data.subarray(5),
           };
-          if (this.videoDecoderConfig.codec == "av1") {
-            delete this.videoDecoderConfig.description;
+          if (videoDecoderConfig.codec == "av1") {
+            this.videoDecoderConfig = {
+              codec: "av1",
+            };
+          } else {
+            if (this.format === 'annexb') {
+              const isHevc = videoDecoderConfig.codec === 'hevc';
+              let parameterSets = []
+              if (isHevc) {
+                 const params = extractParameterSetsFromAvcc(videoDecoderConfig.description)
+                 parameterSets = [
+                   params.vps![0],
+                   params.sps[0],
+                   params.pps[0],
+                 ]
+              } else {
+                 const params = extractParameterSetsFromAvcc(videoDecoderConfig.description)
+                 parameterSets = [
+                  params.sps[0],
+                  params.pps[0],
+                ]
+              }
+              this.videoDecoderConfig = {
+                codec: videoDecoderConfig.codec,
+                parameterSets: parameterSets,
+              }
+            } else {
+              this.videoDecoderConfig = videoDecoderConfig;
+            }
           }
+         
           this.emit(
             DemuxEvent.VIDEO_ENCODER_CONFIG_CHANGED,
             this.videoDecoderConfig!
@@ -149,14 +188,11 @@ export class FlvDemuxer extends BaseDemuxer {
           else return;
         }
         const isKeyframe = data[0] >> 4 == 1;
-        const isHevc = this.videoDecoderConfig?.codec === "hevc";
         const videoData = data.subarray(5);
-        const description = this.videoDecoderConfig?.description instanceof Uint8Array ?
-          this.videoDecoderConfig.description : undefined;
         return this.gotVideo?.({
           type: isKeyframe ? "key" : "delta",
-          data: this.format === 'annexb' ?
-            avccToAnnexb(videoData, isKeyframe, description) :
+          data: this.format === 'annexb' && this.videoDecoderConfig?.codec!=='av1' ?
+           avccToAnnexb(videoData, isKeyframe, this.videoDecoderConfig!.parameterSets) :
             videoData,
           timestamp: timestamp,
           duration: 0,
