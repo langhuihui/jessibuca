@@ -348,10 +348,12 @@ IV_API_CALL_STATUS_T AVCCodec::decodeFrame(const uint8_t *data, size_t size, UWO
   if (ret == IV_SUCCESS) {
 
         if (dec_op.s_disp_frm_buf.u4_y_wd == 0) {
-
+          printf("decodeFrame ret %d dec_op.u4_error_code 0x%x e_pic_type 0x%x  pts %d \n", ret, dec_op.u4_error_code, dec_op.e_pic_type,  dec_op.u4_ts);
             ret = IV_FAIL;
         }
 
+  } else {
+    printf("decodeFrame ret %d dec_op.u4_error_code 0x%x e_pic_type 0x%x  pts %d \n", ret, dec_op.u4_error_code, dec_op.e_pic_type,  dec_op.u4_ts);
   }
 
   return ret;
@@ -430,6 +432,8 @@ void Decoder_AVC_LIBAVC::decode(unsigned char *buf, unsigned int buflen, unsigne
             mObserver->yuvData(mCodec->mBuf, pts);
 
            // printf("SIMD AVC Decoder Success jsts %d ts %d pictype 0x%x consumebyte %d left %d \n", timestamp, pts, pictype, bytesConsumed, size - bytesConsumed);
+        // } else {
+        //    printf("SIMD AVC Decoder Fail %d jsts %d ts %d pictype 0x%x consumebyte %d left %d \n", ret, timestamp, pts, pictype, bytesConsumed, size - bytesConsumed);
         }
 
         bytesConsumed = std::min(size, bytesConsumed);

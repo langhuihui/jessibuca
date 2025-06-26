@@ -21,9 +21,23 @@ export class AudioDecoderHard extends FSM implements AudioDecoderInterface {
   }
   @ChangeState("initialized", "configured", { sync: true })
   configure(config: AudioDecoderConfig): void {
-    if (config.codec === 'aac') config.codec = 'mp4a.40.2';
     this.config = config;
-    this.decoder.configure(config);
+    this.decoder.configure({
+      ...config,
+      codec: this.getCodec(config)
+    });
+  }
+  getCodec(config: AudioDecoderConfig) {
+    switch (config.codec) {
+      case "aac":
+        return 'mp4a.40.2';
+      case "pcma":
+        return 'alaw';
+      case "pcmu":
+        return  'ulaw';
+      default:
+        return config.codec;
+    }
   }
   @Includes("configured")
   decode(packet: EncodedAudioChunkInit): void {
