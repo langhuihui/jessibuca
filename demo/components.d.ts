@@ -11,6 +11,7 @@ declare module 'vue' {
     Decoder: typeof import('./src/components/Decoder.vue')['default']
     Demuxer: typeof import('./src/components/Demuxer.vue')['default']
     LogPanel: typeof import('./src/components/LogPanel.vue')['default']
+    NInput: typeof import('naive-ui')['NInput']
     NMessageProvider: typeof import('naive-ui')['NMessageProvider']
     NSelect: typeof import('naive-ui')['NSelect']
     NSwitch: typeof import('naive-ui')['NSwitch']

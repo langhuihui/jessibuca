@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>打包版 HLS Video Web Components 演示</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .demo-section {
+      margin-bottom: 40px;
+      padding: 20px;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+    }
+
+    .demo-section h2 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+
+    .video-container {
+      margin: 20px 0;
+    }
+
+    hls-video,
+    simple-hls-video {
+      width: 100%;
+      max-width: 800px;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .controls {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 8px 16px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #f8f9fa;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background: #e9ecef;
+    }
+
+    .info-box {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .code-block {
+      background: #f6f8fa;
+      border: 1px solid #e1e4e8;
+      border-radius: 6px;
+      padding: 16px;
+      margin: 16px 0;
+      overflow-x: auto;
+    }
+
+    .code-block code {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>打包版 HLS Video Web Components 演示</h1>
+
+  <div class="info-box">
+    <strong>说明：</strong>这个页面展示了打包了 HLS.js 的 Web Components，无需额外加载任何外部库。
+    Web Components 已经包含了所有必要的功能。
+  </div>
+
+  <!-- 简化版演示 -->
+  <div class="demo-section">
+    <h2>1. 简化版 Web Component</h2>
+    <p>文件大小小，功能专注于基本播放需求</p>
+
+    <div class="code-block">
+      <code>&lt;script src="dist/simple-hls-video.min.js"&gt;&lt;/script&gt;
+&lt;simple-hls-video src="video.m3u8" controls autoplay muted&gt;&lt;/simple-hls-video&gt;</code>
+    </div>
+
+    <div class="video-container">
+      <simple-hls-video id="simple-player" src="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" controls autoplay
+        muted width="800" height="450">
+      </simple-hls-video>
+    </div>
+
+    <div class="controls">
+      <button onclick="simplePlayer.play()">播放</button>
+      <button onclick="simplePlayer.pause()">暂停</button>
+      <button onclick="simplePlayer.currentTime = 0">重播</button>
+      <button onclick="simplePlayer.currentTime += 10">快进10秒</button>
+    </div>
+  </div>
+
+  <!-- 完整版演示 -->
+  <div class="demo-section">
+    <h2>2. 完整版 Web Component</h2>
+    <p>功能丰富，包含画质控制和高级功能</p>
+
+    <div class="code-block">
+      <code>&lt;script src="dist/hls-video.min.js"&gt;&lt;/script&gt;
+&lt;hls-video src="video.m3u8" controls debug&gt;&lt;/hls-video&gt;</code>
+    </div>
+
+    <div class="video-container">
+      <hls-video id="full-player" src="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" controls debug width="800"
+        height="450">
+      </hls-video>
+    </div>
+
+    <div class="controls">
+      <button onclick="fullPlayer.play()">播放</button>
+      <button onclick="fullPlayer.pause()">暂停</button>
+      <button onclick="setQuality(-1)">自动画质</button>
+      <button onclick="setQuality(0)">最低画质</button>
+      <button onclick="showPlayerInfo()">显示信息</button>
+    </div>
+  </div>
+
+  <!-- ES Module 演示 -->
+  <div class="demo-section">
+    <h2>3. ES Module 使用方式</h2>
+    <p>在支持 ES 模块的现代环境中使用</p>
+
+    <div class="code-block">
+      <code>// 导入简化版
+import 'dist/simple-hls-video.esm.js';
+
+// 或导入完整版
+import 'dist/hls-video.esm.js';
+
+// 在 HTML 中使用
+&lt;simple-hls-video src="video.m3u8" controls&gt;&lt;/simple-hls-video&gt;</code>
+    </div>
+  </div>
+
+  <!-- 框架集成 -->
+  <div class="demo-section">
+    <h2>4. 框架集成示例</h2>
+
+    <h3>Vue 3</h3>
+    <div class="code-block">
+      <code>// main.js
+import 'dist/simple-hls-video.esm.js';
+
+// Component.vue
+&lt;template&gt;
+  &lt;simple-hls-video 
+    :src="videoUrl" 
+    controls 
+    @play="onPlay"
+    @pause="onPause"
+    ref="player"
+  &gt;&lt;/simple-hls-video&gt;
+&lt;/template&gt;
+
+&lt;script setup&gt;
+import { ref } from 'vue';
+
+const player = ref(null);
+const videoUrl = ref('video.m3u8');
+
+const onPlay = () => console.log('播放开始');
+const onPause = () => console.log('播放暂停');
+&lt;/script&gt;</code>
+    </div>
+
+    <h3>React</h3>
+    <div class="code-block">
+      <code>// App.js
+import React, { useRef, useEffect } from 'react';
+import 'dist/simple-hls-video.esm.js';
+
+function VideoPlayer() {
+  const playerRef = useRef(null);
+
+  useEffect(() => {
+    const player = playerRef.current;
+    
+    const handlePlay = () => console.log('播放开始');
+    const handlePause = () => console.log('播放暂停');
+    
+    player.addEventListener('play', handlePlay);
+    player.addEventListener('pause', handlePause);
+    
+    return () => {
+      player.removeEventListener('play', handlePlay);
+      player.removeEventListener('pause', handlePause);
+    };
+  }, []);
+
+  return (
+    &lt;simple-hls-video
+      ref={playerRef}
+      src="video.m3u8"
+      controls
+    /&gt;
+  );
+}</code>
+    </div>
+  </div>
+
+  <!-- 构建说明 -->
+  <div class="demo-section">
+    <h2>5. 构建说明</h2>
+
+    <h3>构建命令</h3>
+    <div class="code-block">
+      <code># 构建 HLS.js 库
+npm run build
+
+# 构建 Web Components
+npm run build:webcomponents
+
+# 构建所有
+npm run build:all
+
+# 开发模式（监听变化）
+npm run dev:webcomponents</code>
+    </div>
+
+    <h3>输出文件</h3>
+    <ul>
+      <li><code>web-components/dist/simple-hls-video.js</code> - 简化版 IIFE 格式</li>
+      <li><code>web-components/dist/simple-hls-video.min.js</code> - 简化版压缩版</li>
+      <li><code>web-components/dist/simple-hls-video.esm.js</code> - 简化版 ES 模块</li>
+      <li><code>web-components/dist/hls-video.js</code> - 完整版 IIFE 格式</li>
+      <li><code>web-components/dist/hls-video.min.js</code> - 完整版压缩版</li>
+      <li><code>web-components/dist/hls-video.esm.js</code> - 完整版 ES 模块</li>
+    </ul>
+
+    <h3>文件大小对比</h3>
+    <ul>
+      <li>简化版：~200KB (压缩后)</li>
+      <li>完整版：~300KB (压缩后)</li>
+      <li>原始 HLS.js：~250KB</li>
+    </ul>
+  </div>
+
+  <script src="dist/hls-video.js"></script>
+
+  <script>
+    // 获取播放器引用
+    const simplePlayer = document.getElementById('simple-player');
+    const fullPlayer = document.getElementById('full-player');
+
+    // 设置画质
+    function setQuality(level) {
+      if (fullPlayer && fullPlayer.currentLevel !== undefined) {
+        fullPlayer.currentLevel = level;
+      }
+    }
+
+    // 显示播放器信息
+    function showPlayerInfo() {
+      if (!fullPlayer) return;
+
+      const info = [
+        `当前时间: ${fullPlayer.currentTime?.toFixed(2) || 0}s`,
+        `总时长: ${fullPlayer.duration?.toFixed(2) || 0}s`,
+        `音量: ${(fullPlayer.volume * 100).toFixed(0)}%`,
+        `当前画质: ${fullPlayer.currentLevel || 'N/A'}`,
+        `可用画质: ${fullPlayer.levels?.length || 0}个`,
+        `是否暂停: ${fullPlayer.paused}`
+      ];
+
+      alert(info.join('\n'));
+    }
+
+    // 监听事件
+    simplePlayer.addEventListener('play', () => {
+      console.log('简化版播放器: 开始播放');
+    });
+
+    simplePlayer.addEventListener('pause', () => {
+      console.log('简化版播放器: 暂停播放');
+    });
+
+    fullPlayer.addEventListener('hlsmanifestparsed', (event) => {
+      console.log('完整版播放器: 清单解析完成', event.detail.levels.length, '个画质级别');
+    });
+
+    fullPlayer.addEventListener('hlslevelswitched', (event) => {
+      console.log('完整版播放器: 画质切换到', event.detail.level);
+    });
+
+    // 页面加载完成提示
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('打包版 Web Components 加载完成！');
+    });
+  </script>
+</body>
+
+</html>

@@ -16,6 +16,7 @@
     "jv4-demuxer": "workspace:*",
     "jv4-renderer": "workspace:*",
     "jv4-ui": "workspace:*",
+    "jv4-hls": "workspace:*",
     "naive-ui": "^2.31.0",
     "vue": "^3.2.37",
     "vue-router": "4",

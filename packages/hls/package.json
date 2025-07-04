@@ -1,0 +1,10 @@
+{
+  "name": "jv4-hls",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "module": "src/hls-video.mjs",
+  "keywords": [],
+  "author": "dexter",
+  "license": "ISC"
+}

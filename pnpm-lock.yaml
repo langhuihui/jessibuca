@@ -54,6 +54,9 @@ importers:
       jv4-demuxer:
         specifier: workspace:*
         version: link:../packages/demuxer
+      jv4-hls:
+        specifier: workspace:*
+        version: link:../packages/hls
       jv4-renderer:
         specifier: workspace:*
         version: link:../packages/renderer
@@ -180,6 +183,8 @@ importers:
       vite:
         specifier: ^4.4.9
         version: 4.5.9(@types/node@22.13.4)
+
+  packages/hls: {}
 
   packages/renderer:
     devDependencies:
