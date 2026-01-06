@@ -4,15 +4,16 @@ This document provides a quick start guide for using the new Jessibuca Lit WebCo
 
 ## What's New
 
-A new framework-agnostic WebComponent has been added that wraps the Jessibuca HLS Player. This component can be used in any modern web application, regardless of the framework.
+A new framework-agnostic WebComponent has been added that wraps the Jessibuca Player. This component supports multiple protocols (HLS, ws-flv, webrtc, http-flv) and can be used in any modern web application, regardless of the framework.
 
 ## Files Added
 
 1. **`packages/ui/src/HLSPlayerLit.ts`** - Main WebComponent implementation
-2. **`demo/src/components/WebComponent.vue`** - Vue 3 demo component
-3. **`demo/webcomponent-demo.html`** - Standalone HTML demo
-4. **`packages/ui/WEBCOMPONENT_README.md`** - Comprehensive documentation
-5. **`WEBCOMPONENT_IMPLEMENTATION_SUMMARY.md`** - Technical implementation details
+2. **`packages/ui/src/GeneralPlayer.ts`** - General player for ws-flv/webrtc/http-flv
+3. **`demo/src/components/WebComponent.vue`** - Vue 3 demo component
+4. **`demo/webcomponent-demo.html`** - Standalone HTML demo
+5. **`packages/ui/WEBCOMPONENT_README.md`** - Comprehensive documentation
+6. **`WEBCOMPONENT_IMPLEMENTATION_SUMMARY.md`** - Technical implementation details
 
 ## Quick Usage
 
@@ -27,10 +28,23 @@ A new framework-agnostic WebComponent has been added that wraps the Jessibuca HL
   </script>
 </head>
 <body>
+  <!-- HLS播放 -->
   <jessibuca
     src="https://example.com/video.m3u8"
     show-playback-rate
     show-progress
+    auto-generate-ui
+  ></jessibuca>
+
+  <!-- WebSocket FLV播放 -->
+  <jessibuca
+    src="ws://example.com/live/stream.flv"
+    auto-generate-ui
+  ></jessibuca>
+
+  <!-- WebRTC播放 -->
+  <jessibuca
+    src="webrtc://example.com/live/stream"
     auto-generate-ui
   ></jessibuca>
 </body>
@@ -55,7 +69,7 @@ A new framework-agnostic WebComponent has been added that wraps the Jessibuca HL
 import { ref } from 'vue';
 import 'jv4-ui';
 
-const videoUrl = ref('https://example.com/video.m3u8');
+const videoUrl = ref('ws://example.com/live/stream.flv');
 
 function handlePlay() {
   console.log('Playing');
@@ -96,15 +110,34 @@ player.addEventListener('timeupdate', (e) => {
 
 - ✅ Framework-agnostic (works with Vue, React, Angular, or vanilla JS)
 - ✅ Shadow DOM for style isolation
-- ✅ Full HLS playback support
+- ✅ Multi-protocol support (HLS, ws-flv, webrtc, http-flv)
 - ✅ Custom controls (play/pause, seek, playback rate)
 - ✅ Visual progress bar with buffer visualization
 - ✅ Debug mode
-- ✅ Time range mode
+- ✅ Time range mode (HLS only)
 - ✅ Internationalization (i18n) support (Chinese, English)
 - ✅ TypeScript support
 - ✅ Event-driven API
 - ✅ Public methods for programmatic control
+
+## Supported Protocols
+
+| Protocol | URL Format | Example | Description |
+|----------|------------|---------|-------------|
+| HLS | `http(s)://.../*.m3u8` | `https://example.com/video.m3u8` | HTTP Live Streaming |
+| WebSocket FLV | `ws(s)://...` | `ws://example.com/live/stream.flv` | FLV over WebSocket |
+| WebRTC | `webrtc://...` | `webrtc://example.com/live/stream` | WebRTC live stream |
+| HTTP FLV | `http(s)://.../*.flv` | `https://example.com/live/stream.flv` | FLV over HTTP |
+
+The component automatically detects the protocol from the URL, or you can manually specify it:
+
+```html
+<!-- Auto-detect protocol (default) -->
+<jessibuca src="ws://example.com/live/stream.flv" auto-generate-ui></jessibuca>
+
+<!-- Manually specify protocol -->
+<jessibuca src="..." protocol="ws-flv" auto-generate-ui></jessibuca>
+```
 
 ## Internationalization
 

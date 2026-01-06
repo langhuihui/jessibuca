@@ -1,6 +1,6 @@
 # Jessibuca Player - Lit WebComponent
 
-基于 Lit 框架的 Jessibuca HLS 播放器 Web Component。这是一个独立的、可复用的视频播放器组件，可以在任何 HTML 页面中使用，无需依赖 Vue 或其他框架。
+基于 Lit 框架的 Jessibuca 播放器 Web Component。这是一个独立的、可复用的视频播放器组件，支持多种流媒体协议（HLS, ws-flv, webrtc, http-flv），可以在任何 HTML 页面中使用，无需依赖 Vue 或其他框架。
 
 ## 特性
 
@@ -11,6 +11,7 @@
 - 🐛 **调试模式**: 内置调试信息显示
 - 🎯 **TypeScript 支持**: 完整的类型定义
 - 📱 **响应式设计**: 自适应 16:9 视频比例
+- 🌐 **多协议支持**: HLS (m3u8), ws-flv, webrtc, http-flv
 
 ## 安装
 
@@ -33,11 +34,23 @@ yarn add jv4-ui
   <title>Jessibuca Player Demo</title>
 </head>
 <body>
-  <!-- WebComponent 使用 -->
+  <!-- HLS播放 -->
   <jessibuca
     src="https://example.com/video.m3u8"
     show-playback-rate
     show-progress
+    auto-generate-ui
+  ></jessibuca>
+
+  <!-- WebSocket FLV播放 -->
+  <jessibuca
+    src="ws://example.com/live/stream.flv"
+    auto-generate-ui
+  ></jessibuca>
+
+  <!-- WebRTC播放 -->
+  <jessibuca
+    src="webrtc://example.com/live/stream"
     auto-generate-ui
   ></jessibuca>
 
@@ -161,17 +174,30 @@ player.addEventListener('error', (e) => {
 
 | 属性 | 类型 | 默认值 | 描述 |
 |-----|-----|-------|------|
-| `src` | String | `''` | 视频源 URL (HLS m3u8) |
+| `src` | String | `''` | 视频源 URL (支持 m3u8, ws://, webrtc://, http-flv) |
+| `protocol` | String | `'auto'` | 协议类型: `'hls'`, `'ws-flv'`, `'webrtc'`, `'http-flv'`, 或 `'auto'` (自动检测) |
 | `show-playback-rate` | Boolean | `true` | 是否显示播放速率控制 |
 | `show-progress` | Boolean | `true` | 是否显示进度条 |
 | `auto-generate-ui` | Boolean | `true` | 是否自动生成控制 UI |
-| `time-range-mode` | Boolean | `false` | 是否启用时间片段模式 |
-| `time-ranges` | Array | `[]` | 时间片段数组 |
+| `time-range-mode` | Boolean | `false` | 是否启用时间片段模式 (仅HLS) |
+| `time-ranges` | Array | `[]` | 时间片段数组 (仅HLS) |
 | `playback-rates` | Array | `[0.5, 0.75, 1, 1.25, 1.5, 2]` | 可选的播放速率 |
 | `debug` | Boolean | `false` | 是否启用调试模式 |
-| `show-time-ranges` | Boolean | `false` | 是否显示时间范围 (调试) |
-| `show-media-timeline` | Boolean | `false` | 是否显示媒体时间轴 (调试) |
+| `show-time-ranges` | Boolean | `false` | 是否显示时间范围 (调试, 仅HLS) |
+| `show-media-timeline` | Boolean | `false` | 是否显示媒体时间轴 (调试, 仅HLS) |
 | `autoplay` | Boolean | `false` | 是否自动播放 |
+| `lang` | String | `'zh-CN'` | UI语言 (`'zh-CN'` 或 `'en-US'`) |
+
+## 支持的协议
+
+| 协议 | URL格式 | 示例 | 说明 |
+|-----|---------|------|------|
+| HLS | `http(s)://.../*.m3u8` | `https://example.com/video.m3u8` | HTTP Live Streaming |
+| WebSocket FLV | `ws(s)://...` | `ws://example.com/live/stream.flv` | FLV over WebSocket |
+| WebRTC | `webrtc://...` | `webrtc://example.com/live/stream` | WebRTC 实时流 |
+| HTTP FLV | `http(s)://.../*.flv` | `https://example.com/live/stream.flv` | FLV over HTTP |
+
+组件会根据 URL 自动检测协议类型，也可以通过 `protocol` 属性手动指定。
 
 ## 方法 (Methods)
 

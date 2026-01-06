@@ -150,10 +150,17 @@
       <input
         type="text"
         id="urlInput"
-        placeholder="输入 HLS URL (例如: https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8)"
+        placeholder="输入视频URL (支持 HLS, ws-flv, webrtc, http-flv)"
         value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
       />
       <button onclick="loadUrl()">加载视频</button>
+    </div>
+
+    <div style="margin: 10px 0; font-size: 12px; color: #666;">
+      <strong>示例URL:</strong><br/>
+      HLS: https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8<br/>
+      WebSocket FLV: ws://example.com/live/stream.flv<br/>
+      WebRTC: webrtc://example.com/live/stream
     </div>
 
     <div class="info-grid">
@@ -178,7 +185,7 @@
 
   <div class="card">
     <h2>📖 使用示例</h2>
-    <h3>1. 基本使用</h3>
+    <h3>1. HLS 播放</h3>
     <pre><code>&lt;script type="module"&gt;
   import 'jv4-ui';
 &lt;/script&gt;
@@ -190,7 +197,19 @@
   auto-generate-ui
 &gt;&lt;/jessibuca&gt;</code></pre>
 
-    <h3>2. 带调试模式</h3>
+    <h3>2. WebSocket FLV 播放</h3>
+    <pre><code>&lt;jessibuca
+  src="ws://example.com/live/stream.flv"
+  auto-generate-ui
+&gt;&lt;/jessibuca&gt;</code></pre>
+
+    <h3>3. WebRTC 播放</h3>
+    <pre><code>&lt;jessibuca
+  src="webrtc://example.com/live/stream"
+  auto-generate-ui
+&gt;&lt;/jessibuca&gt;</code></pre>
+
+    <h3>4. 带调试模式</h3>
     <pre><code>&lt;jessibuca
   src="https://example.com/video.m3u8"
   debug
