@@ -1,6 +1,16 @@
 import { LitElement, html, css, PropertyValueMap } from 'lit';
 import { HLSPlayer, HLSPlayerOptions, TimeRange } from './HLSPlayer';
 
+// Default translations
+const defaultTranslations = {
+  play: '播放',
+  pause: '暂停',
+  loading: '加载中...',
+  progressLabel: '视频进度条',
+};
+
+type Translations = typeof defaultTranslations;
+
 /**
  * Jessibuca HLS Player Web Component
  * 
@@ -36,6 +46,7 @@ export class JessibucaPlayer extends LitElement {
       showTimeRanges: { type: Boolean, attribute: 'show-time-ranges' },
       showMediaTimeline: { type: Boolean, attribute: 'show-media-timeline' },
       autoplay: { type: Boolean },
+      lang: { type: String },
       // Internal state
       _isPlaying: { type: Boolean, state: true },
       _currentTime: { type: Number, state: true },
@@ -200,6 +211,7 @@ export class JessibucaPlayer extends LitElement {
   showTimeRanges = false;
   showMediaTimeline = false;
   autoplay = false;
+  lang = 'zh-CN'; // Default language
 
   // Internal state
   _isPlaying = false;
@@ -216,9 +228,35 @@ export class JessibucaPlayer extends LitElement {
   private videoElement?: HTMLVideoElement;
   private progressInput?: HTMLInputElement;
   private progressCanvas?: HTMLCanvasElement;
+  private translations: Translations = defaultTranslations;
+
+  // Localization support
+  private static locales: Record<string, Partial<Translations>> = {
+    'zh-CN': {
+      play: '播放',
+      pause: '暂停',
+      loading: '加载中...',
+      progressLabel: '视频进度条',
+    },
+    'en-US': {
+      play: 'Play',
+      pause: 'Pause',
+      loading: 'Loading...',
+      progressLabel: 'Video progress bar',
+    },
+  };
 
   constructor() {
     super();
+    this.updateTranslations();
+  }
+
+  /**
+   * Update translations based on current language
+   */
+  private updateTranslations() {
+    const localeData = JessibucaPlayer.locales[this.lang] || JessibucaPlayer.locales['zh-CN'];
+    this.translations = { ...defaultTranslations, ...localeData };
   }
 
   /**
@@ -267,6 +305,11 @@ export class JessibucaPlayer extends LitElement {
     if (changedProperties.has('timeRanges') && this.player) {
       this.log('Time ranges updated');
       this.player.setTimeRanges(this.timeRanges);
+    }
+
+    if (changedProperties.has('lang')) {
+      this.log(`Language changed to ${this.lang}`);
+      this.updateTranslations();
     }
   }
 
@@ -653,7 +696,7 @@ export class JessibucaPlayer extends LitElement {
         ${this.autoGenerateUI ? html`
           <div class="controls">
             <button @click=${this.togglePlay}>
-              ${this._isPlaying ? '暂停' : '播放'}
+              ${this._isPlaying ? this.translations.pause : this.translations.play}
             </button>
 
             ${this.showProgress ? html`
@@ -670,7 +713,7 @@ export class JessibucaPlayer extends LitElement {
                     max="100"
                     .value=${progressValue.toString()}
                     @input=${this.handleSeek}
-                    aria-label="视频进度条"
+                    aria-label=${this.translations.progressLabel}
                   />
                 </div>
               </div>
@@ -695,7 +738,7 @@ export class JessibucaPlayer extends LitElement {
         ` : ''}
 
         ${this._isLoading ? html`
-          <div class="loading-indicator">加载中...</div>
+          <div class="loading-indicator">${this.translations.loading}</div>
         ` : ''}
 
         ${this._errorMessage ? html`
@@ -704,10 +747,22 @@ export class JessibucaPlayer extends LitElement {
       </div>
     `;
   }
+
+  /**
+   * Register a new locale for the player
+   * @param locale - Locale identifier (e.g., 'fr-FR', 'de-DE')
+   * @param translations - Translation object
+   */
+  public static registerLocale(locale: string, translations: Partial<Translations>) {
+    JessibucaPlayer.locales[locale] = translations;
+  }
 }
 
 // Register the custom element
 customElements.define('jessibuca-player', JessibucaPlayer);
+
+// Export types for users who want to add custom translations
+export type { Translations };
 
 declare global {
   interface HTMLElementTagNameMap {

@@ -231,8 +231,13 @@ player.addEventListener('timeupdate', (e) => {
   </div>
 
   <script type="module">
-    // Note: This is a demo page. In production, you would import the actual built module
+    // DEMO NOTE: In a real application, uncomment the following import after building the package:
     // import 'jv4-ui';
+    // 
+    // For this demo to work, you need to:
+    // 1. Build the UI package: cd packages/ui && pnpm run build
+    // 2. Run the demo: cd demo && pnpm run dev
+    // 3. The WebComponent will be automatically registered
 
     const player = document.getElementById('player');
     const urlInput = document.getElementById('urlInput');
