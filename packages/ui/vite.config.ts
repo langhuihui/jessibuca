@@ -40,5 +40,8 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src')
     }
+  },
+  esbuild: {
+    target: 'es2020',
   }
 }); 
