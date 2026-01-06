@@ -12,7 +12,7 @@
         </n-alert>
 
         <!-- Jessibuca Player Web Component -->
-        <jessibuca-player
+        <jessibuca
           :src="playerSrc"
           show-playback-rate
           show-progress
@@ -23,7 +23,7 @@
           @pause="handlePause"
           @timeupdate="handleTimeUpdate"
           @error="handleError"
-        ></jessibuca-player>
+        ></jessibuca>
 
         <n-card title="控制面板" size="small">
           <n-space vertical>
@@ -120,15 +120,15 @@ const progress = computed(() => {
 
 const codeExample = computed(() => {
   return `<!-- 基本使用 -->
-<jessibuca-player
+<jessibuca
   src="${hlsUrl.value}"
   show-playback-rate
   show-progress
   auto-generate-ui
-></jessibuca-player>
+></jessibuca>
 
 <!-- 带调试模式 -->
-<jessibuca-player
+<jessibuca
   src="${hlsUrl.value}"
   show-playback-rate
   show-progress
@@ -136,20 +136,20 @@ const codeExample = computed(() => {
   debug
   show-time-ranges
   show-media-timeline
-></jessibuca-player>
+></jessibuca>
 
 <!-- 自定义播放速率 -->
-<jessibuca-player
+<jessibuca
   src="${hlsUrl.value}"
   show-playback-rate
   :playback-rates="[0.5, 1, 1.5, 2, 3]"
-></jessibuca-player>
+></jessibuca>
 
 <!-- 在原生 JavaScript 中使用 -->
 <script type="module">
   import 'jv4-ui';
   
-  const player = document.querySelector('jessibuca-player');
+  const player = document.querySelector('jessibuca');
   player.src = '${hlsUrl.value}';
   
   // 监听事件
@@ -232,7 +232,7 @@ onMounted(() => {
   flex: 1;
 }
 
-jessibuca-player {
+jessibuca {
   width: 100%;
   max-width: 800px;
   margin: 0 auto;

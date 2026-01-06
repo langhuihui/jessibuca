@@ -19,12 +19,12 @@ type Translations = typeof defaultTranslations;
  * 
  * @example
  * ```html
- * <jessibuca-player 
+ * <jessibuca 
  *   src="https://example.com/video.m3u8"
  *   show-playback-rate
  *   show-progress
  *   auto-generate-ui>
- * </jessibuca-player>
+ * </jessibuca>
  * ```
  * 
  * @fires play - Dispatched when playback starts
@@ -759,13 +759,13 @@ export class JessibucaPlayer extends LitElement {
 }
 
 // Register the custom element
-customElements.define('jessibuca-player', JessibucaPlayer);
+customElements.define('jessibuca', JessibucaPlayer);
 
 // Export types for users who want to add custom translations
 export type { Translations };
 
 declare global {
   interface HTMLElementTagNameMap {
-    'jessibuca-player': JessibucaPlayer;
+    'jessibuca': JessibucaPlayer;
   }
 }

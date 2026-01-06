@@ -34,12 +34,12 @@ yarn add jv4-ui
 </head>
 <body>
   <!-- WebComponent 使用 -->
-  <jessibuca-player
+  <jessibuca
     src="https://example.com/video.m3u8"
     show-playback-rate
     show-progress
     auto-generate-ui
-  ></jessibuca-player>
+  ></jessibuca>
 
   <!-- 导入组件 -->
   <script type="module">
@@ -53,7 +53,7 @@ yarn add jv4-ui
 
 ```vue
 <template>
-  <jessibuca-player
+  <jessibuca
     :src="videoUrl"
     show-playback-rate
     show-progress
@@ -110,7 +110,7 @@ function VideoPlayer() {
   }, []);
 
   return (
-    <jessibuca-player
+    <jessibuca
       ref={playerRef}
       src="https://example.com/video.m3u8"
       show-playback-rate
@@ -125,7 +125,7 @@ function VideoPlayer() {
 
 ```javascript
 // 获取播放器元素
-const player = document.querySelector('jessibuca-player');
+const player = document.querySelector('jessibuca');
 
 // 设置视频源
 player.src = 'https://example.com/video.m3u8';
@@ -197,7 +197,7 @@ player.addEventListener('error', (e) => {
 WebComponent 支持时间片段模式，可以播放不连续的视频片段：
 
 ```javascript
-const player = document.querySelector('jessibuca-player');
+const player = document.querySelector('jessibuca');
 
 // 设置时间片段
 player.timeRanges = [
@@ -225,7 +225,7 @@ player.timeRangeMode = true;
 虽然 WebComponent 使用 Shadow DOM，但你可以通过 CSS 自定义变量来调整某些样式：
 
 ```css
-jessibuca-player {
+jessibuca {
   width: 100%;
   max-width: 800px;
   --player-background: #000;

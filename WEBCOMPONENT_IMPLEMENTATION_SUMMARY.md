@@ -111,18 +111,18 @@ Created a comprehensive Lit-based WebComponent that wraps the Jessibuca HLS Play
 <script type="module">
   import 'jv4-ui';
 </script>
-<jessibuca-player
+<jessibuca
   src="https://example.com/video.m3u8"
   show-playback-rate
   show-progress
   auto-generate-ui
-></jessibuca-player>
+></jessibuca>
 ```
 
 ### Vue 3
 ```vue
 <template>
-  <jessibuca-player
+  <jessibuca
     :src="videoUrl"
     @play="handlePlay"
     @timeupdate="handleTimeUpdate"
@@ -135,7 +135,7 @@ Created a comprehensive Lit-based WebComponent that wraps the Jessibuca HLS Play
 function VideoPlayer() {
   const playerRef = useRef(null);
   return (
-    <jessibuca-player
+    <jessibuca
       ref={playerRef}
       src="https://example.com/video.m3u8"
     />
@@ -145,7 +145,7 @@ function VideoPlayer() {
 
 ### Vanilla JavaScript
 ```javascript
-const player = document.querySelector('jessibuca-player');
+const player = document.querySelector('jessibuca');
 player.src = 'https://example.com/video.m3u8';
 await player.play();
 ```

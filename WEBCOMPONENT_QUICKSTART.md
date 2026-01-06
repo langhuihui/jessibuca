@@ -27,12 +27,12 @@ A new framework-agnostic WebComponent has been added that wraps the Jessibuca HL
   </script>
 </head>
 <body>
-  <jessibuca-player
+  <jessibuca
     src="https://example.com/video.m3u8"
     show-playback-rate
     show-progress
     auto-generate-ui
-  ></jessibuca-player>
+  ></jessibuca>
 </body>
 </html>
 ```
@@ -41,7 +41,7 @@ A new framework-agnostic WebComponent has been added that wraps the Jessibuca HL
 
 ```vue
 <template>
-  <jessibuca-player
+  <jessibuca
     :src="videoUrl"
     show-playback-rate
     show-progress
@@ -70,7 +70,7 @@ function handlePause() {
 ### With JavaScript API
 
 ```javascript
-const player = document.querySelector('jessibuca-player');
+const player = document.querySelector('jessibuca');
 
 // Set source
 player.src = 'https://example.com/video.m3u8';
@@ -112,10 +112,10 @@ The component supports multiple languages:
 
 ```html
 <!-- Chinese (default) -->
-<jessibuca-player src="video.m3u8" lang="zh-CN"></jessibuca-player>
+<jessibuca src="video.m3u8" lang="zh-CN"></jessibuca>
 
 <!-- English -->
-<jessibuca-player src="video.m3u8" lang="en-US"></jessibuca-player>
+<jessibuca src="video.m3u8" lang="en-US"></jessibuca>
 ```
 
 You can also register custom locales:

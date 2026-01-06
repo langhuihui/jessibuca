@@ -85,7 +85,7 @@
       font-weight: 500;
     }
 
-    jessibuca-player {
+    jessibuca {
       display: block;
       width: 100%;
       max-width: 800px;
@@ -135,13 +135,13 @@
 
   <div class="card">
     <h2>🎬 视频播放器</h2>
-    <jessibuca-player
+    <jessibuca
       id="player"
       show-playback-rate
       show-progress
       auto-generate-ui
       debug
-    ></jessibuca-player>
+    ></jessibuca>
   </div>
 
   <div class="card">
@@ -183,23 +183,23 @@
   import 'jv4-ui';
 &lt;/script&gt;
 
-&lt;jessibuca-player
+&lt;jessibuca
   src="https://example.com/video.m3u8"
   show-playback-rate
   show-progress
   auto-generate-ui
-&gt;&lt;/jessibuca-player&gt;</code></pre>
+&gt;&lt;/jessibuca&gt;</code></pre>
 
     <h3>2. 带调试模式</h3>
-    <pre><code>&lt;jessibuca-player
+    <pre><code>&lt;jessibuca
   src="https://example.com/video.m3u8"
   debug
   show-time-ranges
   show-media-timeline
-&gt;&lt;/jessibuca-player&gt;</code></pre>
+&gt;&lt;/jessibuca&gt;</code></pre>
 
     <h3>3. JavaScript 控制</h3>
-    <pre><code>const player = document.querySelector('jessibuca-player');
+    <pre><code>const player = document.querySelector('jessibuca');
 
 // 设置视频源
 player.src = 'https://example.com/video.m3u8';
