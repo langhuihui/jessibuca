@@ -19,6 +19,7 @@
     "declaration": true,
     "declarationDir": "./dist/types",
     "emitDeclarationOnly": true,
+    "experimentalDecorators": true,
     "types": ["@vue/runtime-dom", "vite/client"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],

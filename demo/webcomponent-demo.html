@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jessibuca Player - Lit WebComponent Demo</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      color: #666;
+      font-size: 18px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    button {
+      padding: 8px 16px;
+      background: #18a058;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background: #158d4c;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .info-item {
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 4px;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .info-value {
+      font-size: 16px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    jessibuca {
+      display: block;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .log-container {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .log-entry {
+      margin-bottom: 5px;
+    }
+
+    .log-time {
+      color: #858585;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      background: #18a058;
+      color: white;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+
+    code {
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Jessibuca HLS Player <span class="badge">Lit WebComponent</span></h1>
+
+  <div class="card">
+    <h2>🎬 视频播放器</h2>
+    <jessibuca
+      id="player"
+      show-playback-rate
+      show-progress
+      auto-generate-ui
+      debug
+    ></jessibuca>
+  </div>
+
+  <div class="card">
+    <h2>⚙️ 控制面板</h2>
+    <div class="controls">
+      <input
+        type="text"
+        id="urlInput"
+        placeholder="输入视频URL (支持 HLS, ws-flv, webrtc, http-flv)"
+        value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+      />
+      <button onclick="loadUrl()">加载视频</button>
+    </div>
+
+    <div style="margin: 10px 0; font-size: 12px; color: #666;">
+      <strong>示例URL:</strong><br/>
+      HLS: https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8<br/>
+      WebSocket FLV: ws://example.com/live/stream.flv<br/>
+      WebRTC: webrtc://example.com/live/stream
+    </div>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-label">播放状态</div>
+        <div class="info-value" id="playStatus">未播放</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">当前时间</div>
+        <div class="info-value" id="currentTime">00:00</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">总时长</div>
+        <div class="info-value" id="duration">00:00</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">播放进度</div>
+        <div class="info-value" id="progress">0%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📖 使用示例</h2>
+    <h3>1. HLS 播放</h3>
+    <pre><code>&lt;script type="module"&gt;
+  import 'jv4-ui';
+&lt;/script&gt;
+
+&lt;jessibuca
+  src="https://example.com/video.m3u8"
+  show-playback-rate
+  show-progress
+  auto-generate-ui
+&gt;&lt;/jessibuca&gt;</code></pre>
+
+    <h3>2. WebSocket FLV 播放</h3>
+    <pre><code>&lt;jessibuca
+  src="ws://example.com/live/stream.flv"
+  auto-generate-ui
+&gt;&lt;/jessibuca&gt;</code></pre>
+
+    <h3>3. WebRTC 播放</h3>
+    <pre><code>&lt;jessibuca
+  src="webrtc://example.com/live/stream"
+  auto-generate-ui
+&gt;&lt;/jessibuca&gt;</code></pre>
+
+    <h3>4. 带调试模式</h3>
+    <pre><code>&lt;jessibuca
+  src="https://example.com/video.m3u8"
+  debug
+  show-time-ranges
+  show-media-timeline
+&gt;&lt;/jessibuca&gt;</code></pre>
+
+    <h3>3. JavaScript 控制</h3>
+    <pre><code>const player = document.querySelector('jessibuca');
+
+// 设置视频源
+player.src = 'https://example.com/video.m3u8';
+
+// 播放控制
+await player.play();
+player.pause();
+player.seek(30);
+
+// 获取状态
+const currentTime = player.getCurrentTime();
+const duration = player.getDuration();
+
+// 监听事件
+player.addEventListener('play', () => console.log('开始播放'));
+player.addEventListener('pause', () => console.log('暂停播放'));
+player.addEventListener('timeupdate', (e) => {
+  console.log('时间更新:', e.detail);
+});</code></pre>
+  </div>
+
+  <div class="card">
+    <h2>📝 事件日志</h2>
+    <div class="log-container" id="logContainer">
+      <div class="log-entry">
+        <span class="log-time">[等待加载视频...]</span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // DEMO NOTE: In a real application, uncomment the following import after building the package:
+    // import 'jv4-ui';
+    // 
+    // For this demo to work, you need to:
+    // 1. Build the UI package: cd packages/ui && pnpm run build
+    // 2. Run the demo: cd demo && pnpm run dev
+    // 3. The WebComponent will be automatically registered
+
+    const player = document.getElementById('player');
+    const urlInput = document.getElementById('urlInput');
+    const logContainer = document.getElementById('logContainer');
+
+    function addLog(message) {
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `<span class="log-time">[${time}]</span> ${message}`;
+      logContainer.appendChild(entry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    function formatTime(seconds) {
+      if (isNaN(seconds) || !isFinite(seconds) || seconds < 0) {
+        return '00:00';
+      }
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = Math.floor(seconds % 60);
+      if (hours > 0) {
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      }
+      return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    window.loadUrl = function() {
+      const url = urlInput.value.trim();
+      if (!url) {
+        alert('请输入有效的 URL');
+        return;
+      }
+      player.src = url;
+      addLog(`📹 加载视频: ${url}`);
+    };
+
+    // Event listeners
+    player.addEventListener('play', () => {
+      document.getElementById('playStatus').textContent = '播放中';
+      addLog('▶️ 播放开始');
+    });
+
+    player.addEventListener('pause', () => {
+      document.getElementById('playStatus').textContent = '已暂停';
+      addLog('⏸️ 播放暂停');
+    });
+
+    player.addEventListener('timeupdate', (e) => {
+      const { currentTime, duration } = e.detail;
+      document.getElementById('currentTime').textContent = formatTime(currentTime);
+      document.getElementById('duration').textContent = formatTime(duration);
+      if (duration > 0) {
+        const progressPercent = ((currentTime / duration) * 100).toFixed(2);
+        document.getElementById('progress').textContent = `${progressPercent}%`;
+      }
+    });
+
+    player.addEventListener('error', (e) => {
+      const error = e.detail.error;
+      addLog(`❌ 错误: ${error?.message || error}`);
+    });
+
+    // Load default URL on page load
+    addLog('🚀 页面加载完成');
+    addLog('💡 提示: 由于这是一个 demo 页面，WebComponent 可能需要实际构建后才能工作');
+  </script>
+</body>
+</html>
