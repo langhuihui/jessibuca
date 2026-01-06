@@ -1,5 +1,6 @@
 import { LitElement, html, css, PropertyValueMap } from 'lit';
 import { HLSPlayer, HLSPlayerOptions, TimeRange } from './HLSPlayer';
+import { GeneralPlayer, JessibucaPlayerOptions } from './GeneralPlayer';
 
 // Default translations
 const defaultTranslations = {
@@ -12,17 +13,30 @@ const defaultTranslations = {
 type Translations = typeof defaultTranslations;
 
 /**
- * Jessibuca HLS Player Web Component
+ * Jessibuca Player Web Component
  * 
- * A Lit-based web component that provides HLS video playback functionality
- * with custom controls and timeline visualization.
+ * A Lit-based web component that provides video playback functionality
+ * for multiple protocols: HLS (m3u8), ws-flv, webrtc, and http-flv.
  * 
  * @example
  * ```html
+ * <!-- HLS播放 -->
  * <jessibuca 
  *   src="https://example.com/video.m3u8"
  *   show-playback-rate
  *   show-progress
+ *   auto-generate-ui>
+ * </jessibuca>
+ * 
+ * <!-- WebSocket FLV播放 -->
+ * <jessibuca 
+ *   src="ws://example.com/live/stream.flv"
+ *   auto-generate-ui>
+ * </jessibuca>
+ * 
+ * <!-- WebRTC播放 -->
+ * <jessibuca 
+ *   src="webrtc://example.com/live/stream"
  *   auto-generate-ui>
  * </jessibuca>
  * ```
@@ -47,6 +61,7 @@ export class JessibucaPlayer extends LitElement {
       showMediaTimeline: { type: Boolean, attribute: 'show-media-timeline' },
       autoplay: { type: Boolean },
       lang: { type: String },
+      protocol: { type: String }, // 'hls', 'ws-flv', 'webrtc', 'http-flv', or 'auto'
       // Internal state
       _isPlaying: { type: Boolean, state: true },
       _currentTime: { type: Number, state: true },
@@ -212,6 +227,7 @@ export class JessibucaPlayer extends LitElement {
   showMediaTimeline = false;
   autoplay = false;
   lang = 'zh-CN'; // Default language
+  protocol = 'auto'; // Protocol type: 'hls', 'ws-flv', 'webrtc', 'http-flv', or 'auto'
 
   // Internal state
   _isPlaying = false;
@@ -223,12 +239,13 @@ export class JessibucaPlayer extends LitElement {
   _progressInfo = '';
 
   // Private members
-  private player?: HLSPlayer;
+  private player?: HLSPlayer | GeneralPlayer;
   private progressUpdateInterval?: number;
   private videoElement?: HTMLVideoElement;
   private progressInput?: HTMLInputElement;
   private progressCanvas?: HTMLCanvasElement;
   private translations: Translations = defaultTranslations;
+  private detectedProtocol: 'hls' | 'ws-flv' | 'webrtc' | 'http-flv' = 'hls';
 
   // Localization support
   private static locales: Record<string, Partial<Translations>> = {
@@ -314,7 +331,27 @@ export class JessibucaPlayer extends LitElement {
   }
 
   /**
-   * Initialize the HLS player
+   * Detect protocol from URL
+   */
+  private detectProtocolFromUrl(url: string): 'hls' | 'ws-flv' | 'webrtc' | 'http-flv' {
+    if (url.endsWith('.m3u8') || url.includes('.m3u8?')) {
+      return 'hls';
+    } else if (url.startsWith('ws://') || url.startsWith('wss://')) {
+      return 'ws-flv';
+    } else if (url.startsWith('webrtc://')) {
+      return 'webrtc';
+    } else if (url.startsWith('http://') || url.startsWith('https://')) {
+      // HTTP can be either HLS or FLV, check extension
+      if (url.endsWith('.flv') || url.includes('.flv?')) {
+        return 'http-flv';
+      }
+      return 'hls'; // Default to HLS for HTTP(S)
+    }
+    return 'hls'; // Default fallback
+  }
+
+  /**
+   * Initialize the player
    */
   private async initializePlayer() {
     if (!this.videoElement) {
@@ -324,23 +361,44 @@ export class JessibucaPlayer extends LitElement {
     }
 
     try {
-      // Create player options
-      const options: HLSPlayerOptions = {
-        showPlaybackRate: this.showPlaybackRate,
-        showProgress: this.showProgress,
-        autoGenerateUI: false, // We handle UI in the component
-        timeRangeMode: this.timeRangeMode,
-        timeRanges: this.timeRanges,
-        playbackRates: this.playbackRates,
-        debug: {
-          enabled: this.debug,
-          showTimeRanges: this.showTimeRanges,
-          showMediaTimeline: this.showMediaTimeline,
-        },
-      };
+      // Detect protocol if in auto mode
+      if (this.src) {
+        this.detectedProtocol = this.protocol === 'auto' 
+          ? this.detectProtocolFromUrl(this.src)
+          : (this.protocol as any);
+      }
 
-      // Create player instance
-      this.player = new HLSPlayer(this.videoElement, options);
+      this.log(`Initializing player for protocol: ${this.detectedProtocol}`);
+
+      // Create appropriate player based on protocol
+      if (this.detectedProtocol === 'hls') {
+        // Use HLSPlayer for HLS streams
+        const options: HLSPlayerOptions = {
+          showPlaybackRate: this.showPlaybackRate,
+          showProgress: this.showProgress,
+          autoGenerateUI: false, // We handle UI in the component
+          timeRangeMode: this.timeRangeMode,
+          timeRanges: this.timeRanges,
+          playbackRates: this.playbackRates,
+          debug: {
+            enabled: this.debug,
+            showTimeRanges: this.showTimeRanges,
+            showMediaTimeline: this.showMediaTimeline,
+          },
+        };
+
+        this.player = new HLSPlayer(this.videoElement, options);
+      } else {
+        // Use GeneralPlayer for ws-flv, webrtc, and http-flv
+        const options: JessibucaPlayerOptions = {
+          protocol: this.detectedProtocol,
+          debug: this.debug,
+          autoPlay: this.autoplay,
+          videoElement: this.videoElement,
+        };
+
+        this.player = new GeneralPlayer(this.videoElement, options);
+      }
 
       // Setup video event listeners
       this.setupVideoListeners();
@@ -353,8 +411,8 @@ export class JessibucaPlayer extends LitElement {
         await this.loadSource();
       }
 
-      // Autoplay if enabled
-      if (this.autoplay) {
+      // Autoplay if enabled (for HLS, GeneralPlayer handles it internally)
+      if (this.autoplay && this.detectedProtocol === 'hls') {
         await this.play();
       }
 
