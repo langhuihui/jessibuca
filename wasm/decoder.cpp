@@ -249,17 +249,19 @@ public:
     }
     void _decode(u32 timestamp) override
     {
-        if (videoWidth != frame->width || videoHeight != frame->height)
+        if (videoWidth != (u32)frame->width || videoHeight != (u32)frame->height)
         {
             videoWidth = frame->width;
             videoHeight = frame->height;
             jsObject.call<void>("setVideoSize", videoWidth, videoHeight);
-            int size = videoWidth * videoHeight;
+            size_t size = (size_t)videoWidth * videoHeight;
+            if (size == 0 || size > (1u << 26))
+                return;
             if (y)
                 free((void *)y);
-            y = (u32)malloc(size * 3 >> 1);
-            u = y + size;
-            v = u + (size >> 2);
+            y = (u32)malloc((size * 3) >> 1);
+            u = y + (u32)size;
+            v = u + (u32)(size >> 2);
         }
         u32 dst = y;
         for (int i = 0; i < videoHeight; i++)
