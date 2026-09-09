@@ -171,6 +171,7 @@ Jessibuca 是一款开源的纯H5直播流播放器，通过Emscripten将音视�
 
 - 支持音视频回放流（TF卡流）的国标 GB28181 [国标协议介绍](https://jessibuca.com/pro-playback-gb28181.html)
 - 支持音视频回放流（TF卡流）的部标 GA/T1078[部标协议介绍](https://jessibuca.com/pro-playback-gat1078.html)
+- 支持音视频回放流（特殊流）[特殊回放流](https://jessibuca.com/pro-playback-special.html)
 - 支持音视频回放流（TF卡流）的倍数播放，支持2/4/8/16/32/64倍数控制，支持设置多少倍之后只解码I帧播放。
 - 支持音视频回放流（TF卡流）UI控件的底部24小时进度条，并支持精度控制，提供事件回调，方便全屏模式下操作。
 - 支持音视频回放流（TF卡流）UI控件的底部固定时长进度条，并支持精度控制，提供事件回调，方便全屏模式下操作。
