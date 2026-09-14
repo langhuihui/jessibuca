@@ -15,76 +15,69 @@
             >提示与配置</button>
             <div class="player-advanced">
             <div class="input">
-                <span>缓冲(秒):</span>
-                <input
-                    style="width: 50px"
-                    type="number"
-                    ref="buffer"
-                    value="0.2"
-                    @change="changeBuffer"
-                />
-                <label>
-                    <input
-                        type="checkbox"
-                        v-model="isDebug"
-                        ref="isDebug"
-                        @change="restartPlay"
-                    /><span>开启日志</span>
-                </label>
-            </div>
-
-            <div class="input">
+                <span class="player-action-label">缓冲</span>
                 <div>
-                    <label>
-                        <input
-                            type="checkbox"
-                            v-model="isFlv"
-                            @change="restartPlay()"
-                        /><span>设置Flv格式</span>
+                    <label class="player-field">
+                        <span>时长</span>
+                        <input type="number" ref="buffer" value="0.2" @change="changeBuffer" />
+                        <span>秒</span>
                     </label>
                     <label>
-                        <input
-                            type="checkbox"
-                            v-model="controlAutoHide"
-                            @change="restartPlay()"
-                        /><span>控制栏自动隐藏(移动端不支持)</span>
+                        <input type="checkbox" v-model="isDebug" ref="isDebug" @change="restartPlay" />
+                        <span>控制台日志</span>
                     </label>
                 </div>
-
             </div>
             <div class="input">
-                <span>解码器：</span>
-                <label>
-                    <input
-                        type="checkbox"
-                        v-model="useMSE"
-                        ref="vod"
-                        @change="restartPlay('mse')"
-                    /><span>MediaSource</span>
-                </label>
-                <label>
-                    <input
-                        type="checkbox"
-                        v-model="useWCS"
-                        ref="vod"
-                        @change="restartPlay('wcs')"
-                    /><span>webcodecs</span>
-                </label>
-                <label>
-                    <input
-                        type="checkbox"
-                        v-model="useWasm"
-                        ref="vod"
-                        @change="restartPlay('wasm')"
-                    /><span>wasm</span>
-                </label>
+                <span class="player-action-label">格式</span>
+                <div>
+                    <label>
+                        <input type="checkbox" v-model="isFlv" @change="restartPlay()" />
+                        <span>FLV</span>
+                    </label>
+                </div>
+            </div>
+            <div class="input is-stack">
+                <span class="player-action-label">解码</span>
+                <div class="player-groups">
+                    <div class="player-group">
+                        <span class="player-group-label">硬解码</span>
+                        <div>
+                            <label>
+                                <input type="checkbox" v-model="useMSE" ref="vod" @change="restartPlay('mse')" />
+                                <span>MediaSource</span>
+                            </label>
+                            <label>
+                                <input type="checkbox" v-model="useWCS" ref="vod" @change="restartPlay('wcs')" />
+                                <span>WebCodecs</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="player-group">
+                        <span class="player-group-label">软解码</span>
+                        <div>
+                            <label>
+                                <input type="checkbox" v-model="useWasm" ref="vod" @change="restartPlay('wasm')" />
+                                <span>WASM</span>
+                            </label>
+                            <span class="player-hint">未勾选硬解时默认 WASM</span>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="input">
-                <button @click="toggleControlBar">toggle控制条</button>
+                <span class="player-action-label">界面</span>
+                <div>
+                    <label title="移动端不支持">
+                        <input type="checkbox" v-model="controlAutoHide" @change="restartPlay()" />
+                        <span>控制栏自动隐藏</span>
+                    </label>
+                    <button type="button" @click="toggleControlBar">切换控制条</button>
+                </div>
             </div>
             </div>
             <div class="input player-url">
-                <div>输入URL：</div>
+                <span class="player-action-label">地址</span>
                 <input
                     placeholder="支持 ws-raw（M7S 私有格式）/ ws-flv / http-flv"
                     type="input"
@@ -95,74 +88,78 @@
                 <button v-if="!playing" class="btn-primary" @click="play">播放</button>
                 <button v-else @click="pause">停止</button>
             </div>
-            <div class="input" v-if="loaded" style="line-height: 30px">
-                <button @click="destroy">销毁</button>
-                <button v-if="quieting" @click="cancelMute">取消静音</button>
-                <template v-else>
-                    <button @click="mute">静音</button>
-                    音量
-                    <select v-model="volume" @change="volumeChange">
-                        <option value="1">100</option>
-                        <option value="0.75">75</option>
-                        <option value="0.5">50</option>
-                        <option value="0.25">25</option>
-                    </select>
-                </template>
-                <span>旋转</span>
-                <select v-model="rotate" @change="rotateChange">
-                    <option value="0">0</option>
-                    <option value="90">90</option>
-                    <option value="270">270</option>
-                </select>
-
-                <button @click="fullscreen">全屏</button>
-                <button @click="screenShot">截图</button>
-                <div style="line-height: 30px">
-                    <label>
-                        <input
-                            type="checkbox"
-                            ref="operateBtns"
-                            v-model="showOperateBtns"
-                            @change="restartPlay"
-                        /><span>操作按钮</span>
-                    </label>
-                    <label>
-                        <input
-                            type="checkbox"
-                            ref="operateBtns"
-                            v-model="showBandwidth"
-                            @change="restartPlay"
-                        /><span>网速</span>
-                    </label>
-                    <span v-if="fps" style="margin-left: 10px">FPS：{{ fps }}</span>
+            <template v-if="loaded">
+            <div class="input">
+                <span class="player-action-label">控制</span>
+                <div>
+                    <button @click="destroy">销毁</button>
+                    <button v-if="quieting" @click="cancelMute">取消静音</button>
+                    <template v-else>
+                        <button @click="mute">静音</button>
+                        <label class="player-field">
+                            <span>音量</span>
+                            <select v-model="volume" @change="volumeChange">
+                                <option value="1">100</option>
+                                <option value="0.75">75</option>
+                                <option value="0.5">50</option>
+                                <option value="0.25">25</option>
+                            </select>
+                        </label>
+                    </template>
+                    <button @click="fullscreen">全屏</button>
+                    <button @click="screenShot">截图</button>
+                    <span v-if="fps">FPS {{ fps }}</span>
                 </div>
             </div>
-            <div class="input" v-if="loaded">
-                <label>
-                    <input
-                        type="checkbox"
-                        ref="offscreen"
-                        v-model="useOffscreen"
-                        @change="restartPlay('offscreen')"
-                    /><span>离屏渲染</span>
-                </label>
-
-                <select v-model="scale" @change="scaleChange">
-                    <option value="0">完全填充(拉伸)</option>
-                    <option value="1">等比缩放</option>
-                    <option value="2">完全填充(未拉伸)</option>
-                </select>
-                <button v-if="!playing" @click="clearView">清屏</button>
-                <template v-if="playing">
-                    <select v-model="recordType">
-                        <option value="webm">webm</option>
-                        <option value="mp4">mp4</option>
-                    </select>
+            <div class="input">
+                <span class="player-action-label">画面</span>
+                <div>
+                    <label>
+                        <input type="checkbox" ref="offscreen" v-model="useOffscreen" @change="restartPlay('offscreen')" />
+                        <span>离屏渲染</span>
+                    </label>
+                    <label class="player-field">
+                        <span>填充</span>
+                        <select v-model="scale" @change="scaleChange">
+                            <option value="0">完全填充(拉伸)</option>
+                            <option value="1">等比缩放</option>
+                            <option value="2">完全填充(未拉伸)</option>
+                        </select>
+                    </label>
+                    <label class="player-field">
+                        <span>旋转</span>
+                        <select v-model="rotate" @change="rotateChange">
+                            <option value="0">0</option>
+                            <option value="90">90</option>
+                            <option value="270">270</option>
+                        </select>
+                    </label>
+                    <button v-if="!playing" @click="clearView">清屏</button>
+                    <label>
+                        <input type="checkbox" ref="operateBtns" v-model="showOperateBtns" @change="restartPlay" />
+                        <span>操作按钮</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" ref="operateBtns" v-model="showBandwidth" @change="restartPlay" />
+                        <span>网速</span>
+                    </label>
+                </div>
+            </div>
+            <div class="input" v-if="playing">
+                <span class="player-action-label">录制</span>
+                <div>
+                    <label class="player-field">
+                        <span>格式</span>
+                        <select v-model="recordType">
+                            <option value="webm">webm</option>
+                            <option value="mp4">mp4</option>
+                        </select>
+                    </label>
                     <button v-if="!recording" @click="startRecord">录制</button>
                     <button v-if="!recording" @click="stopAndSaveRecord">暂停录制</button>
-                </template>
-
+                </div>
             </div>
+            </template>
         </div>
     </div>
 </template>

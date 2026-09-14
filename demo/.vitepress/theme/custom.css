@@ -1,8 +1,9 @@
 /* Player pages keep the original splash background; doc pages stay clean. */
 .VPDoc:has(._player),
 .VPDoc:has(._player-pro) {
-    background: url(/bg.jpg) no-repeat top;
-    background-size: 100% auto;
+    background: url(/bg.jpg);
+    background-repeat: no-repeat;
+    background-position: top;
 }
 
 .dark .VPDoc:has(._player),
@@ -14,6 +15,39 @@
 .VPDoc:has(._player-pro) .vp-doc img {
     max-width: 100%;
     height: auto;
+}
+
+.VPDoc:has(._player) .vp-doc .player-notes a,
+.VPDoc:has(._player-pro) .vp-doc .player-notes a {
+    font-weight: 600;
+}
+
+.VPDoc:has(._player) .vp-doc .player-notes ul,
+.VPDoc:has(._player-pro) .vp-doc .player-notes ul {
+    list-style: disc;
+}
+
+/* Player pages need a wider column than default VPDoc content (752px),
+   otherwise #container's 640/900 width is clamped by max-width: 100%. */
+@media (min-width: 960px) {
+    .VPDoc:has(._player),
+    .VPDoc:has(._player-pro) {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .VPDoc:has(._player):not(.has-sidebar) .container,
+    .VPDoc:has(._player):not(.has-sidebar) .content,
+    .VPDoc:has(._player-pro):not(.has-sidebar) .container,
+    .VPDoc:has(._player-pro):not(.has-sidebar) .content {
+        max-width: 1080px;
+    }
+
+    .VPDoc:has(._player) .content,
+    .VPDoc:has(._player-pro) .content {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
 }
 
 @media (max-width: 720px) {

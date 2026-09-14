@@ -112,13 +112,33 @@ export default defineConfig({
             }
         ],
     },
+    // Put player SDKs into the real HTML. VitePress `head` scripts are injected
+    // by Unhead after Vue mounts in `vitepress dev`, which races `new JessibucaPro()`.
+    vite: {
+        // Let VitePress treat public *.md as static files, not doc routes.
+        // Otherwise clicks on /jessibuca-api.md become /jessibuca-api.md.html.
+        define: {
+            'import.meta.env.VITE_EXTRA_EXTENSIONS': JSON.stringify('md')
+        },
+        plugins: [
+            {
+                name: 'inject-player-sdk',
+                transformIndexHtml() {
+                    return [
+                        { tag: 'script', attrs: { src: '/jessibuca.js' }, injectTo: 'head' },
+                        { tag: 'script', attrs: { src: '/pro/js/jessibuca-pro-vr-demo.js' }, injectTo: 'head' },
+                        { tag: 'script', attrs: { src: '/pro/js/jessibuca-pro-demo.js' }, injectTo: 'head' },
+                        { tag: 'script', attrs: { src: '/vconsole.js' }, injectTo: 'head' },
+                    ]
+                }
+            }
+        ]
+    },
     head: [
         ['meta', { 'http-equiv': 'origin-trial', content: 'AhQB+uNRI7lww30oPK+0ZcGotIvuoHJL+NkkWOhqDdooY6+xnuiYmZli2SwlH1vkrKdB5WxMpsv5KRc/q9zFswoAAAB3eyJvcmlnaW4iOiJodHRwczovL2plc3NpYnVjYS5jb206NDQzIiwiZmVhdHVyZSI6IlVucmVzdHJpY3RlZFNoYXJlZEFycmF5QnVmZmVyIiwiZXhwaXJ5IjoxNzA5ODU1OTk5LCJpc1N1YmRvbWFpbiI6dHJ1ZX0=' }],
         ['script', { src: 'https://cdn.wwads.cn/js/makemoney.js' }],
         ['script', { src: 'https://hm.baidu.com/hm.js?ed323be621396bd133c1c9b856d16dad' }],
-        ['script', { src: '/jessibuca.js' }],
-        ['script', { src: '/pro/js/jessibuca-pro-vr-demo.js' }],
-        ['script', { src: '/pro/js/jessibuca-pro-demo.js' }],
-        ['script', { src: '/vconsole.js' }]
+        ['link', { rel: 'alternate', type: 'text/plain', href: '/llms.txt', title: 'llms.txt' }],
+        ['link', { rel: 'alternate', type: 'text/markdown', href: '/jessibuca-api.md', title: 'Jessibuca OSS API for agents' }]
     ]
 })

@@ -1,0 +1,18 @@
+# Jessibuca
+
+> Pure H5 live-stream player for the browser (wasm / MSE / WebCodecs).
+
+## Docs for agents
+
+- [Open-source API spec (markdown, use this to write code)](/jessibuca-api.md): constructor, options, methods, events, errors, recipes
+- [Open-source API HTML](/api.html): same API with longer explanations
+- [TypeScript types](/jessibuca.d.ts): `Jessibuca` / `Jessibuca.Config`
+- [User guide](/document.html): FAQ, deployment, decoder path, codec notes
+- [Open-source demo](/player.html)
+
+## Optional Pro product
+
+Pro has a separate constructor (`JessibucaPro`) and decoder. Do not mix Pro APIs into open-source examples.
+
+- [Pro player demo](/player-pro.html)
+- [Pro overview](/pro.html)

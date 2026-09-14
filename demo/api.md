@@ -1,13 +1,244 @@
+---
+outline: deep
+head:
+  - - link
+    - rel: alternate
+      type: text/markdown
+      href: /jessibuca-api.md
+      title: Jessibuca OSS API for agents
+  - - link
+    - rel: alternate
+      type: text/plain
+      href: /llms.txt
+      title: llms.txt
+---
 
 # API
-jessibuca API 文档
+
+开源版 Jessibuca API。写代码请优先看下面的 **Agent 编程手册**；完整字段说明在手册之后。
+
+- Agent 专用 Markdown：<a href="/jessibuca-api.md" target="_blank" rel="noopener noreferrer"><code>/jessibuca-api.md</code></a>
+- TypeScript 类型：<a href="/jessibuca.d.ts" target="_blank" rel="noopener noreferrer"><code>/jessibuca.d.ts</code></a>
+- 站点索引：<a href="/llms.txt" target="_blank" rel="noopener noreferrer"><code>/llms.txt</code></a>
+
+> 这是**开源版** API。不要在开源集成里使用 `JessibucaPro` / `decoder-pro.js`。Pro 文档请联系作者（wx:bosswancheng）。
+
 <Rice/>
 
-## TIPS
+## Agent 编程手册
 
-这是`开源版`的API文档，这是`开源版`的API文档，这是`开源版`的API文档（三遍），`PRO的API文档`请联系作者。
+给 Agent / LLM 生成可运行代码用。按表格和示例写即可；细节展开见后文「Jessibuca(options) / 方法 / 事件」。
+
+### 这是什么
+
+浏览器端 H5 直播播放器。全局构造函数 `window.Jessibuca`。开源版协议：`ws-raw`、`ws-flv`、`http(s)-flv`。编码：H.264 / H.265（wasm）；MSE / WebCodecs 硬解仅 H.264。
+
+### 生成代码时必须遵守
+
+1. 先确认 `typeof window.Jessibuca === 'function'`，再 `new Jessibuca(options)`。
+2. `container` 必填。字符串走 `document.querySelector`。不要传入 `<canvas>` / `<video>`。不要给容器做 CSS `transform` / 旋转 / 缩放。
+3. `decoder.js` 与 `decoder.wasm` 必须同目录。相对路径相对的是**当前页面 URL**。
+4. `play(url)` 返回 `Promise`，必须 `.catch()`。释放资源用 `await player.destroy()`，不要用已废弃的 `close()`。
+5. 默认静音。恢复声音只能在用户点击/触摸里调用 `cancelMute()` 或 `audioResume()`。
+6. 错误、超时用 `Jessibuca.ERROR.*`、`Jessibuca.TIMEOUT.*` 比较，不要猜字符串。
+7. 不要编造 Pro 能力（WebRTC / HLS / fmp4 / mpeg-ts / 多线程 / AI / 对讲 / VR）。
+
+### 最小可运行示例
+
+```html
+<div id="player-wrap">
+  <div id="container" style="width:640px;height:360px;background:#000;"></div>
+</div>
+<button id="btn-play">播放</button>
+<button id="btn-stop">销毁</button>
+<script src="/jessibuca.js"></script>
+<script>
+  const player = new Jessibuca({
+    container: '#container',
+    decoder: '/decoder.js',
+    videoBuffer: 0.2,
+    isResize: true,
+    operateBtns: {
+      fullscreen: true,
+      screenshot: true,
+      play: true,
+      audio: true,
+      record: true
+    }
+  })
+
+  document.getElementById('btn-play').onclick = () => {
+    player.play('https://example.com/live/test.flv').catch(console.error)
+  }
+  document.getElementById('btn-stop').onclick = () => player.destroy()
+
+  player.on('error', (error) => {
+    if (error === Jessibuca.ERROR.fetchError) console.error('HTTP 失败')
+    if (error === Jessibuca.ERROR.websocketError) console.error('WebSocket 失败')
+  })
+  player.on('timeout', (type) => console.warn(type))
+</script>
+```
+
+### 构造参数速查
+
+| 参数 | 类型 | 默认 | 说明 |
+| --- | --- | --- | --- |
+| `container` | `HTMLElement \| string` | 必填 | 挂载节点或选择器 |
+| `decoder` | `string` | `'decoder.js'` | worker 地址，wasm 需同目录 |
+| `videoBuffer` | `number` | `1` | 缓冲秒数 |
+| `videoBufferDelay` | `number` | `1` | 超缓冲后丢帧的额外秒数 |
+| `hiddenAutoPause` | `boolean` | `false` | 页面 hidden 时暂停 |
+| `hasAudio` | `boolean` | `true` | `false` 则不解音频 |
+| `rotate` | `number` | `0` | 仅 `0` / `180` / `270` |
+| `isResize` | `boolean` | `true` | 等比留黑边，等同 `setScaleMode(1)` |
+| `isFullResize` | `boolean` | `false` | 等比裁切填满，等同 `setScaleMode(2)` |
+| `isFlv` | `boolean` | `false` | ws 地址无 `.flv` 时仍按 FLV 解析 |
+| `debug` | `boolean` | `false` | 控制台日志 |
+| `timeout` | `number` | `10` | loading + 心跳超时（秒） |
+| `heartTimeout` | `number` | `10` | 播放中无帧超时（秒） |
+| `heartTimeoutReplay` | `boolean` | `true` | 心跳超时自动重播（URL 可达时） |
+| `heartTimeoutReplayTimes` | `number` | `3` | 重试次数，`-1` 无限 |
+| `loadingTimeout` | `number` | `10` | `play()` 后无数据超时 |
+| `loadingTimeoutReplay` | `boolean` | `true` | loading 超时自动重播 |
+| `loadingTimeoutReplayTimes` | `number` | `3` | 重试次数，`-1` 无限 |
+| `loadingDecoderWorkerTimeout` | `number` | `10` | 加载 decoder worker 超时 |
+| `supportDblclickFullscreen` | `boolean` | `false` | 双击画面全屏（不含控制条） |
+| `showBandwidth` | `boolean` | `false` | 显示码率 |
+| `operateBtns` | `object` | 全 `false` | `{ fullscreen, screenshot, play, audio, record }` |
+| `keepScreenOn` | `boolean` | `false` | 移动端亮屏 |
+| `isNotMute` | `boolean` | `false` | 默认出声，仍需用户手势 |
+| `loadingText` | `string` | `''` | loading 文案 |
+| `background` | `string` | `''` | 背景图 |
+| `useMSE` | `boolean` | `false` | MSE 硬解 H.264，优先于 WCS |
+| `useWCS` | `boolean` | `false` | WebCodecs 硬解 H.264（Chrome 94+ / https 或 localhost） |
+| `wcsUseVideoRender` | `boolean` | `true` | WCS 用 `<video>` 渲染 |
+| `autoWasm` | `boolean` | `true` | 硬解不支持 H.265 时降级 wasm |
+| `hotKey` | `boolean` | `false` | Esc 退出全屏，方向键音量 |
+| `wasmDecodeErrorReplay` | `boolean` | — | wasm 解码失败后重播 |
+| `controlAutoHide` | `boolean` | `false` | 控制条自动隐藏 |
+| `recordType` | `'webm' \| 'mp4'` | `'webm'` | 录制封装 |
+| `useWebFullScreen` | `boolean` | `false` | 移动端/iOS 旋转 90° 网页全屏 |
+| `autoUseSystemFullScreen` | `boolean` | — | 优先系统全屏 |
+| `forceNoOffscreen` | `boolean` | `true` | 已废弃，内部已禁用离屏 |
+| `openWebglAlignment` | `boolean` | — | UV 宽度不能被 4 整除时的绿屏修复 |
+
+`<video>` 渲染（MSE / WCS+video）不支持 `isResize` / `isFullResize` / `setScaleMode` / `clearView`。HTTP 4xx/5xx、ws 连不上不会走 Replay，会走 `error`。
+
+### 方法速查
+
+| 签名 | 返回 | 说明 |
+| --- | --- | --- |
+| `play(url?, options?: { headers? })` | `Promise<void>` | `headers` 仅 HTTP 有效 |
+| `pause()` | `Promise<void>` | 之后 `play()` 可续播同一路 |
+| `destroy()` | `Promise<void>` | 释放资源 |
+| `close()` | `Promise<void>` | **废弃**，等同 `destroy()` |
+| `mute()` / `cancelMute()` / `audioResume()` | `void` | 静音 / 取消 / 手势恢复音频 |
+| `setVolume(n)` | `void` | `0..1`，仍会解码音频 |
+| `setDebug(bool)` | `void` | |
+| `setTimeout(sec)` | `void` | |
+| `setBufferTime(sec)` | `void` | 同 `videoBuffer` |
+| `setScaleMode(0\|1\|2)` | `void` | 拉伸 / 留边 / 裁切 |
+| `setRotate(0\|90\|180\|270)` | `void` | |
+| `setFullscreen(bool)` | `void` | iOS 建议 `useWebFullScreen` |
+| `resize()` | `void` | 容器尺寸变化后调用 |
+| `clearView()` | `void` | canvas 涂黑 |
+| `screenshot(name?, format?, quality?, type?)` | `void\|string\|Blob` | `type`: `download` / `base64` / `blob`。`start` 后请延迟约 1s 再截图 |
+| `startRecord(name?, 'webm'\|'mp4')` | `void` | |
+| `stopRecordAndSave()` | `void` | |
+| `isPlaying()` / `isMute()` / `isRecording()` | `boolean` | |
+| `toggleControlBar(bool?)` | `void` | 省略参数则切换 |
+| `getControlBarShow()` | `boolean` | |
+| `kbps2Speed(kbps)` | `number` | kbps → KB/s |
+| `on(event, cb)` | `void` | 见事件速查 |
+
+### 事件速查
+
+`player.on(name, cb)`
+
+| 事件 | 回调参数 | 时机 |
+| --- | --- | --- |
+| `load` | `()` | 初始化完成。3.x 可直接 `play()` |
+| `play` / `pause` / `start` | `()` | 播放 / 暂停 / 首帧渲染 |
+| `mute` | `(boolean)` | 是否静音 |
+| `volume` | `(number)` | `0..1` |
+| `fullscreen` / `webFullscreen` | `(boolean)` | 系统全屏 / 网页全屏 |
+| `timeUpdate` | `(ts: number)` | 帧 PTS，毫秒 |
+| `videoInfo` | `{ width, height, encTypeCode, encType }` | `10` H.264，`12` H.265 |
+| `audioInfo` | `{ numOfChannels, sampleRate, encTypeCode, encType }` | `10` AAC，`7` G711A，`8` G711U |
+| `kBps` | `(number)` | 码率，每秒 1 次 |
+| `stats` | `{ buf, fps, abps, vbps, ts }` | 每秒 1 次 |
+| `performance` | `0\|1\|2` | 卡顿 / 流畅 / 很流畅 |
+| `log` | `(any)` | 日志 |
+| `error` | `(string)` | 与 `Jessibuca.ERROR.*` 比较 |
+| `timeout` | `(string)` | 与 `Jessibuca.TIMEOUT.*` 比较 |
+| `loadingTimeout` / `delayTimeout` | `()` | 起播无数据 / 播放卡顿 |
+| `recordStart` / `recordEnd` | `()` | |
+| `recordingTimestamp` | `(number)` | 录制时长，每秒 1 次 |
+| `playToRenderTimes` | `(times)` | play → 渲染各阶段耗时 |
+
+### 错误码与超时
+
+```js
+Jessibuca.ERROR.playError              // play() 空 URL / 状态不对，值为 playIsNotPauseOrUrlIsNull
+Jessibuca.ERROR.fetchError             // HTTP 失败
+Jessibuca.ERROR.websocketError         // WebSocket 失败
+Jessibuca.ERROR.webcodecsH265NotSupport
+Jessibuca.ERROR.mediaSourceH265NotSupport
+Jessibuca.ERROR.wasmDecodeError
+Jessibuca.TIMEOUT.loadingTimeout
+Jessibuca.TIMEOUT.delayTimeout
+```
+
+### 常见任务
+
+**组件挂载创建、卸载销毁**
+
+```js
+let player
+onMounted(() => {
+  player = new window.Jessibuca({ container: el, decoder: '/decoder.js' })
+})
+onBeforeUnmount(async () => {
+  if (player) {
+    await player.destroy()
+    player = null
+  }
+})
+```
+
+**HTTP-FLV 带鉴权头**
+
+```js
+await player.play(url, { headers: { Authorization: 'Bearer xxx' } })
+```
+
+**优先硬解，失败降 wasm**
+
+```js
+new Jessibuca({
+  container: '#container',
+  decoder: '/decoder.js',
+  useMSE: true,
+  useWCS: true,
+  autoWasm: true
+})
+```
+
+**截图 / 录制**
+
+```js
+player.on('start', () => {
+  setTimeout(() => player.screenshot('shot', 'png', 0.92, 'base64'), 1000)
+})
+player.startRecord('clip', 'mp4')
+player.stopRecordAndSave()
+```
 
 ## Jessibuca(options)
+
+- **签名**：`new Jessibuca(options: Config): Jessibuca`
+- **必填**：`options.container`
 
 options 支持的参数有：
 
@@ -403,6 +634,7 @@ worker地址
 
 ### setDebug(flag)
 
+- **签名**：`setDebug(flag: boolean): void`
 - **参数**：
     - `{boolean} flag`
 - **用法**： 是否开启控制台调试打印
@@ -416,6 +648,7 @@ jessibuca.setDebug(false)
 
 ### mute()
 
+- **签名**：`mute(): void`
 - **用法**： 静音
 
 ```js
@@ -424,6 +657,7 @@ jessibuca.mute()
 
 ### cancelMute()
 
+- **签名**：`cancelMute(): void`
 - **用法**： 取消静音
 
 ```js
@@ -435,6 +669,7 @@ jessibuca.cancelMute()
 
 ### audioResume()
 
+- **签名**：`audioResume(): void`
 - **用法**： 留给上层用户操作来触发音频恢复的方法。
 
 iPhone，chrome等要求自动播放时，音频必须静音，需要由一个真实的用户交互操作来恢复，不能使用代码。
@@ -443,6 +678,7 @@ https://developers.google.com/web/updates/2017/09/autoplay-policy-changes
 
 ### setTimeout(time)
 
+- **签名**：`setTimeout(time: number): void`
 - **参数**：
     - `{number} time`
 - **用法**：
@@ -459,6 +695,7 @@ jessibuca.on('timeout', function () {
 
 ### setScaleMode(mode)
 
+- **签名**：`setScaleMode(mode: 0 | 1 | 2): void`
 - **参数**：
     - `{number} mode`
 
@@ -481,6 +718,7 @@ jessibuca.setScaleMode(2)
 
 ### pause()
 
+- **签名**：`pause(): Promise<void>`
 - **返回**：
     - `{Promise}`
 - **用法**： 暂停播放
@@ -505,6 +743,7 @@ jessibuca.pause().then(() => {
 
 ### close()（废弃）
 
+- **签名**：`close(): Promise<void>`
 - **用法**： 关闭视频,不释放底层资源
 - **返回**：
     - `{Promise}`
@@ -523,6 +762,7 @@ jessibuca.close().then(() => {
 
 ### destroy()
 
+- **签名**：`destroy(): Promise<void>`
 - **用法**： 关闭视频，释放底层资源
 - **返回**：
     - `{Promise}`
@@ -538,6 +778,7 @@ await jessibuca.destroy();
 
 ### clearView()
 
+- **签名**：`clearView(): void`
 - **用法**： 清理画布为黑色背景
 
 ```js
@@ -549,6 +790,7 @@ jessibuca.clearView()
 
 ### play([url],[options])
 
+- **签名**：`play(url?: string, options?: { headers?: Record<string, string> }): Promise<void>`
 - **参数**：
     - `{string} url` url 地址
     - `{object} options` 额外参数
@@ -580,10 +822,12 @@ jessibuca.play()
 
 ### resize()
 
+- **签名**：`resize(): void`
 - **用法**： 重新调整视图大小
 
 ### setBufferTime(time)
 
+- **签名**：`setBufferTime(time: number): void`
 - **参数**：
     - `{number} time`
 
@@ -598,6 +842,7 @@ jessibuca.setBufferTime(0.2)
 
 ### setRotate(deg)
 
+- **签名**：`setRotate(deg: 0 | 90 | 180 | 270): void`
 - **参数**：
     - `{number} deg`
 - **用法**： 设置旋转角度，支持，0(默认), 90, 180, 270 四个值。
@@ -619,6 +864,7 @@ jessibuca.setRotate(270)
 
 ### setVolume(volume)
 
+- **签名**：`setVolume(volume: number): void`
 - **参数**：
     - `{number} volume`
 
@@ -640,6 +886,7 @@ jessibuca.setVolume(1)
 
 ### hasLoaded()
 
+- **签名**：`hasLoaded(): boolean`
 - **返回值**：`boolean`
 - **用法**： 返回是否加载完毕
 
@@ -652,6 +899,7 @@ console.log(result) // true
 
 ### setKeepScreenOn()
 
+- **签名**：`setKeepScreenOn(): boolean`
 - **用法**： 开启屏幕常亮，在手机浏览器上, canvas标签渲染视频并不会像video标签那样保持屏幕常亮。 H5目前在chrome\edge 84, android chrome 84及以上有原生亮屏API, 需要是https页面
   其余平台为模拟实现，此时为兼容实现，并不保证所有浏览器都支持
 
@@ -661,6 +909,7 @@ jessibuca.setKeepScreenOn()
 
 ### setFullscreen(flag)
 
+- **签名**：`setFullscreen(flag: boolean): void`
 - **参数**：
     - `{boolean} flag`
 
@@ -680,6 +929,7 @@ jessibuca.setFullscreen(false)
 
 ### screenshot(filename, format, quality,type)
 
+- **签名**：`screenshot(filename?: string, format?: 'png' | 'jpeg' | 'webp', quality?: number, type?: 'download' | 'base64' | 'blob'): void | string | Blob`
 - **参数**：
     - `{string} filename`
     - `{string} format`
@@ -708,6 +958,7 @@ const fileBlob = jessibuca.screenshot("test", 'blob')
 
 ### startRecord(fileName,fileType)
 
+- **签名**：`startRecord(fileName?: string, fileType?: 'webm' | 'mp4'): void`
 - **参数**：
     - `{string} filename`
     - `{string} fileType`
@@ -723,6 +974,7 @@ jessibuca.startRecord('xxx', 'webm')
 
 ### stopRecordAndSave()
 
+- **签名**：`stopRecordAndSave(): void`
 - **用法**： 暂停录制并下载。
 
 ```js
@@ -731,6 +983,7 @@ jessibuca.stopRecordAndSave()
 
 ### isPlaying()
 
+- **签名**：`isPlaying(): boolean`
 - **返回值**：`boolean`
 - **用法**： 返回是否正在播放中状态。
 
@@ -741,6 +994,7 @@ console.log(result) // true
 
 ### isMute()
 
+- **签名**：`isMute(): boolean`
 - **返回值**：`boolean`
 - **用法**： 返回是否静音。
 
@@ -751,6 +1005,7 @@ console.log(result) // true
 
 ### isRecording()
 
+- **签名**：`isRecording(): boolean`
 - **返回值**：`boolean`
 - **用法**： 返回是否正在录制。
 
@@ -761,6 +1016,7 @@ console.log(result) // true
 
 ### toggleControlBar(isShow)
 
+- **签名**：`toggleControlBar(isShow?: boolean): void`
 - **用法**： 切换底部控制条 隐藏/显示
 - **参数**：
     - `{boolean} isShow` 是否显示
@@ -778,6 +1034,7 @@ jessibuca.toggleControlBar()
 ````
 
 ### getControlBarShow()
+- **签名**：`getControlBarShow(): boolean`
 - **用法**： 获取底部控制条是否显示
 - **返回**：`{boolean}`
 
@@ -786,6 +1043,7 @@ const isShow = jessibuca.getControlBarShow()
 ```
 
 ### kbps2Speed(kbps)
+- **签名**：`kbps2Speed(kbps: number): number`
 - **用法**： 码率转换成网速 kbps -> KB/s
 - **返回**：`{number}`
 
@@ -799,6 +1057,7 @@ jessibuca.on("kBps", function (data) {
 
 ### on(event, callback)
 
+- **签名**：`on(event: string, callback: (...args: any[]) => void): void`
 - **参数**：
     - `{string} event`
     - `{function} callback`
@@ -814,6 +1073,8 @@ jessibuca.on("load", function () {
 ## 事件
 
 ### load
+
+- **签名**：`on('load', callback: () => void): void`
 
 监听 jessibuca 初始化事件。
 
@@ -849,6 +1110,8 @@ else {
 
 ### timeUpdate
 
+- **签名**：`on('timeUpdate', callback: (ts: number) => void): void`
+
 当前视频帧pts，单位毫秒ms
 
 ```js
@@ -858,6 +1121,8 @@ jessibuca.on('timeUpdate', function (ts) {
 ```
 
 ### videoInfo
+
+- **签名**：`on('videoInfo', callback: (data: { width: number, height: number, encTypeCode: number, encType: string }) => void): void`
 
 当解析出视频信息时回调，2个回调参数
 
@@ -875,6 +1140,8 @@ jessibuca.on("videoInfo", function (data) {
 
 ### audioInfo
 
+- **签名**：`on('audioInfo', callback: (data: { numOfChannels: number, sampleRate: number, encTypeCode: number, encType: string }) => void): void`
+
 当解析出音频信息时回调，2个回调参数
 
 1. numOfChannels：声频通道
@@ -891,6 +1158,8 @@ jessibuca.on("audioInfo", function (data) {
 
 ### log
 
+- **签名**：`on('log', callback: (data: any) => void): void`
+
 信息，包含错误信息
 
 ```js
@@ -901,6 +1170,8 @@ jessibuca.on("log", function (data) {
 ```
 
 ### error
+
+- **签名**：`on('error', callback: (error: string) => void): void`
 
 错误信息
 
@@ -927,6 +1198,8 @@ jessibuca.on("error", function (error) {
 
 ### kBps
 
+- **签名**：`on('kBps', callback: (kbps: number) => void): void`
+
 当前码率， 每秒1次,
 
 > 码率是和网速是区分的，网速是指当前网络的下载速度，码率是指当前视频的码率。
@@ -943,6 +1216,8 @@ jessibuca.on("kBps", function (data) {
 ```
 
 ### start
+
+- **签名**：`on('start', callback: () => void): void`
 
 渲染开始
 
@@ -963,6 +1238,8 @@ jessibuca.on("start", function () {
 
 ### timeout
 
+- **签名**：`on('timeout', callback: (type: string) => void): void`
+
 当设定的超时时间内无数据返回,则回调
 
 1. jessibuca.TIMEOUT.loadingTimeout ; 同loadingTimeout
@@ -977,6 +1254,8 @@ jessibuca.on("timeout", function (error) {
 
 ### loadingTimeout
 
+- **签名**：`on('loadingTimeout', callback: () => void): void`
+
 当play()的时候，如果没有数据返回，则回调
 
 ```js
@@ -987,6 +1266,8 @@ jessibuca.on("loadingTimeout", function () {
 ```
 
 ### delayTimeout
+
+- **签名**：`on('delayTimeout', callback: () => void): void`
 
 当播放过程中，如果超过timeout之后没有数据渲染，则抛出异常。
 
@@ -999,6 +1280,8 @@ jessibuca.on("delayTimeout", function () {
 
 ### fullscreen
 
+- **签名**：`on('fullscreen', callback: (flag: boolean) => void): void`
+
 当前是否全屏
 
 ```js
@@ -1008,6 +1291,8 @@ jessibuca.on("fullscreen", function (flag) {
 ```
 
 ### webFullscreen
+
+- **签名**：`on('webFullscreen', callback: (flag: boolean) => void): void`
 
 当前是否web全屏
 
@@ -1020,6 +1305,8 @@ jessibuca.on("webFullscreen", function (flag) {
 
 ### play
 
+- **签名**：`on('play', callback: () => void): void`
+
 触发播放事件
 
 ```js
@@ -1029,6 +1316,8 @@ jessibuca.on("play", function (flag) {
 ```
 
 ### pause
+
+- **签名**：`on('pause', callback: () => void): void`
 
 触发暂停事件
 
@@ -1040,6 +1329,8 @@ jessibuca.on("pause", function (flag) {
 
 ### mute
 
+- **签名**：`on('mute', callback: (flag: boolean) => void): void`
+
 触发声音事件，返回boolean值
 
 ```js
@@ -1050,6 +1341,8 @@ jessibuca.on("mute", function (flag) {
 
 ### volume
 
+- **签名**：`on('volume', callback: (volume: number) => void): void`
+
 触发音量事件，返回音量值
 
 ```js
@@ -1059,6 +1352,8 @@ jessibuca.on("volume", function (volume) {
 ```
 
 ### stats
+
+- **签名**：`on('stats', callback: (s: { buf: number, fps: number, abps: number, vbps: number, ts: number }) => void): void`
 
 流状态统计，流开始播放后回调，每秒1次。
 
@@ -1076,6 +1371,8 @@ jessibuca.on("stats", function (s) {
 
 ### performance
 
+- **签名**：`on('performance', callback: (level: 0 | 1 | 2) => void): void`
+
 渲染性能统计，流开始播放后回调，每秒1次。
 
 - 0: 表示卡顿
@@ -1090,6 +1387,8 @@ jessibuca.on("performance", function (performance) {
 
 ### recordStart
 
+- **签名**：`on('recordStart', callback: () => void): void`
+
 录制开始的事件
 
 ```js
@@ -1099,6 +1398,8 @@ jessibuca.on("recordStart", function () {
 ```
 
 ### recordEnd
+
+- **签名**：`on('recordEnd', callback: () => void): void`
 
 录制结束的事件
 
@@ -1110,6 +1411,8 @@ jessibuca.on("recordEnd", function () {
 
 ### recordingTimestamp
 
+- **签名**：`on('recordingTimestamp', callback: (timestamp: number) => void): void`
+
 录制的时候，返回的录制时长，1s一次
 
 ```js
@@ -1119,6 +1422,8 @@ jessibuca.on("recordingTimestamp", function (timestamp) {
 ```
 
 ### playToRenderTimes
+
+- **签名**：`on('playToRenderTimes', callback: (times: object) => void): void`
 
 监听调用play方法 经过 初始化-> 网络请求-> 解封装 -> 解码 -> 渲染 一系列过程的时间消耗
 

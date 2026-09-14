@@ -10,7 +10,7 @@
         <section class="home-block">
             <p class="home-kicker">开源版</p>
             <h2>浏览器里直接播</h2>
-            <p class="home-lead">开源版可播 HTTP-FLV、WS-FLV，以及 M7S 私有格式（ws-raw）。HLS、裸流、WebRTC 等在 Pro 区单独标明。</p>
+            <p class="home-lead">开源版可播 HTTP-FLV、WS-FLV，以及 M7S 私有格式（ws-raw）。</p>
             <div class="home-tags" aria-label="开源版协议">
                 <span v-for="item in ossProtocols" :key="item">{{ item }}</span>
             </div>
@@ -94,14 +94,17 @@ export default {
                 'WS-FLV'
             ],
             proProtocols: [
-                'HLS 直播',
+                'Flv',
+                'HLS 直播/点播',
                 'fMP4',
                 'H.264 / H.265 裸流',
                 'MPEG-TS / PS',
+                'Mpeg4',
                 'WebTransport',
                 'WebRTC',
                 '阿里云 RTC',
-                '加密流'
+                '加密流',
+                '等'
             ],
             ossDiffs: [
                 'H.264 / H.265 WASM 软解（720P）',
