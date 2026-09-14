@@ -2,11 +2,25 @@
 .VPDoc:has(._player),
 .VPDoc:has(._player-pro) {
     background: url(/bg.jpg) no-repeat top;
+    background-size: 100% auto;
 }
 
 .dark .VPDoc:has(._player),
 .dark .VPDoc:has(._player-pro) {
     background: none;
+}
+
+.VPDoc:has(._player) .vp-doc img,
+.VPDoc:has(._player-pro) .vp-doc img {
+    max-width: 100%;
+    height: auto;
+}
+
+@media (max-width: 720px) {
+    .VPDoc:has(._player),
+    .VPDoc:has(._player-pro) {
+        padding: 16px 12px 48px;
+    }
 }
 
 :root {

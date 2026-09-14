@@ -1,10 +1,19 @@
 <template>
-    <div class="root">
+    <div class="root player-demo player-demo-pro" :class="{ 'is-advanced-open': showAdvanced }">
         <div class="container-shell">
-            <div class="container-shell-title">jessibuca Pro demo player <span class="tag-version" v-if="version">({{
-                    version
-                }})</span></div>
-            <div id="container"></div>
+            <div class="player-head">
+                <div class="container-shell-title">jessibuca Pro demo player <span class="tag-version" v-if="version">({{
+                        version
+                    }})</span></div>
+            </div>
+            <div id="container" class="player-stage"></div>
+            <button
+                type="button"
+                class="player-advanced-toggle"
+                :aria-expanded="showAdvanced ? 'true' : 'false'"
+                @click="toggleAdvanced"
+            >提示与配置</button>
+            <div class="player-advanced">
             <div class="input input-annnie">
                 <div style="color: red" class="input-tips">Tips:支持录制MP4(MPEG-4)格式的视频(仅录制视频，不包含音频)
                 </div>
@@ -80,145 +89,185 @@
                     v-model="videoBuffer"
                     @change="changeBuffer"
                 /><span style="margin-right: 5px">秒</span>
-
-
             </div>
             <div class="input">
                 <span>硬解码：</span>
-                <input
-                    type="checkbox"
-                    v-model="useMSE"
-                    @change="restartPlay('mse')"
-                /><span>MediaSource</span>
-                <input
-                    type="checkbox"
-                    v-model="useWCS"
-                    @change="restartPlay('wcs')"
-                /><span>webcodecs</span> |
-                <input
-                    checked
-                    @change="restartPlay()"
-                    type="checkbox"
-                    v-model="audioDecodeUseHardware"
-                />
-                <span>硬解码音频</span>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="useMSE"
+                        @change="restartPlay('mse')"
+                    /><span>MediaSource</span>
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="useWCS"
+                        @change="restartPlay('wcs')"
+                    /><span>webcodecs</span>
+                </label> |
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="audioDecodeUseHardware"
+                        @change="restartPlay()"
+                    /><span>硬解码音频</span>
+                </label>
             </div>
             <div class="input">
                 <span>软解码：</span>
-                <input
-                    type="checkbox"
-                    v-model="useWasm"
-                    @change="restartPlay('wasm')"
-                /><span>WASM</span>
-                <input
-                    type="checkbox"
-                    v-model="useSIMD"
-                    @change="restartPlay('simd')"
-                /><span>SIMD</span>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="useWasm"
+                        @change="restartPlay('wasm')"
+                    /><span>WASM</span>
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="useSIMD"
+                        @change="restartPlay('simd')"
+                    /><span>SIMD</span>
+                </label>
                 <span style="color: green">默认使用wasm解码器</span>
             </div>
             <div class="input">
-                <input
-                    v-model="demuxUseWorker"
-                    type="checkbox"
-                    @change="restartPlay()"
-                /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
-                <input
-                    v-model="mseDecoderUseWorker"
-                    type="checkbox"
-                    @change="restartPlay()"
-                /><span>硬解码(MediaSource)worker解码</span>
+                <label>
+                    <input
+                        v-model="demuxUseWorker"
+                        type="checkbox"
+                        @change="restartPlay()"
+                    /><span>硬解码(MediaSource，Webcodec)worker解封装</span>
+                </label>
+                <label>
+                    <input
+                        v-model="mseDecoderUseWorker"
+                        type="checkbox"
+                        @change="restartPlay()"
+                    /><span>硬解码(MediaSource)worker解码</span>
+                </label>
             </div>
             <div class="input">
                 <div>
                     <div v-if="supportMT" style="display: inline-block">
-                        <input
+                        <label>
+                            <input
 
-                            type="checkbox"
-                            v-model="useMT"
-                            @change="restartPlay()"
-                        /><span>使用多线程解码</span>
+                                type="checkbox"
+                                v-model="useMT"
+                                @change="restartPlay()"
+                            /><span>使用多线程解码</span>
+                        </label>
                     </div>
-                    <input
-                        type="checkbox"
-                        v-model="isMute"
-                        @change="restartPlay()"
-                    /><span>静音播放</span>
+                    <label>
+                        <input
+                            type="checkbox"
+                            v-model="isMute"
+                            @change="restartPlay()"
+                        /><span>静音播放</span>
+                    </label>
 
-                    <input
-                        type="checkbox"
-                        v-model="decoderErrorAutoWasm"
-                        @change="restartPlay()"
-                    /><span>硬解码失败降级到wasm</span>
+                    <label>
+                        <input
+                            type="checkbox"
+                            v-model="decoderErrorAutoWasm"
+                            @change="restartPlay()"
+                        /><span>硬解码失败降级到wasm</span>
+                    </label>
                 </div>
             </div>
             <div class="input">
                 <div>
-                    <input
-                        type="checkbox"
-                        v-model="isIgnoreExceptionFrame"
-                        @change="restartPlay()"
-                    /><span>是否跳过花屏\灰色\拖拉\半截不全的画面（wasm和webcodec支持）</span>
+                    <label>
+                        <input
+                            type="checkbox"
+                            v-model="isIgnoreExceptionFrame"
+                            @change="restartPlay()"
+                        /><span>是否跳过花屏\灰色\拖拉\半截不全的画面（wasm和webcodec支持）</span>
+                    </label>
                 </div>
             </div>
             <div class="input">
-                <input
-                    type="checkbox"
-                    v-model="isFlv"
-                    @change="restartPlay('isFlv')"
-                /><span>设置Flv格式</span>
-                <input
-                    type="checkbox"
-                    v-model="isHls"
-                    @change="restartPlay('isHls')"
-                /><span>设置Hls格式</span>
-                <input
-                    type="checkbox"
-                    v-model="isFmp4"
-                    @change="restartPlay('isFmp4')"
-                /><span>设置Fmp4格式</span>
-                <input
-                    type="checkbox"
-                    v-model="isTs"
-                    @change="restartPlay('isTs')"
-                /><span>设置Mpeg-ts格式</span>
-                <input
-                    type="checkbox"
-                    v-model="isPs"
-                    @change="restartPlay('isPs')"
-                /><span>设置Mpeg(PS)格式</span>
-                <input
-                    type="checkbox"
-                    v-model="isNakedFlow"
-                    @change="restartPlay('isNakedFlow')"
-                /><span>设置裸流格式</span>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="isFlv"
+                        @change="restartPlay('isFlv')"
+                    /><span>设置Flv格式</span>
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="isHls"
+                        @change="restartPlay('isHls')"
+                    /><span>设置Hls格式</span>
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="isFmp4"
+                        @change="restartPlay('isFmp4')"
+                    /><span>设置Fmp4格式</span>
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="isTs"
+                        @change="restartPlay('isTs')"
+                    /><span>设置Mpeg-ts格式</span>
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="isPs"
+                        @change="restartPlay('isPs')"
+                    /><span>设置Mpeg(PS)格式</span>
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="isNakedFlow"
+                        @change="restartPlay('isNakedFlow')"
+                    /><span>设置裸流格式</span>
+                </label>
             </div>
             <div class="input">
-                <input
-                    type="checkbox"
-                    v-model="networkDelayTimeoutReplay"
-                    @change="restartPlay()"
-                /><span>网络延迟重新播放</span>
-                <input
-                    type="checkbox"
-                    v-model="hiddenAutoPause"
-                    @change="restartPlay()"
-                /><span>最小化自动暂停</span>
-                <input
-                    type="checkbox"
-                    v-model="hasVideo"
-                    @change="restartPlay()"
-                /><span>解码视频</span>
-                <input
-                    type="checkbox"
-                    v-model="hasAudio"
-                    @change="restartPlay()"
-                /><span>解码音频</span>
-                <input
-                    type="checkbox"
-                    v-model="checkFirstIFrame"
-                    @change="restartPlay()"
-                /><span>检查首帧是否I帧（wasm软解码支持）</span>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="networkDelayTimeoutReplay"
+                        @change="restartPlay()"
+                    /><span>网络延迟重新播放</span>
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="hiddenAutoPause"
+                        @change="restartPlay()"
+                    /><span>最小化自动暂停</span>
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="hasVideo"
+                        @change="restartPlay()"
+                    /><span>解码视频</span>
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="hasAudio"
+                        @change="restartPlay()"
+                    /><span>解码音频</span>
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="checkFirstIFrame"
+                        @change="restartPlay()"
+                    /><span>检查首帧是否I帧（wasm软解码支持）</span>
+                </label>
             </div>
             <div class="input">
                 <span>渲染标签：</span>
@@ -247,12 +296,14 @@
                         <option value="mp4">mp4</option>
                     </select>
                 </span>
-                <input
-                    type="checkbox"
-                    v-model="isDebug"
-                    ref="isDebug"
-                    @change="restartPlay"
-                /><span>控制台日志</span>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="isDebug"
+                        ref="isDebug"
+                        @change="restartPlay"
+                    /><span>控制台日志</span>
+                </label>
                 <span class="span-row" v-if="isDebug" style="margin-left: 10px">
                     <span style="color:red;">日志等级</span>
                     <select v-model="debugLevel" @change="restartPlay()">
@@ -264,41 +315,55 @@
             <div class="input">
 
                 <div style="line-height: 30px">
-                    <input
-                        type="checkbox"
-                        v-model="showOperateBtns"
-                        @change="restartPlay"
-                    /><span>操作按钮</span>
-                    <input
-                        type="checkbox"
-                        v-model="showBandwidth"
-                        @change="restartPlay"
-                    /><span>网速</span>
-                    <input
-                        type="checkbox"
-                        v-model="hotKey"
-                        @change="restartPlay()"
-                    /><span>键盘快捷键</span>
-                    <input
-                        type="checkbox"
-                        v-model="controlAutoHide"
-                        @change="restartPlay()"
-                    /><span>控制栏自动隐藏</span>
-                    <input
-                        type="checkbox"
-                        v-model="syncAudioAndVideo"
-                        @change="restartPlay()"
-                    /><span>音视频同步</span>
-                    <input
-                        type="checkbox"
-                        v-model="isDropSameTimestampGop"
-                        @change="restartPlay()"
-                    /><span>遇到相同时间戳是否丢gop</span>
-                    <input
-                        type="checkbox"
-                        v-model="showPerformance"
-                        @change="togglePerformance"
-                    /><span>显示性能面板</span>
+                    <label>
+                        <input
+                            type="checkbox"
+                            v-model="showOperateBtns"
+                            @change="restartPlay"
+                        /><span>操作按钮</span>
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            v-model="showBandwidth"
+                            @change="restartPlay"
+                        /><span>网速</span>
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            v-model="hotKey"
+                            @change="restartPlay()"
+                        /><span>键盘快捷键</span>
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            v-model="controlAutoHide"
+                            @change="restartPlay()"
+                        /><span>控制栏自动隐藏</span>
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            v-model="syncAudioAndVideo"
+                            @change="restartPlay()"
+                        /><span>音视频同步</span>
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            v-model="isDropSameTimestampGop"
+                            @change="restartPlay()"
+                        /><span>遇到相同时间戳是否丢gop</span>
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            v-model="showPerformance"
+                            @change="togglePerformance"
+                        /><span>显示性能面板</span>
+                    </label>
                 </div>
             </div>
             <div class="input">
@@ -308,7 +373,10 @@
                        style="color: red;margin-left: 10px">测试地址(包含VR测试地址)</a>
                 </div>
             </div>
-            <div class="input">
+            </div>
+
+
+            <div class="input player-url">
                 <div>输入URL：</div>
                 <input
                     placeholder="支持 hls/ws-raw/ws-flv/http-flv/fmp4/mpeg-ts/mpeg(ps)/webrtc/Aliyun-rtc/裸流/等协议"
@@ -316,12 +384,11 @@
                     autocomplete="on"
                     v-model="playUrl"
                 />
-
             </div>
             <div class="input">
                 <div>
                     <template v-if="!playing">
-                        <button v-if="playType === '' || playType === 'play'" @click="play">播放直播流</button>
+                        <button v-if="playType === '' || playType === 'play'" class="btn-primary" @click="play">播放直播流</button>
                         <button v-if="playType === '' || playType === 'playback'" @click="playback">播放录像流</button>
                         <button v-if="playType === '' || playType === 'playbackSpecial'" @click="playbackSpecial">
                             播放录像文件(流)
@@ -340,11 +407,8 @@
                     </template>
                 </div>
             </div>
-
-
-            <div class="input" style="line-height: 30px">
+            <div class="input" v-if="loaded" style="line-height: 30px">
                 <button @click="destroyPlayer">销毁</button>
-                <template v-if="loaded">
                     <button v-if="quieting" @click="cancelMute">取消静音</button>
                     <template v-else>
                         <button @click="mute">静音</button>
@@ -384,7 +448,6 @@
                         </select>
 
                     </template>
-                </template>
             </div>
             <div class="input" v-if="loaded">
                 <button @click="screenShot">截图</button>
@@ -412,11 +475,13 @@
                     <button v-if="!recording" @click="stopAndSaveRecord2">暂停录制(blob)</button>
                 </template>
                 <button @click="clearBufferDelay">手动消除延迟</button>
-                <input
-                    type="checkbox"
-                    v-model="toggleZoom"
-                    @change="toggleZoomOperate"
-                /><span>切换电子放大</span>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="toggleZoom"
+                        @change="toggleZoomOperate"
+                    /><span>切换电子放大</span>
+                </label>
             </div>
             <div class="input" v-if="loaded">
                 <span style="color: red">画框（文字）（随机坐标）</span>：
@@ -430,6 +495,7 @@
 </template>
 <script>
 import {ElNotification, ElMessage} from 'element-plus'
+import './player-shell.css'
 
 function getBrowser() {
     const UserAgent = window.navigator.userAgent.toLowerCase() || '';
@@ -567,6 +633,10 @@ function isPad() {
     return (/ipad|android(?!.*mobile)|tablet|kindle|silk/i.test(window.navigator.userAgent.toLowerCase()));
 }
 
+function defaultShowAdvanced() {
+    return !(isMobile() || isPad() || window.matchMedia('(max-width: 720px)').matches);
+}
+
 
 function checkUrlIsValid(url) {
 
@@ -688,9 +758,11 @@ export default {
             demuxUseWorker: true,
             mseDecoderUseWorker: false,
             isEdgeSupportHevc: false,// 默认
+            showAdvanced: defaultShowAdvanced(),
         };
     },
     mounted() {
+        this.syncAdvancedDom();
         if (window.VConsole && (isMobile() || isPad())) {
             this.vConsole = new window.VConsole();
         }
@@ -707,6 +779,9 @@ export default {
         this.create();
         window.onerror = (msg) => (this.err = msg);
     },
+    updated() {
+        this.syncAdvancedDom();
+    },
     async unmounted() {
         if (this.jessibuca) {
             await this.jessibuca.destroy()
@@ -717,6 +792,19 @@ export default {
         }
     },
     methods: {
+        syncAdvancedDom() {
+            const root = this.$el;
+            if (!root || !root.classList) return;
+            root.classList.toggle('is-advanced-open', this.showAdvanced);
+            const btn = root.querySelector('.player-advanced-toggle');
+            if (btn) {
+                btn.setAttribute('aria-expanded', this.showAdvanced ? 'true' : 'false');
+            }
+        },
+        toggleAdvanced() {
+            this.showAdvanced = !this.showAdvanced;
+            this.syncAdvancedDom();
+        },
         create(options) {
             options = options || {};
             const jessibuca = new window.JessibucaPro(
@@ -726,6 +814,7 @@ export default {
                         decoder: '/pro/js/decoder-pro.js',
                         videoBuffer: Number(this.videoBuffer), // 缓存时长
                         videoBufferDelay: Number(this.videoBufferDelay),
+                        networkDelay: Number(this.networkDelay),
                         isResize: false,
                         useWCS: this.useWCS,
                         decoderErrorAutoWasm: this.decoderErrorAutoWasm,
@@ -782,6 +871,8 @@ export default {
                         isFlv: this.isFlv,
                         isFmp4: this.isFmp4,
                         isHls: this.isHls,
+                        isTs: this.isTs,
+                        isPs: this.isPs,
                         isNakedFlow: this.isNakedFlow,
                         hiddenAutoPause: this.hiddenAutoPause,
                         forceNoOffscreen: !this.useOffscreen,
@@ -792,7 +883,7 @@ export default {
                         timeout: 10,
                         useVideoRender: this.renderDom === 'video',
                         useCanvasRender: this.renderDom === 'canvas',
-                        networkDelayTimeoutReplay: false,
+                        networkDelayTimeoutReplay: this.networkDelayTimeoutReplay,
                         playbackForwardMaxRateDecodeIFrame: 8,
                         checkFirstIFrame: this.checkFirstIFrame,
                         watermarkConfig: {
@@ -1630,79 +1721,6 @@ export default {
 }
 </style>
 <style scoped>
-.root {
-    display: flex;
-    place-content: center;
-    margin-top: 3rem;
-    position: relative;
-}
-
-.container-shell {
-    position: relative;
-    backdrop-filter: blur(5px);
-    background: hsla(0, 0%, 50%, 0.5);
-    padding: 30px 4px 10px 4px;
-    /* border: 2px solid black; */
-    width: auto;
-    position: relative;
-    border-radius: 5px;
-    box-shadow: 0 10px 20px;
-}
-
-.container-shell-title {
-    position: absolute;
-    color: darkgray;
-    top: 4px;
-    left: 10px;
-    text-shadow: 1px 1px black;
-}
-
-.tag-version {
-}
-
-#container {
-    background: rgba(13, 14, 27, 0.7);
-    width: 900px;
-    height: 568px;
-}
-
-.input {
-    display: flex;
-    align-items: center;
-    margin-top: 3px;
-    color: white;
-    place-content: stretch;
-    border-bottom: 1px solid #ccc;
-    justify-content: start;
-}
-
-.input-wrap {
-    justify-content: space-between;
-}
-
-.input2 {
-    bottom: 0px;
-}
-
-.input input[type='input'] {
-    flex: auto;
-}
-
-.input-annnie {
-    position: relative;
-    height: 20px;
-    overflow: hidden;
-}
-
-.input-tips {
-    position: absolute;
-    width: 100%;
-    text-align: right;
-    top: 0;
-    left: 0;
-    animation: ani 20s linear infinite;
-}
-
 .err {
     position: absolute;
     top: 40px;
@@ -1715,30 +1733,6 @@ export default {
     margin-right: 10px;
 }
 
-.option {
-    position: absolute;
-    top: 4px;
-    right: 10px;
-    display: flex;
-    place-content: center;
-    align-items: center;
-    font-size: 12px;
-}
-
-.option span {
-    color: white;
-}
-
-:global(.page) {
-    background: url(/bg.jpg);
-    background-repeat: no-repeat;
-    background-position: top;
-}
-
-:global(html.dark .page) {
-    background: none;
-}
-
 .show-message {
     position: fixed;
     z-index: 10000;
@@ -1749,11 +1743,16 @@ export default {
     background: rgba(0, 0, 0, 0.2);
     color: #fff;
 }
+</style>
 
-@media (max-width: 720px) {
-    #container {
-        width: 90vw;
-        height: 52.7vw;
-    }
+<style>
+.page {
+    background: url(/bg.jpg);
+    background-repeat: no-repeat;
+    background-position: top;
+}
+
+html.dark .page {
+    background: none;
 }
 </style>

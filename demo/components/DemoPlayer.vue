@@ -1,10 +1,19 @@
 <template>
-    <div class="root">
+    <div class="root player-demo player-demo-oss" :class="{ 'is-advanced-open': showAdvanced }">
         <div class="container-shell">
-            <div class="container-shell-title">jessibuca demo player <span class="tag-version" v-if="version">({{
-                    version
-                }})</span></div>
-            <div id="container" ref="container"></div>
+            <div class="player-head">
+                <div class="container-shell-title">jessibuca demo player <span class="tag-version" v-if="version">({{
+                        version
+                    }})</span></div>
+            </div>
+            <div id="container" class="player-stage" ref="container"></div>
+            <button
+                type="button"
+                class="player-advanced-toggle"
+                :aria-expanded="showAdvanced ? 'true' : 'false'"
+                @click="toggleAdvanced"
+            >提示与配置</button>
+            <div class="player-advanced">
             <div class="input">
                 <span>缓冲(秒):</span>
                 <input
@@ -14,64 +23,76 @@
                     value="0.2"
                     @change="changeBuffer"
                 />
-                <input
-                    type="checkbox"
-                    v-model="isDebug"
-                    ref="isDebug"
-                    @change="restartPlay"
-                /><span>开启日志</span>
-
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="isDebug"
+                        ref="isDebug"
+                        @change="restartPlay"
+                    /><span>开启日志</span>
+                </label>
             </div>
 
             <div class="input">
                 <div>
-                    <input
-                        type="checkbox"
-                        v-model="isFlv"
-                        @change="restartPlay()"
-                    /><span>设置Flv格式</span>
-                    <input
-                        type="checkbox"
-                        v-model="controlAutoHide"
-                        @change="restartPlay()"
-                    /><span>控制栏自动隐藏(移动端不支持)</span>
+                    <label>
+                        <input
+                            type="checkbox"
+                            v-model="isFlv"
+                            @change="restartPlay()"
+                        /><span>设置Flv格式</span>
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            v-model="controlAutoHide"
+                            @change="restartPlay()"
+                        /><span>控制栏自动隐藏(移动端不支持)</span>
+                    </label>
                 </div>
 
             </div>
             <div class="input">
                 <span>解码器：</span>
-                <input
-                    type="checkbox"
-                    v-model="useMSE"
-                    ref="vod"
-                    @change="restartPlay('mse')"
-                /><span>MediaSource</span>
-                <input
-                    type="checkbox"
-                    v-model="useWCS"
-                    ref="vod"
-                    @change="restartPlay('wcs')"
-                /><span>webcodecs</span>
-                <input
-                    type="checkbox"
-                    v-model="useWasm"
-                    ref="vod"
-                    @change="restartPlay('wasm')"
-                /><span>wasm</span>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="useMSE"
+                        ref="vod"
+                        @change="restartPlay('mse')"
+                    /><span>MediaSource</span>
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="useWCS"
+                        ref="vod"
+                        @change="restartPlay('wcs')"
+                    /><span>webcodecs</span>
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        v-model="useWasm"
+                        ref="vod"
+                        @change="restartPlay('wasm')"
+                    /><span>wasm</span>
+                </label>
             </div>
             <div class="input">
                 <button @click="toggleControlBar">toggle控制条</button>
             </div>
-            <div class="input">
+            </div>
+            <div class="input player-url">
                 <div>输入URL：</div>
                 <input
-                    placeholder="支持ws-raw/ws-flv/http-flv协议"
+                    placeholder="支持 ws-raw（M7S 私有格式）/ ws-flv / http-flv"
                     type="input"
                     autocomplete="on"
                     ref="playUrl"
                     value=""
                 />
-                <button v-if="!playing" @click="play">播放</button>
+                <button v-if="!playing" class="btn-primary" @click="play">播放</button>
                 <button v-else @click="pause">停止</button>
             </div>
             <div class="input" v-if="loaded" style="line-height: 30px">
@@ -97,28 +118,34 @@
                 <button @click="fullscreen">全屏</button>
                 <button @click="screenShot">截图</button>
                 <div style="line-height: 30px">
-                    <input
-                        type="checkbox"
-                        ref="operateBtns"
-                        v-model="showOperateBtns"
-                        @change="restartPlay"
-                    /><span>操作按钮</span>
-                    <input
-                        type="checkbox"
-                        ref="operateBtns"
-                        v-model="showBandwidth"
-                        @change="restartPlay"
-                    /><span>网速</span>
+                    <label>
+                        <input
+                            type="checkbox"
+                            ref="operateBtns"
+                            v-model="showOperateBtns"
+                            @change="restartPlay"
+                        /><span>操作按钮</span>
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            ref="operateBtns"
+                            v-model="showBandwidth"
+                            @change="restartPlay"
+                        /><span>网速</span>
+                    </label>
                     <span v-if="fps" style="margin-left: 10px">FPS：{{ fps }}</span>
                 </div>
             </div>
             <div class="input" v-if="loaded">
-                <input
-                    type="checkbox"
-                    ref="offscreen"
-                    v-model="useOffscreen"
-                    @change="restartPlay('offscreen')"
-                /><span>离屏渲染</span>
+                <label>
+                    <input
+                        type="checkbox"
+                        ref="offscreen"
+                        v-model="useOffscreen"
+                        @change="restartPlay('offscreen')"
+                    /><span>离屏渲染</span>
+                </label>
 
                 <select v-model="scale" @change="scaleChange">
                     <option value="0">完全填充(拉伸)</option>
@@ -142,6 +169,7 @@
 <script>
 import {VERSION} from "./version";
 import {ElNotification, ElMessage} from 'element-plus'
+import './player-shell.css'
 
 function isMobile() {
     return (/iphone|ipad|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));
@@ -149,6 +177,10 @@ function isMobile() {
 
 function isPad() {
     return (/ipad|android(?!.*mobile)|tablet|kindle|silk/i.test(window.navigator.userAgent.toLowerCase()));
+}
+
+function defaultShowAdvanced() {
+    return !(isMobile() || isPad() || window.matchMedia('(max-width: 720px)').matches);
 }
 
 function checkUrlIsValid(url) {
@@ -223,15 +255,20 @@ export default {
             vConsole: null,
             controlAutoHide: true,
             isFlv: false,
+            showAdvanced: defaultShowAdvanced(),
         };
     },
     mounted() {
+        this.syncAdvancedDom();
         if ((isMobile() || isPad()) && window.VConsole) {
             this.vConsole = new window.VConsole();
         }
         this.version = VERSION === '#VERSION#' ? '' : VERSION;
         this.create();
         window.onerror = (msg) => (this.err = msg);
+    },
+    updated() {
+        this.syncAdvancedDom();
     },
     async unmounted() {
         if (this.$options && this.$options.jessibuca) {
@@ -240,6 +277,19 @@ export default {
         this.vConsole && this.vConsole.destroy();
     },
     methods: {
+        syncAdvancedDom() {
+            const root = this.$el;
+            if (!root || !root.classList) return;
+            root.classList.toggle('is-advanced-open', this.showAdvanced);
+            const btn = root.querySelector('.player-advanced-toggle');
+            if (btn) {
+                btn.setAttribute('aria-expanded', this.showAdvanced ? 'true' : 'false');
+            }
+        },
+        toggleAdvanced() {
+            this.showAdvanced = !this.showAdvanced;
+            this.syncAdvancedDom();
+        },
         create(options) {
             options = options || {};
             const jessibuca = new window.Jessibuca(
@@ -505,85 +555,10 @@ html.dark .page {
 }
 </style>
 <style scoped>
-.root {
-    display: flex;
-    place-content: center;
-    margin-top: 3rem;
-}
-
-.container-shell {
-    position: relative;
-    backdrop-filter: blur(5px);
-    background: hsla(0, 0%, 50%, 0.5);
-    padding: 30px 4px 10px 4px;
-    /* border: 2px solid black; */
-    width: auto;
-    position: relative;
-    border-radius: 5px;
-    box-shadow: 0 10px 20px;
-}
-
-.container-shell-title {
-    position: absolute;
-    color: darkgray;
-    top: 4px;
-    left: 10px;
-    text-shadow: 1px 1px black;
-}
-
-.tag-version {
-}
-
-#container {
-    background: rgba(13, 14, 27, 0.7);
-    width: 640px;
-    height: 398px;
-}
-
-.input {
-    display: flex;
-    align-items: center;
-    margin-top: 10px;
-    color: white;
-    place-content: stretch;
-    justify-content: start;
-
-}
-
-.input2 {
-    bottom: 0px;
-}
-
-.input input[type='input'] {
-    flex: auto;
-}
-
 .err {
     position: absolute;
     top: 40px;
     left: 10px;
     color: red;
-}
-
-.option {
-    position: absolute;
-    top: 4px;
-    right: 10px;
-    display: flex;
-    place-content: center;
-    align-items: center;
-    font-size: 12px;
-}
-
-.option span {
-    color: white;
-}
-
-
-@media (max-width: 720px) {
-    #container {
-        width: 90vw;
-        height: 52.7vw;
-    }
 }
 </style>

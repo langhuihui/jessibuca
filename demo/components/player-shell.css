@@ -1,0 +1,302 @@
+.player-demo {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 1.25rem auto 2rem;
+    padding: 0 16px;
+    box-sizing: border-box;
+}
+
+.player-demo .container-shell {
+    position: relative;
+    width: min(100%, 680px);
+    padding: 16px 16px 14px;
+    border: 1px solid hsla(0, 0%, 100%, 0.18);
+    border-radius: 16px;
+    background: hsla(0, 0%, 50%, 0.5);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(5px);
+}
+
+.player-demo-pro .container-shell {
+    width: min(100%, 940px);
+}
+
+.player-demo .player-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.player-demo .container-shell-title {
+    position: static;
+    color: #e5e7eb;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-shadow: 1px 1px rgba(0, 0, 0, 0.7);
+}
+
+.player-demo .tag-version {
+    color: var(--vp-c-brand-1);
+    font-weight: 700;
+}
+
+.player-demo #container,
+.player-demo .player-stage {
+    display: block;
+    width: 640px;
+    height: 398px;
+    max-width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 12px;
+    background: rgba(13, 14, 27, 0.7);
+}
+
+.player-demo-pro #container,
+.player-demo-pro .player-stage {
+    width: 900px;
+    height: 568px;
+    max-width: 100%;
+}
+
+.player-demo .input {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin-top: 0;
+    padding: 10px 2px;
+    border-bottom: 1px solid var(--vp-c-divider);
+    color: #fff;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.player-demo .input:last-child {
+    border-bottom: none;
+    padding-bottom: 2px;
+}
+
+.player-demo .input > div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    min-width: 0;
+}
+
+.player-demo .input-wrap {
+    justify-content: space-between;
+}
+
+.player-demo .input input[type='input'],
+.player-demo .input input[type='text'],
+.player-demo .input input[type='number'],
+.player-demo .input select {
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--vp-c-divider);
+    border-radius: 8px;
+    background: var(--vp-c-bg);
+    color: var(--vp-c-text-1);
+    font-size: 13px;
+}
+
+.player-demo .input input[type='input'],
+.player-demo .input input[type='text'] {
+    flex: 1 1 220px;
+    min-width: 0;
+}
+
+.player-demo .input input[type='number'] {
+    width: 72px;
+}
+
+.player-demo .input label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+}
+
+.player-demo .input input[type='checkbox'] {
+    width: 14px;
+    height: 14px;
+    margin: 0 2px 0 0;
+    accent-color: var(--vp-c-brand-1);
+}
+
+.player-demo .input button {
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--vp-c-divider);
+    border-radius: 8px;
+    background: var(--vp-c-bg-soft);
+    color: var(--vp-c-text-1);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.player-demo .input button:hover {
+    border-color: var(--vp-c-brand-1);
+    color: var(--vp-c-brand-1);
+}
+
+.player-demo .btn-primary {
+    border-color: transparent !important;
+    background: var(--vp-button-brand-bg, var(--vp-c-brand-1)) !important;
+    color: #fff !important;
+}
+
+.player-demo .btn-primary:hover {
+    background: var(--vp-button-brand-hover-bg, var(--vp-c-brand-3)) !important;
+    color: #fff !important;
+}
+
+.player-demo .input a {
+    color: var(--vp-c-brand-1);
+    font-weight: 600;
+}
+
+.player-demo .input-annnie {
+    height: auto;
+    overflow: visible;
+}
+
+.player-demo .input-tips {
+    position: static;
+    width: auto;
+    text-align: left;
+    animation: none;
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.player-demo .player-url {
+    align-items: stretch;
+}
+
+.player-demo .player-advanced-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 36px;
+    margin: 8px 0 4px;
+    padding: 0 12px;
+    border: 1px dashed hsla(0, 0%, 100%, 0.28);
+    border-radius: 8px;
+    background: hsla(0, 0%, 100%, 0.08);
+    color: #f8fafc;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+}
+
+.player-demo .player-advanced-toggle::before {
+    content: '展开';
+    margin-right: 6px;
+}
+
+.player-demo.is-advanced-open .player-advanced-toggle::before {
+    content: '收起';
+}
+
+.player-demo .player-advanced-toggle:hover {
+    border-color: hsla(0, 0%, 100%, 0.5);
+    background: hsla(0, 0%, 100%, 0.14);
+}
+
+.player-demo .player-advanced {
+    display: none;
+    width: 100%;
+}
+
+.player-demo.is-advanced-open .player-advanced {
+    display: block;
+}
+
+.dark .player-demo .container-shell {
+    background: hsla(0, 0%, 18%, 0.55);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+}
+
+@media (max-width: 720px) {
+    .player-demo {
+        padding: 0;
+        margin-top: 0.5rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .player-demo .container-shell {
+        width: 100%;
+        padding: 12px 10px 10px;
+        border-radius: 12px;
+    }
+
+    .player-demo #container,
+    .player-demo .player-stage {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 640 / 398;
+    }
+
+    .player-demo-pro #container,
+    .player-demo-pro .player-stage {
+        aspect-ratio: 900 / 568;
+    }
+
+    .player-demo .input {
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .player-demo .player-url {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .player-demo .player-url input[type='input'],
+    .player-demo .player-url input[type='text'] {
+        flex: none;
+        width: 100%;
+    }
+
+    .player-demo .input input[type='input'],
+    .player-demo .input input[type='text'],
+    .player-demo .input input[type='number'],
+    .player-demo .input select,
+    .player-demo .input button {
+        font-size: 16px;
+        min-height: 36px;
+        height: auto;
+    }
+
+    .player-demo .input select {
+        max-width: 100%;
+    }
+
+    .player-demo .input label {
+        min-height: 32px;
+        max-width: 100%;
+        gap: 6px;
+    }
+
+    .player-demo .input input[type='checkbox'] {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+    }
+
+    .player-demo .player-advanced-toggle {
+        min-height: 40px;
+        height: auto;
+        font-size: 16px;
+    }
+}
