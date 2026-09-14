@@ -1,18 +1,5 @@
 # Document (常见问题)
 
--
--
--
--
--
--
--
--
--
--
--
--
--
 <Rice/>
 
 > 本文档汇总了 Jessibuca 使用过程中的常见问题（FAQ），并按主题分类整理。可通过下方目录快速跳转到对应分类与问题。
@@ -304,7 +291,7 @@ jessibuca.destroy().then(()=>{
 
 如图
 
-<img src="/public/img/time.png">
+<img src="/img/time.png">
 
 > 想要获取到画面中的时间点。
 
@@ -572,7 +559,7 @@ enabled" 请将当前页面使用https访问
 
 ### 对于hevc(265)支持情况
 
-<img src="/public/hevc-support.png">
+<img src="/hevc-support.png">
 
 [caniuse详情](https://caniuse.com/?search=hevc)
 
@@ -678,22 +665,22 @@ AV1硬解目前仅限于AMD RX 6000系（除6500XT）、Nvidia 30系、Intel Arc
 
 
 
-<img src="/public/img/hevc-download.png">
+<img src="/img/hevc-download.png">
 
 打开Microsoft Store网页版地址。然后把地址复制出来
 
-<img src="/public/img/microsoft-store.png">
+<img src="/img/microsoft-store.png">
 
 打开这个地址：
 > https://store.rg-adguard.net/
 
 然后把“Microsoft Store网页版地址” 复制进去，然后搜索，进行下载就行了。
 
-<img src="/public/img/hevc-download-2.png">
+<img src="/img/hevc-download-2.png">
 
 可下载的资源
 
-<img src="/public/img/hevc-download-3.png">
+<img src="/img/hevc-download-3.png">
 
 
 2. 也可以直接在网上免费下载，两者都是一样的。
@@ -898,7 +885,7 @@ MIMEType: application/wasm
 - 检查浏览器版本是否过旧，尝试更新下浏览器版本。
 - 修复下wasm文件的MIME类型，设置为application/wasm
 
-<img src="/public/wasm.png">
+<img src="/wasm.png">
 
 
 类似
@@ -967,7 +954,7 @@ https://www.mianshigee.com/note/detail/72131ooi/
 
 使用maven进行资源过滤的时候，只要过滤需要过滤的文件，一些二进制文件，比如https证书等，就不要参与资源过滤，否则打包后会破坏文件内容。
 
-<img src="/public/img/maven-wasm.png">
+<img src="/img/maven-wasm.png">
 
 ### 优化加载速度
 
@@ -1009,14 +996,14 @@ windows 系统压缩方法
 
 解压后，将 `jessibuca.js` 和 `decoder.js`和 `decoder.wasm` 文件拖到 gzip.exe上，文件就压缩好了，也需要去掉.gz后缀
 
-<img src="/public/img/gzip.png">
+<img src="/img/gzip.png">
 
 ### Brotli压缩jessibuca.js 和decoder.js 和decoder.wasm 文件
 
 可以看下解决方案
 [https://www.cnblogs.com/densen2014/p/16120778.html](https://www.cnblogs.com/densen2014/p/16120778.html)
 
-<img src="/public/img/br.png">
+<img src="/img/br.png">
 
 ### 关于WASM压缩优化
 
@@ -1047,7 +1034,7 @@ windows 系统压缩方法
 格式的。（因为配置的路径不对，会存在vue 或者react 项目 直接被返回了index.html 内容了）
 
 这是错误的返回（直接被返回了index.html 内容了）
-<img src="/public/img/response-error.png">
+<img src="/img/response-error.png">
 
 3.查看`decoder`参数是否配置的正确，见[decoder参数配置](http://jessibuca.monibuca.com/api.html#decoder)
 ，如果配置错误，会被web服务器以找不到文件，然后返回index.html的内容。
@@ -1056,7 +1043,7 @@ windows 系统压缩方法
 
 最后检查返回的内容，正确的应该是
 
-<img src="/public/img/response-success.png">
+<img src="/img/response-success.png">
 
 
 #### react 解决方案
@@ -1250,7 +1237,7 @@ app.whenReady().then(() => {
 #### 推流配置
 obs的推流配置
 
-<img src="/public/img/obs-setting.png">
+<img src="/img/obs-setting.png">
 
 #### 预览
 
@@ -1265,13 +1252,13 @@ obs的推流配置
 自查：
 1. 检查下network下面加载的`decoder解码器`资源是否有正确返回js内容
 
-<img src="/public/img/decoder/1.png">
+<img src="/img/decoder/1.png">
 
 由图可以发现，js返回的内容是不对的，返回的格式也不对，返回成了html 内容了，不是js 内容
 
 2. 查看下`jessibuca-pro-demo.js`的网络地址是啥。
 
-<img src="/public/img/decoder/2.jpg">
+<img src="/img/decoder/2.jpg">
 
 可以知道了，`jessibuca-pro-demo.js`的网络地址。
 
@@ -1621,11 +1608,11 @@ delayTimeout 是指在`播放器播放过程中`，如果在`delayTimeout`时间
 #### 现象
 正常播放的GPU资源损耗
 
-<img src="/public/img/gpu-normal.png">
+<img src="/img/gpu-normal.png">
 
 异常的GPU资源损耗
 
-<img src="/public/img/gpu-abnormal.png">
+<img src="/img/gpu-abnormal.png">
 
 
 可能的原因
@@ -2055,7 +2042,7 @@ iframe默认不允许全屏, 如果内嵌了video那么控制条上将不显示�
 
 IOS 全屏效果
 
-<img src="/public/ios-fullscreen.png">
+<img src="/ios-fullscreen.png">
 
 
 > IOS是不存在全屏API的，调用全屏会进入系统播放模式
@@ -2315,9 +2302,9 @@ https://blog.csdn.net/DYxiao666/article/details/136072932
 
 如图：
 
-<img src="/public/img/huaping-1.png">
+<img src="/img/huaping-1.png">
 
-<img src="/public/img/huaping-2.png">
+<img src="/img/huaping-2.png">
 
 可能得原因：
 
@@ -2591,7 +2578,7 @@ https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
 
 通过chrome 浏览器设置 `隐私和安全` -> `允许显示不安全内容` 配置让浏览器端认可这个内网https证书。
 
-<img src="/public/img/https-setting.png">
+<img src="/img/https-setting.png">
 
 ### 测试的时候遇到请求的连接（播放地址）跨域报错
 
@@ -2622,13 +2609,13 @@ https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
 比如在`https://jessibuca.com` 访问 `http://192.168.xxx.xxx/test.flv`
 地址，会报`the request client is not a secure context and the resource is in more-private address space 'private'` 错误
 
-<img src="/public/img/play-192-error.png">
+<img src="/img/play-192-error.png">
 
 #### 方法1：修改flags 参数
 
 打开  `chrome://flags/` 搜索 `Block insecure private network requests`，将其设置为 `Disabled`，然后重启浏览器。
 
-<img src="/public/img/block-insecure-setting.png">
+<img src="/img/block-insecure-setting.png">
 
 #### 方法2：使用扩展程序
 
@@ -2672,7 +2659,7 @@ https://support.google.com/chrome/a/answer/7679408?hl=eN
 
 看下network tab 下面的状态码，
 
-<img src="/public/img/network-error2.png">
+<img src="/img/network-error2.png">
 
 如果是 `ERR_CERT_DATE_INVALID`、`ERR_CERT_COMMON_NAME_INVALID` 状态码，则表示网站的 SSL/TLS 证书 时间无效或者不匹配。
 
@@ -2724,7 +2711,7 @@ ERR_CERT_COMMON_NAME_INVALID 可能得原因:
 
 ### Android端webView灰色按钮（默认的播放按钮）问题
 
-<img src="/public/img/android-webview-play-icon.png">
+<img src="/img/android-webview-play-icon.png">
 
 > android端自动起播在首帧出来之前会有一个灰色的播放按钮闪现，不同的手机或者android版本会略有不同，这个是webview中video内置的poster导致，前端无法隐藏
 
@@ -2973,13 +2960,13 @@ pro
 
 这种url地址，在浏览器的地址栏中输入，会直接下载这个文件，而不是播放这个文件。
 
-<img src="/public/img/mp4-1.png">
+<img src="/img/mp4-1.png">
 
 #### 解决方案
 
 修改流媒体服务器端的配置，将点播文件的返回格式修改为 `video/mp4` 。这样浏览器就会直接播放这个文件，而不是下载这个文件。
 
-<img src="/public/img/mp4-2.png">
+<img src="/img/mp4-2.png">
 
 ## 常见报错与崩溃排查
 
@@ -3130,7 +3117,7 @@ WebGL是一种在Web浏览器中渲染3D图形的技术，需要高帧率和持�
 
 ### video 标签报 PIPELINE_ERROR_DECODE 错误
 
-<img src="/public/img/pipline-error-decode.png">
+<img src="/img/pipline-error-decode.png">
 
 PIPELINE_ERROR_DECODE 是指视频解码器在解码视频流时发生了错误，这可能是由多种原因导致的，包括但不限于：
 
@@ -3595,7 +3582,7 @@ const jessibuca = new JessibucaPro({
 
 #### 日志下载
 
-<img src="/public/img/save-log.png">
+<img src="/img/save-log.png">
 
 ### 关于播放器地址不带协议后缀的判断逻辑
 
@@ -3634,7 +3621,7 @@ Pro版本支持所有的格式，如果播放的地址(ws(s)协议)不带后缀�
 F12 打开控制台 -> 切换到 `Network` 选项卡 -> 勾选`Disable cache` -> 刷新页面
 
 
-<img src="/public/img/disable-cache.jpg">
+<img src="/img/disable-cache.jpg">
 
 ### 关于国标 GBT28181 PTZ 指令操作摄像头
 
@@ -3659,7 +3646,7 @@ F12 打开控制台 -> 切换到 `Network` 选项卡 -> 勾选`Disable cache` ->
 
 在F12打开控制台 -> 切换到 Network 选项卡 -> 勾选 Disable cache 选项。
 
-<img src="/public/img/disable-cache.png">
+<img src="/img/disable-cache.png">
 
 然后刷新页面即可。
 
@@ -3667,23 +3654,23 @@ F12 打开控制台 -> 切换到 `Network` 选项卡 -> 勾选`Disable cache` ->
 
 在浏览器的设置里面，找到隐私和安全 -> 清除浏览数据
 
-<img src="/public/img/disable-cache2.png">
+<img src="/img/disable-cache2.png">
 
 ## 支持作者
 
 ### 第一作者
 
-<img src="/public/wx.jpg"><img src="/public/alipay.jpg">
+<img src="/wx.jpg"><img src="/alipay.jpg">
 
 ### V3版本作者
 
-<img src="/public/wx-pay-wc.jpg" style="width:333px"><img src="/public/alipay-wc.jpg" style="width:333px">
+<img src="/wx-pay-wc.jpg" style="width:333px"><img src="/alipay-wc.jpg" style="width:333px">
 
 ### 群
 
-<img src="/public/qrcode.jpeg">
+<img src="/qrcode.jpeg">
 
 
 ## qq频道
 
-<img src="/public/qq-qrcode.jpg">
+<img src="/qq-qrcode.jpg">

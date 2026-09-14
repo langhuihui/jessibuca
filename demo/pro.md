@@ -1,17 +1,6 @@
 # 简介
 
 jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方案的。解决了一些痛点，比如H265的硬解码，SIMD软解码加速。
--
-
--
--
--
--
--
--
--
--
-
 <Rice/>
 ## 开源版与PRO 差异性
 
@@ -306,7 +295,7 @@ jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方
 
 查看是否有：
 
-<img src="/public/img/h265.png">
+<img src="/img/h265.png">
 
 
 H265硬解码，对于电脑硬件支持情况：
@@ -550,7 +539,7 @@ GA/T 1078 TF卡（录像流）流播放 [介绍](https://jessibuca.com/pro-playb
 
 ### 对于hevc(265)支持情况
 
-<img src="/public/hevc-support.png">
+<img src="/hevc-support.png">
 
 [caniuse详情](https://caniuse.com/?search=hevc)
 
@@ -569,17 +558,17 @@ GA/T 1078 TF卡（录像流）流播放 [介绍](https://jessibuca.com/pro-playb
 > 可以在浏览器地址栏上面输入：`chrome://gpu/` 或者 `edge://gpu/` 就可以查看显卡支持情况了
 
 
-<img src="/public/img/gpu-support.jpg">
+<img src="/img/gpu-support.jpg">
 
 ### 对于Webassembly支持情况
 
-<img src="/public/webassembly-support.png">
+<img src="/webassembly-support.png">
 
 [caniuse详情](https://caniuse.com/?search=webassembly)
 
 ### 对于webassembly SIMD 支持情况
 
-<img src="/public/webassembly-simd.png">
+<img src="/webassembly-simd.png">
 
 [caniuse详情](https://caniuse.com/?search=webassembly)
 
@@ -701,7 +690,7 @@ GA/T 1078 TF卡（录像流）流播放 [介绍](https://jessibuca.com/pro-playb
 
 > windows 7 与 windows 10也是存在差异性的。windows 7的性能会比windows 10/11差一些。
 
-<img src="/public/configuration.png">
+<img src="/configuration.png">
 
 
 > 2k,4k的视频，需要更高的配置才能够流畅播放。一般默认情况下，只能支持一路2k或者4k的视频。
@@ -713,17 +702,17 @@ GA/T 1078 TF卡（录像流）流播放 [介绍](https://jessibuca.com/pro-playb
 > 多线程依赖https，并且需要额外开启支持才行 见：[开启多线程解码](/pro-doc.html#localhost)
 
 
-<img src="/public/configuration-2.png">
+<img src="/configuration-2.png">
 
 ### 国产操作系统
 
 > 国产操作系统是指：麒麟、龙芯、飞腾、兆芯等。
 
-<img src="/public/configuration-3.png">
+<img src="/configuration-3.png">
 
 ### 小结
 
-<img src="/public/configuration-4.png">
+<img src="/configuration-4.png">
 
 > 例如：6路 1080p的视频，所需的内存为：6 * 300 = 1800M，1800/1024 = 1.75G
 
@@ -1001,7 +990,7 @@ GA/T 1078 TF卡（录像流）流播放 [介绍](https://jessibuca.com/pro-playb
 
 ### 对于H265硬解码显卡的支持情况：
 
-<img src="/public/hevc-1.png">
+<img src="/hevc-1.png">
 
 如果出现chrome（版本大于104）但是暂未开启硬解码的情况，可以参考下面的链接开启硬解码。
 [chrome 开启HEVC硬件解码](https://blog.csdn.net/water1209/article/details/126959579)
@@ -1159,17 +1148,17 @@ jtt协议包的封装格式，可以参考：[jtt协议包](https://jessibuca.co
 
 ### 第一作者
 
-<img src="/public/wx.jpg"><img src="/public/alipay.jpg">
+<img src="/wx.jpg"><img src="/alipay.jpg">
 
 ### V3版本作者
 
-<img src="/public/wx-pay-wc.jpg" style="width:333px"><img src="/public/alipay-wc.jpg" style="width:333px">
+<img src="/wx-pay-wc.jpg" style="width:333px"><img src="/alipay-wc.jpg" style="width:333px">
 
 # 群
 
-<img src="/public/qrcode.jpeg">
+<img src="/qrcode.jpeg">
 
 ## qq频道
 
-<img src="/public/qq-qrcode.jpg">
+<img src="/qq-qrcode.jpg">
 

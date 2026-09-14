@@ -1,8 +1,12 @@
 ---
 sidebar: false
+aside: false
+outline: false
 ---
 
-<DemoPlayer/>
+<ClientOnly>
+  <DemoPlayer/>
+</ClientOnly>
 
 - 支持3种格式：
 1. ws-raw 即ws://localhost/live/test (该协议只能对接[monibuca服务器](https://monibuca.com))
@@ -23,13 +27,13 @@ sidebar: false
 ## 支持作者
 
 ### 第一作者
-<img src="/public/wx.jpg"><img src="/public/alipay.jpg">
+<img src="/wx.jpg"><img src="/alipay.jpg">
 
 ### V3版本作者
-<img src="/public/wx-pay-wc.jpg" style="width:333px"><img src="/public/alipay-wc.jpg" style="width:333px">
+<img src="/wx-pay-wc.jpg" style="width:333px"><img src="/alipay-wc.jpg" style="width:333px">
 
 ## 群
-<img src="/public/qrcode.jpeg">
+<img src="/qrcode.jpeg">
 
 ## qq频道
-<img src="/public/qq-qrcode.jpg">
+<img src="/qq-qrcode.jpg">

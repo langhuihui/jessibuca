@@ -1,15 +1,5 @@
 
 # 哈哈
--
--
--
--
--
--
--
--
--
--
 <Rice/>
 
 
@@ -20,10 +10,10 @@
 
 然后通过配置选择
 
-<img src="/public/img/g711-config-1.png">
+<img src="/img/g711-config-1.png">
 
 
-<img src="/public/img/g711-config-2.png">
+<img src="/img/g711-config-2.png">
 
 > g711a/u 是标准的8k采样率的
 

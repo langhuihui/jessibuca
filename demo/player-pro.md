@@ -1,8 +1,12 @@
 ---
 sidebar: false
+aside: false
+outline: false
 ---
 
-<ProDemoPlayer/>
+<ClientOnly>
+  <ProDemoPlayer/>
+</ClientOnly>
 
 > 注意：pro 试用开发包(1小时断开, 刷新页面继续测试)
 >
@@ -84,9 +88,9 @@ sidebar: false
 - 支持支持加密文件(国标SM4、XOR加密、m7s加密)
 
 # 群
-<img src="/public/qrcode.jpeg">
+<img src="/qrcode.jpeg">
 
 
 ## qq频道
-<img src="/public/qq-qrcode.jpg">
+<img src="/qq-qrcode.jpg">
 

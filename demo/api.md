@@ -1,16 +1,6 @@
 
 # API
 jessibuca API 文档
--
--
--
--
--
--
--
--
--
--
 <Rice/>
 
 ## TIPS
@@ -1163,13 +1153,13 @@ jessibuca.on("playToRenderTimes", function (times) {
 ## 支持作者
 
 ### 第一作者
-<img src="/public/wx.jpg"><img src="/public/alipay.jpg">
+<img src="/wx.jpg"><img src="/alipay.jpg">
 
 ### V3版本作者
-<img src="/public/wx-pay-wc.jpg" style="width:333px"><img src="/public/alipay-wc.jpg" style="width:333px">
+<img src="/wx-pay-wc.jpg" style="width:333px"><img src="/alipay-wc.jpg" style="width:333px">
 
 
 ## 群
 
-<img src="/public/qrcode.jpeg">
+<img src="/qrcode.jpeg">
 

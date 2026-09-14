@@ -1,0 +1,171 @@
+/* Player pages keep the original splash background; doc pages stay clean. */
+.VPDoc:has(._player),
+.VPDoc:has(._player-pro) {
+    background: url(/bg.jpg) no-repeat top;
+}
+
+:root {
+    --vp-c-brand-1: #6d28d9;
+    --vp-c-brand-2: #7c3aed;
+    --vp-c-brand-3: #5b21b6;
+    --vp-c-brand-soft: rgba(109, 40, 217, 0.12);
+    --vp-home-hero-name-color: transparent;
+    --vp-home-hero-name-background: linear-gradient(120deg, #2563eb 0%, #7c3aed 48%, #db2777 100%);
+    --vp-home-hero-image-background-image: linear-gradient(160deg, #93c5fd 18%, #c4b5fd 52%, #f9a8d4 100%);
+    --vp-home-hero-image-filter: blur(44px);
+    --vp-button-brand-bg: #6d28d9;
+    --vp-button-brand-hover-bg: #5b21b6;
+    --vp-button-brand-active-bg: #4c1d95;
+}
+
+.VPHome {
+    background:
+        radial-gradient(1200px 520px at 12% -10%, rgba(147, 197, 253, 0.28), transparent 58%),
+        radial-gradient(900px 480px at 92% 8%, rgba(196, 181, 253, 0.34), transparent 62%),
+        radial-gradient(700px 360px at 70% 100%, rgba(249, 168, 212, 0.16), transparent 70%);
+}
+
+.VPHomeHero {
+    overflow: hidden;
+    padding-top: 28px;
+}
+
+.VPHomeHero .name,
+.VPHomeHero .text {
+    max-width: 100%;
+}
+
+.VPHomeHero .text {
+    word-break: keep-all;
+    text-wrap: balance;
+}
+
+.VPHomeHero .tagline {
+    max-width: 36em;
+    word-break: keep-all;
+    text-wrap: balance;
+}
+
+.VPHomeHero.has-image .actions {
+    justify-content: flex-start;
+}
+
+.VPHomeHero .image-bg {
+    opacity: 0.78;
+}
+
+.VPHomeHero .image-src {
+    max-width: 220px;
+    filter: drop-shadow(0 18px 40px rgba(91, 33, 182, 0.2));
+}
+
+.VPHomeFeatures .VPFeature {
+    border-radius: 16px;
+    border-color: rgba(109, 40, 217, 0.08);
+    background: rgba(255, 255, 255, 0.82);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.VPHomeFeatures .VPFeature:hover {
+    transform: translateY(-4px);
+    border-color: var(--vp-c-brand-1);
+    box-shadow: 0 16px 36px rgba(91, 33, 182, 0.1);
+}
+
+.VPHomeFeatures .VPFeature .icon {
+    background: #f5f3ff;
+    color: var(--vp-c-brand-1);
+}
+
+.VPHome .vp-doc.container {
+    display: none;
+}
+
+@media (min-width: 960px) {
+    .VPHomeHero.has-image .main {
+        max-width: 640px;
+    }
+
+    .VPHomeHero .name,
+    .VPHomeHero .text {
+        font-size: 48px;
+        line-height: 1.2;
+    }
+
+    .VPHomeHero .image-src {
+        max-width: 260px;
+        max-height: 260px;
+    }
+}
+
+.VPDoc .aside-container {
+    background-color: var(--vp-c-bg);
+}
+
+.VPDoc .left-aside .VPDocAsideOutline .content {
+    border-left: none;
+    border-right: 1px solid var(--vp-c-divider);
+    padding-left: 0;
+    padding-right: 16px;
+}
+
+.VPDoc .left-aside .outline-marker {
+    left: auto;
+    right: -1px;
+}
+
+.VPDocAsideOutline .outline-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--vp-c-text-1);
+    letter-spacing: 0.04em;
+}
+
+.VPDocAsideOutline .outline-link {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    line-height: 1.5;
+    padding: 5px 0;
+}
+
+.VPDocAsideOutline .root > li > .outline-link {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--vp-c-text-1);
+}
+
+.VPDocAsideOutline .root > li > .nested > li > .outline-link {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--vp-c-text-2);
+}
+
+.VPDocAsideOutline .root > li > .nested > li > .nested > li > .outline-link {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--vp-c-text-3);
+}
+
+.VPDocAsideOutline .root > li > .nested > li > .nested > li > .nested .outline-link {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--vp-c-text-3);
+    opacity: 0.8;
+}
+
+.VPDocAsideOutline .outline-link:hover,
+.VPDocAsideOutline .outline-link.active {
+    color: var(--vp-c-brand-1);
+    opacity: 1;
+}
+
+@media (min-width: 1280px) {
+    .VPDoc.has-aside:not(.has-sidebar) .container {
+        max-width: 1240px;
+    }
+
+    .VPDoc.has-aside:not(.has-sidebar) .content {
+        max-width: 900px;
+    }
+}

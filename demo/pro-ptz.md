@@ -1,14 +1,5 @@
 
 # Jessibuca Pro AI
--
--
--
--
--
--
--
--
--
 <Rice/>
 ## 说明
 

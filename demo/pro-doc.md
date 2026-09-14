@@ -1,15 +1,6 @@
 
 # 简介
 jessibuca pro 是在开源版本的基础上额外支持的深入业务解决方案的。解决了一些痛点，比如H265的硬解码，SIMD软解码加速。
--
--
--
--
--
--
--
--
--
 <Rice/>
 
 
@@ -191,12 +182,12 @@ console.log(typeof SharedArrayBuffer)
 
 如果输出结果为 `function`，则表示配置成功，可以使用多线程解码特性。如图：
 
-<img src="/public/img/shared-array-buffer-support.png">
+<img src="/img/shared-array-buffer-support.png">
 
 
 如果是 `undefined`，则表示配置失败，无法使用多线程解码特性。如图：
 
-<img src="/public/img/shared-array-buffer-not-support.png">
+<img src="/img/shared-array-buffer-not-support.png">
 
 ## 关于直播流，回放流，特殊回放流/点播flv，点播文件四者的差异性
 
@@ -253,7 +244,7 @@ console.log(typeof SharedArrayBuffer)
 
 ## 群
 
-<img src="/public/qrcode.jpeg">
+<img src="/qrcode.jpeg">
 
 ## qq频道
-<img src="/public/qq-qrcode.jpg">
+<img src="/qq-qrcode.jpg">

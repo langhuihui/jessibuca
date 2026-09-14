@@ -1,16 +1,6 @@
 # DEMO
 
 ## 提醒: github demo 上面的jessibuca.js、 decoder.js、decoder.wasm 可能存在版本的延迟。如有问题，请更新到最新的文件使用
--
--
--
--
--
--
--
--
--
--
 <Rice/>
 ## 最新（jessibuca.js、 decoder.js、decoder.wasm）
 [最新源码](https://jessibuca.com/dist.zip)
@@ -200,17 +190,17 @@ https://github.com/bosscheng/jessibuca-MSE-3x3-demo
 ## 支持作者
 
 ### 第一作者
-<img src="/public/wx.jpg"><img src="/public/alipay.jpg">
+<img src="/wx.jpg"><img src="/alipay.jpg">
 
 ### V3版本作者
-<img src="/public/wx-pay-wc.jpg" style="width:333px"><img src="/public/alipay-wc.jpg" style="width:333px">
+<img src="/wx-pay-wc.jpg" style="width:333px"><img src="/alipay-wc.jpg" style="width:333px">
 
 
 
 ## 群
-<img src="/public/qrcode.jpeg">
+<img src="/qrcode.jpeg">
 
 
 ## qq频道
-<img src="/public/qq-qrcode.jpg">
+<img src="/qq-qrcode.jpg">
 

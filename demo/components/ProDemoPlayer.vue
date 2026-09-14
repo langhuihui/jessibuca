@@ -1729,7 +1729,7 @@ export default {
     color: white;
 }
 
-.page {
+:global(.page) {
     background: url(/bg.jpg);
     background-repeat: no-repeat;
     background-position: top;

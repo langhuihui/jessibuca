@@ -1,14 +1,5 @@
 
 # Jessibuca Pro AI
--
--
--
--
--
--
--
--
--
 <Rice/>
 ## 说明
 ai 模块都是独立于jessibuca pro 存在的，每个模块的引用都是单独的js 和wasm。需要配合Jessibuca pro 使用
@@ -201,9 +192,9 @@ toothbrush - 牙刷
 
 ## 群
 
-<img src="/public/qrcode.jpeg">
+<img src="/qrcode.jpeg">
 
 ## qq频道
-<img src="/public/qq-qrcode.jpg">
+<img src="/qq-qrcode.jpg">
 
 

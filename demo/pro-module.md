@@ -1,14 +1,4 @@
 ## 哈哈
--
--
--
--
--
--
--
--
--
--
 <Rice/>
 ## 简介
 
@@ -102,8 +92,8 @@ jessibuca pro 扩展模块
 
 ## 群
 
-<img src="/public/qrcode.jpeg">
+<img src="/qrcode.jpeg">
 
 
 ## qq频道
-<img src="/public/qq-qrcode.jpg">
+<img src="/qq-qrcode.jpg">

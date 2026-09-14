@@ -1,15 +1,4 @@
 # 其他demo
--
--
--
--
--
--
--
--
--
--
-
 <Rice/>
 
 ## demo(离线版)
@@ -778,15 +767,15 @@ vue2(单页面):[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue2](
 ## 支持作者
 
 ### 第一作者
-<img src="/public/wx.jpg"><img src="/public/alipay.jpg">
+<img src="/wx.jpg"><img src="/alipay.jpg">
 
 ### V3版本作者
-<img src="/public/wx-pay-wc.jpg" style="width:333px"><img src="/public/alipay-wc.jpg" style="width:333px">
+<img src="/wx-pay-wc.jpg" style="width:333px"><img src="/alipay-wc.jpg" style="width:333px">
 
 
 ## 群
-<img src="/public/qrcode.jpeg">
+<img src="/qrcode.jpeg">
 
 ## qq频道
-<img src="/public/qq-qrcode.jpg">
+<img src="/qq-qrcode.jpg">
 

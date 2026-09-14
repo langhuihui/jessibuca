@@ -1,14 +1,4 @@
 ## 哈哈
--
--
--
--
--
--
--
--
--
--
 <Rice/>
 ## 简介
 
@@ -201,7 +191,7 @@
 
 ## 群
 
-<img src="/public/qrcode.jpeg">
+<img src="/qrcode.jpeg">
 
 ## qq频道
-<img src="/public/qq-qrcode.jpg">
+<img src="/qq-qrcode.jpg">

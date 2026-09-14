@@ -1,15 +1,5 @@
 
 # 哈哈
--
--
--
--
--
--
--
--
--
--
 <Rice/>
 
 
@@ -47,7 +37,7 @@
 
 错误的返回格式：
 
-<img src="/public/img/range-error.png">
+<img src="/img/range-error.png">
 
 解决方法：
 
@@ -55,7 +45,7 @@
 
 正确的返回格式：
 
-<img src="/public/img/range-success.png">
+<img src="/img/range-success.png">
 
 
 
@@ -91,10 +81,10 @@
 访问地址：https://gpac.github.io/mp4box.js/test/filereader.html
 
 正常能播的mp4文件：
-<img src="/public/img/mp4box-1.png">
+<img src="/img/mp4box-1.png">
 
 缺少关键盒子的mp4文件：
 
 > 缺少stss 盒子
 
-<img src="/public/img/mp4box-2.png">
+<img src="/img/mp4box-2.png">

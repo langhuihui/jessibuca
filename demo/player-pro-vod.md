@@ -1,22 +1,10 @@
 ---
 sidebar: false
+aside: false
+outline: false
 ---
 
 # 简介
--
--
--
--
--
--
--
--
--
--
--
--
--
--
 <Rice/>
 
 ## 支持格式
