@@ -107,9 +107,15 @@
                 <span>软解码：</span>
                 <input
                     type="checkbox"
+                    v-model="useWasm"
+                    @change="restartPlay('wasm')"
+                /><span>WASM</span>
+                <input
+                    type="checkbox"
                     v-model="useSIMD"
                     @change="restartPlay('simd')"
                 /><span>SIMD</span>
+                <span style="color: green">默认使用wasm解码器</span>
             </div>
             <div class="input">
                 <input
@@ -632,6 +638,7 @@ export default {
             useWCS: false,
             useMSE: false,
             useSIMD: true,
+            useWasm: false,
             audioDecodeUseHardware: true,
             useMT: true,
             useOffscreen: false,
@@ -1070,7 +1077,6 @@ export default {
                         // isUseLocalCalculateTime: true, //
                         useMSE: this.useMSE,
                         useWCS: this.useWCS,
-                        useWasm: this.useWasm,
                         useSIMD: this.useSIMD,
                     }).then(() => {
                         ElMessage.success('playback success');
@@ -1098,7 +1104,6 @@ export default {
 
                     this.jessibuca.playback(this.playUrl, {
                         useWCS: this.useWCS,
-                        useWasm: this.useWasm,
                         useSIMD: this.useSIMD,
                         showControl: true,
                         showRateBtn: true,
@@ -1142,7 +1147,6 @@ export default {
                     this.jessibuca.playVod(this.playUrl, {
                         useMSE: this.useMSE,
                         useWCS: this.useWCS,
-                        useWasm: this.useWasm,
                         useSIMD: this.useSIMD,
                     }).then(() => {
                         ElMessage.success('playVod success');
@@ -1176,7 +1180,6 @@ export default {
                     this.jessibuca.playVod(this.playUrl, {
                         useMSE: this.useMSE,
                         useWCS: this.useWCS,
-                        useWasm: this.useWasm,
                         useSIMD: this.useSIMD,
                         playVodMp4UseSrc: false,
                     }).then(() => {
@@ -1369,14 +1372,21 @@ export default {
                 this.useWCS = false;
                 this.useOffscreen = false;
                 this.useSIMD = false;
+                this.useWasm = false;
             } else if (type === 'wcs') {
                 this.useMSE = false
                 this.useSIMD = false;
+                this.useWasm = false;
             } else if (type === 'offscreen') {
                 this.useMSE = false
             } else if (type === 'simd') {
                 this.useMSE = false;
                 this.useWCS = false;
+                this.useWasm = false;
+            } else if (type === 'wasm') {
+                this.useMSE = false;
+                this.useWCS = false;
+                this.useSIMD = false;
             } else {
                 this.isFlv = false;
                 this.isFmp4 = false;
