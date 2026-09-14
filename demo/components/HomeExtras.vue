@@ -165,7 +165,7 @@ export default {
     padding: 18px 20px;
     border: 1px solid var(--vp-c-divider);
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.72);
+    background: var(--vp-c-bg-elv);
     box-shadow: 0 10px 30px rgba(91, 33, 182, 0.04);
 }
 
@@ -285,7 +285,7 @@ export default {
     padding: 22px 24px 18px;
     border: 1px solid var(--vp-c-divider);
     border-radius: 16px;
-    background: #fff;
+    background: var(--vp-c-bg-elv);
 }
 
 .home-compare-card-pro {
@@ -343,7 +343,7 @@ export default {
     padding: 22px 22px 20px;
     border: 1px solid rgba(234, 88, 12, 0.16);
     border-radius: 16px;
-    background: #fff;
+    background: var(--vp-c-bg-elv);
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
@@ -403,7 +403,7 @@ export default {
     padding: 0 18px;
     border: 1px solid var(--vp-c-divider);
     border-radius: 22px;
-    background: #fff;
+    background: var(--vp-c-bg-elv);
     color: var(--vp-c-text-1);
     font-size: 14px;
     font-weight: 600;
@@ -423,6 +423,46 @@ export default {
 
 .home-btn-brand:hover {
     background: #9a3412;
+    color: #fff;
+}
+
+:global(html.dark) .home-tags-pro span {
+    border-color: rgba(251, 146, 60, 0.28);
+    background: rgba(154, 52, 18, 0.28);
+    color: #fdba74;
+}
+
+:global(html.dark) .home-compare-card-pro {
+    border-color: rgba(251, 146, 60, 0.28);
+    background: linear-gradient(180deg, rgba(154, 52, 18, 0.28) 0%, var(--vp-c-bg-elv) 48%);
+}
+
+:global(html.dark) .home-pro {
+    background:
+        linear-gradient(180deg, rgba(154, 52, 18, 0.22) 0%, rgba(24, 24, 27, 0) 100%);
+    border-top-color: rgba(251, 146, 60, 0.16);
+}
+
+:global(html.dark) .home-pro-grid article {
+    border-color: rgba(251, 146, 60, 0.22);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+}
+
+:global(html.dark) .home-protocol-pro-label {
+    color: #fdba74;
+}
+
+:global(html.dark) .home-btn:hover {
+    border-color: #fb923c;
+    color: #fdba74;
+}
+
+:global(html.dark) .home-btn-brand {
+    background: #ea580c;
+}
+
+:global(html.dark) .home-btn-brand:hover {
+    background: #c2410c;
     color: #fff;
 }
 

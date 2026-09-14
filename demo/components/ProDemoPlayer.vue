@@ -1735,6 +1735,10 @@ export default {
     background-position: top;
 }
 
+:global(html.dark .page) {
+    background: none;
+}
+
 .show-message {
     position: fixed;
     z-index: 10000;

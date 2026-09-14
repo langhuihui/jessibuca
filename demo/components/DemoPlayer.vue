@@ -499,6 +499,10 @@ export default {
     background-repeat: no-repeat;
     background-position: top;
 }
+
+html.dark .page {
+    background: none;
+}
 </style>
 <style scoped>
 .root {

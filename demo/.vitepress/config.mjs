@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
     title: 'Jessibuca',
     description: '一款纯H5直播流播放器',
-    appearance: false,
+    appearance: true,
     ignoreDeadLinks: true,
     themeConfig: {
         logo: '/logo.png',
@@ -12,6 +12,9 @@ export default defineConfig({
             label: '目录'
         },
         aside: 'left',
+        darkModeSwitchLabel: '外观',
+        lightModeSwitchTitle: '切换到浅色模式',
+        darkModeSwitchTitle: '切换到深色模式',
         footer: {
             message: 'GPL Licensed',
             copyright: 'Copyright © 2020-present dexter · <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">苏ICP备2023025807号-2</a>'

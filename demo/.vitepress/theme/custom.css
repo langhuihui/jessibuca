@@ -4,6 +4,11 @@
     background: url(/bg.jpg) no-repeat top;
 }
 
+.dark .VPDoc:has(._player),
+.dark .VPDoc:has(._player-pro) {
+    background: none;
+}
+
 :root {
     --vp-c-brand-1: #6d28d9;
     --vp-c-brand-2: #7c3aed;
@@ -16,6 +21,18 @@
     --vp-button-brand-bg: #6d28d9;
     --vp-button-brand-hover-bg: #5b21b6;
     --vp-button-brand-active-bg: #4c1d95;
+}
+
+.dark {
+    --vp-c-brand-1: #c4b5fd;
+    --vp-c-brand-2: #ddd6fe;
+    --vp-c-brand-3: #8b5cf6;
+    --vp-c-brand-soft: rgba(167, 139, 250, 0.18);
+    --vp-button-brand-bg: #7c3aed;
+    --vp-button-brand-hover-bg: #8b5cf6;
+    --vp-button-brand-active-bg: #6d28d9;
+    --vp-home-hero-name-background: linear-gradient(120deg, #60a5fa 0%, #a78bfa 48%, #f472b6 100%);
+    --vp-home-hero-image-background-image: linear-gradient(160deg, #1d4ed8 18%, #6d28d9 52%, #9d174d 100%);
 }
 
 .VPHome {
@@ -75,6 +92,30 @@
 .VPHomeFeatures .VPFeature .icon {
     background: #f5f3ff;
     color: var(--vp-c-brand-1);
+}
+
+.dark .VPHome {
+    background:
+        radial-gradient(1200px 520px at 12% -10%, rgba(37, 99, 235, 0.22), transparent 58%),
+        radial-gradient(900px 480px at 92% 8%, rgba(124, 58, 237, 0.24), transparent 62%),
+        radial-gradient(700px 360px at 70% 100%, rgba(219, 39, 119, 0.12), transparent 70%);
+}
+
+.dark .VPHomeHero .image-src {
+    filter: drop-shadow(0 18px 40px rgba(167, 139, 250, 0.28));
+}
+
+.dark .VPHomeFeatures .VPFeature {
+    background: rgba(36, 36, 42, 0.72);
+    border-color: rgba(167, 139, 250, 0.16);
+}
+
+.dark .VPHomeFeatures .VPFeature:hover {
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+}
+
+.dark .VPHomeFeatures .VPFeature .icon {
+    background: rgba(109, 40, 217, 0.32);
 }
 
 .VPHome .vp-doc.container {
