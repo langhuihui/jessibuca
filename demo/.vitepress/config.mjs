@@ -1,5 +1,12 @@
 import { defineConfig } from 'vitepress'
 
+const playerSdkHead = [
+    ['script', { src: '/jessibuca.js' }],
+    ['script', { src: '/pro/js/jessibuca-pro-vr-demo.js' }],
+    ['script', { src: '/pro/js/jessibuca-pro-demo.js' }],
+    ['script', { src: '/vconsole.js' }]
+]
+
 export default defineConfig({
     title: 'Jessibuca',
     description: '一款纯H5直播流播放器',
@@ -112,8 +119,12 @@ export default defineConfig({
             }
         ],
     },
-    // Put player SDKs into the real HTML. VitePress `head` scripts are injected
-    // by Unhead after Vue mounts in `vitepress dev`, which races `new JessibucaPro()`.
+    // Vite `transformIndexHtml` only patches the SPA index.html in `vitepress dev`.
+    // VitePress SSG rebuilds every page (player.html included) from Unhead, so
+    // production HTML must get the SDKs from `transformHead`.
+    transformHead() {
+        return playerSdkHead
+    },
     vite: {
         // Let VitePress treat public *.md as static files, not doc routes.
         // Otherwise clicks on /jessibuca-api.md become /jessibuca-api.md.html.
@@ -123,13 +134,13 @@ export default defineConfig({
         plugins: [
             {
                 name: 'inject-player-sdk',
+                apply: 'serve',
                 transformIndexHtml() {
-                    return [
-                        { tag: 'script', attrs: { src: '/jessibuca.js' }, injectTo: 'head' },
-                        { tag: 'script', attrs: { src: '/pro/js/jessibuca-pro-vr-demo.js' }, injectTo: 'head' },
-                        { tag: 'script', attrs: { src: '/pro/js/jessibuca-pro-demo.js' }, injectTo: 'head' },
-                        { tag: 'script', attrs: { src: '/vconsole.js' }, injectTo: 'head' },
-                    ]
+                    return playerSdkHead.map(([, attrs]) => ({
+                        tag: 'script',
+                        attrs,
+                        injectTo: 'head'
+                    }))
                 }
             }
         ]

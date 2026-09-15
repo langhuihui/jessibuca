@@ -180,6 +180,32 @@ function defaultShowAdvanced() {
     return !(isMobile() || isPad() || window.matchMedia('(max-width: 720px)').matches);
 }
 
+function waitForJessibuca(timeout = 30000) {
+    if (typeof window.Jessibuca === 'function') {
+        return Promise.resolve();
+    }
+
+    const src = '/jessibuca.js';
+    if (!document.querySelector(`script[src="${src}"]`)) {
+        const script = document.createElement('script');
+        script.src = src;
+        document.head.appendChild(script);
+    }
+
+    return new Promise((resolve, reject) => {
+        const start = Date.now();
+        const timer = setInterval(() => {
+            if (typeof window.Jessibuca === 'function') {
+                clearInterval(timer);
+                resolve();
+            } else if (Date.now() - start > timeout) {
+                clearInterval(timer);
+                reject(new Error('window.Jessibuca is not a constructor'));
+            }
+        }, 20);
+    });
+}
+
 function checkUrlIsValid(url) {
     // 必须是http(s) 或者 ws(s) 打头的
     const pattern = /^(https?:\/\/|wss?:\/\/)[^\s/$.?#].[^\s]*$/i;
@@ -255,19 +281,28 @@ export default {
             showAdvanced: defaultShowAdvanced(),
         };
     },
-    mounted() {
+    async mounted() {
+        this._alive = true;
         this.syncAdvancedDom();
         if ((isMobile() || isPad()) && window.VConsole) {
             this.vConsole = new window.VConsole();
         }
         this.version = VERSION === '#VERSION#' ? '' : VERSION;
-        this.create();
         window.onerror = (msg) => (this.err = msg);
+        try {
+            await waitForJessibuca();
+            if (!this._alive) return;
+            this.create();
+        } catch (e) {
+            console.error(e);
+            this.err = e && e.message ? e.message : String(e);
+        }
     },
     updated() {
         this.syncAdvancedDom();
     },
     async unmounted() {
+        this._alive = false;
         if (this.$options && this.$options.jessibuca) {
             await this.$options.jessibuca.destroy();
         }
@@ -289,6 +324,10 @@ export default {
         },
         create(options) {
             options = options || {};
+            if (typeof window.Jessibuca !== 'function') {
+                console.error('window.Jessibuca is not a constructor');
+                return;
+            }
             const jessibuca = new window.Jessibuca(
                 Object.assign(
                     {
