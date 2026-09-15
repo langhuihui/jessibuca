@@ -12,10 +12,10 @@
             <div class="pn-notice-side">
                 <p>购买 Pro 可添加作者微信 <strong>bosswancheng</strong></p>
                 <div class="pn-actions">
-                    <a href="/pro.html">Pro 文档</a>
-                    <a href="https://jessibuca.com/pro.zip">离线包</a>
-                    <a href="http://jessibuca.monibuca.com/pro/index.html">Demo HTTP</a>
-                    <a href="https://jessibuca.com/pro/index.html">Demo HTTPS</a>
+                    <a href="/pro.html">查看Pro 文档</a>
+                    <a href="https://jessibuca.com/pro.zip">下载离线包</a>
+                    <a href="http://jessibuca.monibuca.com/pro/index.html">Demo HTTP 页面</a>
+                    <a href="https://jessibuca.com/pro/index.html">Demo HTTPS 页面</a>
                 </div>
             </div>
         </section>

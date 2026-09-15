@@ -268,30 +268,48 @@
                     </label>
                 </div>
             </div>
-            <div class="input">
+            <div class="input is-stack">
                 <span class="player-action-label">界面</span>
-                <div>
-                    <label>
-                        <input type="checkbox" v-model="showOperateBtns" @change="restartPlay" />
-                        <span>操作按钮</span>
-                    </label>
-                    <label>
-                        <input type="checkbox" v-model="showBandwidth" @change="restartPlay" />
-                        <span>网速</span>
-                    </label>
-                    <label>
-                        <input type="checkbox" v-model="hotKey" @change="restartPlay()" />
-                        <span>快捷键</span>
-                    </label>
-                    <label title="移动端不支持">
-                        <input type="checkbox" v-model="controlAutoHide" @change="restartPlay()" />
-                        <span>控制栏自动隐藏</span>
-                    </label>
-                    <label>
-                        <input type="checkbox" v-model="showPerformance" @change="togglePerformance" />
-                        <span>性能面板</span>
-                    </label>
-                    <button type="button" @click="toggleControlBar">切换控制条</button>
+                <div class="player-groups">
+                    <div class="player-group">
+                        <span class="player-group-label">操作按钮</span>
+                        <div>
+                            <label>
+                                <input type="checkbox" v-model="allOperateBtns" @change="restartPlay" />
+                                <span>全部</span>
+                            </label>
+                            <label v-for="item in operateBtnOptions" :key="item.key">
+                                <input type="checkbox" v-model="operateBtns[item.key]" @change="restartPlay" />
+                                <span>{{ item.label }}</span>
+                            </label>
+                            <label>
+                                <input type="checkbox" v-model="showExtendOperateBtns" @change="restartPlay" />
+                                <span>自定义</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="player-group">
+                        <span class="player-group-label">其他</span>
+                        <div>
+                            <label>
+                                <input type="checkbox" v-model="showBandwidth" @change="restartPlay" />
+                                <span>网速</span>
+                            </label>
+                            <label>
+                                <input type="checkbox" v-model="hotKey" @change="restartPlay()" />
+                                <span>快捷键</span>
+                            </label>
+                            <label title="移动端不支持">
+                                <input type="checkbox" v-model="controlAutoHide" @change="restartPlay()" />
+                                <span>控制栏自动隐藏</span>
+                            </label>
+                            <label>
+                                <input type="checkbox" v-model="showPerformance" @change="togglePerformance" />
+                                <span>性能面板</span>
+                            </label>
+                            <button type="button" @click="toggleControlBar">切换控制条</button>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="input">
@@ -679,6 +697,27 @@ function checkUrlIsValid(url) {
     };
 }
 
+const OPERATE_BTN_OPTIONS = [
+    { key: 'fullscreen', label: '全屏' },
+    { key: 'screenshot', label: '截图' },
+    { key: 'play', label: '播放' },
+    { key: 'audio', label: '声音' },
+    { key: 'record', label: '录制' },
+    { key: 'ptz', label: '云台' },
+    { key: 'quality', label: '清晰度' },
+    { key: 'close', label: '关闭' },
+    { key: 'zoom', label: '电子放大' },
+    { key: 'performance', label: '性能' },
+    { key: 'scale', label: '显示比例' },
+];
+
+function createDefaultOperateBtns() {
+    return OPERATE_BTN_OPTIONS.reduce((acc, item) => {
+        acc[item.key] = true;
+        return acc;
+    }, {});
+}
+
 
 export default {
     name: "ProDemoPlayer",
@@ -698,7 +737,9 @@ export default {
             loading: false,
             loaded: false, // mute
             isMute: false, // 是否静音
-            showOperateBtns: true,
+            operateBtnOptions: OPERATE_BTN_OPTIONS,
+            operateBtns: createDefaultOperateBtns(),
+            showExtendOperateBtns: true,
             showBandwidth: true,
             hotKey: false,
             err: "",
@@ -771,6 +812,19 @@ export default {
             isEdgeSupportHevc: false,// 默认
             showAdvanced: defaultShowAdvanced(),
         };
+    },
+    computed: {
+        allOperateBtns: {
+            get() {
+                return this.operateBtnOptions.every((item) => this.operateBtns[item.key]) && this.showExtendOperateBtns;
+            },
+            set(value) {
+                this.operateBtnOptions.forEach((item) => {
+                    this.operateBtns[item.key] = value;
+                });
+                this.showExtendOperateBtns = value;
+            },
+        },
     },
     async mounted() {
         this._alive = true;
@@ -861,20 +915,8 @@ export default {
                         supportDblclickFullscreen: true,
                         showBandwidth: this.showBandwidth, // 显示网速
                         qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
-                        operateBtns: {
-                            fullscreen: this.showOperateBtns,
-                            screenshot: this.showOperateBtns,
-                            record: this.showOperateBtns,
-                            play: this.showOperateBtns,
-                            audio: this.showOperateBtns,
-                            ptz: this.showOperateBtns,
-                            quality: this.showOperateBtns,
-                            close: this.showOperateBtns,
-                            zoom: this.showOperateBtns,
-                            performance: this.showOperateBtns,
-                            scale: this.showOperateBtns
-                        },
-                        extendOperateBtns: [
+                        operateBtns: { ...this.operateBtns },
+                        extendOperateBtns: this.showExtendOperateBtns ? [
                             {
                                 name: 'testBtn',
                                 index: 2,
@@ -891,7 +933,7 @@ export default {
                                     ElMessage.success('点击了test按钮 active状态')
                                 },
                             },
-                        ],
+                        ]:[],
                         isFlv: this.isFlv,
                         isFmp4: this.isFmp4,
                         isHls: this.isHls,

@@ -187,6 +187,15 @@
     }
 }
 
+/* Hide VitePress mobile "Return to top" local nav. */
+.VPLocalNav.empty {
+    display: none;
+}
+
+.VPLocalNavOutlineDropdown .header {
+    display: none;
+}
+
 .VPDoc .aside-container {
     background-color: var(--vp-c-bg);
 }
