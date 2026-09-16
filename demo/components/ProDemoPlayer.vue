@@ -58,7 +58,7 @@
                     <div class="player-group">
                         <span class="player-group-label">软解码</span>
                         <div class="player-caps">
-                            <span class="player-cap is-ok">WASM</span>
+                            <span class="player-cap is-ok" title="当前浏览器支持 WASM 解码">WASM</span>
                             <span
                                 class="player-cap"
                                 :class="supportSIMDHevc ? 'is-ok' : 'is-no'"
@@ -93,7 +93,7 @@
                 </div>
             </div>
             <div class="input">
-                <span class="player-action-label">缓冲</span>
+                <span class="player-action-label">缓冲设置</span>
                 <div>
                     <label class="player-field">
                         <span>网络延迟</span>
@@ -113,7 +113,7 @@
                 </div>
             </div>
             <div class="input is-stack">
-                <span class="player-action-label">解码</span>
+                <span class="player-action-label">解码设置</span>
                 <div class="player-groups">
                     <div class="player-group">
                         <span class="player-group-label">硬解码</span>
@@ -145,9 +145,8 @@
                             </label>
                             <label title="仅 MediaSource：在 worker 中解码">
                                 <input type="checkbox" v-model="mseDecoderUseWorker" @change="restartPlay()" />
-                                <span>MSE 解码</span>
+                                <span>MSE 解码(仅MediaSource解码生效)</span>
                             </label>
-                            <span class="player-hint">仅硬解码生效</span>
                         </div>
                     </div>
                     <div class="player-group">
@@ -184,7 +183,7 @@
                 </div>
             </div>
             <div class="input">
-                <span class="player-action-label">格式</span>
+                <span class="player-action-label">格式设置</span>
                 <div>
                     <label>
                         <input type="checkbox" v-model="isFlv" @change="restartPlay('isFlv')" />
@@ -213,7 +212,7 @@
                 </div>
             </div>
             <div class="input is-stack">
-                <span class="player-action-label">策略</span>
+                <span class="player-action-label">策略设置</span>
                 <div>
                     <label>
                         <input type="checkbox" v-model="isMute" @change="restartPlay()" />
@@ -254,7 +253,7 @@
                 </div>
             </div>
             <div class="input">
-                <span class="player-action-label">渲染</span>
+                <span class="player-action-label">渲染设置</span>
                 <div>
                     <label class="player-field">
                         <span>标签</span>
@@ -282,7 +281,7 @@
                 </div>
             </div>
             <div class="input is-stack">
-                <span class="player-action-label">界面</span>
+                <span class="player-action-label">界面设置</span>
                 <div class="player-groups">
                     <div class="player-group">
                         <span class="player-group-label">操作按钮</span>
@@ -320,13 +319,13 @@
                                 <input type="checkbox" v-model="showPerformance" @change="togglePerformance" />
                                 <span>性能面板</span>
                             </label>
-                            <button type="button" @click="toggleControlBar">切换控制条</button>
+                            <button type="button" @click="toggleControlBar">隐藏/展示控制条</button>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="input">
-                <span class="player-action-label">录制</span>
+                <span class="player-action-label">录制设置</span>
                 <div>
                     <label class="player-field">
                         <span>格式</span>
@@ -338,7 +337,7 @@
                 </div>
             </div>
             <div class="input">
-                <span class="player-action-label">调试</span>
+                <span class="player-action-label">调试设置</span>
                 <div>
                     <label>
                         <input type="checkbox" v-model="isDebug" ref="isDebug" @change="restartPlay" />

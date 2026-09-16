@@ -4,9 +4,9 @@
             <div class="pn-notice-main">
                 <p class="pn-kicker">试用</p>
                 <ul>
-                    <li>试用开发包约 1 小时断开，刷新页面可继续测试。</li>
-                    <li>体验版 wasm 解码会在到期后暂停，更新官网最新包可继续。</li>
-                    <li>离线包需挂在 Nginx 或本地 web server 上才能运行。</li>
+                    <li style="color: red;">试用开发包约 1 小时断开，刷新页面可继续测试。</li>
+                    <li style="color: red;">体验版 wasm 解码会在到期后暂停，更新官网最新包可继续。</li>
+                    <li style="color: red;">离线包需挂在 Nginx 或本地 web server 上才能运行。</li>
                 </ul>
             </div>
             <div class="pn-notice-side">
