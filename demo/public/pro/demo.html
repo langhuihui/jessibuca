@@ -102,6 +102,19 @@
                 </div>
                 <div class="input">
                     <div>
+                        <span>WASM解码器性能配置 <span style="color: green">仅支持WASM解码器</span>：</span>
+                        <select id="ffmpegDecodeDeblockMode" onchange="replay()">
+                            <option value="no" selected>画质优先</option>
+                            <option value="off">性能优先</option>
+                        </select>
+                        <div style="color: #d46b08; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 4px; padding: 6px 10px; font-size: 14px; font-weight: bold; line-height: 1.8; margin-top: 4px;">
+                            <div>画质优先：高分辨率下/多路并发情况下会导致cpu高，导致解码延迟卡顿。</div>
+                            <div>性能优先：会降低画面质量来保证高分辨率下/多路并发情况下降低cpu的使用，减少解码延迟卡顿现象。</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="input">
+                    <div>
                         软解码音视频同步：
                         <input
                             checked
@@ -237,6 +250,7 @@
     var $useSThreading = document.getElementById('useSThreading');
     var $syncAudioAndVideo = document.getElementById('syncAudioAndVideo');
     var $isIgnoreExceptionFrame = document.getElementById('isIgnoreExceptionFrame');
+    var $ffmpegDecodeDeblockMode = document.getElementById('ffmpegDecodeDeblockMode');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -294,6 +308,7 @@
             mseDecoderUseWorker:$mseDecoderUseWorker.checked === true,
             controlAutoHide:$controlAutoHide.checked === true,
             isIgnoreExceptionFrame:$isIgnoreExceptionFrame.checked === true,
+            ffmpegDecodeDeblockMode: $ffmpegDecodeDeblockMode.value,
         },);
 
         jessibuca.on('stats', (stats) => {

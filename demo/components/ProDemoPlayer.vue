@@ -168,6 +168,19 @@
                             <span class="player-hint">未勾选硬解时默认 WASM</span>
                         </div>
                     </div>
+                    <div class="player-group">
+                        <span class="player-group-label">WASM 性能</span>
+                        <div>
+                            <label class="player-field" title="仅支持 WASM 解码器">
+                                <span>配置</span>
+                                <select v-model="ffmpegDecodeDeblockMode" @change="replay">
+                                    <option value="no">画质优先</option>
+                                    <option value="off">性能优先</option>
+                                </select>
+                            </label>
+                            <span class="player-hint">仅 WASM 生效。画质优先 CPU 更高易卡顿；性能优先会降画质减延迟</span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="input">
@@ -811,6 +824,7 @@ export default {
             mseDecoderUseWorker: false,
             isEdgeSupportHevc: false,// 默认
             showAdvanced: defaultShowAdvanced(),
+            ffmpegDecodeDeblockMode: 'no',
         };
     },
     computed: {
@@ -998,6 +1012,7 @@ export default {
                         demuxUseWorker: this.demuxUseWorker,
                         mseDecoderUseWorker: this.mseDecoderUseWorker,
                         isIgnoreExceptionFrame: this.isIgnoreExceptionFrame,
+                        ffmpegDecodeDeblockMode: this.ffmpegDecodeDeblockMode,
                     },
                     options
                 )

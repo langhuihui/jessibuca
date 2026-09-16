@@ -16,9 +16,12 @@ hero:
     - theme: alt
       text: 查看文档
       link: /document
-    - theme: alt
-      text: Pro 版本
+    - theme: brand
+      text: 打开播放器(Pro)
       link: /player-pro
+    - theme: alt
+      text: 查看文档(Pro)
+      link: /pro
 features:
   - icon: ⚡
     title: 无插件

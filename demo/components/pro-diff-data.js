@@ -18,6 +18,14 @@ export default [
         "n": "H.265 WASM多线程视频(1080P及以上) <a href=\"/pro-demo#demo-支持多线程-4k25p-硬解码-软解码\">demo</a>",
         "o": 0
       },
+        {
+            "n": "H.264 WASM解码器性能配置(1080P及以上) <a href=\"/pro-demo#demo-支持多线程-4k25p-硬解码-软解码\">demo</a>",
+            "o": 0
+        },
+        {
+            "n": "H.265 WASM解码器性能配置(1080P及以上) <a href=\"/pro-demo#demo-支持多线程-4k25p-硬解码-软解码\">demo</a>",
+            "o": 0
+        },
       {
         "n": "H.264 WASM SIMD视频(1080P及以上) <a href=\"/pro-demo#demo-支持多线程-4k25p-硬解码-软解码\">demo</a>",
         "o": 0

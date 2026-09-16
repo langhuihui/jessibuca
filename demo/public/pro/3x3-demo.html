@@ -58,10 +58,12 @@
         <div class="input">
             <div>
                 当前浏览器：
-                <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码</span>
+                <span id="wasmSupport" style="color: green;display: none">支持WASM解码；</span>
+                <span id="simdSupport" style="color: green;display: none">支持WASM SIMD解码；</span>
                 <span id="simdMtSupport" style="color: green;display: none">支持WASM WASM(SIMD) 多线程解码；</span>
+                <span id="wasmNotSupport" style="color: red;display: none">不支持WASM解码；</span>
                 <span id="simdNotSupport"
-                      style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
+                      style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码；</span>
                 <span id="simdMtNotSupport" style="color: red;display: none">不支持WASM WASM(SIMD) 多线程解码；</span>
             </div>
         </div>
@@ -76,25 +78,60 @@
             </div>
         </div>
         <div class="input">
-            <div><input
-                type="checkbox"
-                checked
-                id="useMSE"
-            /><span>MediaSource</span>
-                <input
-                    type="checkbox"
-                    id="useWCS"
-                /><span>Webcodec</span>
-                <input
-                    type="checkbox"
-                    id="useSIMD"
-                /><span>SIMD</span>
-                <input
-                    type="checkbox"
-                    checked
-                    id="useSIMDMThreading"
-                    onclick="replay()"
-                /><span>启动多线程（仅WASM,WASM(SIMD)解码支持）</span>
+            <div>
+                <div>
+                    <span>硬解码：</span>
+                    <input
+                        type="checkbox"
+                        checked
+                        id="useMSE"
+                    /><span>MediaSource</span>
+                    <input
+                        type="checkbox"
+                        id="useWCS"
+                    /><span>Webcodec</span>
+                </div>
+                <div>
+                  <span>软解码：</span>
+                    <input
+                        type="checkbox"
+                        id="useWASM"
+                    /><span>WASM</span>
+                    <input
+                        type="checkbox"
+                        id="useSIMD"
+                    /><span>WASM(SIMD)</span>
+                    <span style="color: green">默认使用wasm解码器</span>
+                </div>
+                <div class="input">
+                    <span>软解码模式：</span>
+                    <input
+                        checked
+                        type="checkbox"
+                        id="useSThreading"
+                        onclick="replayBySThreading()"
+                    /><span>启动单独音视频线程</span>
+                    <input
+                        type="checkbox"
+                        id="useSIMDMThreading"
+                        onclick="replay()"
+                    /><span>启动多线程（WASM,WASM(SIMD)解码支持）</span><span
+                    style="color: green">默认使用音视频同一个线程</span>
+                </div>
+                <div class="input">
+                    <div>
+                        <span>WASM解码器性能配置 <span style="color: green">仅支持WASM解码器</span>：</span>
+                        <select id="ffmpegDecodeDeblockMode" onchange="replay()">
+                            <option value="no" selected>画质优先</option>
+                            <option value="off">性能优先</option>
+                        </select>
+                        <div style="color: #d46b08; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 4px; padding: 6px 10px; font-size: 14px; font-weight: bold; line-height: 1.8; margin-top: 4px;">
+                            <div>画质优先：高分辨率下/多路并发情况下会导致cpu高，导致解码延迟卡顿。</div>
+                            <div>性能优先：会降低画面质量来保证高分辨率下/多路并发情况下降低cpu的使用，减少解码延迟卡顿现象。</div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
         <div class="input">
@@ -133,7 +170,6 @@
                     type="checkbox"
                     id="isDebug"
                 /><span>开启日志</span>
-
             </div>
         </div>
 
@@ -227,6 +263,7 @@
     var $destroy = document.getElementById('destroy');
     var $useMSE = document.getElementById('useMSE');
     var $useSIMD = document.getElementById('useSIMD');
+    var $useWASM = document.getElementById('useWASM');
     var $useWCS = document.getElementById('useWCS');
     var $videoBuffer = document.getElementById('videoBuffer');
     var $videoBufferDelay = document.getElementById('videoBufferDelay');
@@ -236,6 +273,8 @@
     var $isDebug = document.getElementById('isDebug');
     var $isFlv = document.getElementById('isFlv');
     var $useSIMDMThreading = document.getElementById('useSIMDMThreading');
+    var $useSThreading = document.getElementById('useSThreading');
+    var $ffmpegDecodeDeblockMode = document.getElementById('ffmpegDecodeDeblockMode');
 
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
@@ -257,10 +296,11 @@
             debugLevel: $isDebug.checked === true ? "debug" : '',
             isMulti: true,
             useMSE: $useMSE.checked === true,
+            useWCS: $useWCS.checked === true,
             decoderErrorAutoWasm: false,
             useSIMD: $useSIMD.checked === true,
-            useWCS: $useWCS.checked === true,
             useMThreading: $useSIMDMThreading.checked === true,
+            useSThreading: $useSThreading.checked === true,
             hasAudio: false,
             useVideoRender: true,
             controlAutoHide: true,
@@ -284,6 +324,7 @@
             mseDecoderUseWorker:$mseDecoderUseWorker.checked === true,
             websocketOpenTimeout: 3 + index * 0.5,
             loadingTimeout: 5 + index * 0.5,
+            ffmpegDecodeDeblockMode: $ffmpegDecodeDeblockMode.value,
         },);
         jessibuca.on(JessibucaPro.EVENTS.playFailedAndPaused, (error) => {
             jessibuca.showErrorMessageTips('播放异常：' + error);
@@ -311,16 +352,22 @@
             var id = i + 1;
             var $playHref = document.getElementById('playUrl' + id);
             let player = playList[i];
-            if ($playHref.value) {
+            const url = $playHref.value;
+            if (url) {
                 setTimeout((url) => {
                     console.log(url);
+                    const validResult = checkUrlIsValid(url)
+                    if (!validResult.result) {
+                        notifyError(validResult.msg);
+                        return;
+                    }
 
                     player && player.play(url).then(() => {
 
                     }).catch((e) => {
                         console.error(e);
                     });
-                }, 0, $playHref.value)
+                }, 0, url)
             }
         }
 
@@ -349,6 +396,11 @@
             })
         })
 
+    }
+
+    function replayBySThreading() {
+        $useSIMDMThreading.checked = false;
+        replay();
     }
 
     function replay() {
@@ -391,6 +443,7 @@
         if (checked) {
             $useSIMD.checked = false
             $useWCS.checked = false
+            $useWASM.checked = false
         }
         replay();
     })
@@ -400,6 +453,7 @@
         if (checked) {
             $useMSE.checked = false
             $useWCS.checked = false
+            $useWASM.checked = false
         }
         replay();
     })
@@ -409,6 +463,17 @@
         if (checked) {
             $useMSE.checked = false
             $useSIMD.checked = false
+            $useWASM.checked = false
+        }
+        replay();
+    })
+
+    $useWASM.addEventListener('click', function () {
+        const checked = $useWASM.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useSIMD.checked = false
+            $useWCS.checked = false
         }
         replay();
     })
