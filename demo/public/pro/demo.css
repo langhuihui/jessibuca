@@ -25,8 +25,8 @@ body {
 }
 
 .container-shell {
-    backdrop-filter: blur(5px);
-    background: hsla(0, 0%, 50%, 0.5);
+    /*backdrop-filter: blur(5px);*/
+    background: hsla(0, 0%, 50%, 0.9);
     padding: 30px 4px 10px 4px;
     /* border: 2px solid black; */
     width: auto;

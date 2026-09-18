@@ -723,9 +723,12 @@ const OPERATE_BTN_OPTIONS = [
     { key: 'scale', label: '显示比例' },
 ];
 
+const MOBILE_DEFAULT_OPERATE_BTN_KEYS = ['fullscreen', 'play', 'audio', 'performance'];
+
 function createDefaultOperateBtns() {
+    const mobile = isMobile();
     return OPERATE_BTN_OPTIONS.reduce((acc, item) => {
-        acc[item.key] = true;
+        acc[item.key] = mobile ? MOBILE_DEFAULT_OPERATE_BTN_KEYS.includes(item.key) : true;
         return acc;
     }, {});
 }
