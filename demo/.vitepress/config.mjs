@@ -72,6 +72,11 @@ export default defineConfig({
                     { text: 'Demo', link: '/demo' },
                     { text: '测试地址', link: '/test-url' },
                     { text: 'HTTP(ws) 流媒体下载器', link: 'https://jessibuca.com/download-utils.html' },
+                    { text: 'H264-capability-check', link: 'https://jessibuca.com/h264-capability-check.html' },
+                    { text: 'media-capabilities', link: 'https://jessibuca.com/media-capabilities.html' },
+                    { text: 'audio-context-support', link: 'https://jessibuca.com/audio-context-support.html' },
+                    { text: '浏览器音视频能力检测', link: 'https://jessibuca.com/check-support.html' },
+                    { text: '最大并发播放路数检测', link: 'https://jessibuca.com/check-max-play-multi-size.html' },
                     { text: '文章分享系列', link: 'https://juejin.cn/user/1345457961842126/posts' },
                 ]
             },

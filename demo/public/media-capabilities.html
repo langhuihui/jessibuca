@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediaCapabilities.decodingInfo()</title>
+    <style>
+        :root {
+            --bg: #0f1419;
+            --panel: #1a212b;
+            --border: #2a3441;
+            --text: #d6deeb;
+            --muted: #8b98a9;
+            --accent: #4fb3ff;
+            --green: #57d9a3;
+            --red: #ff6b6b;
+            --yellow: #ffd166;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", Segoe UI, sans-serif;
+            line-height: 1.6;
+            padding: 24px;
+        }
+
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        h1 { font-size: 22px; margin: 0 0 4px; }
+        h2 { font-size: 16px; margin: 24px 0 8px; color: var(--accent); }
+
+        .subtitle { color: var(--muted); margin: 0 0 20px; font-size: 14px; }
+
+        .layout { display: flex; gap: 20px; flex-wrap: wrap; }
+        .col { flex: 1 1 420px; min-width: 0; }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        video {
+            width: 100%;
+            max-height: 360px;
+            background: #000;
+            border-radius: 6px;
+            display: block;
+        }
+
+        button {
+            background: var(--accent);
+            color: #03121f;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 4px 6px 4px 0;
+        }
+        button:hover { filter: brightness(1.1); }
+        button:disabled { opacity: .4; cursor: not-allowed; }
+        button.secondary { background: var(--border); color: var(--text); }
+        button.danger { background: var(--red); color: #2a0000; }
+
+        select, input[type="number"] {
+            background: #0c1116;
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 7px 10px;
+            font-size: 13px;
+            margin: 4px 6px 4px 0;
+        }
+
+        label { font-size: 13px; color: var(--muted); margin-right: 6px; }
+
+        .log {
+            background: #0a0e13;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            font-family: "SF Mono", Menlo, Consolas, monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            height: 320px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .log .t { color: var(--muted); }
+        .log .ok { color: var(--green); }
+        .log .err { color: var(--red); }
+        .log .warn { color: var(--yellow); }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        .stat {
+            background: #0c1116;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 10px;
+        }
+        .stat .k { color: var(--muted); font-size: 11px; }
+        .stat .v { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+        .note {
+            background: rgba(79,179,255,.08);
+            border-left: 3px solid var(--accent);
+            padding: 10px 12px;
+            border-radius: 0 6px 6px 0;
+            font-size: 13px;
+            color: var(--muted);
+            margin: 12px 0;
+        }
+        .note b { color: var(--text); }
+
+        .tag {
+            display: inline-block;
+            font-size: 11px;
+            padding: 1px 7px;
+            border-radius: 10px;
+            background: var(--border);
+            color: var(--text);
+            margin-left: 6px;
+        }
+        .tag.star { background: var(--yellow); color: #3a2e00; }
+
+        ul.demo-list { list-style: none; padding: 0; }
+        ul.demo-list li {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+        }
+        ul.demo-list li .d { color: var(--muted); font-size: 13px; margin-top: 2px; }
+        .back { font-size: 13px; margin-bottom: 16px; display: inline-block; }
+
+    </style>
+    <style>
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; }
+        th { background: #0c1116; color: var(--muted); font-weight: 600; }
+        td.y { color: var(--green); font-weight: 600; }
+        td.n { color: var(--red); font-weight: 600; }
+        .codecstr { font-family: "SF Mono", Menlo, monospace; font-size: 12px; color: var(--muted); }
+    </style>
+</head>
+<body>
+<h1>MediaCapabilities.decodingInfo()</h1>
+<p class="subtitle">探测各档位的 supported / smooth / powerEfficient，比 isTypeSupported 精确，服务「软解 vs 硬解」决策。</p>
+
+
+<div class="panel">
+    <button id="btnRun">探测当前设备能力</button>
+    <span id="apiState" style="color:var(--muted);font-size:13px;margin-left:8px"></span>
+</div>
+
+<div class="panel">
+    <h2 style="margin-top:0">探测结果</h2>
+    <table id="result">
+        <thead>
+        <tr><th>场景</th><th>分辨率</th><th>码率/帧率</th><th class="codecstr">codec</th>
+            <th>supported</th><th>smooth</th><th>powerEfficient(硬解)</th></tr>
+        </thead>
+        <tbody><tr><td colspan="7" style="color:var(--muted)">点击上方按钮开始探测</td></tr></tbody>
+    </table>
+</div>
+
+<div class="panel">
+    <h2 style="margin-top:0">说明</h2>
+    <ul style="color:var(--muted);font-size:13px;line-height:1.8;margin:0">
+        <li><b>supported</b>：能否解码。等价于 isTypeSupported 的答案。</li>
+        <li><b>smooth</b>：在该分辨率/码率/帧率下能否流畅播放（不丢帧）。isTypeSupported 回答不了。</li>
+        <li><b>powerEfficient</b>：是否走硬件解码。<code>false</code> 通常意味着软解（CPU），4K 下软解 CPU 压力大。</li>
+        <li>各浏览器对 smooth/powerEfficient 的实现差异较大，建议结合实测帧率交叉验证。</li>
+    </ul>
+</div>
+
+<script>
+    const $ = id => document.getElementById(id);
+
+    // 覆盖你最关心的 4K 软/硬解场景。codec 字符串用常见值，可按需调整。
+    const CASES = [
+        { name: '1080p H264', w: 1920, h: 1080, br: 4_000_000, fps: 30, codec: 'avc1.640028' },
+        { name: '4K H264',    w: 3840, h: 2160, br: 20_000_000, fps: 30, codec: 'avc1.640033' },
+        { name: '4K H264 60', w: 3840, h: 2160, br: 35_000_000, fps: 60, codec: 'avc1.640033' },
+        { name: '1080p H265', w: 1920, h: 1080, br: 3_000_000, fps: 30, codec: 'hvc1.1.6.L120.90' },
+        { name: '4K H265',    w: 3840, h: 2160, br: 15_000_000, fps: 30, codec: 'hvc1.1.6.L153.90' },
+        { name: '4K H265 60', w: 3840, h: 2160, br: 25_000_000, fps: 60, codec: 'hvc1.1.6.L153.90' },
+        { name: '4K H265 10bit', w: 3840, h: 2160, br: 20_000_000, fps: 30, codec: 'hvc1.2.4.L153.90' },
+    ];
+
+    function cell(v) {
+        if (v === true) return '<td class="y">✓ true</td>';
+        if (v === false) return '<td class="n">✗ false</td>';
+        return '<td style="color:var(--muted)">' + v + '</td>';
+    }
+
+    async function run() {
+        const tbody = $('result').querySelector('tbody');
+        if (!navigator.mediaCapabilities || !navigator.mediaCapabilities.decodingInfo) {
+            $('apiState').textContent = '当前浏览器不支持 navigator.mediaCapabilities.decodingInfo';
+            $('apiState').style.color = 'var(--red)';
+            return;
+        }
+        $('apiState').textContent = '探测中...';
+        tbody.innerHTML = '';
+
+        for (const c of CASES) {
+            const config = {
+                type: 'media-source', // MSE 场景
+                video: {
+                    contentType: `video/mp4; codecs="${c.codec}"`,
+                    width: c.w, height: c.h, bitrate: c.br, framerate: c.fps,
+                },
+            };
+            let res;
+            try {
+                res = await navigator.mediaCapabilities.decodingInfo(config);
+            } catch (e) {
+                res = { supported: 'err: ' + e.message, smooth: '-', powerEfficient: '-' };
+            }
+            const tr = document.createElement('tr');
+            tr.innerHTML =
+                `<td><b>${c.name}</b></td>` +
+                `<td>${c.w}×${c.h}</td>` +
+                `<td>${(c.br/1e6).toFixed(0)}Mbps / ${c.fps}fps</td>` +
+                `<td class="codecstr">${c.codec}</td>` +
+                cell(res.supported) + cell(res.smooth) + cell(res.powerEfficient);
+            tbody.appendChild(tr);
+        }
+        $('apiState').textContent = '完成。powerEfficient=false 多为软解，4K 下需重点关注。';
+        $('apiState').style.color = 'var(--green)';
+    }
+
+    $('btnRun').onclick = run;
+</script>
+</body>
+</html>
