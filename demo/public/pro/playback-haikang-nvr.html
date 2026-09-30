@@ -82,6 +82,15 @@
         <div class="input">
             <div>
                 <input
+                    onclick="replay()"
+                    type="checkbox"
+                    id="isCacheData"
+                /><span style="color: blue;">是否支持本地前后任意seek(会缓存全量解码前数据)</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <input
                     checked
                     onclick="replay()"
                     type="checkbox"
@@ -122,6 +131,7 @@
     var $useWCS = document.getElementById('useWCS');
     var $useSIMDMThreading = document.getElementById('useSIMDMThreading');
     var $demuxUseWorker = document.getElementById('demuxUseWorker');
+    var $isCacheData = document.getElementById('isCacheData');
 
     var forceNoOffscreen = true; //
     var jessibuca = null;
@@ -178,8 +188,10 @@
             },
             isNotMute: false,
             demuxUseWorker: $demuxUseWorker.checked === true,
-            isPs: true,
+            isHKNvr: true,
             isSpecialPlaybackVod: true,
+            specialPlaybackVodCacheStream: $isCacheData.checked === true,
+
         },);
 
         $player.style.display = 'inline-block';
