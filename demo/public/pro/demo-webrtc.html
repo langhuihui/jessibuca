@@ -173,6 +173,11 @@
                     <option value="lowNetwork">弱网直播(中等延迟)</option>
                     <option value="highQuality">纯观看端(高延迟)</option>
                 </select>
+                <span>|</span>
+                <input
+                    type="checkbox"
+                    id="hasAudio"
+                /><span>是否有音频</span>
             </div>
         </div>
         <div class="input">
@@ -215,6 +220,7 @@
     var $isEmitSEIForDJI = document.getElementById('isEmitSEIForDJI');
     var $supportWebrtcH265 = document.getElementById('supportWebrtcH265');
     var $notSupportWebrtcH265 = document.getElementById('notSupportWebrtcH265');
+    var $hasAudio = document.getElementById('hasAudio');
     var showOperateBtns = true; // 是否显示按钮
     var forceNoOffscreen = true; //
     var jessibuca = null;
@@ -262,7 +268,7 @@
             loadingTimeout: 1000,
             useMSE: true,
             useWCS: true,
-            // hasAudio:false,
+            hasAudio: $hasAudio.checked === true,
             isWebrtcForOthers: $isForOthers.checked === true,
             webrtcForOthersByWhipWhep: $webrtcForOthersByWhipWhep.checked === true,
             isWebrtcForZLM: $isWebrtcForZLM.checked === true,
@@ -296,7 +302,7 @@
             // console.error('currentPts', pts);
         })
 
-        jessibuca.on('videoSEISyncPts', (value) => {
+        jessibuca.on('videoSEISyncPts', (data) => {
             // console.log('videoSEISyncPts', value);
 
             if ($isEmitSEIForDJI.checked === true) {
@@ -330,7 +336,7 @@
                 }
             } else {
                 //
-                console.log('videoSEISyncPts', value);
+                console.log('videoSEISyncPts', data);
             }
         })
 
