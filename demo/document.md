@@ -2391,7 +2391,7 @@ https://juejin.cn/post/7215608036394614844
 
 在https 协议里面，是不能播放http 或者 ws 协议的，会报跨域报错。
 
-### chrome无法访问更私有的地址
+### chrome无法访问内网的地址（192.168.x.x）
 
 触发了 Chrome 安全策略 - 私有网络控制（CORS-RFC1918）
 
@@ -2590,6 +2590,15 @@ https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
 
 <img src="/img/https-setting.png">
 
+方案3：
+
+> 在chrome://flags/ 里面 搜索 'Local Network Access'  然后对应的设置为`Disabled`，然后重启浏览器即可。
+
+
+<img src="/img/local-network-access.png">
+
+
+
 ### 测试的时候遇到请求的连接（播放地址）跨域报错
 
 #### 方法1：使用扩展程序
@@ -2621,11 +2630,20 @@ https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
 
 <img src="/img/play-192-error.png">
 
-#### 方法1：修改flags 参数
+#### 方法1：修改flags 参数（老版本）
 
 打开  `chrome://flags/` 搜索 `Block insecure private network requests`，将其设置为 `Disabled`，然后重启浏览器。
 
 <img src="/img/block-insecure-setting.png">
+
+#### 方法2：新版本
+
+> 在chrome://flags/ 里面 搜索 'Local Network Access'  然后对应的设置为`Disabled`，然后重启浏览器即可。
+
+
+<img src="/img/local-network-access.png">
+
+
 
 #### 方法2：使用扩展程序
 
@@ -2635,6 +2653,7 @@ https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
 启用扩展程序: 安装完成后，在浏览器扩展程序栏中找到该扩展并启用。
 
 配置扩展程序: 根据需要配置扩展程序的设置，以允许特定的跨域请求。
+
 
 ### 公网访问内网地址(websocket/http) 的时候直接pending不通了
 
@@ -2649,7 +2668,19 @@ https://support.google.com/chrome/a/answer/7679408?hl=eN
 
 解决方案：
 
-1. 开启 `chrome://flags/#local-network-access-check`
+老版本
+
+> 开启 `chrome://flags/#local-network-access-check`
+
+新版本
+
+> 在chrome://flags/ 里面 搜索 'Local Network Access'  然后对应的设置为`Disabled`，然后重启浏览器即可。
+
+
+<img src="/img/local-network-access.png">
+
+
+
 
 ### Mixed Content: The page at 'https://jessibuca.com' was loaded over HTTPS, but requested an insecure resource 'http://xxx.com/xxx.flv'. This request has been blocked; the content must be served over HTTPS.
 
