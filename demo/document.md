@@ -2409,7 +2409,7 @@ https://juejin.cn/post/7215608036394614844
 Access to fetch at 'http://192.168.0.2:8000/live/test.flv' from origin 'http://jessibuca.monibuca.com/' has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `private`.
 ```
 
-打开浏览器的
+打开浏览器的（老版本）
 
 > chrome://flags/#block-insecure-private-network-requests
 
@@ -2417,6 +2417,16 @@ Access to fetch at 'http://192.168.0.2:8000/live/test.flv' from origin 'http://j
 
 > 将Block insecure private network
 > requests配置禁用掉（Disable）。但是一定要注意，修改了配置后必须点击Chrome此时在右下角出现的“重启”（Restart）按钮才能生效。自己主动关闭浏览器全部页面再打开是不会触发Chrome更新配置的。
+
+
+新版本
+
+> 在chrome://flags/ 里面 搜索 'Local Network Access'  然后对应的设置为`Disabled`，然后重启浏览器即可。
+
+
+<img src="/img/local-network-access.png">
+
+
 
 ### 监听请求流的失效(404)或者500报错
 
