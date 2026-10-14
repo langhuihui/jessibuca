@@ -711,8 +711,8 @@ function checkUrlIsValid(url) {
         const hostname = urlObj.hostname;
         if (isInternalIp(hostname)) {
             return {
-                result: false,
-                msg: `当前页面为公网地址，URL:${url}是内网地址，公网环境暂不支持，需要设置在chrome://flags/ 里面 搜索 'Local Network Access'的结果设置为disabled，或者使用公网地址`
+                result: true,
+                msg: `当前页面为公网地址，URL:${url}是内网地址，公网环境暂不支持，需要设置在chrome://flags/ 里面 搜索 'Local Network Access'的结果设置为disabled，重启浏览器或者使用公网地址,如果已经设置了，请忽略此提示`
             };
         }
     } catch (e) {
@@ -1212,6 +1212,11 @@ export default {
                     ElMessage.error(checkResult.msg);
                     return;
                 }
+
+                if(checkResult.msg){
+                    ElMessage.warning(checkResult.msg);
+                }
+
                 this.jessibuca.play(this.playUrl, {
                     useLastFrameShow: true,
                 }).then(() => {
