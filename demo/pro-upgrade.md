@@ -22,7 +22,8 @@
 
 将原本html 里面引用的 `jessibuca.js` 替换成 `jessibuca-pro-demo.js` 或者 `jessibuca-pro-multi-demo.js`
 
-> 如果是delay-time 版本，则需要替换成 `jessibuca-pro-delay-demo.js`
+> 如果是delay-time 版本，则需要替换成 `jessibuca-pro-delay-demo.js` 或者`jessibuca-pro.js`，主要看体验版里面的js文件具体是啥名字
+
 
 ```html
 <html>
@@ -41,6 +42,17 @@
     <head>
 <!--        <script src="./js/jessibuca.js"></script>-->
         <script src="./js/jessibuca-pro-delay-time.js"></script>
+    </head>
+</html>
+
+```
+或者
+
+```html
+<html>
+    <head>
+<!--        <script src="./js/jessibuca.js"></script>-->
+        <script src="./js/jessibuca-pro.js"></script>
     </head>
 </html>
 
