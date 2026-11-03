@@ -611,6 +611,16 @@ vue2(单页面):[https://github.com/bosscheng/jessibuca-vue-demo/tree/pro-vue2](
 #### http
 [http://jessibuca.monibuca.com/pro/demo-record.html](http://jessibuca.monibuca.com/pro/demo-record.html)
 
+### 视频录制（WebM格式(音频+视频)，支持局部水印（文字、图片），支持动态文字水印，支持幽灵文字水印，支持全屏文字水印））
+------
+#### https
+[https://jessibuca.com/pro/demo-record-webm-watermark.html](https://jessibuca.com/pro/demo-record-webm-watermark.html)
+
+#### http
+[http://jessibuca.monibuca.com/pro/demo-record-webm-watermark.html](http://jessibuca.monibuca.com/pro/demo-record-webm-watermark.html)
+
+
+
 ### 视频录制（Mp4格式(视频+音频)）
 ------
 #### https
